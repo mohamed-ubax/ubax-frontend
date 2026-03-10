@@ -1,16 +1,17 @@
 .auth-wrap {
-  width: min(680px, calc(100% - 2rem));
-  margin: 2.5rem auto;
-  padding: 2rem 0;
+  width: min(560px, calc(100% - 2rem));
+  margin: 3rem auto;
+  padding: 2rem 0 3rem;
 }
 
 .auth-card {
   display: grid;
-  gap: 0.8rem;
-  padding: 1.5rem;
+  gap: 0.9rem;
+  padding: 1.6rem;
   border-radius: 16px;
   background: #fff;
   border: 1px solid rgba(26, 48, 71, 0.12);
+  box-shadow: 0 16px 30px rgba(11, 26, 40, 0.08);
 }
 
 .auth-card h1 {
@@ -23,29 +24,14 @@
   color: #4b5563;
 }
 
-.auth-card input {
-  width: 100%;
-  border: 1px solid rgba(26, 48, 71, 0.24);
-  border-radius: 999px;
-  padding: 0.7rem 0.9rem;
-  font: inherit;
-}
-
-.auth-card button {
-  margin-top: 0.25rem;
-  border: none;
-  border-radius: 999px;
-  padding: 0.75rem 0.95rem;
-  font: inherit;
-  font-weight: 600;
-  color: #fff;
-  background: var(--ubax-brand);
-}
-
 .auth-card a {
   color: var(--ubax-accent);
   text-decoration: none;
   font-weight: 600;
+}
+
+.action-link {
+  text-decoration: none;
 }
 
 .otp-grid {
@@ -57,4 +43,19 @@
 .otp-grid input {
   text-align: center;
   border-radius: 12px;
+}
+
+@media (max-width: 640px) {
+  .auth-wrap {
+    width: calc(100% - 1rem);
+    margin: 1.2rem auto;
+  }
+
+  .auth-card {
+    padding: 1rem;
+  }
+
+  .otp-grid {
+    gap: 0.3rem;
+  }
 }

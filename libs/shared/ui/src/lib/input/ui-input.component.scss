@@ -1,0 +1,26 @@
+.ubax-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ubax-field__label {
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  min-height: 2.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 48, 71, 0.24);
+  padding: 0.65rem 0.95rem;
+  font: inherit;
+  color: var(--ubax-text-primary);
+}
+
+input:focus {
+  outline: 2px solid rgba(232, 125, 30, 0.32);
+  outline-offset: 1px;
+  border-color: var(--ubax-accent);
+}

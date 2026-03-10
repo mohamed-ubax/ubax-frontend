@@ -1,0 +1,8 @@
+<article
+  class="ubax-card"
+  [class.ubax-card--elevated]="elevated()"
+  [class.ubax-card--soft]="tone() === 'soft'"
+  [class.ubax-card--dark]="tone() === 'dark'"
+>
+  <ng-content></ng-content>
+</article>

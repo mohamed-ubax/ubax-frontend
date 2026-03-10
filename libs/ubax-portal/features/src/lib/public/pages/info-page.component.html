@@ -1,9 +1,16 @@
 <ubax-public-shell>
   <section class="info-wrap">
-    <article class="content-card">
+    <ubax-ui-card class="content-card" [elevated]="true">
       <h1>{{ title }}</h1>
       <p>{{ description }}</p>
-      <a routerLink="/" class="home-link">Retour a l'accueil</a>
-    </article>
+
+      @if (isFaqPage) {
+      <ubax-ui-accordion [items]="faqItems"></ubax-ui-accordion>
+      }
+
+      <a routerLink="/" class="home-link">
+        <ubax-ui-button variant="ghost">Retour a l'accueil</ubax-ui-button>
+      </a>
+    </ubax-ui-card>
   </section>
 </ubax-public-shell>

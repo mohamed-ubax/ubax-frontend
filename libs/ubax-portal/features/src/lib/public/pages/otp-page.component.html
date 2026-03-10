@@ -8,7 +8,9 @@
         <input type="text" maxlength="1" [attr.aria-label]="'Code ' + ($index + 1)" />
         }
       </div>
-      <button type="button" routerLink="/nouveau-mot-de-passe">Verifier</button>
+      <a routerLink="/nouveau-mot-de-passe" class="action-link">
+        <ubax-ui-button variant="dark" [block]="true">Verifier</ubax-ui-button>
+      </a>
       <a routerLink="/mot-de-passe-oublie">Renvoyer le code</a>
     </article>
   </section>

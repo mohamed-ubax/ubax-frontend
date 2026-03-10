@@ -8,44 +8,68 @@
         seule application.
       </p>
       <div class="hero-actions">
-        <a routerLink="/connexion" class="btn btn-primary">Decouvrir</a>
-        <a href="#fonctionnalites" class="btn btn-ghost">Voir les fonctionnalites</a>
+        <a routerLink="/connexion" class="link-reset">
+          <ubax-ui-button variant="primary">Decouvrir</ubax-ui-button>
+        </a>
+        <a routerLink="/tarifs" class="link-reset">
+          <ubax-ui-button variant="ghost">Voir les fonctionnalites</ubax-ui-button>
+        </a>
       </div>
+    </div>
+    <div class="hero-orbit" aria-hidden="true">
+      <span class="center"></span>
+      <span class="ring"></span>
     </div>
   </section>
 
   <section id="fonctionnalites" class="feature-grid section-box">
-    <article>
+    <ubax-ui-card tone="soft">
       <h3>Recherche intelligente</h3>
       <p>Filtrez rapidement vos biens selon vos criteres et zones prioritaires.</p>
-    </article>
-    <article>
+    </ubax-ui-card>
+    <ubax-ui-card tone="soft">
       <h3>Reservation rapide</h3>
       <p>Proposez, validez et suivez vos reservations en quelques clics.</p>
-    </article>
-    <article>
+    </ubax-ui-card>
+    <ubax-ui-card tone="soft">
       <h3>Paiements securises</h3>
       <p>Encaissez et suivez tous vos flux financiers depuis un tableau unique.</p>
-    </article>
+    </ubax-ui-card>
+  </section>
+
+  <section class="section-box split-section">
+    <div class="mockup"></div>
+    <div>
+      <h2>Votre location commence ici</h2>
+      <p>
+        Consultez les offres en temps reel, planifiez les visites et finalisez
+        vos reservations depuis une interface unique.
+      </p>
+      <a routerLink="/contact" class="link-reset">
+        <ubax-ui-button variant="dark">Decouvrir</ubax-ui-button>
+      </a>
+    </div>
   </section>
 
   <section id="tarifs" class="pricing section-box">
     <h2>Une tarification simple, claire et evolutive</h2>
     <div class="cards">
-      <article class="plan-card">
+      <ubax-ui-card class="plan-card" [elevated]="true">
         <h3>Starter</h3>
         <p>Pour commencer la gestion de vos biens.</p>
-      </article>
-      <article class="plan-card highlighted">
+      </ubax-ui-card>
+      <ubax-ui-card class="plan-card highlighted" [elevated]="true" tone="dark">
         <h3>Pro</h3>
         <p>Pour accelerer vos operations immobilieres.</p>
-      </article>
-      <article class="plan-card">
+      </ubax-ui-card>
+      <ubax-ui-card class="plan-card" [elevated]="true">
         <h3>Enterprise</h3>
         <p>Pour les grandes agences et reseaux.</p>
-      </article>
+      </ubax-ui-card>
     </div>
-    <a routerLink="/tarifs" class="btn btn-primary">Voir tous les tarifs</a>
+    <a routerLink="/tarifs" class="link-reset">
+      <ubax-ui-button variant="primary">Voir tous les tarifs</ubax-ui-button>
+    </a>
   </section>
 
   <section id="temoignages" class="testimonials section-box">
@@ -54,6 +78,8 @@
       Des locataires, bailleurs et agences utilisent UBAX au quotidien pour
       simplifier leurs operations.
     </p>
-    <a routerLink="/temoignages" class="btn btn-ghost">Voir les temoignages</a>
+    <a routerLink="/temoignages" class="link-reset">
+      <ubax-ui-button variant="ghost">Voir les temoignages</ubax-ui-button>
+    </a>
   </section>
 </ubax-public-shell>

@@ -1,0 +1,20 @@
+.ubax-card {
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(26, 48, 71, 0.12);
+  padding: 1.15rem;
+}
+
+.ubax-card--elevated {
+  box-shadow: 0 12px 30px rgba(11, 26, 40, 0.08);
+}
+
+.ubax-card--soft {
+  background: rgba(26, 48, 71, 0.06);
+}
+
+.ubax-card--dark {
+  background: var(--ubax-brand);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.16);
+}

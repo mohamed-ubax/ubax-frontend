@@ -2,12 +2,11 @@
   <header class="main-header">
     <a routerLink="/" class="brand" aria-label="Accueil UBAX">
       <span class="brand-mark">U</span>
-      <span class="brand-text">UBAX</span>
     </a>
 
     <nav class="main-nav" aria-label="Navigation principale">
       @for (item of menuItems; track item.label) {
-      <a [href]="item.path">{{ item.label }}</a>
+      <a [routerLink]="item.path">{{ item.label }}</a>
       }
     </nav>
 

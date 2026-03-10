@@ -12,12 +12,12 @@
 .main-header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.8rem 2rem;
+  padding: 0.65rem 2rem;
   background: #fff;
   border-bottom: 1px solid rgba(26, 48, 71, 0.1);
 }
@@ -35,27 +35,23 @@
   height: 2rem;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 0.45rem;
   font-weight: 700;
   background: var(--ubax-brand);
   color: #fff;
 }
 
-.brand-text {
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 1.5rem;
   font-size: 0.95rem;
 }
 
 .main-nav a {
   color: var(--ubax-text-primary);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .pro-space-btn {
@@ -65,6 +61,7 @@
   color: #fff;
   text-decoration: none;
   font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .main-content {
@@ -76,7 +73,8 @@
   grid-template-columns: 1.4fr 1fr 1fr 1fr;
   gap: 2rem;
   padding: 3rem 2rem;
-  background: var(--ubax-brand);
+  background: radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.05), transparent 45%),
+    var(--ubax-brand);
   color: #fff;
 }
 
@@ -94,6 +92,10 @@
 .footer-column a {
   color: rgba(255, 255, 255, 0.92);
   text-decoration: none;
+}
+
+.footer-column a:hover {
+  color: #fff;
 }
 
 .brand-col p {
@@ -121,6 +123,11 @@
 @media (max-width: 768px) {
   .main-header {
     padding: 0.8rem 1rem;
+  }
+
+  .pro-space-btn {
+    font-size: 0.75rem;
+    padding-inline: 0.75rem;
   }
 
   .main-footer {

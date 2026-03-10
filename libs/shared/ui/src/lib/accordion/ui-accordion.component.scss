@@ -1,0 +1,34 @@
+.ubax-accordion {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.acc-item {
+  border-radius: 14px;
+  border: 1px solid rgba(26, 48, 71, 0.12);
+  background: #fff;
+
+  button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    cursor: pointer;
+  }
+
+  p {
+    margin: 0;
+    padding: 0 1rem 1rem;
+    color: #4b5563;
+  }
+}
+
+.acc-item--open {
+  box-shadow: 0 10px 20px rgba(11, 26, 40, 0.08);
+}

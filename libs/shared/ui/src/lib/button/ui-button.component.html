@@ -1,0 +1,12 @@
+<button
+  class="ubax-btn"
+  [class.ubax-btn--primary]="variant() === 'primary'"
+  [class.ubax-btn--dark]="variant() === 'dark'"
+  [class.ubax-btn--ghost]="variant() === 'ghost'"
+  [class.ubax-btn--outline]="variant() === 'outline'"
+  [class.ubax-btn--block]="block()"
+  [attr.type]="type()"
+  [disabled]="disabled()"
+>
+  <ng-content></ng-content>
+</button>
