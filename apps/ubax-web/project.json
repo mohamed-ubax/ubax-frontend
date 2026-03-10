@@ -2,13 +2,15 @@
   "name": "ubax-web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "prefix": "app",
+  "prefix": "ubax-web",
   "sourceRoot": "apps/ubax-web/src",
   "tags": [],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/ubax-web",
         "browser": "apps/ubax-web/src/main.ts",
@@ -20,7 +22,9 @@
             "input": "apps/ubax-web/public"
           }
         ],
-        "styles": ["apps/ubax-web/src/styles.scss"]
+        "styles": [
+          "apps/ubax-web/src/styles.scss"
+        ]
       },
       "configurations": {
         "production": {
