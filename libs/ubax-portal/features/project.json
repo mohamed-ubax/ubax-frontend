@@ -1,0 +1,8 @@
+{
+  "name": "ubax-portal-features",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ubax-portal/features/src",
+  "prefix": "ubax",
+  "projectType": "library",
+  "tags": []
+}

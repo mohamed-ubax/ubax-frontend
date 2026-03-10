@@ -14,7 +14,14 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@ubax-workspace/ubax-portal-layout": [
+        "libs/ubax-portal/layout/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-portal-features": [
+        "libs/ubax-portal/features/src/index.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

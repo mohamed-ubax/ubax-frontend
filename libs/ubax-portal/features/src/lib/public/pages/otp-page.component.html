@@ -1,0 +1,15 @@
+<ubax-public-shell>
+  <section class="auth-wrap">
+    <article class="auth-card">
+      <h1>Verification du code</h1>
+      <p>Saisissez le code a 6 chiffres envoye par SMS a votre numero.</p>
+      <div class="otp-grid">
+        @for (slot of otpSlots; track $index) {
+        <input type="text" maxlength="1" [attr.aria-label]="'Code ' + ($index + 1)" />
+        }
+      </div>
+      <button type="button" routerLink="/nouveau-mot-de-passe">Verifier</button>
+      <a routerLink="/mot-de-passe-oublie">Renvoyer le code</a>
+    </article>
+  </section>
+</ubax-public-shell>

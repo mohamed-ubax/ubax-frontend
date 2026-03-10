@@ -1,0 +1,57 @@
+<div class="page-shell">
+  <header class="main-header">
+    <a routerLink="/" class="brand" aria-label="Accueil UBAX">
+      <span class="brand-mark">U</span>
+      <span class="brand-text">UBAX</span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navigation principale">
+      @for (item of menuItems; track item.label) {
+      <a [href]="item.path">{{ item.label }}</a>
+      }
+    </nav>
+
+    <a routerLink="/connexion" class="pro-space-btn">Mon espace Pro</a>
+  </header>
+
+  <main class="main-content">
+    <ng-content></ng-content>
+  </main>
+
+  <footer class="main-footer">
+    <section class="footer-column brand-col">
+      <h3>UBAX</h3>
+      <p>
+        L'immobilier devient plus simple, plus rapide et plus sur avec UBAX.
+      </p>
+      <span class="rating">4.8 ★★★★★</span>
+    </section>
+
+    <section class="footer-column">
+      <h4>Liens rapides</h4>
+      <a routerLink="/">Accueil</a>
+      <a href="/#fonctionnalites">Fonctionnalites</a>
+      <a href="/#tarifs">Offres & Tarifs</a>
+      <a href="/#temoignages">Temoignages</a>
+      <a routerLink="/faq">FAQ</a>
+      <a routerLink="/contact">Contacts</a>
+    </section>
+
+    <section class="footer-column">
+      <h4>Solutions</h4>
+      <a href="#">Application mobile UBAX</a>
+      <a href="#">Plateforme agences immobilieres</a>
+      <a href="#">Location longue duree</a>
+      <a href="#">Location courte duree</a>
+      <a href="#">Achat immobilier</a>
+    </section>
+
+    <section class="footer-column">
+      <h4>Support</h4>
+      <a routerLink="/contact">Centre d'aide</a>
+      <a routerLink="/faq">FAQ</a>
+      <a routerLink="/contact">Contacter le support</a>
+      <a routerLink="/mentions-legales">Conditions d'utilisation</a>
+    </section>
+  </footer>
+</div>

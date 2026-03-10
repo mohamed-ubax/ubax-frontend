@@ -1,0 +1,60 @@
+.auth-wrap {
+  width: min(680px, calc(100% - 2rem));
+  margin: 2.5rem auto;
+  padding: 2rem 0;
+}
+
+.auth-card {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(26, 48, 71, 0.12);
+}
+
+.auth-card h1 {
+  margin: 0;
+  color: var(--ubax-brand);
+}
+
+.auth-card p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.auth-card input {
+  width: 100%;
+  border: 1px solid rgba(26, 48, 71, 0.24);
+  border-radius: 999px;
+  padding: 0.7rem 0.9rem;
+  font: inherit;
+}
+
+.auth-card button {
+  margin-top: 0.25rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 0.95rem;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ubax-brand);
+}
+
+.auth-card a {
+  color: var(--ubax-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.otp-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.otp-grid input {
+  text-align: center;
+  border-radius: 12px;
+}
