@@ -1,13 +1,17 @@
 <div class="ubax-accordion">
   @for (item of items(); track item.title; let i = $index) {
-  <section class="acc-item" [class.acc-item--open]="openIndex === i">
-    <button type="button" (click)="toggle(i)" [attr.aria-expanded]="openIndex === i">
-      <span>{{ item.title }}</span>
-      <span>{{ openIndex === i ? '−' : '+' }}</span>
-    </button>
-    @if (openIndex === i) {
-    <p>{{ item.content }}</p>
-    }
-  </section>
+    <section class="acc-item" [class.acc-item--open]="openIndex === i">
+      <button
+        type="button"
+        (click)="toggle(i)"
+        [attr.aria-expanded]="openIndex === i"
+      >
+        <span>{{ item.title }}</span>
+        <span>{{ openIndex === i ? '−' : '+' }}</span>
+      </button>
+      @if (openIndex === i) {
+        <p>{{ item.content }}</p>
+      }
+    </section>
   }
 </div>

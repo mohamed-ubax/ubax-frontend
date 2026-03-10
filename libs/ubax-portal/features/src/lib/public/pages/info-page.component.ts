@@ -30,12 +30,12 @@ export class InfoPageComponent {
 
   protected readonly faqItems: UiAccordionItem[] = [
     {
-      title: 'Qu\'est-ce que UBAX ?',
+      title: "Qu'est-ce que UBAX ?",
       content:
         'UBAX est une plateforme web qui centralise gestion de biens, locations, paiements et support.',
     },
     {
-      title: 'A qui s\'adresse UBAX ?',
+      title: "A qui s'adresse UBAX ?",
       content:
         'La plateforme est concue pour les agences immobilieres, bailleurs et gestionnaires de patrimoine.',
     },
@@ -50,4 +50,3 @@ export class InfoPageComponent {
     return this.title.includes('FAQ');
   }
 }
-

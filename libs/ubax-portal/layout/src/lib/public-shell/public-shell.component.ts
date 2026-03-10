@@ -18,4 +18,3 @@ export class PublicShellComponent {
     { label: 'Contacts', path: '/contact' },
   ];
 }
-

@@ -21,9 +21,7 @@
       "@ubax-workspace/ubax-portal-features": [
         "libs/ubax-portal/features/src/index.ts"
       ],
-      "@ubax-workspace/shared-ui": [
-        "libs/shared/ui/src/index.ts"
-      ]
+      "@ubax-workspace/shared-ui": ["libs/shared/ui/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

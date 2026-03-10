@@ -1,0 +1,58 @@
+.legal-wrap {
+  width: min(1500px, calc(100% - 2rem));
+  margin: 2rem auto;
+  background: #eef3f8;
+  border-radius: 20px;
+  padding: 1.4rem;
+
+  header {
+    text-align: center;
+
+    h1 {
+      margin: 0;
+      color: var(--ubax-brand);
+    }
+  }
+}
+
+.legal-grid {
+  margin-top: 1.2rem;
+  display: grid;
+  grid-template-columns: 0.35fr 1fr;
+  gap: 1rem;
+}
+
+aside {
+  background: #dfe8ef;
+  border-radius: 14px;
+  padding: 1rem;
+
+  ol {
+    margin: 0;
+    padding-left: 1rem;
+    color: var(--ubax-brand);
+    line-height: 2;
+    font-weight: 600;
+  }
+}
+
+article {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+
+  h2 {
+    color: var(--ubax-brand);
+  }
+
+  p {
+    color: #4b5563;
+    line-height: 1.65;
+  }
+}
+
+@media (max-width: 980px) {
+  .legal-grid {
+    grid-template-columns: 1fr;
+  }
+}

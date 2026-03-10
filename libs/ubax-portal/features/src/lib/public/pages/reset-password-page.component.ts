@@ -9,4 +9,3 @@ import { UiButtonComponent, UiInputComponent } from '@ubax-workspace/shared-ui';
   styleUrl: './auth-pages.component.scss',
 })
 export class ResetPasswordPageComponent {}
-

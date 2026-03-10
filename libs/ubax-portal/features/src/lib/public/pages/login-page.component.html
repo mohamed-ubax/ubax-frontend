@@ -1,11 +1,22 @@
 <ubax-public-shell>
   <section class="auth-wrap">
-    <article class="auth-card">
+    <article class="auth-card auth-stage">
+      <div class="auth-logo">U</div>
       <h1>Se connecter</h1>
       <p>Connectez-vous avec votre numero de telephone et mot de passe.</p>
-      <ubax-ui-input type="tel" label="Numero de telephone" placeholder="07 12 34 56 78" />
-      <ubax-ui-input type="password" label="Mot de passe" placeholder="••••••••" />
-      <ubax-ui-button variant="dark" [block]="true">Se connecter</ubax-ui-button>
+      <ubax-ui-input
+        type="tel"
+        label="Numero de telephone"
+        placeholder="07 12 34 56 78"
+      />
+      <ubax-ui-input
+        type="password"
+        label="Mot de passe"
+        placeholder="••••••••"
+      />
+      <ubax-ui-button variant="dark" [block]="true"
+        >Se connecter</ubax-ui-button
+      >
       <a routerLink="/mot-de-passe-oublie">Reinitialiser votre mot de passe</a>
     </article>
   </section>

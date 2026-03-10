@@ -3,26 +3,26 @@
 @tailwind utilities;
 
 :root {
-	--ubax-text-primary: #343434;
-	--ubax-accent: #e87d1e;
-	--ubax-brand: #1a3047;
-	--ubax-support-soft: #c5e0dc;
-	--ubax-support-mint: #e1f6f2;
-	--ubax-page-bg: #edf2f5;
+  --ubax-text-primary: #343434;
+  --ubax-accent: #e87d1e;
+  --ubax-brand: #1a3047;
+  --ubax-support-soft: #c5e0dc;
+  --ubax-support-mint: #e1f6f2;
+  --ubax-page-bg: #edf2f5;
 }
 
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body {
-	margin: 0;
-	min-height: 100%;
+  margin: 0;
+  min-height: 100%;
 }
 
 body {
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	color: var(--ubax-text-primary);
-	background: var(--ubax-page-bg);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--ubax-text-primary);
+  background: var(--ubax-page-bg);
 }

@@ -1,0 +1,67 @@
+.pricing-wrap {
+  width: min(1400px, calc(100% - 2rem));
+  margin: 2rem auto;
+  background: #eef3f8;
+  border-radius: 20px;
+  padding: 2rem;
+
+  header {
+    text-align: center;
+
+    h1 {
+      margin: 0;
+      color: var(--ubax-brand);
+    }
+
+    p {
+      color: #4b5563;
+    }
+  }
+}
+
+.toggle {
+  margin: 1rem auto 1.5rem;
+  width: fit-content;
+  background: #dbe8f2;
+  border-radius: 999px;
+  padding: 0.35rem;
+  font-weight: 600;
+
+  span {
+    margin-left: 0.6rem;
+    background: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+  }
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.plan {
+  h3,
+  h4 {
+    margin: 0;
+  }
+
+  p {
+    color: #4b5563;
+  }
+}
+
+.featured {
+  transform: translateY(-8px);
+}
+
+@media (max-width: 900px) {
+  .plans {
+    grid-template-columns: 1fr;
+  }
+
+  .featured {
+    transform: none;
+  }
+}

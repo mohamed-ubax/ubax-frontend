@@ -1,17 +1,38 @@
 .auth-wrap {
-  width: min(560px, calc(100% - 2rem));
-  margin: 3rem auto;
-  padding: 2rem 0 3rem;
+  width: min(540px, calc(100% - 2rem));
+  margin: 2.4rem auto;
+  padding: 1.5rem 0 2rem;
 }
 
 .auth-card {
   display: grid;
   gap: 0.9rem;
-  padding: 1.6rem;
+  padding: 1.45rem;
   border-radius: 16px;
   background: #fff;
   border: 1px solid rgba(26, 48, 71, 0.12);
   box-shadow: 0 16px 30px rgba(11, 26, 40, 0.08);
+}
+
+.auth-stage {
+  position: relative;
+  margin-top: 2.8rem;
+}
+
+.auth-logo {
+  position: absolute;
+  top: -2.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ubax-brand);
+  border: 3px solid #fff;
 }
 
 .auth-card h1 {
@@ -28,6 +49,7 @@
   color: var(--ubax-accent);
   text-decoration: none;
   font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .action-link {

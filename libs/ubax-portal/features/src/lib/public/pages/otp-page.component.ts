@@ -12,4 +12,3 @@ import { UiButtonComponent } from '@ubax-workspace/shared-ui';
 export class OtpPageComponent {
   protected readonly otpSlots = Array.from({ length: 6 });
 }
-

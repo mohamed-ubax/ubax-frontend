@@ -1,0 +1,20 @@
+<ubax-public-shell>
+  <section class="testimonials-wrap">
+    <header>
+      <h1>Ils font confiance a UBAX</h1>
+      <p>Decouvrez les retours d'experience des utilisateurs et agences.</p>
+    </header>
+
+    <div class="cards-grid">
+      @for (card of cards; track card.name) {
+        <article class="card">
+          <img [src]="card.image" [alt]="card.name" />
+          <div class="overlay">
+            <h3>{{ card.name }}</h3>
+            <span>{{ card.role }}</span>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+</ubax-public-shell>

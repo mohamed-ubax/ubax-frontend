@@ -10,7 +10,10 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease,
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
     border-color 160ms ease;
 
   &:hover:not(:disabled) {

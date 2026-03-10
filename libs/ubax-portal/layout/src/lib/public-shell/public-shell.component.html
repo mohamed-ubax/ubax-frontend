@@ -6,7 +6,7 @@
 
     <nav class="main-nav" aria-label="Navigation principale">
       @for (item of menuItems; track item.label) {
-      <a [routerLink]="item.path">{{ item.label }}</a>
+        <a [routerLink]="item.path">{{ item.label }}</a>
       }
     </nav>
 
@@ -24,6 +24,14 @@
         L'immobilier devient plus simple, plus rapide et plus sur avec UBAX.
       </p>
       <span class="rating">4.8 ★★★★★</span>
+      <h4>Suivez nous</h4>
+      <div class="socials">
+        <span>f</span>
+        <span>ig</span>
+        <span>t</span>
+        <span>x</span>
+        <span>in</span>
+      </div>
     </section>
 
     <section class="footer-column">
@@ -51,6 +59,12 @@
       <a routerLink="/faq">FAQ</a>
       <a routerLink="/contact">Contacter le support</a>
       <a routerLink="/mentions-legales">Conditions d'utilisation</a>
+
+      <div class="store-badges">
+        <span>Google Play</span>
+        <span>App Store</span>
+        <span>AppGallery</span>
+      </div>
     </section>
   </footer>
 </div>

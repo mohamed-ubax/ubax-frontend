@@ -1,6 +1,10 @@
 <label class="ubax-field">
   @if (label()) {
-  <span class="ubax-field__label">{{ label() }}</span>
+    <span class="ubax-field__label">{{ label() }}</span>
   }
-  <input [attr.type]="type()" [attr.placeholder]="placeholder()" [value]="value()" />
+  <input
+    [attr.type]="type()"
+    [attr.placeholder]="placeholder()"
+    [value]="value()"
+  />
 </label>

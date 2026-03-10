@@ -1,5 +1,8 @@
 <ubax-public-shell>
-  <section class="hero">
+  <section class="splash-hero">
+    <img src="/assets/portal/splash-screen.png" alt="Arriere-plan UBAX" class="hero-bg" />
+    <div class="hero-overlay"></div>
+
     <div class="hero-copy">
       <h1>Trouvez, Contactez, emmenager avec <span>UBAX</span></h1>
       <p>
@@ -7,79 +10,133 @@
         Trouvez des biens, reservez en ligne et gerez vos locations depuis une
         seule application.
       </p>
-      <div class="hero-actions">
-        <a routerLink="/connexion" class="link-reset">
-          <ubax-ui-button variant="primary">Decouvrir</ubax-ui-button>
-        </a>
-        <a routerLink="/tarifs" class="link-reset">
-          <ubax-ui-button variant="ghost">Voir les fonctionnalites</ubax-ui-button>
-        </a>
+
+      <div class="users-pill">
+        <img src="/assets/portal/11.png" alt="Utilisateur" />
+        <img src="/assets/portal/12.png" alt="Utilisateur" />
+        <img src="/assets/portal/13.png" alt="Utilisateur" />
+        <img src="/assets/portal/14.png" alt="Utilisateur" />
+        <span>+ 1 Million utilisateurs</span>
+      </div>
+
+      <a routerLink="/connexion" class="hero-cta">
+        <span>Decouvrir</span>
+        <strong>↗</strong>
+      </a>
+    </div>
+  </section>
+
+  <section id="fonctionnalites" class="platform-intro">
+    <div class="intro-copy">
+      <h2>UBAX la plateforme qui connecte tout l'ecosysteme immobilier</h2>
+      <p>
+        L'immobilier devient plus simple, plus rapide et plus sur avec UBAX.
+        Trouvez des biens, reservez en ligne et gerez vos locations depuis une
+        seule application.
+      </p>
+      <div class="store-row">
+        <div class="store-pill">Disponible sur Google Play</div>
+        <div class="store-pill">Telecharger dans l'App Store</div>
+        <div class="store-pill">Decouvrez sur AppGallery</div>
       </div>
     </div>
-    <div class="hero-orbit" aria-hidden="true">
-      <span class="center"></span>
-      <span class="ring"></span>
+    <img
+      src="/assets/portal/homme-avec-cl.png"
+      alt="Professionnel UBAX"
+      class="intro-image"
+    />
+  </section>
+
+  <section class="steps-row">
+    <ubax-ui-card tone="dark">
+      <h3>Installez UBAX en un clic</h3>
+      <p>Telechargez l'application et accedez immediatement a tous les services.</p>
+    </ubax-ui-card>
+    <ubax-ui-card tone="dark">
+      <h3>Inscription rapide et securisee</h3>
+      <p>Creez votre compte en quelques minutes et verifiez votre identite.</p>
+    </ubax-ui-card>
+    <ubax-ui-card tone="dark">
+      <h3>Rechercher, reserver et gerer</h3>
+      <p>Un tableau de bord unique pour tout piloter en temps reel.</p>
+    </ubax-ui-card>
+  </section>
+
+  <section class="key-features">
+    <header>
+      <h2>Fonctionnalites cles</h2>
+      <p>Tout ce dont vous avez besoin pour gerer l'immobilier, en un seul endroit.</p>
+    </header>
+
+    <div class="feature-layout">
+      <div class="feature-col">
+        <article><b>1.</b> Recherche intelligente de biens</article>
+        <article><b>2.</b> Reservation rapide</article>
+      </div>
+
+      <div class="feature-phone">
+        <img src="/assets/portal/img-1.png" alt="Application UBAX" />
+      </div>
+
+      <div class="feature-col">
+        <article><b>3.</b> Tableau de bord personnalise</article>
+        <article><b>4.</b> Paiements securises</article>
+      </div>
     </div>
   </section>
 
-  <section id="fonctionnalites" class="feature-grid section-box">
-    <ubax-ui-card tone="soft">
-      <h3>Recherche intelligente</h3>
-      <p>Filtrez rapidement vos biens selon vos criteres et zones prioritaires.</p>
-    </ubax-ui-card>
-    <ubax-ui-card tone="soft">
-      <h3>Reservation rapide</h3>
-      <p>Proposez, validez et suivez vos reservations en quelques clics.</p>
-    </ubax-ui-card>
-    <ubax-ui-card tone="soft">
-      <h3>Paiements securises</h3>
-      <p>Encaissez et suivez tous vos flux financiers depuis un tableau unique.</p>
-    </ubax-ui-card>
-  </section>
-
-  <section class="section-box split-section">
-    <div class="mockup"></div>
-    <div>
+  <section class="location-section">
+    <img src="/assets/portal/img-2.png" alt="Famille heureuse" class="location-image" />
+    <div class="location-copy">
       <h2>Votre location commence ici</h2>
-      <p>
-        Consultez les offres en temps reel, planifiez les visites et finalisez
-        vos reservations depuis une interface unique.
-      </p>
+      <ul>
+        <li>Biens disponibles a la location</li>
+        <li>Prise de rendez-vous avec l'agence</li>
+        <li>Accompagnement professionnel</li>
+      </ul>
       <a routerLink="/contact" class="link-reset">
         <ubax-ui-button variant="dark">Decouvrir</ubax-ui-button>
       </a>
     </div>
   </section>
 
-  <section id="tarifs" class="pricing section-box">
-    <h2>Une tarification simple, claire et evolutive</h2>
-    <div class="cards">
-      <ubax-ui-card class="plan-card" [elevated]="true">
-        <h3>Starter</h3>
-        <p>Pour commencer la gestion de vos biens.</p>
-      </ubax-ui-card>
-      <ubax-ui-card class="plan-card highlighted" [elevated]="true" tone="dark">
-        <h3>Pro</h3>
-        <p>Pour accelerer vos operations immobilieres.</p>
-      </ubax-ui-card>
-      <ubax-ui-card class="plan-card" [elevated]="true">
-        <h3>Enterprise</h3>
-        <p>Pour les grandes agences et reseaux.</p>
-      </ubax-ui-card>
+  <section class="hotel-section">
+    <div class="hotel-copy">
+      <h2>Hotels, villas et residences pour vos sejours</h2>
+      <p>
+        Decouvrez une selection d'hotels, villas et residences pour vos courts
+        sejours, vacances ou deplacements professionnels.
+      </p>
+      <img src="/assets/portal/widget-01.png" alt="Widget hotel" class="hotel-widget" />
     </div>
-    <a routerLink="/tarifs" class="link-reset">
-      <ubax-ui-button variant="primary">Voir tous les tarifs</ubax-ui-button>
-    </a>
+    <img src="/assets/portal/phone-flour.png" alt="Recherche logements" class="hotel-phone" />
   </section>
 
-  <section id="temoignages" class="testimonials section-box">
-    <h2>Ils font confiance a UBAX</h2>
-    <p>
-      Des locataires, bailleurs et agences utilisent UBAX au quotidien pour
-      simplifier leurs operations.
-    </p>
-    <a routerLink="/temoignages" class="link-reset">
-      <ubax-ui-button variant="ghost">Voir les temoignages</ubax-ui-button>
-    </a>
+  <section class="dashboard-section">
+    <img src="/assets/portal/stat.png" alt="Statistiques UBAX" class="dashboard-media" />
+    <div>
+      <h2>Tableaux de bord intelligents pour locataires et bailleurs</h2>
+      <p>Suivez vos loyers, paiements, contrats et revenus en temps reel.</p>
+      <img src="/assets/portal/widget-card.png" alt="Widget tableau de bord" class="dashboard-widget" />
+    </div>
+  </section>
+
+  <section class="payments-section">
+    <div>
+      <h2>Gerez et securisez tous vos paiements</h2>
+      <p>
+        UBAX simplifie la collecte et le suivi des paiements immobiliers avec
+        des moyens fiables et adaptes a votre agence.
+      </p>
+    </div>
+
+    <div class="payments-visual">
+      <img src="/assets/portal/rectangle-25189.png" alt="Paiements UBAX" class="payments-main" />
+      <div class="floating-logos">
+        @for (logo of paymentLogos; track logo) {
+          <img [src]="logo" alt="Partenaire paiement" />
+        }
+      </div>
+    </div>
   </section>
 </ubax-public-shell>
