@@ -18,9 +18,17 @@
   justify-content: space-between;
   gap: clamp(0.75rem, 2vw, 2rem);
   padding: 0 clamp(1.25rem, 3.993vw, 4.3125rem);
-  height: clamp(4rem, 7.581vw, 8.1875rem);
+  height: clamp(4rem, 7.581vw, 6.1875rem);
   background: #fff;
   box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.15);
+  transition: background 0.35s ease, box-shadow 0.35s ease;
+
+  &.is-scrolled {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: none;
+  }
 }
 
 .brand {
@@ -49,10 +57,14 @@
   color: #000;
   text-decoration: none;
   font-family: 'Lexend', sans-serif;
-  font-size: clamp(0.8125rem, 1.389vw, 1.5rem);
+  font-size: 1rem;
   font-weight: 400;
-  line-height: 1;
+  line-height: 1.5rem;
   white-space: nowrap;
+}
+
+.main-header.is-scrolled .main-nav a {
+  color: #000;
 }
 
 .mobile-nav-panel {
@@ -71,7 +83,7 @@
   color: #fff;
   text-decoration: none;
   font-family: 'Inter', sans-serif;
-  font-size: clamp(0.6875rem, 0.810vw, 0.875rem);
+  font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
 
@@ -112,18 +124,18 @@
 
     &:nth-child(1) {
       top: 0;
-      transition: top 0.3s 0.15s ease, transform 0.3s ease;
+      transition: background 0.35s ease, top 0.3s 0.15s ease, transform 0.3s ease;
     }
 
     &:nth-child(2) {
       top: 50%;
       transform: translateY(-50%);
-      transition: opacity 0.15s ease;
+      transition: background 0.35s ease, opacity 0.15s ease;
     }
 
     &:nth-child(3) {
       bottom: 0;
-      transition: bottom 0.3s 0.15s ease, transform 0.3s ease;
+      transition: background 0.35s ease, bottom 0.3s 0.15s ease, transform 0.3s ease;
     }
   }
 
@@ -176,6 +188,13 @@
     z-index: 28;
     background: #fff;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease;
+
+    &.is-scrolled {
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(16px);
+      box-shadow: none;
+    }
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -434,7 +453,6 @@
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 
   p {
-    max-width: 1748px;
     margin-inline: auto;
     // side padding matches footer-inner / block padding creates the bar height
     padding: clamp(1.25rem, 1.72vw, 1.875rem) clamp(2rem, 5.03vw, 5.5rem);

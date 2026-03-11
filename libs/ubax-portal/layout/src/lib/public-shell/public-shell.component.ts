@@ -10,6 +10,7 @@ import { RouterLink } from '@angular/router';
 })
 export class PublicShellComponent {
   protected menuOpen = false;
+  protected scrolled = false;
 
   protected toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
@@ -17,6 +18,11 @@ export class PublicShellComponent {
 
   protected closeMenu(): void {
     this.menuOpen = false;
+  }
+
+  @HostListener('window:scroll')
+  protected onScroll(): void {
+    this.scrolled = window.scrollY > 20;
   }
 
   @HostListener('document:keydown.escape')
