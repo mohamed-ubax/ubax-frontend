@@ -17,26 +17,6 @@ import { UiButtonComponent, UiCardComponent } from '@ubax-workspace/shared-ui';
   styleUrl: './home-page.component.scss',
 })
 export class HomePageComponent {
-  protected readonly testimonials = [
-    {
-      name: 'Jean-Marc Bedi',
-      role: 'Locataire',
-      image: '/assets/portal-assets/11.png',
-    },
-    {
-      name: 'Ibrahim Diabate',
-      role: 'Locataire',
-      image: '/assets/portal-assets/12.png',
-    },
-    {
-      name: 'Nadia Coulibaly',
-      role: 'Locataire',
-      image: '/assets/portal-assets/13.png',
-    },
-    { name: 'Serge Koffi', role: 'Bailleur', image: '/assets/portal-assets/14.png' },
-    { name: 'Fatou Kone', role: 'Locataire', image: '/assets/portal-assets/15.png' },
-  ];
-
   protected readonly paymentLogos = [
     '/assets/portal-assets/logo-flottant/stripe-logo-revised-2016-svg.png',
     '/assets/portal-assets/logo-flottant/mastercard-logo.svg',

@@ -4,6 +4,11 @@ export const publicRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
+      import('./pages/splash-page.component').then((m) => m.SplashPageComponent),
+  },
+  {
+    path: 'accueil',
+    loadComponent: () =>
       import('./pages/home-page.component').then((m) => m.HomePageComponent),
   },
   {
@@ -60,5 +65,10 @@ export const publicRoutes: Routes = [
     path: 'mentions-legales',
     loadComponent: () =>
       import('./pages/legal-page.component').then((m) => m.LegalPageComponent),
+  },
+  {
+    path: '**',
+    redirectTo: '',
+    pathMatch: 'full',
   },
 ];

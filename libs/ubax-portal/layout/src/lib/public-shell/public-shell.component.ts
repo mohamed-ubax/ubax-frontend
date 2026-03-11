@@ -10,8 +10,8 @@ import { RouterLink } from '@angular/router';
 })
 export class PublicShellComponent {
   protected readonly menuItems = [
-    { label: 'Accueil', path: '/' },
-    { label: 'Fonctionnalites', path: '/' },
+    { label: 'Accueil', path: '/accueil' },
+    { label: 'Fonctionnalites', path: '/accueil' },
     { label: 'Temoignages', path: '/temoignages' },
     { label: 'Tarifs', path: '/tarifs' },
     { label: 'FAQs', path: '/faq' },
