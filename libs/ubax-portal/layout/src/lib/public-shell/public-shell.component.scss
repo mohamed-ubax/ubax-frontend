@@ -74,7 +74,12 @@
   grid-template-columns: 1.4fr 1fr 1fr 1fr;
   gap: 2rem;
   padding: 3rem 2rem;
-  background: radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.08), transparent 42%),
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(255, 255, 255, 0.08),
+      transparent 42%
+    ),
     var(--ubax-brand);
   color: #fff;
 }

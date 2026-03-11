@@ -1,6 +1,10 @@
-<ubax-public-shell>
+﻿<ubax-public-shell>
   <section class="splash-hero">
-    <img src="/assets/portal/splash-screen.png" alt="Arriere-plan UBAX" class="hero-bg" />
+    <img
+      src="/assets/portal-assets/splash-screen.png"
+      alt="Arriere-plan UBAX"
+      class="hero-bg"
+    />
     <div class="hero-overlay"></div>
 
     <div class="hero-copy">
@@ -12,16 +16,16 @@
       </p>
 
       <div class="users-pill">
-        <img src="/assets/portal/11.png" alt="Utilisateur" />
-        <img src="/assets/portal/12.png" alt="Utilisateur" />
-        <img src="/assets/portal/13.png" alt="Utilisateur" />
-        <img src="/assets/portal/14.png" alt="Utilisateur" />
+        <img src="/assets/portal-assets/11.png" alt="Utilisateur" />
+        <img src="/assets/portal-assets/12.png" alt="Utilisateur" />
+        <img src="/assets/portal-assets/13.png" alt="Utilisateur" />
+        <img src="/assets/portal-assets/14.png" alt="Utilisateur" />
         <span>+ 1 Million utilisateurs</span>
       </div>
 
       <a routerLink="/connexion" class="hero-cta">
         <span>Decouvrir</span>
-        <strong>↗</strong>
+        <strong>â†—</strong>
       </a>
     </div>
   </section>
@@ -41,7 +45,7 @@
       </div>
     </div>
     <img
-      src="/assets/portal/homme-avec-cl.png"
+      src="/assets/portal-assets/homme-avec-cl.png"
       alt="Professionnel UBAX"
       class="intro-image"
     />
@@ -50,7 +54,9 @@
   <section class="steps-row">
     <ubax-ui-card tone="dark">
       <h3>Installez UBAX en un clic</h3>
-      <p>Telechargez l'application et accedez immediatement a tous les services.</p>
+      <p>
+        Telechargez l'application et accedez immediatement a tous les services.
+      </p>
     </ubax-ui-card>
     <ubax-ui-card tone="dark">
       <h3>Inscription rapide et securisee</h3>
@@ -65,7 +71,10 @@
   <section class="key-features">
     <header>
       <h2>Fonctionnalites cles</h2>
-      <p>Tout ce dont vous avez besoin pour gerer l'immobilier, en un seul endroit.</p>
+      <p>
+        Tout ce dont vous avez besoin pour gerer l'immobilier, en un seul
+        endroit.
+      </p>
     </header>
 
     <div class="feature-layout">
@@ -75,7 +84,7 @@
       </div>
 
       <div class="feature-phone">
-        <img src="/assets/portal/img-1.png" alt="Application UBAX" />
+        <img src="/assets/portal-assets/img-1.png" alt="Application UBAX" />
       </div>
 
       <div class="feature-col">
@@ -86,7 +95,11 @@
   </section>
 
   <section class="location-section">
-    <img src="/assets/portal/img-2.png" alt="Famille heureuse" class="location-image" />
+    <img
+      src="/assets/portal-assets/img-2.png"
+      alt="Famille heureuse"
+      class="location-image"
+    />
     <div class="location-copy">
       <h2>Votre location commence ici</h2>
       <ul>
@@ -107,17 +120,33 @@
         Decouvrez une selection d'hotels, villas et residences pour vos courts
         sejours, vacances ou deplacements professionnels.
       </p>
-      <img src="/assets/portal/widget-01.png" alt="Widget hotel" class="hotel-widget" />
+      <img
+        src="/assets/portal-assets/widget-01.png"
+        alt="Widget hotel"
+        class="hotel-widget"
+      />
     </div>
-    <img src="/assets/portal/phone-flour.png" alt="Recherche logements" class="hotel-phone" />
+    <img
+      src="/assets/portal-assets/phone-flour.png"
+      alt="Recherche logements"
+      class="hotel-phone"
+    />
   </section>
 
   <section class="dashboard-section">
-    <img src="/assets/portal/stat.png" alt="Statistiques UBAX" class="dashboard-media" />
+    <img
+      src="/assets/portal-assets/stat.png"
+      alt="Statistiques UBAX"
+      class="dashboard-media"
+    />
     <div>
       <h2>Tableaux de bord intelligents pour locataires et bailleurs</h2>
       <p>Suivez vos loyers, paiements, contrats et revenus en temps reel.</p>
-      <img src="/assets/portal/widget-card.png" alt="Widget tableau de bord" class="dashboard-widget" />
+      <img
+        src="/assets/portal-assets/widget-card.png"
+        alt="Widget tableau de bord"
+        class="dashboard-widget"
+      />
     </div>
   </section>
 
@@ -131,7 +160,11 @@
     </div>
 
     <div class="payments-visual">
-      <img src="/assets/portal/rectangle-25189.png" alt="Paiements UBAX" class="payments-main" />
+      <img
+        src="/assets/portal-assets/rectangle-25189.png"
+        alt="Paiements UBAX"
+        class="payments-main"
+      />
       <div class="floating-logos">
         @for (logo of paymentLogos; track logo) {
           <img [src]="logo" alt="Partenaire paiement" />
@@ -140,3 +173,4 @@
     </div>
   </section>
 </ubax-public-shell>
+

@@ -3,33 +3,41 @@
     <header>
       <h1>Une tarification simple, claire et evolutive</h1>
       <p>
-        UBAX propose des plans adaptes a tous les niveaux d'agences immobilieres.
+        UBAX propose des plans adaptes a tous les niveaux d'agences
+        immobilieres, pour gerer vos biens, vos locataires et vos paiements en
+        toute serenite.
       </p>
     </header>
 
-    <div class="toggle">Mensuel <span>Annuel</span></div>
+    <div class="toggle">
+      <span class="active">Mensuel</span><span>Annuel</span>
+    </div>
 
     <div class="plans">
-      <ubax-ui-card class="plan">
-        <h3>Starter</h3>
-        <p>Gestion essentielle</p>
-        <h4>0 FCFA / mois</h4>
-        <ubax-ui-button variant="outline" [block]="true">Selectionner</ubax-ui-button>
-      </ubax-ui-card>
+      @for (plan of plans; track plan.name) {
+        <ubax-ui-card
+          class="plan"
+          [class.featured]="plan.featured"
+          [tone]="plan.featured ? 'dark' : 'default'"
+        >
+          <h3>{{ plan.name }}</h3>
+          <p>{{ plan.subtitle }}</p>
+          <h4>{{ plan.price }} <small>/ mois</small></h4>
 
-      <ubax-ui-card class="plan featured" tone="dark">
-        <h3>Pro</h3>
-        <p>Gestion avancee</p>
-        <h4>0 FCFA / mois</h4>
-        <ubax-ui-button variant="primary" [block]="true">Selectionner</ubax-ui-button>
-      </ubax-ui-card>
+          <ubax-ui-button
+            [variant]="plan.featured ? 'primary' : 'outline'"
+            [block]="true"
+          >
+            Selectionner
+          </ubax-ui-button>
 
-      <ubax-ui-card class="plan">
-        <h3>Enterprise</h3>
-        <p>Multi-agences</p>
-        <h4>0 FCFA / mois</h4>
-        <ubax-ui-button variant="outline" [block]="true">Selectionner</ubax-ui-button>
-      </ubax-ui-card>
+          <ul>
+            @for (feature of plan.features; track feature) {
+              <li>{{ feature }}</li>
+            }
+          </ul>
+        </ubax-ui-card>
+      }
     </div>
   </section>
 </ubax-public-shell>

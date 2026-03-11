@@ -38,12 +38,16 @@ export const publicRoutes: Routes = [
   {
     path: 'contact',
     loadComponent: () =>
-      import('./pages/contact-page.component').then((m) => m.ContactPageComponent),
+      import('./pages/contact-page.component').then(
+        (m) => m.ContactPageComponent,
+      ),
   },
   {
     path: 'tarifs',
     loadComponent: () =>
-      import('./pages/pricing-page.component').then((m) => m.PricingPageComponent),
+      import('./pages/pricing-page.component').then(
+        (m) => m.PricingPageComponent,
+      ),
   },
   {
     path: 'temoignages',

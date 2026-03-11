@@ -1,9 +1,9 @@
 .contact-wrap {
-  width: min(1500px, calc(100% - 2rem));
-  margin: 2rem auto;
+  width: min(1550px, calc(100% - 2rem));
+  margin: 1.8rem auto 2.2rem;
   background: #eef3f8;
   border-radius: 20px;
-  padding: 1.4rem;
+  padding: 2rem 1.6rem;
 
   header {
     text-align: center;
@@ -11,25 +11,30 @@
     h1 {
       margin: 0;
       color: var(--ubax-brand);
+      font-size: clamp(2rem, 3vw, 2.9rem);
     }
 
     p {
       color: #4b5563;
+      max-width: 70ch;
+      margin: 0.6rem auto 0;
+      line-height: 1.6;
     }
   }
 }
 
 .contact-grid {
-  margin-top: 1.2rem;
+  margin-top: 1.8rem;
   display: grid;
   grid-template-columns: 1.35fr 0.65fr;
   border-radius: 16px;
   overflow: hidden;
+  border: 1px solid rgba(26, 48, 71, 0.14);
 }
 
 .contact-form {
   background: #fff;
-  padding: 1.5rem;
+  padding: 1.7rem;
 
   h2 {
     margin-top: 0;
@@ -67,17 +72,18 @@
 .support-panel {
   background: var(--ubax-brand);
   color: #fff;
-  padding: 1.5rem;
+  padding: 1.7rem;
 
   h3 {
     margin-top: 0;
+    font-size: 1.6rem;
   }
 }
 
 .contact-item {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.12);
-  padding: 0.8rem;
+  padding: 0.95rem;
   margin-top: 0.7rem;
 }
 
@@ -85,5 +91,10 @@
   .contact-grid,
   .row {
     grid-template-columns: 1fr;
+  }
+
+  .contact-wrap {
+    width: calc(100% - 1rem);
+    padding: 1.2rem 1rem;
   }
 }

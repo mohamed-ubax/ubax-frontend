@@ -1,9 +1,9 @@
 .testimonials-wrap {
-  width: min(1500px, calc(100% - 2rem));
-  margin: 2rem auto;
+  width: min(1550px, calc(100% - 2rem));
+  margin: 1.8rem auto 2.2rem;
   background: #eef3f8;
   border-radius: 20px;
-  padding: 1.4rem;
+  padding: 2rem 1.6rem;
 
   header {
     text-align: center;
@@ -11,16 +11,20 @@
     h1 {
       margin: 0;
       color: var(--ubax-brand);
+      font-size: clamp(2rem, 3vw, 2.9rem);
     }
 
     p {
       color: #4b5563;
+      max-width: 75ch;
+      margin: 0.6rem auto 0;
+      line-height: 1.7;
     }
   }
 }
 
 .cards-grid {
-  margin-top: 1.2rem;
+  margin-top: 1.8rem;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
@@ -30,7 +34,8 @@
   position: relative;
   border-radius: 14px;
   overflow: hidden;
-  min-height: 280px;
+  min-height: 300px;
+  box-shadow: 0 12px 24px rgba(7, 18, 30, 0.14);
 
   img {
     width: 100%;
@@ -44,14 +49,16 @@
   inset: auto 0 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
   color: #fff;
-  padding: 1rem;
+  padding: 1.1rem;
 
   h3 {
     margin: 0;
+    font-size: 1.35rem;
   }
 
   span {
     color: var(--ubax-accent);
+    font-weight: 600;
   }
 }
 
@@ -62,6 +69,11 @@
 }
 
 @media (max-width: 640px) {
+  .testimonials-wrap {
+    width: calc(100% - 1rem);
+    padding: 1.2rem 1rem;
+  }
+
   .cards-grid {
     grid-template-columns: 1fr;
   }

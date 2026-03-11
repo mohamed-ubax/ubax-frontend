@@ -24,7 +24,12 @@ section {
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.34);
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.64) 0%,
+      rgba(0, 0, 0, 0.48) 45%,
+      rgba(0, 0, 0, 0.38) 100%
+    );
   }
 }
 
@@ -40,6 +45,7 @@ section {
     margin: 0;
     line-height: 1.1;
     font-size: clamp(2.1rem, 4.6vw, 4rem);
+    text-shadow: 0 3px 16px rgba(0, 0, 0, 0.45);
   }
 
   span {
@@ -50,6 +56,7 @@ section {
     margin: 1.3rem 0 0;
     font-size: clamp(1rem, 1.4vw, 1.35rem);
     line-height: 1.65;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -60,9 +67,10 @@ section {
   align-items: center;
   gap: 0.45rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.23);
+  background: rgba(20, 34, 49, 0.78);
   backdrop-filter: blur(5px);
   padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
   img {
     width: 2rem;
@@ -86,7 +94,7 @@ section {
   border-radius: 54px;
   padding: 0.5rem 0.6rem 0.5rem 1.6rem;
   border: 1px solid rgba(80, 75, 73, 0.85);
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(20, 34, 49, 0.72);
   backdrop-filter: blur(4px);
   color: #fff;
   text-decoration: none;

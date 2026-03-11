@@ -1,9 +1,9 @@
 .pricing-wrap {
-  width: min(1400px, calc(100% - 2rem));
-  margin: 2rem auto;
+  width: min(1550px, calc(100% - 2rem));
+  margin: 1.8rem auto 2.2rem;
   background: #eef3f8;
   border-radius: 20px;
-  padding: 2rem;
+  padding: 2.4rem 2rem;
 
   header {
     text-align: center;
@@ -11,52 +11,128 @@
     h1 {
       margin: 0;
       color: var(--ubax-brand);
+      font-size: clamp(2rem, 3vw, 3rem);
     }
 
     p {
       color: #4b5563;
+      max-width: 70ch;
+      margin: 0.8rem auto 0;
+      line-height: 1.7;
     }
   }
 }
 
 .toggle {
-  margin: 1rem auto 1.5rem;
+  margin: 1.4rem auto 1.9rem;
   width: fit-content;
-  background: #dbe8f2;
+  background: #d8e5f0;
   border-radius: 999px;
   padding: 0.35rem;
   font-weight: 600;
+  display: inline-flex;
+  gap: 0.2rem;
 
   span {
-    margin-left: 0.6rem;
-    background: #fff;
-    padding: 0.4rem 0.8rem;
+    padding: 0.45rem 1rem;
     border-radius: 999px;
+    color: #566474;
+  }
+
+  .active {
+    background: #fff;
+    color: var(--ubax-brand);
   }
 }
 
 .plans {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.1rem;
 }
 
 .plan {
+  padding: 1.2rem;
+
   h3,
   h4 {
     margin: 0;
   }
 
+  h3 {
+    color: var(--ubax-brand);
+    font-size: 1.8rem;
+  }
+
   p {
-    color: #4b5563;
+    color: #5a6877;
+    margin: 0.6rem 0 1.1rem;
+    min-height: 3.4rem;
+  }
+
+  h4 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    color: var(--ubax-brand);
+
+    small {
+      font-size: 0.9rem;
+      color: #6c7b89;
+      font-weight: 500;
+    }
+  }
+
+  ul {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0.9rem;
+    border-radius: 14px;
+    background: #edf3f8;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  li {
+    position: relative;
+    padding-left: 1.2rem;
+    font-size: 0.93rem;
+
+    &::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--ubax-accent);
+      font-weight: 700;
+    }
   }
 }
 
 .featured {
-  transform: translateY(-8px);
+  transform: translateY(-10px);
+
+  h3,
+  h4,
+  p,
+  small,
+  li {
+    color: #fff;
+  }
+
+  ul {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  li::before {
+    color: #fff;
+  }
 }
 
 @media (max-width: 900px) {
+  .pricing-wrap {
+    width: calc(100% - 1rem);
+    padding: 1.2rem 1rem;
+  }
+
   .plans {
     grid-template-columns: 1fr;
   }
