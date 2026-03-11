@@ -221,19 +221,13 @@
   overflow: hidden;
   font-family: 'Lexend', sans-serif;
   color: #fff;
-  background-color: rgba(26, 48, 71, 1);
-  background-image: url('/assets/portal-assets/footer/images/Rectangle 25144.png');
-  background-size: cover;
-  background-position: center;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: rgba(26, 48, 71, 0.96);
-    pointer-events: none;
-    z-index: 0;
-  }
+  background: linear-gradient(
+      0deg,
+      rgba(26, 48, 71, 0.96) 0%,
+      rgba(26, 48, 71, 0.96) 100%
+    ),
+    url('/assets/portal-assets/footer/images/source/wavy_line_pattern_in_dark_background.jpg')
+    lightgray 50% / cover no-repeat;
 }
 
 .footer-inner {
@@ -241,14 +235,15 @@
   z-index: 1;
   max-width: 1748px;
   margin-inline: auto;
-  padding: clamp(2.5rem, 4.5vw, 5rem) clamp(1.5rem, 5.5vw, 6rem) 0;
+  // top padding: 80px at 1748px = 4.58vw / side padding: 88px = 5.03vw
+  padding: clamp(3rem, 4.58vw, 5rem) clamp(2rem, 5.03vw, 5.5rem) 0;
 }
 
-// Main 4-column grid
+// Main 4-column grid — columns sized proportionally to Figma: ~31% / ~19% / ~27% / ~23%
 .footer-top {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-  gap: 1rem clamp(1.5rem, 3vw, 3.5rem);
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.95fr) minmax(0, 1.35fr) minmax(0, 1.15fr);
+  gap: 0.25rem clamp(1.5rem, 3.5vw, 4.5rem);
 }
 
 // Shared column
@@ -259,11 +254,14 @@
   a {
     color: #fff;
     font-family: 'Lexend', sans-serif;
-    font-size: 1.25rem;
+    // 20px at 1748px = 1.144vw
+    font-size: clamp(0.875rem, 1.144vw, 1.25rem);
     font-weight: 300;
-    line-height: 4.815rem;
+    // element row height in Figma ~50px at 1748px = 2.86vw
+    line-height: clamp(2.4rem, 2.86vw, 3.125rem);
     letter-spacing: 0.0625rem;
     text-decoration: none;
+    white-space: nowrap;
 
     &:hover {
       opacity: 0.75;
@@ -274,9 +272,11 @@
 .footer-col__heading {
   color: #fff;
   font-family: 'Lexend', sans-serif;
-  font-size: 1.5rem;
+  // 24px at 1748px = 1.372vw
+  font-size: clamp(1.125rem, 1.372vw, 1.5rem);
   font-weight: 700;
-  line-height: 4.815rem;
+  // heading row height in Figma ~53px at 1748px = 3.03vw
+  line-height: clamp(2.6rem, 3.03vw, 3.3125rem);
   letter-spacing: -0.1125rem;
   margin: 0;
 }
@@ -293,10 +293,11 @@
 }
 
 .footer-logo {
-  height: clamp(3.5rem, 5.5vw, 8.5rem);
+  // logo height 136px at 1748px = 7.78vw
+  height: clamp(5rem, 7.78vw, 8.5rem);
   width: auto;
   display: block;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(0.75rem, 1.14vw, 1.25rem);
 }
 
 .footer-tagline {
@@ -312,33 +313,34 @@
 .footer-rating {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  margin-top: 1.25rem;
+  gap: clamp(0.2rem, 0.29vw, 0.3rem);
+  margin-top: clamp(0.75rem, 1.14vw, 1.25rem);
 }
 
 .footer-rating__score {
   font-family: 'Lexend', sans-serif;
-  font-size: 1.5rem;
+  font-size: clamp(1.125rem, 1.372vw, 1.5rem);
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.1125rem;
-  margin-right: 0.2rem;
+  margin-right: clamp(0.15rem, 0.2vw, 0.225rem);
 }
 
 .footer-rating__star {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: clamp(1rem, 1.144vw, 1.25rem);
+  height: clamp(1rem, 1.144vw, 1.25rem);
   object-fit: contain;
 }
 
 // Bottom row: social (left) + store badges (right)
+// Starts at ~506px from top of footer = ~48px gap after main columns
 .footer-bottom {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  padding-top: 2rem;
-  padding-bottom: 2.5rem;
+  padding-top: clamp(1.5rem, 2.75vw, 3rem);
+  padding-bottom: clamp(1.5rem, 2.74vw, 3rem);
 }
 
 .footer-social {
@@ -350,8 +352,9 @@
 .footer-social__icons {
   display: flex;
   align-items: center;
-  gap: clamp(0.75rem, 1.5vw, 1.25rem);
-  margin-top: 0.25rem;
+  // icon gap in Figma: ~28px at 1748px = 1.6vw
+  gap: clamp(0.5rem, 1.6vw, 1.75rem);
+  margin-top: clamp(0.125rem, 0.34vw, 0.375rem);
 }
 
 .footer-social__link {
@@ -360,8 +363,9 @@
   justify-content: center;
 
   img {
-    width: clamp(2rem, 2.75vw, 3rem);
-    height: clamp(2rem, 2.75vw, 3rem);
+    // icon size ~48px at 1748px = 2.75vw
+    width: clamp(1.75rem, 2.75vw, 3rem);
+    height: clamp(1.75rem, 2.75vw, 3rem);
     filter: brightness(0) invert(1);
   }
 }
@@ -369,15 +373,15 @@
 // Store badges
 .footer-stores {
   display: flex;
-  gap: 1rem;
+  gap: clamp(0.5rem, 0.8vw, 0.875rem);
   flex-shrink: 0;
 }
 
 .store-badge {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 1.125rem;
+  gap: clamp(0.5rem, 0.69vw, 0.75rem);
+  padding: clamp(0.5rem, 0.69vw, 0.75rem) clamp(0.75rem, 1.03vw, 1.125rem);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 1);
   background: rgba(133, 133, 133, 0.1);
@@ -391,8 +395,9 @@
 }
 
 .store-badge__icon {
-  width: 2rem;
-  height: 2rem;
+  // Google Play icon ~30px at 1748px = 1.72vw
+  width: clamp(1.25rem, 1.72vw, 1.875rem);
+  height: clamp(1.25rem, 1.72vw, 1.875rem);
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -409,14 +414,15 @@
 
 .store-badge__label {
   font-family: 'Lexend', sans-serif;
-  font-size: 0.625rem;
+  font-size: clamp(0.5rem, 0.572vw, 0.625rem);
   font-weight: 400;
   color: #fff;
 }
 
 .store-badge__name {
   font-family: 'Lexend', sans-serif;
-  font-size: 1.125rem;
+  // 18px at 1748px = 1.03vw
+  font-size: clamp(0.75rem, 1.03vw, 1.125rem);
   font-weight: 400;
   color: #fff;
 }
@@ -430,14 +436,17 @@
   p {
     max-width: 1748px;
     margin-inline: auto;
-    padding: 0 clamp(1.5rem, 5.5vw, 6rem);
+    // side padding matches footer-inner / block padding creates the bar height
+    padding: clamp(1.25rem, 1.72vw, 1.875rem) clamp(2rem, 5.03vw, 5.5rem);
     font-family: 'Lexend', sans-serif;
-    font-size: 1.5rem;
+    // text is ~24px in design at 1748px
+    font-size: clamp(1rem, 1.144vw, 1.25rem);
     font-weight: 400;
-    line-height: 4.815rem;
+    line-height: 1;
     text-align: center;
     color: #fff;
-    letter-spacing: -0.1125rem;
+    letter-spacing: -0.0625rem;
+    margin: 0;
   }
 }
 
