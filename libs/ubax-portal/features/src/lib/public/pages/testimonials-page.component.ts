@@ -10,22 +10,41 @@ import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 export class TestimonialsPageComponent {
   protected readonly cards = [
     {
-      name: 'Jean-Marc Bedi',
+      name: 'Jean-Marc Bédi',
       role: 'Locataire',
-      image: '/assets/portal-assets/11.png',
+      image: '/assets/portal-assets/rectangle-25189.png',
+      duration: '10 : 42',
     },
     {
-      name: 'Ibrahim Diabate',
+      name: 'Ibrahim Diabaté',
       role: 'Locataire',
-      image: '/assets/portal-assets/12.png',
+      image: '/assets/portal-assets/11.png',
+      duration: '05 : 47',
     },
     {
       name: 'Nadia Coulibaly',
       role: 'Locataire',
-      image: '/assets/portal-assets/13.png',
+      image: '/assets/portal-assets/12.png',
+      duration: '10 : 42',
     },
-    { name: 'Serge Koffi', role: 'Bailleur', image: '/assets/portal-assets/14.png' },
-    { name: 'Fatou Kone', role: 'Locataire', image: '/assets/portal-assets/15.png' },
+    {
+      name: 'Serge Koffi',
+      role: 'Bailleur',
+      image: '/assets/portal-assets/13.png',
+      duration: '10 : 42',
+    },
+    {
+      name: 'Fatou Koné',
+      role: 'Locataire',
+      image: '/assets/portal-assets/14.png',
+      duration: '05 : 47',
+    },
+    {
+      name: 'Nadia Coulibaly',
+      role: 'Locataire',
+      image: '/assets/portal-assets/15.png',
+      duration: '10 : 42',
+    },
   ];
 }
 
