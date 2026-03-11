@@ -26,4 +26,3 @@ export class HomePageComponent {
     '/assets/portal-assets/logo-flottant/paypal-2014-logo.png',
   ];
 }
-

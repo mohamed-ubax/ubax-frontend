@@ -4,7 +4,9 @@ export const publicRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./pages/splash-page.component').then((m) => m.SplashPageComponent),
+      import('./pages/splash-page.component').then(
+        (m) => m.SplashPageComponent,
+      ),
   },
   {
     path: 'accueil',
