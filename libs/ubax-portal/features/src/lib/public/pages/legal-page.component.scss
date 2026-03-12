@@ -1,66 +1,118 @@
-.legal-wrap {
-  width: min(1550px, calc(100% - 2rem));
-  margin: 1.8rem auto 2.2rem;
-  background: #eef3f8;
-  border-radius: 20px;
-  padding: 2rem 1.6rem;
+.legal-page {
+  width: 100%;
+  background: #fff;
+}
 
-  header {
-    text-align: center;
+.legal-page__header {
+  background: #ecf2f7;
+  text-align: center;
+  padding: 3.5rem 0;
+  border-radius: 10px;
+}
 
-    h1 {
-      margin: 0;
-      color: var(--ubax-brand);
-      font-size: clamp(2rem, 3vw, 2.8rem);
+.legal-page__title {
+  margin: 0;
+  color: #1a3047;
+  font-family: 'Lexend', sans-serif;
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 4.815rem;
+  letter-spacing: -0.1125rem;
+}
+
+.legal-page__body {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 5rem;
+  padding: 3rem 5rem 6rem;
+  align-items: start;
+}
+
+.legal-toc {
+  background: #ecf2f7;
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  position: sticky;
+  top: 2rem;
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    color: #1a3047;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 3rem;
+    cursor: pointer;
+
+    &:hover {
+      font-weight: 500;
     }
   }
 }
 
-.legal-grid {
-  margin-top: 1.6rem;
-  display: grid;
-  grid-template-columns: 0.38fr 1fr;
-  gap: 1.2rem;
-}
-
-aside {
-  background: #dfe8ef;
-  border-radius: 14px;
-  padding: 1.2rem;
-
-  ol {
-    margin: 0;
-    padding-left: 1rem;
-    color: var(--ubax-brand);
-    line-height: 2;
-    font-weight: 600;
+.legal-article {
+  section + section {
+    margin-top: 2.5rem;
   }
-}
-
-article {
-  background: #fff;
-  border-radius: 14px;
-  padding: 1.2rem 1.4rem;
 
   h2 {
-    color: var(--ubax-brand);
-    margin: 0 0 0.5rem;
+    color: #1a3047;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: normal;
+    margin: 0 0 1.25rem;
   }
 
   p {
-    color: #4b5563;
-    line-height: 1.65;
-    margin: 0 0 1rem;
+    color: #151515;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 2rem;
+    margin: 0 0 0.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul {
+    list-style: disc;
+    color: #151515;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 2rem;
+    margin: 0 0 0.5rem;
+    padding-left: 2.5rem;
+
+    li {
+      margin-bottom: 0;
+    }
   }
 }
 
 @media (max-width: 980px) {
-  .legal-grid {
+  .legal-page__body {
     grid-template-columns: 1fr;
+    padding: 2rem;
+    gap: 2rem;
   }
+
+  .legal-toc {
+    position: static;
+  }
+}
+
 
   .legal-wrap {
     width: calc(100% - 1rem);
     padding: 1.2rem 1rem;
   }
-}
+
