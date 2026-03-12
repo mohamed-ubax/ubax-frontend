@@ -1,23 +1,253 @@
 <ubax-public-shell>
-  <section class="auth-wrap">
-    <article class="auth-card auth-stage">
-      <div class="auth-logo">U</div>
-      <h1>Se connecter</h1>
-      <p>Connectez-vous avec votre numero de telephone et mot de passe.</p>
-      <ubax-ui-input
-        type="tel"
-        label="Numero de telephone"
-        placeholder="07 12 34 56 78"
+  <section class="login-stage">
+    <!-- Orbiting icon circles -->
+    <!-- Top left -->
+    <div class="orbit orbit--top-left">
+      <img
+        class="orbit__circle"
+        src="assets/portal-assets/login/icons/Ellipse 195.svg"
+        alt=""
+        aria-hidden="true"
       />
-      <ubax-ui-input
-        type="password"
-        label="Mot de passe"
-        placeholder="••••••••"
+      <img
+        class="orbit__icon"
+        src="assets/portal-assets/login/icons/ri_hotel-fill.svg"
+        alt=""
+        aria-hidden="true"
       />
-      <ubax-ui-button variant="dark" [block]="true"
-        >Se connecter</ubax-ui-button
+    </div>
+
+    <!-- Top right -->
+    <div class="orbit orbit--top-right">
+      <img
+        class="orbit__circle"
+        src="assets/portal-assets/login/icons/Ellipse 195.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="orbit__icon"
+        src="assets/portal-assets/login/icons/ic_outline-bed.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </div>
+
+    <!-- Middle left -->
+    <div class="orbit orbit--mid-left">
+      <img
+        class="orbit__circle"
+        src="assets/portal-assets/login/icons/Ellipse 195.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="orbit__icon"
+        src="assets/portal-assets/login/icons/material-symbols-light_flights-and-hotels.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </div>
+
+    <!-- Middle right -->
+    <div class="orbit orbit--mid-right">
+      <img
+        class="orbit__circle"
+        src="assets/portal-assets/login/icons/Ellipse 195.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="orbit__icon"
+        src="assets/portal-assets/login/icons/bitcoin-icons_two-keys-outline.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </div>
+
+    <!-- Bottom left -->
+    <div class="orbit orbit--bot-left">
+      <img
+        class="orbit__circle"
+        src="assets/portal-assets/login/icons/Ellipse 194.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="orbit__icon"
+        src="assets/portal-assets/login/icons/bi_suitcase2-fill.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </div>
+
+    <!-- Bottom right -->
+    <div class="orbit orbit--bot-right">
+      <img
+        class="orbit__circle"
+        src="assets/portal-assets/login/icons/Ellipse 194.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="orbit__icon"
+        src="assets/portal-assets/login/icons/ri_building-2-fill.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </div>
+
+    <!-- UBAX logo floating above form -->
+    <div class="login-logo">
+      <img
+        src="assets/portal-assets/login/icons/Group 1171274746-2.svg"
+        alt="UBAX"
+      />
+    </div>
+
+    <!-- Login form card -->
+    <article class="login-card">
+      <form
+        class="login-form"
+        (ngSubmit)="(null)"
+        aria-label="Formulaire de connexion"
+        novalidate
       >
-      <a routerLink="/mot-de-passe-oublie">Reinitialiser votre mot de passe</a>
+        <!-- Phone number field -->
+        <div class="field-group--phone">
+          <label class="field-label" for="phone-input"
+            >Numéro de téléphone</label
+          >
+          <div class="phone-row">
+            <!-- Country code dropdown (PrimeNG Select) -->
+            <p-select
+              [(ngModel)]="selectedCountry"
+              name="countryCode"
+              inputId="country-code-input"
+              [options]="countries"
+              optionLabel="name"
+              [filter]="true"
+              filterBy="name,dialCode,iso2"
+              filterPlaceholder="Rechercher un pays..."
+              appendTo="body"
+              styleClass="country-picker"
+              [showClear]="false"
+              aria-label="Indicatif téléphonique"
+            >
+              <ng-template #selectedItem let-country>
+                <div class="cp-trigger">
+                  <span class="cp-flag-badge" aria-hidden="true">
+                    <img
+                      class="cp-flag-image"
+                      [src]="country?.flagUrl"
+                      [alt]="''"
+                    />
+                  </span>
+                  <span class="cp-dial">+{{ country?.dialCode }}</span>
+                </div>
+              </ng-template>
+              <ng-template #dropdownicon>
+                <img
+                  class="cp-dropdown-icon"
+                  src="assets/portal-assets/login/icons/solar_alt-arrow-down-linear.svg"
+                  alt=""
+                  aria-hidden="true"
+                />
+              </ng-template>
+              <ng-template #item let-country>
+                <div class="cp-item">
+                  <span
+                    class="cp-flag-badge cp-flag-badge--option"
+                    aria-hidden="true"
+                  >
+                    <img
+                      class="cp-flag-image"
+                      [src]="country.flagUrl"
+                      [alt]="''"
+                    />
+                  </span>
+                  <span class="cp-item-name">{{ country.name }}</span>
+                  <span class="cp-item-dial">+{{ country.dialCode }}</span>
+                </div>
+              </ng-template>
+            </p-select>
+            <!-- Phone number input -->
+            <input
+              pInputText
+              id="phone-input"
+              class="phone-input"
+              type="tel"
+              placeholder="07 12 34 56 78"
+              autocomplete="tel"
+              [(ngModel)]="phone"
+              name="phone"
+            />
+          </div>
+          <span class="field-hint">Entrez votre numéro de téléphone</span>
+        </div>
+
+        <!-- Password field -->
+        <div class="field-group--password">
+          <label class="field-label" for="password-input">Mot de passe</label>
+          <div class="password-row">
+            <img
+              class="password-icon--lock"
+              src="assets/portal-assets/login/icons/formkit_password.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <p-password
+              [(ngModel)]="password"
+              name="password"
+              inputId="password-input"
+              [toggleMask]="true"
+              [feedback]="false"
+              placeholder="••••••••"
+              [fluid]="true"
+              styleClass="password-field"
+              [pt]="{
+                pcInputText: { root: { autocomplete: 'current-password' } },
+              }"
+            >
+              <ng-template #hideicon>
+                <img
+                  class="password-visibility-icon"
+                  src="assets/portal-assets/login/icons/akar-icons_eye-closed.svg"
+                  alt=""
+                  aria-hidden="true"
+                />
+              </ng-template>
+              <ng-template #showicon>
+                <img
+                  class="password-visibility-icon password-visibility-icon--active"
+                  src="assets/portal-assets/login/icons/akar-icons_eye-closed.svg"
+                  alt=""
+                  aria-hidden="true"
+                />
+              </ng-template>
+            </p-password>
+          </div>
+          <span class="field-hint"
+            >Saisissez le mot de passe associé à votre compte
+            d'utilisateur</span
+          >
+        </div>
+
+        <!-- Submit button -->
+        <p-button
+          label="Se connecter"
+          type="submit"
+          styleClass="login-submit-btn"
+          [fluid]="true"
+        ></p-button>
+        <!-- Bottom links -->
+        <div class="login-footer-links">
+          <p class="reset-label">Réinitialiser votre mot de passe</p>
+          <a routerLink="/mot-de-passe-oublie" class="help-link"
+            >J'ai besoin d'aide</a
+          >
+        </div>
+      </form>
     </article>
   </section>
 </ubax-public-shell>

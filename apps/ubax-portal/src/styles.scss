@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'primeicons/primeicons.css';
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
 :root {
   --ubax-text-primary: #343434;
   --ubax-accent: #e87d1e;
