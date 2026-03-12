@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { UiButtonComponent, UiCardComponent } from '@ubax-workspace/shared-ui';
 
@@ -9,41 +9,46 @@ import { UiButtonComponent, UiCardComponent } from '@ubax-workspace/shared-ui';
   styleUrl: './pricing-page.component.scss',
 })
 export class PricingPageComponent {
+  protected readonly billingCycle = signal<'mensuel' | 'annuel'>('mensuel');
+
   protected readonly plans = [
     {
       name: 'Starter',
-      subtitle: 'L essentiel pour demarrer la gestion de vos biens.',
+      subtitle: "L'essentiel pour démarrer la gestion de vos biens immobiliers simplement.",
       price: '0 FCFA',
       featured: false,
       features: [
-        'Gestion de biens (limitee)',
-        'Gestion des locataires (limitee)',
+        'Gestion de biens (limitée)',
+        'Gestion des locataires (limitée)',
         'Contrats de location',
         'Tableau de bord basique',
+        'Historique des paiements',
       ],
     },
     {
       name: 'Pro',
-      subtitle: 'La solution complete pour piloter efficacement une agence.',
+      subtitle: 'La solution complète pour piloter efficacement une agence immobilière en croissance.',
       price: '0 FCFA',
       featured: true,
       features: [
-        'Biens illimites',
-        'Locataires illimites',
-        'Gestion avancee des contrats',
-        'Suivi des loyers et paiements',
+        'Biens illimités',
+        'Locataires illimités',
+        'Gestion avancée des contrats',
+        'Suivi des loyers & paiements',
+        'Tableaux de bord avancés',
       ],
     },
     {
-      name: 'Enterprise',
-      subtitle: 'Pour grandes structures multi-sites et multi-utilisateurs.',
+      name: 'Entreprise',
+      subtitle: 'Une plateforme sur mesure pour les grandes agences et les structures multi-sites.',
       price: '0 FCFA',
       featured: false,
       features: [
-        'Biens et locataires illimites',
+        'Biens & locataires illimités',
         'Multi-agences',
         'Multi-utilisateurs',
-        'Rapports personnalises',
+        'Rapports personnalisés',
+        'Intégration paiements',
       ],
     },
   ];
