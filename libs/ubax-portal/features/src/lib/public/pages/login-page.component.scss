@@ -76,7 +76,7 @@
   font-size: 0.825rem;
   font-weight: 400;
   line-height: normal;
-  margin-top: 6px;
+  margin-top: 0;
 }
 
 // ─── Phone field group ───────────────────────────────────────────────────────
@@ -91,7 +91,15 @@
   gap: 0.625rem;
   align-items: center;
   margin-top: 1.625rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0;
+
+  > * {
+    min-width: 0;
+  }
+}
+
+.field-group--phone .field-hint {
+  margin-top: 1.1094rem;
 }
 
 // ─── Password field group ─────────────────────────────────────────────────────
@@ -102,6 +110,10 @@
   margin-top: 1.7975rem;
 }
 
+.field-group--password .field-hint {
+  margin-top: 0.77rem;
+}
+
 .password-row {
   display: flex;
   align-items: center;
@@ -109,9 +121,9 @@
   border: 1px solid #515151;
   background: #fff;
   min-height: 4.1081rem; // 65.73px
-  padding: 0 0 0 1rem;
+  padding: 0 38px 0 18px;
   margin-top: 1.0913rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0;
   overflow: hidden;
 
   &:focus-within {
@@ -125,7 +137,7 @@
   width: 1.5325rem;
   height: 1.5325rem;
   flex-shrink: 0;
-  margin-right: 0.5rem;
+  margin-right: 19px;
 }
 
 // ─── Phone input (pInputText) ─────────────────────────────────────────────────
@@ -263,71 +275,77 @@
 :host ::ng-deep {
   // ── Country picker (p-select) ──────────────────────────────────────────────
 
-  .country-picker {
+  .country-picker,
+  .country-picker.p-select {
     width: 135px;
     flex-shrink: 0;
+    height: 3.5rem;
+    border-radius: 2.5rem;
+  }
 
-    .p-select {
-      width: 135px;
-      height: 56px;
-      border-radius: 2.5rem;
-      border: 1px solid #515151;
-      background: #fff;
+  .country-picker.p-select {
+    width: 135px;
+    height: 3.5rem;
+    border-radius: 2.5rem;
+    border: 1px solid #515151;
+    background: #fff;
+    box-shadow: none;
+    transition: border-color 160ms ease;
+    display: flex;
+    align-items: center;
+    padding-left: 0;
+    overflow: hidden;
+
+    &:hover {
+      border-color: #e87d1e;
+    }
+
+    &.p-focus {
+      border-color: #e87d1e;
+      outline: 2px solid rgba(232, 125, 30, 0.2);
+      outline-offset: 1px;
       box-shadow: none;
-      transition: border-color 160ms ease;
-      display: flex;
-      align-items: center;
-      padding-left: 0;
-      overflow: hidden;
-
-      &:hover {
-        border-color: #e87d1e;
-      }
-
-      &.p-focus {
-        border-color: #e87d1e;
-        outline: 2px solid rgba(232, 125, 30, 0.2);
-        outline-offset: 1px;
-        box-shadow: none;
-      }
     }
+  }
 
-    .p-select-label {
-      display: flex;
-      align-items: center;
-      padding: 0 0 0 0.25rem;
-      width: 100%;
-      height: 100%;
-      min-width: 0;
-    }
+  .country-picker .p-select-label,
+  .country-picker.p-select .p-select-label {
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 4px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+  }
 
-    .p-select-dropdown {
-      width: 1.75rem;
-      min-width: 1.75rem;
-      margin-right: 0.375rem;
-      padding: 0;
-      color: #515151;
-      justify-content: center;
-    }
+  .country-picker .p-select-dropdown,
+  .country-picker.p-select .p-select-dropdown {
+    width: 21px;
+    min-width: 21px;
+    margin-right: 7px;
+    padding: 0;
+    color: #515151;
+    justify-content: center;
+  }
 
-    .p-select-dropdown-icon {
-      width: 1.3125rem;
-      height: 1.3125rem;
-    }
+  .country-picker .p-select-dropdown-icon,
+  .country-picker.p-select .p-select-dropdown-icon {
+    width: 1.3125rem;
+    height: 1.3125rem;
   }
 
   .cp-trigger {
     display: flex;
     align-items: center;
-    gap: 0.40625rem;
+    gap: 8px;
     min-width: 0;
     width: 100%;
     height: 100%;
   }
 
   .cp-flag-badge {
-    width: 2.9375rem;
-    height: 2.9375rem;
+    width: 47px;
+    height: 47px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -339,16 +357,21 @@
   }
 
   .cp-flag-badge--option {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 28px;
+    height: 28px;
   }
 
   .cp-flag-image {
-    width: calc(100% - 0.1875rem);
-    height: calc(100% - 0.1875rem);
+    width: 100%;
+    height: 100%;
     display: block;
     object-fit: cover;
     border-radius: 50%;
+  }
+
+  .cp-flag-badge--option .cp-flag-image {
+    width: 100%;
+    height: 100%;
   }
 
   .cp-dropdown-icon {
@@ -360,7 +383,7 @@
   .cp-dial {
     color: #343434;
     font-family: 'Modernica', 'Segoe UI', sans-serif;
-    font-size: 1.25rem;
+    font-size: 20px;
     line-height: 1;
     font-weight: 400;
     flex: 1;
@@ -427,7 +450,7 @@
   .cp-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
   }
 
@@ -435,7 +458,7 @@
     flex: 1;
     color: #1a1a1a;
     font-family: 'Lexend', sans-serif;
-    font-size: 0.875rem;
+    font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -444,106 +467,116 @@
   .cp-item-dial {
     color: #888;
     font-family: 'Modernica', 'Segoe UI', sans-serif;
-    font-size: 0.9375rem;
+    font-size: 13px;
     flex-shrink: 0;
   }
 
   // ── Password (p-password) ──────────────────────────────────────────────────
 
-  .password-field {
+  .password-field,
+  .password-field.p-password {
     flex: 1;
     height: 100%;
+  }
 
-    .p-password {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      width: 100%;
+  .password-field.p-password {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+
+  .password-field .p-password-input,
+  .password-field.p-password .p-password-input {
+    flex: 1;
+    height: 100%;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 48px 0 0 !important;
+    color: #343434;
+    font-family: 'Modernica', 'Segoe UI', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    min-width: 0;
+
+    &::placeholder {
+      color: #b0b0b0;
+      letter-spacing: 0.15em;
     }
 
-    .p-password-input {
-      flex: 1;
-      height: 100%;
-      border: none !important;
-      background: transparent !important;
+    &:focus {
+      outline: none !important;
       box-shadow: none !important;
-      border-radius: 0 !important;
-      padding: 0 0.5rem !important;
-      color: #343434;
-      font-family: 'Modernica', 'Segoe UI', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 400;
-      min-width: 0;
-
-      &::placeholder {
-        color: #b0b0b0;
-        letter-spacing: 0.15em;
-      }
-
-      &:focus {
-        outline: none !important;
-        box-shadow: none !important;
-      }
     }
+  }
 
-    .p-password-toggle-mask-icon {
-      right: 1rem;
-      width: 1.535rem;
-      height: 1.5325rem;
-      color: #515151;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+  .password-field .p-password-toggle-mask-icon,
+  .password-field.p-password .p-password-toggle-mask-icon,
+  .password-field .p-password-mask-icon,
+  .password-field .p-password-unmask-icon,
+  .password-field.p-password .p-password-mask-icon,
+  .password-field.p-password .p-password-unmask-icon {
+    right: 0;
+    width: 1.535rem;
+    height: 1.5325rem;
+    color: #515151;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-      &:hover {
-        color: #1a3047;
-      }
+    &:hover {
+      color: #1a3047;
     }
+  }
 
-    .password-visibility-icon {
-      width: 1.535rem;
-      height: 1.5325rem;
-      display: block;
-      object-fit: contain;
-    }
+  .password-field .password-visibility-icon,
+  .password-field.p-password .password-visibility-icon {
+    width: 1.535rem;
+    height: 1.5325rem;
+    display: block;
+    object-fit: contain;
+  }
 
-    .password-visibility-icon--active {
-      opacity: 0.72;
-    }
+  .password-field .password-visibility-icon--active,
+  .password-field.p-password .password-visibility-icon--active {
+    opacity: 0.72;
   }
 
   // ── Submit button (p-button) ───────────────────────────────────────────────
 
-  .login-submit-btn {
+  .login-submit-btn,
+  .login-submit-btn.p-button {
     margin-top: 1.775rem;
+  }
 
-    .p-button {
-      width: 100%;
-      height: 4.6946rem; // 75.114px
-      border-radius: 2.5rem;
-      border: none;
-      background: #1a3047;
-      color: #fff;
-      font-family: 'Lexend', sans-serif;
-      font-size: 1.25rem;
-      line-height: normal;
-      font-weight: 500;
-      justify-content: center;
-      transition: background 160ms ease;
+  .login-submit-btn.p-button {
+    width: 100%;
+    height: 3.6946rem; // 75.114px
+    border-radius: 2.5rem;
+    border: none;
+    background: #1a3047;
+    color: #fff;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.25rem;
+    line-height: normal;
+    font-weight: 500;
+    justify-content: center;
+    transition: background 160ms ease;
+    box-shadow: none;
+
+    &:hover {
+      background: #243f5e;
       box-shadow: none;
+    }
 
-      &:hover {
-        background: #243f5e;
-        box-shadow: none;
-      }
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(232, 125, 30, 0.3);
+    }
 
-      &:focus {
-        box-shadow: 0 0 0 2px rgba(232, 125, 30, 0.3);
-      }
-
-      &:active {
-        background: #162740;
-      }
+    &:active {
+      background: #162740;
     }
   }
 }
@@ -551,24 +584,58 @@
 // ─── Responsive ──────────────────────────────────────────────────────────────
 
 @media (max-width: 1200px) {
+  .login-stage {
+    min-height: auto;
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .login-logo {
+    margin-bottom: 2.75rem;
+  }
+
+  .login-card {
+    width: min(31.1875rem, calc(100% - 3rem));
+  }
+
   .orbit--mid-left {
     left: 4%;
   }
+
   .orbit--mid-right {
     left: 91%;
   }
 }
 
 @media (max-width: 1024px) {
+  .login-stage {
+    padding-inline: 1.25rem;
+  }
+
+  .login-logo {
+    width: 6rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .login-card {
+    width: min(31.1875rem, 100%);
+  }
+
+  .login-form {
+    padding: 1.5rem 1.5rem 1.125rem;
+  }
+
   .orbit--top-left,
   .orbit--top-right,
   .orbit--bot-left,
   .orbit--bot-right {
     display: none;
   }
+
   .orbit--mid-left {
     left: 2%;
   }
+
   .orbit--mid-right {
     left: 90%;
   }
@@ -578,31 +645,234 @@
   .orbit {
     display: none;
   }
+
   .login-stage {
-    min-height: unset;
-    padding: 2.5rem 0 3rem;
+    min-height: calc(100svh - 4.5rem);
+    padding: 2rem 1rem 3.5rem;
+  }
+
+  .login-logo {
+    width: 5.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .login-card {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .login-form {
+    padding: 1.375rem 1.25rem 1.125rem;
+  }
+
+  .field-group--password {
+    margin-top: 1.5rem;
+  }
+
+  .password-row {
+    min-height: 3.75rem;
+    padding: 0 1.125rem 0 1rem;
+  }
+
+  .phone-input,
+  .phone-input.p-inputtext {
+    height: 3.375rem;
+    font-size: 1.125rem;
+    padding: 0 1rem !important;
+  }
+
+  .password-icon--lock {
+    margin-right: 0.875rem;
+  }
+
+  :host ::ng-deep .password-field,
+  :host ::ng-deep .password-field.p-password {
+    height: 100%;
+  }
+
+  :host ::ng-deep .password-field .p-password-input,
+  :host ::ng-deep .password-field.p-password .p-password-input {
+    height: 100%;
+    padding: 0 2.5rem 0 0 !important;
+    font-size: 1.125rem;
   }
 }
 
 @media (max-width: 640px) {
   .login-stage {
-    padding: 2rem 0 2.5rem;
+    min-height: calc(100svh - 4.25rem);
+    padding: 1.5rem 0.75rem 3rem;
   }
+
   .login-logo {
-    width: 5.5rem;
-    margin-bottom: 2rem;
+    width: 4.625rem;
+    margin-bottom: 1.25rem;
   }
+
+  .login-card {
+    width: calc(100% - 0.5rem);
+    border-radius: 1rem;
+  }
+
   .login-form {
-    padding: 1.5rem 1.25rem 1rem;
+    padding: 1.125rem 1rem 1rem;
   }
+
+  .field-label {
+    font-size: 0.875rem;
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
   .phone-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 1rem;
   }
-  :host ::ng-deep .country-picker {
+
+  .field-group--phone .field-hint {
+    margin-top: 0.625rem;
+  }
+
+  .field-group--password {
+    margin-top: 1.25rem;
+  }
+
+  .field-group--password .field-hint {
+    margin-top: 0.625rem;
+  }
+
+  .phone-input,
+  .phone-input.p-inputtext {
+    font-size: 1.0625rem;
+    height: 3rem !important;
+    min-height: 3rem;
+    max-height: 3rem;
+    line-height: 3rem;
+    padding: 0 1rem !important;
+  }
+
+  .password-row {
+    min-height: 3.5rem;
+    margin-top: 0.875rem;
+    padding: 0 1rem 0 0.875rem;
+  }
+
+  .password-icon--lock {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+  }
+
+  .login-footer-links {
+    margin-top: 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .reset-label {
+    font-size: 0.8125rem;
+  }
+
+  .help-link {
+    font-size: 0.75rem;
+  }
+
+  :host ::ng-deep .country-picker,
+  :host ::ng-deep .country-picker.p-select {
     width: 100%;
-    .p-select {
-      width: 100%;
-    }
+  }
+
+  :host ::ng-deep .country-picker.p-select {
+    height: 3.25rem;
+  }
+
+  :host ::ng-deep .country-picker .p-select-label,
+  :host ::ng-deep .country-picker.p-select .p-select-label {
+    padding-left: 0.5rem;
+  }
+
+  :host ::ng-deep .cp-flag-badge {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  :host ::ng-deep .cp-dial {
+    font-size: 1rem;
+  }
+
+  :host ::ng-deep .password-field .p-password-input,
+  :host ::ng-deep .password-field.p-password .p-password-input {
+    font-size: 1rem;
+    height: 100%;
+    padding: 0 2.25rem 0 0 !important;
+  }
+
+  :host ::ng-deep .login-submit-btn.p-button {
+    height: 3.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .login-stage {
+    min-height: calc(100svh - 4rem);
+    padding-inline: 0.5rem;
+    padding-bottom: 2.75rem;
+  }
+
+  .login-card {
+    width: 100%;
+  }
+
+  .login-form {
+    padding: 1.125rem 0.875rem 0.875rem;
+  }
+
+  .field-label {
+    font-size: 0.8125rem;
+  }
+
+  .field-hint {
+    font-size: 0.6875rem;
+  }
+
+  :host ::ng-deep .cp-trigger {
+    gap: 0.5rem;
+  }
+
+  :host ::ng-deep .cp-flag-badge {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  :host ::ng-deep .cp-dial {
+    font-size: 0.9375rem;
+  }
+
+  .phone-input,
+  .phone-input.p-inputtext,
+  :host ::ng-deep .password-field .p-password-input,
+  :host ::ng-deep .password-field.p-password .p-password-input {
+    font-size: 0.9375rem;
+  }
+
+  .phone-input,
+  .phone-input.p-inputtext {
+    height: 2.875rem !important;
+    min-height: 2.875rem;
+    max-height: 2.875rem;
+    line-height: 2.875rem;
+  }
+
+  .password-row {
+    padding: 0 0.875rem 0 0.75rem;
+  }
+
+  .password-icon--lock {
+    margin-right: 0.625rem;
   }
 }

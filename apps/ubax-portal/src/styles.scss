@@ -32,3 +32,132 @@ body {
   color: var(--ubax-text-primary);
   background: var(--ubax-page-bg);
 }
+
+.country-picker-overlay {
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  min-width: 260px;
+}
+
+.country-picker-overlay .p-select-list-container {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.country-picker-overlay .p-select-list {
+  padding: 4px 0;
+  overflow: visible;
+}
+
+.country-picker-overlay .p-select-option {
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.country-picker-overlay .p-select-option.p-select-option-selected {
+  background: rgba(26, 48, 71, 0.06);
+  color: inherit;
+}
+
+.country-picker-overlay .p-select-option:hover:not(.p-select-option-selected) {
+  background: #f5f5f5;
+}
+
+.country-picker-overlay .p-select-option.p-focus {
+  background: #f0f4f7;
+}
+
+.country-picker-overlay .cp-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.country-picker-overlay .cp-flag-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.country-picker-overlay .cp-flag-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.country-picker-overlay .cp-item-name {
+  flex: 1;
+  color: #1a1a1a;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.country-picker-overlay .cp-item-dial {
+  color: #888;
+  font-family: 'Modernica', 'Segoe UI', sans-serif;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.country-picker-overlay
+  .p-select-option.p-select-option-selected
+  .cp-item-name {
+  font-weight: 600;
+  color: #1a3047;
+}
+
+@media (max-width: 640px) {
+  .country-picker-overlay {
+    width: min(22rem, calc(100vw - 1rem));
+    min-width: unset;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .country-picker-overlay .p-select-filter-container {
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+
+  .country-picker-overlay .p-select-list-container {
+    max-height: min(16rem, 45vh);
+  }
+}
+
+@media (max-width: 420px) {
+  .country-picker-overlay {
+    width: calc(100vw - 0.75rem);
+    max-width: calc(100vw - 0.75rem);
+  }
+
+  .country-picker-overlay .p-select-option {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .country-picker-overlay .cp-item {
+    gap: 0.5rem;
+  }
+
+  .country-picker-overlay .cp-flag-badge {
+    width: 24px;
+    height: 24px;
+  }
+
+  .country-picker-overlay .cp-item-name,
+  .country-picker-overlay .cp-item-dial {
+    font-size: 12px;
+  }
+}
