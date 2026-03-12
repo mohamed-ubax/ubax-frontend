@@ -1,22 +1,47 @@
 <ubax-public-shell>
-  <section class="auth-wrap">
-    <article class="auth-card auth-stage">
-      <div class="auth-logo">U</div>
-      <h1>Verification du code</h1>
-      <p>Saisissez le code a 6 chiffres envoye par SMS a votre numero.</p>
-      <div class="otp-grid">
-        @for (slot of otpSlots; track $index) {
-          <input
-            type="text"
-            maxlength="1"
-            [attr.aria-label]="'Code ' + ($index + 1)"
-          />
-        }
-      </div>
-      <a routerLink="/nouveau-mot-de-passe" class="action-link">
-        <ubax-ui-button variant="dark" [block]="true">Verifier</ubax-ui-button>
-      </a>
-      <a routerLink="/mot-de-passe-oublie">Renvoyer le code</a>
+  <section class="recovery-flow recovery-flow--otp">
+    <div class="recovery-flow__intro">
+      <h1 class="recovery-flow__title">Vérification du code</h1>
+      <p class="recovery-flow__description">
+        Saisissez le code à 6 chiffres envoyé par SMS à votre numéro.
+      </p>
+    </div>
+
+    <article class="recovery-card recovery-card--otp">
+      <form
+        class="recovery-form"
+        (ngSubmit)="onSubmit()"
+        aria-label="Vérification du code reçu par SMS"
+        novalidate
+      >
+        <p-inputotp
+          class="recovery-otp-wrapper"
+          [(ngModel)]="otpCode"
+          name="otpCode"
+          [length]="6"
+          [integerOnly]="true"
+          [autofocus]="true"
+          styleClass="recovery-otp"
+        ></p-inputotp>
+
+        <div class="recovery-actions">
+          <p-button
+            type="submit"
+            styleClass="recovery-btn"
+            [fluid]="true"
+            label="Vérifier"
+            [disabled]="!canVerifyCode"
+          ></p-button>
+
+          <p-button
+            type="button"
+            styleClass="recovery-btn recovery-btn--accent"
+            [fluid]="true"
+            label="Renvoyer le code"
+            (onClick)="onResendCode()"
+          ></p-button>
+        </div>
+      </form>
     </article>
   </section>
 </ubax-public-shell>
