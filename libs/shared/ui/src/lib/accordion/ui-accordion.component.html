@@ -3,14 +3,40 @@
     <section class="acc-item" [class.acc-item--open]="openIndex === i">
       <button
         type="button"
+        class="acc-trigger"
         (click)="toggle(i)"
         [attr.aria-expanded]="openIndex === i"
       >
-        <span>{{ item.title }}</span>
-        <span>{{ openIndex === i ? '−' : '+' }}</span>
+        <span class="acc-title">{{ item.title }}</span>
+        <span class="acc-icon">
+          @if (openIndex === i) {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              aria-hidden="true"
+            >
+              <path d="M19 13H5v-2h14v2z" fill="currentColor" />
+            </svg>
+          } @else {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              aria-hidden="true"
+            >
+              <path
+                d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
+                fill="currentColor"
+              />
+            </svg>
+          }
+        </span>
       </button>
       @if (openIndex === i) {
-        <p>{{ item.content }}</p>
+        <p class="acc-content">{{ item.content }}</p>
       }
     </section>
   }
