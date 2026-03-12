@@ -1,34 +1,190 @@
 <ubax-public-shell>
-  <section class="contact-wrap">
-    <header>
-      <h1>Besoin d'aide ? Notre equipe est a votre ecoute</h1>
-      <p>Contactez-nous facilement par le canal qui vous convient.</p>
-    </header>
+  <section class="contact-page">
+    <div class="contact-page__inner">
+      <header class="contact-page__hero">
+        <h1 class="contact-page__title">
+          Besoin d'aide ? Notre equipe est a votre ecoute
+        </h1>
+        <p class="contact-page__description">
+          L'equipe UBAX vous accompagne au quotidien. Que ce soit pour une
+          assistance technique, une question sur la gestion de vos biens ou un
+          suivi de paiement, contactez-nous facilement par le canal qui vous
+          convient.
+        </p>
+      </header>
 
-    <div class="contact-grid">
-      <form class="contact-form">
-        <h2>Envoyez un message</h2>
-        <div class="row">
-          <ubax-ui-input label="Prenom" placeholder="Votre prenom" />
-          <ubax-ui-input label="Nom" placeholder="Votre nom" />
-        </div>
-        <div class="row">
-          <ubax-ui-input type="email" label="Email" placeholder="email@ubax.io" />
-          <ubax-ui-input type="tel" label="Telephone" placeholder="+225 xx xx xx xx" />
-        </div>
-        <label class="message-field">
-          <span>Message</span>
-          <textarea rows="6" placeholder="Ecrivez votre message"></textarea>
-        </label>
-        <ubax-ui-button variant="dark">Envoyer</ubax-ui-button>
-      </form>
+      <div class="contact-layout">
+        <form
+          class="contact-card contact-form"
+          (ngSubmit)="onSubmit()"
+          novalidate
+          aria-label="Formulaire de contact"
+        >
+          <div class="contact-form__intro">
+            <h2>Envoyez un message</h2>
+            <p>
+              Une question ou un souci ? Remplissez le formulaire et notre
+              equipe vous repondra dans les plus brefs delais.
+            </p>
+          </div>
 
-      <aside class="support-panel">
-        <h3>Bonjour ! Nous sommes la pour vous aider</h3>
-        <div class="contact-item">Support: +225 01 02 03 04 05</div>
-        <div class="contact-item">SMS / WhatsApp: +225 01 02 03 04 05</div>
-        <div class="contact-item">Email: support@ubax.io</div>
-      </aside>
+          <div class="contact-fields-grid">
+            <label class="contact-field">
+              <span class="contact-field__label">Prenom</span>
+              <input
+                pInputText
+                type="text"
+                name="firstName"
+                class="contact-field-input"
+                placeholder="Veuillez saisir votre prenom"
+                autocomplete="given-name"
+                [(ngModel)]="firstName"
+              />
+            </label>
+
+            <label class="contact-field">
+              <span class="contact-field__label">Nom</span>
+              <input
+                pInputText
+                type="text"
+                name="lastName"
+                class="contact-field-input"
+                placeholder="Veuillez saisir votre Nom"
+                autocomplete="family-name"
+                [(ngModel)]="lastName"
+              />
+            </label>
+
+            <label class="contact-field">
+              <span class="contact-field__label">Email</span>
+              <input
+                pInputText
+                type="email"
+                name="email"
+                class="contact-field-input"
+                placeholder="Email"
+                autocomplete="email"
+                [(ngModel)]="email"
+              />
+            </label>
+
+            <div class="contact-field">
+              <span class="contact-field__label">Telephone</span>
+              <div class="contact-phone-row">
+                <p-select
+                  [(ngModel)]="selectedCountry"
+                  name="countryCode"
+                  inputId="contact-country-code"
+                  [options]="countries"
+                  optionLabel="name"
+                  [filter]="true"
+                  filterBy="name,dialCode,iso2"
+                  filterPlaceholder="Rechercher un pays..."
+                  appendTo="body"
+                  styleClass="contact-country-picker"
+                  panelStyleClass="country-picker-overlay"
+                  [showClear]="false"
+                  aria-label="Indicatif telephonique"
+                >
+                  <ng-template #selectedItem let-country>
+                    <div class="cp-trigger">
+                      <span class="cp-flag-badge" aria-hidden="true">
+                        <img
+                          class="cp-flag-image"
+                          [src]="country?.flagUrl"
+                          [alt]="''"
+                        />
+                      </span>
+                      <span class="cp-dial">+{{ country?.dialCode }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <img
+                      class="cp-dropdown-icon"
+                      src="assets/portal-assets/login/icons/solar_alt-arrow-down-linear.svg"
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  </ng-template>
+                  <ng-template #item let-country>
+                    <div class="cp-item">
+                      <span class="cp-flag-badge cp-flag-badge--option" aria-hidden="true">
+                        <img
+                          class="cp-flag-image"
+                          [src]="country.flagUrl"
+                          [alt]="''"
+                        />
+                      </span>
+                      <span class="cp-item-name">{{ country.name }}</span>
+                      <span class="cp-item-dial">+{{ country.dialCode }}</span>
+                    </div>
+                  </ng-template>
+                </p-select>
+
+                <input
+                  pInputText
+                  type="tel"
+                  name="phone"
+                  class="contact-field-input contact-field-input--phone"
+                  placeholder="xx xx xx xx xx"
+                  [(ngModel)]="phone"
+                />
+              </div>
+            </div>
+          </div>
+
+          <label class="contact-field contact-field--message">
+            <span class="contact-field__label">Message</span>
+            <textarea
+              name="message"
+              class="contact-message-input"
+              rows="6"
+              placeholder="Ecrivez votre message"
+              [(ngModel)]="message"
+            ></textarea>
+          </label>
+
+          <p-button
+            label="Envoyer"
+            type="submit"
+            styleClass="contact-submit-btn"
+          ></p-button>
+        </form>
+
+        <aside class="contact-card contact-support" aria-label="Canaux de support">
+          <h2 class="contact-support__title">
+            Bonjour ! Nous sommes la pour vous aider
+          </h2>
+
+          <div class="contact-support__channels">
+            @for (channel of supportChannels; track channel.label) {
+              <a
+                class="support-channel"
+                [href]="channel.href"
+                [attr.target]="channel.label === 'SMS / WhatsApp' ? '_blank' : null"
+                [attr.rel]="channel.label === 'SMS / WhatsApp' ? 'noreferrer' : null"
+              >
+                <img [src]="channel.icon" [alt]="''" aria-hidden="true" />
+                <span class="support-channel__text">
+                  <span class="support-channel__label">{{ channel.label }}</span>
+                  <span class="support-channel__value">{{ channel.value }}</span>
+                </span>
+              </a>
+            }
+          </div>
+
+          <div class="contact-support__socials">
+            <p>Nos reseaux sociaux</p>
+            <div class="contact-support__social-list">
+              @for (social of socialLinks; track social.label) {
+                <a [href]="social.href" [attr.aria-label]="social.label">
+                  <img [src]="social.icon" [alt]="''" aria-hidden="true" />
+                </a>
+              }
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   </section>
 </ubax-public-shell>
