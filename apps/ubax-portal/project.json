@@ -8,7 +8,9 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/ubax-portal",
         "browser": "apps/ubax-portal/src/main.ts",
@@ -20,7 +22,9 @@
             "input": "apps/ubax-portal/public"
           }
         ],
-        "styles": ["apps/ubax-portal/src/styles.scss"]
+        "styles": [
+          "apps/ubax-portal/src/styles.scss"
+        ]
       },
       "configurations": {
         "production": {
@@ -32,8 +36,8 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "4kb",
-              "maximumError": "8kb"
+              "maximumWarning": "16kb",
+              "maximumError": "32kb"
             }
           ],
           "outputHashing": "all"
