@@ -171,7 +171,7 @@ section {
 
 .steps-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
   gap: 1rem;
 
   h3 {
@@ -409,7 +409,15 @@ section {
     margin-top: 2.2rem;
   }
 
-  .platform-intro,
+  .platform-intro {
+    grid-template-columns: 1fr;
+    min-height: auto;
+
+    .intro-image {
+      max-height: 380px;
+    }
+  }
+
   .location-section,
   .hotel-section,
   .dashboard-section,
@@ -431,10 +439,6 @@ section {
 }
 
 @media (max-width: 900px) {
-  .steps-row {
-    grid-template-columns: 1fr;
-  }
-
   .splash-hero {
     min-height: 70vh;
   }
@@ -465,5 +469,15 @@ section {
 
   .hero-copy {
     padding: 1rem;
+  }
+
+  .key-features header h2 {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .intro-copy {
+    h2 {
+      font-size: clamp(1.4rem, 7vw, 2.4rem);
+    }
   }
 }

@@ -1,143 +1,226 @@
 .pricing-wrap {
   width: min(1550px, calc(100% - 2rem));
-  margin: 1.8rem auto 2.2rem;
-  background: #eef3f8;
+  margin: 1.8rem auto 10rem auto;
+  background: #ecf2f7;
   border-radius: 20px;
-  padding: 2.4rem 2rem;
+  padding: 3rem 2.5rem 3.5rem;
+  font-family: 'Lexend', sans-serif;
+}
 
-  header {
-    text-align: center;
+.pricing-header {
+  text-align: center;
+  margin-bottom: 2.2rem;
 
-    h1 {
-      margin: 0;
-      color: var(--ubax-brand);
-      font-size: clamp(2rem, 3vw, 3rem);
-    }
+  h1 {
+    margin: 0 0 1.1rem;
+    color: #1a3047;
+    font-size: 3rem;
+    font-weight: 600;
+    letter-spacing: -0.1125rem;
+    line-height: 4.815rem;
+  }
 
-    p {
-      color: #4b5563;
-      max-width: 70ch;
-      margin: 0.8rem auto 0;
-      line-height: 1.7;
-    }
+  p {
+    color: #151515;
+    font-size: 1.25rem;
+    font-weight: 300;
+    max-width: 72ch;
+    margin: 0 auto;
+    line-height: 2rem;
   }
 }
 
 .toggle {
-  margin: 1.4rem auto 1.9rem;
+  margin: 2rem auto 4.5rem;
   width: fit-content;
-  background: #d8e5f0;
+  background: #dcedfb;
+  border: 1px solid #b7d0e5;
   border-radius: 999px;
-  padding: 0.35rem;
-  font-weight: 600;
-  display: inline-flex;
-  gap: 0.2rem;
+  padding: 0.42rem;
+  display: flex;
+  gap: 0;
 
-  span {
-    padding: 0.45rem 1rem;
+  &__tab {
+    padding: 1.2rem 2rem;
     border-radius: 999px;
-    color: #566474;
-  }
+    border: none;
+    background: transparent;
+    color: #1a3047;
+    font: inherit;
+    font-size: 0.94rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      color 160ms ease;
 
-  .active {
-    background: #fff;
-    color: var(--ubax-brand);
+    &--active {
+      background: #fff;
+      color: #343434;
+    }
   }
 }
 
 .plans {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+  gap: 1.4rem;
+  align-items: start;
 }
 
 .plan {
-  padding: 1.2rem;
+  --ubax-card-radius: 25px;
+  --ubax-card-padding: 2.21rem 1.0625rem 1.48rem;
+  height: 40.8125rem;
 
-  h3,
-  h4 {
-    margin: 0;
-  }
-
-  h3 {
-    color: var(--ubax-brand);
-    font-size: 1.8rem;
-  }
-
-  p {
-    color: #5a6877;
-    margin: 0.6rem 0 1.1rem;
-    min-height: 3.4rem;
-  }
-
-  h4 {
-    margin-bottom: 1rem;
-    font-size: 2rem;
-    color: var(--ubax-brand);
-
-    small {
-      font-size: 0.9rem;
-      color: #6c7b89;
-      font-weight: 500;
-    }
-  }
-
-  ul {
-    list-style: none;
-    margin: 1rem 0 0;
-    padding: 0.9rem;
-    border-radius: 14px;
-    background: #edf3f8;
-    display: grid;
-    gap: 0.55rem;
-  }
-
-  li {
-    position: relative;
-    padding-left: 1.2rem;
-    font-size: 0.93rem;
-
-    &::before {
-      content: '•';
-      position: absolute;
-      left: 0;
-      color: var(--ubax-accent);
-      font-weight: 700;
-    }
+  &--featured {
+    transform: translateY(-10px);
   }
 }
 
-.featured {
-  transform: translateY(-10px);
+.plan__name {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: normal;
+  color: #1a3047;
 
-  h3,
-  h4,
-  p,
-  small,
-  li {
+  .plan--featured & {
     color: #fff;
   }
+}
 
-  ul {
-    background: rgba(255, 255, 255, 0.12);
+.plan__subtitle {
+  color: #151515;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.5625rem;
+  height: 4.22156rem;
+  margin: 0 0 1.07rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .plan--featured & {
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+.plan__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  margin-bottom: 1.94rem;
+}
+
+.plan__amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a3047;
+
+  .plan--featured & {
+    color: #fff;
+  }
+}
+
+.plan__period {
+  font-size: 0.94rem;
+  font-weight: 400;
+  color: #6c7b89;
+
+  .plan--featured & {
+    color: rgba(255, 255, 255, 0.65);
+  }
+}
+
+.plan ubax-ui-button {
+  display: block;
+  margin-bottom: 1.34rem;
+}
+
+.plan__features {
+  list-style: none;
+  margin: 0;
+  padding: 2.21rem 1.5625rem 1.68rem;
+  border-radius: 20px;
+  background: #ecf2f7;
+  display: grid;
+  gap: 1rem;
+
+  .plan--featured & {
+    background: #fff;
+  }
+}
+
+.plan__feature {
+  display: flex;
+  align-items: center;
+  gap: 1.3125rem;
+  font-size: 1rem;
+  color: #181818;
+}
+
+.plan__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.21rem;
+  height: 2.21rem;
+  border-radius: 50%;
+  background: #fefefe;
+  color: #181818;
+
+  svg {
+    width: 1.035rem;
+    height: 1.035rem;
   }
 
-  li::before {
-    color: #fff;
+  .plan--featured & {
+    background: #ecf2f7;
+    color: #181818;
+  }
+}
+
+@media (max-width: 1180px) {
+  .plan {
+    height: auto;
+    --ubax-card-padding: 1.75rem 0.875rem 1.25rem;
+  }
+
+  .plan--featured {
+    transform: translateY(-6px);
+  }
+
+  .plans {
+    gap: 1rem;
   }
 }
 
 @media (max-width: 900px) {
   .pricing-wrap {
     width: calc(100% - 1rem);
-    padding: 1.2rem 1rem;
+    padding: 1.6rem 1rem 2.5rem;
   }
 
-  .plans {
-    grid-template-columns: 1fr;
+  .pricing-header {
+    h1 {
+      font-size: clamp(1.75rem, 5.5vw, 3rem);
+      line-height: 1.3;
+      letter-spacing: -0.05rem;
+    }
+
+    p {
+      font-size: clamp(1rem, 3.5vw, 1.25rem);
+      max-width: 100%;
+    }
   }
 
-  .featured {
+  .toggle {
+    margin-bottom: 2.5rem;
+  }
+
+  .plan--featured {
     transform: none;
   }
 }
