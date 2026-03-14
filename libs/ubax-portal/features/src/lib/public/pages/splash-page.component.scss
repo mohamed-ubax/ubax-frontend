@@ -233,6 +233,29 @@
     orbit-float-soft 5.2s ease-in-out 2s infinite;
 }
 
+.orbit-ripple {
+  position: absolute;
+  left: 1187px;
+  top: 383px;
+  width: 193px;
+  height: 194px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(233, 239, 244, 0.7);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+}
+
+.orbit-ripple-1 {
+  animation: orbit-ripple-out 3.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.8s infinite;
+}
+.orbit-ripple-2 {
+  animation: orbit-ripple-out 3.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3s infinite;
+}
+.orbit-ripple-3 {
+  animation: orbit-ripple-out 3.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 4.2s infinite;
+}
+
 .orbit-photo {
   position: absolute;
   /* All photos orbit around the center logo — positioned at the orbit center */
@@ -240,6 +263,7 @@
   top: 480px;
   opacity: 0;
   --orbit-r: 312px;
+  z-index: 3;
 }
 
 /* Each photo orbits continuously — sizes preserved, evenly distributed 60° apart */
@@ -304,6 +328,7 @@
   top: 480px;
   opacity: 0;
   --orbit-r: 312px;
+  z-index: 2;
 }
 
 /* Dots orbit CW at a slightly faster speed, 90° apart */
@@ -683,6 +708,17 @@
   }
 }
 
+@keyframes orbit-ripple-out {
+  0% {
+    transform: translate(var(--orbit-shift-x, 92px), 0) scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate(var(--orbit-shift-x, 92px), 0) scale(3.4);
+    opacity: 0;
+  }
+}
+
 @keyframes orange-pulse {
   0%,
   100% {
@@ -721,6 +757,7 @@
   .center-logo-mark,
   .orbit-photo,
   .orbit-dot,
+  .orbit-ripple,
   .discover-shell,
   .discover-arrow-bg,
   .discover-arrow-wrap::after {

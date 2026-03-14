@@ -90,12 +90,13 @@ export class HomePageComponent {
         { x: 80, opacity: 0, scale: 0.95, duration: 1.4 },
         0,
       )
-      .from(
-        '.hp-hero__line',
-        { autoAlpha: 0, y: 34, duration: 1, ease: 'power3.out', stagger: 0.24 },
-        0.75,
+      // Mask reveal : CSS fige l'état initial, GSAP anime uniquement vers visible
+      .to(
+        '.hp-hero__line-inner',
+        { clipPath: 'inset(0% 0 0% 0)', duration: 0.9, ease: 'power3.out', stagger: 0.22 },
+        1.1, // décalage net par rapport au démarrage de l'image
       )
-      .from('.hp-hero__tagline', { y: 26, opacity: 0, duration: 1.1 }, '-=0.55')
+      .from('.hp-hero__tagline', { y: 30, opacity: 0, duration: 1.0, ease: 'power3.out' }, '-=0.35')
       .from(
         '.hp-store-pill',
         {

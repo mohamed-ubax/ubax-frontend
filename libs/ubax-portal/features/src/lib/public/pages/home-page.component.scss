@@ -90,6 +90,12 @@
     white-space: nowrap;
   }
 
+  &__line-inner {
+    display: block;
+    // État initial caché — GSAP anime vers inset(0% 0 0% 0)
+    clip-path: inset(110% 0 0% 0);
+  }
+
   &__brand {
     color: #1a3047;
     font-size: clamp(2.5rem, 3.7vw, 4rem); // Figma: 4rem at 1728px
