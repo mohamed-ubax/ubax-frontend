@@ -41,9 +41,9 @@ export class PreloaderComponent {
     // ── 1. Words sweep UP into view from below ────────────────────────────
     tl.from([w1, w2, w3], {
       yPercent: 120,
-      duration: 1.05,
+      duration: 1.4,
       ease: 'power4.out',
-      stagger: 0.13,
+      stagger: 0.2,
     });
 
     // ── 2. Counter + fill bar tick (runs from t=0.1, parallel) ───────────
@@ -51,8 +51,8 @@ export class PreloaderComponent {
       proxy,
       {
         v: 100,
-        duration: 2.15,
-        ease: 'power2.inOut',
+        duration: 3.8,
+        ease: 'power1.inOut',
         onUpdate: () => {
           const v = Math.round(proxy.v);
           count.textContent = String(v).padStart(2, '0');
@@ -62,15 +62,15 @@ export class PreloaderComponent {
       0.1,
     );
 
-    // ── 3. Slight hold at 100 ─────────────────────────────────────────────
-    tl.to({}, { duration: 0.18 });
+    // ── 3. Hold at 100 — let the viewer breathe ───────────────────────────
+    tl.to({}, { duration: 0.9 });
 
     // ── 4. Words collapse UPWARD (stagger reverse order) ─────────────────
     tl.to([w3, w2, w1], {
       yPercent: -120,
-      duration: 0.5,
-      ease: 'power4.in',
-      stagger: 0.09,
+      duration: 0.72,
+      ease: 'power3.in',
+      stagger: 0.13,
     });
 
     // ── 5. Entire panel slides up, revealing the page beneath ─────────────
@@ -78,11 +78,11 @@ export class PreloaderComponent {
       host,
       {
         yPercent: -100,
-        duration: 0.88,
+        duration: 1.2,
         ease: 'expo.inOut',
         onComplete: () => this.done.emit(),
       },
-      '-=0.3',
+      '-=0.35',
     );
   }
 }

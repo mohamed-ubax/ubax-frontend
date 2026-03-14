@@ -3,10 +3,14 @@
   Component,
   DestroyRef,
   ElementRef,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
+import {
+  PublicShellComponent,
+  LenisService,
+} from '@ubax-workspace/ubax-portal-layout';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -19,7 +23,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 export class HomePageComponent {
   private readonly elRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly lenis = inject(LenisService);
   private gsapCtx: gsap.Context | undefined;
+
+  @ViewChild('bttBtn') private readonly bttRef!: ElementRef<HTMLButtonElement>;
 
   constructor() {
     afterNextRender(() => {
@@ -35,8 +42,45 @@ export class HomePageComponent {
     });
   }
 
+  scrollToTop(): void {
+    const lenis = this.lenis.instance;
+    if (lenis) {
+      lenis.scrollTo(0, {
+        duration: 2,
+        easing: (t: number) => 1 - Math.pow(1 - t, 4), // easeOutQuart
+      });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
   private initAnimations(): void {
     const ease = 'power3.out';
+
+    // ── BACK TO TOP — appears after hero leaves viewport ─────────────────
+    const btt = this.bttRef.nativeElement;
+    ScrollTrigger.create({
+      trigger: '.hp-hero',
+      start: 'bottom 30%',
+      onEnter: () =>
+        gsap.to(btt, {
+          opacity: 1,
+          y: 0,
+          duration: 0.55,
+          ease: 'power3.out',
+          pointerEvents: 'auto',
+          overwrite: true,
+        }),
+      onLeaveBack: () =>
+        gsap.to(btt, {
+          opacity: 0,
+          y: 18,
+          duration: 0.4,
+          ease: 'power2.in',
+          pointerEvents: 'none',
+          overwrite: true,
+        }),
+    });
 
     // ── 1. HERO — cinematic text-wipe + rising elements ──────────────────
     const heroTl = gsap.timeline({ defaults: { ease } });
@@ -108,6 +152,11 @@ export class HomePageComponent {
       y: 40,
       duration: 1.15,
       ease: 'elastic.out(1, 0.7)',
+      onComplete: () => {
+        (this.elRef.nativeElement as HTMLElement)
+          .querySelector('.hp-phone-ring')
+          ?.classList.add('is-pulsing');
+      },
     });
     // Continuous parallax float on the features phone
     gsap.to('.hp-phone-ring', {
