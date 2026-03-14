@@ -131,6 +131,7 @@
 .contact-support__channels {
   display: grid;
   gap: 1rem;
+  grid-auto-rows: 1fr;
   margin-top: 2.3rem;
 }
 
@@ -138,7 +139,6 @@
   display: flex;
   align-items: center;
   gap: 0.95rem;
-  min-height: 6.65rem;
   padding: 1.35rem 1.2rem;
   border-radius: 1rem;
   background: #415877;

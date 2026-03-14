@@ -200,11 +200,9 @@
   transform: translate(var(--orbit-shift-x), var(--orbit-shift-y));
 }
 
-/* ── Photos, dots, logo: layout shift + mouse-parallax via --px/--py ────── */
+/* ── Center logo: layout shift + mouse-parallax via --px/--py ────────────── */
 .center-logo-bg,
-.center-logo-mark,
-.orbit-photo,
-.orbit-dot {
+.center-logo-mark {
   transform: translate(
     calc(var(--orbit-shift-x) + var(--px, 0px)),
     calc(var(--orbit-shift-y) + var(--py, 0px))
@@ -235,119 +233,148 @@
     orbit-float-soft 5.2s ease-in-out 2s infinite;
 }
 
-.orbit-photo {
+.orbit-ripple {
   position: absolute;
+  left: 1187px;
+  top: 383px;
+  width: 193px;
+  height: 194px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(233, 239, 244, 0) 55%,
+    rgba(233, 239, 244, 0.5) 72%,
+    rgba(233, 239, 244, 0.2) 88%,
+    rgba(233, 239, 244, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
   opacity: 0;
-  --enter-delay: 0.36s;
-  animation: orbit-enter 1.15s var(--ease-enter) var(--enter-delay) forwards;
 }
 
-/* Each photo gets its own unique float pattern after entering */
+.orbit-ripple-1 {
+  animation: orbit-ripple-out 5.6s ease-out 1.8s infinite;
+}
+.orbit-ripple-2 {
+  animation: orbit-ripple-out 5.6s ease-out 3.2s infinite;
+}
+.orbit-ripple-3 {
+  animation: orbit-ripple-out 5.6s ease-out 4.6s infinite;
+}
+.orbit-ripple-4 {
+  animation: orbit-ripple-out 5.6s ease-out 6s infinite;
+}
+
+.orbit-photo {
+  position: absolute;
+  /* All photos orbit around the center logo — positioned at the orbit center */
+  left: 1275px;
+  top: 480px;
+  opacity: 0;
+  --orbit-r: 312px;
+  z-index: 3;
+}
+
+/* Each photo orbits continuously — sizes preserved, evenly distributed 60° apart */
 .orbit-photo-1 {
-  left: 948px;
-  top: 317px;
   width: 91px;
   height: 89px;
-  --enter-delay: 0.38s;
+  margin: -44px 0 0 -46px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.38s forwards,
-    orbit-drift-ne 9s ease-in-out 1.8s infinite;
+    splash-orbit-ccw 24s linear 0s infinite;
 }
 
 .orbit-photo-2 {
-  left: 1511px;
-  top: 303px;
   width: 91px;
   height: 92px;
-  --enter-delay: 0.46s;
+  margin: -46px 0 0 -46px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.46s forwards,
-    orbit-drift-nw 12s ease-in-out 2s infinite;
+    splash-orbit-ccw 24s linear -4s infinite;
 }
 
 .orbit-photo-3 {
-  left: 1530px;
-  top: 550px;
   width: 86px;
   height: 87px;
-  --enter-delay: 0.54s;
+  margin: -44px 0 0 -43px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.54s forwards,
-    orbit-drift-se 10.5s ease-in-out 2.2s infinite;
+    splash-orbit-ccw 24s linear -8s infinite;
 }
 
 .orbit-photo-4 {
-  left: 1174px;
-  top: 114px;
   width: 123px;
   height: 119px;
-  --enter-delay: 0.62s;
+  margin: -60px 0 0 -62px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.62s forwards,
-    orbit-drift-north 14s ease-in-out 1.6s infinite;
+    splash-orbit-ccw 24s linear -12s infinite;
 }
 
 .orbit-photo-5 {
-  left: 998px;
-  top: 620px;
   width: 101px;
   height: 103px;
-  --enter-delay: 0.7s;
+  margin: -52px 0 0 -51px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.7s forwards,
-    orbit-drift-sw 11s ease-in-out 2.4s infinite;
+    splash-orbit-ccw 24s linear -16s infinite;
 }
 
 .orbit-photo-6 {
-  left: 1297px;
-  top: 705px;
   width: 131px;
   height: 131px;
-  --enter-delay: 0.78s;
+  margin: -66px 0 0 -66px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.78s forwards,
-    orbit-drift-ew 8s ease-in-out 2.6s infinite;
+    splash-orbit-ccw 24s linear -20s infinite;
 }
 
 .orbit-dot {
   position: absolute;
+  /* Dots orbit around the center logo — positioned at the orbit center */
+  left: 1275px;
+  top: 480px;
   opacity: 0;
-  --dot-delay: 0.5s;
-  animation:
-    orbit-enter 0.9s var(--ease-enter) var(--dot-delay) forwards,
-    orbit-pulse-dot 4.4s ease-in-out 1.9s infinite;
+  --orbit-r: 312px;
+  z-index: 2;
 }
 
+/* Dots orbit CW at a slightly faster speed, 90° apart */
 .orbit-dot-1 {
-  left: 956px;
-  top: 526px;
   width: 18px;
   height: 19px;
-  --dot-delay: 0.56s;
+  margin: -10px 0 0 -9px;
+  animation:
+    orbit-enter 0.9s var(--ease-enter) 0.56s forwards,
+    splash-orbit-cw 20s linear 0s infinite;
 }
 
 .orbit-dot-2 {
-  left: 1431px;
-  top: 207px;
   width: 18px;
   height: 19px;
-  --dot-delay: 0.64s;
+  margin: -10px 0 0 -9px;
+  animation:
+    orbit-enter 0.9s var(--ease-enter) 0.64s forwards,
+    splash-orbit-cw 20s linear -5s infinite;
 }
 
 .orbit-dot-3 {
-  left: 1159px;
-  top: 759px;
   width: 19px;
   height: 19px;
-  --dot-delay: 0.72s;
+  margin: -10px 0 0 -10px;
+  animation:
+    orbit-enter 0.9s var(--ease-enter) 0.72s forwards,
+    splash-orbit-cw 20s linear -10s infinite;
 }
 
 .orbit-dot-4 {
-  left: 1497px;
-  top: 677px;
   width: 19px;
   height: 18px;
-  --dot-delay: 0.8s;
+  margin: -9px 0 0 -10px;
+  animation:
+    orbit-enter 0.9s var(--ease-enter) 0.8s forwards,
+    splash-orbit-cw 20s linear -15s infinite;
 }
 
 .discover-shell {
@@ -667,6 +694,43 @@
   }
 }
 
+/* ── Orbital revolution keyframes (images stay upright via counter-rotation) ── */
+@keyframes splash-orbit-ccw {
+  from {
+    transform: translate(var(--orbit-shift-x, 92px), 0px) rotate(0deg)
+      translateX(var(--orbit-r, 312px)) rotate(0deg);
+  }
+  to {
+    transform: translate(var(--orbit-shift-x, 92px), 0px) rotate(-360deg)
+      translateX(var(--orbit-r, 312px)) rotate(360deg);
+  }
+}
+
+@keyframes splash-orbit-cw {
+  from {
+    transform: translate(var(--orbit-shift-x, 92px), 0px) rotate(0deg)
+      translateX(var(--orbit-r, 312px)) rotate(0deg);
+  }
+  to {
+    transform: translate(var(--orbit-shift-x, 92px), 0px) rotate(360deg)
+      translateX(var(--orbit-r, 312px)) rotate(-360deg);
+  }
+}
+
+@keyframes orbit-ripple-out {
+  0% {
+    transform: translate(var(--orbit-shift-x, 92px), 0) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(var(--orbit-shift-x, 92px), 0) scale(3.22);
+    opacity: 0;
+  }
+}
+
 @keyframes orange-pulse {
   0%,
   100% {
@@ -705,6 +769,7 @@
   .center-logo-mark,
   .orbit-photo,
   .orbit-dot,
+  .orbit-ripple,
   .discover-shell,
   .discover-arrow-bg,
   .discover-arrow-wrap::after {

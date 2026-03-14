@@ -1,7 +1,10 @@
 <div class="page-shell">
   <header class="main-header" [class.is-scrolled]="scrolled">
     <a routerLink="/accueil" class="brand" aria-label="Accueil UBAX">
-      <img src="assets/portal-assets/header/icons/Group 1171274746.svg" alt="UBAX" />
+      <img
+        src="assets/portal-assets/header/icons/Group 1171274746.svg"
+        alt="UBAX"
+      />
     </a>
 
     <nav class="main-nav" aria-label="Navigation principale">
@@ -12,7 +15,11 @@
 
     <div class="header-end">
       <a routerLink="/connexion" class="pro-space-btn">
-        <img src="assets/portal-assets/header/icons/codicon_account.svg" alt="" aria-hidden="true" />
+        <img
+          src="assets/portal-assets/header/icons/codicon_account.svg"
+          alt=""
+          aria-hidden="true"
+        />
         Mon espace Pro
       </a>
       <button
@@ -30,7 +37,12 @@
     </div>
   </header>
 
-  <nav class="mobile-nav-panel" [class.is-open]="menuOpen" [class.is-scrolled]="scrolled" aria-label="Menu mobile">
+  <nav
+    class="mobile-nav-panel"
+    [class.is-open]="menuOpen"
+    [class.is-scrolled]="scrolled"
+    aria-label="Menu mobile"
+  >
     @for (item of menuItems; track item.label) {
       <a [routerLink]="item.path" (click)="closeMenu()">{{ item.label }}</a>
     }
@@ -42,13 +54,15 @@
 
   <footer class="main-footer">
     <div class="footer-inner">
-
       <!-- Main 4-column grid -->
       <div class="footer-top">
-
         <!-- Brand column -->
         <div class="footer-col footer-brand">
-          <a routerLink="/accueil" class="footer-logo-wrap" aria-label="Accueil UBAX">
+          <a
+            routerLink="/accueil"
+            class="footer-logo-wrap"
+            aria-label="Accueil UBAX"
+          >
             <img
               src="assets/portal-assets/footer/icons/Group 1171274746.svg"
               alt="UBAX"
@@ -56,8 +70,10 @@
             />
           </a>
           <p class="footer-tagline">
-            L'immobilier devient plus simple, plus rapide et plus sûr avec UBAX<br />
-            Trouvez des biens, réservez en ligne et gérez vos locations depuis une seule application.
+            L'immobilier devient plus simple, plus rapide et plus sûr avec
+            UBAX<br />
+            Trouvez des biens, réservez en ligne et gérez vos locations depuis
+            une seule application.
           </p>
           <div class="footer-rating" aria-label="Note : 4.8 sur 5">
             <span class="footer-rating__score">4.8</span>
@@ -76,7 +92,6 @@
         <nav class="footer-col" aria-label="Liens rapides">
           <h3 class="footer-col__heading">Liens rapides</h3>
           <a routerLink="/accueil">Accueil</a>
-          <a routerLink="/fonctionnalites">Fonctionnalités</a>
           <a routerLink="/tarifs">Offres &amp; Tarifs</a>
           <a routerLink="/temoignages">Témoignages</a>
           <a routerLink="/faq">FAQ</a>
@@ -101,65 +116,110 @@
           <a routerLink="/contact">Contacter le support</a>
           <a routerLink="/mentions-legales">Conditions d'utilisation</a>
         </nav>
-
-      </div><!-- /footer-top -->
+      </div>
+      <!-- /footer-top -->
 
       <!-- Bottom row : réseaux sociaux (gauche) + boutons de téléchargement (droite) -->
       <div class="footer-bottom">
-
         <div class="footer-social">
           <h3 class="footer-col__heading">Suivez nous</h3>
           <div class="footer-social__icons">
             <a href="#" class="footer-social__link" aria-label="Facebook">
-              <img src="assets/portal-assets/footer/icons/ic_baseline-facebook.svg" alt="" aria-hidden="true" />
+              <img
+                src="assets/portal-assets/footer/icons/ic_baseline-facebook.svg"
+                alt=""
+                aria-hidden="true"
+              />
             </a>
             <a href="#" class="footer-social__link" aria-label="Instagram">
-              <img src="assets/portal-assets/footer/icons/mdi_instagram.svg" alt="" aria-hidden="true" />
+              <img
+                src="assets/portal-assets/footer/icons/mdi_instagram.svg"
+                alt=""
+                aria-hidden="true"
+              />
             </a>
             <a href="#" class="footer-social__link" aria-label="TikTok">
-              <img src="assets/portal-assets/footer/icons/ic_baseline-tiktok.svg" alt="" aria-hidden="true" />
+              <img
+                src="assets/portal-assets/footer/icons/ic_baseline-tiktok.svg"
+                alt=""
+                aria-hidden="true"
+              />
             </a>
             <a href="#" class="footer-social__link" aria-label="X (Twitter)">
-              <img src="assets/portal-assets/footer/icons/pajamas_twitter.svg" alt="" aria-hidden="true" />
+              <img
+                src="assets/portal-assets/footer/icons/pajamas_twitter.svg"
+                alt=""
+                aria-hidden="true"
+              />
             </a>
             <a href="#" class="footer-social__link" aria-label="LinkedIn">
-              <img src="assets/portal-assets/footer/icons/pajamas_linkedin.svg" alt="" aria-hidden="true" />
+              <img
+                src="assets/portal-assets/footer/icons/pajamas_linkedin.svg"
+                alt=""
+                aria-hidden="true"
+              />
             </a>
           </div>
         </div>
 
         <div class="footer-stores">
-          <a href="#" class="store-badge" aria-label="Télécharger sur Google Play">
-            <img src="assets/portal-assets/footer/icons/logos_google-play-icon.svg" class="store-badge__icon" alt="" aria-hidden="true" />
+          <a
+            href="#"
+            class="store-badge"
+            aria-label="Télécharger sur Google Play"
+          >
+            <img
+              src="assets/portal-assets/footer/icons/logos_google-play-icon.svg"
+              class="store-badge__icon"
+              alt=""
+              aria-hidden="true"
+            />
             <div class="store-badge__text">
               <span class="store-badge__label">Disponible sur</span>
               <span class="store-badge__name">Google Play</span>
             </div>
           </a>
-          <a href="#" class="store-badge" aria-label="Télécharger sur l'App Store">
-            <img src="assets/portal-assets/footer/icons/ic_baseline-apple.svg" class="store-badge__icon store-badge__icon--white" alt="" aria-hidden="true" />
+          <a
+            href="#"
+            class="store-badge"
+            aria-label="Télécharger sur l'App Store"
+          >
+            <img
+              src="assets/portal-assets/footer/icons/ic_baseline-apple.svg"
+              class="store-badge__icon store-badge__icon--white"
+              alt=""
+              aria-hidden="true"
+            />
             <div class="store-badge__text">
               <span class="store-badge__label">Télécharger dans</span>
               <span class="store-badge__name">L'App Store</span>
             </div>
           </a>
-          <a href="#" class="store-badge" aria-label="Télécharger sur AppGallery">
-            <img src="assets/portal-assets/footer/images/huawei_appgallery-logo_brandlogos.net_gkwdr 1.png" class="store-badge__icon" alt="" aria-hidden="true" />
+          <a
+            href="#"
+            class="store-badge"
+            aria-label="Télécharger sur AppGallery"
+          >
+            <img
+              src="assets/portal-assets/footer/images/huawei_appgallery-logo_brandlogos.net_gkwdr 1.png"
+              class="store-badge__icon"
+              alt=""
+              aria-hidden="true"
+            />
             <div class="store-badge__text">
               <span class="store-badge__label">Découvrez sur</span>
               <span class="store-badge__name">AppGallery</span>
             </div>
           </a>
         </div>
-
-      </div><!-- /footer-bottom -->
-
-    </div><!-- /footer-inner -->
+      </div>
+      <!-- /footer-bottom -->
+    </div>
+    <!-- /footer-inner -->
 
     <!-- Copyright bar -->
     <div class="footer-copyright">
       <p>© 2026 Ubax. Tous droits réservés.</p>
     </div>
-
   </footer>
 </div>
