@@ -13,10 +13,10 @@
   h1 {
     color: #1a3047;
     font-family: 'Lexend', sans-serif;
-    font-size: 3rem;
+    font-size: clamp(1.75rem, 3.5vw, 3rem);
     font-style: normal;
     font-weight: 600;
-    line-height: 4.815rem;
+    line-height: 1.2;
     letter-spacing: -0.1125rem;
     margin: 0 0 0.75rem;
   }
@@ -29,7 +29,7 @@
     font-style: normal;
     font-weight: 300;
     line-height: 2rem;
-    max-width: 63.7%;
+    max-width: min(63.7%, 65ch);
     margin: 0 auto;
   }
 }
