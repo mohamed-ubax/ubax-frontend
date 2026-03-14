@@ -1,4 +1,4 @@
-﻿import {
+import {
   afterNextRender,
   Component,
   DestroyRef,
@@ -57,7 +57,7 @@ export class HomePageComponent {
   private initAnimations(): void {
     const ease = 'power3.out';
 
-    // ── BACK TO TOP — appears after hero leaves viewport ─────────────────
+    // -- BACK TO TOP � appears after hero leaves viewport -----------------
     const btt = this.bttRef.nativeElement;
     ScrollTrigger.create({
       trigger: '.hp-hero',
@@ -82,75 +82,73 @@ export class HomePageComponent {
         }),
     });
 
-    // ── 1. HERO — cinematic text-wipe + rising elements ──────────────────
+    // -- 1. HERO � image first, then copy rises in -------------------------
     const heroTl = gsap.timeline({ defaults: { ease } });
     heroTl
-      .from('.hp-hero__line', {
-        autoAlpha: 0,
-        y: 28,
-        duration: 0.6,
-        ease: 'power3.out',
-        stagger: 0.18,
-      })
-      .from('.hp-hero__tagline', { y: 22, opacity: 0, duration: 0.72 }, '-=0.5')
+      .from(
+        '.hp-hero__img',
+        { x: 80, opacity: 0, scale: 0.95, duration: 1.4 },
+        0,
+      )
+      .from(
+        '.hp-hero__line',
+        { autoAlpha: 0, y: 34, duration: 1, ease: 'power3.out', stagger: 0.24 },
+        0.75,
+      )
+      .from('.hp-hero__tagline', { y: 26, opacity: 0, duration: 1.1 }, '-=0.55')
       .from(
         '.hp-store-pill',
         {
-          y: 24,
+          y: 26,
           opacity: 0,
-          duration: 0.65,
-          stagger: 0.12,
+          duration: 0.9,
+          stagger: 0.16,
           ease: 'back.out(1.8)',
         },
-        '-=0.4',
-      )
-      .from(
-        '.hp-hero__img',
-        { x: 90, opacity: 0, scale: 0.94, duration: 1 },
-        0.15,
+        '-=0.5',
       );
 
-    // ── 2. STEPS — numbered cards stagger up ─────────────────────────────
+    // -- 2. STEPS � numbered cards stagger up -----------------------------
     gsap.from('.hp-step', {
-      scrollTrigger: { trigger: '.hp-steps', start: 'top 82%' },
-      y: 65,
+      scrollTrigger: { trigger: '.hp-steps', start: 'top 55%' },
+      y: 70,
       opacity: 0,
-      duration: 0.72,
-      stagger: 0.15,
+      duration: 1,
+      stagger: 0.2,
       ease,
     });
     gsap.from('.hp-step__icon', {
-      scrollTrigger: { trigger: '.hp-steps', start: 'top 82%' },
+      scrollTrigger: { trigger: '.hp-steps', start: 'top 55%' },
       scale: 0.45,
       opacity: 0,
-      duration: 0.65,
-      stagger: 0.15,
+      duration: 0.9,
+      stagger: 0.2,
       ease: 'back.out(2.2)',
     });
 
-    // ── 3. FEATURES — left/right split + phone elastic pop ───────────────
+    // -- 3. FEATURES � left/right split + phone elastic pop ---------------
     gsap.from('.hp-feat-col:first-child .hp-feat', {
-      scrollTrigger: { trigger: '.hp-features__grid', start: 'top 78%' },
-      x: -60,
+      scrollTrigger: { trigger: '.hp-features__grid', start: 'top 58%' },
+      x: -65,
       opacity: 0,
-      duration: 0.75,
-      stagger: 0.14,
+      duration: 1,
+      stagger: 0.18,
       ease,
     });
     gsap.from('.hp-feat-col:last-child .hp-feat', {
-      scrollTrigger: { trigger: '.hp-features__grid', start: 'top 78%' },
-      x: 60,
+      scrollTrigger: { trigger: '.hp-features__grid', start: 'top 58%' },
+      x: 65,
       opacity: 0,
-      duration: 0.75,
-      stagger: 0.14,
+      duration: 1,
+      stagger: 0.18,
       ease,
     });
     gsap.from('.hp-phone-ring', {
-      scrollTrigger: { trigger: '.hp-features__grid', start: 'top 78%' },
+      scrollTrigger: { trigger: '.hp-features__grid', start: 'top 58%' },
       scale: 0.72,
       opacity: 0,
       y: 40,
-      duration: 1.15,
+      duration: 1.4,
       ease: 'elastic.out(1, 0.7)',
       onComplete: () => {
         (this.elRef.nativeElement as HTMLElement)
@@ -170,35 +168,34 @@ export class HomePageComponent {
       ease: 'none',
     });
 
-    // ── 4. LOCATION — magazine-split entrance ────────────────────────────
+    // -- 4. LOCATION � magazine-split entrance ----------------------------
     gsap.from('.hp-location__media', {
-      scrollTrigger: { trigger: '.hp-location', start: 'top 82%' },
-      x: -85,
+      scrollTrigger: { trigger: '.hp-location', start: 'top 55%' },
+      x: -90,
       opacity: 0,
-      duration: 0.95,
+      duration: 1.2,
       ease,
     });
-    // h2 text-wipe reveal
     gsap.from('.hp-location__copy h2', {
-      scrollTrigger: { trigger: '.hp-location', start: 'top 82%' },
+      scrollTrigger: { trigger: '.hp-location', start: 'top 55%' },
       clipPath: 'inset(0 100% 0 0)',
-      duration: 0.9,
+      duration: 1.1,
       ease: 'expo.inOut',
     });
     gsap.from('.hp-location__list li', {
-      scrollTrigger: { trigger: '.hp-location__list', start: 'top 86%' },
-      x: 50,
+      scrollTrigger: { trigger: '.hp-location__list', start: 'top 65%' },
+      x: 55,
       opacity: 0,
-      duration: 0.65,
-      stagger: 0.13,
+      duration: 0.9,
+      stagger: 0.18,
       ease,
     });
     gsap.from('.hp-location .hp-btn-dark', {
-      scrollTrigger: { trigger: '.hp-location .hp-btn-dark', start: 'top 92%' },
+      scrollTrigger: { trigger: '.hp-location .hp-btn-dark', start: 'top 80%' },
       y: 22,
       opacity: 0,
       scale: 0.88,
-      duration: 0.6,
+      duration: 0.8,
       ease: 'back.out(1.8)',
     });
     // Subtle parallax on location image
@@ -213,27 +210,27 @@ export class HomePageComponent {
       ease: 'none',
     });
 
-    // ── 5. HOTELS — alternating reveal + composite parallax ──────────────
+    // -- 5. HOTELS � alternating reveal + composite parallax --------------
     gsap.from('.hp-hotels__copy', {
-      scrollTrigger: { trigger: '.hp-hotels', start: 'top 82%' },
-      x: -65,
+      scrollTrigger: { trigger: '.hp-hotels', start: 'top 55%' },
+      x: -70,
       opacity: 0,
-      duration: 0.88,
+      duration: 1.1,
       ease,
     });
     gsap.from('.hp-hotels__visual', {
-      scrollTrigger: { trigger: '.hp-hotels', start: 'top 82%' },
-      x: 65,
+      scrollTrigger: { trigger: '.hp-hotels', start: 'top 55%' },
+      x: 70,
       opacity: 0,
-      duration: 0.88,
+      duration: 1.1,
       ease,
     });
     gsap.from('.hp-hotel-row', {
-      scrollTrigger: { trigger: '.hp-hotel-rows', start: 'top 86%' },
-      y: 38,
+      scrollTrigger: { trigger: '.hp-hotel-rows', start: 'top 65%' },
+      y: 45,
       opacity: 0,
-      duration: 0.65,
-      stagger: 0.14,
+      duration: 0.9,
+      stagger: 0.18,
       ease: 'power2.out',
     });
     gsap.to('.hp-hotels__composite', {
@@ -247,70 +244,70 @@ export class HomePageComponent {
       ease: 'none',
     });
 
-    // ── 6. DASHBOARD — phones swing in with rotation ─────────────────────
+    // -- 6. DASHBOARD � phones swing in with rotation ---------------------
     gsap.from('.hp-dash-phone--left', {
-      scrollTrigger: { trigger: '.hp-dashboard', start: 'top 80%' },
-      x: -95,
+      scrollTrigger: { trigger: '.hp-dashboard', start: 'top 55%' },
+      x: -100,
       rotation: -14,
       opacity: 0,
-      duration: 1.1,
+      duration: 1.3,
       ease: 'power3.out',
     });
     gsap.from('.hp-dash-phone--right', {
-      scrollTrigger: { trigger: '.hp-dashboard', start: 'top 80%' },
-      x: 95,
+      scrollTrigger: { trigger: '.hp-dashboard', start: 'top 55%' },
+      x: 100,
       rotation: 14,
       opacity: 0,
-      duration: 1.1,
-      delay: 0.18,
+      duration: 1.3,
+      delay: 0.22,
       ease: 'power3.out',
     });
     gsap.from('.hp-dash-stat, .hp-dash-widget, .hp-dash-cercle', {
-      scrollTrigger: { trigger: '.hp-dashboard__phones', start: 'top 78%' },
+      scrollTrigger: { trigger: '.hp-dashboard__phones', start: 'top 60%' },
       scale: 0.65,
       opacity: 0,
-      duration: 0.75,
-      stagger: 0.12,
+      duration: 1,
+      stagger: 0.15,
       ease: 'back.out(2)',
     });
     gsap.from('.hp-dashboard__copy .hp-dash-item', {
-      scrollTrigger: { trigger: '.hp-dashboard__copy', start: 'top 82%' },
-      x: 65,
+      scrollTrigger: { trigger: '.hp-dashboard__copy', start: 'top 60%' },
+      x: 70,
       opacity: 0,
-      duration: 0.7,
-      stagger: 0.15,
+      duration: 0.95,
+      stagger: 0.2,
       ease,
     });
 
-    // ── 7. PAYMENTS orbit — logos pop in + center person + continuous float ─
+    // -- 7. PAYMENTS orbit � logos pop in + center person -----------------
     gsap.from('.hp-pay-center', {
-      scrollTrigger: { trigger: '.hp-payments', start: 'top 82%' },
+      scrollTrigger: { trigger: '.hp-payments', start: 'top 55%' },
       scale: 0.78,
       opacity: 0,
-      duration: 1,
+      duration: 1.2,
       ease: 'elastic.out(1, 0.72)',
     });
     // CSS animation handles orbit transform; GSAP only fades logos in
     gsap.to('.hp-pay-logo', {
-      scrollTrigger: { trigger: '.hp-payments', start: 'top 82%' },
+      scrollTrigger: { trigger: '.hp-payments', start: 'top 55%' },
       opacity: 1,
-      duration: 0.6,
-      stagger: { each: 0.07, from: 'edges' },
+      duration: 0.8,
+      stagger: { each: 0.1, from: 'edges' },
       ease: 'power2.out',
     });
     // h2 text-wipe
     gsap.from('.hp-payments__copy h2', {
-      scrollTrigger: { trigger: '.hp-payments', start: 'top 84%' },
+      scrollTrigger: { trigger: '.hp-payments', start: 'top 58%' },
       clipPath: 'inset(0 100% 0 0)',
-      duration: 0.9,
+      duration: 1.1,
       ease: 'expo.inOut',
     });
     gsap.from('.hp-payments__copy p', {
-      scrollTrigger: { trigger: '.hp-payments', start: 'top 84%' },
-      x: -45,
+      scrollTrigger: { trigger: '.hp-payments', start: 'top 58%' },
+      x: -50,
       opacity: 0,
-      duration: 0.75,
-      delay: 0.18,
+      duration: 0.95,
+      delay: 0.22,
       ease,
     });
   }

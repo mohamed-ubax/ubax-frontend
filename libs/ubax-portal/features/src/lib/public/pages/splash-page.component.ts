@@ -58,30 +58,15 @@ export class SplashPageComponent implements OnInit, OnDestroy {
 
   private _initParallax(): void {
     const host = this._el.nativeElement as HTMLElement;
-    const photos = Array.from(
-      host.querySelectorAll<HTMLElement>('.orbit-photo'),
-    );
     const logoMark = host.querySelector<HTMLElement>('.center-logo-mark');
     const logoBg = host.querySelector<HTMLElement>('.center-logo-bg');
-    const dots = Array.from(host.querySelectorAll<HTMLElement>('.orbit-dot'));
 
-    // Per-element parallax depths (px at normalized mouse ±1)
-    const photoDepths = [18, 14, 22, 12, 20, 16];
-    const dotDepths = [10, 13, 7, 11, 9, 12];
-
-    // Flat list: photos → logoMark → logoBg → dots
+    // Flat list: center logo elements only (photos/dots use CSS orbit animation)
     const allEls: HTMLElement[] = [
-      ...photos,
       ...(logoMark ? [logoMark] : []),
       ...(logoBg ? [logoBg] : []),
-      ...dots,
     ];
-    const allDepths = [
-      ...photoDepths,
-      ...(logoMark ? [8] : []),
-      ...(logoBg ? [6] : []),
-      ...dotDepths.slice(0, dots.length),
-    ];
+    const allDepths = [...(logoMark ? [8] : []), ...(logoBg ? [6] : [])];
 
     // Lerp accumulators
     const lerpX = new Array(allEls.length).fill(0);
