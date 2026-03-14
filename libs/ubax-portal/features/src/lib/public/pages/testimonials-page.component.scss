@@ -39,6 +39,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin: 5rem 0;
+  perspective: 1200px;
 }
 
 .card {
@@ -50,6 +51,14 @@
   background-position: center 50%;
   background-repeat: no-repeat;
   background-color: lightgray;
+  transform-style: preserve-3d;
+  will-change: transform;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.28);
+  }
 }
 
 .duration-badge {

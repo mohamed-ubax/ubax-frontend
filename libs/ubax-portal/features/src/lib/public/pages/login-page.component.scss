@@ -26,6 +26,8 @@
   z-index: 2;
   width: 7.009rem; // 112.14px
   margin-bottom: 57px;
+  opacity: 0;
+  animation: login-logo-in 0.75s cubic-bezier(0, 0, 0.2, 1) 0.15s forwards;
 
   img {
     width: 100%;
@@ -46,6 +48,8 @@
   border: 1px solid #cfcfcf;
   background: #fff;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  animation: login-card-in 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) 0.28s forwards;
 }
 
 // ─── Form layout ─────────────────────────────────────────────────────────────
@@ -200,7 +204,9 @@
   }
 }
 
-// ─── Orbit icons ─────────────────────────────────────────────────────────────
+// ─── Orbit System — Magic UI Orbiting Circles ────────────────────────────────
+
+// ─── Orbit icon badges — fixed positions, animated in place ──────────────────
 
 .orbit {
   position: absolute;
@@ -208,6 +214,12 @@
   align-items: center;
   justify-content: center;
   z-index: 0;
+  // Entry: pop up from scale 0 + blur
+  opacity: 0;
+  animation:
+    orbit-pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--orbit-delay, 0.3s) forwards,
+    orbit-drift var(--orbit-period, 5s) ease-in-out var(--orbit-drift-delay, 1.5s) infinite,
+    orbit-pulse var(--orbit-pulse-dur, 3.2s) ease-in-out var(--orbit-pulse-delay, 0.8s) infinite;
 
   &__circle {
     position: absolute;
@@ -215,57 +227,104 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    // Add a soft drop-shadow tint to the SVG circle
+    filter: drop-shadow(0 6px 18px rgba(43, 67, 91, 0.22));
   }
 
   &__icon {
     position: relative;
     z-index: 1;
-    width: 52%;
-    height: 52%;
+    width: 48%;
+    height: 48%;
     object-fit: contain;
+    // Vibrant orange tint on the icon
+    filter: drop-shadow(0 0 6px rgba(248, 150, 30, 0.5));
   }
 }
 
+// Each badge: larger, and clearly visible
 .orbit--top-left {
-  width: 5.6875rem;
-  height: 5.6875rem;
+  width: 6.25rem;
+  height: 6.25rem;
   top: 58px;
   left: 23.15%;
+  --orbit-delay: 0.2s;
+  --orbit-period: 4.6s;
+  --orbit-drift-delay: 1.3s;
+  --orbit-pulse-dur: 3s;
+  --orbit-pulse-delay: 0.4s;
+  --orbit-drift-x: -6px;
+  --orbit-drift-y: -14px;
 }
 
 .orbit--top-right {
-  width: 5.6875rem;
-  height: 5.6875rem;
+  width: 6.25rem;
+  height: 6.25rem;
   top: 58px;
   left: 72.28%;
+  --orbit-delay: 0.38s;
+  --orbit-period: 5.4s;
+  --orbit-drift-delay: 1.7s;
+  --orbit-pulse-dur: 3.6s;
+  --orbit-pulse-delay: 1.1s;
+  --orbit-drift-x: 8px;
+  --orbit-drift-y: -12px;
 }
 
 .orbit--mid-left {
-  width: 5.6875rem;
-  height: 5.6875rem;
+  width: 6.25rem;
+  height: 6.25rem;
   top: 368px;
   left: 11.46%;
+  --orbit-delay: 0.56s;
+  --orbit-period: 5.8s;
+  --orbit-drift-delay: 2s;
+  --orbit-pulse-dur: 4s;
+  --orbit-pulse-delay: 0.6s;
+  --orbit-drift-x: -10px;
+  --orbit-drift-y: -10px;
 }
 
 .orbit--mid-right {
-  width: 5.6875rem;
-  height: 5.6875rem;
+  width: 6.25rem;
+  height: 6.25rem;
   top: 346px;
   left: 83.33%;
+  --orbit-delay: 0.72s;
+  --orbit-period: 6.2s;
+  --orbit-drift-delay: 2.3s;
+  --orbit-pulse-dur: 3.4s;
+  --orbit-pulse-delay: 1.8s;
+  --orbit-drift-x: 10px;
+  --orbit-drift-y: -8px;
 }
 
 .orbit--bot-left {
-  width: 5.875rem;
-  height: 5.75rem;
+  width: 6.5rem;
+  height: 6.5rem;
   top: 827px;
   left: 22.63%;
+  --orbit-delay: 0.88s;
+  --orbit-period: 4.4s;
+  --orbit-drift-delay: 2.6s;
+  --orbit-pulse-dur: 2.8s;
+  --orbit-pulse-delay: 0.2s;
+  --orbit-drift-x: -7px;
+  --orbit-drift-y: -16px;
 }
 
 .orbit--bot-right {
-  width: 5.875rem;
-  height: 5.75rem;
+  width: 6.5rem;
+  height: 6.5rem;
   top: 827px;
   left: 74.54%;
+  --orbit-delay: 1.04s;
+  --orbit-period: 5s;
+  --orbit-drift-delay: 2.9s;
+  --orbit-pulse-dur: 3.8s;
+  --orbit-pulse-delay: 1.5s;
+  --orbit-drift-x: 9px;
+  --orbit-drift-y: -13px;
 }
 
 // ─── PrimeNG overrides (::ng-deep) ───────────────────────────────────────────
@@ -874,5 +933,63 @@
 
   .password-icon--lock {
     margin-right: 0.625rem;
+  }
+}
+
+// ─── Animation keyframes ─────────────────────────────────────────────────────
+
+@keyframes login-logo-in {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes login-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(36px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes orbit-pop-in {
+  from {
+    opacity: 0;
+    scale: 0.45;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+  }
+}
+
+// Gentle position drift (each icon has custom --orbit-drift-x/y)
+@keyframes orbit-drift {
+  0%, 100% { translate: 0 0; }
+  50%       { translate: var(--orbit-drift-x, 0px) var(--orbit-drift-y, -10px); }
+}
+
+// Subtle scale pulse — gives a breathing / alive feel
+@keyframes orbit-pulse {
+  0%, 100% { scale: 1; }
+  50%       { scale: 1.08; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-logo,
+  .login-card,
+  .orbit {
+    animation: none !important;
+    opacity: 1 !important;
   }
 }

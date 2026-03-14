@@ -196,14 +196,19 @@
   animation:
     orbit-enter 1.2s var(--ease-enter) 0.28s forwards,
     orbit-breathe 6.8s ease-in-out 1.5s infinite;
+  /* Fixed position only — NO parallax, NO rotation */
+  transform: translate(var(--orbit-shift-x), var(--orbit-shift-y));
 }
 
-.orbit-ring,
+/* ── Photos, dots, logo: layout shift + mouse-parallax via --px/--py ────── */
 .center-logo-bg,
 .center-logo-mark,
 .orbit-photo,
 .orbit-dot {
-  transform: translate(var(--orbit-shift-x), var(--orbit-shift-y));
+  transform: translate(
+    calc(var(--orbit-shift-x) + var(--px, 0px)),
+    calc(var(--orbit-shift-y) + var(--py, 0px))
+  );
 }
 
 .center-logo-bg {
@@ -234,17 +239,19 @@
   position: absolute;
   opacity: 0;
   --enter-delay: 0.36s;
-  animation:
-    orbit-enter 1.15s var(--ease-enter) var(--enter-delay) forwards,
-    orbit-float 8.5s ease-in-out 1.7s infinite;
+  animation: orbit-enter 1.15s var(--ease-enter) var(--enter-delay) forwards;
 }
 
+/* Each photo gets its own unique float pattern after entering */
 .orbit-photo-1 {
   left: 948px;
   top: 317px;
   width: 91px;
   height: 89px;
   --enter-delay: 0.38s;
+  animation:
+    orbit-enter 1.15s var(--ease-enter) 0.38s forwards,
+    orbit-drift-ne 9s ease-in-out 1.8s infinite;
 }
 
 .orbit-photo-2 {
@@ -253,6 +260,9 @@
   width: 91px;
   height: 92px;
   --enter-delay: 0.46s;
+  animation:
+    orbit-enter 1.15s var(--ease-enter) 0.46s forwards,
+    orbit-drift-nw 12s ease-in-out 2s infinite;
 }
 
 .orbit-photo-3 {
@@ -261,6 +271,9 @@
   width: 86px;
   height: 87px;
   --enter-delay: 0.54s;
+  animation:
+    orbit-enter 1.15s var(--ease-enter) 0.54s forwards,
+    orbit-drift-se 10.5s ease-in-out 2.2s infinite;
 }
 
 .orbit-photo-4 {
@@ -269,6 +282,9 @@
   width: 123px;
   height: 119px;
   --enter-delay: 0.62s;
+  animation:
+    orbit-enter 1.15s var(--ease-enter) 0.62s forwards,
+    orbit-drift-north 14s ease-in-out 1.6s infinite;
 }
 
 .orbit-photo-5 {
@@ -277,6 +293,9 @@
   width: 101px;
   height: 103px;
   --enter-delay: 0.7s;
+  animation:
+    orbit-enter 1.15s var(--ease-enter) 0.7s forwards,
+    orbit-drift-sw 11s ease-in-out 2.4s infinite;
 }
 
 .orbit-photo-6 {
@@ -285,6 +304,9 @@
   width: 131px;
   height: 131px;
   --enter-delay: 0.78s;
+  animation:
+    orbit-enter 1.15s var(--ease-enter) 0.78s forwards,
+    orbit-drift-ew 8s ease-in-out 2.6s infinite;
 }
 
 .orbit-dot {
@@ -473,6 +495,155 @@
   }
   50% {
     translate: 0 -5px;
+  }
+}
+
+/* ── Per-photo unique drift patterns — enhanced amplitude ───────────────── */
+@keyframes orbit-drift-ne {
+  0% {
+    translate: 0 0;
+    scale: 1;
+    filter: drop-shadow(0 0 0 rgba(248, 150, 30, 0));
+  }
+  20% {
+    translate: 22px -26px;
+    scale: 1.06;
+    filter: drop-shadow(0 0 12px rgba(248, 150, 30, 0.3));
+  }
+  50% {
+    translate: 8px -18px;
+    scale: 1.02;
+  }
+  75% {
+    translate: -16px -8px;
+    scale: 0.96;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+    filter: drop-shadow(0 0 0 rgba(248, 150, 30, 0));
+  }
+}
+
+@keyframes orbit-drift-nw {
+  0% {
+    translate: 0 0;
+    scale: 1;
+  }
+  25% {
+    translate: -26px -22px;
+    scale: 1.07;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+  }
+  55% {
+    translate: -12px 4px;
+    scale: 0.95;
+  }
+  80% {
+    translate: 16px -16px;
+    scale: 1.03;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes orbit-drift-se {
+  0% {
+    translate: 0 0;
+    scale: 1;
+  }
+  25% {
+    translate: 24px 22px;
+    scale: 1.05;
+  }
+  55% {
+    translate: 30px -2px;
+    scale: 1.09;
+    filter: drop-shadow(0 0 14px rgba(248, 150, 30, 0.25));
+  }
+  80% {
+    translate: 10px -14px;
+    scale: 0.97;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes orbit-drift-north {
+  0% {
+    translate: 0 0;
+    scale: 1;
+    filter: drop-shadow(0 0 0 rgba(248, 150, 30, 0));
+  }
+  20% {
+    translate: 10px -30px;
+    scale: 1.08;
+    filter: drop-shadow(0 0 16px rgba(248, 150, 30, 0.35));
+  }
+  55% {
+    translate: -8px -20px;
+    scale: 0.94;
+  }
+  80% {
+    translate: 4px -8px;
+    scale: 1.02;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+    filter: drop-shadow(0 0 0 rgba(248, 150, 30, 0));
+  }
+}
+
+@keyframes orbit-drift-sw {
+  0% {
+    translate: 0 0;
+    scale: 1;
+  }
+  30% {
+    translate: -28px 18px;
+    scale: 1.06;
+  }
+  60% {
+    translate: 6px 26px;
+    scale: 0.93;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+  }
+  85% {
+    translate: -10px 8px;
+    scale: 1.02;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes orbit-drift-ew {
+  0% {
+    translate: 0 0;
+    scale: 1;
+  }
+  25% {
+    translate: 28px -8px;
+    scale: 1.07;
+    filter: drop-shadow(0 0 12px rgba(248, 150, 30, 0.28));
+  }
+  50% {
+    translate: 4px -22px;
+    scale: 1;
+  }
+  75% {
+    translate: -22px -4px;
+    scale: 0.95;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
   }
 }
 

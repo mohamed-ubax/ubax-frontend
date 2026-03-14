@@ -4,6 +4,55 @@
   text-decoration: none;
 }
 
+// ─── BACK TO TOP ─────────────────────────────────────────────────────────────
+
+.hp-btt {
+  position: fixed;
+  bottom: 2.25rem;
+  right: 2.25rem;
+  z-index: 1000;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f8961e;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(248, 150, 30, 0.38);
+
+  // hidden by default — GSAP toggles visibility
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px);
+  will-change: transform, opacity;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.22s ease;
+
+  &:hover {
+    background: #e07c08;
+    box-shadow: 0 8px 32px rgba(248, 150, 30, 0.55);
+    transform: translateY(-3px);
+  }
+
+  &:active {
+    transform: scale(0.93);
+  }
+
+  svg {
+    display: block;
+    transition: transform 0.22s ease;
+  }
+
+  &:hover svg {
+    transform: translateY(-2px);
+  }
+}
+
 // ─── 1. HERO ─────────────────────────────────────────────────────────────────
 
 .hp-hero {
@@ -30,19 +79,30 @@
 
   &__title {
     margin: 0;
-    font-size: clamp(2rem, 4.5vw, 4rem); // 4rem ≈ 64px
+    font-family: Lexend, sans-serif;
     font-weight: 700;
+    line-height: 3.815rem; // 77.04px — Figma spec
+    letter-spacing: -0.1125rem;
+  }
+
+  &__line {
+    display: block;
+    white-space: nowrap;
+  }
+
+  &__brand {
     color: #1a3047;
-    line-height: 1.204; // 77.04px / 64px
-    letter-spacing: -1.8px;
+    font-size: clamp(2.5rem, 3.7vw, 4rem); // Figma: 4rem at 1728px
   }
 
   &__eco {
-    color: var(--ubax-brand);
+    color: #212121;
+    font-size: clamp(1.6rem, 2.4vw, 2.625rem); // Figma: 2.625rem at 1728px
   }
 
   &__immo {
     color: #f8961e;
+    font-size: clamp(1.6rem, 2.4vw, 2.625rem);
     font-weight: 700;
   }
 
@@ -50,7 +110,7 @@
     margin: 1.6rem 0 0;
     color: #151515;
     font-size: clamp(1rem, 1.7vw, 1.5rem); // 1.5rem ≈ 24px
-    font-weight: 300;
+    font-weight: 400;
     line-height: 1.333; // 32px / 24px
     max-width: 50ch;
   }
@@ -220,7 +280,7 @@
   &__grid {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
-    gap: 2rem;
+    gap: clamp(3rem, 5vw, 6rem);
     align-items: center;
   }
 
@@ -236,16 +296,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  // Phone in Figma: 392×673px (portrait) — ring ellipse: 616×593px
-  width: clamp(300px, 28vw, 460px);
+  // Container = outer ring size (616px in Figma at 1728px = 35.6vw)
+  // Circles sized as % of container → zero overflow into text columns
+  width: clamp(300px, 35.6vw, 616px);
   height: clamp(480px, 44vw, 700px);
 
   &::before {
-    // Orange filled circle (Ellipse 85 in Figma)
+    // Orange filled circle: Ellipse 85 = 558/616 = 90.6% of outer ring
     content: '';
     position: absolute;
-    width: clamp(250px, 25vw, 400px);
-    height: clamp(250px, 25vw, 400px);
+    width: 90.6%;
+    aspect-ratio: 1;
     border-radius: 50%;
     background: #f8961e;
     z-index: 0;
@@ -255,11 +316,11 @@
   }
 
   &::after {
-    // Border ring (Ellipse 86 in Figma)
+    // Outer border ring: 100% of container = exactly fills container
     content: '';
     position: absolute;
-    width: clamp(278px, 28vw, 446px);
-    height: clamp(278px, 28vw, 446px);
+    width: 100%;
+    aspect-ratio: 1;
     border-radius: 50%;
     border: 1.5px solid #f8961e;
     z-index: 0;
@@ -274,6 +335,48 @@
     height: 100%;
     width: auto;
     object-fit: contain;
+  }
+
+  // ── Pulse ripple rings (activated via .is-pulsing class after entry anim)
+  &__pulse {
+    position: absolute;
+    width: 90.6%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #f8961e;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    animation-name: hp-phone-pulse;
+    animation-duration: 5.5s;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-iteration-count: infinite;
+    animation-play-state: paused;
+
+    &--2 {
+      animation-delay: 2.75s;
+    }
+  }
+
+  &.is-pulsing .hp-phone-ring__pulse {
+    animation-play-state: running;
+  }
+}
+
+@keyframes hp-phone-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.28;
+  }
+  60% {
+    opacity: 0.12;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.32);
+    opacity: 0;
   }
 }
 
@@ -292,29 +395,37 @@
     flex-shrink: 0;
     width: 55px;
     height: 49px;
-    background: #f8961e;
+    background: rgba(255, 225, 188, 1);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1a3047;
+    color: #f8961e;
   }
 
   &__body {
+    // Figma spec: 25.25rem × 7.875rem flex column, vertically centred
+    display: flex;
+    max-width: 25.25rem;
+    min-height: 7.875rem;
+    flex-direction: column;
+    justify-content: center;
+
     h3 {
-      margin: 0 0 0.5rem;
-      font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+      margin: 0 0 0.6rem;
+      font-size: clamp(1.1rem, 1.6vw, 1.5rem); // ~28px in Figma at 1728px
       font-weight: 600;
-      color: #1a3047;
+      color: #000;
+      line-height: 1.25;
     }
 
     p {
       margin: 0;
-      font-size: clamp(0.85rem, 1vw, 1rem);
+      font-size: clamp(0.875rem, 1.15vw, 1.25rem); // 20px in Figma at 1728px
       color: #4d4d4d;
-      line-height: 1.65;
+      line-height: 1.5;
     }
   }
 }
@@ -353,7 +464,7 @@
     padding: 0;
 
     h2 {
-      margin: 0 0 2rem;
+      margin: 0 0 4rem;
       color: #1a3047;
       font-size: clamp(2rem, 3.2vw, 3rem);
       font-weight: 700;
@@ -387,9 +498,9 @@
           display: block;
           color: #000;
           font-size: clamp(1rem, 1.6vw, 1.5rem);
-          font-weight: 400;
+          font-weight: 500;
           line-height: 1.333;
-          margin-bottom: 0.4rem;
+          margin-bottom: 1.4rem;
         }
 
         p {
@@ -397,7 +508,7 @@
           color: #000;
           font-family: 'Modernica', sans-serif;
           font-size: clamp(0.9rem, 1.3vw, 1.25rem);
-          font-weight: 400;
+          font-weight: 100;
           line-height: 1.1;
         }
       }
@@ -409,9 +520,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 2.5rem;
+  margin-top: 3.5rem;
   width: 260px;
-  height: 56px;
+  height: 66px;
   background: #1a3047;
   color: #fff;
   border: none;
@@ -438,7 +549,7 @@
   padding: clamp(3rem, 5vw, 5rem) clamp(2rem, 5vw, 4.5rem);
 
   &__title {
-    margin: 0 0 1.2rem;
+    margin: 0 0 1.5rem;
     color: var(--ubax-brand);
     font-size: clamp(1.8rem, 2.8vw, 2.8rem);
     font-weight: 700;
@@ -448,9 +559,10 @@
   &__desc {
     margin: 0 0 2.4rem;
     color: #4b5563;
-    font-size: clamp(0.9rem, 1.2vw, 1rem);
+    font-size: clamp(0.9rem, 1.2vw, 1.25rem);
     line-height: 1.82;
     max-width: 56ch;
+    font-weight: 500;
   }
 
   &__visual {
@@ -485,9 +597,10 @@
   p {
     margin: 0;
     color: #4b5563;
-    font-size: clamp(0.85rem, 1vw, 0.95rem);
+    font-size: clamp(0.85rem, 1vw, 1.5rem);
     line-height: 1.68;
     flex: 1;
+    font-weight: 400;
   }
 }
 
@@ -505,7 +618,6 @@
     width: 44px;
     height: 44px;
     object-fit: contain;
-    filter: brightness(0) invert(1);
   }
 }
 
@@ -522,7 +634,11 @@
 
   &__phones {
     position: relative;
-    height: clamp(420px, 46vw, 700px);
+    height: clamp(
+      520px,
+      52vw,
+      760px
+    ); // accommodate ~705px phones at full height
     overflow: visible;
   }
 
@@ -537,7 +653,8 @@
   }
 }
 
-// Phones: Phone1 left-back, Phone2 right-front (Figma: p1 x=64,h=689 / p2 x=401,h=705 in ~760px container)
+// Phones: Phone1 left-back, Phone2 right-front
+// Figma: p1 x=64,h=689 / p2 x=401,h=705 in ~867px column → left:7.4%/46.3%, height:~97-100%
 .hp-dash-phone {
   position: absolute;
   object-fit: contain;
@@ -545,30 +662,30 @@
   transform-origin: center;
 
   &--left {
-    left: 4%;
-    top: 10%;
-    height: 78%;
+    left: 7%;
+    top: 2%;
+    height: 93%;
     z-index: 1;
-    filter: blur(1.4px);
-    opacity: 0.95;
+    filter: blur(3px);
+    opacity: 0.9;
   }
 
   &--right {
-    left: 33%;
-    top: 7%;
-    height: 80%;
+    left: 47%;
+    top: 0%;
+    height: 97%;
     z-index: 2;
-    filter: blur(1px);
-    opacity: 0.96;
+    filter: blur(3px);
+    opacity: 0.98;
   }
 }
 
-// stat: top-right floating card (Figma x=617, y=4349 → top of phones)
+// stat: top-right floating card (Figma x=617, y=4349 → slightly above phones, right area)
 .hp-dash-stat {
   position: absolute;
-  right: 8%;
-  top: 2%;
-  width: 36%;
+  left: 71%;
+  top: -2%;
+  width: 24%;
   z-index: 4;
   border-radius: 16px;
   box-shadow: 0 6px 32px rgba(0, 0, 0, 0.15);
@@ -576,12 +693,12 @@
   object-fit: contain;
 }
 
-// widget-card: lower-left floating card (Figma x=46, y=4507)
+// widget-card: left-side floating card, upper-mid area (Figma x=46, y=4507 → top:17% within phones)
 .hp-dash-widget {
   position: absolute;
-  left: 2%;
-  bottom: 4%;
-  width: 56%;
+  left: 5%;
+  top: 17%;
+  width: 50%;
   z-index: 3;
   border-radius: 18px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
@@ -589,12 +706,12 @@
   object-fit: contain;
 }
 
-// widget-cercle: bottom-right donut (Figma x=564, y=4971)
+// widget-cercle: bottom-right donut (Figma x=564, y=4971 → top:83%, left:65%)
 .hp-dash-cercle {
   position: absolute;
-  right: 11%;
-  bottom: 19%;
-  width: 30%;
+  left: 65%;
+  top: 82%;
+  width: 27%;
   z-index: 5;
   border-radius: 18px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
@@ -604,36 +721,39 @@
 
 .hp-dash-item {
   display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  margin-bottom: 1.8rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2.2rem;
 
   &:last-child {
     margin-bottom: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .hp-check-icon {
     flex-shrink: 0;
     width: 40px;
     height: 40px;
-    margin-top: 0.1rem;
   }
 
-  div {
-    strong {
-      display: block;
-      color: var(--ubax-brand);
-      font-size: clamp(1rem, 1.3vw, 1.1rem);
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-    }
+  strong {
+    color: #1a3047;
+    font-size: clamp(1.1rem, 1.4vw, 1.5rem); // Figma: 24px at 1728px
+    font-weight: 600;
+    line-height: 1.3;
+  }
 
-    p {
-      margin: 0;
-      color: #4b5563;
-      font-size: clamp(0.85rem, 1vw, 0.95rem);
-      line-height: 1.72;
-    }
+  > p {
+    margin: 0;
+    padding-left: calc(40px + 0.75rem); // align under title
+    color: #4d4d4d; // Figma node 150-551 color
+    font-size: clamp(0.9rem, 1.1vw, 1.25rem); // Figma: 20px at 1728px
+    line-height: 1.55;
   }
 }
 
@@ -643,15 +763,14 @@
   width: 100%;
   background: #fff;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 53% 40%;
+  gap: 0;
   align-items: center;
-  padding: clamp(3rem, 5vw, 6rem) clamp(2rem, 5vw, 4.5rem);
-  margin-bottom: 2rem;
+  padding: clamp(2rem, 4vw, 5rem) clamp(1.5rem, 4vw, 3.5rem);
 
   &__copy {
     h2 {
-      margin: 0 0 1.4rem;
+      margin: 0 0 2.5rem;
       color: var(--ubax-brand);
       font-size: clamp(1.8rem, 2.8vw, 2.9rem);
       font-weight: 700;
@@ -661,7 +780,7 @@
     p {
       margin: 0;
       color: #4b5563;
-      font-size: clamp(0.9rem, 1.2vw, 1rem);
+      font-size: clamp(0.9rem, 1.2vw, 1.5rem);
       line-height: 1.82;
       max-width: 52ch;
     }
@@ -669,7 +788,7 @@
 
   &__visual {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
   }
 }
@@ -682,30 +801,54 @@
 
 .hp-pay-orbit {
   position: relative;
-  width: min(580px, 100%);
+  width: min(700px, 100%);
   aspect-ratio: 780 / 749;
+  // Orbit center (matches center of .hp-pay-center person image)
+  --hp-orbit-cx: 48%;
+  --hp-orbit-cy: 47%;
+  // Responsive radii
+  --hp-outer-r: 310px;
+  --hp-inner-r: 165px;
 
-  // Orange orbit ring (Figma Ellipse 193 — thin orange stroke)
+  // Outer ring path
   &::before {
     content: '';
     position: absolute;
-    inset: 0;
+    top: var(--hp-orbit-cy);
+    left: var(--hp-orbit-cx);
+    width: calc(var(--hp-outer-r) * 2);
+    height: calc(var(--hp-outer-r) * 2);
+    transform: translate(-50%, -50%);
     border-radius: 50%;
-    border: 1.5px solid #f8961e;
+    border: 1.5px solid rgba(248, 150, 30, 0.55);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // Inner ring path
+  &::after {
+    content: '';
+    position: absolute;
+    top: var(--hp-orbit-cy);
+    left: var(--hp-orbit-cx);
+    width: calc(var(--hp-inner-r) * 2);
+    height: calc(var(--hp-inner-r) * 2);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(248, 150, 30, 0.28);
     pointer-events: none;
     z-index: 0;
   }
 }
 
 .hp-pay-center {
-  // Figma: center image x=905,y=5391,w=461,h=469 relative to orbit ring x=763,y=5276,w=780,h=749
-  // left% = (905-763)/780 = 18.2%, top% = (5391-5276)/749 = 15.4%
-  // width% = 461/780 = 59.1%, height% = 469/749 = 62.6%
+  // Sized to exactly match the ::after inner orbit ring
   position: absolute;
-  left: 18.2%;
-  top: 15.4%;
-  width: 59.1%;
-  height: 62.6%;
+  left: var(--hp-orbit-cx);
+  top: var(--hp-orbit-cy);
+  width: calc(var(--hp-inner-r) * 2);
+  height: calc(var(--hp-inner-r) * 2);
+  transform: translate(-50%, -50%);
   border-radius: 50%;
   overflow: hidden;
   z-index: 1;
@@ -720,87 +863,91 @@
 }
 
 .hp-pay-logo {
+  // All logos start at the orbit center and revolve via CSS animation
   position: absolute;
+  top: var(--hp-orbit-cy, 47%);
+  left: var(--hp-orbit-cx, 48%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #dce8f3;
   border-radius: 50%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   overflow: hidden;
+  opacity: 0; // revealed by GSAP on scroll
   z-index: 2;
 
   img {
-    width: 64%;
-    height: 64%;
+    width: 68%;
+    height: 68%;
     object-fit: contain;
   }
 
-  // Figma positions, all relative to orbit ring (763,5276,780×749)
-  // Formula: left% = (logo_cx - 763 - logo_w/2) / 780, top% = (logo_cy - 5276 - logo_h/2) / 749
-
-  // Wave: Ellipse184 x=792,y=5310,w=161,h=161 → cx=872,cy=5390
-  &--wave {
-    width: 21%;
-    aspect-ratio: 1;
-    left: 3.5%;
-    top: 4.5%;
-  }
-
-  // Stripe: Ellipse191 x=1120,y=5247,w=85,h=85 → cx=1162,cy=5289
-  &--stripe {
-    width: 12%;
-    aspect-ratio: 1;
-    left: 45.8%;
-    top: -4.9%;
-  }
-
-  // Mastercard: Ellipse188 x=1351,y=5290,w=173,h=173 → cx=1437,cy=5376
-  &--mastercard {
-    width: 22%;
-    aspect-ratio: 1;
-    right: 1%;
-    top: 5.5%;
-  }
-
-  // PayPal: Ellipse186 x=891,y=5626,w=85,h=85 → cx=933,cy=5668
-  &--paypal {
-    width: 12%;
-    aspect-ratio: 1;
-    left: 15.7%;
-    top: 51.4%;
-  }
-
-  // MTN: Ellipse190 x=1484,y=5632,w=117,h=117 → cx=1542,cy=5690
-  &--mtn {
-    width: 16%;
-    aspect-ratio: 1;
-    right: 0;
-    top: 53.6%;
-  }
-
-  // PayDunya: Ellipse185 x=741,y=5739,w=117,h=117 → cx=799,cy=5797
-  &--paydunya {
-    width: 16%;
-    aspect-ratio: 1;
-    left: 1.8%;
-    bottom: 8.8%;
-  }
-
-  // Orange: Ellipse189 x=1307,y=5834,w=117,h=117 → cx=1365,cy=5892
-  &--orange {
-    width: 16%;
-    aspect-ratio: 1;
-    right: 9.5%;
-    bottom: 3%;
-  }
-
-  // Visa: Ellipse192 x=948,y=5931,w=99,h=99 → cx=997,cy=5980
+  // ── Outer ring — CCW 32 s, 6 logos 60° apart ────────────────────────────────
+  &--wave,
+  &--mastercard,
+  &--mtn,
+  &--paydunya,
+  &--orange,
   &--visa {
-    width: 14%;
-    aspect-ratio: 1;
-    left: 30.3%;
-    bottom: 0.7%;
+    width: 72px;
+    height: 72px;
+    margin: -36px 0 0 -36px;
+    --hp-r: var(--hp-outer-r);
+  }
+
+  &--wave {
+    animation: hp-orbit-ccw 32s linear 0s infinite;
+  }
+  &--mastercard {
+    animation: hp-orbit-ccw 32s linear -5.3s infinite;
+  }
+  &--mtn {
+    animation: hp-orbit-ccw 32s linear -10.6s infinite;
+  }
+  &--paydunya {
+    animation: hp-orbit-ccw 32s linear -16s infinite;
+  }
+  &--orange {
+    animation: hp-orbit-ccw 32s linear -21.3s infinite;
+  }
+  &--visa {
+    animation: hp-orbit-ccw 32s linear -26.7s infinite;
+  }
+
+  // ── Inner ring — CW 18 s, 2 logos 180° apart ─────────────────────────────────
+  &--stripe,
+  &--paypal {
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    --hp-r: var(--hp-inner-r);
+  }
+
+  &--stripe {
+    animation: hp-orbit-cw 18s linear 0s infinite;
+  }
+  &--paypal {
+    animation: hp-orbit-cw 18s linear -9s infinite;
+  }
+}
+
+// ── Orbit keyframes (icon stays upright via counter-rotation) ─────────────────
+@keyframes hp-orbit-cw {
+  from {
+    transform: rotate(0deg) translateX(var(--hp-r)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(var(--hp-r)) rotate(-360deg);
+  }
+}
+
+@keyframes hp-orbit-ccw {
+  from {
+    transform: rotate(0deg) translateX(var(--hp-r)) rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg) translateX(var(--hp-r)) rotate(360deg);
   }
 }
 
@@ -877,5 +1024,30 @@
   .hp-dashboard,
   .hp-payments {
     padding: 2.5rem 1.2rem;
+  }
+
+  .hp-pay-orbit {
+    --hp-outer-r: 148px;
+    --hp-inner-r: 88px;
+  }
+
+  .hp-pay-logo {
+    &--wave,
+    &--mastercard,
+    &--mtn,
+    &--paydunya {
+      width: 44px;
+      height: 44px;
+      margin: -22px 0 0 -22px;
+    }
+
+    &--stripe,
+    &--paypal,
+    &--orange,
+    &--visa {
+      width: 36px;
+      height: 36px;
+      margin: -18px 0 0 -18px;
+    }
   }
 }

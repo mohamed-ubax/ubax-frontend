@@ -1,10 +1,18 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { COUNTRY_CODES, type CountryCode } from '../shared/country-codes';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface ContactChannel {
   icon: string;
@@ -22,17 +30,77 @@ interface SocialLink {
 @Component({
   selector: 'ubax-contact-page',
   standalone: true,
-  imports: [
-    PublicShellComponent,
-    FormsModule,
-    Select,
-    InputText,
-    Button,
-  ],
+  imports: [PublicShellComponent, FormsModule, Select, InputText, Button],
   templateUrl: './contact-page.component.html',
   styleUrl: './contact-page.component.scss',
 })
 export class ContactPageComponent {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _destroyRef = inject(DestroyRef);
+  private _gsapCtx: gsap.Context | null = null;
+
+  constructor() {
+    afterNextRender(() => this._initAnimations());
+  }
+
+  private _initAnimations(): void {
+    const el = this._el.nativeElement as HTMLElement;
+    gsap.registerPlugin(ScrollTrigger);
+
+    this._gsapCtx = gsap.context(() => {
+      const hero = el.querySelector('.contact-page__hero');
+
+      gsap.from('.contact-page__title', {
+        y: -30,
+        opacity: 0,
+        duration: 0.85,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: hero, start: 'top 82%' },
+      });
+
+      gsap.from('.contact-page__description', {
+        y: -18,
+        opacity: 0,
+        duration: 0.75,
+        delay: 0.18,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: hero, start: 'top 82%' },
+      });
+
+      const layout = el.querySelector('.contact-layout');
+
+      gsap.from('.contact-form', {
+        x: -75,
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: layout, start: 'top 80%' },
+      });
+
+      gsap.from('.contact-support', {
+        x: 75,
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: layout, start: 'top 80%' },
+      });
+
+      gsap.from('.support-channel', {
+        y: 30,
+        autoAlpha: 0,
+        duration: 0.65,
+        stagger: 0.12,
+        ease: 'back.out(1.6)',
+        scrollTrigger: { trigger: '.contact-support', start: 'top 85%' },
+      });
+    }, el);
+
+    this._destroyRef.onDestroy(() => {
+      this._gsapCtx?.revert();
+      this._gsapCtx = null;
+    });
+  }
+
   protected readonly countries = COUNTRY_CODES;
   protected selectedCountry: CountryCode = COUNTRY_CODES[0];
 

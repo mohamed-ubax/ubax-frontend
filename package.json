@@ -13,6 +13,8 @@
     "@angular/router": "~21.2.0",
     "@primeng/themes": "^21.0.4",
     "@primeuix/themes": "^2.0.3",
+    "gsap": "^3.14.2",
+    "lenis": "^1.3.18",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.3",
     "rxjs": "~7.8.0"
