@@ -711,7 +711,7 @@
 @keyframes orbit-ripple-out {
   0% {
     transform: translate(var(--orbit-shift-x, 92px), 0) scale(1);
-    opacity: 0.55;
+    opacity: 0.65;
   }
   100% {
     transform: translate(var(--orbit-shift-x, 92px), 0) scale(3.4);
