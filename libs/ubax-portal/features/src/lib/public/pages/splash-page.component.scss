@@ -432,6 +432,9 @@
   width: 50px;
   height: 50px;
   animation: orange-pulse 2.8s ease-in-out infinite;
+  transition:
+    filter 260ms ease,
+    opacity 260ms ease;
 }
 
 .discover-arrow {
@@ -441,6 +444,16 @@
   width: 24px;
   height: 22px;
   transform: rotate(0deg);
+  transition: filter 260ms ease;
+}
+
+.discover-shell:hover .discover-arrow-bg {
+  animation: none;
+  filter: brightness(1.15) drop-shadow(0 0 10px rgba(255, 220, 0, 0.65));
+}
+
+.discover-shell:hover .discover-arrow {
+  filter: brightness(0);
 }
 
 @keyframes bg-enter {
