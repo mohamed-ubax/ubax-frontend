@@ -160,8 +160,14 @@
   &__icon {
     width: 36px;
     height: 36px;
+    scale: 1.5;
     object-fit: contain;
     flex-shrink: 0;
+  }
+
+  &:first-child &__icon {
+    width: 28px;
+    height: 28px;
   }
 
   div {

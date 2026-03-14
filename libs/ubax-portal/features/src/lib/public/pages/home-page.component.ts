@@ -108,23 +108,26 @@ export class HomePageComponent {
         '-=0.5',
       );
 
-    // -- 2. STEPS � numbered cards stagger up -----------------------------
-    gsap.from('.hp-step', {
-      scrollTrigger: { trigger: '.hp-steps', start: 'top 55%' },
-      y: 70,
-      opacity: 0,
-      duration: 1,
-      stagger: 0.2,
-      ease,
+    // -- 2. STEPS � sequential after hero, scroll as fallback -------------
+    const stepsTl = gsap.timeline({ paused: true });
+    stepsTl
+      .from('.hp-step', { y: 70, opacity: 0, duration: 1, stagger: 0.2, ease }, 0)
+      .from(
+        '.hp-step__icon',
+        { scale: 0.45, opacity: 0, duration: 0.9, stagger: 0.2, ease: 'back.out(2.2)' },
+        0,
+      );
+
+    // Fallback : si l'utilisateur scrolle avant la fin du hero
+    ScrollTrigger.create({
+      trigger: '.hp-steps',
+      start: 'top 80%',
+      once: true,
+      onEnter: () => { if (stepsTl.progress() === 0) stepsTl.play(); },
     });
-    gsap.from('.hp-step__icon', {
-      scrollTrigger: { trigger: '.hp-steps', start: 'top 55%' },
-      scale: 0.45,
-      opacity: 0,
-      duration: 0.9,
-      stagger: 0.2,
-      ease: 'back.out(2.2)',
-    });
+
+    // Declenchement sequentiel : joue des que le hero est termine
+    heroTl.then(() => { if (stepsTl.progress() === 0) stepsTl.play(); });
 
     // -- 3. FEATURES � left/right split + phone elastic pop ---------------
     gsap.from('.hp-feat-col:first-child .hp-feat', {
