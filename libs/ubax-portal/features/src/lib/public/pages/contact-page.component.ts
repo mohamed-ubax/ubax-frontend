@@ -90,7 +90,8 @@ export class ContactPageComponent {
         autoAlpha: 0,
         duration: 0.65,
         stagger: 0.12,
-        ease: 'back.out(1.6)',
+        ease: 'power3.out',
+        clearProps: 'y,transform',
         scrollTrigger: { trigger: '.contact-support', start: 'top 85%' },
       });
     }, el);

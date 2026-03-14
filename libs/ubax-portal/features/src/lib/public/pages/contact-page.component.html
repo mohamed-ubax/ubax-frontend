@@ -3,7 +3,7 @@
     <div class="contact-page__inner">
       <header class="contact-page__hero">
         <h1 class="contact-page__title">
-          Besoin d'aide ? Notre equipe est a votre ecoute
+          Besoin d'aide ? Notre equipe est a votre écoute
         </h1>
         <p class="contact-page__description">
           L'equipe UBAX vous accompagne au quotidien. Que ce soit pour une
@@ -108,7 +108,10 @@
                   </ng-template>
                   <ng-template #item let-country>
                     <div class="cp-item">
-                      <span class="cp-flag-badge cp-flag-badge--option" aria-hidden="true">
+                      <span
+                        class="cp-flag-badge cp-flag-badge--option"
+                        aria-hidden="true"
+                      >
                         <img
                           class="cp-flag-image"
                           [src]="country.flagUrl"
@@ -151,7 +154,10 @@
           ></p-button>
         </form>
 
-        <aside class="contact-card contact-support" aria-label="Canaux de support">
+        <aside
+          class="contact-card contact-support"
+          aria-label="Canaux de support"
+        >
           <h2 class="contact-support__title">
             Bonjour ! Nous sommes la pour vous aider
           </h2>
@@ -161,13 +167,21 @@
               <a
                 class="support-channel"
                 [href]="channel.href"
-                [attr.target]="channel.label === 'SMS / WhatsApp' ? '_blank' : null"
-                [attr.rel]="channel.label === 'SMS / WhatsApp' ? 'noreferrer' : null"
+                [attr.target]="
+                  channel.label === 'SMS / WhatsApp' ? '_blank' : null
+                "
+                [attr.rel]="
+                  channel.label === 'SMS / WhatsApp' ? 'noreferrer' : null
+                "
               >
                 <img [src]="channel.icon" [alt]="''" aria-hidden="true" />
                 <span class="support-channel__text">
-                  <span class="support-channel__label">{{ channel.label }}</span>
-                  <span class="support-channel__value">{{ channel.value }}</span>
+                  <span class="support-channel__label">{{
+                    channel.label
+                  }}</span>
+                  <span class="support-channel__value">{{
+                    channel.value
+                  }}</span>
                 </span>
               </a>
             }
