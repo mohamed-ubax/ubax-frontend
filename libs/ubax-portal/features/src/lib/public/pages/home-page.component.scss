@@ -903,44 +903,62 @@
   &--paydunya,
   &--orange,
   &--visa {
-    width: 72px;
-    height: 72px;
-    margin: -36px 0 0 -36px;
     --hp-r: var(--hp-outer-r);
   }
 
   &--wave {
+    width: 112px;
+    height: 112px;
+    margin: -56px 0 0 -56px;
     animation: hp-orbit-ccw 32s linear 0s infinite;
   }
   &--mastercard {
+    width: 96px;
+    height: 96px;
+    margin: -48px 0 0 -48px;
     animation: hp-orbit-ccw 32s linear -5.3s infinite;
   }
   &--mtn {
+    width: 76px;
+    height: 76px;
+    margin: -38px 0 0 -38px;
     animation: hp-orbit-ccw 32s linear -10.6s infinite;
   }
   &--paydunya {
+    width: 88px;
+    height: 88px;
+    margin: -44px 0 0 -44px;
     animation: hp-orbit-ccw 32s linear -16s infinite;
   }
   &--orange {
+    width: 76px;
+    height: 76px;
+    margin: -38px 0 0 -38px;
     animation: hp-orbit-ccw 32s linear -21.3s infinite;
   }
   &--visa {
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
     animation: hp-orbit-ccw 32s linear -26.7s infinite;
   }
 
   // ── Inner ring — CW 18 s, 2 logos 180° apart ─────────────────────────────────
   &--stripe,
   &--paypal {
-    width: 60px;
-    height: 60px;
-    margin: -30px 0 0 -30px;
     --hp-r: var(--hp-inner-r);
   }
 
   &--stripe {
+    width: 66px;
+    height: 66px;
+    margin: -33px 0 0 -33px;
     animation: hp-orbit-cw 18s linear 0s infinite;
   }
   &--paypal {
+    width: 86px;
+    height: 86px;
+    margin: -43px 0 0 -43px;
     animation: hp-orbit-cw 18s linear -9s infinite;
   }
 }
@@ -1045,22 +1063,41 @@
   }
 
   .hp-pay-logo {
-    &--wave,
-    &--mastercard,
-    &--mtn,
+    &--wave {
+      width: 58px;
+      height: 58px;
+      margin: -29px 0 0 -29px;
+    }
+    &--mastercard {
+      width: 50px;
+      height: 50px;
+      margin: -25px 0 0 -25px;
+    }
+    &--visa {
+      width: 52px;
+      height: 52px;
+      margin: -26px 0 0 -26px;
+    }
     &--paydunya {
+      width: 46px;
+      height: 46px;
+      margin: -23px 0 0 -23px;
+    }
+    &--mtn,
+    &--orange {
+      width: 40px;
+      height: 40px;
+      margin: -20px 0 0 -20px;
+    }
+    &--paypal {
       width: 44px;
       height: 44px;
       margin: -22px 0 0 -22px;
     }
-
-    &--stripe,
-    &--paypal,
-    &--orange,
-    &--visa {
-      width: 36px;
-      height: 36px;
-      margin: -18px 0 0 -18px;
+    &--stripe {
+      width: 34px;
+      height: 34px;
+      margin: -17px 0 0 -17px;
     }
   }
 }
