@@ -1,10 +1,18 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  inject,
+} from '@angular/core';
 import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import {
   UiAccordionComponent,
   UiAccordionItem,
   UiButtonComponent,
 } from '@ubax-workspace/shared-ui';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 @Component({
   selector: 'ubax-faq-page',
@@ -13,6 +21,63 @@ import {
   styleUrl: './faq-page.component.scss',
 })
 export class FaqPageComponent {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _destroyRef = inject(DestroyRef);
+  private _gsapCtx: gsap.Context | null = null;
+
+  constructor() {
+    afterNextRender(() => this._initAnimations());
+  }
+
+  private _initAnimations(): void {
+    const el = this._el.nativeElement as HTMLElement;
+    gsap.registerPlugin(ScrollTrigger);
+
+    this._gsapCtx = gsap.context(() => {
+      const section = el.querySelector('.faq-section');
+
+      gsap.from('.faq-heading', {
+        x: -55,
+        opacity: 0,
+        duration: 0.85,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: section, start: 'top 78%' },
+      });
+
+      gsap.from('.faq-desc', {
+        x: -40,
+        opacity: 0,
+        duration: 0.75,
+        delay: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: section, start: 'top 78%' },
+      });
+
+      gsap.from('.faq-contact-card', {
+        y: 50,
+        opacity: 0,
+        scale: 0.96,
+        duration: 0.9,
+        delay: 0.3,
+        ease: 'back.out(1.8)',
+        scrollTrigger: { trigger: section, start: 'top 78%' },
+      });
+
+      gsap.from('.faq-list', {
+        x: 65,
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: section, start: 'top 75%' },
+      });
+    }, el);
+
+    this._destroyRef.onDestroy(() => {
+      this._gsapCtx?.revert();
+      this._gsapCtx = null;
+    });
+  }
+
   protected readonly items: UiAccordionItem[] = [
     {
       title: "Qu'est-ce que UBAX ?",

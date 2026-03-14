@@ -161,3 +161,85 @@ body {
     font-size: 12px;
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// View Transitions — page-level route animations
+// ─────────────────────────────────────────────────────────────────────────────
+
+@keyframes vt-slide-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.985);
+  }
+}
+
+@keyframes vt-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+::view-transition-old(root) {
+  animation: 260ms cubic-bezier(0.4, 0, 1, 1) both vt-slide-out;
+}
+
+::view-transition-new(root) {
+  animation: 400ms cubic-bezier(0, 0, 0.2, 1) 60ms both vt-slide-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lenis — smooth scroll reset
+// ─────────────────────────────────────────────────────────────────────────────
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Global animation utilities shared across pages
+// ─────────────────────────────────────────────────────────────────────────────
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 125, 30, 0);
+  }
+  50% {
+    box-shadow: 0 0 28px 6px rgba(232, 125, 30, 0.22);
+  }
+}

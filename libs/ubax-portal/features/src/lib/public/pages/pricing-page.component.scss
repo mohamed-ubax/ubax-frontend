@@ -39,8 +39,31 @@
   padding: 0.42rem;
   display: flex;
   gap: 0;
+  position: relative;
+
+  // Sliding pill — morphs under the active tab
+  &__pill {
+    position: absolute;
+    top: 0.42rem;
+    left: 0.42rem;
+    height: calc(100% - 0.84rem);
+    width: calc(50% - 0.42rem);
+    background: #fff;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &--annuel &__pill {
+    transform: translateX(100%);
+  }
 
   &__tab {
+    position: relative;
+    z-index: 1;
+    flex: 1;
     padding: 1.2rem 2rem;
     border-radius: 999px;
     border: none;
@@ -50,13 +73,12 @@
     font-size: 0.94rem;
     font-weight: 500;
     cursor: pointer;
-    transition:
-      background 160ms ease,
-      color 160ms ease;
+    white-space: nowrap;
+    transition: color 250ms ease;
 
     &--active {
-      background: #fff;
       color: #343434;
+      font-weight: 600;
     }
   }
 }
@@ -74,7 +96,7 @@
   height: 40.8125rem;
 
   &--featured {
-    transform: translateY(-10px);
+    // elevation and float managed by GSAP
   }
 }
 
@@ -188,10 +210,6 @@
     --ubax-card-padding: 1.75rem 0.875rem 1.25rem;
   }
 
-  .plan--featured {
-    transform: translateY(-6px);
-  }
-
   .plans {
     gap: 1rem;
   }
@@ -218,9 +236,5 @@
 
   .toggle {
     margin-bottom: 2.5rem;
-  }
-
-  .plan--featured {
-    transform: none;
   }
 }

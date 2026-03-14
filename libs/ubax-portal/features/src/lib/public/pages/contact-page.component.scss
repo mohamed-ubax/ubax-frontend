@@ -144,6 +144,8 @@
   background: #415877;
   text-decoration: none;
   color: inherit;
+  // Reserve space in the grid during GSAP stagger entrance
+  visibility: hidden;
   transition:
     transform 160ms ease,
     background 160ms ease;
