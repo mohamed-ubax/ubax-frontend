@@ -1,483 +1,881 @@
-.link-reset {
+// ─── Shared helpers ──────────────────────────────────────────────────────────
+
+.hp-link-clean {
   text-decoration: none;
 }
 
-section {
-  width: min(1728px, 100%);
-  margin: 0 auto;
-}
+// ─── 1. HERO ─────────────────────────────────────────────────────────────────
 
-.splash-hero {
-  position: relative;
-  min-height: 84vh;
-  border-radius: 0 0 24px 24px;
-  overflow: hidden;
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.64) 0%,
-      rgba(0, 0, 0, 0.48) 45%,
-      rgba(0, 0, 0, 0.38) 100%
-    );
-  }
-}
-
-.hero-copy {
-  position: relative;
-  z-index: 2;
-  max-width: 640px;
-  color: #fff;
-  padding: clamp(2rem, 5vw, 4rem);
-  margin-top: clamp(4rem, 8vw, 8rem);
-
-  h1 {
-    margin: 0;
-    line-height: 1.1;
-    font-size: clamp(2.1rem, 4.6vw, 4rem);
-    text-shadow: 0 3px 16px rgba(0, 0, 0, 0.45);
-  }
-
-  span {
-    color: var(--ubax-accent);
-  }
-
-  p {
-    margin: 1.3rem 0 0;
-    font-size: clamp(1rem, 1.4vw, 1.35rem);
-    line-height: 1.65;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.users-pill {
-  margin-top: 1.7rem;
-  width: fit-content;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  border-radius: 999px;
-  background: rgba(20, 34, 49, 0.78);
-  backdrop-filter: blur(5px);
-  padding: 0.55rem 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  img {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-  }
-
-  span {
-    color: #fff;
-    font-size: 0.8rem;
-  }
-}
-
-.hero-cta {
-  margin-top: 10rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  border-radius: 54px;
-  padding: 0.5rem 0.6rem 0.5rem 1.6rem;
-  border: 1px solid rgba(80, 75, 73, 0.85);
-  background: rgba(20, 34, 49, 0.72);
-  backdrop-filter: blur(4px);
-  color: #fff;
-  text-decoration: none;
-
-  strong {
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: var(--ubax-accent);
-  }
-}
-
-.platform-intro,
-.steps-row,
-.key-features,
-.location-section,
-.hotel-section,
-.dashboard-section,
-.payments-section {
-  width: min(1700px, calc(100% - 2rem));
-  margin: 2rem auto 0;
-}
-
-.platform-intro {
-  background: #eef3f7;
-  border-radius: 20px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  overflow: hidden;
-  min-height: 620px;
-}
-
-.intro-copy {
-  padding: 3rem;
-
-  h2 {
-    margin: 0;
-    color: var(--ubax-brand);
-    font-size: clamp(2rem, 3.2vw, 3.3rem);
-    max-width: 17ch;
-  }
-
-  p {
-    color: #4b5563;
-    max-width: 52ch;
-    line-height: 1.8;
-    margin-top: 1.4rem;
-  }
-}
-
-.store-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  margin-top: 1.4rem;
-}
-
-.store-pill {
-  border-radius: 10px;
-  padding: 0.6rem 0.8rem;
-  background: #fff;
-  border: 1px solid rgba(26, 48, 71, 0.13);
-  font-size: 0.82rem;
-}
-
-.intro-image {
+.hp-hero {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  align-self: stretch;
-}
-
-.steps-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
-  gap: 1rem;
+  grid-template-columns: 42% 58%;
+  min-height: 745px;
+  background-color: rgba(236, 242, 247, 0.98);
+  background-image:
+    linear-gradient(rgba(236, 242, 247, 0.93), rgba(236, 242, 247, 0.93)),
+    url('/assets/portal-assets/home-page/images/hero-pattern.png');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  border-radius: 0 0 24px 24px;
 
-  h3 {
-    margin: 0 0 0.6rem;
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 6rem) clamp(2rem, 4vw, 3rem)
+      clamp(2rem, 5vw, 6rem) clamp(2.5rem, 5vw, 4rem);
   }
 
-  p {
+  &__title {
+    margin: 0;
+    font-size: clamp(2rem, 4.5vw, 4rem); // 4rem ≈ 64px
+    font-weight: 700;
+    color: #1a3047;
+    line-height: 1.204; // 77.04px / 64px
+    letter-spacing: -1.8px;
+  }
+
+  &__eco {
+    color: var(--ubax-brand);
+  }
+
+  &__immo {
+    color: #f8961e;
+    font-weight: 700;
+  }
+
+  &__tagline {
+    margin: 1.6rem 0 0;
+    color: #151515;
+    font-size: clamp(1rem, 1.7vw, 1.5rem); // 1.5rem ≈ 24px
+    font-weight: 300;
+    line-height: 1.333; // 32px / 24px
+    max-width: 50ch;
+  }
+
+  &__stores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.4rem;
+  }
+
+  &__media {
+    position: relative;
+    overflow: hidden;
+    align-self: stretch;
+  }
+
+  &__img {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+  }
+}
+
+.hp-store-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1rem 0.55rem 0.7rem;
+  background: rgba(6, 6, 6, 0.05);
+  border: 1px solid #dbdbdb;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--ubax-brand);
+  min-width: 170px;
+  transition: background 0.18s;
+
+  &:hover {
+    background: rgba(6, 6, 6, 0.09);
+  }
+
+  &__icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  &__label {
+    font-size: 0.7rem;
+    color: #6b7280;
+    line-height: 1.2;
+  }
+
+  &__name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ubax-brand);
+    line-height: 1.2;
+  }
+}
+
+// ─── 2. ÉTAPES ───────────────────────────────────────────────────────────────
+
+.hp-steps {
+  width: 100%;
+  background: var(--ubax-brand);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 5vw, 4rem);
+}
+
+.hp-step {
+  background: #253d56;
+  border-radius: 30px;
+  padding: 2.2rem 2rem;
+  display: grid;
+  grid-template-columns: 55px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 1.1rem;
+  row-gap: 1.2rem;
+  align-items: start;
+
+  &__icon {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    width: 55px;
+    height: 49px;
+    background: #f8961e;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  &__title {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    margin: 0;
+    color: #fff;
+    font-size: clamp(1rem, 1.3vw, 1.15rem);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  &__text {
+    grid-column: 1 / -1;
+    grid-row: 2;
     margin: 0;
     color: rgba(255, 255, 255, 0.85);
-  }
-}
-
-.key-features {
-  background: #f8f9fb;
-  border-radius: 20px;
-  padding: 2.4rem;
-
-  header {
-    text-align: center;
-    margin-bottom: 2rem;
-
-    h2 {
-      margin: 0;
-      color: var(--ubax-brand);
-      font-size: clamp(1.9rem, 3vw, 3rem);
-    }
-
-    p {
-      margin-top: 0.5rem;
-      color: #4b5563;
-    }
-  }
-}
-
-.feature-layout {
-  display: grid;
-  grid-template-columns: 1fr 0.9fr 1fr;
-  gap: 1rem;
-  align-items: center;
-}
-
-.feature-col {
-  display: grid;
-  gap: 0.8rem;
-
-  article {
-    background: #fff;
-    border: 1px solid rgba(26, 48, 71, 0.12);
-    border-radius: 14px;
-    padding: 1rem;
-  }
-
-  b {
-    color: var(--ubax-accent);
-    margin-right: 0.3rem;
-  }
-}
-
-.feature-phone {
-  text-align: center;
-
-  img {
-    max-width: 100%;
-    width: 360px;
-  }
-}
-
-.location-section {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 1.2rem;
-  background: #eef3f8;
-  border-radius: 20px;
-  padding: 1.1rem;
-}
-
-.location-image {
-  width: 100%;
-  height: 100%;
-  border-radius: 14px;
-  object-fit: cover;
-}
-
-.location-copy {
-  align-self: center;
-  padding: 1rem 1.4rem;
-
-  h2 {
-    margin-top: 0;
-    color: var(--ubax-brand);
-  }
-
-  ul {
-    padding-left: 1.2rem;
-    color: #3b4754;
-    line-height: 1.8;
-  }
-}
-
-.hotel-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  align-items: center;
-  background: #f8f9fb;
-  border-radius: 20px;
-  padding: 2rem;
-}
-
-.hotel-copy {
-  h2 {
-    color: var(--ubax-brand);
-    margin-top: 0;
-  }
-
-  p {
-    color: #4b5563;
+    font-size: clamp(0.9rem, 1.1vw, 1.05rem);
     line-height: 1.75;
   }
 }
 
-.hotel-widget {
-  width: min(360px, 100%);
-  margin-top: 1rem;
-}
+// ─── 3. FONCTIONNALITÉS CLÉS ─────────────────────────────────────────────────
 
-.hotel-phone {
-  width: min(650px, 100%);
-  justify-self: end;
-}
+.hp-features {
+  width: 100%;
+  background: #fff;
+  padding: clamp(2.5rem, 4vw, 4.5rem) clamp(2rem, 5vw, 4.5rem);
 
-.dashboard-section {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 1.4rem;
-  align-items: center;
-  background: #eef3f8;
-  border-radius: 20px;
-  padding: 1.4rem;
+  &__header {
+    text-align: center;
+    margin-bottom: 3rem;
 
-  h2 {
-    color: var(--ubax-brand);
-    margin-top: 0;
-  }
+    h2 {
+      margin: 0;
+      color: #1a3047;
+      font-size: clamp(1.8rem, 3.2vw, 3rem); // 3rem = 48px
+      font-weight: 700;
+      line-height: 1.605; // 77.04px / 48px
+      letter-spacing: -1.8px;
+    }
 
-  p {
-    color: #4b5563;
-  }
-}
-
-.dashboard-media {
-  width: min(640px, 100%);
-}
-
-.dashboard-widget {
-  width: min(420px, 100%);
-  margin-top: 0.8rem;
-}
-
-.payments-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.4rem;
-  align-items: center;
-  background: #f8f9fb;
-  border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-
-  h2 {
-    color: var(--ubax-brand);
-    margin-top: 0;
-  }
-
-  p {
-    color: #4b5563;
-    line-height: 1.8;
-  }
-}
-
-.payments-visual {
-  position: relative;
-  display: grid;
-  place-items: center;
-}
-
-.payments-main {
-  width: min(520px, 100%);
-}
-
-.floating-logos {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  img {
-    position: absolute;
-    width: 54px;
-    height: 54px;
-    object-fit: contain;
-    background: #fff;
-    border-radius: 50%;
-    padding: 0.45rem;
-    border: 1px solid rgba(26, 48, 71, 0.1);
-  }
-
-  img:nth-child(1) {
-    top: 2%;
-    left: 45%;
-  }
-  img:nth-child(2) {
-    top: 14%;
-    right: 7%;
-  }
-  img:nth-child(3) {
-    top: 45%;
-    right: 0;
-  }
-  img:nth-child(4) {
-    bottom: 8%;
-    right: 18%;
-  }
-  img:nth-child(5) {
-    bottom: 9%;
-    left: 17%;
-  }
-  img:nth-child(6) {
-    top: 47%;
-    left: 5%;
-  }
-}
-
-@media (max-width: 1200px) {
-  .hero-cta {
-    margin-top: 2.2rem;
-  }
-
-  .platform-intro {
-    grid-template-columns: 1fr;
-    min-height: auto;
-
-    .intro-image {
-      max-height: 380px;
+    p {
+      margin: 0.7rem 0 0;
+      color: #343434;
+      font-size: clamp(1rem, 1.7vw, 1.5rem); // 1.5rem = 24px
+      font-weight: 400;
+      line-height: 3.21; // 77.04px / 24px
+      letter-spacing: -1.8px;
     }
   }
 
-  .location-section,
-  .hotel-section,
-  .dashboard-section,
-  .payments-section,
-  .feature-layout {
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  &__phone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.hp-phone-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Phone in Figma: 392×673px (portrait) — ring ellipse: 616×593px
+  width: clamp(300px, 28vw, 460px);
+  height: clamp(480px, 44vw, 700px);
+
+  &::before {
+    // Orange filled circle (Ellipse 85 in Figma)
+    content: '';
+    position: absolute;
+    width: clamp(250px, 25vw, 400px);
+    height: clamp(250px, 25vw, 400px);
+    border-radius: 50%;
+    background: #f8961e;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  &::after {
+    // Border ring (Ellipse 86 in Figma)
+    content: '';
+    position: absolute;
+    width: clamp(278px, 28vw, 446px);
+    height: clamp(278px, 28vw, 446px);
+    border-radius: 50%;
+    border: 1.5px solid #f8961e;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  img {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+  }
+}
+
+.hp-feat-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.hp-feat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__num {
+    flex-shrink: 0;
+    width: 55px;
+    height: 49px;
+    background: #f8961e;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a3047;
+  }
+
+  &__body {
+    h3 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+      font-weight: 600;
+      color: #1a3047;
+    }
+
+    p {
+      margin: 0;
+      font-size: clamp(0.85rem, 1vw, 1rem);
+      color: #4d4d4d;
+      line-height: 1.65;
+    }
+  }
+}
+
+// ─── 4. VOTRE LOCATION ───────────────────────────────────────────────────────
+
+.hp-location {
+  width: 100%;
+  background: #ecf2f7;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(2rem, 5vw, 4.5rem);
+  gap: clamp(2rem, 4vw, 3.5rem);
+
+  &__media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      max-width: 642px;
+      height: auto;
+      aspect-ratio: 642 / 751;
+      object-fit: cover;
+      display: block;
+      border-radius: 16px;
+    }
+  }
+
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0;
+
+    h2 {
+      margin: 0 0 2rem;
+      color: #1a3047;
+      font-size: clamp(2rem, 3.2vw, 3rem);
+      font-weight: 700;
+      line-height: 1.605;
+      letter-spacing: -1.8px;
+    }
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    li {
+      display: flex;
+      gap: 1.2rem;
+      align-items: flex-start;
+
+      .hp-check-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        margin-top: 0.15rem;
+      }
+
+      div {
+        strong {
+          display: block;
+          color: #000;
+          font-size: clamp(1rem, 1.6vw, 1.5rem);
+          font-weight: 400;
+          line-height: 1.333;
+          margin-bottom: 0.4rem;
+        }
+
+        p {
+          margin: 0;
+          color: #000;
+          font-family: 'Modernica', sans-serif;
+          font-size: clamp(0.9rem, 1.3vw, 1.25rem);
+          font-weight: 400;
+          line-height: 1.1;
+        }
+      }
+    }
+  }
+}
+
+.hp-btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2.5rem;
+  width: 260px;
+  height: 56px;
+  background: #1a3047;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.18s;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
+// ─── 5. HÔTELS, VILLAS & RÉSIDENCES ─────────────────────────────────────────
+
+.hp-hotels {
+  width: 100%;
+  background: #fff;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: clamp(3rem, 5vw, 5rem) clamp(2rem, 5vw, 4.5rem);
+
+  &__title {
+    margin: 0 0 1.2rem;
+    color: var(--ubax-brand);
+    font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  &__desc {
+    margin: 0 0 2.4rem;
+    color: #4b5563;
+    font-size: clamp(0.9rem, 1.2vw, 1rem);
+    line-height: 1.82;
+    max-width: 56ch;
+  }
+
+  &__visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+  }
+
+  &__composite {
+    width: min(700px, 100%);
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+}
+
+.hp-hotel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hp-hotel-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #ecf2f7;
+  border-radius: 25px;
+  padding: 0.9rem 1.2rem;
+
+  p {
+    margin: 0;
+    color: #4b5563;
+    font-size: clamp(0.85rem, 1vw, 0.95rem);
+    line-height: 1.68;
+    flex: 1;
+  }
+}
+
+.hp-hotel-icon {
+  flex-shrink: 0;
+  width: 71px;
+  height: 74px;
+  background: #f8961e;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+}
+
+// ─── 6. TABLEAUX DE BORD ─────────────────────────────────────────────────────
+
+.hp-dashboard {
+  width: 100%;
+  background: #ecf2f7;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: clamp(3rem, 5vw, 5rem) clamp(2rem, 5vw, 4.5rem);
+
+  &__phones {
+    position: relative;
+    height: clamp(420px, 46vw, 700px);
+    overflow: visible;
+  }
+
+  &__copy {
+    h2 {
+      margin: 0 0 2rem;
+      color: var(--ubax-brand);
+      font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+  }
+}
+
+// Phones: Phone1 left-back, Phone2 right-front (Figma: p1 x=64,h=689 / p2 x=401,h=705 in ~760px container)
+.hp-dash-phone {
+  position: absolute;
+  object-fit: contain;
+  width: auto;
+  transform-origin: center;
+
+  &--left {
+    left: 4%;
+    top: 10%;
+    height: 78%;
+    z-index: 1;
+    filter: blur(1.4px);
+    opacity: 0.95;
+  }
+
+  &--right {
+    left: 33%;
+    top: 7%;
+    height: 80%;
+    z-index: 2;
+    filter: blur(1px);
+    opacity: 0.96;
+  }
+}
+
+// stat: top-right floating card (Figma x=617, y=4349 → top of phones)
+.hp-dash-stat {
+  position: absolute;
+  right: 8%;
+  top: 2%;
+  width: 36%;
+  z-index: 4;
+  border-radius: 16px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.15);
+  height: auto;
+  object-fit: contain;
+}
+
+// widget-card: lower-left floating card (Figma x=46, y=4507)
+.hp-dash-widget {
+  position: absolute;
+  left: 2%;
+  bottom: 4%;
+  width: 56%;
+  z-index: 3;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  height: auto;
+  object-fit: contain;
+}
+
+// widget-cercle: bottom-right donut (Figma x=564, y=4971)
+.hp-dash-cercle {
+  position: absolute;
+  right: 11%;
+  bottom: 19%;
+  width: 30%;
+  z-index: 5;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+  height: auto;
+  object-fit: contain;
+}
+
+.hp-dash-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.8rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .hp-check-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    margin-top: 0.1rem;
+  }
+
+  div {
+    strong {
+      display: block;
+      color: var(--ubax-brand);
+      font-size: clamp(1rem, 1.3vw, 1.1rem);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    p {
+      margin: 0;
+      color: #4b5563;
+      font-size: clamp(0.85rem, 1vw, 0.95rem);
+      line-height: 1.72;
+    }
+  }
+}
+
+// ─── 7. PAIEMENTS ────────────────────────────────────────────────────────────
+
+.hp-payments {
+  width: 100%;
+  background: #fff;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: clamp(3rem, 5vw, 6rem) clamp(2rem, 5vw, 4.5rem);
+  margin-bottom: 2rem;
+
+  &__copy {
+    h2 {
+      margin: 0 0 1.4rem;
+      color: var(--ubax-brand);
+      font-size: clamp(1.8rem, 2.8vw, 2.9rem);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0;
+      color: #4b5563;
+      font-size: clamp(0.9rem, 1.2vw, 1rem);
+      line-height: 1.82;
+      max-width: 52ch;
+    }
+  }
+
+  &__visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+// ── Payments orbit ───────────────────────────────────────────────────────────
+// From Figma: section x=-1,y=5171,w=1747,h=966
+// Ellipse 193 (orbit ring): x=763,y=5276,w=780,h=749  → centered at x=1153,y=5650
+// Central image (Ellipse 182): x=905,y=5391,w=461,h=469
+// All logo positions derived relative to orbit ring bounds
+
+.hp-pay-orbit {
+  position: relative;
+  width: min(580px, 100%);
+  aspect-ratio: 780 / 749;
+
+  // Orange orbit ring (Figma Ellipse 193 — thin orange stroke)
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid #f8961e;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+.hp-pay-center {
+  // Figma: center image x=905,y=5391,w=461,h=469 relative to orbit ring x=763,y=5276,w=780,h=749
+  // left% = (905-763)/780 = 18.2%, top% = (5391-5276)/749 = 15.4%
+  // width% = 461/780 = 59.1%, height% = 469/749 = 62.6%
+  position: absolute;
+  left: 18.2%;
+  top: 15.4%;
+  width: 59.1%;
+  height: 62.6%;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 1;
+  background: #dce8f3;
+}
+
+.hp-pay-person {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hp-pay-logo {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 2;
+
+  img {
+    width: 64%;
+    height: 64%;
+    object-fit: contain;
+  }
+
+  // Figma positions, all relative to orbit ring (763,5276,780×749)
+  // Formula: left% = (logo_cx - 763 - logo_w/2) / 780, top% = (logo_cy - 5276 - logo_h/2) / 749
+
+  // Wave: Ellipse184 x=792,y=5310,w=161,h=161 → cx=872,cy=5390
+  &--wave {
+    width: 21%;
+    aspect-ratio: 1;
+    left: 3.5%;
+    top: 4.5%;
+  }
+
+  // Stripe: Ellipse191 x=1120,y=5247,w=85,h=85 → cx=1162,cy=5289
+  &--stripe {
+    width: 12%;
+    aspect-ratio: 1;
+    left: 45.8%;
+    top: -4.9%;
+  }
+
+  // Mastercard: Ellipse188 x=1351,y=5290,w=173,h=173 → cx=1437,cy=5376
+  &--mastercard {
+    width: 22%;
+    aspect-ratio: 1;
+    right: 1%;
+    top: 5.5%;
+  }
+
+  // PayPal: Ellipse186 x=891,y=5626,w=85,h=85 → cx=933,cy=5668
+  &--paypal {
+    width: 12%;
+    aspect-ratio: 1;
+    left: 15.7%;
+    top: 51.4%;
+  }
+
+  // MTN: Ellipse190 x=1484,y=5632,w=117,h=117 → cx=1542,cy=5690
+  &--mtn {
+    width: 16%;
+    aspect-ratio: 1;
+    right: 0;
+    top: 53.6%;
+  }
+
+  // PayDunya: Ellipse185 x=741,y=5739,w=117,h=117 → cx=799,cy=5797
+  &--paydunya {
+    width: 16%;
+    aspect-ratio: 1;
+    left: 1.8%;
+    bottom: 8.8%;
+  }
+
+  // Orange: Ellipse189 x=1307,y=5834,w=117,h=117 → cx=1365,cy=5892
+  &--orange {
+    width: 16%;
+    aspect-ratio: 1;
+    right: 9.5%;
+    bottom: 3%;
+  }
+
+  // Visa: Ellipse192 x=948,y=5931,w=99,h=99 → cx=997,cy=5980
+  &--visa {
+    width: 14%;
+    aspect-ratio: 1;
+    left: 30.3%;
+    bottom: 0.7%;
+  }
+}
+
+// ─── RESPONSIVE ──────────────────────────────────────────────────────────────
+
+@media (max-width: 1100px) {
+  .hp-hero {
+    grid-template-columns: 52% 48%;
+    min-height: 560px;
+  }
+
+  .hp-steps {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .hp-features__grid {
+    grid-template-columns: 1fr;
+
+    .hp-features__phone {
+      order: -1;
+    }
+  }
+
+  .hp-location,
+  .hp-hotels,
+  .hp-dashboard,
+  .hp-payments {
     grid-template-columns: 1fr;
   }
 
-  .intro-copy,
-  .location-copy {
-    padding: 1rem;
+  .hp-location__media {
+    img {
+      max-width: 100%;
+    }
   }
 
-  .hotel-phone,
-  .dashboard-media,
-  .payments-main {
+  .hp-hotels__composite {
+    width: min(620px, 100%);
+  }
+
+  .hp-hotels__visual,
+  .hp-dashboard__phones,
+  .hp-payments__visual {
     justify-self: center;
   }
 }
 
-@media (max-width: 900px) {
-  .splash-hero {
-    min-height: 70vh;
-  }
+@media (max-width: 700px) {
+  .hp-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
 
-  .hero-copy {
-    margin-top: 2rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .platform-intro,
-  .steps-row,
-  .key-features,
-  .location-section,
-  .hotel-section,
-  .dashboard-section,
-  .payments-section {
-    width: calc(100% - 1rem);
-    margin-top: 1rem;
-  }
-
-  .platform-intro,
-  .key-features,
-  .hotel-section,
-  .payments-section {
-    padding: 1rem;
-  }
-
-  .hero-copy {
-    padding: 1rem;
-  }
-
-  .key-features header h2 {
-    font-size: clamp(1.5rem, 6vw, 2rem);
-  }
-
-  .intro-copy {
-    h2 {
-      font-size: clamp(1.4rem, 7vw, 2.4rem);
+    &__media {
+      height: 280px;
+      position: relative;
     }
+
+    &__img {
+      position: absolute;
+    }
+  }
+
+  .hp-feat-col {
+    gap: 1rem;
+  }
+
+  .hp-hotel-rows {
+    gap: 0.7rem;
+  }
+
+  .hp-hotels,
+  .hp-dashboard,
+  .hp-payments {
+    padding: 2.5rem 1.2rem;
   }
 }
