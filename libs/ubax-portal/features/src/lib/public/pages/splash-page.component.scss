@@ -191,6 +191,7 @@
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(5px);
   opacity: 0;
+  will-change: transform, filter;
   animation:
     orbit-enter 1.2s var(--ease-enter) 0.28s forwards,
     orbit-breathe 6.8s ease-in-out 1.5s infinite;
@@ -214,6 +215,7 @@
   width: 193px;
   height: 194px;
   opacity: 0;
+  will-change: transform;
   animation:
     orbit-enter 1.2s var(--ease-enter) 0.36s forwards,
     orbit-float-soft 5.6s ease-in-out 1.8s infinite;
@@ -271,6 +273,7 @@
   opacity: 0;
   --orbit-r: 312px;
   z-index: 3;
+  will-change: transform, filter;
 }
 
 /* Each photo orbits continuously — sizes preserved, evenly distributed 60° apart */
@@ -336,6 +339,7 @@
   opacity: 0;
   --orbit-r: 312px;
   z-index: 2;
+  will-change: transform, filter;
 }
 
 /* Dots orbit CW at a slightly faster speed, 90° apart */
