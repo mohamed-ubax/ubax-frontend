@@ -5,6 +5,7 @@ import {
   ElementRef,
   ViewChild,
   inject,
+  DOCUMENT,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
@@ -24,11 +25,21 @@ export class HomePageComponent {
   private readonly elRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly lenis = inject(LenisService);
+  private readonly document = inject(DOCUMENT);
   private gsapCtx: gsap.Context | undefined;
+  private heroPreloadLink: HTMLLinkElement | undefined;
 
   @ViewChild('bttBtn') private readonly bttRef!: ElementRef<HTMLButtonElement>;
 
   constructor() {
+    const link = this.document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = 'assets/portal-assets/home-page/images/homme-avec-cl.webp';
+    (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
+    this.document.head.appendChild(link);
+    this.heroPreloadLink = link;
+
     afterNextRender(() => {
       gsap.registerPlugin(ScrollTrigger);
       this.gsapCtx = gsap.context(
@@ -39,6 +50,7 @@ export class HomePageComponent {
 
     this.destroyRef.onDestroy(() => {
       this.gsapCtx?.revert();
+      this.heroPreloadLink?.remove();
     });
   }
 
