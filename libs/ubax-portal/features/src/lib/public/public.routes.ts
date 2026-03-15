@@ -10,11 +10,13 @@ export const publicRoutes: Routes = [
   },
   {
     path: 'accueil',
+    data: { preload: true },
     loadComponent: () =>
       import('./pages/home-page.component').then((m) => m.HomePageComponent),
   },
   {
     path: 'connexion',
+    data: { preload: true },
     loadComponent: () =>
       import('./pages/login-page.component').then((m) => m.LoginPageComponent),
   },
