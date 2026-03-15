@@ -24,37 +24,37 @@ export class TestimonialsPageComponent {
     {
       name: 'Jean-Marc Bédi',
       role: 'Locataire',
-      image: '/assets/portal-assets/rectangle-25189.png',
+      image: '/assets/portal-assets/rectangle-25189.webp',
       duration: '10 : 42',
     },
     {
       name: 'Ibrahim Diabaté',
       role: 'Locataire',
-      image: '/assets/portal-assets/11.png',
+      image: '/assets/portal-assets/11.webp',
       duration: '05 : 47',
     },
     {
       name: 'Nadia Coulibaly',
       role: 'Locataire',
-      image: '/assets/portal-assets/12.png',
+      image: '/assets/portal-assets/12.webp',
       duration: '10 : 42',
     },
     {
       name: 'Serge Koffi',
       role: 'Bailleur',
-      image: '/assets/portal-assets/13.png',
+      image: '/assets/portal-assets/13.webp',
       duration: '10 : 42',
     },
     {
       name: 'Fatou Koné',
       role: 'Locataire',
-      image: '/assets/portal-assets/14.png',
+      image: '/assets/portal-assets/14.webp',
       duration: '05 : 47',
     },
     {
       name: 'Nadia Coulibaly',
       role: 'Locataire',
-      image: '/assets/portal-assets/15.png',
+      image: '/assets/portal-assets/15.webp',
       duration: '10 : 42',
     },
   ];
