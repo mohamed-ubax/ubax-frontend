@@ -1,7 +1,4 @@
-import {
-  ApplicationConfig,
-  provideBrowserGlobalErrorListeners,
-} from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import {
   provideRouter,
   withPreloading,
@@ -49,7 +46,6 @@ const UbaxPreset = definePreset(Aura, {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes, withViewTransitions(), withPreloading(SelectivePreloadStrategy)),
     providePrimeNG({
       theme: {

@@ -5,9 +5,11 @@ import {
   OnInit,
   OnDestroy,
   ElementRef,
+  PLATFORM_ID,
   inject,
   afterNextRender,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
 
@@ -19,6 +21,7 @@ import { gsap } from 'gsap';
 })
 export class SplashPageComponent implements OnInit, OnDestroy {
   private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly designWidth = 1731;
   private readonly designHeight = 1095;
 
@@ -39,7 +42,9 @@ export class SplashPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.updateResponsiveVars();
+    if (isPlatformBrowser(this.platformId)) {
+      this.updateResponsiveVars();
+    }
   }
 
   ngOnDestroy(): void {
@@ -53,7 +58,9 @@ export class SplashPageComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    this.updateResponsiveVars();
+    if (isPlatformBrowser(this.platformId)) {
+      this.updateResponsiveVars();
+    }
   }
 
   private _initParallax(): void {

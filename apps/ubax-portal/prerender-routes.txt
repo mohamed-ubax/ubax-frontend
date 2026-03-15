@@ -1,0 +1,7 @@
+/
+/accueil
+/faq
+/contact
+/tarifs
+/temoignages
+/mentions-legales
