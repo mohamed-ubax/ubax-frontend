@@ -3,11 +3,11 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
-  PreloadAllModules,
   provideRouter,
   withPreloading,
   withViewTransitions,
 } from '@angular/router';
+import { SelectivePreloadStrategy } from './selective-preload.strategy';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeuix/styled';
 import Aura from '@primeuix/themes/aura';
@@ -50,7 +50,7 @@ const UbaxPreset = definePreset(Aura, {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(appRoutes, withViewTransitions(), withPreloading(PreloadAllModules)),
+    provideRouter(appRoutes, withViewTransitions(), withPreloading(SelectivePreloadStrategy)),
     providePrimeNG({
       theme: {
         preset: UbaxPreset,
