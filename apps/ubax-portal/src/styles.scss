@@ -31,6 +31,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--ubax-text-primary);
   background: var(--ubax-page-bg);
+  overflow-x: clip;
 }
 
 .country-picker-overlay {

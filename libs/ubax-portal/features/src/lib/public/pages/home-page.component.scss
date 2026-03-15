@@ -11,8 +11,8 @@
   bottom: 2.25rem;
   right: 2.25rem;
   z-index: 1000;
-  width: 52px;
-  height: 52px;
+  width: 3.25rem;
+  height: 3.25rem;
   border-radius: 50%;
   background: #f8961e;
   color: #fff;
@@ -59,7 +59,7 @@
   width: 100%;
   display: grid;
   grid-template-columns: 42% 58%;
-  min-height: 745px;
+  min-height: clamp(420px, 52vw, 745px);
   background-color: rgba(236, 242, 247, 0.98);
   background-image:
     linear-gradient(rgba(236, 242, 247, 0.93), rgba(236, 242, 247, 0.93)),
@@ -81,7 +81,7 @@
     margin: 0;
     font-family: Lexend, sans-serif;
     font-weight: 700;
-    line-height: 3.815rem; // 77.04px — Figma spec
+    line-height: clamp(2.2rem, 4.4vw, 3.815rem);
     letter-spacing: -0.1125rem;
   }
 
@@ -212,7 +212,7 @@
   border-radius: 30px;
   padding: 2.2rem 2rem;
   display: grid;
-  grid-template-columns: 55px 1fr;
+  grid-template-columns: 3.4375rem 1fr;
   grid-template-rows: auto auto;
   column-gap: 1.1rem;
   row-gap: 1.2rem;
@@ -222,8 +222,8 @@
     grid-column: 1;
     grid-row: 1;
     align-self: center;
-    width: 55px;
-    height: 49px;
+    width: 3.4375rem;
+    height: 3.0625rem;
     background: #f8961e;
     border-radius: 10px;
     display: flex;
@@ -232,8 +232,8 @@
     flex-shrink: 0;
 
     img {
-      width: 26px;
-      height: 26px;
+      width: 1.625rem;
+      height: 1.625rem;
       object-fit: contain;
       filter: brightness(0) invert(1);
     }
@@ -312,7 +312,7 @@
   // Container = outer ring size (616px in Figma at 1728px = 35.6vw)
   // Circles sized as % of container → zero overflow into text columns
   width: clamp(300px, 35.6vw, 616px);
-  height: clamp(480px, 44vw, 700px);
+  height: clamp(320px, 44vw, 700px);
 
   &::before {
     // Orange filled circle: Ellipse 85 = 558/616 = 90.6% of outer ring
@@ -406,8 +406,8 @@
 
   &__num {
     flex-shrink: 0;
-    width: 55px;
-    height: 49px;
+    width: 3.4375rem;
+    height: 3.0625rem;
     background: rgba(255, 225, 188, 1);
     border-radius: 10px;
     display: flex;
@@ -422,7 +422,7 @@
     // Figma spec: 25.25rem × 7.875rem flex column, vertically centred
     display: flex;
     max-width: 25.25rem;
-    min-height: 7.875rem;
+    min-height: 0;
     flex-direction: column;
     justify-content: center;
 
@@ -477,7 +477,7 @@
     padding: 0;
 
     h2 {
-      margin: 0 0 4rem;
+      margin: 0 0 clamp(1.5rem, 4vw, 4rem);
       color: #1a3047;
       font-size: clamp(2rem, 3.2vw, 3rem);
       font-weight: 700;
@@ -534,8 +534,8 @@
   align-items: center;
   justify-content: center;
   margin-top: 3.5rem;
-  width: 260px;
-  height: 66px;
+  width: min(16.25rem, 100%);
+  height: 4.125rem;
   background: #1a3047;
   color: #fff;
   border: none;
@@ -619,8 +619,8 @@
 
 .hp-hotel-icon {
   flex-shrink: 0;
-  width: 71px;
-  height: 74px;
+  width: 4.4375rem;
+  height: 4.625rem;
   background: #f8961e;
   border-radius: 20px;
   display: flex;
@@ -628,8 +628,8 @@
   justify-content: center;
 
   img {
-    width: 44px;
-    height: 44px;
+    width: 2.75rem;
+    height: 2.75rem;
     object-fit: contain;
   }
 }
@@ -647,11 +647,7 @@
 
   &__phones {
     position: relative;
-    height: clamp(
-      520px,
-      52vw,
-      760px
-    ); // accommodate ~705px phones at full height
+    height: clamp(280px, 52vw, 760px);
     overflow: visible;
   }
 
@@ -984,6 +980,108 @@
 
 // ─── RESPONSIVE ──────────────────────────────────────────────────────────────
 
+// ── Orbit radius scaling — prevents logos overflowing 40% grid column ────────
+
+@media (max-width: 1650px) {
+  .hp-pay-orbit {
+    --hp-outer-r: 280px;
+    --hp-inner-r: 150px;
+  }
+
+  .hp-pay-logo {
+    &--wave {
+      width: 100px;
+      height: 100px;
+      margin: -50px 0 0 -50px;
+    }
+    &--mastercard {
+      width: 86px;
+      height: 86px;
+      margin: -43px 0 0 -43px;
+    }
+    &--mtn {
+      width: 68px;
+      height: 68px;
+      margin: -34px 0 0 -34px;
+    }
+    &--paydunya {
+      width: 78px;
+      height: 78px;
+      margin: -39px 0 0 -39px;
+    }
+    &--orange {
+      width: 68px;
+      height: 68px;
+      margin: -34px 0 0 -34px;
+    }
+    &--visa {
+      width: 90px;
+      height: 90px;
+      margin: -45px 0 0 -45px;
+    }
+    &--stripe {
+      width: 60px;
+      height: 60px;
+      margin: -30px 0 0 -30px;
+    }
+    &--paypal {
+      width: 78px;
+      height: 78px;
+      margin: -39px 0 0 -39px;
+    }
+  }
+}
+
+@media (max-width: 1400px) {
+  .hp-pay-orbit {
+    --hp-outer-r: 215px;
+    --hp-inner-r: 115px;
+  }
+
+  .hp-pay-logo {
+    &--wave {
+      width: 78px;
+      height: 78px;
+      margin: -39px 0 0 -39px;
+    }
+    &--mastercard {
+      width: 66px;
+      height: 66px;
+      margin: -33px 0 0 -33px;
+    }
+    &--mtn {
+      width: 52px;
+      height: 52px;
+      margin: -26px 0 0 -26px;
+    }
+    &--paydunya {
+      width: 60px;
+      height: 60px;
+      margin: -30px 0 0 -30px;
+    }
+    &--orange {
+      width: 52px;
+      height: 52px;
+      margin: -26px 0 0 -26px;
+    }
+    &--visa {
+      width: 68px;
+      height: 68px;
+      margin: -34px 0 0 -34px;
+    }
+    &--stripe {
+      width: 46px;
+      height: 46px;
+      margin: -23px 0 0 -23px;
+    }
+    &--paypal {
+      width: 60px;
+      height: 60px;
+      margin: -30px 0 0 -30px;
+    }
+  }
+}
+
 @media (max-width: 1100px) {
   .hp-hero {
     grid-template-columns: 52% 48%;
@@ -1025,6 +1123,54 @@
   .hp-dashboard__phones,
   .hp-payments__visual {
     justify-self: center;
+  }
+
+  .hp-pay-orbit {
+    --hp-outer-r: 310px;
+    --hp-inner-r: 165px;
+  }
+
+  .hp-pay-logo {
+    &--wave {
+      width: 112px;
+      height: 112px;
+      margin: -56px 0 0 -56px;
+    }
+    &--mastercard {
+      width: 96px;
+      height: 96px;
+      margin: -48px 0 0 -48px;
+    }
+    &--mtn {
+      width: 76px;
+      height: 76px;
+      margin: -38px 0 0 -38px;
+    }
+    &--paydunya {
+      width: 88px;
+      height: 88px;
+      margin: -44px 0 0 -44px;
+    }
+    &--orange {
+      width: 76px;
+      height: 76px;
+      margin: -38px 0 0 -38px;
+    }
+    &--visa {
+      width: 100px;
+      height: 100px;
+      margin: -50px 0 0 -50px;
+    }
+    &--stripe {
+      width: 66px;
+      height: 66px;
+      margin: -33px 0 0 -33px;
+    }
+    &--paypal {
+      width: 86px;
+      height: 86px;
+      margin: -43px 0 0 -43px;
+    }
   }
 }
 
