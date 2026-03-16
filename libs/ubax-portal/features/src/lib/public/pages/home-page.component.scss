@@ -889,10 +889,9 @@
     object-fit: contain;
   }
 
-  // ── Outer ring — CCW 32 s, 6 logos 60° apart ────────────────────────────────
+  // ── Outer ring — CCW 32 s, 5 logos 72° apart ────────────────────────────────
   &--wave,
   &--mastercard,
-  &--mtn,
   &--paydunya,
   &--orange,
   &--visa {
@@ -909,31 +908,25 @@
     width: 96px;
     height: 96px;
     margin: -48px 0 0 -48px;
-    animation: hp-orbit-ccw 32s linear -5.3s infinite;
-  }
-  &--mtn {
-    width: 76px;
-    height: 76px;
-    margin: -38px 0 0 -38px;
-    animation: hp-orbit-ccw 32s linear -10.6s infinite;
+    animation: hp-orbit-ccw 32s linear -6.4s infinite;
   }
   &--paydunya {
     width: 88px;
     height: 88px;
     margin: -44px 0 0 -44px;
-    animation: hp-orbit-ccw 32s linear -16s infinite;
+    animation: hp-orbit-ccw 32s linear -12.8s infinite;
   }
   &--orange {
     width: 76px;
     height: 76px;
     margin: -38px 0 0 -38px;
-    animation: hp-orbit-ccw 32s linear -21.3s infinite;
+    animation: hp-orbit-ccw 32s linear -19.2s infinite;
   }
   &--visa {
     width: 100px;
     height: 100px;
     margin: -50px 0 0 -50px;
-    animation: hp-orbit-ccw 32s linear -26.7s infinite;
+    animation: hp-orbit-ccw 32s linear -25.6s infinite;
   }
 
   // ── Inner ring — CW 18 s, 2 logos 180° apart ─────────────────────────────────
@@ -996,11 +989,6 @@
       height: 86px;
       margin: -43px 0 0 -43px;
     }
-    &--mtn {
-      width: 68px;
-      height: 68px;
-      margin: -34px 0 0 -34px;
-    }
     &--paydunya {
       width: 78px;
       height: 78px;
@@ -1045,11 +1033,6 @@
       width: 66px;
       height: 66px;
       margin: -33px 0 0 -33px;
-    }
-    &--mtn {
-      width: 52px;
-      height: 52px;
-      margin: -26px 0 0 -26px;
     }
     &--paydunya {
       width: 60px;
@@ -1138,11 +1121,6 @@
       height: 96px;
       margin: -48px 0 0 -48px;
     }
-    &--mtn {
-      width: 76px;
-      height: 76px;
-      margin: -38px 0 0 -38px;
-    }
     &--paydunya {
       width: 88px;
       height: 88px;
@@ -1226,7 +1204,6 @@
       height: 46px;
       margin: -23px 0 0 -23px;
     }
-    &--mtn,
     &--orange {
       width: 40px;
       height: 40px;
