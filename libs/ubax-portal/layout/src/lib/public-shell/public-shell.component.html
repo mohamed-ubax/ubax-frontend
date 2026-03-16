@@ -54,7 +54,7 @@
 
   <footer class="main-footer">
     <div class="footer-inner">
-      <!-- Main 4-column grid -->
+      <!-- Main 5-column grid -->
       <div class="footer-top">
         <!-- Brand column -->
         <div class="footer-col footer-brand">
@@ -73,7 +73,11 @@
             L'immobilier devient plus simple, plus rapide et plus sûr avec
             UBAX<br />
             Trouvez des biens, réservez en ligne et gérez vos locations depuis
-            une seule application.
+            une seule application.<br />
+            Pour découvrir l'univers Ubax ou obtenir une assistance
+            personnalisée, nos conseillers vous répondent instantanément via la
+            messagerie de votre application ou par email à l'adresse
+            support&#64;ubax.io
           </p>
           <div class="footer-rating" aria-label="Note : 4.8 sur 5">
             <span class="footer-rating__score">4.8</span>
@@ -88,33 +92,49 @@
           </div>
         </div>
 
-        <!-- Liens rapides -->
-        <nav class="footer-col" aria-label="Liens rapides">
-          <h3 class="footer-col__heading">Liens rapides</h3>
-          <a routerLink="/accueil">Accueil</a>
-          <a routerLink="/tarifs">Offres &amp; Tarifs</a>
-          <a routerLink="/temoignages">Témoignages</a>
-          <a routerLink="/faq">FAQ</a>
+        <!-- Entreprise -->
+        <nav class="footer-col" aria-label="Entreprise">
+          <h3 class="footer-col__heading">ENTREPRISE</h3>
+          <a routerLink="/a-propos">A Propos</a>
+          <a routerLink="/carrieres">Carrières</a>
           <a routerLink="/contact">Contacts</a>
+          <a routerLink="/politique-de-confidentialite"
+            >Politique de confidentialité</a
+          >
+          <a routerLink="/mentions-legales"
+            >Conditions générales d'utilisation</a
+          >
+        </nav>
+
+        <!-- Nos Services (informatif, pas de liens) -->
+        <nav class="footer-col" aria-label="Nos services">
+          <h3 class="footer-col__heading">NOS SERVICES</h3>
+          <span class="footer-service-item">Locations</span>
+          <span class="footer-service-item">Réservations</span>
+          <span class="footer-service-item">Ventes</span>
+          <span class="footer-service-item">Achats</span>
         </nav>
 
         <!-- Solutions -->
         <nav class="footer-col" aria-label="Solutions">
-          <h3 class="footer-col__heading">Solutions</h3>
-          <a href="#">Application mobile UBAX</a>
-          <a href="#">Plateforme agences immobilières</a>
-          <a href="#">Location longue durée</a>
-          <a href="#">Location courte durée</a>
-          <a href="#">Achat immobilier</a>
+          <h3 class="footer-col__heading">SOLUTIONS</h3>
+          <a routerLink="/fonctionnalites" fragment="application-mobile"
+            >Application Mobile</a
+          >
+          <a routerLink="/fonctionnalites" fragment="plateforme-agences"
+            >Plateforme d'agences</a
+          >
+          <a routerLink="/fonctionnalites" fragment="plateforme-hotels"
+            >Plateforme Hôtels</a
+          >
         </nav>
 
         <!-- Support -->
         <nav class="footer-col" aria-label="Support">
-          <h3 class="footer-col__heading">Support</h3>
+          <h3 class="footer-col__heading">SUPPORT</h3>
           <a routerLink="/contact">Centre d'aide</a>
-          <a routerLink="/faq">FAQ</a>
-          <a routerLink="/contact">Contacter le support</a>
-          <a routerLink="/mentions-legales">Conditions d'utilisation</a>
+          <a routerLink="/faq">FAQs</a>
+          <a routerLink="/contact">Contacts</a>
         </nav>
       </div>
       <!-- /footer-top -->
@@ -122,7 +142,7 @@
       <!-- Bottom row : réseaux sociaux (gauche) + boutons de téléchargement (droite) -->
       <div class="footer-bottom">
         <div class="footer-social">
-          <h3 class="footer-col__heading">Suivez nous</h3>
+          <h3 class="footer-folllow-us">Suivez nous</h3>
           <div class="footer-social__icons">
             <a href="#" class="footer-social__link" aria-label="Facebook">
               <img
