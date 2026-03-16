@@ -59,7 +59,7 @@
   color: #000;
   text-decoration: none;
   font-family: 'Lexend', sans-serif;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 400;
   line-height: 1.5rem;
   white-space: nowrap;
@@ -83,10 +83,23 @@
     transform: scaleX(1);
     transform-origin: left center;
   }
+
+  &.nav-active {
+    color: #f8961e;
+    font-weight: 500;
+
+    &::after {
+      display: none;
+    }
+  }
 }
 
 .main-header.is-scrolled .main-nav a {
   color: #000;
+
+  &.nav-active {
+    color: #f8961e;
+  }
 }
 
 .mobile-nav-panel {
@@ -257,6 +270,11 @@
 
       &:active {
         background: rgba(0, 0, 0, 0.03);
+      }
+
+      &.nav-active {
+        color: #f8961e;
+        font-weight: 500;
       }
     }
   }
