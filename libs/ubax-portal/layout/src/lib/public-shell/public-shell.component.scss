@@ -331,7 +331,7 @@
     color: #fff;
     font-family: 'Lexend', sans-serif;
     // link size ~18px at 1748px = 1.03vw
-    font-size: clamp(0.875rem, 1.03vw, 1rem);
+    font-size: clamp(0.875rem, 1.03vw, 1.1rem);
     font-weight: 300;
     // item row height ~44px at 1748px = 2.52vw
     line-height: clamp(2rem, 2.52vw, 2.75rem);
@@ -368,7 +368,7 @@
 .footer-service-item {
   color: #fff;
   font-family: 'Lexend', sans-serif;
-  font-size: clamp(0.875rem, 1.03vw, 1rem);
+  font-size: clamp(0.875rem, 1.03vw, 1.1rem);
   font-weight: 300;
   line-height: clamp(2rem, 2.52vw, 2.75rem);
   letter-spacing: 0.02em;
