@@ -303,7 +303,6 @@
 .footer-inner {
   position: relative;
   z-index: 1;
-  max-width: 1748px;
   margin-inline: auto;
   // top padding: 80px at 1748px = 4.58vw / side padding: 88px = 5.03vw
   padding: clamp(3rem, 4.58vw, 5rem) clamp(2rem, 5.03vw, 5.5rem) 0;
@@ -312,9 +311,9 @@
 // Main 5-column grid — brand / Entreprise / Nos Services / Solutions / Support
 .footer-top {
   display: grid;
-  // brand ~22% / 4 nav cols share the rest evenly
+  // brand ~33% / 4 nav cols share the rest evenly
   grid-template-columns:
-    minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr)
+    minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 0.9fr)
     minmax(0, 0.9fr) minmax(0, 0.9fr);
   // column gap from Figma: ~56px at 1748px ≈ 3.2vw
   column-gap: clamp(1.5rem, 3.2vw, 3.5rem);
@@ -402,7 +401,7 @@
   line-height: 1.6;
   color: #fff;
   margin: 0;
-  max-width: 28ch;
+  max-width: 100%;
 }
 
 .footer-rating {
