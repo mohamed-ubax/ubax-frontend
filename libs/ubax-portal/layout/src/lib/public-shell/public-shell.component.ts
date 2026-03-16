@@ -8,14 +8,14 @@ import {
   inject,
   OnDestroy,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LenisService } from '../lenis.service';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 @Component({
   selector: 'ubax-public-shell',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './public-shell.component.html',
   styleUrl: './public-shell.component.scss',
 })
@@ -99,10 +99,11 @@ export class PublicShellComponent implements OnDestroy {
   }
 
   protected readonly menuItems = [
-    { label: 'Accueil', path: '/accueil' },
-    { label: 'Témoignages', path: '/temoignages' },
-    { label: 'Tarifs', path: '/tarifs' },
-    { label: 'FAQs', path: '/faq' },
-    { label: 'Contacts', path: '/contact' },
+    { label: 'Accueil', path: '/accueil', exact: true },
+    { label: 'Fonctionnalités', path: '/fonctionnalites', exact: false },
+    { label: 'Tarifs', path: '/tarifs', exact: false },
+    { label: 'Témoignages', path: '/temoignages', exact: false },
+    { label: 'Formations', path: '/formations', exact: false },
+    { label: 'FAQs', path: '/faq', exact: false },
   ];
 }

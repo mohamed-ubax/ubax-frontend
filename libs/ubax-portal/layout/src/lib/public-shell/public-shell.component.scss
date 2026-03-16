@@ -59,7 +59,7 @@
   color: #000;
   text-decoration: none;
   font-family: 'Lexend', sans-serif;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 400;
   line-height: 1.5rem;
   white-space: nowrap;
@@ -83,10 +83,23 @@
     transform: scaleX(1);
     transform-origin: left center;
   }
+
+  &.nav-active {
+    color: #f8961e;
+    font-weight: 500;
+
+    &::after {
+      display: none;
+    }
+  }
 }
 
 .main-header.is-scrolled .main-nav a {
   color: #000;
+
+  &.nav-active {
+    color: #f8961e;
+  }
 }
 
 .mobile-nav-panel {
@@ -258,6 +271,11 @@
       &:active {
         background: rgba(0, 0, 0, 0.03);
       }
+
+      &.nav-active {
+        color: #f8961e;
+        font-weight: 500;
+      }
     }
   }
 }
@@ -292,14 +310,17 @@
   padding: clamp(3rem, 4.58vw, 5rem) clamp(2rem, 5.03vw, 5.5rem) 0;
 }
 
-// Main 4-column grid — columns sized proportionally to Figma: ~31% / ~19% / ~27% / ~23%
+// Main 5-column grid — brand / Entreprise / Nos Services / Solutions / Support
 .footer-top {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.95fr) minmax(
-      0,
-      1.35fr
-    ) minmax(0, 1.15fr);
-  gap: 0.25rem clamp(1.5rem, 3.5vw, 4.5rem);
+  // brand ~27% / 4 nav cols share the rest evenly
+  grid-template-columns:
+    minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr)
+    minmax(0, 0.9fr) minmax(0, 0.9fr);
+  // column gap from Figma: ~56px at 1748px ≈ 3.2vw
+  column-gap: clamp(1.5rem, 3.2vw, 3.5rem);
+  row-gap: 0;
+  align-items: start;
 }
 
 // Shared column
@@ -310,13 +331,13 @@
   a {
     color: #fff;
     font-family: 'Lexend', sans-serif;
-    // 20px at 1748px = 1.144vw
+    // link size ~18px at 1748px = 1.03vw
+    font-size: clamp(0.875rem, 1.03vw, 1rem);
     font-weight: 300;
-    // element row height in Figma ~50px at 1748px = 2.86vw
-    line-height: clamp(2.4rem, 2.86vw, 3.125rem);
-    letter-spacing: 0.0625rem;
+    // item row height ~44px at 1748px = 2.52vw
+    line-height: clamp(2rem, 2.52vw, 2.75rem);
+    letter-spacing: 0.02em;
     text-decoration: none;
-    white-space: nowrap;
 
     &:hover {
       opacity: 0.75;
@@ -327,13 +348,31 @@
 .footer-col__heading {
   color: #fff;
   font-family: 'Lexend', sans-serif;
-  // 24px at 1748px = 1.372vw
-  font-size: clamp(1.125rem, 1.372vw, 1.5rem);
-  font-weight: 700;
-  // heading row height in Figma ~53px at 1748px = 3.03vw
-  line-height: clamp(2.6rem, 3.03vw, 3.3125rem);
-  letter-spacing: -0.1125rem;
-  margin: 0;
+  // heading ~20px at 1748px = 1.144vw
+  font-size: clamp(0.9375rem, 1.144vw, 1.25rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  // heading row height ~52px at 1748px = 2.97vw
+  line-height: clamp(2.25rem, 2.97vw, 3.25rem);
+  margin: 0 0 clamp(0.25rem, 0.57vw, 0.625rem);
+}
+
+.footer-follow-us {
+  text-transform: none;
+  font-family: 'Lexend', sans-serif;
+  margin: 0 0 clamp(0.25rem, 0.57vw, 0.625rem);
+}
+
+// Non-clickable service items (NOS SERVICES column — informatif)
+.footer-service-item {
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: clamp(0.875rem, 1.03vw, 1rem);
+  font-weight: 300;
+  line-height: clamp(2rem, 2.52vw, 2.75rem);
+  letter-spacing: 0.02em;
+  cursor: default;
 }
 
 // Brand column
@@ -352,50 +391,52 @@
   height: clamp(5rem, 7.78vw, 8.5rem);
   width: auto;
   display: block;
-  margin-bottom: clamp(0.75rem, 1.14vw, 1.25rem);
+  margin-bottom: clamp(1rem, 1.6vw, 1.75rem);
 }
 
 .footer-tagline {
   font-family: 'Lexend', sans-serif;
-  font-size: clamp(0.75rem, 0.85vw, 0.9375rem);
+  // tagline ~16px at 1748px = 0.915vw
+  font-size: clamp(0.8125rem, 0.915vw, 1rem);
   font-weight: 300;
-  line-height: 1.65;
+  line-height: 1.75;
   color: #fff;
   margin: 0;
-  max-width: 34ch;
+  max-width: 36ch;
 }
 
 .footer-rating {
   display: flex;
   align-items: center;
   gap: clamp(0.2rem, 0.29vw, 0.3rem);
-  margin-top: clamp(0.75rem, 1.14vw, 1.25rem);
+  margin-top: clamp(0.875rem, 1.37vw, 1.5rem);
 }
 
 .footer-rating__score {
   font-family: 'Lexend', sans-serif;
-  font-size: clamp(1.125rem, 1.372vw, 1.5rem);
-  font-weight: 700;
+  font-size: clamp(1rem, 1.2vw, 1.3125rem);
+  font-weight: 300;
   color: #fff;
-  letter-spacing: -0.1125rem;
+  letter-spacing: 0;
   margin-right: clamp(0.15rem, 0.2vw, 0.225rem);
 }
 
 .footer-rating__star {
-  width: clamp(1rem, 1.144vw, 1.25rem);
-  height: clamp(1rem, 1.144vw, 1.25rem);
+  width: clamp(0.9rem, 1.1vw, 1.2rem);
+  height: clamp(0.9rem, 1.1vw, 1.2rem);
   object-fit: contain;
 }
 
 // Bottom row: social (left) + store badges (right)
-// Starts at ~506px from top of footer = ~48px gap after main columns
 .footer-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  padding-top: clamp(1.5rem, 2.75vw, 3rem);
-  padding-bottom: clamp(1.5rem, 2.74vw, 3rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: clamp(1.25rem, 2.29vw, 2.5rem);
+  padding-bottom: clamp(1.25rem, 2.29vw, 2.5rem);
+  margin-top: clamp(1.5rem, 2.29vw, 2.5rem);
 }
 
 .footer-social {
@@ -408,8 +449,8 @@
   display: flex;
   align-items: center;
   // icon gap in Figma: ~28px at 1748px = 1.6vw
-  gap: clamp(0.5rem, 1.6vw, 1.75rem);
-  margin-top: clamp(0.125rem, 0.34vw, 0.375rem);
+  gap: clamp(0.75rem, 1.6vw, 1.75rem);
+  margin-top: clamp(0.375rem, 0.57vw, 0.625rem);
 }
 
 .footer-social__link {
@@ -418,7 +459,10 @@
   justify-content: center;
 
   img {
-    // icon size ~48px at 1748px = 2.75vw
+    // icon size ~32px at 1748px = 1.83vw
+    width: clamp(1.5rem, 1.83vw, 2rem);
+    height: clamp(1.5rem, 1.83vw, 2rem);
+    object-fit: contain;
     filter: brightness(0) invert(1);
   }
 }
@@ -448,15 +492,24 @@
 }
 
 .store-badge__icon {
-  // Google Play icon ~30px at 1748px = 1.72vw
+  display: block;
   width: clamp(1.25rem, 1.72vw, 1.875rem);
   height: clamp(1.25rem, 1.72vw, 1.875rem);
+  min-width: clamp(1.25rem, 1.72vw, 1.875rem);
+  min-height: clamp(1.25rem, 1.72vw, 1.875rem);
+  max-width: clamp(1.25rem, 1.72vw, 1.875rem);
+  max-height: clamp(1.25rem, 1.72vw, 1.875rem);
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .store-badge__icon--white {
   filter: brightness(0) invert(1);
+  scale: 1.5;
+}
+
+.store-badge__icon--red {
+  scale: 1.5;
 }
 
 .store-badge__text {
@@ -484,7 +537,7 @@
 .footer-copyright {
   position: relative;
   z-index: 1;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 
   p {
     margin-inline: auto;
@@ -509,7 +562,7 @@
 
   .footer-top {
     grid-template-columns: 1fr 1fr;
-    gap: 2rem 3rem;
+    gap: 2rem 2.5rem;
   }
 
   .footer-bottom {
