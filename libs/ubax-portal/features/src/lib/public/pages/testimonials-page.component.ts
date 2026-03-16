@@ -53,7 +53,7 @@ export class TestimonialsPageComponent {
       duration: '05 : 47',
     },
     {
-      name: 'Nadia Coulibaly',
+      name: 'Jules Gomis',
       role: 'Locataire',
       image: '/assets/portal-assets/15.webp',
       duration: '10 : 42',
