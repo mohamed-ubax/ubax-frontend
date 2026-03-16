@@ -441,7 +441,10 @@
   justify-content: center;
 
   img {
-    // icon size ~48px at 1748px = 2.75vw
+    // icon size ~32px at 1748px = 1.83vw
+    width: clamp(1.5rem, 1.83vw, 2rem);
+    height: clamp(1.5rem, 1.83vw, 2rem);
+    object-fit: contain;
     filter: brightness(0) invert(1);
   }
 }
@@ -471,15 +474,24 @@
 }
 
 .store-badge__icon {
-  // Google Play icon ~30px at 1748px = 1.72vw
+  display: block;
   width: clamp(1.25rem, 1.72vw, 1.875rem);
   height: clamp(1.25rem, 1.72vw, 1.875rem);
+  min-width: clamp(1.25rem, 1.72vw, 1.875rem);
+  min-height: clamp(1.25rem, 1.72vw, 1.875rem);
+  max-width: clamp(1.25rem, 1.72vw, 1.875rem);
+  max-height: clamp(1.25rem, 1.72vw, 1.875rem);
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .store-badge__icon--white {
   filter: brightness(0) invert(1);
+  scale: 1.5;
+}
+
+.store-badge__icon--red {
+  scale: 1.5;
 }
 
 .store-badge__text {
