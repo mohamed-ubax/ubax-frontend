@@ -58,7 +58,7 @@
 .hp-hero {
   width: 100%;
   display: grid;
-  grid-template-columns: 42% 58%;
+  grid-template-columns: 45% 55%;
   min-height: clamp(420px, 52vw, 745px);
   background-color: rgba(236, 242, 247, 0.98);
   background-image:
@@ -88,6 +88,7 @@
 
   &__line {
     display: block;
+    line-height: 1.5;
   }
 
   &__line-inner {
@@ -102,14 +103,16 @@
 
   &__brand-bax {
     color: #f8961e; // orange
+    font-size: 3.5rem;
   }
 
   &__rest {
     color: #1a3047; // bleu
+    font-size: 2.5rem;
   }
 
   &__tagline {
-    margin: 1.6rem 0 0;
+    margin: 4rem 0 0;
     color: #151515;
     font-size: clamp(1rem, 1.7vw, 1.5rem); // 1.5rem ≈ 24px
     font-weight: 400;
@@ -187,7 +190,7 @@
   &__name {
     font-size: 0.9rem;
     font-weight: 700;
-    color: var(--ubax-brand);
+    color: #000;
     line-height: 1.2;
   }
 }
@@ -282,7 +285,6 @@
       font-size: clamp(1rem, 1.7vw, 1.5rem); // 1.5rem = 24px
       font-weight: 400;
       line-height: 3.21; // 77.04px / 24px
-      letter-spacing: -1.8px;
     }
   }
 
@@ -433,7 +435,7 @@
 
     p {
       margin: 0;
-      font-size: clamp(0.875rem, 1.15vw, 1.1rem); // 20px in Figma at 1728px
+      font-size: clamp(0.875rem, 1.15vw, 1.2rem); // 20px in Figma at 1728px
       color: #4d4d4d;
       line-height: 1.5;
     }
@@ -650,7 +652,7 @@
 
   &__copy {
     h2 {
-      margin: 0 0 2rem;
+      margin: 0 0 6rem;
       color: var(--ubax-brand);
       font-size: clamp(1.8rem, 2.8vw, 2.8rem);
       font-weight: 700;
@@ -728,7 +730,7 @@
 .hp-dash-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.5rem;
   margin-bottom: 2.2rem;
 
   &:last-child {
@@ -748,7 +750,7 @@
   }
 
   strong {
-    color: #1a3047;
+    color: #000;
     font-size: clamp(1.1rem, 1.4vw, 1.5rem); // Figma: 24px at 1728px
     font-weight: 600;
     line-height: 1.3;
@@ -756,7 +758,6 @@
 
   > p {
     margin: 0;
-    padding-left: calc(40px + 0.75rem); // align under title
     color: #4d4d4d; // Figma node 150-551 color
     font-size: clamp(0.9rem, 1.1vw, 1.25rem); // Figma: 20px at 1728px
     line-height: 1.55;
@@ -788,7 +789,7 @@
       color: #4b5563;
       font-size: clamp(0.9rem, 1.2vw, 1.5rem);
       line-height: 1.82;
-      max-width: 52ch;
+      max-width: 49ch;
     }
   }
 
