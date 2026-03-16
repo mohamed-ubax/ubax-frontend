@@ -1,13 +1,12 @@
 ﻿import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { Button } from 'primeng/button';
 import { InputOtp } from 'primeng/inputotp';
 
 @Component({
   selector: 'ubax-otp-page',
-  imports: [PublicShellComponent, FormsModule, InputOtp, Button],
+  imports: [FormsModule, InputOtp, Button],
   templateUrl: './otp-page.component.html',
   styleUrl: './auth-pages.component.scss',
 })

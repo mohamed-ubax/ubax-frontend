@@ -1,13 +1,12 @@
 ﻿import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { Button } from 'primeng/button';
 import { Password } from 'primeng/password';
 
 @Component({
   selector: 'ubax-reset-password-page',
-  imports: [PublicShellComponent, FormsModule, Password, Button],
+  imports: [FormsModule, Password, Button],
   templateUrl: './reset-password-page.component.html',
   styleUrl: './auth-pages.component.scss',
 })

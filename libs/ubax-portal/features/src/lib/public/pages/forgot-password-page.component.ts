@@ -1,7 +1,6 @@
 ﻿import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -9,7 +8,7 @@ import { COUNTRY_CODES, type CountryCode } from '../shared/country-codes';
 
 @Component({
   selector: 'ubax-forgot-password-page',
-  imports: [PublicShellComponent, FormsModule, Select, InputText, Button],
+  imports: [FormsModule, Select, InputText, Button],
   templateUrl: './forgot-password-page.component.html',
   styleUrl: './auth-pages.component.scss',
 })

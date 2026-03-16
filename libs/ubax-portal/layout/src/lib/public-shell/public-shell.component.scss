@@ -59,7 +59,7 @@
   color: #000;
   text-decoration: none;
   font-family: 'Lexend', sans-serif;
-  font-size: 1.0625rem;
+  font-size: 1.25rem;
   font-weight: 400;
   line-height: 1.5rem;
   white-space: nowrap;
@@ -117,8 +117,7 @@
   background: #f8961e;
   color: #fff;
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 500;
   white-space: nowrap;
 
@@ -304,23 +303,25 @@
 .footer-inner {
   position: relative;
   z-index: 1;
-  max-width: 1748px;
   margin-inline: auto;
   // top padding: 80px at 1748px = 4.58vw / side padding: 88px = 5.03vw
   padding: clamp(3rem, 4.58vw, 5rem) clamp(2rem, 5.03vw, 5.5rem) 0;
 }
 
-// Main 5-column grid — brand / Entreprise / Nos Services / Solutions / Support
+// Footer top — brand (left) + nav group (right edge)
 .footer-top {
-  display: grid;
-  // brand ~27% / 4 nav cols share the rest evenly
-  grid-template-columns:
-    minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr)
-    minmax(0, 0.9fr) minmax(0, 0.9fr);
-  // column gap from Figma: ~56px at 1748px ≈ 3.2vw
-  column-gap: clamp(1.5rem, 3.2vw, 3.5rem);
-  row-gap: 0;
-  align-items: start;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 3.2vw, 3.5rem);
+}
+
+// The 4 nav columns grouped, flush to the right edge
+.footer-nav-group {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(1.5rem, 3.2vw, 4.5rem);
+  flex-shrink: 0;
 }
 
 // Shared column
@@ -332,7 +333,7 @@
     color: #fff;
     font-family: 'Lexend', sans-serif;
     // link size ~18px at 1748px = 1.03vw
-    font-size: clamp(0.875rem, 1.03vw, 1rem);
+    font-size: clamp(0.875rem, 1.03vw, 1.1rem);
     font-weight: 300;
     // item row height ~44px at 1748px = 2.52vw
     line-height: clamp(2rem, 2.52vw, 2.75rem);
@@ -340,7 +341,8 @@
     text-decoration: none;
 
     &:hover {
-      opacity: 0.75;
+      opacity: 0.8;
+      color: #f8961e;
     }
   }
 }
@@ -368,7 +370,7 @@
 .footer-service-item {
   color: #fff;
   font-family: 'Lexend', sans-serif;
-  font-size: clamp(0.875rem, 1.03vw, 1rem);
+  font-size: clamp(0.875rem, 1.03vw, 1.1rem);
   font-weight: 300;
   line-height: clamp(2rem, 2.52vw, 2.75rem);
   letter-spacing: 0.02em;
@@ -396,13 +398,13 @@
 
 .footer-tagline {
   font-family: 'Lexend', sans-serif;
-  // tagline ~16px at 1748px = 0.915vw
-  font-size: clamp(0.8125rem, 0.915vw, 1rem);
+  // tagline ~14px at 1748px
+  font-size: clamp(0.75rem, 0.82vw, 0.875rem);
   font-weight: 300;
-  line-height: 1.75;
+  line-height: 1.6;
   color: #fff;
   margin: 0;
-  max-width: 36ch;
+  max-width: 100%;
 }
 
 .footer-rating {
@@ -433,10 +435,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: clamp(1.25rem, 2.29vw, 2.5rem);
   padding-bottom: clamp(1.25rem, 2.29vw, 2.5rem);
-  margin-top: clamp(1.5rem, 2.29vw, 2.5rem);
 }
 
 .footer-social {
@@ -561,8 +561,13 @@
   }
 
   .footer-top {
-    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
     gap: 2rem 2.5rem;
+  }
+
+  .footer-nav-group {
+    flex: 1;
+    justify-content: space-between;
   }
 
   .footer-bottom {
@@ -586,7 +591,12 @@
   }
 
   .footer-top {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .footer-nav-group {
+    flex-wrap: wrap;
+    gap: 1.5rem 2rem;
   }
 
   .footer-stores {
