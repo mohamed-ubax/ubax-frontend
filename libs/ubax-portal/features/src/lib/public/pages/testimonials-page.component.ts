@@ -8,6 +8,7 @@
 import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
 @Component({
   selector: 'ubax-testimonials-page',
@@ -61,7 +62,7 @@ export class TestimonialsPageComponent {
 
   constructor() {
     afterNextRender(() => {
-      gsap.registerPlugin(ScrollTrigger);
+      gsap.registerPlugin(ScrollTrigger, SplitText);
       this.gsapCtx = gsap.context(
         () => this.initAnimations(),
         this.elRef.nativeElement,
@@ -76,18 +77,38 @@ export class TestimonialsPageComponent {
   private initAnimations(): void {
     const ease = 'power3.out';
 
-    // Header entrance
-    gsap.from('.testimonials-header h1', {
-      y: -28,
-      opacity: 0,
-      duration: 0.8,
-      ease,
+    // ── Title: SplitText line-by-line mask reveal ─────────────────────────────
+    const h1 = this.elRef.nativeElement.querySelector(
+      '.testimonials-header h1',
+    ) as HTMLElement;
+
+    const split = new SplitText(h1, {
+      type: 'lines',
+      mask: 'lines', // GSAP wraps each line in overflow:hidden automatically
     });
-    gsap.from('.testimonials-header p', {
-      y: -18,
-      opacity: 0,
+
+    gsap.from(split.lines, {
+      y: '110%',
+      duration: 1.2,
+      ease: 'power3.out',
+      stagger: 0.22,
+    });
+
+    // Divider expands after the last line lands
+    const lastLineDelay = (split.lines.length - 1) * 0.22 + 1.2;
+    gsap.to('.testimonials-divider', {
+      scaleX: 1,
       duration: 0.7,
-      delay: 0.18,
+      delay: lastLineDelay + 0.1,
+      ease: 'power2.inOut',
+    });
+
+    // Subtitle appears just after the divider starts expanding
+    gsap.from('.testimonials-header p', {
+      y: 20,
+      opacity: 0,
+      duration: 0.85,
+      delay: lastLineDelay + 0.35,
       ease,
     });
 
