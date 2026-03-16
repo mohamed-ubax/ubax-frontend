@@ -312,9 +312,9 @@
 // Main 5-column grid — brand / Entreprise / Nos Services / Solutions / Support
 .footer-top {
   display: grid;
-  // brand ~27% / 4 nav cols share the rest evenly
+  // brand ~22% / 4 nav cols share the rest evenly
   grid-template-columns:
-    minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr)
+    minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr)
     minmax(0, 0.9fr) minmax(0, 0.9fr);
   // column gap from Figma: ~56px at 1748px ≈ 3.2vw
   column-gap: clamp(1.5rem, 3.2vw, 3.5rem);
@@ -396,13 +396,13 @@
 
 .footer-tagline {
   font-family: 'Lexend', sans-serif;
-  // tagline ~16px at 1748px = 0.915vw
-  font-size: clamp(0.8125rem, 0.915vw, 1rem);
+  // tagline ~14px at 1748px
+  font-size: clamp(0.75rem, 0.82vw, 0.875rem);
   font-weight: 300;
-  line-height: 1.75;
+  line-height: 1.6;
   color: #fff;
   margin: 0;
-  max-width: 36ch;
+  max-width: 28ch;
 }
 
 .footer-rating {

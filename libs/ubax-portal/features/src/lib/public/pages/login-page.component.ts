@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { Select } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
@@ -12,7 +11,6 @@ import { COUNTRY_CODES, type CountryCode } from '../shared/country-codes';
   selector: 'ubax-login-page',
   imports: [
     RouterLink,
-    PublicShellComponent,
     FormsModule,
     Select,
     InputText,

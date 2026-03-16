@@ -6,15 +6,19 @@
 
 // ─── Login stage layout ──────────────────────────────────────────────────────
 
+:host {
+  display: block;
+}
+
 .login-stage {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding-top: clamp(2rem, 4.7vh, 2.875rem);
   padding-bottom: clamp(2rem, 4.6vh, 2.8125rem);
-  min-height: clamp(600px, 85vh, 964px);
+  min-height: 100dvh;
   background: #ecf2f7;
   overflow: hidden;
 }
@@ -708,7 +712,7 @@
   }
 
   .login-stage {
-    min-height: calc(100svh - 4.5rem);
+    min-height: 100dvh;
     padding: 2rem 1rem 3.5rem;
   }
 
@@ -761,7 +765,7 @@
 
 @media (max-width: 640px) {
   .login-stage {
-    min-height: calc(100svh - 4.25rem);
+    min-height: 100dvh;
     padding: 1.5rem 0.75rem 3rem;
   }
 
@@ -880,7 +884,7 @@
 
 @media (max-width: 420px) {
   .login-stage {
-    min-height: calc(100svh - 4rem);
+    min-height: 100dvh;
     padding-inline: 0.5rem;
     padding-bottom: 2.75rem;
   }
