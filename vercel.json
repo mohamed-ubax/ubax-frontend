@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx nx build ubax-portal --configuration=production",
+  "buildCommand": "NX_NO_CLOUD=true npx nx build ubax-portal --configuration=production",
   "outputDirectory": "dist/apps/ubax-portal/browser",
   "installCommand": "npm ci",
   "framework": null,
