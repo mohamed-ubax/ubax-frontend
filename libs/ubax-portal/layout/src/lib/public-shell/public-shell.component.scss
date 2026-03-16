@@ -308,17 +308,20 @@
   padding: clamp(3rem, 4.58vw, 5rem) clamp(2rem, 5.03vw, 5.5rem) 0;
 }
 
-// Main 5-column grid — brand / Entreprise / Nos Services / Solutions / Support
+// Footer top — brand (left) + nav group (right edge)
 .footer-top {
-  display: grid;
-  // brand ~33% / 4 nav cols share the rest evenly
-  grid-template-columns:
-    minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 0.9fr)
-    minmax(0, 0.9fr) minmax(0, 0.9fr);
-  // column gap from Figma: ~56px at 1748px ≈ 3.2vw
-  column-gap: clamp(1.5rem, 3.2vw, 3.5rem);
-  row-gap: 0;
-  align-items: start;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 3.2vw, 3.5rem);
+}
+
+// The 4 nav columns grouped, flush to the right edge
+.footer-nav-group {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(1.5rem, 3.2vw, 4.5rem);
+  flex-shrink: 0;
 }
 
 // Shared column
@@ -432,10 +435,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: clamp(1.25rem, 2.29vw, 2.5rem);
   padding-bottom: clamp(1.25rem, 2.29vw, 2.5rem);
-  margin-top: clamp(1.5rem, 2.29vw, 2.5rem);
 }
 
 .footer-social {
@@ -560,8 +561,13 @@
   }
 
   .footer-top {
-    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
     gap: 2rem 2.5rem;
+  }
+
+  .footer-nav-group {
+    flex: 1;
+    justify-content: space-between;
   }
 
   .footer-bottom {
@@ -585,7 +591,12 @@
   }
 
   .footer-top {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .footer-nav-group {
+    flex-wrap: wrap;
+    gap: 1.5rem 2rem;
   }
 
   .footer-stores {
