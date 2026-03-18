@@ -1,0 +1,209 @@
+<ubax-public-shell>
+
+  <!-- ── 1. HERO ─────────────────────────────────────────────── -->
+  <section class="fnc-hero">
+    <div class="fnc-hero__content">
+      <h1 class="fnc-hero__title">Ubax&nbsp;– Recherche immobilière intelligente</h1>
+      <p class="fnc-hero__subtitle">
+        Recherche avancée, visite virtuelle 3D, réservation rapide et achat sécurisé.
+        UBAX simplifie l'immobilier.
+      </p>
+
+      <div class="fnc-hero__pill">
+        <span class="fnc-hero__pill-icon" aria-hidden="true">
+          <img src="assets/portal-assets/fonctionnalites/icons/Group 1171274746.svg" alt="" />
+        </span>
+        <span class="fnc-hero__pill-text">Rapide&nbsp;•&nbsp;Sécurisée&nbsp;•&nbsp;Intuitive&nbsp;•&nbsp;Moderne</span>
+      </div>
+
+      <div class="fnc-hero__stores" aria-label="Télécharger l'application">
+        <a class="fnc-store-btn" href="#" aria-label="Disponible sur Google Play">
+          <img src="assets/portal-assets/fonctionnalites/icons/logos_google-play-icon.svg" alt="" aria-hidden="true" class="fnc-store-btn__icon" />
+          <div class="fnc-store-btn__labels">
+            <span class="fnc-store-btn__sub">Disponible sur</span>
+            <span class="fnc-store-btn__name">Google Play</span>
+          </div>
+        </a>
+        <a class="fnc-store-btn" href="#" aria-label="Télécharger dans l'App Store">
+          <img src="assets/portal-assets/fonctionnalites/icons/ic_baseline-apple-1.svg" alt="" aria-hidden="true" class="fnc-store-btn__icon" />
+          <div class="fnc-store-btn__labels">
+            <span class="fnc-store-btn__sub">Télécharger dans</span>
+            <span class="fnc-store-btn__name">L'App Store</span>
+          </div>
+        </a>
+        <a class="fnc-store-btn" href="#" aria-label="Découvrez sur AppGallery">
+          <img src="assets/portal-assets/fonctionnalites/images/huawei_appgallery-logo_brandlogos.net_gkwdr 1.png" alt="" aria-hidden="true" class="fnc-store-btn__icon fnc-store-btn__icon--huawei" />
+          <div class="fnc-store-btn__labels">
+            <span class="fnc-store-btn__sub">Découvrez sur</span>
+            <span class="fnc-store-btn__name">AppGallery</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="fnc-hero__visual" aria-hidden="true">
+      <div class="fnc-hero__phone-bg"></div>
+      <img
+        class="fnc-hero__phone-img"
+        src="assets/portal-assets/fonctionnalites/images/iPhone 13 Pro.png"
+        alt="Application UBAX sur iPhone"
+        loading="eager"
+      />
+      <img
+        class="fnc-hero__card-overlay"
+        src="assets/portal-assets/fonctionnalites/images/Frame 1686555363 1.png"
+        alt=""
+        loading="eager"
+      />
+      <img
+        class="fnc-hero__stats-overlay"
+        src="assets/portal-assets/fonctionnalites/images/Group 65 1.png"
+        alt=""
+        loading="eager"
+      />
+    </div>
+  </section>
+
+  <!-- ── 2. COMMENT UTILISER UBAX ──────────────────────────── -->
+  <section class="fnc-how">
+    <div class="fnc-how__heading">
+      <h2 class="fnc-how__title">Comment utiliser UBAX</h2>
+      <p class="fnc-how__subtitle">
+        Suivez ces étapes simples pour rechercher des biens, visiter en 3D,
+        réserver facilement et finaliser votre achat en toute sécurité.
+      </p>
+    </div>
+
+    <div class="fnc-how__rows">
+      <div class="fnc-how__row">
+        @for (step of stepsRow1; track step.title) {
+          <article class="fnc-step-card">
+            <div class="fnc-step-card__icon-wrap" aria-hidden="true">
+              <img [src]="step.icon" alt="" />
+            </div>
+            <div class="fnc-step-card__body">
+              <h3 class="fnc-step-card__title">{{ step.title }}</h3>
+              <p class="fnc-step-card__desc">{{ step.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+      <div class="fnc-how__row fnc-how__row--centered">
+        @for (step of stepsRow2; track step.title) {
+          <article class="fnc-step-card">
+            <div class="fnc-step-card__icon-wrap" aria-hidden="true">
+              <img [src]="step.icon" alt="" />
+            </div>
+            <div class="fnc-step-card__body">
+              <h3 class="fnc-step-card__title">{{ step.title }}</h3>
+              <p class="fnc-step-card__desc">{{ step.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. PLATEFORME AGENCES ──────────────────────────────── -->
+  <section class="fnc-agency">
+    <img
+      class="fnc-agency__bg-img"
+      src="assets/portal-assets/fonctionnalites/images/Rectangle 25144.png"
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+    />
+
+    <div class="fnc-agency__heading">
+      <h2 class="fnc-agency__title">Plateforme dédiée aux agences immobilières</h2>
+      <p class="fnc-agency__subtitle">
+        UBAX met à disposition des agences une plateforme professionnelle pour gérer
+        leurs biens, suivre leurs finances et traiter les demandes clients depuis un
+        tableau de bord moderne et intuitif.
+      </p>
+    </div>
+
+    <div class="fnc-agency__dashboards" aria-label="Aperçu du tableau de bord agence">
+      <div class="fnc-agency__dash-overlay" aria-hidden="true"></div>
+      <img class="fnc-agency__dash fnc-agency__dash--main" src="assets/portal-assets/fonctionnalites/images/Accueil tableau de bord DG Agence 1.png" alt="Tableau de bord Directeur Général" loading="lazy" />
+      <img class="fnc-agency__dash fnc-agency__dash--left" src="assets/portal-assets/fonctionnalites/images/Accueil tableau de bord commercial 1.png" alt="" aria-hidden="true" loading="lazy" />
+      <img class="fnc-agency__dash fnc-agency__dash--right" src="assets/portal-assets/fonctionnalites/images/Accueil tableau de bord comptable 1.png" alt="" aria-hidden="true" loading="lazy" />
+      <img class="fnc-agency__panel fnc-agency__panel--nav" src="assets/portal-assets/fonctionnalites/images/Group 142 1.png" alt="" aria-hidden="true" loading="lazy" />
+      <img class="fnc-agency__panel fnc-agency__panel--widget" src="assets/portal-assets/fonctionnalites/images/uigekfdjbn 1.png" alt="" aria-hidden="true" loading="lazy" />
+      <img class="fnc-agency__panel fnc-agency__panel--chart" src="assets/portal-assets/fonctionnalites/images/Chart 1cc 1.png" alt="" aria-hidden="true" loading="lazy" />
+    </div>
+
+    <div class="fnc-agency__roles" aria-label="Rôles disponibles sur la plateforme">
+      @for (role of agencyRoles; track role.number) {
+        <div class="fnc-agency__role-card">
+          <span class="fnc-agency__role-num" aria-hidden="true">{{ role.number }}</span>
+          <div class="fnc-agency__role-info">
+            <h3 class="fnc-agency__role-title">{{ role.title }}</h3>
+            <p class="fnc-agency__role-desc">{{ role.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ── 4. PLATEFORME HÔTELS ──────────────────────────────── -->
+  <section class="fnc-hotels">
+    <div class="fnc-hotels__heading">
+      <h2 class="fnc-hotels__title">Plateforme dédiée aux hôtels</h2>
+      <p class="fnc-hotels__subtitle">
+        UBAX propose une plateforme complète pour les hôtels avec un tableau de bord
+        pour la direction, la gestion des réservations et le suivi des performances
+        en temps réel.
+      </p>
+    </div>
+
+    <div class="fnc-hotels__layout">
+      <!-- Left features column -->
+      <div class="fnc-hotels__features">
+        @for (feat of hotelFeaturesLeft; track feat.title; let last = $last) {
+          <div class="fnc-feature-item">
+            <div class="fnc-feature-item__icon" aria-hidden="true">
+              <img [src]="feat.icon" alt="" />
+            </div>
+            <div class="fnc-feature-item__content">
+              <h3 class="fnc-feature-item__title">{{ feat.title }}</h3>
+              <p class="fnc-feature-item__desc">{{ feat.description }}</p>
+            </div>
+          </div>
+          @if (!last) {
+            <hr class="fnc-feature-divider" />
+          }
+        }
+      </div>
+
+      <!-- Center: dashboard screenshot -->
+      <div class="fnc-hotels__dashboard" aria-label="Aperçu du tableau de bord hôtel">
+        <div class="fnc-hotels__dash-blur" aria-hidden="true"></div>
+        <img class="fnc-hotels__dash-img" src="assets/portal-assets/fonctionnalites/images/Tableau de bord hhh 1.png" alt="Tableau de bord hôtel" loading="lazy" />
+        <img class="fnc-hotels__dash-panel fnc-hotels__dash-panel--chart2" src="assets/portal-assets/fonctionnalites/images/Chart 2 1.png" alt="" aria-hidden="true" loading="lazy" />
+        <img class="fnc-hotels__dash-panel fnc-hotels__dash-panel--group362" src="assets/portal-assets/fonctionnalites/images/Group 362 1.png" alt="" aria-hidden="true" loading="lazy" />
+        <img class="fnc-hotels__dash-panel fnc-hotels__dash-panel--group349" src="assets/portal-assets/fonctionnalites/images/Group 349 1.png" alt="" aria-hidden="true" loading="lazy" />
+        <img class="fnc-hotels__dash-panel fnc-hotels__dash-panel--group1171" src="assets/portal-assets/fonctionnalites/images/Group 1171274855 1.png" alt="" aria-hidden="true" loading="lazy" />
+      </div>
+
+      <!-- Right features column -->
+      <div class="fnc-hotels__features">
+        @for (feat of hotelFeaturesRight; track feat.title; let last = $last) {
+          <div class="fnc-feature-item">
+            <div class="fnc-feature-item__icon" aria-hidden="true">
+              <img [src]="feat.icon" alt="" />
+            </div>
+            <div class="fnc-feature-item__content">
+              <h3 class="fnc-feature-item__title">{{ feat.title }}</h3>
+              <p class="fnc-feature-item__desc">{{ feat.description }}</p>
+            </div>
+          </div>
+          @if (!last) {
+            <hr class="fnc-feature-divider" />
+          }
+        }
+      </div>
+    </div>
+  </section>
+
+</ubax-public-shell>

@@ -40,6 +40,14 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'fonctionnalites',
+    data: { preload: true },
+    loadComponent: () =>
+      import('./pages/fonctionnalites-page.component').then(
+        (m) => m.FonctionnalitesPageComponent,
+      ),
+  },
+  {
     path: 'faq',
     loadComponent: () =>
       import('./pages/faq-page.component').then((m) => m.FaqPageComponent),

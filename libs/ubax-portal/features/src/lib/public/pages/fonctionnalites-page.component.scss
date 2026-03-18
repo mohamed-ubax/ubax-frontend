@@ -1,0 +1,729 @@
+// ─── Design tokens ────────────────────────────────────────────────────────────
+$accent: var(--ubax-accent);      // #e87d1e
+$brand:  var(--ubax-brand);       // #1a3047
+$brand-dark: #192e44;
+
+// ─── Shared section padding ───────────────────────────────────────────────────
+%section-pad {
+  padding-inline: clamp(1.5rem, 5vw, 6rem);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 1. HERO
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-hero {
+  @extend %section-pad;
+  display: grid;
+  grid-template-columns: 1fr clamp(340px, 43vw, 760px);
+  align-items: center;
+  min-height: clamp(520px, 52vw, 860px);
+  padding-block: clamp(2rem, 4vw, 5rem);
+  gap: clamp(2rem, 4vw, 5rem);
+  overflow: hidden;
+  background: #fff;
+}
+
+.fnc-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 560px;
+}
+
+.fnc-hero__title {
+  font-size: clamp(1.75rem, 3.5vw, 3rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: $brand;
+  margin: 0;
+}
+
+.fnc-hero__subtitle {
+  font-size: clamp(0.875rem, 1.1vw, 0.9375rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: #181818;
+  margin: 0;
+  max-width: 470px;
+}
+
+// Pill badge "Rapide • Sécurisée • Intuitive • Moderne"
+.fnc-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+}
+
+.fnc-hero__pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: $accent;
+  flex-shrink: 0;
+
+  img {
+    width: 1.125rem;
+    height: 1.125rem;
+    object-fit: contain;
+  }
+}
+
+.fnc-hero__pill-text {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  border-radius: 2rem;
+  background: $brand;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 300;
+  white-space: nowrap;
+}
+
+// App store buttons
+.fnc-hero__stores {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.fnc-store-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #dbdbdb;
+  border-radius: 0.625rem;
+  background: rgba(6, 6, 6, 0.05);
+  text-decoration: none;
+  color: #000;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}
+
+.fnc-store-btn__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  object-fit: contain;
+}
+
+.fnc-store-btn__icon--huawei {
+  border-radius: 0.25rem;
+}
+
+.fnc-store-btn__labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.fnc-store-btn__sub {
+  font-size: 0.625rem;
+  line-height: 1;
+  color: #000;
+}
+
+.fnc-store-btn__name {
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #000;
+}
+
+// Right: phone visual
+.fnc-hero__visual {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: clamp(480px, 50vw, 860px);
+}
+
+.fnc-hero__phone-bg {
+  position: absolute;
+  inset: 0;
+  left: 10%;
+  background: $brand-dark;
+  border-radius: 400px 400px 0 0;
+  z-index: 0;
+}
+
+.fnc-hero__phone-img {
+  position: relative;
+  z-index: 1;
+  width: clamp(220px, 26vw, 444px);
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 0;
+}
+
+.fnc-hero__card-overlay {
+  position: absolute;
+  right: 0;
+  bottom: clamp(120px, 12vw, 200px);
+  z-index: 2;
+  width: clamp(160px, 18vw, 308px);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.fnc-hero__stats-overlay {
+  position: absolute;
+  left: 0;
+  top: clamp(80px, 8vw, 188px);
+  z-index: 2;
+  width: clamp(160px, 21vw, 360px);
+  object-fit: cover;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 2. COMMENT UTILISER UBAX
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-how {
+  @extend %section-pad;
+  background: $accent;
+  padding-block: clamp(3rem, 5vw, 6rem);
+  overflow: hidden;
+}
+
+.fnc-how__heading {
+  text-align: center;
+  margin-bottom: clamp(2.5rem, 4vw, 4rem);
+  color: #fff;
+}
+
+.fnc-how__title {
+  font-size: clamp(1.75rem, 3vw, 3rem);
+  font-weight: 500;
+  line-height: 1.17;
+  margin: 0 0 1rem;
+}
+
+.fnc-how__subtitle {
+  font-size: clamp(0.875rem, 1.1vw, 0.9375rem);
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 527px;
+}
+
+.fnc-how__rows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2vw, 2rem);
+}
+
+.fnc-how__row {
+  display: flex;
+  justify-content: center;
+  gap: clamp(1rem, 2vw, 2.5rem);
+  flex-wrap: wrap;
+
+  &--centered {
+    // 2-card row stays centered naturally
+  }
+}
+
+.fnc-step-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  width: clamp(260px, 24vw, 411px);
+  min-height: 254px;
+  padding: 1.5rem 1.5rem 2rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: none;
+}
+
+.fnc-step-card__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1.75rem;
+  background: $brand;
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 0.125rem;
+
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+  }
+}
+
+.fnc-step-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fnc-step-card__title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 2rem;
+  color: #070707;
+  margin: 0;
+}
+
+.fnc-step-card__desc {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+  color: #181818;
+  margin: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 3. PLATEFORME AGENCES
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-agency {
+  @extend %section-pad;
+  position: relative;
+  padding-block: clamp(3rem, 5vw, 6rem);
+  overflow: hidden;
+  background: $brand;
+}
+
+.fnc-agency__bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  z-index: 0;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.fnc-agency__heading {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: #fff;
+  margin-bottom: clamp(2rem, 3.5vw, 4rem);
+
+  h2 {
+    font-size: clamp(1.75rem, 3vw, 3rem);
+    font-weight: 500;
+    line-height: 1.17;
+    margin: 0 0 1.25rem;
+  }
+
+  p {
+    font-size: clamp(0.875rem, 1.1vw, 0.9375rem);
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 0 auto;
+    max-width: 700px;
+  }
+}
+
+// Dashboard screenshots stack
+.fnc-agency__dashboards {
+  position: relative;
+  z-index: 1;
+  height: clamp(280px, 32vw, 560px);
+  margin-bottom: clamp(2rem, 3vw, 4rem);
+  margin-inline: auto;
+  max-width: 1100px;
+}
+
+.fnc-agency__dash-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(1px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.fnc-agency__dash {
+  position: absolute;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+.fnc-agency__dash--main {
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(360px, 48vw, 824px);
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.5);
+}
+
+.fnc-agency__dash--left {
+  left: 0;
+  top: clamp(20px, 2.5vw, 44px);
+  width: clamp(200px, 24vw, 420px);
+  z-index: 0;
+}
+
+.fnc-agency__dash--right {
+  right: 0;
+  top: clamp(20px, 2.5vw, 44px);
+  width: clamp(200px, 24vw, 420px);
+  z-index: 0;
+}
+
+.fnc-agency__panel {
+  position: absolute;
+  z-index: 3;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.fnc-agency__panel--nav {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: clamp(50px, 7vw, 120px);
+  width: clamp(280px, 35vw, 600px);
+}
+
+.fnc-agency__panel--widget {
+  left: clamp(120px, 14vw, 260px);
+  bottom: clamp(20px, 3vw, 60px);
+  width: clamp(100px, 11vw, 200px);
+}
+
+.fnc-agency__panel--chart {
+  left: 50%;
+  bottom: clamp(10px, 1.5vw, 30px);
+  width: clamp(200px, 28vw, 500px);
+  margin-left: clamp(20px, 3vw, 60px);
+}
+
+// Role cards row
+.fnc-agency__roles {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+}
+
+.fnc-agency__role-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.125rem;
+  border-radius: 0.9375rem;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.fnc-agency__role-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  height: 2.375rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: url('assets/portal-assets/fonctionnalites/icons/Ellipse 223.svg') center/cover no-repeat;
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.fnc-agency__role-title {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 3.5rem;
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fnc-agency__role-desc {
+  font-size: 0.75rem;
+  font-weight: 300;
+  line-height: 1.5rem;
+  color: #fff;
+  margin: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 4. PLATEFORME HÔTELS
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-hotels {
+  @extend %section-pad;
+  padding-block: clamp(3rem, 5vw, 6rem);
+  background: #fff;
+}
+
+.fnc-hotels__heading {
+  text-align: center;
+  margin-bottom: clamp(2rem, 4vw, 4rem);
+  color: $brand;
+
+  h2 {
+    font-size: clamp(1.75rem, 3vw, 3rem);
+    font-weight: 500;
+    line-height: 1.17;
+    margin: 0 0 1rem;
+  }
+
+  p {
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000;
+    margin: 0 auto;
+    max-width: 578px;
+  }
+}
+
+.fnc-hotels__layout {
+  display: grid;
+  grid-template-columns: 1fr clamp(300px, 46vw, 788px) 1fr;
+  gap: clamp(1.5rem, 2.5vw, 3rem);
+  align-items: start;
+}
+
+.fnc-hotels__features {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1.5rem;
+  border: 1px solid #ebebeb;
+  border-radius: 1.5rem;
+  background: #fff;
+}
+
+// Center dashboard
+.fnc-hotels__dashboard {
+  position: relative;
+  height: clamp(300px, 35vw, 597px);
+}
+
+.fnc-hotels__dash-blur {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(1px);
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 0.25rem;
+}
+
+.fnc-hotels__dash-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.fnc-hotels__dash-panel {
+  position: absolute;
+  z-index: 2;
+  object-fit: cover;
+  border-radius: 0.375rem;
+}
+
+.fnc-hotels__dash-panel--chart2 {
+  left: 1.25rem;
+  bottom: clamp(10px, 2vw, 40px);
+  width: clamp(140px, 19vw, 314px);
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
+}
+
+.fnc-hotels__dash-panel--group362 {
+  left: 1.25rem;
+  top: clamp(10px, 2vw, 40px);
+  width: clamp(180px, 22vw, 370px);
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
+}
+
+.fnc-hotels__dash-panel--group349 {
+  left: 50%;
+  top: 50%;
+  transform: translate(-10%, -50%);
+  width: clamp(80px, 9.5vw, 164px);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.fnc-hotels__dash-panel--group1171 {
+  right: 0;
+  bottom: clamp(20px, 3vw, 56px);
+  width: clamp(100px, 14vw, 244px);
+  box-shadow: 0 14px 14px rgba(0, 0, 0, 0.25);
+}
+
+// Feature items (hotels)
+.fnc-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-block: 1.5rem;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.fnc-feature-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  min-width: 3rem;
+  border-radius: 1.75rem;
+  background: $accent;
+  overflow: hidden;
+  padding: 0.125rem;
+
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+  }
+}
+
+.fnc-feature-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 301px;
+}
+
+.fnc-feature-item__title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 2rem;
+  color: #070707;
+  margin: 0;
+}
+
+.fnc-feature-item__desc {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+  color: #575757;
+  margin: 0;
+}
+
+.fnc-feature-divider {
+  border: none;
+  border-top: 1px solid #dbdbdb;
+  margin: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════════════════════════════════════════════
+@media (max-width: 1024px) {
+  .fnc-agency__roles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fnc-hotels__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .fnc-hotels__dashboard {
+    height: clamp(200px, 50vw, 420px);
+    margin-inline: auto;
+    width: 100%;
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .fnc-hero {
+    grid-template-columns: 1fr;
+    min-height: unset;
+    padding-block: 2.5rem;
+  }
+
+  .fnc-hero__visual {
+    height: clamp(280px, 60vw, 400px);
+    order: -1;
+  }
+
+  .fnc-hero__content {
+    max-width: 100%;
+  }
+
+  .fnc-hero__pill-text {
+    font-size: 0.8125rem;
+    white-space: normal;
+  }
+
+  .fnc-how__row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .fnc-step-card {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .fnc-agency__dashboards {
+    height: clamp(160px, 50vw, 360px);
+  }
+
+  .fnc-agency__roles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fnc-agency__role-title {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    white-space: normal;
+  }
+
+  .fnc-hotels__features {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .fnc-agency__roles {
+    grid-template-columns: 1fr;
+  }
+
+  .fnc-hero__stores {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fnc-store-btn {
+    width: 100%;
+  }
+}
