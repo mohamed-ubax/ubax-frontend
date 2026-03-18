@@ -93,6 +93,13 @@ export const publicRoutes: Routes = [
       import('./pages/legal-page.component').then((m) => m.LegalPageComponent),
   },
   {
+    path: 'politique-de-confidentialite',
+    loadComponent: () =>
+      import('./pages/politique-confidentialite-page.component').then(
+        (m) => m.PolitiqueConfidentialitePageComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',

@@ -197,12 +197,26 @@ $brand-dark: #192e44;
 // ═══════════════════════════════════════════════════════════════════════════════
 .fnc-how {
   @extend %section-pad;
+  position: relative;
   background: $accent;
   padding-block: clamp(3rem, 5vw, 6rem);
   overflow: hidden;
 }
 
+.fnc-how__union {
+  position: absolute;
+  right: clamp(-4rem, -2vw, 4rem);
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  width: clamp(14rem, 25vw, 27rem);
+  height: clamp(14rem, 25vw, 27rem);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .fnc-how__heading {
+  position: relative;
+  z-index: 1;
   text-align: center;
   margin-bottom: clamp(2.5rem, 4vw, 4rem);
   color: #fff;
@@ -224,6 +238,8 @@ $brand-dark: #192e44;
 }
 
 .fnc-how__rows {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: clamp(1.25rem, 2vw, 2rem);
@@ -435,19 +451,34 @@ $brand-dark: #192e44;
   background: rgba(255, 255, 255, 0.14);
 }
 
+.fnc-agency__role-num-wrap {
+  position: relative;
+  width: 2.375rem;
+  height: 2.375rem;
+  min-width: 2.375rem;
+  flex-shrink: 0;
+}
+
+.fnc-agency__role-num-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .fnc-agency__role-num {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.375rem;
-  height: 2.375rem;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: url('assets/portal-assets/fonctionnalites/icons/Ellipse 223.svg') center/cover no-repeat;
+  width: 100%;
+  height: 100%;
   color: #fff;
   font-size: 0.9375rem;
   font-weight: 400;
   line-height: 1;
+  z-index: 1;
 }
 
 .fnc-agency__role-title {
