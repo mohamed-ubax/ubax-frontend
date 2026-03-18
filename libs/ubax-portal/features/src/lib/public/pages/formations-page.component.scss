@@ -159,26 +159,27 @@
   &__light {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1408px;
-    max-width: 100%;
-    height: 350px;
+    left: 0;
+    right: 0;
+    height: 21.875rem; // 350px
     pointer-events: none;
     z-index: 0;
-    overflow: visible;
+    overflow: hidden; // clip les bords du blur CSS
   }
 
   // Beam / glow (Figma node 370:659)
+  // fill: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%)
+  // Les bords étendus cachent le cutoff du filtre gaussien
   &__beam {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    width: 1003px;
-    max-width: 100%;
-    height: 350px;
+    transform: translate(-50%, -50%);
+    width: 55.6875rem;  // 891px
+    height: 21.875rem;  // 350px
+    max-width: none;
     display: block;
+    filter: blur(28px);
   }
 
   // Lamp fixture (Figma node 370:660)

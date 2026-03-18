@@ -34,33 +34,12 @@
     <div class="fp-guides__light" aria-hidden="true">
 
       <!-- Beam / glow (370:659) -->
-      <svg class="fp-guides__beam"
-        xmlns="http://www.w3.org/2000/svg"
-        width="1003" height="350"
-        viewBox="0 0 1003 350"
-        fill="none">
-        <g filter="url(#fp-beam-filter)">
-          <path d="M187.5 0H825L947 350H56L187.5 0Z"
-            fill="url(#fp-beam-gradient)"
-            fill-opacity="0.15"/>
-        </g>
-        <defs>
-          <filter id="fp-beam-filter"
-            x="0" y="-56" width="1003" height="462"
-            filterUnits="userSpaceOnUse"
-            color-interpolation-filters="sRGB">
-            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-            <feGaussianBlur stdDeviation="28" result="effect1_foregroundBlur"/>
-          </filter>
-          <linearGradient id="fp-beam-gradient"
-            x1="505.5" y1="0" x2="505.5" y2="350"
-            gradientUnits="userSpaceOnUse">
-            <stop stop-color="white"/>
-            <stop offset="1" stop-color="white" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-      </svg>
+      <img
+        class="fp-guides__beam"
+        src="assets/portal-assets/formations/images/beam.svg"
+        alt=""
+        aria-hidden="true"
+      />
 
       <!-- Lamp fixture (370:660) -->
       <svg class="fp-guides__lamp"
