@@ -133,12 +133,13 @@
             <p class="fp-guide-card__excerpt">{{ guide.excerpt }}</p>
             <div class="fp-guide-card__footer">
               <div class="fp-guide-card__author">
-                <img
-                  src="assets/portal-assets/formations/icons/Group 1171274746.svg"
-                  alt=""
-                  class="fp-guide-card__author-logo"
-                  aria-hidden="true"
-                />
+                <div class="fp-guide-card__author-avatar" aria-hidden="true">
+                  <img
+                    src="assets/portal-assets/formations/icons/Group 1171274746-1.svg"
+                    alt=""
+                    class="fp-guide-card__author-logo"
+                  />
+                </div>
                 <span>Ubax</span>
               </div>
               <a [routerLink]="['/formations', guide.slug]" class="fp-guide-card__link">

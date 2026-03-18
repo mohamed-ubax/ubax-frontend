@@ -227,7 +227,8 @@
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3); // Figma: glass/ice border — net, non blurry
+  border: 1px solid rgba(255, 255, 255, 0.45); // Figma: glass/ice border — net, non blurry
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3); // top highlight — effet réfraction ice
   border-radius: 20px;
   overflow: hidden;
 
@@ -307,11 +308,21 @@
     }
   }
 
-  &__author-logo {
+  &__author-avatar {
     width: 35px;
     height: 35px;
-    object-fit: cover;
     border-radius: 50%;
+    background: #ffffff; // Figma: Ellipse 21897 — cercle blanc
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__author-logo {
+    width: 60%;
+    height: 60%;
+    object-fit: contain; // logo sombre Group 1171274746-1 sur fond blanc
   }
 }
 
@@ -344,8 +355,9 @@
   margin-top: clamp(2rem, 4vw, 3rem);
 
   // Figma 371:984 — glass pill container
-  background: rgba(236, 242, 247, 0.55); // teinte #ecf2f7 semi-transparent
-  border: 1px solid rgba(255, 255, 255, 0.65); // border ice — net, non blurry
+  background: rgba(255, 255, 255, 0.08); // vrai glass — quasi-transparent comme les cards
+  border: 1px solid rgba(255, 255, 255, 0.45); // border ice cohérente avec les cards
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25); // top highlight ice
   border-radius: 45px; // pill (h=90px → r=45px)
   padding: 1rem 1.5rem;
   width: fit-content;
