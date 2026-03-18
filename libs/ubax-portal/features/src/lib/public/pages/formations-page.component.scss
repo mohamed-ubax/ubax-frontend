@@ -1,0 +1,419 @@
+// ─── 1. HERO ─────────────────────────────────────────────────────────────────
+
+.fp-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(380px, 48vw, 560px);
+  background-color: rgba(236, 242, 247, 0.98);
+  overflow: hidden;
+  border-radius: 0 0 24px 24px;
+  padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 4vw, 3rem);
+
+  &__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 680px;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(248, 150, 30, 0.12);
+    border: 1px solid rgba(248, 150, 30, 0.35);
+    border-radius: 999px;
+    padding: 0.3rem 1rem;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #f8961e;
+    margin-bottom: 1.75rem;
+  }
+
+  &__badge-dot {
+    font-size: 1.1rem;
+    line-height: 1;
+    color: #f8961e;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.05rem;
+    color: #1a3047;
+    margin: 0 0 1.5rem;
+  }
+
+  &__desc {
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.9;
+    color: #3a4a5c;
+    margin: 0 0 2.25rem;
+    max-width: 52ch;
+  }
+
+  &__cta {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+// Floating icon cards
+.fp-float-card {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(26, 48, 71, 0.12);
+
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+
+  // Positions matching Figma layout
+  &--tl {
+    top: 18%;
+    left: 8%;
+  }
+  &--ml {
+    top: 50%;
+    left: 4%;
+    transform: translateY(-50%);
+  }
+  &--bl {
+    bottom: 18%;
+    left: 12%;
+  }
+  &--tr {
+    top: 18%;
+    right: 10%;
+  }
+  &--br {
+    bottom: 18%;
+    right: 8%;
+  }
+}
+
+// ─── 2. GUIDES IMMOBILIERS ────────────────────────────────────────────────────
+
+.fp-guides {
+  background: #1a3047;
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 4vw, 4rem)
+    clamp(3.5rem, 7vw, 6rem);
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    margin: 0 0 clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.04rem;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+// ─── Guide card ───────────────────────────────────────────────────────────────
+
+.fp-guide-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &__img-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  &:hover &__img {
+    transform: scale(1.04);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 1.25rem 1.25rem 1.25rem;
+    gap: 0.75rem;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #1a3047;
+    margin: 0;
+  }
+
+  &__excerpt {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: #4a5568;
+    margin: 0;
+    flex: 1;
+
+    // Clamp at 3 lines
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #eef2f7;
+    margin-top: auto;
+  }
+
+  &__author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #1a3047;
+    }
+  }
+
+  &__author-logo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+}
+
+// Link wrapper around button
+.fp-guide-card__link {
+  text-decoration: none;
+  display: inline-flex;
+}
+
+// Smaller "Lire la suite" button + arrow icon inside it
+.fp-guide-card ubax-ui-button {
+  --btn-pad: 0.5rem 0.9rem;
+  font-size: 0.8125rem;
+}
+
+.fp-btn-arrow {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  filter: brightness(10);
+}
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+.fp-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.fp-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  &--active {
+    background: #f8961e;
+    color: #fff;
+    border-color: #f8961e;
+
+    &:hover:not(:disabled) {
+      background: #e07c08;
+      border-color: #e07c08;
+    }
+  }
+
+  &--arrow {
+    img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      filter: brightness(10);
+      opacity: 0.7;
+    }
+
+    &:hover:not(:disabled) img {
+      opacity: 1;
+    }
+  }
+}
+
+// ─── 3. CTA ──────────────────────────────────────────────────────────────────
+
+.fp-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(3.5rem, 7vw, 6rem) clamp(1.5rem, 4vw, 3rem);
+  background: #ecf2f7;
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1a3047;
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.04rem;
+  }
+
+  &__desc {
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: #3a4a5c;
+    margin: 0 0 2rem;
+    max-width: 48ch;
+  }
+
+  &__btn {
+    a {
+      text-decoration: none;
+    }
+  }
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .fp-guides__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .fp-hero {
+    padding: 5rem 1.5rem 4rem;
+  }
+
+  // Hide outer floating cards on mobile, keep only 2 for visual interest
+  .fp-float-card {
+    width: 56px;
+    height: 56px;
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+
+    &--ml,
+    &--bl,
+    &--br {
+      display: none;
+    }
+
+    &--tl {
+      top: 10%;
+      left: 4%;
+    }
+
+    &--tr {
+      top: 10%;
+      right: 4%;
+    }
+  }
+
+  .fp-guides__grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+
+  .fp-guide-card__footer {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .fp-float-card {
+    display: none;
+  }
+
+  .fp-pagination {
+    gap: 0.35rem;
+  }
+
+  .fp-page-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 0.8125rem;
+  }
+}

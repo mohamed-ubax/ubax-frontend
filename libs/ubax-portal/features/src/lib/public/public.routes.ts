@@ -66,6 +66,20 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'formations/:slug',
+    loadComponent: () =>
+      import('./pages/formation-detail-page.component').then(
+        (m) => m.FormationDetailPageComponent,
+      ),
+  },
+  {
+    path: 'formations',
+    loadComponent: () =>
+      import('./pages/formations-page.component').then(
+        (m) => m.FormationsPageComponent,
+      ),
+  },
+  {
     path: 'mentions-legales',
     loadComponent: () =>
       import('./pages/legal-page.component').then((m) => m.LegalPageComponent),
