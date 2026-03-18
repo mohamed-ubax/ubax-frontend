@@ -29,6 +29,91 @@
 
   <!-- ── 2. GUIDES IMMOBILIERS ──────────────────────────────── -->
   <section class="fp-guides">
+
+    <!-- Light effect — Figma node 370:658 (beam 370:659 + lamp 370:660) -->
+    <div class="fp-guides__light" aria-hidden="true">
+
+      <!-- Beam / glow (370:659) -->
+      <svg class="fp-guides__beam"
+        xmlns="http://www.w3.org/2000/svg"
+        width="1003" height="350"
+        viewBox="0 0 1003 350"
+        fill="none">
+        <g filter="url(#fp-beam-filter)">
+          <path d="M187.5 0H825L947 350H56L187.5 0Z"
+            fill="url(#fp-beam-gradient)"
+            fill-opacity="0.15"/>
+        </g>
+        <defs>
+          <filter id="fp-beam-filter"
+            x="0" y="-56" width="1003" height="462"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+            <feGaussianBlur stdDeviation="28" result="effect1_foregroundBlur"/>
+          </filter>
+          <linearGradient id="fp-beam-gradient"
+            x1="505.5" y1="0" x2="505.5" y2="350"
+            gradientUnits="userSpaceOnUse">
+            <stop stop-color="white"/>
+            <stop offset="1" stop-color="white" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <!-- Lamp fixture (370:660) -->
+      <svg class="fp-guides__lamp"
+        xmlns="http://www.w3.org/2000/svg"
+        width="670" height="68"
+        viewBox="0 0 670 68"
+        fill="none">
+        <g filter="url(#fp-lamp-filter)">
+          <path d="M25.3666 26.9631C29.432 35.0939 37.7423 40.23 46.8328 40.23H623.167C632.258 40.23 640.568 35.0939 644.633 26.9631L654 8.22998H16L25.3666 26.9631Z"
+            fill="#E4E4E7"/>
+        </g>
+        <defs>
+          <filter id="fp-lamp-filter"
+            x="0" y="0" width="670" height="67.23"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+            <feColorMatrix in="SourceAlpha" type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset dy="7.77"/>
+            <feGaussianBlur stdDeviation="8"/>
+            <feColorMatrix type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0597 0"/>
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+            <feColorMatrix in="SourceAlpha" type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset dy="16"/>
+            <feGaussianBlur stdDeviation="5.5"/>
+            <feComposite in2="hardAlpha" operator="out"/>
+            <feColorMatrix type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"/>
+            <feBlend mode="normal" in2="effect1_dropShadow" result="effect2_dropShadow"/>
+            <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow" result="shape"/>
+            <feColorMatrix in="SourceAlpha" type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset dy="-6"/>
+            <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+            <feColorMatrix type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.11 0"/>
+            <feBlend mode="normal" in2="shape" result="effect3_innerShadow"/>
+            <feColorMatrix in="SourceAlpha" type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset dy="2"/>
+            <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+            <feColorMatrix type="matrix"
+              values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0"/>
+            <feBlend mode="normal" in2="effect3_innerShadow" result="effect4_innerShadow"/>
+          </filter>
+        </defs>
+      </svg>
+
+    </div>
+
     <h2 class="fp-guides__title">Guides immobiliers</h2>
 
     <div class="fp-guides__grid">

@@ -1,12 +1,12 @@
 // ─── 1. HERO ──────────────────────────────────────────────────────────────────
 
 .fdp-hero {
-  padding: 1.5rem 1.5rem 0;
+  padding: 1.5rem 2.5rem 0; // Figma: 40px latéral
 
   &__img-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 1665 / 685; // Figma exact: 1665px × 685px
     border-radius: 20px;
     overflow: hidden;
   }
@@ -21,26 +21,22 @@
   &__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.08) 0%,
-      rgba(0, 0, 0, 0.45) 55%,
-      rgba(0, 0, 0, 0.78) 100%
-    );
+    background: rgba(0, 0, 0, 0.5); // Figma: overlay plat 50%
     border-radius: inherit;
   }
 
   &__title {
     position: absolute;
-    bottom: 0;
+    top: 35.5%; // Figma: 243px / 685px depuis le haut de l'image
     left: 0;
     right: 0;
-    padding: 2rem clamp(1.5rem, 5vw, 4rem) 2.5rem;
+    transform: translateY(-50%);
+    padding: 0 clamp(2rem, 6vw, 5rem); // Figma: titre ~57% de la largeur centré
     text-align: center;
     font-family: 'Lexend', sans-serif;
-    font-size: clamp(1.125rem, 2.5vw, 2rem);
-    font-weight: 700;
-    line-height: 1.3;
+    font-size: clamp(1.25rem, 2.5vw, 2.25rem); // Figma: 36px
+    font-weight: 600; // Figma: SemiBold
+    line-height: 1.4; // Figma: 50px / 36px ≈ 1.39
     color: #fff;
     margin: 0;
     z-index: 2;
@@ -53,14 +49,14 @@
     gap: 0.5rem;
     padding: 1.25rem 0 1.75rem;
     font-family: 'Lexend', sans-serif;
-    font-size: 0.875rem;
+    font-size: 0.9375rem; // Figma: 15px
     font-weight: 400;
-    color: #3a4a5c;
+    color: #181818; // Figma: #181818
   }
 
   &__date-icon {
-    width: 18px;
-    height: 18px;
+    width: 26px; // Figma: 26px
+    height: 26px; // Figma: 26px
     flex-shrink: 0;
   }
 }
@@ -221,7 +217,7 @@
   }
 
   .fdp-hero__img-wrap {
-    aspect-ratio: 16 / 8;
+    aspect-ratio: 1665 / 800; // légèrement plus haut sur tablette
   }
 }
 
@@ -235,7 +231,7 @@
     }
 
     &__title {
-      padding: 1.25rem 1.25rem 1.75rem;
+      padding: 0 1.25rem;
       font-size: 1rem;
     }
   }

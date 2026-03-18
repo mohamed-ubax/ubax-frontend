@@ -148,18 +148,64 @@
 // ─── 2. GUIDES IMMOBILIERS ────────────────────────────────────────────────────
 
 .fp-guides {
+  position: relative;
   background: #1a3047;
   padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 4vw, 4rem)
     clamp(3.5rem, 7vw, 6rem);
 
+  // ── Light container (Figma node 370:658) ───────────────────
+  &__light {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1408px;
+    max-width: 100%;
+    height: 350px;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+  }
+
+  // Beam / glow (Figma node 370:659)
+  &__beam {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1003px;
+    max-width: 100%;
+    height: 350px;
+    display: block;
+  }
+
+  // Lamp fixture (Figma node 370:660)
+  &__lamp {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 670px;
+    max-width: 90%;
+    height: 68px;
+    display: block;
+    filter: drop-shadow(0 7.77px 16px rgba(0, 0, 0, 0.06))
+      drop-shadow(0 16px 11px rgba(0, 0, 0, 0.2));
+  }
+
   &__title {
-    font-family: 'Lexend', sans-serif;
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-family: 'Lexend Deca', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
-    color: #fff;
+    background: linear-gradient(133.38deg, #ffffff 1.91%, #eaeaea 43.92%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     text-align: center;
     margin: 0 0 clamp(2rem, 4vw, 3.5rem);
-    letter-spacing: -0.04rem;
+    letter-spacing: -1.44px;
+    position: relative;
+    z-index: 1;
   }
 
   &__grid {
@@ -168,6 +214,8 @@
     gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 }
 
@@ -176,13 +224,14 @@
 .fp-guide-card {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
   overflow: hidden;
 
   &__img-wrap {
-    width: 100%;
-    aspect-ratio: 16 / 10;
+    margin: 9px 10px 0; // Figma: image inset 9px top, 10px sides
+    border-radius: 15px; // Figma: rounded-[15px]
+    aspect-ratio: 355 / 224; // Figma: 355×224px
     overflow: hidden;
     flex-shrink: 0;
   }
@@ -202,25 +251,26 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 1.25rem 1.25rem 1.25rem;
-    gap: 0.75rem;
+    padding: 0.625rem 0.9375rem 1.375rem; // Figma: ~10px top, 15px sides, 22px bottom
+    gap: 0.5625rem; // Figma: ~9px entre éléments
   }
 
   &__title {
     font-family: 'Lexend', sans-serif;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    line-height: 1.45;
-    color: #1a3047;
+    font-size: 1rem;
+    font-weight: 500; // Figma: Medium
+    line-height: 1.5; // Figma: 24px / 16px = 1.5
+    color: #ffffff;
+    text-align: center;
     margin: 0;
   }
 
   &__excerpt {
     font-family: 'Lexend', sans-serif;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 300;
-    line-height: 1.7;
-    color: #4a5568;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.8);
     margin: 0;
     flex: 1;
 
@@ -237,7 +287,7 @@
     justify-content: space-between;
     gap: 0.5rem;
     padding-top: 0.5rem;
-    border-top: 1px solid #eef2f7;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     margin-top: auto;
   }
 
@@ -248,16 +298,17 @@
 
     span {
       font-family: 'Lexend', sans-serif;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: #1a3047;
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: #ffffff;
     }
   }
 
   &__author-logo {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 50%;
   }
 }
 
@@ -294,15 +345,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.7);
-  font-family: 'Lexend', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
+  width: 3.625rem;
+  height: 3.625rem;
+  border-radius: 50px;
+  border: 1px solid #cfd6dc;
+  background: #fff;
+  color: #1a3047;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -311,39 +362,47 @@
     transform 0.15s ease;
 
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.9);
+    color: #1a3047;
+    border-color: #b0bcc8;
     transform: translateY(-1px);
   }
 
   &:disabled {
-    opacity: 0.3;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   &--active {
-    background: #f8961e;
+    background: #e87d1e;
     color: #fff;
-    border-color: #f8961e;
+    border-color: #e87d1e;
+    font-weight: 600;
+    font-size: 1.25rem;
 
     &:hover:not(:disabled) {
-      background: #e07c08;
-      border-color: #e07c08;
+      background: #d06a10;
+      border-color: #d06a10;
     }
   }
 
   &--arrow {
+    border-radius: 10px; // Figma: rounded-[10px]
+    background: #e87d1e;
+    border-color: #cfd6dc; // Figma: border border-[#cfd6dc]
+    width: 3.25rem;  // Figma: 52px
+    height: 3.125rem; // Figma: 50px
+
     img {
-      width: 18px;
+      width: 18px; // Figma: size-[18px]
       height: 18px;
       object-fit: contain;
       filter: brightness(10);
-      opacity: 0.7;
     }
 
-    &:hover:not(:disabled) img {
-      opacity: 1;
+    &:hover:not(:disabled) {
+      background: #d06a10;
+      border-color: #d06a10;
     }
   }
 }
@@ -441,8 +500,8 @@
   }
 
   .fp-page-btn {
-    width: 2.1rem;
-    height: 2.1rem;
-    font-size: 0.8125rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 0.875rem;
   }
 }
