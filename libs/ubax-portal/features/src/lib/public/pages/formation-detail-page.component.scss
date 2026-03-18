@@ -1,7 +1,7 @@
 // ─── 1. HERO ──────────────────────────────────────────────────────────────────
 
 .fdp-hero {
-  padding: 1.5rem 2.5rem 0; // Figma: 40px latéral
+  padding: 3rem 2.5rem 0; // Figma: 40px latéral
 
   &__img-wrap {
     position: relative;
@@ -9,6 +9,14 @@
     aspect-ratio: 1665 / 685; // Figma exact: 1665px × 685px
     border-radius: 20px;
     overflow: hidden;
+    // Concave notch at bottom-center (outer border-radius kept on border-radius above)
+    // SVG mask: full rectangle, centred notch from x=36%–64%, floor at y=89%, concave Q-curves
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1648 645' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M1648 605 C1648 627.091 1630.09 645 1608 645 H1033.21 C1019.71 645 1007.15 638.161 999.479 626.508 L994.975 619.444 C987.653 607.964 974.948 601 961.249 601 H686.75 C673.051 601 660.346 607.964 653.024 619.444 L648.52 626.508 C640.846 638.161 628.294 645 614.794 645 H40 C17.909 645 0 627.091 0 605 V40 C0 17.909 17.909 0 40 0 H1608 C1630.09 0 1648 17.909 1648 40 V605 Z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1648 645' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M1648 605 C1648 627.091 1630.09 645 1608 645 H1033.21 C1019.71 645 1007.15 638.161 999.479 626.508 L994.975 619.444 C987.653 607.964 974.948 601 961.249 601 H686.75 C673.051 601 660.346 607.964 653.024 619.444 L648.52 626.508 C640.846 638.161 628.294 645 614.794 645 H40 C17.909 645 0 627.091 0 605 V40 C0 17.909 17.909 0 40 0 H1608 C1630.09 0 1648 17.909 1648 40 V605 Z'/%3E%3C/svg%3E");
+    -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
   }
 
   &__img {
@@ -22,7 +30,6 @@
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.5); // Figma: overlay plat 50%
-    border-radius: inherit;
   }
 
   &__title {
@@ -43,11 +50,15 @@
   }
 
   &__date {
+    // Pulled up into the concave notch: notch depth = 11% × (685/1665) ≈ 4.53% of container width
+    margin-top: -2%;
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 1.25rem 0 1.75rem;
+    padding: 0.6rem 0 1.75rem;
     font-family: 'Lexend', sans-serif;
     font-size: 0.9375rem; // Figma: 15px
     font-weight: 400;
@@ -219,6 +230,11 @@
   .fdp-hero__img-wrap {
     aspect-ratio: 1665 / 800; // légèrement plus haut sur tablette
   }
+
+  // Notch depth recalculated: 11% × (800/1665) ≈ 5.29% of container width
+  .fdp-hero__date {
+    margin-top: -5.29%;
+  }
 }
 
 @media (max-width: 600px) {
@@ -234,9 +250,14 @@
       padding: 0 1.25rem;
       font-size: 1rem;
     }
+
+    // Notch depth recalculated: 11% × (3/4) ≈ 8.25% of container width
+    &__date {
+      margin-top: -8.25%;
+    }
   }
 
   .fdp-content {
-    padding: 0 1rem clamp(2.5rem, 5vw, 4rem);
+    padding: 6rem 1rem clamp(2.5rem, 5vw, 4rem);
   }
 }
