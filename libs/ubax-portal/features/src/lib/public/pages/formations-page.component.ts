@@ -61,6 +61,11 @@ export class FormationsPageComponent {
       alt: '',
     },
     {
+      cls: 'fp-float--mr',
+      src: 'assets/portal-assets/formations/icons/fluent-color_building-home-20.svg',
+      alt: '',
+    },
+    {
       cls: 'fp-float--br',
       src: 'assets/portal-assets/formations/icons/streamline-cyber-color_business-handshake-deal.svg',
       alt: '',
