@@ -1,5 +1,5 @@
 <button
-  class="ubax-btn"
+  [class]="['ubax-btn', shadowed() ? 'ubax-btn--shadowed' : ''].join(' ')"
   [class.ubax-btn--primary]="variant() === 'primary'"
   [class.ubax-btn--dark]="variant() === 'dark'"
   [class.ubax-btn--ghost]="variant() === 'ghost'"
