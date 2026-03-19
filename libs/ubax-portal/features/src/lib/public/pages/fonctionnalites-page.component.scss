@@ -8,54 +8,6 @@ $brand-dark: #192e44;
   padding-inline: clamp(1.5rem, 5vw, 6rem);
 }
 
-// ─── BACK TO TOP ─────────────────────────────────────────────────────────────
-
-.fnc-btt {
-  position: fixed;
-  bottom: 2.25rem;
-  right: 2.25rem;
-  z-index: 1000;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 50%;
-  background: #f8961e;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 24px rgba(248, 150, 30, 0.38);
-
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(18px);
-  will-change: transform, opacity;
-  transition:
-    background 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.22s ease;
-
-  &:hover {
-    background: #e07c08;
-    box-shadow: 0 8px 32px rgba(248, 150, 30, 0.55);
-    transform: translateY(-3px);
-  }
-
-  &:active {
-    transform: scale(0.93);
-  }
-
-  svg {
-    display: block;
-    transition: transform 0.22s ease;
-  }
-
-  &:hover svg {
-    transform: translateY(-2px);
-  }
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. HERO
 // ═══════════════════════════════════════════════════════════════════════════════

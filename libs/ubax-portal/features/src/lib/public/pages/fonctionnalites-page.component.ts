@@ -3,13 +3,12 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  ViewChild,
   afterNextRender,
   inject,
 } from '@angular/core';
 import {
   PublicShellComponent,
-  LenisService,
+  BackToTopComponent,
 } from '@ubax-workspace/ubax-portal-layout';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,7 +17,7 @@ const ASSETS = 'assets/portal-assets/fonctionnalites';
 
 @Component({
   selector: 'ubax-fonctionnalites-page',
-  imports: [PublicShellComponent],
+  imports: [PublicShellComponent, BackToTopComponent],
   templateUrl: './fonctionnalites-page.component.html',
   styleUrl: './fonctionnalites-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,22 +25,7 @@ const ASSETS = 'assets/portal-assets/fonctionnalites';
 export class FonctionnalitesPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _destroyRef = inject(DestroyRef);
-  private readonly _lenis = inject(LenisService);
   private _gsapCtx: gsap.Context | null = null;
-
-  @ViewChild('bttBtn') private readonly _bttRef!: ElementRef<HTMLButtonElement>;
-
-  scrollToTop(): void {
-    const lenis = this._lenis.instance;
-    if (lenis) {
-      lenis.scrollTo(0, {
-        duration: 2,
-        easing: (t: number) => 1 - Math.pow(1 - t, 4),
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
 
   protected readonly stepsRow1 = [
     {
@@ -157,31 +141,6 @@ export class FonctionnalitesPageComponent {
     gsap.registerPlugin(ScrollTrigger);
 
     this._gsapCtx = gsap.context(() => {
-      // -- BACK TO TOP — appears after hero leaves viewport
-      const btt = this._bttRef.nativeElement;
-      ScrollTrigger.create({
-        trigger: '.fnc-hero',
-        start: 'bottom 30%',
-        onEnter: () =>
-          gsap.to(btt, {
-            opacity: 1,
-            y: 0,
-            duration: 0.55,
-            ease: 'power3.out',
-            pointerEvents: 'auto',
-            overwrite: true,
-          }),
-        onLeaveBack: () =>
-          gsap.to(btt, {
-            opacity: 0,
-            y: 18,
-            duration: 0.4,
-            ease: 'power2.in',
-            pointerEvents: 'none',
-            overwrite: true,
-          }),
-      });
-
       gsap.from('.fnc-hero__title', {
         y: 40,
         opacity: 0,
