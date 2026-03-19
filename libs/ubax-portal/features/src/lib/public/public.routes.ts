@@ -40,6 +40,14 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'fonctionnalites',
+    data: { preload: true },
+    loadComponent: () =>
+      import('./pages/fonctionnalites-page.component').then(
+        (m) => m.FonctionnalitesPageComponent,
+      ),
+  },
+  {
     path: 'faq',
     loadComponent: () =>
       import('./pages/faq-page.component').then((m) => m.FaqPageComponent),
@@ -66,9 +74,30 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'formations/:slug',
+    loadComponent: () =>
+      import('./pages/formation-detail-page.component').then(
+        (m) => m.FormationDetailPageComponent,
+      ),
+  },
+  {
+    path: 'formations',
+    loadComponent: () =>
+      import('./pages/formations-page.component').then(
+        (m) => m.FormationsPageComponent,
+      ),
+  },
+  {
     path: 'mentions-legales',
     loadComponent: () =>
       import('./pages/legal-page.component').then((m) => m.LegalPageComponent),
+  },
+  {
+    path: 'politique-de-confidentialite',
+    loadComponent: () =>
+      import('./pages/politique-confidentialite-page.component').then(
+        (m) => m.PolitiqueConfidentialitePageComponent,
+      ),
   },
   {
     path: '**',

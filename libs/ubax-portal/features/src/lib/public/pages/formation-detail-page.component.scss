@@ -1,0 +1,263 @@
+// ─── 1. HERO ──────────────────────────────────────────────────────────────────
+
+.fdp-hero {
+  padding: 3rem 2.5rem 0; // Figma: 40px latéral
+
+  &__img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1665 / 685; // Figma exact: 1665px × 685px
+    border-radius: 20px;
+    overflow: hidden;
+    // Concave notch at bottom-center (outer border-radius kept on border-radius above)
+    // SVG mask: full rectangle, centred notch from x=36%–64%, floor at y=89%, concave Q-curves
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1648 645' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M1648 605 C1648 627.091 1630.09 645 1608 645 H1033.21 C1019.71 645 1007.15 638.161 999.479 626.508 L994.975 619.444 C987.653 607.964 974.948 601 961.249 601 H686.75 C673.051 601 660.346 607.964 653.024 619.444 L648.52 626.508 C640.846 638.161 628.294 645 614.794 645 H40 C17.909 645 0 627.091 0 605 V40 C0 17.909 17.909 0 40 0 H1608 C1630.09 0 1648 17.909 1648 40 V605 Z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1648 645' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M1648 605 C1648 627.091 1630.09 645 1608 645 H1033.21 C1019.71 645 1007.15 638.161 999.479 626.508 L994.975 619.444 C987.653 607.964 974.948 601 961.249 601 H686.75 C673.051 601 660.346 607.964 653.024 619.444 L648.52 626.508 C640.846 638.161 628.294 645 614.794 645 H40 C17.909 645 0 627.091 0 605 V40 C0 17.909 17.909 0 40 0 H1608 C1630.09 0 1648 17.909 1648 40 V605 Z'/%3E%3C/svg%3E");
+    -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5); // Figma: overlay plat 50%
+  }
+
+  &__title {
+    position: absolute;
+    top: 35.5%; // Figma: 243px / 685px depuis le haut de l'image
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    padding: 0 clamp(2rem, 6vw, 5rem); // Figma: titre ~57% de la largeur centré
+    text-align: center;
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.25rem, 2.5vw, 2.25rem); // Figma: 36px
+    font-weight: 600; // Figma: SemiBold
+    line-height: 1.4; // Figma: 50px / 36px ≈ 1.39
+    color: #fff;
+    margin: 0;
+    z-index: 2;
+  }
+
+  &__date {
+    // Pulled up into the concave notch: notch depth = 11% × (685/1665) ≈ 4.53% of container width
+    margin-top: -2%;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0 1.75rem;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9375rem; // Figma: 15px
+    font-weight: 400;
+    color: #181818; // Figma: #181818
+  }
+
+  &__date-icon {
+    width: 26px; // Figma: 26px
+    height: 26px; // Figma: 26px
+    flex-shrink: 0;
+  }
+}
+
+// ─── 2. CONTENT ───────────────────────────────────────────────────────────────
+
+.fdp-content {
+  padding: 3.5rem 1.5rem clamp(3rem, 6vw, 5rem);
+
+  &__container {
+    max-width: 85%;
+    margin: 0 auto;
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr 450px;
+    gap: 3.5rem;
+    align-items: start;
+  }
+}
+
+// ─── Article ──────────────────────────────────────────────────────────────────
+
+.fdp-article {
+  background: #fff;
+  border-radius: 16px;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  box-shadow: 0 2px 16px rgba(26, 48, 71, 0.06);
+
+  &__heading {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    font-weight: 700;
+    color: #1a3047;
+    margin: 2rem 0 0.75rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  &__para {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 300;
+    line-height: 1.85;
+    color: #3a4a5c;
+    margin: 0 0 0.75rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__list {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin: 0.25rem 0 1rem;
+
+    li {
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: #3a4a5c;
+      margin-bottom: 0.3rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
+.fdp-sidebar {
+  background: #fff;
+  border-radius: 16px;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  box-shadow: 0 2px 16px rgba(26, 48, 71, 0.06);
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1a3047;
+    margin: 0 0 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eef2f7;
+  }
+}
+
+.fdp-sidebar-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eef2f7;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &__img {
+    width: 88px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #1a3047;
+    margin: 0 0 0.35rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__excerpt {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 300;
+    line-height: 1.6;
+    color: #4a5568;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 960px) {
+  .fdp-content__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .fdp-hero__img-wrap {
+    aspect-ratio: 1665 / 800; // légèrement plus haut sur tablette
+  }
+
+  // Notch depth recalculated: 11% × (800/1665) ≈ 5.29% of container width
+  .fdp-hero__date {
+    margin-top: -5.29%;
+  }
+}
+
+@media (max-width: 600px) {
+  .fdp-hero {
+    padding: 1rem 1rem 0;
+
+    &__img-wrap {
+      aspect-ratio: 4 / 3;
+      border-radius: 14px;
+    }
+
+    &__title {
+      padding: 0 1.25rem;
+      font-size: 1rem;
+    }
+
+    // Notch depth recalculated: 11% × (3/4) ≈ 8.25% of container width
+    &__date {
+      margin-top: -8.25%;
+    }
+  }
+
+  .fdp-content {
+    padding: 6rem 1rem clamp(2.5rem, 5vw, 4rem);
+  }
+}
