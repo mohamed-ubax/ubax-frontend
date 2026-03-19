@@ -542,10 +542,13 @@
   font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.18s;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
-    opacity: 0.88;
+    color: #1a3047;
+    background-color: #fff;
   }
 }
 
