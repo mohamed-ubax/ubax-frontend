@@ -1,6 +1,6 @@
 // ─── Design tokens ────────────────────────────────────────────────────────────
-$accent: var(--ubax-accent);      // #e87d1e
-$brand:  var(--ubax-brand);       // #1a3047
+$accent: var(--ubax-accent); // #e87d1e
+$brand: var(--ubax-brand); // #1a3047
 $brand-dark: #192e44;
 
 // ─── Shared section padding ───────────────────────────────────────────────────
@@ -14,11 +14,12 @@ $brand-dark: #192e44;
 .fnc-hero {
   @extend %section-pad;
   display: grid;
-  grid-template-columns: 1fr clamp(340px, 43vw, 760px);
+  grid-template-columns: 1fr clamp(420px, 49vw, 900px);
   align-items: center;
-  min-height: clamp(520px, 52vw, 860px);
-  padding-block: clamp(2rem, 4vw, 5rem);
-  gap: clamp(2rem, 4vw, 5rem);
+  min-height: clamp(600px, 90vh, 980px);
+  padding-top: clamp(1.5rem, 3vw, 0.1rem);
+  padding-bottom: 0;
+  gap: clamp(1.5rem, 3.5vw, 4rem);
   overflow: hidden;
   background: #fff;
 }
@@ -27,13 +28,13 @@ $brand-dark: #192e44;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 560px;
+  max-width: 95%;
 }
 
 .fnc-hero__title {
   font-size: clamp(1.75rem, 3.5vw, 3rem);
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.5;
   color: $brand;
   margin: 0;
 }
@@ -89,6 +90,7 @@ $brand-dark: #192e44;
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+  margin-top: 4rem;
 }
 
 .fnc-store-btn {
@@ -101,7 +103,9 @@ $brand-dark: #192e44;
   background: rgba(6, 6, 6, 0.05);
   text-decoration: none;
   color: #000;
-  transition: box-shadow 160ms ease, transform 160ms ease;
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease;
 
   &:hover,
   &:focus-visible {
@@ -145,50 +149,53 @@ $brand-dark: #192e44;
 }
 
 // Right: phone visual
+// Phone is top-aligned in the arch, bottom overflows (cropped by section overflow:hidden)
 .fnc-hero__visual {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
-  height: clamp(480px, 50vw, 860px);
+  height: clamp(600px, 90vh, 980px);
+  align-self: stretch;
 }
 
 .fnc-hero__phone-bg {
   position: absolute;
   inset: 0;
-  left: 10%;
+  left: 2%;
   background: $brand-dark;
-  border-radius: 400px 400px 0 0;
+  border-radius: 500px 500px 0 0;
   z-index: 0;
 }
 
+// Phone image starts ~170px (design) from top, overflows bottom — clipped by .fnc-hero overflow:hidden
 .fnc-hero__phone-img {
   position: relative;
   z-index: 1;
-  width: clamp(220px, 26vw, 444px);
+  width: clamp(280px, 30vw, 540px);
   height: auto;
   object-fit: contain;
   display: block;
-  margin-bottom: 0;
+  margin-top: clamp(90px, 10.5vw, 142px);
+  flex-shrink: 0;
 }
 
+// Hotels / Villas / Résidences card — bottom-right floating overlay
 .fnc-hero__card-overlay {
   position: absolute;
-  right: 0;
-  bottom: clamp(120px, 12vw, 200px);
+  right: -6%;
   z-index: 2;
-  width: clamp(160px, 18vw, 308px);
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  border-radius: 0.5rem;
   object-fit: cover;
+  border-radius: 0.75rem;
+  bottom: clamp(220px, 7vw, 50px);
 }
 
+// Louer / Acheter card — left-side floating overlay, ~1/3 down the phone
 .fnc-hero__stats-overlay {
   position: absolute;
-  left: 0;
-  top: clamp(80px, 8vw, 188px);
+  top: 0;
   z-index: 2;
-  width: clamp(160px, 21vw, 360px);
+  left: -14%;
   object-fit: cover;
 }
 
@@ -205,9 +212,9 @@ $brand-dark: #192e44;
 
 .fnc-how__union {
   position: absolute;
-  right: clamp(-4rem, -2vw, 4rem);
-  top: 50%;
-  transform: translateY(-50%) rotate(90deg);
+  right: 8%;
+  top: 70.5%;
+  transform: translateY(-50%);
   width: clamp(14rem, 25vw, 27rem);
   height: clamp(14rem, 25vw, 27rem);
   pointer-events: none;
@@ -218,7 +225,7 @@ $brand-dark: #192e44;
   position: relative;
   z-index: 1;
   text-align: center;
-  margin-bottom: clamp(2.5rem, 4vw, 4rem);
+  margin-bottom: clamp(2.5rem, 6vw, 6rem);
   color: #fff;
 }
 
@@ -226,11 +233,11 @@ $brand-dark: #192e44;
   font-size: clamp(1.75rem, 3vw, 3rem);
   font-weight: 500;
   line-height: 1.17;
-  margin: 0 0 1rem;
+  margin: 0 0 2.5rem;
 }
 
 .fnc-how__subtitle {
-  font-size: clamp(0.875rem, 1.1vw, 0.9375rem);
+  font-size: clamp(0.875rem, 1.1vw, 1rem);
   font-weight: 400;
   line-height: 1.5;
   margin: 0 auto;
@@ -346,15 +353,15 @@ $brand-dark: #192e44;
     font-size: clamp(1.75rem, 3vw, 3rem);
     font-weight: 500;
     line-height: 1.17;
-    margin: 0 0 1.25rem;
+    margin: 0 0 2rem;
   }
 
   p {
-    font-size: clamp(0.875rem, 1.1vw, 0.9375rem);
+    font-size: clamp(0.875rem, 1.1vw, 1rem);
     font-weight: 400;
     line-height: 1.5;
     margin: 0 auto;
-    max-width: 700px;
+    max-width: 40rem;
   }
 }
 
@@ -386,23 +393,21 @@ $brand-dark: #192e44;
 .fnc-agency__dash--main {
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(360px, 48vw, 824px);
   top: 0;
   z-index: 2;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.5);
+  filter: blur(1px);
+  position: relative;
 }
 
 .fnc-agency__dash--left {
-  left: 0;
-  top: clamp(20px, 2.5vw, 44px);
-  width: clamp(200px, 24vw, 420px);
+  left: -14%;
+  top: 16%;
   z-index: 0;
 }
 
 .fnc-agency__dash--right {
-  right: 0;
-  top: clamp(20px, 2.5vw, 44px);
-  width: clamp(200px, 24vw, 420px);
+  right: -16.5%;
+  top: 16%;
   z-index: 0;
 }
 
@@ -410,27 +415,22 @@ $brand-dark: #192e44;
   position: absolute;
   z-index: 3;
   border-radius: 0.375rem;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .fnc-agency__panel--nav {
   left: 50%;
   transform: translateX(-50%);
-  bottom: clamp(50px, 7vw, 120px);
-  width: clamp(280px, 35vw, 600px);
+  top: 27%;
 }
 
 .fnc-agency__panel--widget {
-  left: clamp(120px, 14vw, 260px);
-  bottom: clamp(20px, 3vw, 60px);
-  width: clamp(100px, 11vw, 200px);
+  left: 14%;
+  top: 42.5%;
 }
 
 .fnc-agency__panel--chart {
-  left: 50%;
-  bottom: clamp(10px, 1.5vw, 30px);
-  width: clamp(200px, 28vw, 500px);
-  margin-left: clamp(20px, 3vw, 60px);
+  left: 37%;
+  top: 42.5%;
 }
 
 // Role cards row
@@ -440,6 +440,7 @@ $brand-dark: #192e44;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  margin-top: 10rem;
 }
 
 .fnc-agency__role-card {
@@ -493,7 +494,7 @@ $brand-dark: #192e44;
 }
 
 .fnc-agency__role-desc {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 300;
   line-height: 1.5rem;
   color: #fff;
@@ -518,11 +519,11 @@ $brand-dark: #192e44;
     font-size: clamp(1.75rem, 3vw, 3rem);
     font-weight: 500;
     line-height: 1.17;
-    margin: 0 0 1rem;
+    margin: 0 0 2rem;
   }
 
   p {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
     color: #000;
@@ -571,7 +572,6 @@ $brand-dark: #192e44;
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.25);
 }
 
 .fnc-hotels__dash-panel {
@@ -583,31 +583,24 @@ $brand-dark: #192e44;
 
 .fnc-hotels__dash-panel--chart2 {
   left: 1.25rem;
-  bottom: clamp(10px, 2vw, 40px);
-  width: clamp(140px, 19vw, 314px);
-  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
+  top: 23%;
 }
 
 .fnc-hotels__dash-panel--group362 {
   left: 1.25rem;
-  top: clamp(10px, 2vw, 40px);
-  width: clamp(180px, 22vw, 370px);
-  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
+  top: 11%;
 }
 
 .fnc-hotels__dash-panel--group349 {
-  left: 50%;
-  top: 50%;
+  left: 46%;
+  top: 48%;
   transform: translate(-10%, -50%);
-  width: clamp(80px, 9.5vw, 164px);
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .fnc-hotels__dash-panel--group1171 {
-  right: 0;
+  right: 3px;
+  top: 37%;
   bottom: clamp(20px, 3vw, 56px);
-  width: clamp(100px, 14vw, 244px);
-  box-shadow: 0 14px 14px rgba(0, 0, 0, 0.25);
 }
 
 // Feature items (hotels)
@@ -661,7 +654,7 @@ $brand-dark: #192e44;
 }
 
 .fnc-feature-item__desc {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.5rem;
   color: #575757;
@@ -702,8 +695,24 @@ $brand-dark: #192e44;
   }
 
   .fnc-hero__visual {
-    height: clamp(280px, 60vw, 400px);
+    height: clamp(320px, 68vw, 460px);
     order: -1;
+    align-self: auto;
+  }
+
+  .fnc-hero__phone-img {
+    width: clamp(200px, 36vw, 320px);
+    margin-top: clamp(50px, 8vw, 100px);
+  }
+
+  .fnc-hero__card-overlay {
+    width: clamp(160px, 30vw, 260px);
+    bottom: clamp(20px, 4vw, 60px);
+  }
+
+  .fnc-hero__stats-overlay {
+    width: clamp(160px, 32vw, 280px);
+    top: clamp(100px, 14vw, 200px);
   }
 
   .fnc-hero__content {
