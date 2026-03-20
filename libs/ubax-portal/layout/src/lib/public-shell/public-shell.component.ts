@@ -82,10 +82,12 @@ export class PublicShellComponent implements OnDestroy {
 
   protected toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
+    document.body.style.overflow = this.menuOpen ? 'hidden' : '';
   }
 
   protected closeMenu(): void {
     this.menuOpen = false;
+    document.body.style.overflow = '';
   }
 
   @HostListener('window:scroll')
@@ -96,6 +98,7 @@ export class PublicShellComponent implements OnDestroy {
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     this.menuOpen = false;
+    document.body.style.overflow = '';
   }
 
   protected readonly menuItems = [

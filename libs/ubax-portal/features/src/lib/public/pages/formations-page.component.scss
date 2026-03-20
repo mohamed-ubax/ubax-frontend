@@ -361,7 +361,7 @@
   border: 1px solid rgba(255, 255, 255, 0.45); // border ice cohérente avec les cards
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25); // top highlight ice
   border-radius: 45px; // pill (h=90px → r=45px)
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   width: fit-content;
   align-self: center;
 }
@@ -370,8 +370,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.625rem;
-  height: 3.625rem;
+  width: 3.2rem;
+  height: 3.2rem;
   border-radius: 50px;
   border: 1px solid #cfd6dc;
   background: #fff;
@@ -415,8 +415,8 @@
     border-radius: 10px; // Figma: rounded-[10px]
     background: #e87d1e;
     border-color: #cfd6dc; // Figma: border border-[#cfd6dc]
-    width: 3.25rem; // Figma: 52px
-    height: 3.125rem; // Figma: 50px
+    width: 3rem; // Figma: 52px
+    height: 3rem; // Figma: 50px
 
     img {
       width: 18px; // Figma: size-[18px]

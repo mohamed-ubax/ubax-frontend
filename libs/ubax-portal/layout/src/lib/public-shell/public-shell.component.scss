@@ -138,87 +138,64 @@
 
 .burger-btn {
   display: none;
-  position: relative;
-  width: 1.75rem;
-  height: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  width: 2.6875rem;
+  height: 2.6875rem;
   padding: 0;
   background: none;
   border: none;
   cursor: pointer;
   flex-shrink: 0;
 
-  span {
-    position: absolute;
-    left: 0;
+  img {
     width: 100%;
-    height: 2px;
-    background: var(--ubax-brand);
-    border-radius: 2px;
-    transform-origin: center center;
-
-    &:nth-child(1) {
-      top: 0;
-      transition:
-        background 0.35s ease,
-        top 0.3s 0.15s ease,
-        transform 0.3s ease;
-    }
-
-    &:nth-child(2) {
-      top: 50%;
-      transform: translateY(-50%);
-      transition:
-        background 0.35s ease,
-        opacity 0.15s ease;
-    }
-
-    &:nth-child(3) {
-      bottom: 0;
-      transition:
-        background 0.35s ease,
-        bottom 0.3s 0.15s ease,
-        transform 0.3s ease;
-    }
-  }
-
-  &.is-open {
-    span:nth-child(1) {
-      top: 50%;
-      transform: translateY(-50%) rotate(45deg);
-      transition:
-        top 0.3s ease,
-        transform 0.3s 0.15s ease;
-    }
-
-    span:nth-child(2) {
-      opacity: 0;
-    }
-
-    span:nth-child(3) {
-      bottom: auto;
-      top: 50%;
-      transform: translateY(-50%) rotate(-45deg);
-      transition:
-        top 0.3s ease,
-        transform 0.3s 0.15s ease;
-    }
+    height: 100%;
+    display: block;
+    object-fit: contain;
   }
 }
 
-.nav-backdrop {
+// ── Off-canvas overlay ────────────────────────────────────────────────────────
+.nav-overlay {
   position: fixed;
   inset: 0;
-  z-index: 29;
+  z-index: 39;
   background: transparent;
+  pointer-events: none;
+  transition: background 0.5s ease;
+
+  &.is-open {
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+  }
+}
+
+// ── Off-canvas panel (hidden on desktop) ─────────────────────────────────────
+.offcanvas-panel {
+  display: none;
 }
 
 @media (max-width: 1024px) {
   .main-header {
     gap: 0.5rem;
     padding-inline: 1rem;
+    background: transparent;
+    box-shadow: none;
+
+    &.is-scrolled {
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: none;
+    }
   }
 
   .main-nav {
+    display: none;
+  }
+
+  .pro-space-btn {
     display: none;
   }
 
@@ -226,56 +203,166 @@
     display: flex;
   }
 
-  .mobile-nav-panel {
+  // ── Off-canvas panel ──────────────────────────────────────────────────────
+  .offcanvas-panel {
     display: flex;
     flex-direction: column;
-    position: sticky;
-    top: clamp(4rem, 7.581vw, 8.1875rem);
-    z-index: 28;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
     background: #fff;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-
-    &.is-scrolled {
-      background: rgba(255, 255, 255, 0.18);
-      backdrop-filter: blur(16px);
-      box-shadow: none;
-    }
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
-    transition:
-      max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 0.25s ease;
+    z-index: 40;
+    overflow-y: auto;
+    will-change: transform;
+    transform: translateX(-100%);
+    transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1);
 
     &.is-open {
-      max-height: 32rem;
-      opacity: 1;
-      pointer-events: auto;
+      transform: translateX(0);
     }
+  }
+
+  .offcanvas-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: clamp(4rem, 7.581vw, 6.1875rem);
+    padding: 0 1rem;
+    flex-shrink: 0;
+  }
+
+  .offcanvas-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6875rem;
+    height: 2.6875rem;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // Logo — stagger delay set on BASE state → applies during OPEN transition
+  .offcanvas-logo-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+    transition:
+      opacity 0.5s 0.08s ease,
+      transform 0.6s 0.08s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  // On CLOSE (transitions FROM is-open) → fast, no delay
+  .offcanvas-panel.is-open .offcanvas-logo-wrap {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s ease;
+  }
+
+  .offcanvas-logo {
+    height: clamp(4.5rem, 12vw, 6.5rem);
+    width: auto;
+  }
+
+  .offcanvas-links {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0.5rem 0;
 
     a {
-      padding: 1rem 1.5rem;
+      display: block;
+      padding: 1rem 2.5rem;
       font-family: 'Lexend', sans-serif;
-      font-size: 1rem;
+      font-size: 1.25rem;
       font-weight: 400;
-      color: #000;
+      line-height: 1.5rem;
+      color: #181818;
       text-decoration: none;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      &:active {
-        background: rgba(0, 0, 0, 0.03);
-      }
+      // BASE state transitions (applied during OPEN) — with stagger
+      opacity: 0;
+      transform: translateX(-24px);
+      transition:
+        opacity 0.45s ease,
+        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+        color 0.2s ease;
+      transition-delay: calc(var(--i, 0) * 60ms + 150ms);
 
       &.nav-active {
         color: #f8961e;
         font-weight: 500;
       }
+
+      &:active {
+        background: rgba(0, 0, 0, 0.03);
+      }
     }
+  }
+
+  // IS-OPEN state (applied during CLOSE) — fast, no stagger
+  .offcanvas-panel.is-open .offcanvas-links a {
+    opacity: 1;
+    transform: translateX(0);
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s ease,
+      color 0.2s ease;
+    transition-delay: 0s;
+  }
+
+  // CTA — BASE state (applied during OPEN)
+  .offcanvas-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    margin: auto 2.5rem 3rem;
+    padding: 0 1.5rem;
+    height: 3.4375rem;
+    border-radius: 9999px;
+    background: #f8961e;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Inter', 'Lexend', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.5s 0.52s ease,
+      transform 0.6s 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+
+    img {
+      width: 1.5rem;
+      height: 1.5rem;
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  // IS-OPEN state (applied during CLOSE) — fast
+  .offcanvas-panel.is-open .offcanvas-cta {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s ease;
   }
 }
 

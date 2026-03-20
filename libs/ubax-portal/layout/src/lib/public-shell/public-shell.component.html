@@ -29,34 +29,79 @@
       </a>
       <button
         class="burger-btn"
-        [class.is-open]="menuOpen"
         (click)="toggleMenu()"
         type="button"
-        aria-label="Ouvrir le menu de navigation"
+        [attr.aria-label]="menuOpen ? 'Fermer le menu' : 'Ouvrir le menu de navigation'"
         [attr.aria-expanded]="menuOpen"
       >
-        <span></span>
-        <span></span>
-        <span></span>
+        <img
+          src="assets/portal-assets/home-page/icons/mingcute_menu-fill.svg"
+          alt=""
+          aria-hidden="true"
+        />
       </button>
     </div>
   </header>
 
-  <nav
-    class="mobile-nav-panel"
+  <!-- Overlay -->
+  <div
+    class="nav-overlay"
     [class.is-open]="menuOpen"
-    [class.is-scrolled]="scrolled"
+    (click)="closeMenu()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Off-canvas panel -->
+  <nav
+    class="offcanvas-panel"
+    [class.is-open]="menuOpen"
     aria-label="Menu mobile"
+    [attr.aria-hidden]="!menuOpen"
   >
-    @for (item of menuItems; track item.label) {
-      <a
-        [routerLink]="item.path"
-        routerLinkActive="nav-active"
-        [routerLinkActiveOptions]="{ exact: item.exact }"
+    <div class="offcanvas-top">
+      <button
+        class="offcanvas-close"
         (click)="closeMenu()"
-        >{{ item.label }}</a
+        type="button"
+        aria-label="Fermer le menu"
       >
-    }
+        <img
+          src="assets/portal-assets/home-page/icons/material-symbols_close-rounded.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+
+    <div class="offcanvas-logo-wrap">
+      <img
+        src="assets/portal-assets/header/icons/Group 1171274746.svg"
+        alt="UBAX"
+        class="offcanvas-logo"
+      />
+    </div>
+
+    <div class="offcanvas-links">
+      @for (item of menuItems; track item.label; let i = $index) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="nav-active"
+          [routerLinkActiveOptions]="{ exact: item.exact }"
+          (click)="closeMenu()"
+          [style]="{'--i': i}"
+          >{{ item.label }}</a
+        >
+      }
+    </div>
+
+    <a routerLink="/connexion" class="offcanvas-cta" (click)="closeMenu()">
+      <img
+        src="assets/portal-assets/header/icons/codicon_account.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      Mon espace Pro
+    </a>
   </nav>
 
   <main class="main-content">
