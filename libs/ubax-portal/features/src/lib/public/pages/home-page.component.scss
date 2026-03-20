@@ -687,6 +687,11 @@
   object-fit: contain;
 }
 
+// responsive image shown only below 1100px
+.hp-dash-intelligent {
+  display: none;
+}
+
 .hp-dash-item {
   display: flex;
   flex-direction: column;
@@ -988,6 +993,12 @@
     min-height: 560px;
   }
 
+  .hp-dashboard {
+    &__copy h2 {
+      text-align: center;
+    }
+  }
+
   .hp-steps {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -1002,17 +1013,28 @@
     }
   }
 
+  .hp-location {
+    &__copy h2 {
+      text-align: center;
+    }
+  }
+
+  .hp-hotels__title {
+    text-align: center;
+  }
+
+  .hp-hotels {
+    &__desc {
+      text-align: center;
+      max-width: none;
+    }
+  }
+
   .hp-location,
   .hp-hotels,
   .hp-dashboard,
   .hp-payments {
     grid-template-columns: 1fr;
-  }
-
-  .hp-location__media {
-    img {
-      max-width: 100%;
-    }
   }
 
   .hp-hotels__composite {
@@ -1023,6 +1045,39 @@
   .hp-dashboard__phones,
   .hp-payments__visual {
     justify-self: center;
+  }
+
+  .hp-dashboard__phones {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+
+    .hp-dash-phone,
+    .hp-dash-stat,
+    .hp-dash-widget,
+    .hp-dash-cercle {
+      display: none;
+    }
+
+    .hp-dash-intelligent {
+      display: block;
+      width: min(480px, 100%);
+      height: auto;
+    }
+  }
+
+  .hp-feat-col {
+    align-items: center;
+  }
+
+  .hp-feat__num {
+    margin: 0 auto;
+  }
+
+  .hp-link-clean {
+    display: flex;
+    justify-content: center;
   }
 
   // Orbit uses same default radii (230px/120px) — orbit container stays min(560px,100%)
