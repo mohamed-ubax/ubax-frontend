@@ -17,7 +17,7 @@
   align-items: center;
   justify-content: space-between;
   gap: clamp(0.75rem, 2vw, 2rem);
-  padding: 0 clamp(1.25rem, 3.993vw, 4.3125rem);
+  padding: 0 max(1.25rem, calc((100% - 1284px) / 2));
   height: clamp(4rem, 7.581vw, 6.1875rem);
   background: #fff;
   box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.15);
@@ -304,14 +304,14 @@
   position: relative;
   z-index: 1;
   margin-inline: auto;
-  // top padding: 80px at 1748px = 4.58vw / side padding: 88px = 5.03vw
-  padding: clamp(3rem, 4.58vw, 5rem) clamp(2rem, 5.03vw, 5.5rem) 0;
+  // top padding: 80px at 1748px / side padding: 222px at 1728px → capped at 1284px content area
+  padding: clamp(3rem, 4.58vw, 5rem) max(2rem, calc((100% - 1284px) / 2)) 0;
 }
 
 // Footer top — brand (left) + nav group (right edge)
 .footer-top {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: clamp(1.5rem, 3.2vw, 3.5rem);
 }
@@ -322,6 +322,7 @@
   align-items: flex-start;
   gap: clamp(1.5rem, 3.2vw, 4.5rem);
   flex-shrink: 0;
+  margin-top: 6rem;
 }
 
 // Shared column
@@ -542,7 +543,8 @@
   p {
     margin-inline: auto;
     // side padding matches footer-inner / block padding creates the bar height
-    padding: clamp(1.25rem, 1.72vw, 1.875rem) clamp(2rem, 5.03vw, 5.5rem);
+    padding: clamp(1.25rem, 1.72vw, 1.875rem)
+      max(2rem, calc((100% - 1284px) / 2));
     font-family: 'Lexend', sans-serif;
     // text is ~24px in design at 1748px
     font-size: clamp(1rem, 1.144vw, 1.25rem);
