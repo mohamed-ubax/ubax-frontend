@@ -11,7 +11,7 @@
   width: 100%;
   display: grid;
   grid-template-columns: 45% 55%;
-  min-height: 38vw;
+  min-height: 35vw;
   background-color: rgba(236, 242, 247, 0.98);
   background-image:
     linear-gradient(rgba(236, 242, 247, 0.93), rgba(236, 242, 247, 0.93)),
@@ -95,7 +95,7 @@
     position: absolute;
     bottom: 0;
     right: 10%;
-    height: 82%;
+    height: 88%;
     width: auto;
     object-fit: contain;
     object-position: bottom right;
@@ -212,7 +212,7 @@
     grid-row: 2;
     margin: 0;
     color: rgba(255, 255, 255, 0.85);
-    font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+    font-size: clamp(0.9rem, 1.1vw, 1rem);
     line-height: 1.75;
   }
 }
@@ -476,9 +476,9 @@
         p {
           margin: 0;
           color: #000;
-          font-family: 'Modernica', sans-serif;
-          font-size: clamp(0.875rem, 1.157vw, 1.25rem); // 20px at 1728px
-          font-weight: 100;
+          font-family: 'Lexend', sans-serif;
+          font-size: clamp(0.875rem, 1.157vw, 1rem); // 20px at 1728px
+          font-weight: 300;
           line-height: 1.38;
         }
       }
@@ -659,7 +659,6 @@
   width: 24%;
   z-index: 4;
   border-radius: 16px;
-  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.15);
   height: auto;
   object-fit: contain;
 }
@@ -672,7 +671,6 @@
   width: 50%;
   z-index: 3;
   border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   height: auto;
   object-fit: contain;
 }
@@ -685,7 +683,6 @@
   width: 27%;
   z-index: 5;
   border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
   height: auto;
   object-fit: contain;
 }
@@ -1102,5 +1099,62 @@
       height: 34px;
       margin: -17px 0 0 -17px;
     }
+  }
+}
+
+@media (max-width: 1730px) {
+  .hp-hero {
+    min-height: 37vw;
+  }
+}
+
+@media (max-width: 1665px) {
+  .hp-hero {
+    min-height: 38vw;
+  }
+}
+
+@media (max-width: 1560px) {
+  .hp-hero {
+    min-height: 40vw;
+  }
+}
+
+@media (max-width: 1452px) {
+  .hp-hero {
+    min-height: 42vw;
+  }
+}
+
+@media (max-width: 1200px) {
+  .hp-hero {
+    min-height: 44vw;
+  }
+}
+
+@media (max-width: 1150px) {
+  .hp-hero {
+    min-height: 45vw;
+  }
+  .hp-hero__img {
+    right: 6%;
+  }
+}
+
+@media (max-width: 1065px) {
+  .hp-hero {
+    min-height: 46vw;
+  }
+  .hp-hero__img {
+    right: 2%;
+  }
+}
+
+@media (max-width: 1005px) {
+  .hp-hero {
+    min-height: 48vw;
+  }
+  .hp-hero__img {
+    right: 0%;
   }
 }
