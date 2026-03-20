@@ -26,7 +26,8 @@ $brand-dark: #192e44;
   // Use vw (not vh) to match home page hero proportions — consistent at any
   // screen height. Same scale factor as home page (52vw / 745px).
   min-height: clamp(480px, 52vw, 745px);
-  padding-block: clamp(2rem, 3vw, 3.5rem);
+  padding-block: 0;
+  padding-inline: 19rem;
   gap: clamp(1.25rem, 2.5%, 3rem);
   overflow: hidden;
   background: #fff;
@@ -161,7 +162,7 @@ $brand-dark: #192e44;
 .fnc-hero__visual {
   position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: center;
   height: clamp(480px, 52vw, 745px);
   align-self: stretch;
@@ -170,7 +171,9 @@ $brand-dark: #192e44;
 .fnc-hero__phone-bg {
   position: absolute;
   inset: 0;
-  left: 2%;
+  left: 8%;
+  top: 14%;
+  right: 8%;
   background: $brand-dark;
   border-radius: 500px 500px 0 0;
   z-index: 0;
@@ -181,7 +184,6 @@ $brand-dark: #192e44;
 .fnc-hero__phone-img {
   position: relative;
   z-index: 1;
-  width: clamp(160px, 44%, 360px);
   height: auto;
   object-fit: contain;
   display: block;
@@ -195,8 +197,8 @@ $brand-dark: #192e44;
 // Figma: top=358px in ~625px section → 57% from top; right overflows section
 .fnc-hero__card-overlay {
   position: absolute;
-  right: -8%;
-  top: clamp(190px, 57%, 430px);
+  right: -4%;
+  top: 63%;
   z-index: 2;
   width: clamp(100px, 30%, 190px);
   height: auto;
@@ -208,9 +210,9 @@ $brand-dark: #192e44;
 // Figma: left=568px (arch at 695px) → hangs 127px left of arch = ~21% of arch width
 .fnc-hero__stats-overlay {
   position: absolute;
-  top: 2%;
+  top: 10%;
   z-index: 2;
-  left: -22%;
+  left: -10%;
   width: clamp(140px, 40%, 260px);
   height: auto;
   object-fit: contain;
@@ -229,8 +231,8 @@ $brand-dark: #192e44;
 
 .fnc-how__union {
   position: absolute;
-  right: -3%; // Figma: right edge overflows section by ~62px/1440 ≈ 4%
-  top: 45%;   // Figma: top=446px in ~900px section = 50%, starts mid-section
+  right: 10.5%; // Figma: right edge overflows section by ~62px/1440 ≈ 4%
+  top: 45%; // Figma: top=446px in ~900px section = 50%, starts mid-section
   transform: none;
   // Figma: exactly 432×432px in 1440px design = 30vw — DO NOT use % here,
   // % would be relative to padded content area not section, breaking the overlap
@@ -268,7 +270,7 @@ $brand-dark: #192e44;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.875rem, 1.5%, 1.75rem);
+  gap: 2rem;
 }
 
 .fnc-how__row {
@@ -389,8 +391,6 @@ $brand-dark: #192e44;
 .fnc-agency__dashboards {
   position: relative;
   z-index: 1;
-  // Cancel out section padding so this container spans the full section width
-  margin-inline: calc(-1 * max(clamp(2rem, 9vw, 10rem), calc((100vw - 1440px) / 2)));
   width: auto;
   // Height based on main DG dashboard aspect ratio (842:590 ≈ 1.43)
   // At max-width 1440px content × 68% main = ~980px wide → height = 980/1.43 ≈ 685... too tall
@@ -469,7 +469,6 @@ $brand-dark: #192e44;
   left: 34%;
   top: 27%;
   width: 54%;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 // uigekfdjbn 1 — small widget card
@@ -479,7 +478,6 @@ $brand-dark: #192e44;
   left: 33.5%;
   top: 43%;
   width: 18%;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 // Chart 1cc 1 — revenue chart
@@ -489,7 +487,6 @@ $brand-dark: #192e44;
   left: 52%;
   top: 43%;
   width: 37%;
-  box-shadow: 5px 15px 15px 0 rgba(0, 0, 0, 0.14);
 }
 
 // Role cards row
