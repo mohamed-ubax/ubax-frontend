@@ -5,16 +5,17 @@
       <h1 class="hp-hero__title">
         <span class="hp-hero__line"
           ><span class="hp-hero__line-inner"
-            ><span class="hp-hero__brand-bax">UBAX </span
-            ><span class="hp-hero__rest"
-              >la plateforme qui connecte tout l'écosystème immobilier.</span
-            ></span
+            ><span class="hp-hero__brand-bax">UBAX&nbsp;</span
+            ><span class="hp-hero__rest">la plateforme qui connecte</span></span
           ></span
         >
         <span class="hp-hero__line"
           ><span class="hp-hero__line-inner"
-            ><span class="hp-hero__rest"></span></span
-        ></span>
+            ><span class="hp-hero__rest"
+              >tout&nbsp;l'écosystème&nbsp;immobilier</span
+            ></span
+          ></span
+        >
       </h1>
       <p class="hp-hero__tagline">
         L'immobilier devient plus simple, plus rapide et plus sûr avec UBAX.<br />
@@ -247,7 +248,7 @@
           </div>
         </li>
       </ul>
-      <a routerLink="/contact" class="hp-link-clean">
+      <a routerLink="/fonctionnalites" class="hp-link-clean">
         <button class="hp-btn-dark">Découvrir</button>
       </a>
     </div>
@@ -356,6 +357,13 @@
         src="assets/portal-assets/home-page/images/widget-cercle.webp"
         alt="Widget graphique biens"
         class="hp-dash-cercle"
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        src="assets/portal-assets/home-page/images/intelligent-phones.svg"
+        alt="Tableaux de bord intelligents"
+        class="hp-dash-intelligent"
         loading="lazy"
         decoding="async"
       />
@@ -491,25 +499,5 @@
   </section>
 
   <!-- ── BACK TO TOP ──────────────────────────────────────── -->
-  <button
-    class="hp-btt"
-    #bttBtn
-    aria-label="Remonter en haut de page"
-    (click)="scrollToTop()"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="18 15 12 9 6 15"></polyline>
-    </svg>
-  </button>
+  <ubax-back-to-top />
 </ubax-public-shell>

@@ -6,7 +6,10 @@ import {
   afterNextRender,
   inject,
 } from '@angular/core';
-import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
+import {
+  PublicShellComponent,
+  BackToTopComponent,
+} from '@ubax-workspace/ubax-portal-layout';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -14,7 +17,7 @@ const ASSETS = 'assets/portal-assets/fonctionnalites';
 
 @Component({
   selector: 'ubax-fonctionnalites-page',
-  imports: [PublicShellComponent],
+  imports: [PublicShellComponent, BackToTopComponent],
   templateUrl: './fonctionnalites-page.component.html',
   styleUrl: './fonctionnalites-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

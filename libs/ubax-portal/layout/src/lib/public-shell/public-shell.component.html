@@ -1,6 +1,6 @@
 <div class="page-shell">
   <header class="main-header" [class.is-scrolled]="scrolled">
-    <a routerLink="/accueil" class="brand" aria-label="Accueil UBAX">
+    <a routerLink="/" class="brand" aria-label="Accueil UBAX">
       <img
         src="assets/portal-assets/header/icons/Group 1171274746.svg"
         alt="UBAX"
@@ -19,7 +19,7 @@
     </nav>
 
     <div class="header-end">
-      <a routerLink="/connexion" class="pro-space-btn">
+      <a routerLink="/connexion" class="pro-space-btn" target="_blank">
         <img
           src="assets/portal-assets/header/icons/codicon_account.svg"
           alt=""
@@ -29,35 +29,89 @@
       </a>
       <button
         class="burger-btn"
-        [class.is-open]="menuOpen"
         (click)="toggleMenu()"
         type="button"
-        aria-label="Ouvrir le menu de navigation"
+        [attr.aria-label]="menuOpen ? 'Fermer le menu' : 'Ouvrir le menu de navigation'"
         [attr.aria-expanded]="menuOpen"
       >
-        <span></span>
-        <span></span>
-        <span></span>
+        <img
+          src="assets/portal-assets/home-page/icons/mingcute_menu-fill.svg"
+          alt=""
+          aria-hidden="true"
+        />
       </button>
     </div>
   </header>
 
-  <nav
-    class="mobile-nav-panel"
-    [class.is-open]="menuOpen"
-    [class.is-scrolled]="scrolled"
-    aria-label="Menu mobile"
-  >
-    @for (item of menuItems; track item.label) {
-      <a
-        [routerLink]="item.path"
-        routerLinkActive="nav-active"
-        [routerLinkActiveOptions]="{ exact: item.exact }"
+  <!-- Off-canvas wrapper — position:fixed containing block (ReactBits pattern) -->
+  <div class="offcanvas-wrapper">
+    <!-- Overlay sombre -->
+    <div
+      class="nav-overlay"
+      [class.is-open]="menuOpen"
+      (click)="closeMenu()"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Navy swoosh — pré-couche (CSS transition triggered by is-open class) -->
+    <div class="offcanvas-prelayer" [class.is-open]="menuOpen" aria-hidden="true"></div>
+
+    <!-- Off-canvas panel (position:absolute inside wrapper) -->
+    <nav
+      class="offcanvas-panel"
+      [class.is-open]="menuOpen"
+      aria-label="Menu mobile"
+      [attr.aria-hidden]="!menuOpen"
+    >
+    <div class="offcanvas-top">
+      <button
+        class="offcanvas-close"
         (click)="closeMenu()"
-        >{{ item.label }}</a
+        type="button"
+        aria-label="Fermer le menu"
       >
-    }
+        <img
+          src="assets/portal-assets/home-page/icons/material-symbols_close-rounded.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+
+    <div class="offcanvas-logo-wrap">
+      <img
+        src="assets/portal-assets/header/icons/Group 1171274746.svg"
+        alt="UBAX"
+        class="offcanvas-logo"
+      />
+    </div>
+
+    <!-- Clip container sur chaque li — GSAP anime le span intérieur (yPercent + rotate) -->
+    <ul class="offcanvas-links" role="list">
+      @for (item of menuItems; track item.label) {
+        <li class="offcanvas-item-wrap">
+          <a
+            class="offcanvas-item"
+            [routerLink]="item.path"
+            routerLinkActive="nav-active"
+            [routerLinkActiveOptions]="{ exact: item.exact }"
+            (click)="closeMenu()"
+            ><span class="offcanvas-item-label">{{ item.label }}</span></a
+          >
+        </li>
+      }
+    </ul>
+
+    <a routerLink="/connexion" class="offcanvas-cta" (click)="closeMenu()">
+      <img
+        src="assets/portal-assets/header/icons/codicon_account.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      Mon espace Pro
+    </a>
   </nav>
+  </div><!-- /offcanvas-wrapper -->
 
   <main class="main-content">
     <ng-content></ng-content>

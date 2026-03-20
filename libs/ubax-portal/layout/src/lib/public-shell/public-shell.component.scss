@@ -17,7 +17,7 @@
   align-items: center;
   justify-content: space-between;
   gap: clamp(0.75rem, 2vw, 2rem);
-  padding: 0 clamp(1.25rem, 3.993vw, 4.3125rem);
+  padding: 0 max(1.25rem, calc((100% - 1284px) / 2));
   height: clamp(4rem, 7.581vw, 6.1875rem);
   background: #fff;
   box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.15);
@@ -138,87 +138,120 @@
 
 .burger-btn {
   display: none;
-  position: relative;
-  width: 1.75rem;
-  height: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  width: 2.6875rem;
+  height: 2.6875rem;
   padding: 0;
   background: none;
   border: none;
   cursor: pointer;
   flex-shrink: 0;
 
-  span {
-    position: absolute;
-    left: 0;
+  img {
     width: 100%;
-    height: 2px;
-    background: var(--ubax-brand);
-    border-radius: 2px;
-    transform-origin: center center;
-
-    &:nth-child(1) {
-      top: 0;
-      transition:
-        background 0.35s ease,
-        top 0.3s 0.15s ease,
-        transform 0.3s ease;
-    }
-
-    &:nth-child(2) {
-      top: 50%;
-      transform: translateY(-50%);
-      transition:
-        background 0.35s ease,
-        opacity 0.15s ease;
-    }
-
-    &:nth-child(3) {
-      bottom: 0;
-      transition:
-        background 0.35s ease,
-        bottom 0.3s 0.15s ease,
-        transform 0.3s ease;
-    }
-  }
-
-  &.is-open {
-    span:nth-child(1) {
-      top: 50%;
-      transform: translateY(-50%) rotate(45deg);
-      transition:
-        top 0.3s ease,
-        transform 0.3s 0.15s ease;
-    }
-
-    span:nth-child(2) {
-      opacity: 0;
-    }
-
-    span:nth-child(3) {
-      bottom: auto;
-      top: 50%;
-      transform: translateY(-50%) rotate(-45deg);
-      transition:
-        top 0.3s ease,
-        transform 0.3s 0.15s ease;
-    }
+    height: 100%;
+    display: block;
+    object-fit: contain;
   }
 }
 
-.nav-backdrop {
+// ── Off-canvas wrapper — position:fixed containing block (ReactBits pattern) ─
+// Panel + prelayer sont position:absolute à l'intérieur → héritent 100vw/100dvh
+// sans être affectés par les stacking contexts des ancêtres.
+.offcanvas-wrapper {
   position: fixed;
-  inset: 0;
-  z-index: 29;
-  background: transparent;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
+  pointer-events: none;
+  z-index: 38;
+  overflow: hidden; // clip les éléments traduits hors du wrapper (xPercent:-100)
+}
+
+// ── Nav overlay (inside wrapper, position:absolute) ───────────────────────────
+.nav-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+
+  &.is-open {
+    pointer-events: auto;
+  }
+}
+
+// ── Pré-couche navy ───────────────────────────────────────────────────────────
+// CSS transition (pas GSAP) — plus fiable pour le transform slide.
+// Direction trick : base = close easing, .is-open = open easing.
+.offcanvas-prelayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #1a3047;
+  z-index: 2;
+  will-change: transform;
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.55, 0, 1, 0.45); // close: power3.in
+
+  &.is-open {
+    transform: translateX(0);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); // open: power4.out, no delay
+  }
+}
+
+// ── Off-canvas panel ──────────────────────────────────────────────────────────
+// CSS transition — panel suit la pré-couche avec 70ms de délai à l'ouverture.
+.offcanvas-panel {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  z-index: 3;
+  overflow-y: auto;
+  will-change: transform;
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.55, 0, 1, 0.45); // close: power3.in
+  pointer-events: none;
+
+  &.is-open {
+    transform: translateX(0);
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.07s; // open: power4.out + 70ms delay
+    pointer-events: auto;
+  }
 }
 
 @media (max-width: 1024px) {
   .main-header {
     gap: 0.5rem;
     padding-inline: 1rem;
+    background: transparent !important;
+    box-shadow: none !important;
+
+    &.is-scrolled {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: none !important;
+    }
   }
 
   .main-nav {
+    display: none;
+  }
+
+  .pro-space-btn {
     display: none;
   }
 
@@ -226,55 +259,113 @@
     display: flex;
   }
 
-  .mobile-nav-panel {
+  .offcanvas-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: clamp(4rem, 7.581vw, 6.1875rem);
+    padding: 0 1rem;
+    flex-shrink: 0;
+  }
+
+  .offcanvas-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6875rem;
+    height: 2.6875rem;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // Logo — GSAP contrôle opacity + y
+  .offcanvas-logo-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .offcanvas-logo {
+    height: clamp(3.5rem, 10vw, 5rem);
+    width: auto;
+  }
+
+  // Conteneur liste — centré verticalement pour remplir la page
+  .offcanvas-links {
     display: flex;
     flex-direction: column;
-    position: sticky;
-    top: clamp(4rem, 7.581vw, 8.1875rem);
-    z-index: 28;
-    background: #fff;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    justify-content: center;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
 
-    &.is-scrolled {
-      background: rgba(255, 255, 255, 0.18);
-      backdrop-filter: blur(16px);
-      box-shadow: none;
-    }
-    max-height: 0;
+  // Clip wrapper — overflow:hidden isole l'animation yPercent du label
+  .offcanvas-item-wrap {
     overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
-    transition:
-      max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 0.25s ease;
+  }
 
-    &.is-open {
-      max-height: 32rem;
-      opacity: 1;
-      pointer-events: auto;
+  .offcanvas-item {
+    display: block;
+    padding: 0.875rem 2.5rem;
+    text-decoration: none;
+    color: #181818;
+    transition: color 0.2s ease;
+
+    &.nav-active {
+      color: #f8961e;
     }
 
-    a {
-      padding: 1rem 1.5rem;
-      font-family: 'Lexend', sans-serif;
-      font-size: 1rem;
-      font-weight: 400;
-      color: #000;
-      text-decoration: none;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    &:active {
+      background: rgba(0, 0, 0, 0.03);
+    }
+  }
 
-      &:last-child {
-        border-bottom: none;
-      }
+  // Label animé par GSAP — yPercent:140 rotate:10 → yPercent:0 rotate:0
+  .offcanvas-item-label {
+    display: inline-block;
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.5rem, 5vw, 2rem); // plus grand pour remplir la page
+    font-weight: 400;
+    line-height: 1.3;
+    color: inherit; // hérite de .nav-active sur le parent .offcanvas-item
+    transform-origin: 50% 100%; // rotation ancre en bas (signature ReactBits)
+    will-change: transform;
+  }
 
-      &:active {
-        background: rgba(0, 0, 0, 0.03);
-      }
+  // CTA — GSAP contrôle opacity + y
+  .offcanvas-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    margin: auto 2.5rem 3rem;
+    padding: 0 1.5rem;
+    height: 3.4375rem;
+    border-radius: 9999px;
+    background: #f8961e;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Inter', 'Lexend', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
 
-      &.nav-active {
-        color: #f8961e;
-        font-weight: 500;
-      }
+    img {
+      width: 1.5rem;
+      height: 1.5rem;
+      filter: brightness(0) invert(1);
     }
   }
 }
@@ -304,14 +395,14 @@
   position: relative;
   z-index: 1;
   margin-inline: auto;
-  // top padding: 80px at 1748px = 4.58vw / side padding: 88px = 5.03vw
-  padding: clamp(3rem, 4.58vw, 5rem) clamp(2rem, 5.03vw, 5.5rem) 0;
+  // top padding: 80px at 1748px / side padding: 222px at 1728px → capped at 1284px content area
+  padding: clamp(3rem, 4.58vw, 5rem) max(2rem, calc((100% - 1284px) / 2)) 0;
 }
 
 // Footer top — brand (left) + nav group (right edge)
 .footer-top {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: clamp(1.5rem, 3.2vw, 3.5rem);
 }
@@ -322,6 +413,7 @@
   align-items: flex-start;
   gap: clamp(1.5rem, 3.2vw, 4.5rem);
   flex-shrink: 0;
+  margin-top: 6rem;
 }
 
 // Shared column
@@ -542,7 +634,8 @@
   p {
     margin-inline: auto;
     // side padding matches footer-inner / block padding creates the bar height
-    padding: clamp(1.25rem, 1.72vw, 1.875rem) clamp(2rem, 5.03vw, 5.5rem);
+    padding: clamp(1.25rem, 1.72vw, 1.875rem)
+      max(2rem, calc((100% - 1284px) / 2));
     font-family: 'Lexend', sans-serif;
     // text is ~24px in design at 1748px
     font-size: clamp(1rem, 1.144vw, 1.25rem);
@@ -552,6 +645,14 @@
     color: #fff;
     letter-spacing: -0.0625rem;
     margin: 0;
+  }
+}
+
+@media (max-width: 1440px) {
+  .main-nav {
+    a {
+      font-size: 1.1rem;
+    }
   }
 }
 

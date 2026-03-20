@@ -13,4 +13,5 @@ export class UiButtonComponent {
   readonly block = input(false);
   readonly type = input<'button' | 'submit' | 'reset'>('button');
   readonly disabled = input(false);
+  readonly shadowed = input(false);
 }

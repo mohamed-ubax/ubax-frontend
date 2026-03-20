@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   afterNextRender,
   Component,
@@ -25,6 +25,13 @@ export class PublicShellComponent implements OnDestroy {
   private readonly _destroyRef = inject(DestroyRef);
   private _gsapCtx: gsap.Context | null = null;
 
+  // Cached DOM references (set once in afterNextRender) — panel + prelayer
+  // are driven by CSS transitions, not GSAP, so they don't need caching here.
+  private _overlay!: HTMLElement;
+  private _itemLabels!: NodeListOf<Element>;
+  private _logoWrap!: HTMLElement;
+  private _ctaEl!: HTMLElement;
+
   protected menuOpen = false;
   protected scrolled = false;
 
@@ -32,9 +39,17 @@ export class PublicShellComponent implements OnDestroy {
     afterNextRender(() => {
       this.lenisService.init();
       gsap.registerPlugin(ScrollTrigger);
+
+      const host = this._el.nativeElement;
+      this._overlay = host.querySelector('.nav-overlay');
+      this._itemLabels = host.querySelectorAll('.offcanvas-item-label');
+      this._logoWrap = host.querySelector('.offcanvas-logo-wrap');
+      this._ctaEl = host.querySelector('.offcanvas-cta');
+
       this._gsapCtx = gsap.context(() => {
         this._animateHeader();
-      }, this._el.nativeElement);
+        this._initMenu();
+      }, host);
     });
 
     this._destroyRef.onDestroy(() => {
@@ -47,7 +62,7 @@ export class PublicShellComponent implements OnDestroy {
     this.lenisService.destroy();
   }
 
-  // ── Header entrance ──────────────────────────────────────────────────────
+  // ── Header entrance ───────────────────────────────────────────────────────
   private _animateHeader(): void {
     gsap.from('.main-header', {
       y: -72,
@@ -80,12 +95,81 @@ export class PublicShellComponent implements OnDestroy {
     });
   }
 
+  // ── Menu — initial hidden state ───────────────────────────────────────────
+  private _initMenu(): void {
+    // Panel + prelayer: CSS transitions handle the slide (transform is in CSS).
+    // GSAP only initialises the non-transform properties it will later animate.
+    gsap.set(this._overlay, { opacity: 0 });
+    gsap.set(this._itemLabels, { yPercent: 140, rotate: 10 });
+    gsap.set([this._logoWrap, this._ctaEl], { opacity: 0, y: 20 });
+  }
+
+  // ── Menu OPEN — overlay + items stagger (slide handled by CSS transition) ──
+  private _openMenu(): void {
+    this.menuOpen = true; // triggers [class.is-open] → CSS transition on panel + prelayer
+    document.body.style.overflow = 'hidden';
+
+    // Items start when panel has slid ~15% of its 0.65s course (after 0.07s delay)
+    // = 0.07 + 0.65 * 0.15 ≈ 0.17s
+    const itemsStart = 0.17;
+
+    const tl = gsap.timeline();
+
+    tl.to(this._overlay, { opacity: 1, duration: 0.4, ease: 'power2.out' }, 0);
+
+    tl.fromTo(
+      this._logoWrap,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
+      itemsStart
+    );
+
+    // Nav items — yPercent + rotate stagger (ReactBits signature)
+    tl.fromTo(
+      this._itemLabels,
+      { yPercent: 140, rotate: 10 },
+      {
+        yPercent: 0,
+        rotate: 0,
+        duration: 1,
+        ease: 'power4.out',
+        stagger: { each: 0.1, from: 'start' },
+      },
+      itemsStart + 0.05
+    );
+
+    tl.fromTo(
+      this._ctaEl,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
+      itemsStart + 0.4
+    );
+  }
+
+  // ── Menu CLOSE — CSS transition closes slide, GSAP fades overlay + resets ─
+  private _closeMenu(): void {
+    this.menuOpen = false; // removes [class.is-open] → CSS transition slides panel + prelayer out
+    document.body.style.overflow = '';
+
+    gsap.to(this._overlay, {
+      opacity: 0,
+      duration: 0.32, // matches CSS close transition duration
+      ease: 'power2.in',
+      overwrite: 'auto',
+      onComplete: () => {
+        // Reset item state for next open
+        gsap.set(this._itemLabels, { yPercent: 140, rotate: 10 });
+        gsap.set([this._logoWrap, this._ctaEl], { opacity: 0, y: 20 });
+      },
+    });
+  }
+
   protected toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
+    this.menuOpen ? this._closeMenu() : this._openMenu();
   }
 
   protected closeMenu(): void {
-    this.menuOpen = false;
+    if (this.menuOpen) this._closeMenu();
   }
 
   @HostListener('window:scroll')
@@ -95,7 +179,7 @@ export class PublicShellComponent implements OnDestroy {
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
-    this.menuOpen = false;
+    if (this.menuOpen) this._closeMenu();
   }
 
   protected readonly menuItems = [

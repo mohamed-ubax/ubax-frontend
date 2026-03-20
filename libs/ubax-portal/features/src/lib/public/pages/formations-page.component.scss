@@ -9,7 +9,7 @@
   background-color: rgba(236, 242, 247, 0.98);
   overflow: hidden;
   border-radius: 0 0 24px 24px;
-  padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(4rem, 8vw, 10rem) clamp(1.5rem, 4vw, 3rem);
 
   &__content {
     position: relative;
@@ -18,7 +18,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    max-width: 680px;
+    max-width: 30%;
   }
 
   &__badge {
@@ -30,11 +30,11 @@
     border: none;
     border-radius: 8px;
     padding: 0 1rem;
-    font-family: 'Urbanist', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 1rem;
     font-weight: 600;
     color: #e87d1e;
-    margin-bottom: 1.75rem;
+    margin-bottom: 3.75rem;
     box-shadow:
       0px 3px 3px 0px rgba(0, 0, 0, 0.14),
       inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7),
@@ -55,7 +55,7 @@
     font-family: 'Lexend', sans-serif;
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.5;
     letter-spacing: -0.03em;
     color: #1a3047;
     margin: 0 0 1.5rem;
@@ -98,7 +98,7 @@
 // Sizes, rotations and shadows per Figma node 370:614
 .fp-float--tl {
   top: 18%;
-  left: 8%;
+  left: 32%;
   width: 103px;
   height: 103px;
   transform: rotate(30deg);
@@ -106,7 +106,7 @@
 }
 .fp-float--ml {
   top: 50%;
-  left: 4%;
+  left: 26%;
   width: 80px;
   height: 80px;
   transform: translateY(-50%) rotate(-15deg);
@@ -114,15 +114,15 @@
 }
 .fp-float--bl {
   bottom: 18%;
-  left: 12%;
+  left: 30%;
   width: 91px;
   height: 91px;
   transform: rotate(-15deg);
   box-shadow: -8.596px 14.327px 28.654px rgba(0, 0, 0, 0.1);
 }
 .fp-float--tr {
-  top: 18%;
-  right: 10%;
+  top: 19%;
+  right: 34%;
   width: 91px;
   height: 91px;
   transform: rotate(-15deg);
@@ -130,15 +130,15 @@
 }
 .fp-float--mr {
   top: 50%;
-  right: 4%;
+  right: 27%;
   width: 91px;
   height: 91px;
-  transform: translateY(-50%) rotate(-15deg);
+  transform: translateY(-50%) rotate(6deg);
   box-shadow: -8.596px 14.327px 28.654px rgba(0, 0, 0, 0.1);
 }
 .fp-float--br {
   bottom: 18%;
-  right: 8%;
+  right: 30%;
   width: 103px;
   height: 103px;
   transform: rotate(30deg);
@@ -175,11 +175,9 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 55.6875rem;  // 891px
-    height: 21.875rem;  // 350px
     max-width: none;
     display: block;
-    filter: blur(28px);
+    filter: blur(2px);
   }
 
   // Lamp fixture (Figma node 370:660)
@@ -197,7 +195,7 @@
   }
 
   &__title {
-    font-family: 'Lexend Deca', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
     background: linear-gradient(133.38deg, #ffffff 1.91%, #eaeaea 43.92%);
@@ -205,8 +203,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
-    margin: 0 0 clamp(2rem, 4vw, 3.5rem);
-    letter-spacing: -1.44px;
+    margin: 3rem 0 clamp(2rem, 4vw, 5.5rem);
     position: relative;
     z-index: 1;
   }
@@ -364,7 +361,7 @@
   border: 1px solid rgba(255, 255, 255, 0.45); // border ice cohérente avec les cards
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25); // top highlight ice
   border-radius: 45px; // pill (h=90px → r=45px)
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   width: fit-content;
   align-self: center;
 }
@@ -373,8 +370,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.625rem;
-  height: 3.625rem;
+  width: 3.2rem;
+  height: 3.2rem;
   border-radius: 50px;
   border: 1px solid #cfd6dc;
   background: #fff;
@@ -418,8 +415,8 @@
     border-radius: 10px; // Figma: rounded-[10px]
     background: #e87d1e;
     border-color: #cfd6dc; // Figma: border border-[#cfd6dc]
-    width: 3.25rem; // Figma: 52px
-    height: 3.125rem; // Figma: 50px
+    width: 3rem; // Figma: 52px
+    height: 3rem; // Figma: 50px
 
     img {
       width: 18px; // Figma: size-[18px]

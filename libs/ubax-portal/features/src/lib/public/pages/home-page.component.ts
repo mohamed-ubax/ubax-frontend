@@ -3,33 +3,29 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  ViewChild,
   inject,
   DOCUMENT,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   PublicShellComponent,
-  LenisService,
+  BackToTopComponent,
 } from '@ubax-workspace/ubax-portal-layout';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 @Component({
   selector: 'ubax-home-page',
-  imports: [RouterLink, PublicShellComponent],
+  imports: [RouterLink, PublicShellComponent, BackToTopComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
 })
 export class HomePageComponent {
   private readonly elRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly lenis = inject(LenisService);
   private readonly document = inject(DOCUMENT);
   private gsapCtx: gsap.Context | undefined;
   private heroPreloadLink: HTMLLinkElement | undefined;
-
-  @ViewChild('bttBtn') private readonly bttRef!: ElementRef<HTMLButtonElement>;
 
   constructor() {
     const link = this.document.createElement('link');
@@ -54,45 +50,8 @@ export class HomePageComponent {
     });
   }
 
-  scrollToTop(): void {
-    const lenis = this.lenis.instance;
-    if (lenis) {
-      lenis.scrollTo(0, {
-        duration: 2,
-        easing: (t: number) => 1 - Math.pow(1 - t, 4), // easeOutQuart
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
   private initAnimations(): void {
     const ease = 'power3.out';
-
-    // -- BACK TO TOP � appears after hero leaves viewport -----------------
-    const btt = this.bttRef.nativeElement;
-    ScrollTrigger.create({
-      trigger: '.hp-hero',
-      start: 'bottom 30%',
-      onEnter: () =>
-        gsap.to(btt, {
-          opacity: 1,
-          y: 0,
-          duration: 0.55,
-          ease: 'power3.out',
-          pointerEvents: 'auto',
-          overwrite: true,
-        }),
-      onLeaveBack: () =>
-        gsap.to(btt, {
-          opacity: 0,
-          y: 18,
-          duration: 0.4,
-          ease: 'power2.in',
-          pointerEvents: 'none',
-          overwrite: true,
-        }),
-    });
 
     // -- 1. HERO � image first, then copy rises in -------------------------
     const heroTl = gsap.timeline({ defaults: { ease } });

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1003" height="350" viewBox="0 0 1003 350" fill="none">
+  <defs>
+    <filter id="beam-blur" x="0" y="0" width="1003" height="350" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="28" />
+    </filter>
+
+    <linearGradient id="beam-fill" x1="501.5" y1="0" x2="501.5" y2="350"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.15" />
+      <stop offset="1" stop-color="white" stop-opacity="0" />
+    </linearGradient>
+
+    <linearGradient id="bottom-blur-mask" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="white" stop-opacity="0" />
+      <stop offset="55%" stop-color="white" stop-opacity="0" />
+      <stop offset="78%" stop-color="white" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="white" stop-opacity="1" />
+    </linearGradient>
+
+    <mask id="bottom-blur-reveal">
+      <rect width="1003" height="350" fill="url(#bottom-blur-mask)" />
+    </mask>
+  </defs>
+
+  <path
+    d="M182.75 0H820.25L947 350H56L182.75 0Z"
+    fill="url(#beam-fill)"
+  />
+
+  <g filter="url(#beam-blur)" mask="url(#bottom-blur-reveal)">
+    <path
+      d="M182.75 0H820.25L947 350H56L182.75 0Z"
+      fill="url(#beam-fill)"
+    />
+  </g>
+</svg>
