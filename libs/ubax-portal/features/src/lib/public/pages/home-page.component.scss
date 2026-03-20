@@ -1042,9 +1042,27 @@
   }
 
   .hp-hotels__visual,
-  .hp-dashboard__phones,
-  .hp-payments__visual {
+  .hp-dashboard__phones {
     justify-self: center;
+  }
+
+  .hp-payments {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    &__visual {
+      width: 100%;
+      justify-content: center;
+    }
+
+    &__copy h2 {
+      text-align: center;
+    }
+
+    &__copy p {
+      max-width: none;
+    }
   }
 
   .hp-dashboard__phones {
