@@ -1102,6 +1102,40 @@
   // in single-column layout too, so no override needed here
 }
 
+@media (max-width: 1005px) {
+  .hp-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+
+    &__copy {
+      width: 100%;
+      text-align: center;
+      padding-right: max(2.5rem, calc((100vw - 1284px) / 2));
+    }
+
+    &__media {
+      position: relative;
+      height: clamp(300px, 45vw, 460px);
+    }
+
+    &__img {
+      right: auto;
+      left: 10%;
+      transform: translateX(10%);
+      height: 100%;
+      object-position: center bottom;
+    }
+
+    &__tagline {
+      max-width: none;
+    }
+
+    &__stores {
+      justify-content: center;
+    }
+  }
+}
+
 @media (max-width: 700px) {
   .hp-hero {
     grid-template-columns: 1fr;
@@ -1229,5 +1263,29 @@
   }
   .hp-hero__img {
     right: 0%;
+  }
+}
+
+@media (max-width: 610px) {
+  .hp-hero {
+    &__copy {
+      padding: 1rem;
+    }
+
+    &__img {
+      left: 5%;
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .hp-hero {
+    &__stores {
+      flex-wrap: wrap;
+    }
+
+    &__img {
+      left: 0%;
+    }
   }
 }
