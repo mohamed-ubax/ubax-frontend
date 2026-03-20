@@ -156,38 +156,94 @@
   }
 }
 
-// ── Off-canvas overlay ────────────────────────────────────────────────────────
-.nav-overlay {
+// ── Off-canvas wrapper — position:fixed containing block (ReactBits pattern) ─
+// Panel + prelayer sont position:absolute à l'intérieur → héritent 100vw/100dvh
+// sans être affectés par les stacking contexts des ancêtres.
+.offcanvas-wrapper {
   position: fixed;
-  inset: 0;
-  z-index: 39;
-  background: transparent;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
   pointer-events: none;
-  transition: background 0.5s ease;
+  z-index: 38;
+  overflow: hidden; // clip les éléments traduits hors du wrapper (xPercent:-100)
+}
+
+// ── Nav overlay (inside wrapper, position:absolute) ───────────────────────────
+.nav-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 
   &.is-open {
-    background: rgba(0, 0, 0, 0.5);
     pointer-events: auto;
   }
 }
 
-// ── Off-canvas panel (hidden on desktop) ─────────────────────────────────────
+// ── Pré-couche navy ───────────────────────────────────────────────────────────
+// CSS transition (pas GSAP) — plus fiable pour le transform slide.
+// Direction trick : base = close easing, .is-open = open easing.
+.offcanvas-prelayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #1a3047;
+  z-index: 2;
+  will-change: transform;
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.55, 0, 1, 0.45); // close: power3.in
+
+  &.is-open {
+    transform: translateX(0);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); // open: power4.out, no delay
+  }
+}
+
+// ── Off-canvas panel ──────────────────────────────────────────────────────────
+// CSS transition — panel suit la pré-couche avec 70ms de délai à l'ouverture.
 .offcanvas-panel {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  z-index: 3;
+  overflow-y: auto;
+  will-change: transform;
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.55, 0, 1, 0.45); // close: power3.in
+  pointer-events: none;
+
+  &.is-open {
+    transform: translateX(0);
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.07s; // open: power4.out + 70ms delay
+    pointer-events: auto;
+  }
 }
 
 @media (max-width: 1024px) {
   .main-header {
     gap: 0.5rem;
     padding-inline: 1rem;
-    background: transparent;
-    box-shadow: none;
+    background: transparent !important;
+    box-shadow: none !important;
 
     &.is-scrolled {
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      box-shadow: none;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: none !important;
     }
   }
 
@@ -201,28 +257,6 @@
 
   .burger-btn {
     display: flex;
-  }
-
-  // ── Off-canvas panel ──────────────────────────────────────────────────────
-  .offcanvas-panel {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    height: 100dvh;
-    background: #fff;
-    z-index: 40;
-    overflow-y: auto;
-    will-change: transform;
-    transform: translateX(-100%);
-    transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1);
-
-    &.is-open {
-      transform: translateX(0);
-    }
   }
 
   .offcanvas-top {
@@ -252,80 +286,64 @@
     }
   }
 
-  // Logo — stagger delay set on BASE state → applies during OPEN transition
+  // Logo — GSAP contrôle opacity + y
   .offcanvas-logo-wrap {
     display: flex;
     justify-content: center;
-    padding: 1.5rem 1rem 2rem;
+    padding: 2rem 1rem 1.5rem;
     flex-shrink: 0;
-    opacity: 0;
-    transform: translateY(16px) scale(0.92);
-    transition:
-      opacity 0.5s 0.08s ease,
-      transform 0.6s 0.08s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  // On CLOSE (transitions FROM is-open) → fast, no delay
-  .offcanvas-panel.is-open .offcanvas-logo-wrap {
-    opacity: 1;
-    transform: none;
-    transition:
-      opacity 0.2s ease,
-      transform 0.25s ease;
   }
 
   .offcanvas-logo {
-    height: clamp(4.5rem, 12vw, 6.5rem);
+    height: clamp(3.5rem, 10vw, 5rem);
     width: auto;
   }
 
+  // Conteneur liste — centré verticalement pour remplir la page
   .offcanvas-links {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     flex: 1;
-    padding: 0.5rem 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
 
-    a {
-      display: block;
-      padding: 1rem 2.5rem;
-      font-family: 'Lexend', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 400;
-      line-height: 1.5rem;
-      color: #181818;
-      text-decoration: none;
-      // BASE state transitions (applied during OPEN) — with stagger
-      opacity: 0;
-      transform: translateX(-24px);
-      transition:
-        opacity 0.45s ease,
-        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-        color 0.2s ease;
-      transition-delay: calc(var(--i, 0) * 60ms + 150ms);
+  // Clip wrapper — overflow:hidden isole l'animation yPercent du label
+  .offcanvas-item-wrap {
+    overflow: hidden;
+  }
 
-      &.nav-active {
-        color: #f8961e;
-        font-weight: 500;
-      }
+  .offcanvas-item {
+    display: block;
+    padding: 0.875rem 2.5rem;
+    text-decoration: none;
+    color: #181818;
+    transition: color 0.2s ease;
 
-      &:active {
-        background: rgba(0, 0, 0, 0.03);
-      }
+    &.nav-active {
+      color: #f8961e;
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.03);
     }
   }
 
-  // IS-OPEN state (applied during CLOSE) — fast, no stagger
-  .offcanvas-panel.is-open .offcanvas-links a {
-    opacity: 1;
-    transform: translateX(0);
-    transition:
-      opacity 0.2s ease,
-      transform 0.25s ease,
-      color 0.2s ease;
-    transition-delay: 0s;
+  // Label animé par GSAP — yPercent:140 rotate:10 → yPercent:0 rotate:0
+  .offcanvas-item-label {
+    display: inline-block;
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.5rem, 5vw, 2rem); // plus grand pour remplir la page
+    font-weight: 400;
+    line-height: 1.3;
+    color: inherit; // hérite de .nav-active sur le parent .offcanvas-item
+    transform-origin: 50% 100%; // rotation ancre en bas (signature ReactBits)
+    will-change: transform;
   }
 
-  // CTA — BASE state (applied during OPEN)
+  // CTA — GSAP contrôle opacity + y
   .offcanvas-cta {
     display: flex;
     align-items: center;
@@ -343,26 +361,12 @@
     font-weight: 500;
     white-space: nowrap;
     flex-shrink: 0;
-    opacity: 0;
-    transform: translateY(20px);
-    transition:
-      opacity 0.5s 0.52s ease,
-      transform 0.6s 0.52s cubic-bezier(0.22, 1, 0.36, 1);
 
     img {
       width: 1.5rem;
       height: 1.5rem;
       filter: brightness(0) invert(1);
     }
-  }
-
-  // IS-OPEN state (applied during CLOSE) — fast
-  .offcanvas-panel.is-open .offcanvas-cta {
-    opacity: 1;
-    transform: translateY(0);
-    transition:
-      opacity 0.2s ease,
-      transform 0.25s ease;
   }
 }
 

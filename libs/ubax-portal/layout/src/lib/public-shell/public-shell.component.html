@@ -43,21 +43,26 @@
     </div>
   </header>
 
-  <!-- Overlay -->
-  <div
-    class="nav-overlay"
-    [class.is-open]="menuOpen"
-    (click)="closeMenu()"
-    aria-hidden="true"
-  ></div>
+  <!-- Off-canvas wrapper — position:fixed containing block (ReactBits pattern) -->
+  <div class="offcanvas-wrapper">
+    <!-- Overlay sombre -->
+    <div
+      class="nav-overlay"
+      [class.is-open]="menuOpen"
+      (click)="closeMenu()"
+      aria-hidden="true"
+    ></div>
 
-  <!-- Off-canvas panel -->
-  <nav
-    class="offcanvas-panel"
-    [class.is-open]="menuOpen"
-    aria-label="Menu mobile"
-    [attr.aria-hidden]="!menuOpen"
-  >
+    <!-- Navy swoosh — pré-couche (CSS transition triggered by is-open class) -->
+    <div class="offcanvas-prelayer" [class.is-open]="menuOpen" aria-hidden="true"></div>
+
+    <!-- Off-canvas panel (position:absolute inside wrapper) -->
+    <nav
+      class="offcanvas-panel"
+      [class.is-open]="menuOpen"
+      aria-label="Menu mobile"
+      [attr.aria-hidden]="!menuOpen"
+    >
     <div class="offcanvas-top">
       <button
         class="offcanvas-close"
@@ -81,18 +86,21 @@
       />
     </div>
 
-    <div class="offcanvas-links">
-      @for (item of menuItems; track item.label; let i = $index) {
-        <a
-          [routerLink]="item.path"
-          routerLinkActive="nav-active"
-          [routerLinkActiveOptions]="{ exact: item.exact }"
-          (click)="closeMenu()"
-          [style]="{'--i': i}"
-          >{{ item.label }}</a
-        >
+    <!-- Clip container sur chaque li — GSAP anime le span intérieur (yPercent + rotate) -->
+    <ul class="offcanvas-links" role="list">
+      @for (item of menuItems; track item.label) {
+        <li class="offcanvas-item-wrap">
+          <a
+            class="offcanvas-item"
+            [routerLink]="item.path"
+            routerLinkActive="nav-active"
+            [routerLinkActiveOptions]="{ exact: item.exact }"
+            (click)="closeMenu()"
+            ><span class="offcanvas-item-label">{{ item.label }}</span></a
+          >
+        </li>
       }
-    </div>
+    </ul>
 
     <a routerLink="/connexion" class="offcanvas-cta" (click)="closeMenu()">
       <img
@@ -103,6 +111,7 @@
       Mon espace Pro
     </a>
   </nav>
+  </div><!-- /offcanvas-wrapper -->
 
   <main class="main-content">
     <ng-content></ng-content>
