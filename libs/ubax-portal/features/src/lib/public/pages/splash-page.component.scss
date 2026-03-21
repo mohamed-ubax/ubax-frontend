@@ -976,6 +976,170 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   LANDSCAPE PHONES  (max-width: 768px, orientation: landscape)
+   e.g. iPhone SE/8 rotated — 568×320, 667×375.
+   Overrides the portrait stacking above: text LEFT, orbit RIGHT.
+   Sized by vh (the short axis) so nothing overflows the screen height.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* ── Orbit ring — right side, centered vertically ────────────────────── */
+  .orbit-ring {
+    width: min(70vh, 260px);
+    height: min(70vh, 260px);
+    left: calc(65% - min(35vh, 130px));
+    top: calc(50% - min(35vh, 130px));
+    transform: translate(0, 0);
+  }
+
+  /* ── Center logo bg ──────────────────────────────────────────────────── */
+  .center-logo-bg {
+    width: min(24vh, 88px);
+    height: min(24vh, 88px);
+    left: calc(65% - min(12vh, 44px));
+    top: calc(50% - min(12vh, 44px));
+    transform: translate(0, 0);
+  }
+
+  /* ── Center logo mark ────────────────────────────────────────────────── */
+  .center-logo-mark {
+    width: min(8.2vh, 30px);
+    height: min(10.2vh, 37px);
+    left: calc(65% - min(4.1vh, 15px));
+    top: calc(50% - min(5.1vh, 18.5px));
+    transform: translate(0, 0);
+  }
+
+  /* ── Orbit ripples ───────────────────────────────────────────────────── */
+  .orbit-ripple {
+    width: min(24vh, 88px);
+    height: min(24vh, 88px);
+    left: calc(65% - min(12vh, 44px));
+    top: calc(50% - min(12vh, 44px));
+  }
+
+  /* ── Orbit photos — orbit around (65 %, 50 %) ───────────────────────── */
+  .orbit-photo {
+    --orbit-r: min(35vh, 130px);
+    left: 65%;
+    top: 50%;
+  }
+
+  .orbit-photo-1 {
+    width: min(9vh, 34px);
+    height: min(9vh, 33px);
+    margin: -16.5px 0 0 -17px;
+  }
+
+  .orbit-photo-2 {
+    width: min(9vh, 34px);
+    height: min(9.3vh, 34px);
+    margin: -17px 0 0 -17px;
+  }
+
+  .orbit-photo-3 {
+    width: min(8.5vh, 32px);
+    height: min(8.5vh, 32px);
+    margin: -16px 0 0 -16px;
+  }
+
+  .orbit-photo-4 {
+    width: min(12vh, 45px);
+    height: min(11.5vh, 43px);
+    margin: -21.5px 0 0 -22.5px;
+  }
+
+  .orbit-photo-5 {
+    width: min(9.8vh, 37px);
+    height: min(10vh, 38px);
+    margin: -19px 0 0 -18.5px;
+  }
+
+  .orbit-photo-6 {
+    width: min(12.5vh, 47px);
+    height: min(12.5vh, 47px);
+    margin: -23.5px 0 0 -23.5px;
+  }
+
+  /* ── Orbit dots ──────────────────────────────────────────────────────── */
+  .orbit-dot {
+    --orbit-r: min(35vh, 130px);
+    left: 65%;
+    top: 50%;
+  }
+
+  .orbit-dot-1,
+  .orbit-dot-2,
+  .orbit-dot-3,
+  .orbit-dot-4 {
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+  }
+
+  /* ── Hero title — left column ────────────────────────────────────────── */
+  .hero-title {
+    left: 5vw;
+    top: 10vh;
+    width: 46vw;
+    font-size: clamp(0.95rem, 4.2vh, 1.3rem);
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── Hero subtitle ───────────────────────────────────────────────────── */
+  .hero-subtitle {
+    left: 5vw;
+    top: 44vh;
+    width: 46vw;
+    font-size: clamp(0.7rem, 2.4vh, 0.875rem);
+    line-height: 1.5;
+  }
+
+  /* ── Users pill — hidden in landscape (insufficient vertical room) ───── */
+  .users-pill {
+    display: none;
+  }
+
+  /* ── Discover button — centered in left text column ──────────────────── */
+  /* left: 28vw + the animation's translateX(-50%) = center at ~28 % width  */
+  .discover-shell {
+    top: auto;
+    bottom: 5vh;
+    left: 28vw;
+    width: 170px;
+    height: 58px;
+  }
+
+  .discover-pill {
+    left: 14px;
+    top: 9px;
+    width: 141px;
+    height: 39px;
+    font-size: 12px;
+    padding-right: 25px;
+  }
+
+  .discover-arrow-wrap {
+    left: 114px;
+    top: 12px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .discover-arrow-bg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .discover-arrow {
+    left: 9px;
+    top: 10px;
+    width: 17px;
+    height: 16px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scene-design,
   .scene-bg,
