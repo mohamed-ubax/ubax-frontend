@@ -76,6 +76,13 @@ export class FormationsPageComponent {
     afterNextRender(() => this._initAnimations());
   }
 
+  protected scrollToGuides(): void {
+    const guidesEl = (this._el.nativeElement as HTMLElement).querySelector(
+      '.fp-guides',
+    );
+    guidesEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   protected goToPage(page: number): void {
     if (page < 1 || page > this.totalPages()) return;
     this.currentPage.set(page);
