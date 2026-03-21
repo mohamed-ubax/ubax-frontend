@@ -29,7 +29,7 @@
   position: relative;
   z-index: 2;
   width: 7.009rem; // 112.14px
-  margin-bottom: clamp(2rem, 4vh, 3.5625rem);
+  margin-bottom: 2rem;
   opacity: 0;
   animation: login-logo-in 0.75s cubic-bezier(0, 0, 0.2, 1) 0.15s forwards;
 
@@ -47,7 +47,7 @@
   position: relative;
   z-index: 1;
   width: min(31.1875rem, calc(100% - 2rem)); // 499px
-  min-height: 33.3125rem; // 533px
+  min-height: 30rem; // 480px
   border-radius: 1.25rem;
   border: 1px solid #cfcfcf;
   background: #fff;
@@ -128,7 +128,7 @@
   border-radius: 2.5rem;
   border: 1px solid #515151;
   background: #fff;
-  min-height: 4.1081rem; // 65.73px
+  min-height: 3.2rem; // 65.73px
   padding: 0 2.375rem 0 1.125rem;
   margin-top: 1.0913rem;
   margin-bottom: 0;
@@ -152,7 +152,7 @@
 
 .phone-input {
   flex: 1;
-  height: 3.5rem; // 56px
+  height: 3.2rem; // 56px
   border-radius: 2.5rem !important;
   border: 1px solid #515151 !important;
   background: #fff !important;
@@ -182,7 +182,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.77rem;
-  margin-top: 2.1963rem;
+  margin-top: 1.4rem;
 }
 
 .reset-label {
@@ -239,16 +239,16 @@
   &__icon {
     position: relative;
     z-index: 1;
-    width: 35%;
-    height: 35%;
+    width: 50px;
+    height: 30px;
     object-fit: contain;
   }
 }
 
 // Each badge: larger, and clearly visible
 .orbit--top-left {
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 4rem;
+  height: 4rem;
   top: 6%;
   left: 23.15%;
   --orbit-delay: 0.2s;
@@ -261,8 +261,8 @@
 }
 
 .orbit--top-right {
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 4rem;
+  height: 4rem;
   top: 6%;
   left: 72.28%;
   --orbit-delay: 0.38s;
@@ -275,8 +275,8 @@
 }
 
 .orbit--mid-left {
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 4rem;
+  height: 4rem;
   top: 38%;
   left: 11.46%;
   --orbit-delay: 0.56s;
@@ -289,8 +289,8 @@
 }
 
 .orbit--mid-right {
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 4rem;
+  height: 4rem;
   top: 36%;
   left: 83.33%;
   --orbit-delay: 0.72s;
@@ -303,8 +303,8 @@
 }
 
 .orbit--bot-left {
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 4rem;
+  height: 4rem;
   bottom: 2rem;
   left: 22.63%;
   --orbit-delay: 0.88s;
@@ -317,8 +317,8 @@
 }
 
 .orbit--bot-right {
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 4rem;
+  height: 4rem;
   bottom: 2rem;
   left: 74.54%;
   --orbit-delay: 1.04s;
@@ -347,7 +347,7 @@
 
   .country-picker.p-select {
     width: 8.4375rem;
-    height: 3.5rem;
+    height: 3.2rem;
     border-radius: 2.5rem;
     border: 1px solid #515151;
     background: #fff;
@@ -458,7 +458,7 @@
     border: 1px solid #e0e0e0;
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
     overflow: hidden;
-    min-width: 15.25rem;
+    min-width: 14rem;
   }
 
   .p-select-filter-container {
@@ -716,7 +716,7 @@
   }
 
   .login-logo {
-    width: 5.25rem;
+    width: 4rem;
     margin-bottom: 1.5rem;
   }
 

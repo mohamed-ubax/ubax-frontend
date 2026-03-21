@@ -29,7 +29,7 @@
     font-size: 1.25rem;
     font-weight: 300;
     line-height: 2rem;
-    max-width: 69rem;
+    max-width: 80rem;
     margin: 0 auto;
   }
 }
@@ -38,7 +38,7 @@
   display: grid;
   grid-template-columns: min(320px, 28%) 1fr;
   gap: 5rem;
-  padding: clamp(2rem, 3vw, 3rem) clamp(2rem, 5vw, 5rem) clamp(3rem, 6vw, 6rem);
+  padding: 3rem 24vw 3rem 9vw;
   align-items: start;
 }
 

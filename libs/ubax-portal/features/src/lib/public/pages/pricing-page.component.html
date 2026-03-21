@@ -1,7 +1,7 @@
 <ubax-public-shell>
   <section class="pricing-wrap">
     <header class="pricing-header">
-      <h1>Une tarification simple, claire et évolutive</h1>
+      <h1>Une offre simple, claire et évolutive</h1>
       <p>
         UBAX propose des plans adaptés à tous les niveaux d'agences
         immobilières, pour gérer vos biens, vos locataires et vos paiements en
@@ -41,13 +41,6 @@
             <span class="plan__amount">{{ plan.price }}</span>
             <span class="plan__period">&nbsp;/ mois</span>
           </div>
-
-          <ubax-ui-button
-            [variant]="plan.featured ? 'primary' : 'outline'"
-            [block]="true"
-          >
-            Sélectionner
-          </ubax-ui-button>
 
           <ul class="plan__features">
             @for (feature of plan.features; track feature) {

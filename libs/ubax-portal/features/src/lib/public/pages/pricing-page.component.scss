@@ -1,6 +1,6 @@
 .pricing-wrap {
   width: min(1550px, calc(100% - 2rem));
-  margin: 1.8rem auto 10rem auto;
+  margin: 0 auto 10rem auto;
   background: #ecf2f7;
   border-radius: 20px;
   padding: 3rem 2.5rem 3.5rem;
@@ -31,7 +31,7 @@
 }
 
 .toggle {
-  margin: 2rem auto 4.5rem;
+  margin: 2rem auto;
   width: fit-content;
   background: #dcedfb;
   border: 1px solid #b7d0e5;

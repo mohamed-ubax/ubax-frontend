@@ -348,7 +348,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.7rem;
   margin-top: clamp(2rem, 4vw, 3rem);
 
   // Figma 371:984 — glass pill container
@@ -370,8 +370,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50px;
   border: 1px solid #cfd6dc;
   background: #fff;
@@ -415,8 +415,8 @@
     border-radius: 10px; // Figma: rounded-[10px]
     background: #e87d1e;
     border-color: #cfd6dc; // Figma: border border-[#cfd6dc]
-    width: 3rem; // Figma: 52px
-    height: 3rem; // Figma: 50px
+    width: 2rem; // Figma: 52px
+    height: 2rem; // Figma: 50px
 
     img {
       width: 18px; // Figma: size-[18px]
@@ -471,6 +471,64 @@
 
 // ─── Responsive ──────────────────────────────────────────────────────────────
 
+@media (max-width: 1973px) {
+  .fp-hero__content {
+    max-width: 50%;
+  }
+
+  .fp-float-card {
+    margin: -1rem;
+  }
+}
+
+@media (max-width: 1845px) {
+  .fp-float-card {
+    margin: -4rem;
+  }
+}
+
+@media (max-width: 1543px) {
+  .fp-float-card {
+    margin: -6rem;
+  }
+}
+
+@media (max-width: 1440px) {
+  .fp-float--br,
+  .fp-float--bl {
+    bottom: 28%;
+  }
+}
+
+@media (max-width: 1212px) {
+  .fp-hero__content {
+    max-width: 80%;
+  }
+  .fp-float-card {
+    margin: -9rem;
+  }
+  .fp-float--tl {
+    top: 28%;
+  }
+  .fp-float--tr {
+    top: 28%;
+  }
+  .fp-float--ml {
+    top: 66%;
+    left: 20%;
+  }
+  .fp-float--mr {
+    top: 66%;
+    right: 19%;
+  }
+  .fp-float--bl {
+    bottom: 36%;
+  }
+  .fp-float--br {
+    bottom: 36%;
+  }
+}
+
 @media (max-width: 1024px) {
   .fp-guides__grid {
     grid-template-columns: repeat(2, 1fr);
@@ -512,6 +570,22 @@
   .fp-guide-card__footer {
     flex-wrap: wrap;
     gap: 0.75rem;
+  }
+}
+
+@media (max-width: 725px) {
+  .fp-guides {
+    &__lamp {
+      top: -14px;
+      max-width: 70%;
+    }
+    &__beam {
+      top: 100px;
+      max-width: 100%;
+    }
+    &__titles {
+      margin: 3rem 0 clamp(4.5rem, 4vw, 5.5rem);
+    }
   }
 }
 

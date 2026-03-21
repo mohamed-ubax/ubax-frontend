@@ -2,6 +2,6 @@
 /accueil
 /faq
 /contact
-/tarifs
+/offres
 /temoignages
 /mentions-legales
