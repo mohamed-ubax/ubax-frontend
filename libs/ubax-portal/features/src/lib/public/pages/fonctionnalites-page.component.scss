@@ -962,7 +962,7 @@ $brand-dark: #192e44;
 
   .fnc-agency__panel--chart {
     width: 37.2%;
-    left: 40.5%
+    left: 40.5%;
   }
 }
 
@@ -994,7 +994,7 @@ $brand-dark: #192e44;
 
   .fnc-agency__panel--chart {
     width: 38.5%;
-    left: 40.5%
+    left: 40.5%;
   }
 }
 
@@ -1012,13 +1012,13 @@ $brand-dark: #192e44;
 
 @media (max-width: 1537px) {
   .fnc-agency__panel--widget {
-left: 20.8%;
-        width: 19.5%;
+    left: 20.8%;
+    width: 19.5%;
   }
 
   .fnc-agency__panel--chart {
-width: 40.5%;
-        left: 39.5%;
+    width: 40.5%;
+    left: 39.5%;
   }
 }
 
@@ -1051,13 +1051,13 @@ width: 40.5%;
 
 @media (max-width: 1480px) {
   .fnc-agency__panel--widget {
-        left: 19.8%;
-        width: 20.5%;
+    left: 19.8%;
+    width: 20.5%;
   }
 
   .fnc-agency__panel--chart {
-width: 42%;
-        left: 39.5%;
+    width: 42%;
+    left: 39.5%;
   }
 }
 
@@ -1269,10 +1269,30 @@ width: 42%;
   }
 }
 
+.fnc-agency__dash--mobile {
+  display: none;
+}
+
 @media (max-width: 1024px) {
+  .fnc-agency__dash--main,
+  .fnc-agency__dash--left,
+  .fnc-agency__dash--right,
+  .fnc-agency__panel {
+    display: none;
+  }
+
+  .fnc-agency__dash--mobile {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+  }
+
   .fnc-agency__roles {
     grid-template-columns: repeat(2, 1fr);
-    margin-top: clamp(2.5rem, 4vw, 5rem);
+    margin-top: 4.5rem;
+    gap: 1rem;
   }
 
   .fnc-agency__role-title {
