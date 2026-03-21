@@ -210,6 +210,10 @@
   .privacy-toc {
     position: static;
     max-height: none;
+
+    li {
+      cursor: default;
+    }
   }
 }
 
