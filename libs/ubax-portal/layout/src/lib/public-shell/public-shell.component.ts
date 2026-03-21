@@ -121,7 +121,7 @@ export class PublicShellComponent implements OnDestroy {
       this._logoWrap,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
-      itemsStart
+      itemsStart,
     );
 
     // Nav items — yPercent + rotate stagger (ReactBits signature)
@@ -135,14 +135,14 @@ export class PublicShellComponent implements OnDestroy {
         ease: 'power4.out',
         stagger: { each: 0.1, from: 'start' },
       },
-      itemsStart + 0.05
+      itemsStart + 0.05,
     );
 
     tl.fromTo(
       this._ctaEl,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
-      itemsStart + 0.4
+      itemsStart + 0.4,
     );
   }
 
@@ -185,7 +185,7 @@ export class PublicShellComponent implements OnDestroy {
   protected readonly menuItems = [
     { label: 'Accueil', path: '/accueil', exact: true },
     { label: 'Fonctionnalités', path: '/fonctionnalites', exact: false },
-    { label: 'Tarifs', path: '/tarifs', exact: false },
+    { label: 'Offres', path: '/offres', exact: false },
     { label: 'Témoignages', path: '/temoignages', exact: false },
     { label: 'Formations', path: '/formations', exact: false },
     { label: 'FAQs', path: '/faq', exact: false },

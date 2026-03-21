@@ -6,14 +6,14 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
-import { UiButtonComponent, UiCardComponent } from '@ubax-workspace/shared-ui';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { UiCardComponent } from '@ubax-workspace/shared-ui';
+import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 
 @Component({
   selector: 'ubax-pricing-page',
-  imports: [PublicShellComponent, UiButtonComponent, UiCardComponent],
+  imports: [PublicShellComponent, UiCardComponent],
   templateUrl: './pricing-page.component.html',
   styleUrl: './pricing-page.component.scss',
 })

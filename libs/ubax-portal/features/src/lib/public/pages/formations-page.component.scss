@@ -348,7 +348,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.7rem;
   margin-top: clamp(2rem, 4vw, 3rem);
 
   // Figma 371:984 — glass pill container
@@ -370,8 +370,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50px;
   border: 1px solid #cfd6dc;
   background: #fff;
@@ -415,8 +415,8 @@
     border-radius: 10px; // Figma: rounded-[10px]
     background: #e87d1e;
     border-color: #cfd6dc; // Figma: border border-[#cfd6dc]
-    width: 3rem; // Figma: 52px
-    height: 3rem; // Figma: 50px
+    width: 2rem; // Figma: 52px
+    height: 2rem; // Figma: 50px
 
     img {
       width: 18px; // Figma: size-[18px]

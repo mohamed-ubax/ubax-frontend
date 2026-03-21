@@ -202,7 +202,7 @@
     align-self: center;
     margin: 0;
     color: #fff;
-    font-size: clamp(1rem, 1.3vw, 1.15rem);
+    font-size: 1.1rem;
     font-weight: 600;
     line-height: 1.35;
   }
@@ -505,8 +505,8 @@
     color 0.2s ease;
 
   &:hover {
-    color: #1a3047;
-    background-color: #fff;
+    color: #fff;
+    background-color: #f8961e;
   }
 }
 

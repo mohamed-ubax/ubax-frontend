@@ -60,7 +60,7 @@ export const publicRoutes: Routes = [
       ),
   },
   {
-    path: 'tarifs',
+    path: 'offres',
     loadComponent: () =>
       import('./pages/pricing-page.component').then(
         (m) => m.PricingPageComponent,
