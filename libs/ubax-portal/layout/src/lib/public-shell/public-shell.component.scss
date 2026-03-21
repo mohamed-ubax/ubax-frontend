@@ -304,7 +304,6 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    flex: 1;
     padding: 0;
     margin: 0;
     list-style: none;
@@ -335,7 +334,7 @@
   .offcanvas-item-label {
     display: inline-block;
     font-family: 'Lexend', sans-serif;
-    font-size: clamp(1.5rem, 5vw, 2rem); // plus grand pour remplir la page
+    font-size: clamp(1.125rem, 3.5vw, 1.5rem);
     font-weight: 400;
     line-height: 1.3;
     color: inherit; // hérite de .nav-active sur le parent .offcanvas-item

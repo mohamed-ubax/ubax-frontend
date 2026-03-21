@@ -3,15 +3,11 @@ import {
   HostBinding,
   HostListener,
   OnInit,
-  OnDestroy,
-  ElementRef,
   PLATFORM_ID,
   inject,
-  afterNextRender,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { gsap } from 'gsap';
 
 @Component({
   selector: 'ubax-splash-page',
@@ -19,17 +15,10 @@ import { gsap } from 'gsap';
   templateUrl: './splash-page.component.html',
   styleUrl: './splash-page.component.scss',
 })
-export class SplashPageComponent implements OnInit, OnDestroy {
-  private readonly _el = inject(ElementRef<HTMLElement>);
+export class SplashPageComponent implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly designWidth = 1731;
   private readonly designHeight = 1095;
-
-  private _mouseX = 0;
-  private _mouseY = 0;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _tickerFn?: (...args: any[]) => void;
-  private _mouseMoveHandler?: (e: MouseEvent) => void;
 
   @HostBinding('style.--splash-scene-scale')
   protected sceneScale = '1';
@@ -37,79 +26,37 @@ export class SplashPageComponent implements OnInit, OnDestroy {
   @HostBinding('style.--splash-orbit-shift-x')
   protected orbitShiftX = '92px';
 
-  constructor() {
-    afterNextRender(() => this._initParallax());
-  }
-
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.updateResponsiveVars();
     }
   }
 
-  ngOnDestroy(): void {
-    if (this._mouseMoveHandler) {
-      document.removeEventListener('mousemove', this._mouseMoveHandler);
-    }
-    if (this._tickerFn) {
-      gsap.ticker.remove(this._tickerFn);
-    }
-  }
-
   @HostListener('window:resize')
   onWindowResize(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.updateResponsiveVars();
-    }
-  }
-
-  private _initParallax(): void {
-    const host = this._el.nativeElement as HTMLElement;
-    const logoMark = host.querySelector<HTMLElement>('.center-logo-mark');
-    const logoBg = host.querySelector<HTMLElement>('.center-logo-bg');
-
-    // Flat list: center logo elements only (photos/dots use CSS orbit animation)
-    const allEls: HTMLElement[] = [
-      ...(logoMark ? [logoMark] : []),
-      ...(logoBg ? [logoBg] : []),
-    ];
-    const allDepths = [...(logoMark ? [8] : []), ...(logoBg ? [6] : [])];
-
-    // Lerp accumulators
-    const lerpX = new Array(allEls.length).fill(0);
-    const lerpY = new Array(allEls.length).fill(0);
-
-    this._mouseMoveHandler = (e: MouseEvent) => {
-      this._mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-      this._mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-    };
-
-    this._tickerFn = () => {
-      allEls.forEach((el, i) => {
-        // Smooth lerp (factor 0.07 ≈ nice eased lag)
-        lerpX[i] += (this._mouseX * allDepths[i] - lerpX[i]) * 0.07;
-        lerpY[i] += (this._mouseY * allDepths[i] - lerpY[i]) * 0.07;
-        el.style.setProperty('--px', `${lerpX[i].toFixed(2)}px`);
-        el.style.setProperty('--py', `${lerpY[i].toFixed(2)}px`);
-      });
-    };
-
-    document.addEventListener('mousemove', this._mouseMoveHandler);
-    gsap.ticker.add(this._tickerFn);
+    // resize only fires in the browser — no platform guard needed
+    this.updateResponsiveVars();
   }
 
   private updateResponsiveVars(): void {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
+    if (viewportWidth <= 768) {
+      // Mobile: CSS manages layout — no design-space scaling
+      this.sceneScale = '1';
+      this.orbitShiftX = '0px';
+      return;
+    }
+
     const scaleX = viewportWidth / this.designWidth;
     const scaleY = viewportHeight / this.designHeight;
-    const minScale = viewportWidth <= 768 ? 0.34 : 0.42;
-    const clampedScale = Math.min(
-      1,
-      Math.max(minScale, Math.min(scaleX, scaleY)),
-    );
+    const rawScale = Math.min(scaleX, scaleY);
 
+    // Allow up to 1.5 for large/4K displays; floor at 0.42 for small tablets
+    const clampedScale = Math.min(1.5, Math.max(0.42, rawScale));
+
+    // Orbit shift interpolates 24 → 92px over the 0.42 → 1.0 scale range
     const normalized = Math.max(0, Math.min(1, (clampedScale - 0.42) / 0.58));
     const orbitShift = 24 + normalized * 68;
 
