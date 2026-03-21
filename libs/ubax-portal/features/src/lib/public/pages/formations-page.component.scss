@@ -576,15 +576,23 @@
 @media (max-width: 725px) {
   .fp-guides {
     &__lamp {
-      top: -14px;
+      top: -8px;
       max-width: 70%;
+      height: auto; // preserve aspect ratio as width shrinks
     }
     &__beam {
-      top: 100px;
-      max-width: 100%;
+      // anchor to top so cone apex stays under the lamp
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      // scale beam proportionally with the lamp:
+      // lamp = 70vw, beam intrinsic = 1003px vs lamp intrinsic = 670px
+      // → beam_width = 70vw × (1003 / 670) ≈ 104.8vw
+      width: calc(70vw * 1.498);
+      height: auto;
     }
-    &__titles {
-      margin: 3rem 0 clamp(4.5rem, 4vw, 5.5rem);
+    &__title {
+      margin: 3rem 0 clamp(2rem, 4vw, 5.5rem);
     }
   }
 }
