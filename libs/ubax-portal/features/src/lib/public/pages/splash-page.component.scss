@@ -1,6 +1,7 @@
 :host {
   position: fixed;
   inset: 0;
+  z-index: 40; /* above main-header (z-index: 30) */
   display: block;
   width: 100vw;
   height: 100vh;
