@@ -170,18 +170,17 @@ body {
 // or during the view-transition slide-in (translateY starts 22px below).
 // ─────────────────────────────────────────────────────────────────────────────
 
+// When splash is active: match all backgrounds to dark + block overscroll
+:root:has(ubax-splash-page),
 :root:has(ubax-splash-page) body {
   background: #0d1520;
   overscroll-behavior: none;
 }
 
-// Disable the slide-in view-transition for the splash page — it would reveal
-// the body background for ~400ms because the fixed scene starts 22px below.
-ubax-splash-page {
-  view-transition-name: splash;
-}
-::view-transition-old(splash),
-::view-transition-new(splash) {
+// Disable view-transition slide animations when navigating to/from splash —
+// the vt-slide-in starts at translateY(22px) which would expose the body bg.
+:root:has(ubax-splash-page) ::view-transition-old(root),
+:root:has(ubax-splash-page) ::view-transition-new(root) {
   animation: none;
 }
 

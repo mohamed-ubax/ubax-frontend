@@ -20,7 +20,8 @@
   position: absolute;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  /* no explicit height — inset:0 makes height = host's 100dvh, so place-items:center
+     won't create a top gap when Android URL bar changes 100vh vs 100dvh */
   display: grid;
   place-items: center;
   padding: 0;
