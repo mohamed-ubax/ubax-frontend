@@ -1,16 +1,16 @@
 // ─── 1. HERO ──────────────────────────────────────────────────────────────────
 
 .fdp-hero {
-  padding: 3rem 2.5rem 0; // Figma: 40px latéral
+  // Aligne les marges latérales du hero avec la formule du header
+  padding: clamp(1.5rem, 3vw, 3rem) max(1.25rem, calc((100% - 1284px) / 2)) 0;
 
   &__img-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 1665 / 685; // Figma exact: 1665px × 685px
+    aspect-ratio: 1665 / 685; // Figma: 1665px × 685px
     border-radius: 20px;
     overflow: hidden;
-    // Concave notch at bottom-center (outer border-radius kept on border-radius above)
-    // SVG mask: full rectangle, centred notch from x=36%–64%, floor at y=89%, concave Q-curves
+    // Encoche concave centrée en bas (Q-curves) — preserveAspectRatio='none' s'adapte à tous les ratios
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1648 645' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M1648 605 C1648 627.091 1630.09 645 1608 645 H1033.21 C1019.71 645 1007.15 638.161 999.479 626.508 L994.975 619.444 C987.653 607.964 974.948 601 961.249 601 H686.75 C673.051 601 660.346 607.964 653.024 619.444 L648.52 626.508 C640.846 638.161 628.294 645 614.794 645 H40 C17.909 645 0 627.091 0 605 V40 C0 17.909 17.909 0 40 0 H1608 C1630.09 0 1648 17.909 1648 40 V605 Z'/%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1648 645' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M1648 605 C1648 627.091 1630.09 645 1608 645 H1033.21 C1019.71 645 1007.15 638.161 999.479 626.508 L994.975 619.444 C987.653 607.964 974.948 601 961.249 601 H686.75 C673.051 601 660.346 607.964 653.024 619.444 L648.52 626.508 C640.846 638.161 628.294 645 614.794 645 H40 C17.909 645 0 627.091 0 605 V40 C0 17.909 17.909 0 40 0 H1608 C1630.09 0 1648 17.909 1648 40 V605 Z'/%3E%3C/svg%3E");
     -webkit-mask-size: 100% 100%;
@@ -29,29 +29,32 @@
   &__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5); // Figma: overlay plat 50%
+    background: rgba(0, 0, 0, 0.5);
   }
 
   &__title {
     position: absolute;
-    top: 50%; // Figma: 243px / 685px depuis le haut de l'image
+    top: 50%;
     left: 0;
     right: 0;
     transform: translateY(-50%);
-    padding: 0 clamp(2rem, 6vw, 5rem); // Figma: titre ~57% de la largeur centré
+    padding: 0 clamp(2rem, 6vw, 5rem);
     text-align: center;
     font-family: 'Lexend', sans-serif;
     font-size: clamp(1.25rem, 2.5vw, 2.25rem); // Figma: 36px
-    font-weight: 600; // Figma: SemiBold
-    line-height: 1.4; // Figma: 50px / 36px ≈ 1.39
+    font-weight: 600;
+    line-height: 1.4;
     color: #fff;
     margin: 0;
     z-index: 2;
   }
 
+  // ── Date : dans l'encoche concave ─────────────────────────────────────────
+  // La profondeur du notch SVG (44/645 × H) = 2.81 % de la largeur image
+  // pour le ratio 1665/685.  On tire la date vers le haut d'environ cette
+  // valeur pour la centrer visuellement dans la partie concave.
   &__date {
-    // Pulled up into the concave notch: notch depth = 11% × (685/1665) ≈ 4.53% of container width
-    margin-top: -2%;
+    margin-top: -2.8%; // notch depth ≈ 2.81 % pour ratio 1665/685
     position: relative;
     z-index: 2;
     display: flex;
@@ -60,14 +63,14 @@
     gap: 0.5rem;
     padding: 0.6rem 0 1.75rem;
     font-family: 'Lexend', sans-serif;
-    font-size: 0.9375rem; // Figma: 15px
+    font-size: 0.9375rem; // 15px
     font-weight: 400;
-    color: #181818; // Figma: #181818
+    color: #181818;
   }
 
   &__date-icon {
-    width: 26px; // Figma: 26px
-    height: 26px; // Figma: 26px
+    width: 26px;
+    height: 26px;
     flex-shrink: 0;
   }
 }
@@ -75,17 +78,13 @@
 // ─── 2. CONTENT ───────────────────────────────────────────────────────────────
 
 .fdp-content {
-  padding: 3.5rem 1.5rem clamp(3rem, 6vw, 5rem);
-
-  &__container {
-    max-width: 85%;
-    margin: 0 auto;
-  }
+  // Même formule que le header — aligne le contenu avec les marges latérales
+  padding: 3.5rem max(1.25rem, calc((100% - 1284px) / 2)) clamp(3rem, 6vw, 5rem);
 
   &__layout {
     display: grid;
     grid-template-columns: 1fr 450px;
-    gap: 3.5rem;
+    gap: clamp(1.5rem, 3vw, 3.5rem);
     align-items: start;
   }
 }
@@ -222,42 +221,148 @@
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
 
-@media (max-width: 960px) {
-  .fdp-content__layout {
-    grid-template-columns: 1fr;
+// ── ≤ 1024px : formule → padding fixe 1rem (idem header mobile) ───────────
+@media (max-width: 1024px) {
+  .fdp-hero {
+    padding: clamp(1rem, 2vw, 1.5rem) 1rem 0;
   }
 
-  .fdp-hero__img-wrap {
-    aspect-ratio: 1665 / 800; // légèrement plus haut sur tablette
-  }
-
-  // Notch depth recalculated: 11% × (800/1665) ≈ 5.29% of container width
-  .fdp-hero__date {
-    margin-top: -5.29%;
+  .fdp-content {
+    padding: 3rem 1rem clamp(2.5rem, 5vw, 4rem);
   }
 }
 
+// ── ≤ 960px : image plus haute, colonne unique, ajustement notch ──────────
+@media (max-width: 960px) {
+  .fdp-hero {
+    &__img-wrap {
+      aspect-ratio: 1665 / 800; // plus de hauteur sur tablette
+      border-radius: 16px;
+    }
+
+    // Profondeur notch pour 1665/800 : (44×800)/(645×1665) = 3.28 % de la largeur
+    &__date {
+      margin-top: 0%;
+    }
+  }
+
+  .fdp-content__layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+// ── ≤ 768px : la date descend sous le hero ────────────────────────────────
+// Le notch est trop peu profond en pixels pour loger le texte — la date
+// passe en flux normal, toujours centrée horizontalement (justify-content: center).
+@media (max-width: 768px) {
+  .fdp-hero {
+    &__date {
+      margin-top: 0; // sort du notch, descend sous l'image
+      padding: 1.5rem 1rem 1.5rem;
+    }
+  }
+
+  // Le top padding du contenu est réduit car la date fournit déjà l'espacement
+  .fdp-content {
+    padding-top: 2rem;
+  }
+}
+
+// ── ≤ 600px : mobile portrait ─────────────────────────────────────────────
 @media (max-width: 600px) {
   .fdp-hero {
-    padding: 1rem 1rem 0;
+    padding: 0.75rem 0.75rem 0;
 
     &__img-wrap {
       aspect-ratio: 4 / 3;
-      border-radius: 14px;
+      border-radius: 12px;
     }
 
     &__title {
       padding: 0 1.25rem;
-      font-size: 1rem;
+      font-size: clamp(1rem, 5vw, 1.375rem);
     }
 
-    // Notch depth recalculated: 11% × (3/4) ≈ 8.25% of container width
     &__date {
-      margin-top: -8.25%;
+      padding: 1.5rem 1rem 1.25rem;
+      font-size: 0.875rem;
+      gap: 0.375rem;
+    }
+
+    &__date-icon {
+      width: 20px;
+      height: 20px;
     }
   }
 
   .fdp-content {
-    padding: 6rem 1rem clamp(2.5rem, 5vw, 4rem);
+    padding: 1.5rem 0.75rem clamp(2rem, 4vw, 3rem);
+  }
+}
+
+// ── ≤ 480px : petits mobiles ──────────────────────────────────────────────
+@media (max-width: 480px) {
+  .fdp-hero {
+    padding: 0.5rem 0.5rem 0;
+
+    &__img-wrap {
+      border-radius: 10px;
+    }
+
+    &__title {
+      font-size: clamp(0.9375rem, 5vw, 1.25rem);
+      padding: 0 0.75rem;
+    }
+
+    &__date {
+      font-size: 0.8125rem;
+    }
+  }
+
+  .fdp-content {
+    padding: 1.25rem 0.5rem clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .fdp-sidebar-card {
+    &__img {
+      width: 72px;
+      height: 54px;
+    }
+  }
+}
+
+// ── ≤ 320px : très petits écrans ──────────────────────────────────────────
+@media (max-width: 320px) {
+  .fdp-hero {
+    padding: 0.5rem 0.25rem 0;
+
+    &__title {
+      padding: 0 0.5rem;
+      font-size: 0.9375rem;
+    }
+
+    &__date {
+      font-size: 0.75rem;
+      gap: 0.25rem;
+    }
+
+    &__date-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .fdp-content {
+    padding: 1rem 0.25rem 2rem;
+  }
+
+  .fdp-sidebar-card {
+    gap: 0.75rem;
+
+    &__img {
+      width: 60px;
+      height: 45px;
+    }
   }
 }

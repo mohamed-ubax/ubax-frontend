@@ -2,7 +2,6 @@ import {
   Component,
   HostBinding,
   HostListener,
-  OnInit,
   PLATFORM_ID,
   inject,
 } from '@angular/core';
@@ -15,38 +14,49 @@ import { RouterLink } from '@angular/router';
   templateUrl: './splash-page.component.html',
   styleUrl: './splash-page.component.scss',
 })
-export class SplashPageComponent implements OnInit {
+export class SplashPageComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly designWidth = 1731;
   private readonly designHeight = 1095;
+  private resizeTimer?: ReturnType<typeof setTimeout>;
 
   @HostBinding('style.--splash-scene-scale')
-  protected sceneScale = '1';
+  protected sceneScale: string;
 
   @HostBinding('style.--splash-orbit-shift-x')
-  protected orbitShiftX = '92px';
+  protected orbitShiftX: string;
 
-  ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.updateResponsiveVars();
-    }
+  constructor() {
+    // Compute layout vars synchronously so the first render uses correct values,
+    // preventing the brief layout-jump that occurred when ngOnInit ran post-render.
+    const vars = this.computeVars();
+    this.sceneScale = vars.scale;
+    this.orbitShiftX = vars.shiftX;
   }
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    // resize only fires in the browser — no platform guard needed
-    this.updateResponsiveVars();
+    // Debounce: rapid resize events (e.g. Android URL-bar collapse/expand)
+    // used to cause visible distortion by triggering multiple layout recalcs.
+    clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => {
+      const vars = this.computeVars();
+      this.sceneScale = vars.scale;
+      this.orbitShiftX = vars.shiftX;
+    }, 150);
   }
 
-  private updateResponsiveVars(): void {
+  private computeVars(): { scale: string; shiftX: string } {
+    if (!isPlatformBrowser(this.platformId)) {
+      return { scale: '1', shiftX: '92px' };
+    }
+
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
     if (viewportWidth <= 768) {
       // Mobile: CSS manages layout — no design-space scaling
-      this.sceneScale = '1';
-      this.orbitShiftX = '0px';
-      return;
+      return { scale: '1', shiftX: '0px' };
     }
 
     const scaleX = viewportWidth / this.designWidth;
@@ -60,7 +70,9 @@ export class SplashPageComponent implements OnInit {
     const normalized = Math.max(0, Math.min(1, (clampedScale - 0.42) / 0.58));
     const orbitShift = 24 + normalized * 68;
 
-    this.sceneScale = clampedScale.toFixed(4);
-    this.orbitShiftX = `${orbitShift.toFixed(1)}px`;
+    return {
+      scale: clampedScale.toFixed(4),
+      shiftX: `${orbitShift.toFixed(1)}px`,
+    };
   }
 }
