@@ -1167,27 +1167,3 @@
   }
 }
 
-/* ── Mobile performance: disable heavy continuous animations on small screens ─
-   Orbit rotation is GPU-intensive. On phones we keep the enter animation but
-   stop the infinite revolution to save battery and prevent jank.              */
-@media (max-width: 768px) {
-  .orbit-photo-1,
-  .orbit-photo-2,
-  .orbit-photo-3,
-  .orbit-photo-4,
-  .orbit-photo-5,
-  .orbit-photo-6 {
-    animation-name: orbit-enter; /* keep fade-in, drop infinite orbit rotation */
-    animation-iteration-count: 1;
-    animation-fill-mode: forwards;
-  }
-
-  .orbit-dot-1,
-  .orbit-dot-2,
-  .orbit-dot-3,
-  .orbit-dot-4 {
-    animation-name: orbit-enter;
-    animation-iteration-count: 1;
-    animation-fill-mode: forwards;
-  }
-}
