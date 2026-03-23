@@ -979,87 +979,89 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) and (orientation: landscape) {
   /* ── Orbit ring — right side, centered vertically ────────────────────── */
+  /* Orbit center pushed to 70 % (was 65 %) and radius reduced so the orbit
+     clears the text column (which ends at ~47vw) with comfortable gap.      */
   .orbit-ring {
-    width: min(70vh, 260px);
-    height: min(70vh, 260px);
-    left: calc(65% - min(35vh, 130px));
-    top: calc(50% - min(35vh, 130px));
+    width: min(60vh, 220px);
+    height: min(60vh, 220px);
+    left: calc(70% - min(30vh, 110px));
+    top: calc(50% - min(30vh, 110px));
     transform: translate(0, 0);
   }
 
   /* ── Center logo bg ──────────────────────────────────────────────────── */
   .center-logo-bg {
-    width: min(24vh, 88px);
-    height: min(24vh, 88px);
-    left: calc(65% - min(12vh, 44px));
-    top: calc(50% - min(12vh, 44px));
+    width: min(20vh, 74px);
+    height: min(20vh, 74px);
+    left: calc(70% - min(10vh, 37px));
+    top: calc(50% - min(10vh, 37px));
     transform: translate(0, 0);
   }
 
   /* ── Center logo mark ────────────────────────────────────────────────── */
   .center-logo-mark {
-    width: min(8.2vh, 30px);
-    height: min(10.2vh, 37px);
-    left: calc(65% - min(4.1vh, 15px));
-    top: calc(50% - min(5.1vh, 18.5px));
+    width: min(6.8vh, 25px);
+    height: min(8.5vh, 31px);
+    left: calc(70% - min(3.4vh, 12.5px));
+    top: calc(50% - min(4.25vh, 15.5px));
     transform: translate(0, 0);
   }
 
   /* ── Orbit ripples ───────────────────────────────────────────────────── */
   .orbit-ripple {
-    width: min(24vh, 88px);
-    height: min(24vh, 88px);
-    left: calc(65% - min(12vh, 44px));
-    top: calc(50% - min(12vh, 44px));
+    width: min(20vh, 74px);
+    height: min(20vh, 74px);
+    left: calc(70% - min(10vh, 37px));
+    top: calc(50% - min(10vh, 37px));
   }
 
-  /* ── Orbit photos — orbit around (65 %, 50 %) ───────────────────────── */
+  /* ── Orbit photos — orbit around (70 %, 50 %) ───────────────────────── */
   .orbit-photo {
-    --orbit-r: min(35vh, 130px);
-    left: 65%;
+    --orbit-r: min(30vh, 110px);
+    left: 70%;
     top: 50%;
   }
 
   .orbit-photo-1 {
-    width: min(9vh, 34px);
-    height: min(9vh, 33px);
-    margin: -16.5px 0 0 -17px;
+    width: min(7.5vh, 29px);
+    height: min(7.5vh, 28px);
+    margin: -14px 0 0 -14.5px;
   }
 
   .orbit-photo-2 {
-    width: min(9vh, 34px);
-    height: min(9.3vh, 34px);
-    margin: -17px 0 0 -17px;
+    width: min(7.5vh, 29px);
+    height: min(7.8vh, 29px);
+    margin: -14.5px 0 0 -14.5px;
   }
 
   .orbit-photo-3 {
-    width: min(8.5vh, 32px);
-    height: min(8.5vh, 32px);
-    margin: -16px 0 0 -16px;
+    width: min(7vh, 27px);
+    height: min(7vh, 27px);
+    margin: -13.5px 0 0 -13.5px;
   }
 
   .orbit-photo-4 {
-    width: min(12vh, 45px);
-    height: min(11.5vh, 43px);
-    margin: -21.5px 0 0 -22.5px;
+    width: min(10vh, 38px);
+    height: min(9.6vh, 36px);
+    margin: -18px 0 0 -19px;
   }
 
   .orbit-photo-5 {
-    width: min(9.8vh, 37px);
-    height: min(10vh, 38px);
-    margin: -19px 0 0 -18.5px;
+    width: min(8.3vh, 31px);
+    height: min(8.5vh, 32px);
+    margin: -16px 0 0 -15.5px;
   }
 
   .orbit-photo-6 {
-    width: min(12.5vh, 47px);
-    height: min(12.5vh, 47px);
-    margin: -23.5px 0 0 -23.5px;
+    width: min(10.5vh, 40px);
+    height: min(10.5vh, 40px);
+    margin: -20px 0 0 -20px;
   }
 
   /* ── Orbit dots ──────────────────────────────────────────────────────── */
   .orbit-dot {
-    --orbit-r: min(35vh, 130px);
-    left: 65%;
+    --orbit-r: min(30vh, 110px);
+    left: 70%;
     top: 50%;
   }
 
@@ -1072,11 +1074,11 @@
     margin: -3.5px 0 0 -3.5px;
   }
 
-  /* ── Hero title — left column ────────────────────────────────────────── */
+  /* ── Hero title — left column (42 vw wide, was 46 vw) ───────────────── */
   .hero-title {
     left: 5vw;
     top: 10vh;
-    width: 46vw;
+    width: 42vw;
     font-size: clamp(0.95rem, 4.2vh, 1.3rem);
     line-height: 1.2;
     letter-spacing: -0.3px;
@@ -1086,7 +1088,7 @@
   .hero-subtitle {
     left: 5vw;
     top: 44vh;
-    width: 46vw;
+    width: 42vw;
     font-size: clamp(0.7rem, 2.4vh, 0.875rem);
     line-height: 1.5;
   }
@@ -1097,12 +1099,12 @@
   }
 
   /* ── Discover button — centered in left text column ──────────────────── */
-  /* left: 28vw + the animation's translateX(-50%) = center at ~28 % width  */
+  /* left: 26vw + translateX(-50%) = center at 5vw + 42vw/2 = 26vw          */
   .discover-shell {
     top: auto;
     bottom: 5vh; /* fallback */
     bottom: max(5dvh, calc(env(safe-area-inset-bottom, 0px) + 16px));
-    left: 28vw;
+    left: 26vw;
     width: 170px;
     height: 58px;
   }
