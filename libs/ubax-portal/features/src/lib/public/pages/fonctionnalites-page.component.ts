@@ -141,81 +141,132 @@ export class FonctionnalitesPageComponent {
     gsap.registerPlugin(ScrollTrigger);
 
     this._gsapCtx = gsap.context(() => {
-      gsap.from('.fnc-hero__title', {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-      });
-      gsap.from('.fnc-hero__subtitle', {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        delay: 0.15,
-        ease: 'power3.out',
-      });
-      gsap.from('.fnc-hero__pill, .fnc-hero__stores', {
-        y: 20,
-        opacity: 0,
-        duration: 0.7,
-        delay: 0.3,
-        stagger: 0.12,
-        ease: 'power3.out',
-      });
-      gsap.from('.fnc-hero__visual', {
-        x: 60,
-        opacity: 0,
-        duration: 1,
-        delay: 0.2,
-        ease: 'power3.out',
-      });
+      // ── Hero timeline (mirrors home-page technique + original touches) ────
+      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
+      heroTl
+        // ① Arch rises from the bottom (original — home page has no arch)
+        .from('.fnc-hero__phone-bg', {
+          scaleY: 0, transformOrigin: 'bottom center', duration: 1.2, ease: 'power4.out',
+        }, 0)
+        // ② Phone slides up inside the arch
+        .from('.fnc-hero__phone-img', { y: 80, opacity: 0, duration: 1.3 }, 0.1)
+        // ③ Title lines clip-path reveal bottom→top  ← same as home page
+        .to('.fnc-hero__line-inner', {
+          clipPath: 'inset(0% 0 0% 0)', duration: 0.9, stagger: 0.22,
+        }, 0.85)
+        // ④ Subtitle fades up  ← same as home page tagline
+        .from('.fnc-hero__subtitle', { y: 30, opacity: 0, duration: 1.0 }, '-=0.35')
+        // ⑤ Pill pops in with back-out bounce  ← original (home page has no pill)
+        .from('.fnc-hero__pill', { y: 20, opacity: 0, duration: 0.8, ease: 'back.out(2)' }, '-=0.4')
+        // ⑥ Store buttons bounce in with stagger  ← same ease as home page
+        .from('.fnc-store-btn', {
+          y: 26, opacity: 0, duration: 0.9, stagger: 0.16, ease: 'back.out(1.8)',
+        }, '-=0.5')
+        // ⑦ Overlays slide in from opposite sides (original — home page has one image)
+        .from('.fnc-hero__card-overlay',  { x: 55, opacity: 0, duration: 0.9 }, '-=0.7')
+        .from('.fnc-hero__stats-overlay', { x: -55, opacity: 0, duration: 0.9 }, '<0.1');
+
+
+      // ── How-to steps ───────────────────────────────────────────────────────
       gsap.from('.fnc-how__heading', {
         scrollTrigger: { trigger: '.fnc-how', start: 'top 78%' },
-        y: 40,
-        opacity: 0,
-        duration: 0.85,
-        ease: 'power3.out',
+        y: 40, opacity: 0, duration: 0.85, ease: 'power3.out',
       });
       gsap.from('.fnc-step-card', {
         scrollTrigger: { trigger: '.fnc-how__rows', start: 'top 80%' },
-        y: 60,
-        opacity: 0,
-        duration: 0.85,
-        stagger: 0.1,
-        ease: 'power3.out',
+        y: 60, opacity: 0, duration: 0.85, stagger: 0.1, ease: 'power3.out',
       });
 
+      // ── Agency section ──────────────────────────────────────────────────────
+
+      // Background: subtle Ken Burns zoom on scroll through section
+      gsap.to('.fnc-agency__bg-img', {
+        scrollTrigger: {
+          trigger: '.fnc-agency',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.5,
+        },
+        scale: 1.08,
+        ease: 'none',
+      });
+
+      // Heading: blur-to-clear reveal (immersive entrance)
       gsap.from('.fnc-agency__heading', {
-        scrollTrigger: { trigger: '.fnc-agency', start: 'top 78%' },
-        y: 40,
+        scrollTrigger: { trigger: '.fnc-agency', start: 'top 72%' },
+        y: 50,
         opacity: 0,
-        duration: 0.85,
-        ease: 'power3.out',
-      });
-      gsap.from('.fnc-agency__role-card', {
-        scrollTrigger: { trigger: '.fnc-agency__roles', start: 'top 82%' },
-        y: 40,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.1,
+        filter: 'blur(6px)',
+        duration: 1.1,
         ease: 'power3.out',
       });
 
+      // ── Dashboard convergence sequence ─────────────────────────────────────
+      // Pre-set: side dashes spread wide + hidden; main hidden; panels hidden.
+      // All inside gsap.context() → automatically reverted on destroy.
+      gsap.set('.fnc-agency__dash--left', {
+        x: -220, opacity: 0, rotateY: 10, transformPerspective: 1200,
+      });
+      gsap.set('.fnc-agency__dash--right', {
+        x: 220, opacity: 0, rotateY: -10, transformPerspective: 1200,
+      });
+      // Do NOT animate scale/transform on main dash — it relies on CSS
+      // transform: translateX(-50%) for centering. GSAP would overwrite that.
+      // Opacity-only fade preserves the CSS centering intact.
+      gsap.set('.fnc-agency__dash--main', { opacity: 0 });
+      gsap.set('.fnc-agency__panel', { opacity: 0, y: 14 });
+
+      const dashTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.fnc-agency__dashboards',
+          start: 'top 72%',
+          toggleActions: 'play none none none',
+        },
+        defaults: { ease: 'power3.out' },
+      });
+
+      dashTl
+        // Phase 1 — side dashes slide in from outside and settle at "exposed" position
+        //           (viewer clearly sees both lateral dashboards before anything hides them)
+        .to('.fnc-agency__dash--left',  { x: -65, opacity: 1, rotateY:  3, duration: 0.8 })
+        .to('.fnc-agency__dash--right', { x:  65, opacity: 1, rotateY: -3, duration: 0.8 }, '<')
+        // Phase 2 — brief pause (+=0.15s), then both converge behind the main dashboard;
+        //           the main dashboard rises simultaneously, completing the "hide" effect
+        .to('.fnc-agency__dash--left',  { x: 0, rotateY: 0, duration: 1.0, ease: 'power3.inOut' }, '+=0.15')
+        .to('.fnc-agency__dash--right', { x: 0, rotateY: 0, duration: 1.0, ease: 'power3.inOut' }, '<')
+        .to('.fnc-agency__dash--main',  { opacity: 1, duration: 0.9 }, '<0.05')
+        // Phase 3 — floating UI panels stagger in over the settled stack
+        .to('.fnc-agency__panel--nav',    { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '>-0.3')
+        .to('.fnc-agency__panel--widget', { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '<0.12')
+        .to('.fnc-agency__panel--chart',  { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '<0.12');
+
+      // Mobile-only single dashboard image (replaces stack on ≤1024 px)
+      gsap.from('.fnc-agency__dash--mobile', {
+        scrollTrigger: { trigger: '.fnc-agency__dashboards', start: 'top 75%' },
+        y: 30, opacity: 0, duration: 0.9, delay: 0.2, ease: 'power3.out',
+      });
+
+      // Role cards: subtle 3D-tilt reveal with stagger
+      gsap.from('.fnc-agency__role-card', {
+        scrollTrigger: { trigger: '.fnc-agency__roles', start: 'top 85%' },
+        y: 50,
+        opacity: 0,
+        rotateX: 15,
+        transformPerspective: 900,
+        duration: 0.75,
+        stagger: 0.12,
+        ease: 'power3.out',
+      });
+
+      // ── Hotels section ─────────────────────────────────────────────────────
       gsap.from('.fnc-hotels__heading', {
         scrollTrigger: { trigger: '.fnc-hotels', start: 'top 78%' },
-        y: 40,
-        opacity: 0,
-        duration: 0.85,
-        ease: 'power3.out',
+        y: 40, opacity: 0, duration: 0.85, ease: 'power3.out',
       });
       gsap.from('.fnc-feature-item', {
         scrollTrigger: { trigger: '.fnc-hotels__layout', start: 'top 80%' },
-        y: 30,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.1,
-        ease: 'power3.out',
+        y: 30, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out',
       });
     }, el);
 
