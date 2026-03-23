@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -16,6 +17,7 @@ import { ALL_GUIDES, Guide, GUIDES_MAP } from './formations.data';
   imports: [PublicShellComponent, RouterLink],
   templateUrl: './formation-detail-page.component.html',
   styleUrl: './formation-detail-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormationDetailPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);

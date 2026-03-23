@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 @Injectable({ providedIn: 'root' })
 export class LenisService {
   private _lenis: Lenis | null = null;
+  private readonly _zone = inject(NgZone);
   private readonly _tick = (time: number) => {
     this._lenis?.raf(time * 1000);
   };
@@ -14,15 +15,19 @@ export class LenisService {
     if (this._lenis) return;
     gsap.registerPlugin(ScrollTrigger);
 
-    this._lenis = new Lenis({
-      lerp: 0.09,
-      smoothWheel: true,
-      syncTouch: false,
-    });
+    // Run Lenis + GSAP ticker entirely outside Angular's change detection
+    // to prevent unnecessary CD cycles on every animation frame.
+    this._zone.runOutsideAngular(() => {
+      this._lenis = new Lenis({
+        lerp: 0.09,
+        smoothWheel: true,
+        syncTouch: false,
+      });
 
-    gsap.ticker.add(this._tick);
-    gsap.ticker.lagSmoothing(0);
-    this._lenis.on('scroll', () => ScrollTrigger.update());
+      gsap.ticker.add(this._tick);
+      gsap.ticker.lagSmoothing(0);
+      this._lenis.on('scroll', () => ScrollTrigger.update());
+    });
   }
 
   get instance(): Lenis | null {
@@ -33,5 +38,6 @@ export class LenisService {
     gsap.ticker.remove(this._tick);
     this._lenis?.destroy();
     this._lenis = null;
+    ScrollTrigger.clearScrollMemory();
   }
 }

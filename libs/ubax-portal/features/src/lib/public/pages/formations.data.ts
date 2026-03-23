@@ -17,8 +17,8 @@ export interface Guide {
 export const ALL_GUIDES: Guide[] = [
   {
     slug: 'role-agence-immobiliere',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.webp',
     title: "Le rôle d'une agence immobilière et pourquoi passer par elle",
     excerpt:
       "Découvrez pourquoi travailler avec une agence immobilière peut vous aider à éviter des problèmes et sécuriser votre achat ou votre location.",
@@ -63,8 +63,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'construire-maison-cote-ivoire',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-1.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-1.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.webp',
     title: "Construire une maison en Côte d'Ivoire : les étapes importantes",
     excerpt:
       "Du choix du terrain jusqu'à la construction, voici les étapes à suivre pour réaliser votre projet immobilier dans les règles.",
@@ -114,8 +114,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'acheter-terrain-cote-ivoire',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-2.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/attestation-de-droit-dusage-coutumier.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-2.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/attestation-de-droit-dusage-coutumier.webp',
     title: "Comment acheter un terrain en Côte d'Ivoire en toute sécurité",
     excerpt:
       "Découvrez les étapes essentielles pour acheter un terrain sans risque en Côte d'Ivoire, les documents à vérifier et les erreurs à éviter avant de payer.",
@@ -176,8 +176,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'comprendre-acd-titre-foncier',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-3.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/attestation-de-droit-dusage-coutumier.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-3.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/attestation-de-droit-dusage-coutumier.webp',
     title: "Comprendre l'ACD, le titre foncier et l'attestation villageoise",
     excerpt:
       "Apprenez la différence entre les principaux documents immobiliers en Côte d'Ivoire et pourquoi ils sont importants.",
@@ -240,8 +240,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'erreurs-eviter-achat-immobilier',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-4.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/family-broken-home.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-4.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/family-broken-home.webp',
     title: "Les erreurs à éviter lors d'un achat immobilier",
     excerpt:
       "Beaucoup d'acheteurs perdent de l'argent à cause d'erreurs simples. Voici les précautions à prendre avant d'acheter une maison ou un terrain.",
@@ -294,8 +294,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'investir-immobilier-cote-ivoire',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-5.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/6329c9b63a88a-investissement immobilier.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-5.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/6329c9b63a88a-investissement immobilier.webp',
     title: "Investir dans l'immobilier en Côte d'Ivoire : par où commencer ?",
     excerpt:
       "Conseils pratiques pour débuter dans l'investissement immobilier, même avec un petit budget, et comprendre les opportunités du marché ivoirien.",
@@ -353,8 +353,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'comprendre-bail-location',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/family-broken-home.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/family-broken-home.webp',
     title: "Comprendre le bail de location en Côte d'Ivoire",
     excerpt:
       "Tout ce que locataires et bailleurs doivent savoir sur le contrat de bail, leurs droits et obligations légaux.",
@@ -407,8 +407,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'frais-caches-achat-bien',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-1.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/6329c9b63a88a-investissement immobilier.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-1.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/6329c9b63a88a-investissement immobilier.webp',
     title: "Les frais cachés à connaître avant d'acheter un bien",
     excerpt:
       "Au-delà du prix affiché, découvrez tous les frais annexes qui peuvent alourdir votre budget d'acquisition immobilière.",
@@ -451,8 +451,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'negocier-prix-immobilier',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-2.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/6329c9b63a88a-investissement immobilier.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-2.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/6329c9b63a88a-investissement immobilier.webp',
     title: "Comment négocier le prix d'un bien immobilier",
     excerpt:
       "Les meilleures stratégies pour négocier efficacement et obtenir le meilleur prix lors de votre prochain achat immobilier.",
@@ -494,8 +494,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'financement-immobilier',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-3.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-3.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.webp',
     title: "Financement immobilier : options disponibles en Côte d'Ivoire",
     excerpt:
       "Tour d'horizon des solutions de financement accessibles aux particuliers pour concrétiser leur projet immobilier.",
@@ -539,8 +539,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'gerer-propriete-locative',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-4.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/family-broken-home.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-4.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/family-broken-home.webp',
     title: 'Gérer sa propriété locative comme un professionnel',
     excerpt:
       "Astuces et bonnes pratiques pour maximiser la rentabilité de votre bien et entretenir une relation saine avec vos locataires.",
@@ -589,8 +589,8 @@ export const ALL_GUIDES: Guide[] = [
   },
   {
     slug: 'quartiers-fort-potentiel-abidjan',
-    image: 'assets/portal-assets/formations/images/Rectangle 240648229-5.png',
-    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.jpg',
+    image: 'assets/portal-assets/formations/images/Rectangle 240648229-5.webp',
+    heroImage: 'assets/portal-assets/formation-details/images/source/large-building-site.webp',
     title: 'Les quartiers à fort potentiel à Abidjan en 2026',
     excerpt:
       "Analyse des zones en plein essor où investir en immobilier résidentiel ou commercial peut offrir d'excellentes perspectives.",

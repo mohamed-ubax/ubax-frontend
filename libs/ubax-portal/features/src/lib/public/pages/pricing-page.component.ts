@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -16,6 +17,7 @@ import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
   imports: [PublicShellComponent, UiCardComponent],
   templateUrl: './pricing-page.component.html',
   styleUrl: './pricing-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PricingPageComponent {
   private readonly elRef = inject(ElementRef);

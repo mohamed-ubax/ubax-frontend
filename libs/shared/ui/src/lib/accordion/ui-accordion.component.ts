@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { UiAccordionItem } from './ui-accordion.types';
 
 @Component({
@@ -6,6 +6,7 @@ import { UiAccordionItem } from './ui-accordion.types';
   standalone: true,
   templateUrl: './ui-accordion.component.html',
   styleUrl: './ui-accordion.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UiAccordionComponent {
   readonly items = input<UiAccordionItem[]>([]);

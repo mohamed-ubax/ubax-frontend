@@ -1,12 +1,11 @@
-import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'ubax-ui-button',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './ui-button.component.html',
   styleUrl: './ui-button.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UiButtonComponent {
   readonly variant = input<'primary' | 'dark' | 'ghost' | 'outline'>('dark');

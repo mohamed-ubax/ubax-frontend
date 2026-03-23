@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -19,6 +20,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
   imports: [PublicShellComponent, UiAccordionComponent, UiButtonComponent],
   templateUrl: './faq-page.component.html',
   styleUrl: './faq-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FaqPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);

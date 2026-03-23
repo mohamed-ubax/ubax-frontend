@@ -1,5 +1,6 @@
 ﻿import {
   afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -15,6 +16,7 @@ import { SplitText } from 'gsap/SplitText';
   imports: [PublicShellComponent],
   templateUrl: './testimonials-page.component.html',
   styleUrl: './testimonials-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestimonialsPageComponent {
   private readonly elRef = inject(ElementRef);

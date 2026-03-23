@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -14,6 +15,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
   imports: [PublicShellComponent],
   templateUrl: './legal-page.component.html',
   styleUrl: './legal-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LegalPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);

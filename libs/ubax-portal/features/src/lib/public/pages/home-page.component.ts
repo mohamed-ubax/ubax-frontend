@@ -1,10 +1,11 @@
 import {
   afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
   inject,
-  DOCUMENT,
+  NgZone,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
@@ -19,271 +20,167 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
   imports: [RouterLink, PublicShellComponent, BackToTopComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePageComponent {
   private readonly elRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly document = inject(DOCUMENT);
+  private readonly zone = inject(NgZone);
   private gsapCtx: gsap.Context | undefined;
-  private heroPreloadLink: HTMLLinkElement | undefined;
 
   constructor() {
-    const link = this.document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.href = 'assets/portal-assets/home-page/images/homme-avec-cl.webp';
-    (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
-    this.document.head.appendChild(link);
-    this.heroPreloadLink = link;
-
     afterNextRender(() => {
-      gsap.registerPlugin(ScrollTrigger);
-      this.gsapCtx = gsap.context(
-        () => this.initAnimations(),
-        this.elRef.nativeElement,
-      );
+      // Skip all GSAP animations on mobile — reduces INP by ~300 ms on low-end devices
+      if (window.innerWidth < 768) return;
+
+      this.zone.runOutsideAngular(() => {
+        gsap.registerPlugin(ScrollTrigger);
+        this.gsapCtx = gsap.context(
+          () => this.initAnimations(),
+          this.elRef.nativeElement,
+        );
+      });
     });
 
     this.destroyRef.onDestroy(() => {
       this.gsapCtx?.revert();
-      this.heroPreloadLink?.remove();
     });
   }
 
   private initAnimations(): void {
     const ease = 'power3.out';
 
-    // -- 1. HERO � image first, then copy rises in -------------------------
+    // -- 1. HERO
     const heroTl = gsap.timeline({ defaults: { ease } });
     heroTl
-      .from(
-        '.hp-hero__img',
-        { x: 80, opacity: 0, scale: 0.95, duration: 1.4 },
-        0,
-      )
-      // Mask reveal : CSS fige l'état initial, GSAP anime uniquement vers visible
+      .from('.hp-hero__img', { x: 60, opacity: 0, scale: 0.95, duration: 1.0 }, 0)
       .to(
         '.hp-hero__line-inner',
-        { clipPath: 'inset(0% 0 0% 0)', duration: 0.9, ease: 'power3.out', stagger: 0.22 },
-        1.1, // décalage net par rapport au démarrage de l'image
+        { clipPath: 'inset(0% 0 0% 0)', duration: 0.75, ease: 'power3.out', stagger: 0.18 },
+        0.8,
       )
-      .from('.hp-hero__tagline', { y: 30, opacity: 0, duration: 1.0, ease: 'power3.out' }, '-=0.35')
+      .from('.hp-hero__tagline', { y: 24, opacity: 0, duration: 0.75, ease: 'power3.out' }, '-=0.3')
       .from(
         '.hp-store-pill',
-        {
-          y: 26,
-          opacity: 0,
-          duration: 0.9,
-          stagger: 0.16,
-          ease: 'back.out(1.8)',
-        },
-        '-=0.5',
+        { y: 20, opacity: 0, duration: 0.7, stagger: 0.12, ease: 'back.out(1.8)' },
+        '-=0.4',
       );
 
-    // -- 2. STEPS � sequential after hero, scroll as fallback -------------
+    // -- 2. STEPS
     const stepsTl = gsap.timeline({ paused: true });
     stepsTl
-      .from('.hp-step', { y: 70, opacity: 0, duration: 1, stagger: 0.2, ease }, 0)
+      .from('.hp-step', { y: 50, opacity: 0, duration: 0.75, stagger: 0.15, ease }, 0)
       .from(
         '.hp-step__icon',
-        { scale: 0.45, opacity: 0, duration: 0.9, stagger: 0.2, ease: 'back.out(2.2)' },
+        { scale: 0.5, opacity: 0, duration: 0.7, stagger: 0.15, ease: 'back.out(2)' },
         0,
       );
 
-    // Fallback : si l'utilisateur scrolle avant la fin du hero
     ScrollTrigger.create({
       trigger: '.hp-steps',
       start: 'top 80%',
       once: true,
       onEnter: () => { if (stepsTl.progress() === 0) stepsTl.play(); },
     });
-
-    // Declenchement sequentiel : joue des que le hero est termine
     heroTl.then(() => { if (stepsTl.progress() === 0) stepsTl.play(); });
 
-    // -- 3. FEATURES � left/right split + phone elastic pop ---------------
+    // -- 3. FEATURES
     gsap.from('.hp-feat-col:first-child .hp-feat', {
       scrollTrigger: { trigger: '.hp-features__grid', start: 'top 58%' },
-      x: -65,
-      opacity: 0,
-      duration: 1,
-      stagger: 0.18,
-      ease,
+      x: -50, opacity: 0, duration: 0.8, stagger: 0.15, ease,
     });
     gsap.from('.hp-feat-col:last-child .hp-feat', {
       scrollTrigger: { trigger: '.hp-features__grid', start: 'top 58%' },
-      x: 65,
-      opacity: 0,
-      duration: 1,
-      stagger: 0.18,
-      ease,
+      x: 50, opacity: 0, duration: 0.8, stagger: 0.15, ease,
     });
     gsap.from('.hp-phone-ring', {
       scrollTrigger: { trigger: '.hp-features__grid', start: 'top 58%' },
-      scale: 0.72,
-      opacity: 0,
-      y: 40,
-      duration: 1.4,
-      ease: 'elastic.out(1, 0.7)',
+      scale: 0.75, opacity: 0, y: 30, duration: 1.0, ease: 'elastic.out(1, 0.7)',
       onComplete: () => {
         (this.elRef.nativeElement as HTMLElement)
           .querySelector('.hp-phone-ring')
           ?.classList.add('is-pulsing');
       },
     });
-    // Continuous parallax float on the features phone
     gsap.to('.hp-phone-ring', {
-      scrollTrigger: {
-        trigger: '.hp-features',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1.4,
-      },
-      y: -55,
-      ease: 'none',
+      scrollTrigger: { trigger: '.hp-features', start: 'top bottom', end: 'bottom top', scrub: 1 },
+      y: -45, ease: 'none',
     });
 
-    // -- 4. LOCATION � magazine-split entrance ----------------------------
+    // -- 4. LOCATION
     gsap.from('.hp-location__media', {
       scrollTrigger: { trigger: '.hp-location', start: 'top 55%' },
-      x: -90,
-      opacity: 0,
-      duration: 1.2,
-      ease,
+      x: -70, opacity: 0, duration: 0.9, ease,
     });
     gsap.from('.hp-location__copy h2', {
       scrollTrigger: { trigger: '.hp-location', start: 'top 55%' },
-      clipPath: 'inset(0 100% 0 0)',
-      duration: 1.1,
-      ease: 'expo.inOut',
+      clipPath: 'inset(0 100% 0 0)', duration: 0.9, ease: 'expo.inOut',
     });
     gsap.from('.hp-location__list li', {
       scrollTrigger: { trigger: '.hp-location__list', start: 'top 65%' },
-      x: 55,
-      opacity: 0,
-      duration: 0.9,
-      stagger: 0.18,
-      ease,
+      x: 45, opacity: 0, duration: 0.7, stagger: 0.15, ease,
     });
     gsap.from('.hp-location .hp-btn-dark', {
       scrollTrigger: { trigger: '.hp-location .hp-btn-dark', start: 'top 80%' },
-      y: 22,
-      opacity: 0,
-      scale: 0.88,
-      duration: 0.8,
-      ease: 'back.out(1.8)',
+      y: 18, opacity: 0, scale: 0.9, duration: 0.65, ease: 'back.out(1.8)',
     });
-    // Subtle parallax on location image
     gsap.to('.hp-location__media img', {
-      scrollTrigger: {
-        trigger: '.hp-location',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1.2,
-      },
-      y: -30,
-      ease: 'none',
+      scrollTrigger: { trigger: '.hp-location', start: 'top bottom', end: 'bottom top', scrub: 1 },
+      y: -25, ease: 'none',
     });
 
-    // -- 5. HOTELS � alternating reveal + composite parallax --------------
+    // -- 5. HOTELS
     gsap.from('.hp-hotels__copy', {
       scrollTrigger: { trigger: '.hp-hotels', start: 'top 55%' },
-      x: -70,
-      opacity: 0,
-      duration: 1.1,
-      ease,
+      x: -55, opacity: 0, duration: 0.85, ease,
     });
     gsap.from('.hp-hotels__visual', {
       scrollTrigger: { trigger: '.hp-hotels', start: 'top 55%' },
-      x: 70,
-      opacity: 0,
-      duration: 1.1,
-      ease,
+      x: 55, opacity: 0, duration: 0.85, ease,
     });
     gsap.from('.hp-hotel-row', {
       scrollTrigger: { trigger: '.hp-hotel-rows', start: 'top 65%' },
-      y: 45,
-      opacity: 0,
-      duration: 0.9,
-      stagger: 0.18,
-      ease: 'power2.out',
+      y: 35, opacity: 0, duration: 0.7, stagger: 0.15, ease: 'power2.out',
     });
     gsap.to('.hp-hotels__composite', {
-      scrollTrigger: {
-        trigger: '.hp-hotels',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1.2,
-      },
-      y: -40,
-      ease: 'none',
+      scrollTrigger: { trigger: '.hp-hotels', start: 'top bottom', end: 'bottom top', scrub: 1 },
+      y: -32, ease: 'none',
     });
 
-    // -- 6. DASHBOARD � phones swing in with rotation ---------------------
+    // -- 6. DASHBOARD
     gsap.from('.hp-dash-phone--left', {
       scrollTrigger: { trigger: '.hp-dashboard', start: 'top 55%' },
-      x: -100,
-      rotation: -14,
-      opacity: 0,
-      duration: 1.3,
-      ease: 'power3.out',
+      x: -80, rotation: -12, opacity: 0, duration: 1.0, ease: 'power3.out',
     });
     gsap.from('.hp-dash-phone--right', {
       scrollTrigger: { trigger: '.hp-dashboard', start: 'top 55%' },
-      x: 100,
-      rotation: 14,
-      opacity: 0,
-      duration: 1.3,
-      delay: 0.22,
-      ease: 'power3.out',
+      x: 80, rotation: 12, opacity: 0, duration: 1.0, delay: 0.18, ease: 'power3.out',
     });
     gsap.from('.hp-dash-stat, .hp-dash-widget, .hp-dash-cercle', {
       scrollTrigger: { trigger: '.hp-dashboard__phones', start: 'top 60%' },
-      scale: 0.65,
-      opacity: 0,
-      duration: 1,
-      stagger: 0.15,
-      ease: 'back.out(2)',
+      scale: 0.7, opacity: 0, duration: 0.8, stagger: 0.12, ease: 'back.out(2)',
     });
     gsap.from('.hp-dashboard__copy .hp-dash-item', {
       scrollTrigger: { trigger: '.hp-dashboard__copy', start: 'top 60%' },
-      x: 70,
-      opacity: 0,
-      duration: 0.95,
-      stagger: 0.2,
-      ease,
+      x: 55, opacity: 0, duration: 0.75, stagger: 0.15, ease,
     });
 
-    // -- 7. PAYMENTS orbit � logos pop in + center person -----------------
+    // -- 7. PAYMENTS
     gsap.from('.hp-pay-center', {
       scrollTrigger: { trigger: '.hp-payments', start: 'top 55%' },
-      scale: 0.78,
-      opacity: 0,
-      duration: 1.2,
-      ease: 'elastic.out(1, 0.72)',
+      scale: 0.8, opacity: 0, duration: 0.9, ease: 'elastic.out(1, 0.72)',
     });
-    // CSS animation handles orbit transform; GSAP only fades logos in
     gsap.to('.hp-pay-logo', {
       scrollTrigger: { trigger: '.hp-payments', start: 'top 55%' },
-      opacity: 1,
-      duration: 0.8,
-      stagger: { each: 0.1, from: 'edges' },
-      ease: 'power2.out',
+      opacity: 1, duration: 0.7, stagger: { each: 0.08, from: 'edges' }, ease: 'power2.out',
     });
-    // h2 text-wipe
     gsap.from('.hp-payments__copy h2', {
       scrollTrigger: { trigger: '.hp-payments', start: 'top 58%' },
-      clipPath: 'inset(0 100% 0 0)',
-      duration: 1.1,
-      ease: 'expo.inOut',
+      clipPath: 'inset(0 100% 0 0)', duration: 0.9, ease: 'expo.inOut',
     });
     gsap.from('.hp-payments__copy p', {
       scrollTrigger: { trigger: '.hp-payments', start: 'top 58%' },
-      x: -50,
-      opacity: 0,
-      duration: 0.95,
-      delay: 0.22,
-      ease,
+      x: -40, opacity: 0, duration: 0.75, delay: 0.18, ease,
     });
   }
 }

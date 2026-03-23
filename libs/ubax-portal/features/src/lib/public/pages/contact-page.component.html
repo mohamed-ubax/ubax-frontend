@@ -3,10 +3,10 @@
     <div class="contact-page__inner">
       <header class="contact-page__hero">
         <h1 class="contact-page__title">
-          Besoin d'aide ? Notre equipe est a votre écoute
+          Besoin d'aide ? Notre équipe est à votre écoute
         </h1>
         <p class="contact-page__description">
-          L'equipe UBAX vous accompagne au quotidien. Que ce soit pour une
+          L'équipe UBAX vous accompagne au quotidien. Que ce soit pour une
           assistance technique, une question sur la gestion de vos biens ou un
           suivi de paiement, contactez-nous facilement par le canal qui vous
           convient.
@@ -24,19 +24,19 @@
             <h2>Envoyez un message</h2>
             <p>
               Une question ou un souci ? Remplissez le formulaire et notre
-              equipe vous repondra dans les plus brefs delais.
+              équipe vous répondra dans les plus brefs délais.
             </p>
           </div>
 
           <div class="contact-fields-grid">
             <label class="contact-field">
-              <span class="contact-field__label">Prenom</span>
+              <span class="contact-field__label">Prénom</span>
               <input
                 pInputText
                 type="text"
                 name="firstName"
                 class="contact-field-input"
-                placeholder="Veuillez saisir votre prenom"
+                placeholder="Veuillez saisir votre prénom"
                 autocomplete="given-name"
                 [(ngModel)]="firstName"
               />
@@ -49,7 +49,7 @@
                 type="text"
                 name="lastName"
                 class="contact-field-input"
-                placeholder="Veuillez saisir votre Nom"
+                placeholder="Veuillez saisir votre nom"
                 autocomplete="family-name"
                 [(ngModel)]="lastName"
               />
@@ -69,7 +69,7 @@
             </label>
 
             <div class="contact-field">
-              <span class="contact-field__label">Telephone</span>
+              <span class="contact-field__label">Téléphone</span>
               <div class="contact-phone-row">
                 <p-select
                   [(ngModel)]="selectedCountry"
@@ -84,7 +84,7 @@
                   styleClass="contact-country-picker"
                   panelStyleClass="country-picker-overlay"
                   [showClear]="false"
-                  aria-label="Indicatif telephonique"
+                  aria-label="Indicatif téléphonique"
                 >
                   <ng-template #selectedItem let-country>
                     <div class="cp-trigger">
@@ -142,7 +142,7 @@
               name="message"
               class="contact-message-input"
               rows="6"
-              placeholder="Ecrivez votre message"
+              placeholder="Écrivez votre message"
               [(ngModel)]="message"
             ></textarea>
           </label>
@@ -159,7 +159,7 @@
           aria-label="Canaux de support"
         >
           <h2 class="contact-support__title">
-            Bonjour ! Nous sommes la pour vous aider
+            Bonjour ! Nous sommes là pour vous aider
           </h2>
 
           <div class="contact-support__channels">
@@ -188,7 +188,7 @@
           </div>
 
           <div class="contact-support__socials">
-            <p>Nos reseaux sociaux</p>
+            <p>Nos réseaux sociaux</p>
             <div class="contact-support__social-list">
               @for (social of socialLinks; track social.label) {
                 <a [href]="social.href" [attr.aria-label]="social.label">
