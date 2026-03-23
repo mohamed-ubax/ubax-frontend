@@ -124,14 +124,26 @@ export class FormationsPageComponent {
         ease: 'power3.out',
       });
 
-      // Floating icon cards — staggered pop in
-      gsap.from('.fp-float-card', {
-        scale: 0.6,
-        opacity: 0,
-        duration: 1,
-        delay: 0.2,
-        stagger: { each: 0.1, from: 'random' },
-        ease: 'back.out(2)',
+      // Floating icon cards — confetti burst from centre
+      // Each card starts near the hero centre (behind the text) and flies
+      // outward to its final CSS position.  x/y are FROM-offsets pointing
+      // from the card's natural position toward the centre, so gsap.from()
+      // produces a centre → final-position trajectory.
+      // ml/mr omit y so GSAP preserves their CSS translateY(-50%) centering.
+      const burst: Array<{ sel: string; x: number; y?: number; delay: number }> = [
+        { sel: '.fp-float--tl', x:  250, y:  220, delay: 0.20 },
+        { sel: '.fp-float--tr', x: -230, y:  220, delay: 0.24 },
+        { sel: '.fp-float--ml', x:  290,           delay: 0.30 },
+        { sel: '.fp-float--mr', x: -280,           delay: 0.34 },
+        { sel: '.fp-float--bl', x:  255, y: -210,  delay: 0.40 },
+        { sel: '.fp-float--br', x: -250, y: -210,  delay: 0.44 },
+      ];
+      burst.forEach(({ sel, x, y, delay }) => {
+        const from: gsap.TweenVars = {
+          x, scale: 0.05, opacity: 0, duration: 1.1, delay, ease: 'back.out(1.6)',
+        };
+        if (y !== undefined) from['y'] = y;
+        gsap.from(sel, from);
       });
 
       // Guides section heading
