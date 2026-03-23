@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  NgZone,
   afterNextRender,
   inject,
 } from '@angular/core';
@@ -25,6 +26,7 @@ const ASSETS = 'assets/portal-assets/fonctionnalites';
 export class FonctionnalitesPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _zone = inject(NgZone);
   private _gsapCtx: gsap.Context | null = null;
 
   protected readonly stepsRow1 = [
@@ -133,7 +135,10 @@ export class FonctionnalitesPageComponent {
   ];
 
   constructor() {
-    afterNextRender(() => this._initAnimations());
+    afterNextRender(() => {
+      if (window.innerWidth < 768) return;
+      this._zone.runOutsideAngular(() => this._initAnimations());
+    });
   }
 
   private _initAnimations(): void {

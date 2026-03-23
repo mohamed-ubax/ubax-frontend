@@ -87,18 +87,22 @@
         src="assets/portal-assets/fonctionnalites/images/iPhone 13 Pro.webp"
         alt="Application UBAX sur iPhone"
         loading="eager"
+        decoding="async"
+        fetchpriority="high"
       />
       <img
         class="fnc-hero__card-overlay"
         src="assets/portal-assets/fonctionnalites/images/Frame 1686555363 1.webp"
         alt=""
         loading="eager"
+        decoding="async"
       />
       <img
         class="fnc-hero__stats-overlay"
         src="assets/portal-assets/fonctionnalites/images/Group 65 1.webp"
         alt=""
         loading="eager"
+        decoding="async"
       />
     </div>
   </section>
@@ -147,7 +151,7 @@
         @for (step of stepsRow1; track step.title) {
           <article class="fnc-step-card">
             <div class="fnc-step-card__icon-wrap" aria-hidden="true">
-              <img [src]="step.icon" alt="" />
+              <img [src]="step.icon" alt="" loading="lazy" decoding="async" />
             </div>
             <div class="fnc-step-card__body">
               <h3 class="fnc-step-card__title">{{ step.title }}</h3>
@@ -160,7 +164,7 @@
         @for (step of stepsRow2; track step.title) {
           <article class="fnc-step-card">
             <div class="fnc-step-card__icon-wrap" aria-hidden="true">
-              <img [src]="step.icon" alt="" />
+              <img [src]="step.icon" alt="" loading="lazy" decoding="async" />
             </div>
             <div class="fnc-step-card__body">
               <h3 class="fnc-step-card__title">{{ step.title }}</h3>
@@ -286,7 +290,7 @@
         @for (feat of hotelFeaturesLeft; track feat.title; let last = $last) {
           <div class="fnc-feature-item row-reverse text-end">
             <div class="fnc-feature-item__icon" aria-hidden="true">
-              <img [src]="feat.icon" alt="" />
+              <img [src]="feat.icon" alt="" loading="lazy" decoding="async" />
             </div>
             <div class="fnc-feature-item__content">
               <h3 class="fnc-feature-item__title">{{ feat.title }}</h3>
@@ -346,7 +350,7 @@
         @for (feat of hotelFeaturesRight; track feat.title; let last = $last) {
           <div class="fnc-feature-item">
             <div class="fnc-feature-item__icon" aria-hidden="true">
-              <img [src]="feat.icon" alt="" />
+              <img [src]="feat.icon" alt="" loading="lazy" decoding="async" />
             </div>
             <div class="fnc-feature-item__content">
               <h3 class="fnc-feature-item__title">{{ feat.title }}</h3>

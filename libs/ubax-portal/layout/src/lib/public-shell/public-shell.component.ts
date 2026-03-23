@@ -1,11 +1,13 @@
 import {
   afterNextRender,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   ElementRef,
   HostListener,
   inject,
+  NgZone,
   OnDestroy,
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -24,7 +26,10 @@ export class PublicShellComponent implements OnDestroy {
   private readonly lenisService = inject(LenisService);
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _zone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
   private _gsapCtx: gsap.Context | null = null;
+  private _scrollListener: (() => void) | null = null;
 
   // Cached DOM references (set once in afterNextRender) — panel + prelayer
   // are driven by CSS transitions, not GSAP, so they don't need caching here.
@@ -39,7 +44,6 @@ export class PublicShellComponent implements OnDestroy {
   constructor() {
     afterNextRender(() => {
       this.lenisService.init();
-      gsap.registerPlugin(ScrollTrigger);
 
       const host = this._el.nativeElement;
       this._overlay = host.querySelector('.nav-overlay');
@@ -47,10 +51,23 @@ export class PublicShellComponent implements OnDestroy {
       this._logoWrap = host.querySelector('.offcanvas-logo-wrap');
       this._ctaEl = host.querySelector('.offcanvas-cta');
 
-      this._gsapCtx = gsap.context(() => {
-        this._animateHeader();
-        this._initMenu();
-      }, host);
+      this._zone.runOutsideAngular(() => {
+        gsap.registerPlugin(ScrollTrigger);
+        this._gsapCtx = gsap.context(() => {
+          this._animateHeader();
+          this._initMenu();
+        }, host);
+
+        // Scroll listener runs outside Angular zone; only triggers CD on state change
+        this._scrollListener = () => {
+          const isScrolled = window.scrollY > 20;
+          if (isScrolled !== this.scrolled) {
+            this.scrolled = isScrolled;
+            this._zone.run(() => this._cdr.markForCheck());
+          }
+        };
+        window.addEventListener('scroll', this._scrollListener, { passive: true });
+      });
     });
 
     this._destroyRef.onDestroy(() => {
@@ -60,6 +77,10 @@ export class PublicShellComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this._scrollListener) {
+      window.removeEventListener('scroll', this._scrollListener);
+      this._scrollListener = null;
+    }
     this.lenisService.destroy();
   }
 
@@ -171,11 +192,6 @@ export class PublicShellComponent implements OnDestroy {
 
   protected closeMenu(): void {
     if (this.menuOpen) this._closeMenu();
-  }
-
-  @HostListener('window:scroll')
-  protected onScroll(): void {
-    this.scrolled = window.scrollY > 20;
   }
 
   @HostListener('document:keydown.escape')

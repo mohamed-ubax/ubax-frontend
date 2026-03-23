@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  NgZone,
   afterNextRender,
   inject,
   signal,
@@ -27,6 +28,7 @@ const PAGE_SIZE = 6;
 export class FormationsPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _zone = inject(NgZone);
   private _gsapCtx: gsap.Context | null = null;
 
   protected readonly currentPage = signal(1);
@@ -75,7 +77,10 @@ export class FormationsPageComponent {
   ];
 
   constructor() {
-    afterNextRender(() => this._initAnimations());
+    afterNextRender(() => {
+      if (window.innerWidth < 768) return;
+      this._zone.runOutsideAngular(() => this._initAnimations());
+    });
   }
 
   protected scrollToGuides(): void {

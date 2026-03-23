@@ -191,12 +191,11 @@
   border-radius: 38.875rem;
   border: 1px solid #fff;
   background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(5px);
   opacity: 0;
-  will-change: transform, filter;
+  will-change: transform;
   animation:
     orbit-enter 1.2s var(--ease-enter) 0.28s forwards,
-    orbit-breathe 6.8s ease-in-out 1.5s infinite;
+    orbit-breathe 5s ease-in-out 1.5s infinite;
   /* Fixed position only — NO parallax, NO rotation */
   transform: translate(var(--orbit-shift-x), var(--orbit-shift-y));
 }
@@ -217,7 +216,7 @@
   will-change: transform;
   animation:
     orbit-enter 1.2s var(--ease-enter) 0.36s forwards,
-    orbit-float-soft 5.6s ease-in-out 1.8s infinite;
+    orbit-float-soft 4s ease-in-out 1.8s infinite;
 }
 
 .center-logo-mark {
@@ -229,7 +228,7 @@
   opacity: 0;
   animation:
     orbit-enter 1.2s var(--ease-enter) 0.4s forwards,
-    orbit-float-soft 5.2s ease-in-out 2s infinite;
+    orbit-float-soft 4s ease-in-out 2s infinite;
 }
 
 .orbit-ripple {
@@ -282,7 +281,7 @@
   margin: -44px 0 0 -46px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.38s forwards,
-    splash-orbit-ccw 36s linear 0s infinite;
+    splash-orbit-ccw 22s linear 0s infinite;
 }
 
 .orbit-photo-2 {
@@ -291,7 +290,7 @@
   margin: -46px 0 0 -46px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.46s forwards,
-    splash-orbit-ccw 36s linear -6s infinite;
+    splash-orbit-ccw 22s linear -3.7s infinite;
 }
 
 .orbit-photo-3 {
@@ -300,7 +299,7 @@
   margin: -44px 0 0 -43px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.54s forwards,
-    splash-orbit-ccw 36s linear -12s infinite;
+    splash-orbit-ccw 22s linear -7.3s infinite;
 }
 
 .orbit-photo-4 {
@@ -309,7 +308,7 @@
   margin: -60px 0 0 -62px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.62s forwards,
-    splash-orbit-ccw 36s linear -18s infinite;
+    splash-orbit-ccw 22s linear -11s infinite;
 }
 
 .orbit-photo-5 {
@@ -318,7 +317,7 @@
   margin: -52px 0 0 -51px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.7s forwards,
-    splash-orbit-ccw 36s linear -24s infinite;
+    splash-orbit-ccw 22s linear -14.7s infinite;
 }
 
 .orbit-photo-6 {
@@ -327,7 +326,7 @@
   margin: -66px 0 0 -66px;
   animation:
     orbit-enter 1.15s var(--ease-enter) 0.78s forwards,
-    splash-orbit-ccw 36s linear -30s infinite;
+    splash-orbit-ccw 22s linear -18.3s infinite;
 }
 
 .orbit-dot {
@@ -348,7 +347,7 @@
   margin: -10px 0 0 -9px;
   animation:
     orbit-enter 0.9s var(--ease-enter) 0.56s forwards,
-    splash-orbit-cw 32s linear 0s infinite;
+    splash-orbit-cw 20s linear 0s infinite;
 }
 
 .orbit-dot-2 {
@@ -357,7 +356,7 @@
   margin: -10px 0 0 -9px;
   animation:
     orbit-enter 0.9s var(--ease-enter) 0.64s forwards,
-    splash-orbit-cw 32s linear -8s infinite;
+    splash-orbit-cw 20s linear -5s infinite;
 }
 
 .orbit-dot-3 {
@@ -366,7 +365,7 @@
   margin: -10px 0 0 -10px;
   animation:
     orbit-enter 0.9s var(--ease-enter) 0.72s forwards,
-    splash-orbit-cw 32s linear -16s infinite;
+    splash-orbit-cw 20s linear -10s infinite;
 }
 
 .orbit-dot-4 {
@@ -375,7 +374,7 @@
   margin: -9px 0 0 -10px;
   animation:
     orbit-enter 0.9s var(--ease-enter) 0.8s forwards,
-    splash-orbit-cw 32s linear -24s infinite;
+    splash-orbit-cw 20s linear -15s infinite;
 }
 
 .discover-shell {
@@ -387,7 +386,7 @@
   border: 1px solid #504b49;
   border-radius: 54.5px;
   background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(3px);
   text-decoration: none;
   color: #ffffff;
   transform: translateX(-50%);
@@ -1165,5 +1164,30 @@
     animation: none !important;
     opacity: 1 !important;
     filter: none !important;
+  }
+}
+
+/* ── Mobile performance: disable heavy continuous animations on small screens ─
+   Orbit rotation is GPU-intensive. On phones we keep the enter animation but
+   stop the infinite revolution to save battery and prevent jank.              */
+@media (max-width: 768px) {
+  .orbit-photo-1,
+  .orbit-photo-2,
+  .orbit-photo-3,
+  .orbit-photo-4,
+  .orbit-photo-5,
+  .orbit-photo-6 {
+    animation-name: orbit-enter; /* keep fade-in, drop infinite orbit rotation */
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+  }
+
+  .orbit-dot-1,
+  .orbit-dot-2,
+  .orbit-dot-3,
+  .orbit-dot-4 {
+    animation-name: orbit-enter;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
   }
 }

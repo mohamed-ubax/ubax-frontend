@@ -4,7 +4,7 @@
     <!-- Floating icon cards -->
     @for (icon of floatingIcons; track icon.cls) {
       <div class="fp-float-card {{ icon.cls }}" aria-hidden="true">
-        <img [src]="icon.src" [alt]="icon.alt" />
+        <img [src]="icon.src" [alt]="icon.alt" loading="lazy" decoding="async" />
       </div>
     }
 
