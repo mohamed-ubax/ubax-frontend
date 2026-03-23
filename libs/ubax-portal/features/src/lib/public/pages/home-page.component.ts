@@ -30,9 +30,6 @@ export class HomePageComponent {
 
   constructor() {
     afterNextRender(() => {
-      // Skip all GSAP animations on mobile — reduces INP by ~300 ms on low-end devices
-      if (window.innerWidth < 768) return;
-
       this.zone.runOutsideAngular(() => {
         gsap.registerPlugin(ScrollTrigger);
         this.gsapCtx = gsap.context(
