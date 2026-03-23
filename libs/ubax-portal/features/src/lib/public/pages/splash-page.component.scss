@@ -21,7 +21,7 @@
   display: grid;
   place-items: center;
   padding: 0;
-  background: rgb(236, 212, 182);
+  background: #0d1520; /* dark fallback — prevents beige flash before image loads */
   overflow: hidden;
 }
 
@@ -29,6 +29,7 @@
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* dynamic: adapts as Android URL bar shows/hides */
   overflow: hidden;
 }
 
@@ -36,6 +37,7 @@
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* dynamic: adapts as Android URL bar shows/hides */
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
@@ -791,6 +793,8 @@
     top: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* dvh matches actual visible viewport; fixes button cut-off
+                       when Android URL bar is shown (vh = max height, dvh = current) */
     transform: none;
     animation: none; /* disable scene-drift */
   }
@@ -942,7 +946,8 @@
   /* ── Discover button ─────────────────────────────────────────────────── */
   .discover-shell {
     top: auto;
-    bottom: 4vh;
+    bottom: 4vh; /* fallback for browsers without dvh support */
+    bottom: max(4dvh, calc(env(safe-area-inset-bottom, 0px) + 20px));
     width: 200px;
     height: 68px;
   }
@@ -1105,7 +1110,8 @@
   /* left: 28vw + the animation's translateX(-50%) = center at ~28 % width  */
   .discover-shell {
     top: auto;
-    bottom: 5vh;
+    bottom: 5vh; /* fallback */
+    bottom: max(5dvh, calc(env(safe-area-inset-bottom, 0px) + 16px));
     left: 28vw;
     width: 170px;
     height: 58px;
