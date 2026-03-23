@@ -164,6 +164,28 @@ body {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Splash page — body background + overscroll match
+// When the splash screen is active, body background and overscroll must match
+// the dark splash color so no light strip shows on Android rubber-band scroll
+// or during the view-transition slide-in (translateY starts 22px below).
+// ─────────────────────────────────────────────────────────────────────────────
+
+:root:has(ubax-splash-page) body {
+  background: #0d1520;
+  overscroll-behavior: none;
+}
+
+// Disable the slide-in view-transition for the splash page — it would reveal
+// the body background for ~400ms because the fixed scene starts 22px below.
+ubax-splash-page {
+  view-transition-name: splash;
+}
+::view-transition-old(splash),
+::view-transition-new(splash) {
+  animation: none;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // View Transitions — page-level route animations
 // ─────────────────────────────────────────────────────────────────────────────
 

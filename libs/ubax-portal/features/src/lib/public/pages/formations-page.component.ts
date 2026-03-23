@@ -78,7 +78,6 @@ export class FormationsPageComponent {
 
   constructor() {
     afterNextRender(() => {
-      if (window.innerWidth < 768) return;
       this._zone.runOutsideAngular(() => this._initAnimations());
     });
   }
