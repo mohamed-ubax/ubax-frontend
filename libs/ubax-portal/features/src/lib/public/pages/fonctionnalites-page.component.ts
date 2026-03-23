@@ -141,19 +141,32 @@ export class FonctionnalitesPageComponent {
     gsap.registerPlugin(ScrollTrigger);
 
     this._gsapCtx = gsap.context(() => {
-      // ── Hero ───────────────────────────────────────────────────────────────
-      gsap.from('.fnc-hero__title', {
-        y: 40, opacity: 0, duration: 0.9, ease: 'power3.out',
-      });
-      gsap.from('.fnc-hero__subtitle', {
-        y: 30, opacity: 0, duration: 0.8, delay: 0.15, ease: 'power3.out',
-      });
-      gsap.from('.fnc-hero__pill, .fnc-hero__stores', {
-        y: 20, opacity: 0, duration: 0.7, delay: 0.3, stagger: 0.12, ease: 'power3.out',
-      });
-      gsap.from('.fnc-hero__visual', {
-        x: 60, opacity: 0, duration: 1, delay: 0.2, ease: 'power3.out',
-      });
+      // ── Hero timeline (mirrors home-page technique + original touches) ────
+      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      heroTl
+        // ① Arch rises from the bottom (original — home page has no arch)
+        .from('.fnc-hero__phone-bg', {
+          scaleY: 0, transformOrigin: 'bottom center', duration: 1.2, ease: 'power4.out',
+        }, 0)
+        // ② Phone slides up inside the arch
+        .from('.fnc-hero__phone-img', { y: 80, opacity: 0, duration: 1.3 }, 0.1)
+        // ③ Title lines clip-path reveal bottom→top  ← same as home page
+        .to('.fnc-hero__line-inner', {
+          clipPath: 'inset(0% 0 0% 0)', duration: 0.9, stagger: 0.22,
+        }, 0.85)
+        // ④ Subtitle fades up  ← same as home page tagline
+        .from('.fnc-hero__subtitle', { y: 30, opacity: 0, duration: 1.0 }, '-=0.35')
+        // ⑤ Pill pops in with back-out bounce  ← original (home page has no pill)
+        .from('.fnc-hero__pill', { y: 20, opacity: 0, duration: 0.8, ease: 'back.out(2)' }, '-=0.4')
+        // ⑥ Store buttons bounce in with stagger  ← same ease as home page
+        .from('.fnc-store-btn', {
+          y: 26, opacity: 0, duration: 0.9, stagger: 0.16, ease: 'back.out(1.8)',
+        }, '-=0.5')
+        // ⑦ Overlays slide in from opposite sides (original — home page has one image)
+        .from('.fnc-hero__card-overlay',  { x: 55, opacity: 0, duration: 0.9 }, '-=0.7')
+        .from('.fnc-hero__stats-overlay', { x: -55, opacity: 0, duration: 0.9 }, '<0.1');
+
 
       // ── How-to steps ───────────────────────────────────────────────────────
       gsap.from('.fnc-how__heading', {

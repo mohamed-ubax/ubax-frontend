@@ -56,6 +56,30 @@ $brand-dark: #192e44;
   margin: 0;
 }
 
+// Each line is a clip-path mask — text reveals bottom-to-top (same technique as home page)
+.fnc-hero__line {
+  display: block;
+}
+
+.fnc-hero__line-inner {
+  display: block;
+  // État initial caché — GSAP anime vers inset(0% 0 0% 0)
+  clip-path: inset(110% 0 0% 0);
+  will-change: clip-path;
+}
+
+// "Ubax" — accent orange, inherits title size
+.fnc-hero__brand {
+  color: $accent;
+}
+
+// "– Recherche immobilière" — brand dark blue, inherits title size
+.fnc-hero__rest {
+  color: $brand;
+}
+
+
+
 .fnc-hero__subtitle {
   font-size: clamp(0.8125rem, 1vw, 0.9375rem);
   font-weight: 400;
@@ -100,6 +124,26 @@ $brand-dark: #192e44;
   font-size: clamp(0.8125rem, 1vw, 1rem);
   font-weight: 300;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+
+  // Repeating shimmer sweep — starts after the pill entrance animation (~3 s)
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.32) 50%,
+      transparent 100%
+    );
+    animation: fnc-pill-shine 4.5s ease-in-out 3s infinite;
+    pointer-events: none;
+  }
 }
 
 // App store buttons
@@ -185,6 +229,7 @@ $brand-dark: #192e44;
   background: $brand-dark;
   border-radius: 500px 500px 0 0;
   z-index: 0;
+  will-change: transform;
 }
 
 // Phone image — Figma: 270px in 605px arch = 44.6% of arch column width
@@ -199,6 +244,7 @@ $brand-dark: #192e44;
   // → phone top ≈ 26% of visual height
   margin-top: clamp(60px, 26%, 175px);
   flex-shrink: 0;
+  will-change: transform, opacity;
 }
 
 // Frame 1686555363 — Hotel/reservation card, bottom-right, slight overflow
@@ -212,6 +258,7 @@ $brand-dark: #192e44;
   height: auto;
   object-fit: contain;
   border-radius: 0.75rem;
+  will-change: transform, opacity;
 }
 
 // Group 65 — Search/filter card, top area, overhangs left of arch
@@ -224,6 +271,12 @@ $brand-dark: #192e44;
   width: clamp(140px, 40%, 260px);
   height: auto;
   object-fit: contain;
+  will-change: transform, opacity;
+}
+
+@keyframes fnc-pill-shine {
+  0%    { left: -60%; }
+  35%, 100% { left: 120%; }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
