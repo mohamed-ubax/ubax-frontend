@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -21,6 +22,7 @@ const PAGE_SIZE = 6;
   imports: [PublicShellComponent, UiButtonComponent, RouterLink],
   templateUrl: './formations-page.component.html',
   styleUrl: './formations-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormationsPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);

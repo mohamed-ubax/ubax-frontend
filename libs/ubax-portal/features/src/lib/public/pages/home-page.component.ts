@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -19,6 +20,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
   imports: [RouterLink, PublicShellComponent, BackToTopComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePageComponent {
   private readonly elRef = inject(ElementRef);

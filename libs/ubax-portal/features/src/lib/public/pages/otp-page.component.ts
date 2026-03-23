@@ -1,4 +1,4 @@
-﻿import { Component, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Button } from 'primeng/button';
@@ -9,6 +9,7 @@ import { InputOtp } from 'primeng/inputotp';
   imports: [FormsModule, InputOtp, Button],
   templateUrl: './otp-page.component.html',
   styleUrl: './auth-pages.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OtpPageComponent {
   protected otpCode = '';

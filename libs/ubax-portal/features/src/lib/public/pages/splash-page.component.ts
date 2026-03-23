@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   HostBinding,
   HostListener,
@@ -13,6 +14,7 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   templateUrl: './splash-page.component.html',
   styleUrl: './splash-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SplashPageComponent {
   private readonly platformId = inject(PLATFORM_ID);

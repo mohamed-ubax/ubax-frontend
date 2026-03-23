@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -33,6 +34,7 @@ interface SocialLink {
   imports: [PublicShellComponent, FormsModule, Select, InputText, Button],
   templateUrl: './contact-page.component.html',
   styleUrl: './contact-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContactPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);

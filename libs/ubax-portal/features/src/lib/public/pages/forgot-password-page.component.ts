@@ -1,4 +1,4 @@
-﻿import { Component, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Button } from 'primeng/button';
@@ -11,6 +11,7 @@ import { COUNTRY_CODES, type CountryCode } from '../shared/country-codes';
   imports: [FormsModule, Select, InputText, Button],
   templateUrl: './forgot-password-page.component.html',
   styleUrl: './auth-pages.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPasswordPageComponent {
   protected readonly countries = COUNTRY_CODES;

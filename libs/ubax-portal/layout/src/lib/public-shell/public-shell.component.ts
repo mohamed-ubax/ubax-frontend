@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
 import {
   afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -15,9 +15,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 @Component({
   selector: 'ubax-public-shell',
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './public-shell.component.html',
   styleUrl: './public-shell.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicShellComponent implements OnDestroy {
   private readonly lenisService = inject(LenisService);
