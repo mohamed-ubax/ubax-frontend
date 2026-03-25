@@ -88,6 +88,13 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'carrieres',
+    loadComponent: () =>
+      import('./pages/carrieres-page.component').then(
+        (m) => m.CarrieresPageComponent,
+      ),
+  },
+  {
     path: 'mentions-legales',
     loadComponent: () =>
       import('./pages/legal-page.component').then((m) => m.LegalPageComponent),
