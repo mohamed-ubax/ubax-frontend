@@ -1,39 +1,67 @@
 <ubax-public-shell>
   <section class="pricing-wrap">
-    <header>
-      <h1>Une tarification simple, claire et evolutive</h1>
+    <header class="pricing-header">
+      <h1>Une offre simple, claire et évolutive</h1>
       <p>
-        UBAX propose des plans adaptes a tous les niveaux d'agences
-        immobilieres, pour gerer vos biens, vos locataires et vos paiements en
-        toute serenite.
+        UBAX propose des plans adaptés à tous les niveaux d'agences
+        immobilières, pour gérer vos biens, vos locataires et vos paiements en
+        toute sérénité.
       </p>
     </header>
 
-    <div class="toggle">
-      <span class="active">Mensuel</span><span>Annuel</span>
+    <div class="toggle" [class.toggle--annuel]="billingCycle() === 'annuel'">
+      <span class="toggle__pill" aria-hidden="true"></span>
+      <button
+        class="toggle__tab"
+        [class.toggle__tab--active]="billingCycle() === 'mensuel'"
+        (click)="billingCycle.set('mensuel')"
+      >
+        Agence
+      </button>
+      <button
+        class="toggle__tab"
+        [class.toggle__tab--active]="billingCycle() === 'annuel'"
+        (click)="billingCycle.set('annuel')"
+      >
+        Hôtel
+      </button>
     </div>
 
     <div class="plans">
       @for (plan of plans; track plan.name) {
         <ubax-ui-card
           class="plan"
-          [class.featured]="plan.featured"
+          [class.plan--featured]="plan.featured"
           [tone]="plan.featured ? 'dark' : 'default'"
         >
-          <h3>{{ plan.name }}</h3>
-          <p>{{ plan.subtitle }}</p>
-          <h4>{{ plan.price }} <small>/ mois</small></h4>
+          <h3 class="plan__name">{{ plan.name }}</h3>
+          <p class="plan__subtitle">{{ plan.subtitle }}</p>
 
-          <ubax-ui-button
-            [variant]="plan.featured ? 'primary' : 'outline'"
-            [block]="true"
-          >
-            Selectionner
-          </ubax-ui-button>
+          <div class="plan__price">
+            <span class="plan__amount">{{ plan.price }}</span>
+            <span class="plan__period">&nbsp;/ mois</span>
+          </div>
 
-          <ul>
+          <ul class="plan__features">
             @for (feature of plan.features; track feature) {
-              <li>{{ feature }}</li>
+              <li class="plan__feature">
+                <span class="plan__check" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 12.5L10 17.5L19 8.5"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                {{ feature }}
+              </li>
             }
           </ul>
         </ubax-ui-card>

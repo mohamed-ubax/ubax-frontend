@@ -46,3 +46,6 @@ Thumbs.db
 __screenshots__/
 
 .nx/polygraph
+
+.claude
+instructions.md

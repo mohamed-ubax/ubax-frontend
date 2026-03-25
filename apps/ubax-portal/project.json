@@ -8,10 +8,16 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/ubax-portal",
         "browser": "apps/ubax-portal/src/main.ts",
+        "server": "apps/ubax-portal/src/main.server.ts",
+        "prerender": {
+          "discoverRoutes": true
+        },
         "tsConfig": "apps/ubax-portal/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -20,7 +26,9 @@
             "input": "apps/ubax-portal/public"
           }
         ],
-        "styles": ["apps/ubax-portal/src/styles.scss"]
+        "styles": [
+          "apps/ubax-portal/src/styles.scss"
+        ]
       },
       "configurations": {
         "production": {
@@ -32,8 +40,8 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "4kb",
-              "maximumError": "8kb"
+              "maximumWarning": "20kb",
+              "maximumError": "32kb"
             }
           ],
           "outputHashing": "all"

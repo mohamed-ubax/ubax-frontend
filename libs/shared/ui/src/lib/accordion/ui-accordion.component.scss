@@ -1,34 +1,61 @@
 .ubax-accordion {
-  display: grid;
-  gap: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .acc-item {
-  border-radius: 14px;
-  border: 1px solid rgba(26, 48, 71, 0.12);
+  border-radius: 20px;
   background: #fff;
-
-  button {
-    width: 100%;
-    border: none;
-    background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font: inherit;
-    font-weight: 600;
-    text-align: left;
-    padding: 1rem;
-    cursor: pointer;
-  }
-
-  p {
-    margin: 0;
-    padding: 0 1rem 1rem;
-    color: #4b5563;
-  }
+  overflow: hidden;
+  transition: box-shadow 200ms ease;
 }
 
 .acc-item--open {
-  box-shadow: 0 10px 20px rgba(11, 26, 40, 0.08);
+  box-shadow: 0 8px 30px rgba(11, 26, 40, 0.1);
+}
+
+.acc-trigger {
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  min-height: 5.25rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.acc-title {
+  color: rgba(33, 33, 33, 1);
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.acc-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  background: #ecf2f7;
+  color: #1a3047;
+  flex-shrink: 0;
+}
+
+.acc-content {
+  margin: 0;
+  padding: 0 1.5rem 1.75rem;
+  color: #4b5563;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.75rem;
 }

@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'primeicons/primeicons.css';
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
 :root {
   --ubax-text-primary: #343434;
   --ubax-accent: #e87d1e;
@@ -22,7 +28,240 @@ body {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Lexend', sans-serif;
   color: var(--ubax-text-primary);
   background: var(--ubax-page-bg);
+  overflow-x: clip;
+}
+
+.country-picker-overlay {
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  min-width: 260px;
+}
+
+.country-picker-overlay .p-select-list-container {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.country-picker-overlay .p-select-list {
+  padding: 4px 0;
+  overflow: visible;
+}
+
+.country-picker-overlay .p-select-option {
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.country-picker-overlay .p-select-option.p-select-option-selected {
+  background: rgba(26, 48, 71, 0.06);
+  color: inherit;
+}
+
+.country-picker-overlay .p-select-option:hover:not(.p-select-option-selected) {
+  background: #f5f5f5;
+}
+
+.country-picker-overlay .p-select-option.p-focus {
+  background: #f0f4f7;
+}
+
+.country-picker-overlay .cp-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.country-picker-overlay .cp-flag-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.country-picker-overlay .cp-flag-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.country-picker-overlay .cp-item-name {
+  flex: 1;
+  color: #1a1a1a;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.country-picker-overlay .cp-item-dial {
+  color: #888;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.country-picker-overlay
+  .p-select-option.p-select-option-selected
+  .cp-item-name {
+  font-weight: 600;
+  color: #1a3047;
+}
+
+@media (max-width: 640px) {
+  .country-picker-overlay {
+    width: min(22rem, calc(100vw - 1rem));
+    min-width: unset;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .country-picker-overlay .p-select-filter-container {
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+
+  .country-picker-overlay .p-select-list-container {
+    max-height: min(16rem, 45vh);
+  }
+}
+
+@media (max-width: 420px) {
+  .country-picker-overlay {
+    width: calc(100vw - 0.75rem);
+    max-width: calc(100vw - 0.75rem);
+  }
+
+  .country-picker-overlay .p-select-option {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .country-picker-overlay .cp-item {
+    gap: 0.5rem;
+  }
+
+  .country-picker-overlay .cp-flag-badge {
+    width: 24px;
+    height: 24px;
+  }
+
+  .country-picker-overlay .cp-item-name,
+  .country-picker-overlay .cp-item-dial {
+    font-size: 12px;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Splash page — body background + overscroll match
+// When the splash screen is active, body background and overscroll must match
+// the dark splash color so no light strip shows on Android rubber-band scroll
+// or during the view-transition slide-in (translateY starts 22px below).
+// ─────────────────────────────────────────────────────────────────────────────
+
+// When splash is active: match all backgrounds to dark + block overscroll
+:root:has(ubax-splash-page),
+:root:has(ubax-splash-page) body {
+  background: #0d1520;
+  overscroll-behavior: none;
+}
+
+// Disable view-transition slide animations when navigating to/from splash —
+// the vt-slide-in starts at translateY(22px) which would expose the body bg.
+:root:has(ubax-splash-page) ::view-transition-old(root),
+:root:has(ubax-splash-page) ::view-transition-new(root) {
+  animation: none;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// View Transitions — page-level route animations
+// ─────────────────────────────────────────────────────────────────────────────
+
+@keyframes vt-slide-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.985);
+  }
+}
+
+@keyframes vt-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+::view-transition-old(root) {
+  animation: 260ms cubic-bezier(0.4, 0, 1, 1) both vt-slide-out;
+}
+
+::view-transition-new(root) {
+  animation: 400ms cubic-bezier(0, 0, 0.2, 1) 60ms both vt-slide-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lenis — smooth scroll reset
+// ─────────────────────────────────────────────────────────────────────────────
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Global animation utilities shared across pages
+// ─────────────────────────────────────────────────────────────────────────────
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 125, 30, 0);
+  }
+  50% {
+    box-shadow: 0 0 28px 6px rgba(232, 125, 30, 0.22);
+  }
 }

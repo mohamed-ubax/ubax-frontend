@@ -1,0 +1,1543 @@
+// ─── Design tokens ────────────────────────────────────────────────────────────
+$accent: var(--ubax-accent); // #e87d1e
+$brand: var(--ubax-brand); // #1a3047
+$brand-dark: #192e44;
+
+// ─── Shared section padding ───────────────────────────────────────────────────
+// Strategy: cap the content area at 1440px (Figma reference width) on wide
+// screens. Below 1440px the 9vw value wins; above 1440px the auto-centering
+// calc() takes over. This way a developer on 1920px and a client on 1366px
+// both see elements at the same *proportional* size relative to content area.
+%section-pad {
+  padding-inline: max(clamp(2rem, 9vw, 10rem), calc((100% - 1440px) / 2));
+}
+
+.row-reverse {
+  flex-direction: row-reverse;
+}
+
+.text-end {
+  text-align: end;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 1. HERO
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-hero {
+  @extend %section-pad;
+  display: grid;
+  // % = relative to grid container (= content area), not viewport.
+  // Ensures the right column is always ~54% of available content regardless
+  // of whether viewport is 1366px or 1920px.
+  grid-template-columns: 1fr clamp(320px, 54%, 780px);
+  align-items: center;
+  // Use vw (not vh) to match home page hero proportions — consistent at any
+  // screen height. Same scale factor as home page (52vw / 745px).
+  min-height: clamp(480px, 52vw, 745px);
+  padding-block: 0;
+  padding-inline: 19rem;
+  gap: clamp(1.25rem, 2.5%, 3rem);
+  overflow: hidden;
+  background: #fff;
+}
+
+.fnc-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 95%;
+}
+
+.fnc-hero__title {
+  font-size: clamp(1.5rem, 2.6vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.5;
+  color: $brand;
+  margin: 0;
+}
+
+// Each line is a clip-path mask — text reveals bottom-to-top (same technique as home page)
+.fnc-hero__line {
+  display: block;
+}
+
+.fnc-hero__line-inner {
+  display: block;
+  // État initial caché — GSAP anime vers inset(0% 0 0% 0)
+  clip-path: inset(110% 0 0% 0);
+  will-change: clip-path;
+}
+
+// "Ubax" — accent orange, inherits title size
+.fnc-hero__brand {
+  color: $accent;
+}
+
+// "– Recherche immobilière" — brand dark blue, inherits title size
+.fnc-hero__rest {
+  color: $brand;
+}
+
+
+
+.fnc-hero__subtitle {
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: #181818;
+  margin: 0;
+  max-width: 400px;
+}
+
+// Pill badge
+.fnc-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+}
+
+.fnc-hero__pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: $accent;
+  flex-shrink: 0;
+
+  img {
+    width: 1.125rem;
+    height: 1.125rem;
+    object-fit: contain;
+  }
+}
+
+.fnc-hero__pill-text {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: 2rem;
+  background: $brand;
+  color: #fff;
+  font-size: clamp(0.8125rem, 1vw, 1rem);
+  font-weight: 300;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+
+  // Repeating shimmer sweep — starts after the pill entrance animation (~3 s)
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.32) 50%,
+      transparent 100%
+    );
+    animation: fnc-pill-shine 4.5s ease-in-out 3s infinite;
+    pointer-events: none;
+  }
+}
+
+// App store buttons
+.fnc-hero__stores {
+  display: flex;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  margin-top: 3.5rem;
+}
+
+.fnc-store-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.75rem;
+  border: 1px solid #dbdbdb;
+  border-radius: 0.625rem;
+  background: rgba(6, 6, 6, 0.05);
+  text-decoration: none;
+  color: #000;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.1));
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}
+
+.fnc-store-btn__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.fnc-store-btn__icon--huawei {
+  border-radius: 0.25rem;
+}
+
+.fnc-store-btn__labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.fnc-store-btn__sub {
+  font-size: 0.625rem;
+  line-height: 1;
+  color: #000;
+}
+
+.fnc-store-btn__name {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #000;
+}
+
+// Right visual — arch + phone + floating overlays
+.fnc-hero__visual {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: clamp(480px, 52vw, 745px);
+  align-self: stretch;
+}
+
+.fnc-hero__phone-bg {
+  position: absolute;
+  inset: 0;
+  left: 8%;
+  top: 14%;
+  right: 8%;
+  background: $brand-dark;
+  border-radius: 500px 500px 0 0;
+  z-index: 0;
+  will-change: transform;
+}
+
+// Phone image — Figma: 270px in 605px arch = 44.6% of arch column width
+// Using 44% of visual column keeps the same proportion at every viewport.
+.fnc-hero__phone-img {
+  position: relative;
+  z-index: 1;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  // Figma: phone starts 153px below arch top, arch is 26% down from section top
+  // → phone top ≈ 26% of visual height
+  margin-top: clamp(60px, 26%, 175px);
+  flex-shrink: 0;
+  will-change: transform, opacity;
+}
+
+// Frame 1686555363 — Hotel/reservation card, bottom-right, slight overflow
+// Figma: top=358px in ~625px section → 57% from top; right overflows section
+.fnc-hero__card-overlay {
+  position: absolute;
+  right: -4%;
+  top: 63%;
+  z-index: 2;
+  width: clamp(100px, 30%, 190px);
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.75rem;
+}
+
+// Group 65 — Search/filter card, top area, overhangs left of arch
+// Figma: left=568px (arch at 695px) → hangs 127px left of arch = ~21% of arch width
+.fnc-hero__stats-overlay {
+  position: absolute;
+  top: 10%;
+  z-index: 2;
+  left: -10%;
+  width: clamp(140px, 40%, 260px);
+  height: auto;
+  object-fit: contain;
+}
+
+@keyframes fnc-pill-shine {
+  0%    { left: -60%; }
+  35%, 100% { left: 120%; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 2. COMMENT UTILISER UBAX
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-how {
+  @extend %section-pad;
+  position: relative;
+  background: $accent;
+  padding-block: clamp(3rem, 5vw, 5.5rem);
+  overflow: hidden;
+}
+
+.fnc-how__union {
+  position: absolute;
+  right: 10.5%; // Figma: right edge overflows section by ~62px/1440 ≈ 4%
+  top: 45%; // Figma: top=446px in ~900px section = 50%, starts mid-section
+  transform: none;
+  // Figma: exactly 432×432px in 1440px design = 30vw — DO NOT use % here,
+  // % would be relative to padded content area not section, breaking the overlap
+  width: clamp(220px, 30vw, 432px);
+  height: clamp(220px, 30vw, 432px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fnc-how__heading {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: clamp(2.5rem, 5%, 5rem);
+  color: #fff;
+}
+
+.fnc-how__title {
+  font-size: clamp(1.5rem, 2.6vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.17;
+  margin: 0 0 2rem;
+}
+
+.fnc-how__subtitle {
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 500px;
+}
+
+.fnc-how__rows {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.fnc-how__row {
+  display: flex;
+  justify-content: center;
+  gap: clamp(0.875rem, 1.5%, 1.75rem);
+  flex-wrap: wrap;
+}
+
+// Step card — % width ensures exactly 3 per row at any content area width.
+// calc(32% - 1rem) ≈ (content_area / 3) - gap_allocation
+.fnc-step-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  width: clamp(200px, calc(32% - 1rem), 360px);
+  min-height: 230px;
+  padding: 1.375rem 1.375rem 1.75rem;
+  background: #fff;
+  border-radius: 0.75rem;
+}
+
+.fnc-step-card__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1.75rem;
+  background: $brand;
+  margin-bottom: 1.125rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 0.125rem;
+
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+  }
+}
+
+.fnc-step-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fnc-step-card__title {
+  font-size: clamp(1.125rem, 1.5vw, 1.5rem);
+  font-weight: 500;
+  line-height: 2rem;
+  color: #070707;
+  margin: 0;
+}
+
+.fnc-step-card__desc {
+  font-size: clamp(0.8125rem, 0.9vw, 0.875rem);
+  font-weight: 400;
+  line-height: 1.5rem;
+  color: #181818;
+  margin: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 3. PLATEFORME AGENCES
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-agency {
+  @extend %section-pad;
+  position: relative;
+  padding-block: clamp(3rem, 5vw, 5.5rem);
+  overflow: hidden;
+  background: $brand;
+}
+
+.fnc-agency__bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  z-index: 0;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.fnc-agency__heading {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 4.5rem;
+
+  h2 {
+    font-size: clamp(1.5rem, 2.6vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.17;
+    margin: 0 0 1.75rem;
+  }
+
+  p {
+    font-size: clamp(0.8125rem, 1vw, 1rem);
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 0 auto;
+    max-width: 37rem;
+  }
+}
+
+// ─── Agency dashboard stack ──────────────────────────────────────────────────
+// Figma frame 471:844 is 1750px wide — side dashboards extend beyond page
+// padding. Strategy: counter-extend the container back to full section width
+// with negative inline margins so the images can overflow the content gutters.
+// The parent .fnc-agency has overflow:hidden which clips the excess.
+.fnc-agency__dashboards {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  // Height based on main DG dashboard aspect ratio (842:590 ≈ 1.43)
+  // At max-width 1440px content × 68% main = ~980px wide → height = 980/1.43 ≈ 685... too tall
+  // Better: use vw so it scales naturally, matching Figma's 590px at 1440px ≈ 41vw
+  height: clamp(240px, 41vw, 590px);
+  margin-bottom: clamp(1.75rem, 2.5vw, 3.5rem);
+}
+
+.fnc-agency__dash-overlay {
+  position: absolute;
+  // Covers only the center (main dash area), matching Figma blur layers 468:766/768/769
+  left: 18%;
+  right: 18%;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(1px);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.fnc-agency__dash {
+  position: absolute;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  will-change: transform, opacity;
+}
+
+// Main DG dashboard — centered, z:2, casts shadow over side dashes
+.fnc-agency__dash--main {
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  z-index: 2;
+  height: 100%;
+  max-width: 68%;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.fnc-agency__dash--main,
+.fnc-agency__dash--left,
+.fnc-agency__dash--right {
+  width: auto;
+  filter: brightness(0.9);
+}
+// Commercial dashboard — left, starts at section edge (not content edge)
+// Figma: left edge at ~1% inside section width → shows 15-20% on left of main
+.fnc-agency__dash--left {
+  left: 9%;
+  top: 14%;
+  z-index: 1;
+  height: 76%;
+}
+
+// Comptable dashboard — right, mirrors commercial
+.fnc-agency__dash--right {
+  right: 7.5%;
+  top: 16%;
+  z-index: 1;
+  height: 74%;
+}
+
+// ─── Floating overlay panels ─────────────────────────────────────────────────
+// Positions mapped from Figma 1750px frame to our page coordinates:
+//   frame_content_origin = (1750 - 1440) / 2 + page_padding = 155 + 130 = 285px
+//   left_% = (frame_x - 285) / 1180   top_% = (frame_y - 298_dashTop) / 590_dashH
+// All % are relative to the dashboards container (now full section width ~1440px),
+// so divide by 1440 instead of 1180 for the left positions.
+.fnc-agency__panel {
+  position: absolute;
+  z-index: 4;
+  border-radius: 0.375rem;
+  height: auto;
+  will-change: transform, opacity;
+}
+
+// Group 142 1 — navigation/search bar
+// frame: left=493, w=770  → left=493/1440=34.2%, w=770/1440=53.5%
+// top: (456-298)/590=26.8%
+.fnc-agency__panel--nav {
+  left: 25.5%;
+  top: 23%;
+  width: 44.2rem;
+}
+
+// uigekfdjbn 1 — small widget card
+// frame: left=483, w=260 → left=483/1440=33.5%, w=260/1440=18%
+// top: (553-298)/590=43.2%
+.fnc-agency__panel--widget {
+  left: 25%;
+  top: 38.4%;
+  width: 17%;
+}
+
+// Chart 1cc 1 — revenue chart
+// frame: left=750, w=527 → left=750/1440=52.1%, w=527/1440=36.6%
+// top: (554-298)/590=43.4%
+.fnc-agency__panel--chart {
+  left: 41%;
+  top: 38.4%;
+  width: 35.5%;
+}
+
+// Role cards row
+.fnc-agency__roles {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.625rem, 1.2%, 1.25rem);
+  // Natural gap below dashboard container
+  margin-top: 6rem;
+}
+
+.fnc-agency__role-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.9375rem;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.fnc-agency__role-num-wrap {
+  position: relative;
+  width: 2.375rem;
+  height: 2.375rem;
+  min-width: 2.375rem;
+  flex-shrink: 0;
+}
+
+.fnc-agency__role-num-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fnc-agency__role-num {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1;
+  z-index: 1;
+}
+
+.fnc-agency__role-title {
+  font-size: clamp(0.75rem, 0.9vw, 0.9375rem);
+  font-weight: 400;
+  line-height: 3.5rem;
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fnc-agency__role-desc {
+  font-size: clamp(0.6875rem, 0.75vw, 0.8rem);
+  font-weight: 300;
+  line-height: 1.5rem;
+  color: #fff;
+  margin: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 4. PLATEFORME HÔTELS
+// ═══════════════════════════════════════════════════════════════════════════════
+.fnc-hotels {
+  @extend %section-pad;
+  padding-block: clamp(3rem, 5vw, 5.5rem);
+  background: #fff;
+}
+
+.fnc-hotels__heading {
+  text-align: center;
+  margin-bottom: clamp(2rem, 3.5%, 3.5rem);
+  color: $brand;
+
+  h2 {
+    font-size: clamp(1.5rem, 2.6vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.17;
+    margin: 0 0 1.75rem;
+  }
+
+  p {
+    font-size: clamp(0.875rem, 1vw, 1rem);
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000;
+    margin: 0 auto;
+    max-width: 520px;
+  }
+}
+
+.fnc-hotels__layout {
+  display: grid;
+  // Center column = 47% of content area — consistent at any screen size
+  grid-template-columns: 1fr clamp(240px, 47%, 680px) 1fr;
+  gap: clamp(1.25rem, 2%, 2.5rem);
+  align-items: center;
+}
+
+.fnc-hotels__features {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1.375rem;
+  border: 1px solid #ebebeb;
+  border-radius: 1.5rem;
+  background: #fff;
+}
+
+// Center dashboard — height maintains aspect ratio ~0.75 of its column width
+.fnc-hotels__dashboard {
+  position: relative;
+  aspect-ratio: 553 / 418; // matches Figma frame proportions
+  height: auto;
+  // Safety clamps so it never gets too small or too large
+  min-height: 220px;
+  max-height: 540px;
+}
+
+.fnc-hotels__dash-blur {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(1px);
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 0.25rem;
+}
+
+.fnc-hotels__dash-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  border-radius: 0.25rem;
+}
+
+// All overlay panels use % width relative to the dashboard container
+// so they remain proportional at every screen size.
+.fnc-hotels__dash-panel {
+  position: absolute;
+  z-index: 2;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.375rem;
+}
+
+.fnc-hotels__dash-panel--chart2 {
+  left: 2%;
+  top: 23%;
+  width: 41%;
+}
+
+.fnc-hotels__dash-panel--group362 {
+  left: 2%;
+  top: 11%;
+  width: 65%;
+}
+
+.fnc-hotels__dash-panel--group349 {
+  left: 46%;
+  top: 48%;
+  transform: translate(-10%, -50%);
+  width: 23%;
+}
+
+.fnc-hotels__dash-panel--group1171 {
+  right: 0;
+  top: 37%;
+  width: 35%;
+  object-fit: contain;
+}
+
+// Feature items
+.fnc-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-block: 1.375rem;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.fnc-feature-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  min-width: 3rem;
+  border-radius: 1.75rem;
+  background: $accent;
+  overflow: hidden;
+  padding: 0.125rem;
+  flex-shrink: 0;
+
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+  }
+}
+
+.fnc-feature-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.fnc-feature-item__title {
+  font-size: clamp(1rem, 1.3vw, 1.375rem);
+  font-weight: 500;
+  line-height: 1.6;
+  color: #070707;
+  margin: 0;
+}
+
+.fnc-feature-item__desc {
+  font-size: clamp(0.8125rem, 0.9vw, 0.9375rem);
+  font-weight: 400;
+  line-height: 1.5rem;
+  color: #575757;
+  margin: 0;
+}
+
+.fnc-feature-divider {
+  border: none;
+  border-top: 1px solid #dbdbdb;
+  margin: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RESPONSIVE CUSTOMIZATION
+// Breakpoints target:
+@media (max-width: 2560px) {
+  .fnc-hero {
+    padding-inline: 40rem;
+  }
+
+  .fnc-how {
+    &__union {
+      right: 20.5%;
+    }
+  }
+}
+
+@media (max-width: 2520px) {
+  .fnc-hero {
+    padding-inline: 38rem;
+  }
+}
+
+@media (max-width: 2458px) {
+  .fnc-hero {
+    padding-inline: 36rem;
+  }
+}
+
+@media (max-width: 2400px) {
+  .fnc-hero {
+    padding-inline: 34rem;
+  }
+}
+
+@media (max-width: 2363px) {
+  .fnc-how {
+    &__union {
+      right: 18.5%;
+    }
+  }
+}
+
+@media (max-width: 2329px) {
+  .fnc-hero {
+    padding-inline: 32rem;
+  }
+}
+
+@media (max-width: 2270px) {
+  .fnc-hero {
+    padding-inline: 30rem;
+  }
+}
+
+@media (max-width: 2214px) {
+  .fnc-how {
+    &__union {
+      right: 16.5%;
+    }
+  }
+}
+
+@media (max-width: 2200px) {
+  .fnc-hero {
+    padding-inline: 28rem;
+  }
+}
+
+@media (max-width: 2140px) {
+  .fnc-hero {
+    padding-inline: 26rem;
+  }
+}
+
+@media (max-width: 2074px) {
+  .fnc-hero {
+    padding-inline: 24rem;
+  }
+}
+
+@media (max-width: 2008px) {
+  .fnc-hero {
+    padding-inline: 22rem;
+  }
+}
+
+@media (max-width: 1985px) {
+  .fnc-how {
+    &__union {
+      right: 12.5%;
+    }
+  }
+}
+
+@media (max-width: 1945px) {
+  .fnc-hero {
+    padding-inline: 20rem;
+  }
+}
+
+@media (max-width: 1882px) {
+  .fnc-hero {
+    padding-inline: 18rem;
+  }
+}
+
+@media (max-width: 1816px) {
+  .fnc-hero {
+    padding-inline: 16rem;
+  }
+}
+
+@media (max-width: 1805px) {
+  .fnc-how {
+    &__union {
+      right: 8.5%;
+    }
+  }
+}
+
+@media (max-width: 1730px) {
+  .fnc-agency__panel--nav {
+    left: 25.1%;
+    top: 23%;
+    width: 44.2rem;
+  }
+
+  .fnc-agency__panel--widget {
+    left: 24.2%;
+  }
+
+  .fnc-agency__panel--chart {
+    left: 40.9%;
+  }
+}
+
+@media (max-width: 1756px) {
+  .fnc-hero {
+    padding-inline: 14rem;
+  }
+}
+
+@media (max-width: 1710px) {
+  .fnc-agency__panel--chart {
+    width: 35.9%;
+  }
+}
+
+@media (max-width: 1690px) {
+  .fnc-hero {
+    padding-inline: 12rem;
+  }
+}
+
+@media (max-width: 1674px) {
+  .fnc-agency__panel--widget {
+    left: 23.6%;
+  }
+  .fnc-agency__panel--chart {
+    width: 36.2%;
+  }
+}
+
+@media (max-width: 1668px) {
+  .fnc-agency__panel--widget {
+    width: 17.5%;
+  }
+  .fnc-agency__panel--chart {
+    left: 41%;
+  }
+}
+
+@media (max-width: 1684px) {
+  .fnc-agency__panel--nav {
+    left: 24.4%;
+  }
+
+  .fnc-agency__panel--chart {
+    width: 36%;
+  }
+}
+
+@media (max-width: 1660px) {
+  .fnc-agency__panel--nav {
+    left: 24.1%;
+  }
+}
+
+@media (max-width: 1660px) {
+  .fnc-agency__panel--chart {
+    width: 36.5%;
+  }
+}
+
+@media (max-width: 1635px) {
+  .fnc-agency__panel--nav {
+    left: 23.3%;
+  }
+}
+
+@media (max-width: 1631px) {
+  .fnc-agency__panel--widget {
+    left: 22.8%;
+  }
+
+  .fnc-agency__panel--chart {
+    width: 37.2%;
+    left: 40.5%;
+  }
+}
+
+@media (max-width: 1627px) {
+  .fnc-hero {
+    padding-inline: 10rem;
+  }
+}
+
+@media (max-width: 1616px) {
+  .fnc-how {
+    &__union {
+      right: 3.5%;
+    }
+  }
+}
+
+@media (max-width: 1592px) {
+  .fnc-agency__panel--nav {
+    left: 22.7%;
+  }
+}
+
+@media (max-width: 1588px) {
+  .fnc-agency__panel--widget {
+    left: 21.8%;
+    width: 18%;
+  }
+
+  .fnc-agency__panel--chart {
+    width: 38.5%;
+    left: 40.5%;
+  }
+}
+
+@media (max-width: 1564px) {
+  .fnc-hero {
+    padding-inline: 8rem;
+  }
+}
+
+@media (max-width: 1558px) {
+  .fnc-agency__panel--nav {
+    left: 22.05%;
+  }
+}
+
+@media (max-width: 1537px) {
+  .fnc-agency__panel--widget {
+    left: 20.8%;
+    width: 19.5%;
+  }
+
+  .fnc-agency__panel--chart {
+    width: 40.5%;
+    left: 39.5%;
+  }
+}
+
+@media (max-width: 1500px) {
+  .fnc-how {
+    &__union {
+      top: 44%;
+      right: -0.5%;
+    }
+  }
+}
+
+@media (max-width: 1524px) {
+  .fnc-agency__panel--nav {
+    left: 22.05%;
+  }
+}
+
+@media (max-width: 1516px) {
+  .fnc-agency__panel--nav {
+    left: 21.2%;
+  }
+}
+
+@media (max-width: 1498px) {
+  .fnc-hero {
+    padding-inline: 6rem;
+  }
+}
+
+@media (max-width: 1480px) {
+  .fnc-agency__panel--widget {
+    left: 19.8%;
+    width: 20.5%;
+  }
+
+  .fnc-agency__panel--chart {
+    width: 42%;
+    left: 39.5%;
+  }
+}
+
+@media (max-width: 1478px) {
+  .fnc-agency__panel--nav {
+    left: 20.5%;
+  }
+}
+
+@media (max-width: 1435px) {
+  .fnc-hero {
+    padding-inline: 4rem;
+  }
+
+  .fnc-how {
+    &__union {
+      right: -2.5%;
+    }
+  }
+
+  .fnc-agency__panel--nav {
+    left: 19.8%;
+  }
+}
+
+@media (max-width: 1414px) {
+  .fnc-agency__panel--nav {
+    width: 43.2rem;
+    left: 20.8%;
+  }
+}
+
+@media (max-width: 1408px) {
+  .fnc-agency__panel--nav {
+    left: 19.8%;
+  }
+
+  .fnc-hotels {
+    padding-inline: 1rem;
+  }
+}
+
+@media (max-width: 1382px) {
+  .fnc-agency__panel--nav {
+    left: 19.5%;
+  }
+}
+
+@media (max-width: 1370px) {
+  .fnc-hero {
+    padding-inline: 2rem;
+  }
+}
+
+@media (max-width: 1366px) {
+  .fnc-agency__panel--nav {
+    width: 42.1rem;
+  }
+}
+
+@media (max-width: 1304px) {
+  .fnc-hero {
+    padding-inline: 1rem;
+    padding-block: 3rem 0;
+    justify-items: center;
+    grid-template-columns: 1fr;
+
+    &__content {
+      text-align: center;
+      align-items: center;
+    }
+
+    &__phone-bg {
+      left: -50%;
+      right: -50%;
+    }
+
+    &__card-overlay {
+      top: 61%;
+      right: -87%;
+      width: clamp(13rem, 30%, 190px);
+    }
+
+    &__stats-overlay {
+      top: 10%;
+      left: -92%;
+      width: clamp(16rem, 40%, 260px);
+    }
+  }
+}
+
+@media (max-width: 1332px) {
+  .fnc-agency__panel--nav {
+    width: 41rem;
+  }
+}
+
+@media (max-width: 1298px) {
+  .fnc-agency__panel--nav {
+    width: 40rem;
+  }
+}
+
+@media (max-width: 1270px) {
+  .fnc-agency__panel--nav {
+    width: 39rem;
+  }
+}
+
+@media (max-width: 1260px) {
+  .fnc-how {
+    &__union {
+      top: 45%;
+    }
+  }
+}
+
+@media (max-width: 1242px) {
+  .fnc-agency__panel--nav {
+    width: 38rem;
+  }
+}
+
+@media (max-width: 1216px) {
+  .fnc-agency__panel--nav {
+    width: 37.25rem;
+  }
+}
+
+@media (max-width: 1182px) {
+  .fnc-how {
+    &__union {
+      top: 44%;
+    }
+  }
+}
+
+@media (max-width: 1180px) {
+  .fnc-agency__panel--nav {
+    width: 36.25rem;
+  }
+}
+
+@media (max-width: 1152px) {
+  .fnc-agency__panel--nav {
+    width: 35.25rem;
+  }
+}
+
+@media (max-width: 1145px) {
+  .fnc-hero {
+    &__phone-bg {
+      top: 6%;
+      left: -60%;
+      right: -60%;
+    }
+
+    &__card-overlay {
+      top: 56%;
+      right: -94%;
+    }
+
+    &__stats-overlay {
+      top: 8%;
+      left: -118%;
+    }
+  }
+}
+
+@media (max-width: 1120px) {
+  .fnc-agency__panel--nav {
+    width: 34.25rem;
+  }
+}
+
+@media (max-width: 1092px) {
+  .fnc-how {
+    &__union {
+      top: 46.5%;
+    }
+  }
+
+  .fnc-agency__panel--nav {
+    width: 34.25rem;
+  }
+}
+
+@media (max-width: 1088px) {
+  .fnc-agency__panel--nav {
+    width: 33.5rem;
+  }
+}
+
+@media (max-width: 1068px) {
+  .fnc-agency__panel--nav {
+    width: 32.7rem;
+  }
+}
+
+@media (max-width: 1042px) {
+  .fnc-agency__panel--nav {
+    width: 32rem;
+  }
+}
+
+@media (max-width: 1040px) {
+  .fnc-hero {
+    gap: 3rem;
+  }
+}
+
+.fnc-agency__dash--mobile {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .fnc-agency__dash--main,
+  .fnc-agency__dash--left,
+  .fnc-agency__dash--right,
+  .fnc-agency__panel {
+    display: none;
+  }
+
+  .fnc-agency__dash--mobile {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+  }
+
+  .fnc-agency__roles {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 4.5rem;
+    gap: 1rem;
+  }
+
+  .fnc-agency__role-title {
+    white-space: normal;
+    line-height: 1.4;
+    font-size: 0.875rem;
+  }
+
+  .fnc-hotels__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .fnc-hotels__features {
+    max-width: 560px;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .fnc-hotels__dashboard {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 540px;
+    max-height: 420px;
+  }
+
+  .fnc-how {
+    padding-inline: 0rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .fnc-hero {
+    gap: 5rem;
+
+    &__phone-bg {
+      top: -5%;
+    }
+  }
+}
+
+@media (max-width: 938px) {
+  .fnc-hero {
+    gap: 8rem;
+
+    &__phone-bg {
+      top: -12%;
+    }
+
+    &__card-overlay {
+      top: 46%;
+    }
+
+    &__stats-overlay {
+      top: -10%;
+      left: -108%;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .fnc-agency__dashboards {
+    height: clamp(160px, 35vw, 340px);
+  }
+
+  .fnc-how {
+    &__union {
+      top: 48.5%;
+    }
+  }
+}
+
+@media (max-width: 866px) {
+  .fnc-hero {
+    &__card-overlay {
+      right: -60%;
+    }
+
+    &__stats-overlay {
+      left: -75%;
+    }
+  }
+}
+
+@media (max-width: 776px) {
+  .fnc-how {
+    &__union {
+      top: 49.5%;
+    }
+  }
+}
+
+@media (max-width: 708px) {
+  .fnc-hero {
+    &__card-overlay {
+      right: -40%;
+    }
+
+    &__stats-overlay {
+      left: -46%;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .fnc-hero {
+    &__stores {
+      justify-content: center;
+      margin: 2rem 0;
+    }
+  }
+
+  .fnc-hero,
+  .fnc-how,
+  .fnc-agency,
+  .fnc-hotels {
+    padding-inline: clamp(1.25rem, 5vw, 2rem);
+  }
+
+  // Re-sync dashboards negative margin with the new reduced padding
+  .fnc-agency__dashboards {
+    margin-inline: calc(-1 * clamp(1.25rem, 5vw, 2rem));
+  }
+}
+
+@media (max-width: 624px) {
+  .fnc-step-card {
+    width: 28rem;
+  }
+
+  .fnc-how {
+    &__rows {
+      gap: 0.9rem;
+    }
+  }
+}
+
+@media (max-width: 542px) {
+  .fnc-hero {
+    &__card-overlay {
+      right: 12%;
+      top: 40%;
+    }
+
+    &__stats-overlay {
+      left: 1%;
+      top: -21%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .fnc-agency__roles {
+    grid-template-columns: 1fr;
+  }
+
+  .fnc-hero__stores {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fnc-store-btn {
+    width: 100%;
+  }
+
+  .fnc-agency__dashboards {
+    height: clamp(100px, 42vw, 220px);
+  }
+
+  .fnc-hotels__dashboard {
+    max-height: 280px;
+  }
+}
+
+@media (max-width: 360px) {
+  .fnc-hero__pill-text {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.875rem;
+  }
+
+  .fnc-step-card {
+    padding: 1rem;
+    min-height: unset;
+  }
+
+  .fnc-agency__role-card {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 350px) {
+  .fnc-hero {
+    &__pill {
+      flex-direction: column;
+    }
+  }
+}
