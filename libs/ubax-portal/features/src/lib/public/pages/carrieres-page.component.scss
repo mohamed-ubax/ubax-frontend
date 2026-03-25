@@ -5,11 +5,10 @@ $c-dark-navy: #23304f;
 $c-filter-bg: #eef4ff;
 $c-divider: #cfd6dc;
 
-// ── Layout helpers ─────────────────────────────────────────────────────────
-$gutter: 160px;
-$gutter-md: 48px;
-$gutter-sm: 24px;
-$container-max: 1550px;
+// ── Gutter — mirrors the header formula exactly ─────────────────────────────
+:host {
+  --_gutter: max(1.25rem, calc((100% - 1284px) / 2));
+}
 
 // ══ HERO ═══════════════════════════════════════════════════════════════════
 .hero {
@@ -30,7 +29,7 @@ $container-max: 1550px;
 
 .hero__content {
   position: absolute;
-  left: $gutter;
+  left: var(--_gutter);
   top: 133px;
   z-index: 1;
   max-width: 650px;
@@ -138,7 +137,7 @@ $container-max: 1550px;
 
 .hero__visual {
   position: absolute;
-  right: 8%;
+  right: var(--_gutter);
   top: 50%;
   transform: translateY(-55%);
   width: 380px;
@@ -235,7 +234,7 @@ $container-max: 1550px;
 
 .hero__companies-stat {
   position: absolute;
-  right: calc(8% + 30px);
+  right: var(--_gutter);
   bottom: 80px;
   text-align: center;
   color: #fff;
@@ -255,10 +254,7 @@ $container-max: 1550px;
   display: flex;
   align-items: flex-start;
   gap: 60px;
-  padding: 80px $gutter 64px;
-  max-width: calc(#{$container-max} + #{$gutter} * 2);
-  margin: 0 auto;
-  box-sizing: border-box;
+  padding: 80px var(--_gutter) 64px;
 }
 
 .about__text-col {
@@ -286,7 +282,7 @@ $container-max: 1550px;
 
 .about__heading {
   flex: 1;
-  font-size: clamp(1.75rem, 3vw, 3rem);
+  font-size: clamp(1.75rem, 3.5vw, 3rem);
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.1;
@@ -296,10 +292,8 @@ $container-max: 1550px;
 
 // ══ INFO SECTION ═══════════════════════════════════════════════════════════
 .info-section {
-  padding: 0 $gutter;
-  max-width: calc(#{$container-max} + #{$gutter} * 2);
-  margin: 0 auto 84px;
-  box-sizing: border-box;
+  padding: 0 var(--_gutter);
+  margin: 0 0 84px;
 }
 
 .info-card-wrap {
@@ -395,10 +389,8 @@ $container-max: 1550px;
 
 // ══ EXPLORE ════════════════════════════════════════════════════════════════
 .explore {
-  padding: 0 $gutter;
-  max-width: calc(#{$container-max} + #{$gutter} * 2);
-  margin: 0 auto 40px;
-  box-sizing: border-box;
+  padding: 0 var(--_gutter);
+  margin: 0 0 40px;
 }
 
 .explore__breadcrumb {
@@ -412,7 +404,7 @@ $container-max: 1550px;
 }
 
 .explore__heading {
-  font-size: clamp(1.75rem, 3vw, 3rem);
+  font-size: clamp(1.75rem, 3.5vw, 3rem);
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.1;
@@ -429,8 +421,7 @@ $container-max: 1550px;
   background: var(--ubax-brand);
   border-radius: 20px;
   padding: 28px 30px;
-  width: min(1420px, calc(100% - #{$gutter} * 2));
-  margin: 0 auto 48px;
+  margin: 0 var(--_gutter) 48px;
 }
 
 .search-bar__filters {
@@ -548,10 +539,8 @@ $container-max: 1550px;
   grid-template-columns: repeat(3, minmax(0, 441px));
   gap: 49px;
   justify-content: center;
-  padding: 0 $gutter;
-  margin: 0 auto 48px;
-  max-width: calc(#{$container-max} + #{$gutter} * 2);
-  box-sizing: border-box;
+  padding: 0 var(--_gutter);
+  margin: 0 0 48px;
 }
 
 .job-card {
@@ -670,8 +659,8 @@ $container-max: 1550px;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 0 $gutter;
-  margin: 0 auto 80px;
+  padding: 0 var(--_gutter);
+  margin: 0 0 80px;
 }
 
 .pagination__arrow {
@@ -726,12 +715,8 @@ $container-max: 1550px;
 
 // ══ RESPONSIVE ═════════════════════════════════════════════════════════════
 @media (max-width: 1280px) {
-  .hero__content {
-    left: $gutter-md;
-  }
-
   .hero__visual {
-    right: 2%;
+    right: var(--_gutter);
     width: 300px;
     height: 340px;
   }
@@ -741,14 +726,7 @@ $container-max: 1550px;
   }
 
   .about {
-    padding-left: $gutter-md;
-    padding-right: $gutter-md;
     gap: 40px;
-  }
-
-  .info-section {
-    padding-left: $gutter-md;
-    padding-right: $gutter-md;
   }
 
   .info-card-wrap {
@@ -760,13 +738,7 @@ $container-max: 1550px;
     height: 320px;
   }
 
-  .explore {
-    padding-left: $gutter-md;
-    padding-right: $gutter-md;
-  }
-
   .search-bar {
-    width: calc(100% - #{$gutter-md} * 2);
     flex-wrap: wrap;
   }
 
@@ -780,14 +752,7 @@ $container-max: 1550px;
   }
 
   .jobs-grid {
-    padding-left: $gutter-md;
-    padding-right: $gutter-md;
     grid-template-columns: repeat(auto-fit, minmax(min(441px, 100%), 1fr));
-  }
-
-  .pagination {
-    padding-left: $gutter-md;
-    padding-right: $gutter-md;
   }
 }
 
@@ -799,8 +764,8 @@ $container-max: 1550px;
   }
 
   .hero__content {
-    left: $gutter-sm;
-    right: $gutter-sm;
+    left: var(--_gutter);
+    right: var(--_gutter);
     top: 80px;
     max-width: 100%;
   }
@@ -833,7 +798,8 @@ $container-max: 1550px;
 
   .about {
     flex-direction: column;
-    padding: 48px $gutter-sm;
+    padding-top: 48px;
+    padding-bottom: 48px;
     gap: 24px;
   }
 
@@ -843,8 +809,6 @@ $container-max: 1550px;
   }
 
   .info-section {
-    padding-left: $gutter-sm;
-    padding-right: $gutter-sm;
     margin-bottom: 48px;
   }
 
@@ -873,8 +837,6 @@ $container-max: 1550px;
   }
 
   .explore {
-    padding-left: $gutter-sm;
-    padding-right: $gutter-sm;
     margin-bottom: 24px;
   }
 
@@ -883,7 +845,6 @@ $container-max: 1550px;
   }
 
   .search-bar {
-    width: calc(100% - #{$gutter-sm} * 2);
     flex-direction: column;
     padding: 20px 16px;
   }
@@ -898,15 +859,11 @@ $container-max: 1550px;
   }
 
   .jobs-grid {
-    padding-left: $gutter-sm;
-    padding-right: $gutter-sm;
     grid-template-columns: 1fr;
     gap: 24px;
   }
 
   .pagination {
-    padding-left: $gutter-sm;
-    padding-right: $gutter-sm;
     gap: 6px;
   }
 
