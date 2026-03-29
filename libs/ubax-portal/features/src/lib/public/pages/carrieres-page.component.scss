@@ -14,8 +14,9 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ HERO ═══════════════════════════════════════════════════════════════════
-// Fix 1: card container — horizontal margins + border-radius expose page bg
-// Fix 2: reduced min-height to match Figma proportions
+// Hero card: horizontal margins expose page bg on each side; border-radius
+// on three convex corners; ::after creates the concave notch at bottom-left.
+// Overlay reduced to 0.88 so the background image texture is visible.
 .hero {
   position: relative;
   min-height: 420px;
@@ -23,12 +24,27 @@ $c-placeholder: #b3b3b3;
   align-items: center;
   gap: 48px;
   margin: 0 var(--_gutter);
-  padding: 60px 56px;
+  padding: 60px 56px 60px;
   border-radius: 24px;
   overflow: hidden;
   background:
-    linear-gradient(rgba(26, 48, 71, 0.96), rgba(26, 48, 71, 0.96)),
+    linear-gradient(rgba(26, 48, 71, 0.88), rgba(26, 48, 71, 0.88)),
     url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png') center / cover no-repeat;
+
+  // Concave notch at bottom-left: a page-bg-coloured overlay sized to cut into
+  // the corner. overflow:hidden on .hero clips the outer corner to the card's
+  // own border-radius; border-top-right-radius creates the inner concave curve.
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    height: 90px;
+    background: var(--ubax-page-bg);
+    border-top-right-radius: 24px;
+    pointer-events: none;
+  }
 }
 
 // Left visual area
@@ -74,22 +90,22 @@ $c-placeholder: #b3b3b3;
   z-index: 2;
 }
 
+// Badge sits inside the concave notch (::after overlay area at bottom-left).
+// z-index: 1 keeps it above the ::after pseudo-element (z-index: auto).
 .hero__badge {
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 24px;
+  left: 24px;
   background: #fff;
   border: 1px solid #f5f5f5;
   border-radius: 32px;
   padding: 8px 20px;
   white-space: nowrap;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.5;
-  text-align: center;
-  z-index: 3;
+  z-index: 1;
 }
 
 // Right content area
@@ -235,14 +251,10 @@ $c-placeholder: #b3b3b3;
     box-shadow 300ms ease;
 
   // ── Grid placement (.culture__left is nth-child(1), cards are 2–6) ──
-  &:nth-child(2) { grid-column: 2; grid-row: 1; }
-  &:nth-child(3) { grid-column: 3; grid-row: 1; }
-  &:nth-child(4) { grid-column: 1; grid-row: 2; }
-  &:nth-child(5) { grid-column: 2; grid-row: 2; }
-  &:nth-child(6) { grid-column: 3; grid-row: 2; }
-
-  // ── Default featured card: L'Audace Technologique (nth-child 2) ─────
+  // nth-child(2) = L'Audace Technologique: col 2, row 1, default featured
   &:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
     background: var(--ubax-accent);
     transform: rotate(-3deg);
     transform-origin: center;
@@ -250,6 +262,10 @@ $c-placeholder: #b3b3b3;
     .culture__card-title { color: #fff; }
     .culture__card-body  { color: rgba(255, 255, 255, 0.9); }
   }
+  &:nth-child(3) { grid-column: 3; grid-row: 1; }
+  &:nth-child(4) { grid-column: 1; grid-row: 2; }
+  &:nth-child(5) { grid-column: 2; grid-row: 2; }
+  &:nth-child(6) { grid-column: 3; grid-row: 2; }
 }
 
 .culture__card-title {
@@ -802,25 +818,28 @@ $c-placeholder: #b3b3b3;
 // ══ BOTTOM CTA ═════════════════════════════════════════════════════════════
 .cta-bottom {
   position: relative;
-  margin: 0 var(--_gutter) 80px;
+  margin: 125px var(--_gutter) 80px;
   background: var(--ubax-brand);
   border-radius: 20px;
-  overflow: hidden;
-  min-height: 517px;
+  overflow: visible;
+  min-height: 392px;
   display: flex;
   align-items: center;
 }
 
+// Absolute: out of flex flow, overflows 125px above the card top.
 .cta-bottom__visual {
-  flex: 0 0 530px;
+  position: absolute;
+  top: -125px;
+  left: 0;
+  width: 530px;
   height: 517px;
   overflow: hidden;
-  position: relative;
 }
 
 .cta-bottom__img {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
@@ -828,10 +847,12 @@ $c-placeholder: #b3b3b3;
   object-position: center top;
 }
 
+// margin-left replaces the flex space the visual used to occupy.
 .cta-bottom__content {
   flex: 1;
   padding: 48px 48px 48px 32px;
   min-width: 0;
+  margin-left: 545px;
 }
 
 .cta-bottom__title {
@@ -890,9 +911,6 @@ $c-placeholder: #b3b3b3;
     &:nth-child(6) { grid-column: 1 / -1; grid-row: 4; }
   }
 
-  .cta-bottom__visual {
-    flex: 0 0 350px;
-  }
 
   .search-bar {
     flex-wrap: wrap;
@@ -915,15 +933,21 @@ $c-placeholder: #b3b3b3;
 @media (max-width: 900px) {
   .cta-bottom {
     flex-direction: column;
+    overflow: hidden;
+    margin-top: 0;
+    min-height: auto;
   }
 
   .cta-bottom__visual {
-    flex: 0 0 280px;
+    position: relative;
+    top: auto;
     width: 100%;
+    height: 280px;
   }
 
   .cta-bottom__content {
     padding: 32px;
+    margin-left: 0;
   }
 }
 
@@ -934,7 +958,11 @@ $c-placeholder: #b3b3b3;
     padding: 48px 24px;
     gap: 32px;
     border-radius: 16px;
+
+    &::after { display: none; }
   }
+
+  .hero__badge { display: none; }
 
   .hero__visual {
     width: 220px;
