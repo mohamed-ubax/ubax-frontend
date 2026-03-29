@@ -1,5 +1,4 @@
 <ubax-public-shell>
-
   <!-- ══ HERO ═══════════════════════════════════════════════════════════════ -->
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero__visual" aria-hidden="true">
@@ -11,8 +10,8 @@
     <div class="hero__content">
       <h1 id="hero-title" class="hero__title">Rejoignez l'aventure Ubax</h1>
       <p class="hero__subtitle">
-        Découvrez les opportunités professionnelles chez UBAX et évoluez dans
-        un environnement dynamique et innovant.
+        Découvrez les opportunités professionnelles chez UBAX et évoluez dans un
+        environnement dynamique et innovant.
       </p>
       <form
         class="hero__search"
@@ -32,7 +31,9 @@
       </form>
     </div>
     <!-- Badge sits in the concave notch at the bottom-left of the hero card -->
-    <div class="hero__badge" aria-hidden="true">Portail carrière et recrutement</div>
+    <div class="hero__badge" aria-hidden="true">
+      Portail carrière et recrutement
+    </div>
   </section>
 
   <!-- ══ NOTRE CULTURE ══════════════════════════════════════════════════════ -->
@@ -40,9 +41,10 @@
     <div class="culture__left">
       <h2 id="culture-heading" class="culture__heading">Notre culture</h2>
       <p class="culture__desc">
-        Chez Ubax, notre culture allie innovation, autonomie et transparence. Nous donnons à chacun
-        les moyens d'agir et de créer, avec un objectif clair : le succès de nos clients. Portés par
-        un esprit d'équipe fort, nous construisons une plateforme qui transforme la gestion financière.
+        Chez Ubax, notre culture allie innovation, autonomie et transparence.
+        Nous donnons à chacun les moyens d'agir et de créer, avec un objectif
+        clair : le succès de nos clients. Portés par un esprit d'équipe fort,
+        nous construisons une plateforme qui transforme la gestion financière.
       </p>
     </div>
 
@@ -61,24 +63,34 @@
     </div>
     <h2 id="mission-heading" class="mission__title">Notre mission</h2>
     <p class="mission__text">
-      La mission d'Ubax est de transformer radicalement la gestion financière en convertissant
-      la complexité administrative en une expérience fluide, intuitive et accessible à tous les
-      entrepreneurs. En plaçant la transparence et la sécurité au cœur de chaque transaction,
-      nous bâtissons un écosystème de confiance qui libère le potentiel de croissance de nos
-      partenaires en les déchargeant des contraintes opérationnelles. Nous nous engageons à
-      démocratiser l'accès aux technologies de pointe, agissant comme le catalyseur stratégique
-      de la transformation digitale pour les entreprises de demain.
+      La mission d'Ubax est de transformer radicalement la gestion financière en
+      convertissant la complexité administrative en une expérience fluide,
+      intuitive et accessible à tous les entrepreneurs. En plaçant la
+      transparence et la sécurité au cœur de chaque transaction, nous bâtissons
+      un écosystème de confiance qui libère le potentiel de croissance de nos
+      partenaires en les déchargeant des contraintes opérationnelles. Nous nous
+      engageons à démocratiser l'accès aux technologies de pointe, agissant
+      comme le catalyseur stratégique de la transformation digitale pour les
+      entreprises de demain.
     </p>
   </section>
 
   <!-- ══ INFO SECTION ═══════════════════════════════════════════════════════ -->
   <section class="info-section" aria-labelledby="info-heading">
     <div class="info-section__inner">
-      <img class="info-section__deco" [src]="subtractImg" alt="" aria-hidden="true" />
-      <h2 id="info-heading" class="info-section__title">Le métier idéal vous attend</h2>
+      <img
+        class="info-section__deco"
+        [src]="subtractImg"
+        alt=""
+        aria-hidden="true"
+      />
+      <h2 id="info-heading" class="info-section__title">
+        Le métier idéal vous attend
+      </h2>
       <p class="info-section__subtitle">
-        Construisez une carrière qui vous ressemble, développez vos talents et révélez pleinement
-        votre potentiel au sein d'un environnement qui vous inspire.
+        Construisez une carrière qui vous ressemble, développez vos talents et
+        révélez pleinement votre potentiel au sein d'un environnement qui vous
+        inspire.
       </p>
       <div class="info-cards">
         <div class="info-card">
@@ -89,8 +101,9 @@
             <p class="info-card__label">Opportunités de carrière</p>
           </div>
           <p class="info-card__body">
-            Envoyez votre candidature en quelques étapes seulement. Notre équipe de recrutement
-            étudiera votre profil et vous contactera si une opportunité correspond à votre parcours.
+            Envoyez votre candidature en quelques étapes seulement. Notre équipe
+            de recrutement étudiera votre profil et vous contactera si une
+            opportunité correspond à votre parcours.
           </p>
         </div>
         <div class="info-card">
@@ -101,8 +114,9 @@
             <p class="info-card__label">Rejoindre notre équipe</p>
           </div>
           <p class="info-card__body">
-            Soumettez votre candidature et participez au développement de projets ambitieux dans
-            l'immobilier, les services et les plateformes technologiques.
+            Soumettez votre candidature et participez au développement de
+            projets ambitieux dans l'immobilier, les services et les plateformes
+            technologiques.
           </p>
         </div>
       </div>
@@ -118,80 +132,6 @@
       Postuler à l'offre qui vous correspond<br />Chez Ubax
     </h2>
   </section>
-
-  <!-- ══ SEARCH BAR ═════════════════════════════════════════════════════════ -->
-  <div class="search-bar" role="search" aria-label="Filtres de recherche d'offres">
-    <div class="search-bar__filters">
-      <div class="search-filter">
-        <label class="search-filter__label" for="filter-poste">Poste</label>
-        <div class="search-filter__input-wrap">
-          <i class="pi pi-briefcase" aria-hidden="true"></i>
-          <input
-            id="filter-poste"
-            type="text"
-            class="search-filter__input"
-            placeholder="Rechercher un poste"
-            aria-label="Rechercher un poste"
-          />
-        </div>
-      </div>
-
-      <div class="search-filter">
-        <label class="search-filter__label" for="filter-adresse">Adresse</label>
-        <div class="search-filter__input-wrap">
-          <i class="pi pi-map-marker" aria-hidden="true"></i>
-          <input
-            id="filter-adresse"
-            type="text"
-            class="search-filter__input"
-            placeholder="Pays"
-            aria-label="Adresse ou pays"
-          />
-        </div>
-      </div>
-
-      <div class="search-filter">
-        <label class="search-filter__label" for="filter-category">Catégorie</label>
-        <div class="search-filter__input-wrap">
-          <i class="pi pi-th-large" aria-hidden="true"></i>
-          <select
-            id="filter-category"
-            class="search-filter__input search-filter__input--select"
-            aria-label="Catégorie de travail"
-          >
-            <option value="">Catégories de travail</option>
-          </select>
-          <i class="pi pi-chevron-down search-filter__chevron" aria-hidden="true"></i>
-        </div>
-      </div>
-
-      <div class="search-filter">
-        <label class="search-filter__label" for="filter-level">Niveau d'expérience</label>
-        <div class="search-filter__input-wrap">
-          <i class="pi pi-chart-bar" aria-hidden="true"></i>
-          <select
-            id="filter-level"
-            class="search-filter__input search-filter__input--select"
-            aria-label="Niveau d'expérience"
-          >
-            <option value="">Choisir niveau</option>
-          </select>
-          <i class="pi pi-chevron-down search-filter__chevron" aria-hidden="true"></i>
-        </div>
-      </div>
-    </div>
-
-    <button
-      class="search-bar__btn"
-      type="button"
-      aria-label="Lancer la recherche d'offres"
-    >
-      <span>Rechercher</span>
-      <span class="search-bar__btn-icon" aria-hidden="true">
-        <img [src]="searchIcon" alt="" />
-      </span>
-    </button>
-  </div>
 
   <!-- ══ JOBS GRID ══════════════════════════════════════════════════════════ -->
   <div class="jobs-grid" aria-label="Liste des offres d'emploi">
@@ -225,8 +165,12 @@
             <dd class="job-card__detail-value">{{ offer.sexe }}</dd>
           </div>
           <div class="job-card__detail-row">
-            <dt class="job-card__detail-label job-card__detail-label--red">Echéance :</dt>
-            <dd class="job-card__detail-value job-card__detail-value--red">{{ offer.echeance }}</dd>
+            <dt class="job-card__detail-label job-card__detail-label--red">
+              Echéance :
+            </dt>
+            <dd class="job-card__detail-value job-card__detail-value--red">
+              {{ offer.echeance }}
+            </dd>
           </div>
         </dl>
 
@@ -290,9 +234,10 @@
         Mettez votre profil en avant et attirez les bonnes opportunités
       </h2>
       <p class="cta-bottom__text">
-        Vous êtes à la recherche d'un emploi ? Publiez votre profil en quelques minutes et laissez
-        les recruteurs vous trouver. Mettez en valeur vos compétences, votre expérience et vos
-        ambitions pour accéder à des opportunités qui correspondent réellement à votre parcours.
+        Vous êtes à la recherche d'un emploi ? Publiez votre profil en quelques
+        minutes et laissez les recruteurs vous trouver. Mettez en valeur vos
+        compétences, votre expérience et vos ambitions pour accéder à des
+        opportunités qui correspondent réellement à votre parcours.
       </p>
       <a class="cta-bottom__btn" [routerLink]="['/carrieres', 1, 'postuler']">
         Déposer mon profil

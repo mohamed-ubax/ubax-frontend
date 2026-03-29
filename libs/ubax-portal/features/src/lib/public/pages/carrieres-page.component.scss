@@ -23,13 +23,12 @@ $c-placeholder: #b3b3b3;
   display: flex;
   align-items: center;
   gap: 48px;
-  margin: 0 var(--_gutter);
+  margin: 3rem var(--_gutter);
   padding: 60px 56px 60px;
   border-radius: 24px;
   overflow: hidden;
-  background:
-    linear-gradient(rgba(26, 48, 71, 0.88), rgba(26, 48, 71, 0.88)),
-    url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png') center / cover no-repeat;
+  background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
+    center / cover no-repeat;
 
   // Concave notch at bottom-left: a page-bg-coloured overlay sized to cut into
   // the corner. overflow:hidden on .hero clips the outer corner to the card's
@@ -39,8 +38,8 @@ $c-placeholder: #b3b3b3;
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 280px;
-    height: 90px;
+    width: 440px;
+    height: 185px;
     background: var(--ubax-page-bg);
     border-top-right-radius: 24px;
     pointer-events: none;
@@ -259,13 +258,29 @@ $c-placeholder: #b3b3b3;
     transform: rotate(-3deg);
     transform-origin: center;
 
-    .culture__card-title { color: #fff; }
-    .culture__card-body  { color: rgba(255, 255, 255, 0.9); }
+    .culture__card-title {
+      color: #fff;
+    }
+    .culture__card-body {
+      color: rgba(255, 255, 255, 0.9);
+    }
   }
-  &:nth-child(3) { grid-column: 3; grid-row: 1; }
-  &:nth-child(4) { grid-column: 1; grid-row: 2; }
-  &:nth-child(5) { grid-column: 2; grid-row: 2; }
-  &:nth-child(6) { grid-column: 3; grid-row: 2; }
+  &:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  &:nth-child(4) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  &:nth-child(5) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  &:nth-child(6) {
+    grid-column: 3;
+    grid-row: 2;
+  }
 }
 
 .culture__card-title {
@@ -290,13 +305,18 @@ $c-placeholder: #b3b3b3;
 // When a card OTHER than the default is hovered → revert default to neutral.
 // :has(.culture__card:not(:nth-child(2)):hover) ensures hovering card 0
 // itself leaves it in the featured state.
-.culture:has(.culture__card:not(:nth-child(2)):hover) .culture__card:nth-child(2) {
+.culture:has(.culture__card:not(:nth-child(2)):hover)
+  .culture__card:nth-child(2) {
   background: #fff;
   transform: none;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 
-  .culture__card-title { color: $c-body; }
-  .culture__card-body  { color: $c-body; }
+  .culture__card-title {
+    color: $c-body;
+  }
+  .culture__card-body {
+    color: $c-body;
+  }
 }
 
 // Any hovered card takes the featured style
@@ -306,8 +326,12 @@ $c-placeholder: #b3b3b3;
   transform-origin: center;
   box-shadow: 0 8px 28px rgba(248, 150, 30, 0.32);
 
-  .culture__card-title { color: #fff; }
-  .culture__card-body  { color: rgba(255, 255, 255, 0.9); }
+  .culture__card-title {
+    color: #fff;
+  }
+  .culture__card-body {
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 // ══ NOTRE MISSION ══════════════════════════════════════════════════════════
@@ -379,7 +403,7 @@ $c-placeholder: #b3b3b3;
 // eliminating the overlap with the title area
 .info-section__deco {
   position: absolute;
-  right: 0;
+  right: 3.5%;
   top: 33px;
   width: 536px;
   height: 498px;
@@ -409,7 +433,7 @@ $c-placeholder: #b3b3b3;
 
 .info-cards {
   display: grid;
-  grid-template-columns: 330px 330px;
+  grid-template-columns: 295px 295px;
   gap: 24px;
 }
 
@@ -485,7 +509,6 @@ $c-placeholder: #b3b3b3;
   color: var(--ubax-brand);
   line-height: 1.1;
   margin: 0;
-  max-width: 650px;
 }
 
 // ══ SEARCH BAR ═════════════════════════════════════════════════════════════
@@ -904,13 +927,27 @@ $c-placeholder: #b3b3b3;
   }
 
   .culture__card {
-    &:nth-child(2) { grid-column: 1; grid-row: 2; }
-    &:nth-child(3) { grid-column: 2; grid-row: 2; }
-    &:nth-child(4) { grid-column: 1; grid-row: 3; }
-    &:nth-child(5) { grid-column: 2; grid-row: 3; }
-    &:nth-child(6) { grid-column: 1 / -1; grid-row: 4; }
+    &:nth-child(2) {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    &:nth-child(3) {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    &:nth-child(4) {
+      grid-column: 1;
+      grid-row: 3;
+    }
+    &:nth-child(5) {
+      grid-column: 2;
+      grid-row: 3;
+    }
+    &:nth-child(6) {
+      grid-column: 1 / -1;
+      grid-row: 4;
+    }
   }
-
 
   .search-bar {
     flex-wrap: wrap;
@@ -959,10 +996,14 @@ $c-placeholder: #b3b3b3;
     gap: 32px;
     border-radius: 16px;
 
-    &::after { display: none; }
+    &::after {
+      display: none;
+    }
   }
 
-  .hero__badge { display: none; }
+  .hero__badge {
+    display: none;
+  }
 
   .hero__visual {
     width: 220px;
@@ -1000,7 +1041,7 @@ $c-placeholder: #b3b3b3;
   }
 
   .culture__card {
-    &:nth-child(n+2) {
+    &:nth-child(n + 2) {
       grid-column: 1;
       grid-row: auto;
     }
