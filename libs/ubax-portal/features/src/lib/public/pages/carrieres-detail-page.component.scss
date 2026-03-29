@@ -1,0 +1,224 @@
+// ── Local tokens ─────────────────────────────────────────────────────────────
+$c-dark-blue: #003456;
+$c-near-black: #181818;
+$c-dark-navy: #23304f;
+
+// ── Gutter ────────────────────────────────────────────────────────────────────
+:host {
+  --_gutter: max(1.25rem, calc((100% - 1284px) / 2));
+}
+
+// ══ PAGE HERO ═════════════════════════════════════════════════════════════════
+.page-hero {
+  background: var(--ubax-brand);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px var(--_gutter);
+  gap: 16px;
+}
+
+.page-hero__icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 93px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+}
+
+.page-hero__icon {
+  font-size: 2.5rem;
+  color: #fff;
+}
+
+.page-hero__title {
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: #fff;
+  line-height: normal;
+  margin: 0;
+  text-align: center;
+}
+
+// ══ LAYOUT ════════════════════════════════════════════════════════════════════
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 468px;
+  gap: 30px;
+  padding: 40px var(--_gutter) 80px;
+  align-items: start;
+}
+
+// ══ MAIN PANEL ════════════════════════════════════════════════════════════════
+.detail-main__card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 43px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.detail-section {
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
+.detail-section__label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: $c-dark-blue;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.detail-section__content {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: #252525;
+  line-height: 1.5;
+
+  p {
+    margin: 0 0 2px;
+  }
+}
+
+// ══ SIDEBAR ═══════════════════════════════════════════════════════════════════
+.detail-sidebar__card {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  position: sticky;
+  top: 100px;
+}
+
+.detail-sidebar__head {
+  background: var(--ubax-brand);
+  height: 80px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0;
+  position: relative;
+}
+
+.detail-sidebar__avatar {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  background: var(--ubax-brand);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  z-index: 1;
+
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+}
+
+.detail-sidebar__company {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $c-dark-navy;
+  text-align: center;
+  margin: 56px 0 20px;
+  padding: 0 20px;
+}
+
+.detail-sidebar__info {
+  margin: 0;
+  padding: 0 21px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-sidebar__info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-sidebar__info-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ubax-accent);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.detail-sidebar__info-value {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: #181818;
+}
+
+.detail-sidebar__cta {
+  display: block;
+  background: var(--ubax-accent);
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 25px;
+  padding: 16px 20px;
+  margin: 24px 31px 31px;
+  letter-spacing: 0.5px;
+  transition: opacity 200ms ease;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
+// ══ RESPONSIVE ═══════════════════════════════════════════════════════════════
+@media (max-width: 1100px) {
+  .detail-layout {
+    grid-template-columns: 1fr 380px;
+  }
+}
+
+@media (max-width: 900px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-sidebar__card {
+    position: static;
+  }
+}
+
+@media (max-width: 600px) {
+  .detail-main__card {
+    padding: 24px 20px;
+  }
+
+  .page-hero__title {
+    font-size: 1.75rem;
+  }
+}

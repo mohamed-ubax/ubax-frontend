@@ -1,0 +1,81 @@
+<ubax-public-shell>
+
+  <!-- ══ PAGE HERO ══════════════════════════════════════════════════════════ -->
+  <div class="page-hero">
+    <div class="page-hero__icon-box" aria-hidden="true">
+      <i class="pi pi-briefcase page-hero__icon"></i>
+    </div>
+    <h1 class="page-hero__title">{{ job.title }}</h1>
+  </div>
+
+  <!-- ══ CONTENT ════════════════════════════════════════════════════════════ -->
+  <div class="detail-layout">
+
+    <!-- Left: job description -->
+    <div class="detail-main">
+      <div class="detail-main__card">
+        @for (section of sections; track section.label) {
+          <section class="detail-section">
+            <h2 class="detail-section__label">{{ section.label }}</h2>
+            <div class="detail-section__content">
+              @for (line of section.content.split('\n'); track $index) {
+                @if (line.trim()) {
+                  <p>{{ line }}</p>
+                } @else {
+                  <br />
+                }
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+
+    <!-- Right: quick-info sidebar -->
+    <aside class="detail-sidebar">
+      <div class="detail-sidebar__card">
+        <div class="detail-sidebar__head">
+          <div class="detail-sidebar__avatar" aria-hidden="true">
+            <img [src]="ubaxIcon" alt="Ubax" />
+          </div>
+        </div>
+
+        <p class="detail-sidebar__company">{{ job.company }}</p>
+
+        <dl class="detail-sidebar__info">
+          <div class="detail-sidebar__info-row">
+            <dt class="detail-sidebar__info-label">Poste :</dt>
+            <dd class="detail-sidebar__info-value">{{ job.title }}</dd>
+          </div>
+          <div class="detail-sidebar__info-row">
+            <dt class="detail-sidebar__info-label">Localisation :</dt>
+            <dd class="detail-sidebar__info-value">{{ job.location }}</dd>
+          </div>
+          <div class="detail-sidebar__info-row">
+            <dt class="detail-sidebar__info-label">Type de contrat :</dt>
+            <dd class="detail-sidebar__info-value">{{ job.contractType }}</dd>
+          </div>
+          <div class="detail-sidebar__info-row">
+            <dt class="detail-sidebar__info-label">Disponibilité :</dt>
+            <dd class="detail-sidebar__info-value">{{ job.availability }}</dd>
+          </div>
+          <div class="detail-sidebar__info-row">
+            <dt class="detail-sidebar__info-label">Rémunération :</dt>
+            <dd class="detail-sidebar__info-value">{{ job.remuneration }}</dd>
+          </div>
+        </dl>
+
+        <a
+          class="detail-sidebar__cta"
+          [routerLink]="['/carrieres', job.id, 'postuler']"
+          role="button"
+        >
+          POSTULER
+        </a>
+      </div>
+    </aside>
+
+  </div>
+
+  <ubax-back-to-top />
+</ubax-public-shell>
