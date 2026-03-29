@@ -14,17 +14,21 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ HERO ═══════════════════════════════════════════════════════════════════
+// Fix 1: card container — horizontal margins + border-radius expose page bg
+// Fix 2: reduced min-height to match Figma proportions
 .hero {
   position: relative;
-  min-height: 640px;
+  min-height: 420px;
   display: flex;
   align-items: center;
   gap: 48px;
-  padding: 80px var(--_gutter) 60px;
+  margin: 0 var(--_gutter);
+  padding: 60px 56px;
+  border-radius: 24px;
   overflow: hidden;
   background:
     linear-gradient(rgba(26, 48, 71, 0.96), rgba(26, 48, 71, 0.96)),
-    url('assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png') center / cover no-repeat;
+    url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png') center / cover no-repeat;
 }
 
 // Left visual area
@@ -32,16 +36,30 @@ $c-placeholder: #b3b3b3;
   position: relative;
   flex: 0 0 auto;
   width: 280px;
-  height: 400px;
+  height: 340px;
 }
 
+// Fix 4: dashed decorative ring around the orange circle
+.hero__dashed-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -55%);
+  width: 258px;
+  height: 258px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.32);
+  pointer-events: none;
+}
+
+// Fix 3: orange circle reduced to SVG natural size (206×204)
 .hero__ellipse {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -55%);
-  width: 263px;
-  height: 256px;
+  width: 206px;
+  height: 204px;
   pointer-events: none;
 }
 
@@ -179,13 +197,15 @@ $c-placeholder: #b3b3b3;
   padding-right: 24px;
 }
 
+// Fix 1: title left-aligned in its column (was text-align: right which
+// made it appear horizontally centered in the left grid column)
 .culture__heading {
   font-size: clamp(2rem, 3.5vw, 3rem);
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.1;
   margin: 0;
-  text-align: right;
+  text-align: left;
 }
 
 .culture__desc {
@@ -196,6 +216,10 @@ $c-placeholder: #b3b3b3;
   margin: 0;
 }
 
+// Fix 2–5: grid placement via :nth-child (offset +1 for .culture__left),
+// default featured state on card 0, smooth hover transfer between cards.
+// Previously used :first-of-type/:nth-of-type which counted .culture__left
+// as the first div and produced wrong placement with no orange card at all.
 .culture__card {
   background: #fff;
   border-radius: 15px;
@@ -204,46 +228,27 @@ $c-placeholder: #b3b3b3;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition:
+    background 300ms ease,
+    transform 300ms ease,
+    box-shadow 300ms ease;
 
-  // First card (accent): column 2, row 1, rotated
-  &:first-of-type {
-    grid-column: 2;
-    grid-row: 1;
+  // ── Grid placement (.culture__left is nth-child(1), cards are 2–6) ──
+  &:nth-child(2) { grid-column: 2; grid-row: 1; }
+  &:nth-child(3) { grid-column: 3; grid-row: 1; }
+  &:nth-child(4) { grid-column: 1; grid-row: 2; }
+  &:nth-child(5) { grid-column: 2; grid-row: 2; }
+  &:nth-child(6) { grid-column: 3; grid-row: 2; }
+
+  // ── Default featured card: L'Audace Technologique (nth-child 2) ─────
+  &:nth-child(2) {
     background: var(--ubax-accent);
     transform: rotate(-3deg);
     transform-origin: center;
 
-    .culture__card-title {
-      color: #fff;
-    }
-
-    .culture__card-body {
-      color: rgba(255, 255, 255, 0.9);
-    }
-  }
-
-  // Second card: column 3, row 1
-  &:nth-of-type(2) {
-    grid-column: 3;
-    grid-row: 1;
-  }
-
-  // Third card: column 1 (left col), row 2 — but left col is taken, so col 1
-  &:nth-of-type(3) {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  // Fourth card: column 2, row 2
-  &:nth-of-type(4) {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  // Fifth card: column 3, row 2
-  &:nth-of-type(5) {
-    grid-column: 3;
-    grid-row: 2;
+    .culture__card-title { color: #fff; }
+    .culture__card-body  { color: rgba(255, 255, 255, 0.9); }
   }
 }
 
@@ -253,6 +258,7 @@ $c-placeholder: #b3b3b3;
   color: $c-body;
   line-height: 1.1;
   margin: 0;
+  transition: color 300ms ease;
 }
 
 .culture__card-body {
@@ -261,6 +267,31 @@ $c-placeholder: #b3b3b3;
   color: $c-body;
   line-height: 1.5;
   margin: 0;
+  transition: color 300ms ease;
+}
+
+// ── Featured hover behaviour ────────────────────────────────────────────────
+// When a card OTHER than the default is hovered → revert default to neutral.
+// :has(.culture__card:not(:nth-child(2)):hover) ensures hovering card 0
+// itself leaves it in the featured state.
+.culture:has(.culture__card:not(:nth-child(2)):hover) .culture__card:nth-child(2) {
+  background: #fff;
+  transform: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+  .culture__card-title { color: $c-body; }
+  .culture__card-body  { color: $c-body; }
+}
+
+// Any hovered card takes the featured style
+.culture__card:hover {
+  background: var(--ubax-accent);
+  transform: rotate(-3deg);
+  transform-origin: center;
+  box-shadow: 0 8px 28px rgba(248, 150, 30, 0.32);
+
+  .culture__card-title { color: #fff; }
+  .culture__card-body  { color: rgba(255, 255, 255, 0.9); }
 }
 
 // ══ NOTRE MISSION ══════════════════════════════════════════════════════════
@@ -328,27 +359,27 @@ $c-placeholder: #b3b3b3;
   min-height: 573px;
 }
 
+// Fix 4: image starts at top:33px (not top:0) and uses Figma exact size,
+// eliminating the overlap with the title area
 .info-section__deco {
   position: absolute;
   right: 0;
-  top: 0;
-  height: 100%;
-  max-width: 40%;
-  object-fit: contain;
-  object-position: right center;
+  top: 33px;
+  width: 536px;
+  height: 498px;
   pointer-events: none;
 }
 
+// Fix 1–2: title left-aligned in its column (was text-align:center + margin:auto
+// which made it appear centered and caused visual collision with the image)
 .info-section__title {
   font-size: 2.5rem;
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.1;
   margin: 0 0 20px;
-  text-align: center;
+  text-align: left;
   max-width: 571px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .info-section__subtitle {
@@ -369,10 +400,17 @@ $c-placeholder: #b3b3b3;
 .info-card {
   background: var(--ubax-brand);
   border-radius: 20px;
-  padding: 24px;
+  padding: 28px 24px 24px;
   min-height: 248px;
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+// Fix 5: icon and label on the same horizontal line (was flex-direction:column)
+.info-card__header {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
@@ -845,30 +883,11 @@ $c-placeholder: #b3b3b3;
   }
 
   .culture__card {
-    &:first-of-type {
-      grid-column: 1;
-      grid-row: 2;
-    }
-
-    &:nth-of-type(2) {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
-    &:nth-of-type(3) {
-      grid-column: 1;
-      grid-row: 3;
-    }
-
-    &:nth-of-type(4) {
-      grid-column: 2;
-      grid-row: 3;
-    }
-
-    &:nth-of-type(5) {
-      grid-column: 1 / -1;
-      grid-row: 4;
-    }
+    &:nth-child(2) { grid-column: 1; grid-row: 2; }
+    &:nth-child(3) { grid-column: 2; grid-row: 2; }
+    &:nth-child(4) { grid-column: 1; grid-row: 3; }
+    &:nth-child(5) { grid-column: 2; grid-row: 3; }
+    &:nth-child(6) { grid-column: 1 / -1; grid-row: 4; }
   }
 
   .cta-bottom__visual {
@@ -912,9 +931,9 @@ $c-placeholder: #b3b3b3;
   .hero {
     flex-direction: column;
     min-height: auto;
-    padding-top: 48px;
-    padding-bottom: 48px;
+    padding: 48px 24px;
     gap: 32px;
+    border-radius: 16px;
   }
 
   .hero__visual {
@@ -953,11 +972,7 @@ $c-placeholder: #b3b3b3;
   }
 
   .culture__card {
-    &:first-of-type,
-    &:nth-of-type(2),
-    &:nth-of-type(3),
-    &:nth-of-type(4),
-    &:nth-of-type(5) {
+    &:nth-child(n+2) {
       grid-column: 1;
       grid-row: auto;
     }

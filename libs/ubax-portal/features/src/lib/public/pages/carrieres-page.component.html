@@ -3,6 +3,7 @@
   <!-- ══ HERO ═══════════════════════════════════════════════════════════════ -->
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero__visual" aria-hidden="true">
+      <div class="hero__dashed-ring"></div>
       <img class="hero__ellipse" [src]="heroEllipseOuter" alt="" />
       <img class="hero__person" [src]="heroPersonImg" alt="" />
       <div class="hero__badge">Portail carrière et recrutement</div>
@@ -80,20 +81,24 @@
       </p>
       <div class="info-cards">
         <div class="info-card">
-          <div class="info-card__icon" aria-hidden="true">
-            <img [src]="starIcon" alt="" />
+          <div class="info-card__header">
+            <div class="info-card__icon" aria-hidden="true">
+              <img [src]="starIcon" alt="" />
+            </div>
+            <p class="info-card__label">Opportunités de carrière</p>
           </div>
-          <p class="info-card__label">Opportunités de carrière</p>
           <p class="info-card__body">
             Envoyez votre candidature en quelques étapes seulement. Notre équipe de recrutement
             étudiera votre profil et vous contactera si une opportunité correspond à votre parcours.
           </p>
         </div>
         <div class="info-card">
-          <div class="info-card__icon" aria-hidden="true">
-            <img [src]="starIcon" alt="" />
+          <div class="info-card__header">
+            <div class="info-card__icon" aria-hidden="true">
+              <img [src]="starIcon" alt="" />
+            </div>
+            <p class="info-card__label">Rejoindre notre équipe</p>
           </div>
-          <p class="info-card__label">Rejoindre notre équipe</p>
           <p class="info-card__body">
             Soumettez votre candidature et participez au développement de projets ambitieux dans
             l'immobilier, les services et les plateformes technologiques.
