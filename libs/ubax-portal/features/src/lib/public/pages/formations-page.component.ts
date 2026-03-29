@@ -10,7 +10,7 @@ import {
   computed,
 } from '@angular/core';
 import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
-import { UiButtonComponent } from '@ubax-workspace/shared-ui';
+import { UiButtonComponent, UiPaginationComponent } from '@ubax-workspace/shared-ui';
 import { RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -20,7 +20,7 @@ const PAGE_SIZE = 6;
 
 @Component({
   selector: 'ubax-formations-page',
-  imports: [PublicShellComponent, UiButtonComponent, RouterLink],
+  imports: [PublicShellComponent, UiButtonComponent, RouterLink, UiPaginationComponent],
   templateUrl: './formations-page.component.html',
   styleUrl: './formations-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,9 +34,6 @@ export class FormationsPageComponent {
   protected readonly currentPage = signal(1);
   protected readonly totalPages = computed(() =>
     Math.ceil(ALL_GUIDES.length / PAGE_SIZE),
-  );
-  protected readonly pageRange = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, i) => i + 1),
   );
   protected readonly guides = computed(() => {
     const start = (this.currentPage() - 1) * PAGE_SIZE;

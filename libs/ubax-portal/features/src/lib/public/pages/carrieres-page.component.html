@@ -10,8 +10,8 @@
     <div class="hero__content">
       <h1 id="hero-title" class="hero__title">Rejoignez l'aventure Ubax</h1>
       <p class="hero__subtitle">
-        Découvrez les opportunités professionnelles chez UBAX et évoluez dans un
-        environnement dynamique et innovant.
+        Découvrez les opportunités professionnelles chez UBAX <br />
+        et évoluez dans un environnement dynamique et innovant.
       </p>
       <form
         class="hero__search"
@@ -30,9 +30,9 @@
         <button class="hero__search-btn" type="submit">Rechercher</button>
       </form>
     </div>
-    <!-- Badge sits in the concave notch at the bottom-left of the hero card -->
-    <div class="hero__badge" aria-hidden="true">
-      Portail carrière et recrutement
+    <!-- Concave notch with inverted corners and centred badge -->
+    <div class="hero__notch" aria-hidden="true">
+      <span class="hero__badge">Portail carrière et recrutement</span>
     </div>
   </section>
 
@@ -189,40 +189,15 @@
   </div>
 
   <!-- ══ PAGINATION ════════════════════════════════════════════════════════ -->
-  <nav class="pagination" aria-label="Pagination des offres d'emploi">
-    <button
-      class="pagination__arrow"
-      type="button"
-      [disabled]="currentPage() === 1"
-      (click)="goToPage(currentPage() - 1)"
-      aria-label="Page précédente"
-    >
-      <img [src]="arrowLeftIcon" alt="" />
-    </button>
-
-    @for (page of pages(); track page) {
-      <button
-        class="pagination__page"
-        [class.pagination__page--active]="page === currentPage()"
-        type="button"
-        (click)="goToPage(page)"
-        [attr.aria-label]="'Page ' + page"
-        [attr.aria-current]="page === currentPage() ? 'page' : null"
-      >
-        {{ page }}
-      </button>
-    }
-
-    <button
-      class="pagination__arrow"
-      type="button"
-      [disabled]="currentPage() === totalPages"
-      (click)="goToPage(currentPage() + 1)"
-      aria-label="Page suivante"
-    >
-      <img [src]="arrowRightIcon" alt="" />
-    </button>
-  </nav>
+  <ubax-ui-pagination
+    class="pagination-wrapper"
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages"
+    [arrowLeftSrc]="arrowLeftIcon"
+    [arrowRightSrc]="arrowRightIcon"
+    ariaLabel="Pagination des offres d'emploi"
+    (pageChange)="goToPage($event)"
+  />
 
   <!-- ══ BOTTOM CTA ═════════════════════════════════════════════════════════ -->
   <section class="cta-bottom" aria-labelledby="cta-heading">

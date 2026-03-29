@@ -2,7 +2,6 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
-  computed,
   DestroyRef,
   ElementRef,
   inject,
@@ -16,6 +15,7 @@ import {
   BackToTopComponent,
   PublicShellComponent,
 } from '@ubax-workspace/ubax-portal-layout';
+import { UiPaginationComponent } from '@ubax-workspace/shared-ui';
 
 interface JobOffer {
   id: number;
@@ -37,7 +37,7 @@ interface CultureCard {
 
 @Component({
   selector: 'ubax-carrieres-page',
-  imports: [PublicShellComponent, BackToTopComponent, RouterLink],
+  imports: [PublicShellComponent, BackToTopComponent, RouterLink, UiPaginationComponent],
   templateUrl: './carrieres-page.component.html',
   styleUrl: './carrieres-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,9 +50,6 @@ export class CarrieresPageComponent {
 
   protected readonly currentPage = signal(1);
   protected readonly totalPages = 5;
-  protected readonly pages = computed(() =>
-    Array.from({ length: this.totalPages }, (_, i) => i + 1),
-  );
 
   // ── Assets ─────────────────────────────────────────────────────────────
   protected readonly heroPersonImg =

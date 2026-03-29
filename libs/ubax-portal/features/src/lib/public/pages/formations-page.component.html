@@ -245,44 +245,15 @@
     </div>
 
     <!-- Pagination -->
-    <nav class="fp-pagination" aria-label="Pagination des guides">
-      <button
-        class="fp-page-btn fp-page-btn--arrow"
-        (click)="goToPage(currentPage() - 1)"
-        [disabled]="currentPage() === 1"
-        aria-label="Page précédente"
-      >
-        <img
-          src="assets/portal-assets/formations/icons/Outline/Arrows/Alt Arrow Left.svg"
-          alt=""
-          aria-hidden="true"
-        />
-      </button>
-
-      @for (page of pageRange(); track page) {
-        <button
-          class="fp-page-btn"
-          [class.fp-page-btn--active]="page === currentPage()"
-          (click)="goToPage(page)"
-          [attr.aria-current]="page === currentPage() ? 'page' : null"
-        >
-          {{ page }}
-        </button>
-      }
-
-      <button
-        class="fp-page-btn fp-page-btn--arrow"
-        (click)="goToPage(currentPage() + 1)"
-        [disabled]="currentPage() === totalPages()"
-        aria-label="Page suivante"
-      >
-        <img
-          src="assets/portal-assets/formations/icons/Outline/Arrows/Alt Arrow Right.svg"
-          alt=""
-          aria-hidden="true"
-        />
-      </button>
-    </nav>
+    <ubax-ui-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      arrowLeftSrc="assets/portal-assets/formations/icons/Outline/Arrows/Alt Arrow Left.svg"
+      arrowRightSrc="assets/portal-assets/formations/icons/Outline/Arrows/Alt Arrow Right.svg"
+      variant="glass"
+      ariaLabel="Pagination des guides"
+      (pageChange)="goToPage($event)"
+    />
   </section>
 
   <!-- ── 3. CTA ─────────────────────────────────────────────── -->

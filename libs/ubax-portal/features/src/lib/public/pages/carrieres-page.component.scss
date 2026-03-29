@@ -14,44 +14,75 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ HERO ═══════════════════════════════════════════════════════════════════
-// Hero card: horizontal margins expose page bg on each side; border-radius
-// on three convex corners; ::after creates the concave notch at bottom-left.
-// Overlay reduced to 0.88 so the background image texture is visible.
 .hero {
   position: relative;
-  min-height: 420px;
+  min-height: 538px;
   display: flex;
   align-items: center;
-  gap: 48px;
   margin: 3rem var(--_gutter);
-  padding: 60px 56px 60px;
+  // padding-bottom = notch height → shifts the flex centering axis into the
+  // non-notch area so title/search bar stay above the concave cutout.
+  padding: 60px 56px 200px;
   border-radius: 24px;
-  overflow: hidden;
+  // No overflow:hidden needed — the notch element handles its own corner radii.
   background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
     center / cover no-repeat;
-
-  // Concave notch at bottom-left: a page-bg-coloured overlay sized to cut into
-  // the corner. overflow:hidden on .hero clips the outer corner to the card's
-  // own border-radius; border-top-right-radius creates the inner concave curve.
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 440px;
-    height: 185px;
-    background: var(--ubax-page-bg);
-    border-top-right-radius: 24px;
-    pointer-events: none;
-  }
 }
 
-// Left visual area
+// ── Concave notch (replaces ::after) ───────────────────────────────────────
+// The main page-bg rectangle sits at bottom-left.
+// ::before / ::after add the two inverted (concave) corners at the points
+// where the notch meets the hero card's straight edges:
+//   • top-left  — a 24×24 page-bg square with border-bottom-right-radius: 24px
+//   • bottom-right — a 24×24 page-bg square with border-top-left-radius: 24px
+.hero__notch {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 470px;
+  height: 200px;
+  background: var(--ubax-page-bg);
+  // Convex top-right → concave bite into the hero card interior
+  border-top-right-radius: 24px;
+  // Match the hero card's own bottom-left radius so the corner blends
+  border-bottom-left-radius: 24px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // // Inverted corner — top-left of the notch (notch top meets hero left edge)
+  // &::before {
+  //   content: '';
+  //   position: absolute;
+  //   top: -24px;
+  //   left: 0;
+  //   width: 24px;
+  //   height: 24px;
+  //   background: var(--ubax-page-bg);
+  //   border-bottom-right-radius: 24px;
+  // }
+
+  // // Inverted corner — bottom-right of the notch (notch right edge meets hero bottom)
+  // &::after {
+  //   content: '';
+  //   position: absolute;
+  //   bottom: 0;
+  //   right: -24px;
+  //   width: 24px;
+  //   height: 24px;
+  //   background: var(--ubax-page-bg);
+  //   border-top-left-radius: 24px;
+  // }
+}
+
+// Left visual area — wider to fill the notch column (~470 px)
 .hero__visual {
-  position: relative;
+  position: absolute;
   flex: 0 0 auto;
-  width: 280px;
-  height: 340px;
+  top: 6.5%;
+  width: 400px;
+  height: 300px;
 }
 
 // Fix 4: dashed decorative ring around the orange circle
@@ -89,12 +120,8 @@ $c-placeholder: #b3b3b3;
   z-index: 2;
 }
 
-// Badge sits inside the concave notch (::after overlay area at bottom-left).
-// z-index: 1 keeps it above the ::after pseudo-element (z-index: auto).
+// Badge — centred inside .hero__notch via its parent's flexbox
 .hero__badge {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
   background: #fff;
   border: 1px solid #f5f5f5;
   border-radius: 32px;
@@ -104,7 +131,7 @@ $c-placeholder: #b3b3b3;
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.5;
-  z-index: 1;
+  pointer-events: auto;
 }
 
 // Right content area
@@ -112,6 +139,9 @@ $c-placeholder: #b3b3b3;
   flex: 1;
   min-width: 0;
   max-width: 590px;
+  position: absolute;
+  top: 25%;
+  right: 12%;
 }
 
 .hero__title {
@@ -119,15 +149,16 @@ $c-placeholder: #b3b3b3;
   font-weight: 700;
   color: #fff;
   line-height: normal;
-  margin: 0 0 20px;
+  margin: 0 0 2.5rem;
 }
 
 .hero__subtitle {
   font-size: 1rem;
   font-weight: 400;
   color: #fff;
+  max-width: 28rem;
   line-height: 1.5625;
-  margin: 0 0 28px;
+  margin: 0 0 2.5rem;
 }
 
 .hero__search {
@@ -198,7 +229,7 @@ $c-placeholder: #b3b3b3;
   display: grid;
   grid-template-columns: 1fr 435px 435px;
   grid-template-rows: auto auto;
-  gap: 24px;
+  gap: 30px;
   padding: 64px var(--_gutter);
   align-items: start;
 }
@@ -215,7 +246,7 @@ $c-placeholder: #b3b3b3;
 // Fix 1: title left-aligned in its column (was text-align: right which
 // made it appear horizontally centered in the left grid column)
 .culture__heading {
-  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-size: clamp(2rem, 3.5vw, 2.5rem);
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.1;
@@ -243,6 +274,7 @@ $c-placeholder: #b3b3b3;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  cursor: pointer;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition:
     background 300ms ease,
@@ -778,64 +810,12 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ PAGINATION ═════════════════════════════════════════════════════════════
-.pagination {
+// Layout wrapper — component provides its own button styles.
+.pagination-wrapper {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 10px;
   padding: 0 var(--_gutter);
   margin: 0 0 80px;
-}
-
-.pagination__arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 50px;
-  background: var(--ubax-accent);
-  border: 1px solid $c-divider;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: opacity 200ms ease;
-
-  img {
-    width: 18px;
-    height: 18px;
-    filter: brightness(0) invert(1);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-.pagination__page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid $c-divider;
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--ubax-brand);
-  cursor: pointer;
-  transition:
-    background 200ms ease,
-    color 200ms ease,
-    border-color 200ms ease;
-
-  &--active {
-    background: var(--ubax-accent);
-    color: #fff;
-    font-weight: 600;
-    font-size: 1.25rem;
-    border-color: transparent;
-  }
 }
 
 // ══ BOTTOM CTA ═════════════════════════════════════════════════════════════
@@ -992,22 +972,18 @@ $c-placeholder: #b3b3b3;
   .hero {
     flex-direction: column;
     min-height: auto;
-    padding: 48px 24px;
+    padding: 48px 24px 48px;
     gap: 32px;
     border-radius: 16px;
-
-    &::after {
-      display: none;
-    }
   }
 
-  .hero__badge {
+  .hero__notch {
     display: none;
   }
 
   .hero__visual {
     width: 220px;
-    height: 300px;
+    height: 260px;
   }
 
   .hero__title {
@@ -1089,20 +1065,5 @@ $c-placeholder: #b3b3b3;
   .jobs-grid {
     grid-template-columns: 1fr;
     gap: 24px;
-  }
-
-  .pagination {
-    gap: 6px;
-  }
-
-  .pagination__page {
-    width: 44px;
-    height: 44px;
-    font-size: 0.875rem;
-  }
-
-  .pagination__arrow {
-    width: 44px;
-    height: 44px;
   }
 }

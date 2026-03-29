@@ -1,0 +1,42 @@
+<nav
+  class="ui-pagination"
+  [class.ui-pagination--glass]="variant() === 'glass'"
+  [attr.aria-label]="ariaLabel()"
+>
+  <button
+    class="ui-pagination__arrow"
+    type="button"
+    [disabled]="currentPage() === 1"
+    (click)="onPageChange(currentPage() - 1)"
+    aria-label="Page précédente"
+  >
+    @if (arrowLeftSrc()) {
+      <img [src]="arrowLeftSrc()" alt="" aria-hidden="true" />
+    }
+  </button>
+
+  @for (page of pages(); track page) {
+    <button
+      class="ui-pagination__page"
+      [class.ui-pagination__page--active]="page === currentPage()"
+      type="button"
+      (click)="onPageChange(page)"
+      [attr.aria-label]="'Page ' + page"
+      [attr.aria-current]="page === currentPage() ? 'page' : null"
+    >
+      {{ page }}
+    </button>
+  }
+
+  <button
+    class="ui-pagination__arrow"
+    type="button"
+    [disabled]="currentPage() === totalPages()"
+    (click)="onPageChange(currentPage() + 1)"
+    aria-label="Page suivante"
+  >
+    @if (arrowRightSrc()) {
+      <img [src]="arrowRightSrc()" alt="" aria-hidden="true" />
+    }
+  </button>
+</nav>
