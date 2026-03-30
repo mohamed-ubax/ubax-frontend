@@ -700,14 +700,22 @@ $c-placeholder: #b3b3b3;
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: normal;
-  margin: 0 0 16px;
+  margin: 0 0 8px;
+}
+
+.job-card__location {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: $c-near-black;
+  margin: 0 0 20px;
+  line-height: normal;
 }
 
 .job-card__details {
   margin: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
 }
 
 .job-card__detail-row {
@@ -722,10 +730,6 @@ $c-placeholder: #b3b3b3;
   color: $c-near-black;
   flex-shrink: 0;
   min-width: 0;
-
-  i {
-    font-size: 0.875rem;
-  }
 
   &--red {
     color: $c-red;
@@ -745,9 +749,9 @@ $c-placeholder: #b3b3b3;
 
 .job-card__apply {
   display: block;
-  background: var(--ubax-accent);
+  background: #f8961e;
   color: #fff;
-  font-family: 'Lexend', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 1.25rem;
   font-weight: 400;
   text-align: center;
@@ -776,7 +780,6 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ PAGINATION ═════════════════════════════════════════════════════════════
-// Layout wrapper — component provides its own button styles.
 .pagination-wrapper {
   display: flex;
   justify-content: center;

@@ -149,13 +149,9 @@
 
         <h3 class="job-card__title">{{ offer.title }}</h3>
 
+        <p class="job-card__location">{{ offer.location }}</p>
+
         <dl class="job-card__details">
-          <div class="job-card__detail-row">
-            <dt class="job-card__detail-label">
-              <i class="pi pi-map-marker" aria-hidden="true"></i>
-            </dt>
-            <dd class="job-card__detail-value">{{ offer.location }}</dd>
-          </div>
           <div class="job-card__detail-row">
             <dt class="job-card__detail-label">Langue :</dt>
             <dd class="job-card__detail-value">{{ offer.langue }}</dd>
@@ -189,15 +185,17 @@
   </div>
 
   <!-- ══ PAGINATION ════════════════════════════════════════════════════════ -->
-  <ubax-ui-pagination
-    class="pagination-wrapper"
-    [currentPage]="currentPage()"
-    [totalPages]="totalPages"
-    [arrowLeftSrc]="arrowLeftIcon"
-    [arrowRightSrc]="arrowRightIcon"
-    ariaLabel="Pagination des offres d'emploi"
-    (pageChange)="goToPage($event)"
-  />
+  <div class="pagination-wrapper">
+    <ubax-ui-pagination
+      variant="light"
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages"
+      [arrowLeftSrc]="arrowLeftIcon"
+      [arrowRightSrc]="arrowRightIcon"
+      ariaLabel="Pagination des offres d'emploi"
+      (pageChange)="goToPage($event)"
+    />
+  </div>
 
   <!-- ══ BOTTOM CTA ═════════════════════════════════════════════════════════ -->
   <section class="cta-bottom" aria-labelledby="cta-heading">
