@@ -805,20 +805,20 @@ $c-placeholder: #b3b3b3;
 .cta-bottom__visual {
   position: absolute;
   top: -125px;
-  left: 0;
+  left: 53px;
   width: 530px;
   height: 517px;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .cta-bottom__img {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: -16.04%;
+  width: 172.99%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  max-width: none;
 }
 
 // margin-left replaces the flex space the visual used to occupy.
@@ -830,20 +830,20 @@ $c-placeholder: #b3b3b3;
 }
 
 .cta-bottom__title {
-  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
-  font-weight: 500;
-  color: #fff;
-  line-height: 1.1;
-  margin: 0 0 20px;
-  max-width: 698px;
+font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.1;
+    margin: 0 0 2.5rem;
+    max-width: 698px;
 }
 
 .cta-bottom__text {
   font-size: 0.9375rem;
-  font-weight: 400;
+  font-weight: 300;
   color: #fff;
   line-height: 1.5;
-  margin: 0 0 32px;
+  margin: 0 0 2.5rem;
   max-width: 673px;
 }
 
