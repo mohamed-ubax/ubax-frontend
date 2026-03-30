@@ -25,55 +25,21 @@ $c-placeholder: #b3b3b3;
   padding: 60px 56px 200px;
   border-radius: 24px;
   // No overflow:hidden needed — the notch element handles its own corner radii.
-  background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
+  background: url('/assets/portal-assets/careers/images/mask-group.png')
     center / cover no-repeat;
 }
 
 // ── Concave notch (replaces ::after) ───────────────────────────────────────
 // The main page-bg rectangle sits at bottom-left.
-// ::before / ::after add the two inverted (concave) corners at the points
-// where the notch meets the hero card's straight edges:
-//   • top-left  — a 24×24 page-bg square with border-bottom-right-radius: 24px
-//   • bottom-right — a 24×24 page-bg square with border-top-left-radius: 24px
 .hero__notch {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 470px;
   height: 200px;
-  background: var(--ubax-page-bg);
-  // Convex top-right → concave bite into the hero card interior
-  border-top-right-radius: 24px;
-  // Match the hero card's own bottom-left radius so the corner blends
-  border-bottom-left-radius: 24px;
-  pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  // // Inverted corner — top-left of the notch (notch top meets hero left edge)
-  // &::before {
-  //   content: '';
-  //   position: absolute;
-  //   top: -24px;
-  //   left: 0;
-  //   width: 24px;
-  //   height: 24px;
-  //   background: var(--ubax-page-bg);
-  //   border-bottom-right-radius: 24px;
-  // }
-
-  // // Inverted corner — bottom-right of the notch (notch right edge meets hero bottom)
-  // &::after {
-  //   content: '';
-  //   position: absolute;
-  //   bottom: 0;
-  //   right: -24px;
-  //   width: 24px;
-  //   height: 24px;
-  //   background: var(--ubax-page-bg);
-  //   border-top-left-radius: 24px;
-  // }
 }
 
 // Left visual area — wider to fill the notch column (~470 px)
