@@ -22,7 +22,7 @@ interface JobSection {
 })
 export class CarrieresDetailPageComponent {
   protected readonly ubaxIcon =
-    'assets/portal-assets/careers/icons/Group 1171274746.svg';
+    'assets/portal-assets/careers/icons/Group 1171274746-2.svg';
 
   // Mock data — à remplacer par un service en production
   protected readonly job = {
