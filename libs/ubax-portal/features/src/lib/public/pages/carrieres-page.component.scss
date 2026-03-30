@@ -24,9 +24,16 @@ $c-placeholder: #b3b3b3;
   // non-notch area so title/search bar stay above the concave cutout.
   padding: 60px 56px 200px;
   border-radius: 24px;
-  // No overflow:hidden needed — the notch element handles its own corner radii.
+  // mask-group.png is an alpha mask that shapes the hero (rounded corners,
+  // no bottom-left radius). unsplash photo is the actual background image.
   background: url('/assets/portal-assets/careers/images/mask-group.png')
     center / cover no-repeat;
+  -webkit-mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
+  mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 // ── Concave notch (replaces ::after) ───────────────────────────────────────
@@ -336,7 +343,10 @@ $c-placeholder: #b3b3b3;
 .mission {
   position: relative;
   margin: 0 var(--_gutter) 64px;
-  background: var(--ubax-brand);
+  background:
+    url('/assets/portal-assets/careers/images/ligne-deco.png') center / cover
+      no-repeat,
+    var(--ubax-brand);
   border-radius: 20px;
   overflow: hidden;
   padding: 52px 48px;
@@ -768,9 +778,9 @@ $c-placeholder: #b3b3b3;
 
 .job-card__divider {
   border: none;
-    border-top: 1px solid $c-divider;
-    margin: 16px auto 12px;
-    width: 50%;
+  border-top: 1px solid $c-divider;
+  margin: 16px auto 12px;
+  width: 50%;
 }
 
 .job-card__posted {
@@ -830,12 +840,12 @@ $c-placeholder: #b3b3b3;
 }
 
 .cta-bottom__title {
-font-size: clamp(1.5rem, 2.5vw, 2.25rem);
-    font-weight: 400;
-    color: #fff;
-    line-height: 1.1;
-    margin: 0 0 2.5rem;
-    max-width: 698px;
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0 0 2.5rem;
+  max-width: 698px;
 }
 
 .cta-bottom__text {
