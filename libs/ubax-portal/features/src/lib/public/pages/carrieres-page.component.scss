@@ -768,8 +768,9 @@ $c-placeholder: #b3b3b3;
 
 .job-card__divider {
   border: none;
-  border-top: 1px solid $c-divider;
-  margin: 16px 0 12px;
+    border-top: 1px solid $c-divider;
+    margin: 16px auto 12px;
+    width: 50%;
 }
 
 .job-card__posted {
@@ -777,6 +778,7 @@ $c-placeholder: #b3b3b3;
   font-weight: 400;
   color: $c-near-black;
   margin: 0;
+  text-align: center;
 }
 
 // ══ PAGINATION ═════════════════════════════════════════════════════════════
