@@ -16,6 +16,7 @@ $c-placeholder: #b3b3b3;
 // ══ HERO ═══════════════════════════════════════════════════════════════════
 .hero {
   position: relative;
+  isolation: isolate; // new stacking context so ::before z-index:-1 stays inside
   min-height: 538px;
   display: flex;
   align-items: center;
@@ -23,17 +24,23 @@ $c-placeholder: #b3b3b3;
   // padding-bottom = notch height → shifts the flex centering axis into the
   // non-notch area so title/search bar stay above the concave cutout.
   padding: 60px 56px 200px;
-  border-radius: 24px;
-  // mask-group.png is an alpha mask that shapes the hero (rounded corners,
-  // no bottom-left radius). unsplash photo is the actual background image.
-  background: url('/assets/portal-assets/careers/images/mask-group.png')
-    center / cover no-repeat;
-  -webkit-mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
-  mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+
+  // The mask is applied only to the background layer so child elements
+  // (badge, content) remain fully visible in the transparent bottom-left zone.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
+      center / cover no-repeat;
+    -webkit-mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
+    mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
 }
 
 // ── Concave notch (replaces ::after) ───────────────────────────────────────
@@ -200,7 +207,8 @@ $c-placeholder: #b3b3b3;
 // ══ NOTRE CULTURE ══════════════════════════════════════════════════════════
 .culture {
   display: grid;
-  grid-template-columns: 1fr 435px 435px;
+  // Figma: 3 equal columns (~435px each). Using 1fr so they scale together.
+  grid-template-columns: repeat(3, 1fr);
   grid-template-rows: auto auto;
   gap: 30px;
   padding: 64px var(--_gutter);
@@ -209,7 +217,9 @@ $c-placeholder: #b3b3b3;
 
 .culture__left {
   grid-column: 1;
-  grid-row: 1 / 3;
+  // Row 1 only — row 2 col-1 is occupied by the third card (La Transparence).
+  // Previously grid-row: 1/3 caused culture__left to overlap the row-2 cards.
+  grid-row: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;

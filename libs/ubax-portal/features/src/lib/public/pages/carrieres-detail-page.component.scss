@@ -120,7 +120,7 @@ $c-dark-navy: #23304f;
   transform: translateX(-50%);
   width: 72px;
   height: 72px;
-  background: var(--ubax-brand);
+  background: #ECF2F7;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -132,7 +132,6 @@ $c-dark-navy: #23304f;
     width: 32px;
     height: 32px;
     object-fit: contain;
-    filter: brightness(0) invert(1);
   }
 }
 
