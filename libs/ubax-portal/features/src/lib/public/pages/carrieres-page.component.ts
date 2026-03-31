@@ -166,6 +166,9 @@ export class CarrieresPageComponent {
       duration: 0.7,
       stagger: 0.12,
       ease,
+      // Clear inline transform after animation so CSS rotate(-3deg) on the
+      // featured card (nth-child 2) is not overridden by GSAP's residual style.
+      clearProps: 'transform',
     });
 
     gsap.from('.mission__title', {

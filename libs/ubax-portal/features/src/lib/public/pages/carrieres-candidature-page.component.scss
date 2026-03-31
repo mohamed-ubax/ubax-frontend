@@ -27,6 +27,9 @@ $c-placeholder: #b3b3b3;
   width: 93px;
   height: 72px;
   background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
 }
 
@@ -192,11 +195,11 @@ $c-placeholder: #b3b3b3;
   border-radius: 32.5px;
   padding: 16px 48px;
   cursor: pointer;
-  transition: opacity 200ms ease;
+  transition: background 200ms ease;
   white-space: nowrap;
 
   &:hover {
-    opacity: 0.88;
+    background: var(--ubax-brand);
   }
 }
 
@@ -310,6 +313,7 @@ $c-placeholder: #b3b3b3;
 .success-modal__elements {
   width: 100px;
   height: 100px;
+  scale: 3;
   object-fit: contain;
 }
 
@@ -324,6 +328,7 @@ $c-placeholder: #b3b3b3;
 
 .success-modal__btn {
   display: inline-flex;
+  flex-direction: row-reverse;
   align-items: center;
   gap: 10px;
   background: var(--ubax-accent);
@@ -334,10 +339,10 @@ $c-placeholder: #b3b3b3;
   text-decoration: none;
   border-radius: 32.5px;
   padding: 14px 32px;
-  transition: opacity 200ms ease;
+  transition: background 200ms ease;
 
   &:hover {
-    opacity: 0.88;
+    background: var(--ubax-brand);
   }
 
   i {

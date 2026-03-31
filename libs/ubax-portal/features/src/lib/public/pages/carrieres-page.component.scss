@@ -213,9 +213,11 @@ $c-placeholder: #b3b3b3;
   // Figma: 3 equal columns (~435px each). Using 1fr so they scale together.
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: auto auto;
-  gap: 30px;
+  column-gap: 30px;
+  row-gap: 44px;
   padding: 64px var(--_gutter);
   align-items: start;
+  overflow: visible;
 }
 
 .culture__left {
