@@ -61,6 +61,7 @@ $c-placeholder: #b3b3b3;
   position: absolute;
   flex: 0 0 auto;
   top: 6.5%;
+  left: 3%;
   width: 400px;
   height: 300px;
 }
@@ -893,7 +894,27 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ RESPONSIVE ═════════════════════════════════════════════════════════════
+@media (max-width: 1300px) {
+  .hero {
+    &__content {
+      right: 11.5%;
+    }
+    &__visual {
+      left: 2%;
+    }
+    &__notch {
+      left: -1%;
+    }
+  }
+}
+
 @media (max-width: 1280px) {
+  .hero {
+    &__content {
+      right: 10.5%;
+    }
+  }
+
   .culture {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto auto;
@@ -943,6 +964,117 @@ $c-placeholder: #b3b3b3;
 
   .jobs-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(441px, 100%), 1fr));
+  }
+}
+
+@media (max-width: 1245px) {
+  .hero {
+    &__visual {
+      left: 1%;
+    }
+    &__notch {
+      left: -2%;
+    }
+  }
+}
+
+@media (max-width: 1230px) {
+  .hero {
+    &__content {
+      right: 8%;
+    }
+  }
+}
+
+@media (max-width: 1170px) {
+  .hero {
+    &__visual {
+      left: 0%;
+    }
+    &__notch {
+      left: -3%;
+    }
+  }
+}
+
+@media (max-width: 1155px) {
+  .hero {
+    &__content {
+      right: 5%;
+    }
+  }
+}
+
+@media (max-width: 1112px) {
+  .hero {
+    &__content {
+      right: 2.5%;
+    }
+  }
+}
+
+@media (max-width: 1100px) {
+  .hero {
+    &__visual {
+      left: -2%;
+    }
+    &__notch {
+      left: -5%;
+    }
+  }
+}
+
+@media (max-width: 1060px) {
+  .hero {
+    &__content {
+      right: -2.5%;
+    }
+  }
+}
+
+@media (max-width: 1026px) {
+  .hero {
+    &__visual {
+      left: -3%;
+    }
+    &__notch {
+      left: -6%;
+    }
+  }
+}
+
+@media (max-width: 1000px) {
+  .hero {
+    &__content {
+      right: -4.5%;
+    }
+  }
+}
+
+@media (max-width: 986px) {
+  .hero {
+    &__visual {
+      left: -4.25%;
+    }
+    &__notch {
+      left: -7.25%;
+    }
+  }
+}
+
+@media (max-width: 945px) {
+  .hero {
+    &__content {
+      right: -6.5%;
+    }
+  }
+}
+
+@media (max-width: 904px) {
+  .hero {
+    &__content {
+      right: -7.5%;
+    }
   }
 }
 
