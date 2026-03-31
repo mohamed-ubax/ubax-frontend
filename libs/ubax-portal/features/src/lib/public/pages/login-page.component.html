@@ -1,229 +1,225 @@
 <section class="login-stage">
-    <!-- Floating icon badges — fixed positions, animated in place -->
-    <div class="orbit orbit--top-left" aria-hidden="true">
-      <img
-        class="orbit__circle"
-        src="assets/portal-assets/login/icons/Ellipse 195.svg"
-        alt=""
-      />
-      <img
-        class="orbit__icon"
-        src="assets/portal-assets/login/icons/ri_hotel-fill.svg"
-        alt=""
-      />
-    </div>
-    <div class="orbit orbit--top-right" aria-hidden="true">
-      <img
-        class="orbit__circle"
-        src="assets/portal-assets/login/icons/Ellipse 195.svg"
-        alt=""
-      />
-      <img
-        class="orbit__icon"
-        src="assets/portal-assets/login/icons/ic_outline-bed.svg"
-        alt=""
-      />
-    </div>
-    <div class="orbit orbit--mid-left" aria-hidden="true">
-      <img
-        class="orbit__circle"
-        src="assets/portal-assets/login/icons/Ellipse 195.svg"
-        alt=""
-      />
-      <img
-        class="orbit__icon"
-        src="assets/portal-assets/login/icons/material-symbols-light_flights-and-hotels.svg"
-        alt=""
-      />
-    </div>
-    <div class="orbit orbit--mid-right" aria-hidden="true">
-      <img
-        class="orbit__circle"
-        src="assets/portal-assets/login/icons/Ellipse 195.svg"
-        alt=""
-      />
-      <img
-        class="orbit__icon"
-        src="assets/portal-assets/login/icons/bitcoin-icons_two-keys-outline.svg"
-        alt=""
-      />
-    </div>
-    <div class="orbit orbit--bot-left" aria-hidden="true">
-      <img
-        class="orbit__circle"
-        src="assets/portal-assets/login/icons/Ellipse 194.svg"
-        alt=""
-      />
-      <img
-        class="orbit__icon"
-        src="assets/portal-assets/login/icons/bi_suitcase2-fill.svg"
-        alt=""
-      />
-    </div>
-    <div class="orbit orbit--bot-right" aria-hidden="true">
-      <img
-        class="orbit__circle"
-        src="assets/portal-assets/login/icons/Ellipse 194.svg"
-        alt=""
-      />
-      <img
-        class="orbit__icon"
-        src="assets/portal-assets/login/icons/ri_building-2-fill.svg"
-        alt=""
-      />
-    </div>
+  <!-- Floating icon badges — fixed positions, animated in place -->
+  <div class="orbit orbit--top-left" aria-hidden="true">
+    <img
+      class="orbit__circle"
+      src="assets/portal-assets/login/icons/Ellipse 195.svg"
+      alt=""
+    />
+    <img
+      class="orbit__icon"
+      src="assets/portal-assets/login/icons/ri_hotel-fill.svg"
+      alt=""
+    />
+  </div>
+  <div class="orbit orbit--top-right" aria-hidden="true">
+    <img
+      class="orbit__circle"
+      src="assets/portal-assets/login/icons/Ellipse 195.svg"
+      alt=""
+    />
+    <img
+      class="orbit__icon"
+      src="assets/portal-assets/login/icons/ic_outline-bed.svg"
+      alt=""
+    />
+  </div>
+  <div class="orbit orbit--mid-left" aria-hidden="true">
+    <img
+      class="orbit__circle"
+      src="assets/portal-assets/login/icons/Ellipse 195.svg"
+      alt=""
+    />
+    <img
+      class="orbit__icon"
+      src="assets/portal-assets/login/icons/material-symbols-light_flights-and-hotels.svg"
+      alt=""
+    />
+  </div>
+  <div class="orbit orbit--mid-right" aria-hidden="true">
+    <img
+      class="orbit__circle"
+      src="assets/portal-assets/login/icons/Ellipse 195.svg"
+      alt=""
+    />
+    <img
+      class="orbit__icon"
+      src="assets/portal-assets/login/icons/bitcoin-icons_two-keys-outline.svg"
+      alt=""
+    />
+  </div>
+  <div class="orbit orbit--bot-left" aria-hidden="true">
+    <img
+      class="orbit__circle"
+      src="assets/portal-assets/login/icons/Ellipse 194.svg"
+      alt=""
+    />
+    <img
+      class="orbit__icon"
+      src="assets/portal-assets/login/icons/bi_suitcase2-fill.svg"
+      alt=""
+    />
+  </div>
+  <div class="orbit orbit--bot-right" aria-hidden="true">
+    <img
+      class="orbit__circle"
+      src="assets/portal-assets/login/icons/Ellipse 194.svg"
+      alt=""
+    />
+    <img
+      class="orbit__icon"
+      src="assets/portal-assets/login/icons/ri_building-2-fill.svg"
+      alt=""
+    />
+  </div>
 
-    <!-- UBAX logo floating above form -->
-    <div class="login-logo">
-      <img
-        src="assets/portal-assets/login/icons/Group 1171274746-2.svg"
-        alt="UBAX"
-      />
-    </div>
+  <!-- UBAX logo floating above form -->
+  <div class="login-logo">
+    <img
+      src="assets/portal-assets/login/icons/Group 1171274746-2.svg"
+      alt="UBAX"
+    />
+  </div>
 
-    <!-- Login form card -->
-    <article class="login-card">
-      <form
-        class="login-form"
-        (ngSubmit)="(null)"
-        aria-label="Formulaire de connexion"
-        novalidate
-      >
-        <!-- Phone number field -->
-        <div class="field-group--phone">
-          <label class="field-label" for="phone-input"
-            >Numéro de téléphone</label
+  <!-- Login form card -->
+  <article class="login-card">
+    <form
+      class="login-form"
+      (ngSubmit)="(null)"
+      aria-label="Formulaire de connexion"
+      novalidate
+    >
+      <!-- Phone number field -->
+      <div class="field-group--phone">
+        <label class="field-label" for="phone-input">Numéro de téléphone</label>
+        <div class="phone-row">
+          <!-- Country code dropdown (PrimeNG Select) -->
+          <p-select
+            [(ngModel)]="selectedCountry"
+            name="countryCode"
+            inputId="country-code-input"
+            [options]="countries"
+            optionLabel="name"
+            [filter]="true"
+            filterBy="name,dialCode,iso2"
+            filterPlaceholder="Rechercher un pays..."
+            appendTo="body"
+            styleClass="country-picker"
+            panelStyleClass="country-picker-overlay"
+            [showClear]="false"
+            aria-label="Indicatif téléphonique"
           >
-          <div class="phone-row">
-            <!-- Country code dropdown (PrimeNG Select) -->
-            <p-select
-              [(ngModel)]="selectedCountry"
-              name="countryCode"
-              inputId="country-code-input"
-              [options]="countries"
-              optionLabel="name"
-              [filter]="true"
-              filterBy="name,dialCode,iso2"
-              filterPlaceholder="Rechercher un pays..."
-              appendTo="body"
-              styleClass="country-picker"
-              panelStyleClass="country-picker-overlay"
-              [showClear]="false"
-              aria-label="Indicatif téléphonique"
-            >
-              <ng-template #selectedItem let-country>
-                <div class="cp-trigger">
-                  <span class="cp-flag-badge" aria-hidden="true">
-                    <img
-                      class="cp-flag-image"
-                      [src]="country?.flagUrl"
-                      [alt]="''"
-                    />
-                  </span>
-                  <span class="cp-dial">+{{ country?.dialCode }}</span>
-                </div>
-              </ng-template>
-              <ng-template #dropdownicon>
-                <img
-                  class="cp-dropdown-icon"
-                  src="assets/portal-assets/login/icons/solar_alt-arrow-down-linear.svg"
-                  alt=""
+            <ng-template #selectedItem let-country>
+              <div class="cp-trigger">
+                <span class="cp-flag-badge" aria-hidden="true">
+                  <img
+                    class="cp-flag-image"
+                    [src]="country?.flagUrl"
+                    [alt]="''"
+                  />
+                </span>
+                <span class="cp-dial">+{{ country?.dialCode }}</span>
+              </div>
+            </ng-template>
+            <ng-template #dropdownicon>
+              <img
+                class="cp-dropdown-icon"
+                src="assets/portal-assets/login/icons/solar_alt-arrow-down-linear.svg"
+                alt=""
+                aria-hidden="true"
+              />
+            </ng-template>
+            <ng-template #item let-country>
+              <div class="cp-item">
+                <span
+                  class="cp-flag-badge cp-flag-badge--option"
                   aria-hidden="true"
-                />
-              </ng-template>
-              <ng-template #item let-country>
-                <div class="cp-item">
-                  <span
-                    class="cp-flag-badge cp-flag-badge--option"
-                    aria-hidden="true"
-                  >
-                    <img
-                      class="cp-flag-image"
-                      [src]="country.flagUrl"
-                      [alt]="''"
-                    />
-                  </span>
-                  <span class="cp-item-name">{{ country.name }}</span>
-                  <span class="cp-item-dial">+{{ country.dialCode }}</span>
-                </div>
-              </ng-template>
-            </p-select>
-            <!-- Phone number input -->
-            <input
-              pInputText
-              id="phone-input"
-              class="phone-input"
-              type="tel"
-              placeholder="07 12 34 56 78"
-              autocomplete="tel"
-              [(ngModel)]="phone"
-              name="phone"
-            />
-          </div>
-          <span class="field-hint">Entrez votre numéro de téléphone</span>
+                >
+                  <img
+                    class="cp-flag-image"
+                    [src]="country.flagUrl"
+                    [alt]="''"
+                  />
+                </span>
+                <span class="cp-item-name">{{ country.name }}</span>
+                <span class="cp-item-dial">+{{ country.dialCode }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+          <!-- Phone number input -->
+          <input
+            pInputText
+            id="phone-input"
+            class="phone-input"
+            type="tel"
+            placeholder="07 12 34 56 78"
+            autocomplete="tel"
+            [(ngModel)]="phone"
+            name="phone"
+          />
         </div>
+        <span class="field-hint">Entrez votre numéro de téléphone</span>
+      </div>
 
-        <!-- Password field -->
-        <div class="field-group--password">
-          <label class="field-label" for="password-input">Mot de passe</label>
-          <div class="password-row">
-            <img
-              class="password-icon--lock"
-              src="assets/portal-assets/login/icons/formkit_password.svg"
-              alt=""
-              aria-hidden="true"
-            />
-            <p-password
-              [(ngModel)]="password"
-              name="password"
-              inputId="password-input"
-              [toggleMask]="true"
-              [feedback]="false"
-              placeholder="••••••••"
-              [fluid]="true"
-              styleClass="password-field"
-              [pt]="{
-                pcInputText: { root: { autocomplete: 'current-password' } },
-              }"
-            >
-              <ng-template #hideicon>
-                <img
-                  class="password-visibility-icon"
-                  src="assets/portal-assets/login/icons/akar-icons_eye-opened.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
-              </ng-template>
-              <ng-template #showicon>
-                <img
-                  class="password-visibility-icon password-visibility-icon--active"
-                  src="assets/portal-assets/login/icons/akar-icons_eye-closed.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
-              </ng-template>
-            </p-password>
-          </div>
-          <span class="field-hint"
-            >Saisissez le mot de passe associé à votre compte
-            d'utilisateur</span
+      <!-- Password field -->
+      <div class="field-group--password">
+        <label class="field-label" for="password-input">Mot de passe</label>
+        <div class="password-row">
+          <img
+            class="password-icon--lock"
+            src="assets/portal-assets/login/icons/formkit_password.svg"
+            alt=""
+            aria-hidden="true"
+          />
+          <p-password
+            [(ngModel)]="password"
+            name="password"
+            inputId="password-input"
+            [toggleMask]="true"
+            [feedback]="false"
+            placeholder="••••••••"
+            [fluid]="true"
+            styleClass="password-field"
+            [pt]="{
+              pcInputText: { root: { autocomplete: 'current-password' } },
+            }"
           >
+            <ng-template #hideicon>
+              <img
+                class="password-visibility-icon"
+                src="assets/portal-assets/login/icons/akar-icons_eye-opened.svg"
+                alt=""
+                aria-hidden="true"
+              />
+            </ng-template>
+            <ng-template #showicon>
+              <img
+                class="password-visibility-icon password-visibility-icon--active"
+                src="assets/portal-assets/login/icons/akar-icons_eye-closed.svg"
+                alt=""
+                aria-hidden="true"
+              />
+            </ng-template>
+          </p-password>
         </div>
+        <span class="field-hint"
+          >Saisissez le mot de passe associé à votre compte
+        </span>
+      </div>
 
-        <!-- Submit button -->
-        <p-button
-          label="Se connecter"
-          type="submit"
-          styleClass="login-submit-btn"
-          [fluid]="true"
-        ></p-button>
-        <!-- Bottom links -->
-        <div class="login-footer-links">
-          <p class="reset-label">Réinitialiser votre mot de passe</p>
-          <a routerLink="/mot-de-passe-oublie" class="help-link"
-            >J'ai besoin d'aide</a
-          >
-        </div>
-      </form>
-    </article>
-  </section>
+      <!-- Submit button -->
+      <p-button
+        label="Se connecter"
+        type="submit"
+        styleClass="login-submit-btn"
+        [fluid]="true"
+      ></p-button>
+      <!-- Bottom links -->
+      <div class="login-footer-links">
+        <a routerLink="/mot-de-passe-oublie" class="help-link"
+          >Mot de passe oublié ?</a
+        >
+      </div>
+    </form>
+  </article>
+</section>
