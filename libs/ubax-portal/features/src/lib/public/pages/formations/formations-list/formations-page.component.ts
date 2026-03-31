@@ -14,7 +14,7 @@ import { UiButtonComponent, UiPaginationComponent } from '@ubax-workspace/shared
 import { RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ALL_GUIDES } from './formations.data';
+import { ALL_GUIDES } from '../formations.data';
 
 const PAGE_SIZE = 6;
 

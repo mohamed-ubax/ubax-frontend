@@ -8,7 +8,7 @@ import { InputOtp } from 'primeng/inputotp';
   selector: 'ubax-otp-page',
   imports: [FormsModule, InputOtp, Button],
   templateUrl: './otp-page.component.html',
-  styleUrl: './auth-pages.component.scss',
+  styleUrl: '../auth-pages.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OtpPageComponent {

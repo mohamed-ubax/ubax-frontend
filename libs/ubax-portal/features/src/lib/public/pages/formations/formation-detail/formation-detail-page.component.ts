@@ -10,7 +10,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ALL_GUIDES, Guide, GUIDES_MAP } from './formations.data';
+import { ALL_GUIDES, Guide, GUIDES_MAP } from '../formations.data';
 
 @Component({
   selector: 'ubax-formation-detail-page',

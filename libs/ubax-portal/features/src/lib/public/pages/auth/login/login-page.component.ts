@@ -5,7 +5,7 @@ import { Select } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
 import { Button } from 'primeng/button';
-import { COUNTRY_CODES, type CountryCode } from '../shared/country-codes';
+import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
 
 @Component({
   selector: 'ubax-login-page',

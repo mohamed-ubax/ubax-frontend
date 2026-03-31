@@ -8,7 +8,7 @@ import { Password } from 'primeng/password';
   selector: 'ubax-reset-password-page',
   imports: [FormsModule, Password, Button],
   templateUrl: './reset-password-page.component.html',
-  styleUrl: './auth-pages.component.scss',
+  styleUrl: '../auth-pages.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordPageComponent {

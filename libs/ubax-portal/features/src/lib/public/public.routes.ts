@@ -4,7 +4,7 @@ export const publicRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./pages/splash-page.component').then(
+      import('./pages/splash/splash-page.component').then(
         (m) => m.SplashPageComponent,
       ),
   },
@@ -12,30 +12,36 @@ export const publicRoutes: Routes = [
     path: 'accueil',
     data: { preload: true },
     loadComponent: () =>
-      import('./pages/home-page.component').then((m) => m.HomePageComponent),
+      import('./pages/marketing/home/home-page.component').then(
+        (m) => m.HomePageComponent,
+      ),
   },
   {
     path: 'connexion',
     data: { preload: true },
     loadComponent: () =>
-      import('./pages/login-page.component').then((m) => m.LoginPageComponent),
+      import('./pages/auth/login/login-page.component').then(
+        (m) => m.LoginPageComponent,
+      ),
   },
   {
     path: 'mot-de-passe-oublie',
     loadComponent: () =>
-      import('./pages/forgot-password-page.component').then(
+      import('./pages/auth/forgot-password/forgot-password-page.component').then(
         (m) => m.ForgotPasswordPageComponent,
       ),
   },
   {
     path: 'verification-code',
     loadComponent: () =>
-      import('./pages/otp-page.component').then((m) => m.OtpPageComponent),
+      import('./pages/auth/otp/otp-page.component').then(
+        (m) => m.OtpPageComponent,
+      ),
   },
   {
     path: 'nouveau-mot-de-passe',
     loadComponent: () =>
-      import('./pages/reset-password-page.component').then(
+      import('./pages/auth/reset-password/reset-password-page.component').then(
         (m) => m.ResetPasswordPageComponent,
       ),
   },
@@ -43,80 +49,84 @@ export const publicRoutes: Routes = [
     path: 'fonctionnalites',
     data: { preload: true },
     loadComponent: () =>
-      import('./pages/fonctionnalites-page.component').then(
+      import('./pages/marketing/fonctionnalites/fonctionnalites-page.component').then(
         (m) => m.FonctionnalitesPageComponent,
       ),
   },
   {
     path: 'faq',
     loadComponent: () =>
-      import('./pages/faq-page.component').then((m) => m.FaqPageComponent),
+      import('./pages/info/faq/faq-page.component').then(
+        (m) => m.FaqPageComponent,
+      ),
   },
   {
     path: 'contact',
     loadComponent: () =>
-      import('./pages/contact-page.component').then(
+      import('./pages/info/contact/contact-page.component').then(
         (m) => m.ContactPageComponent,
       ),
   },
   {
     path: 'offres',
     loadComponent: () =>
-      import('./pages/pricing-page.component').then(
+      import('./pages/marketing/pricing/pricing-page.component').then(
         (m) => m.PricingPageComponent,
       ),
   },
   {
     path: 'temoignages',
     loadComponent: () =>
-      import('./pages/testimonials-page.component').then(
+      import('./pages/marketing/testimonials/testimonials-page.component').then(
         (m) => m.TestimonialsPageComponent,
       ),
   },
   {
     path: 'formations/:slug',
     loadComponent: () =>
-      import('./pages/formation-detail-page.component').then(
+      import('./pages/formations/formation-detail/formation-detail-page.component').then(
         (m) => m.FormationDetailPageComponent,
       ),
   },
   {
     path: 'formations',
     loadComponent: () =>
-      import('./pages/formations-page.component').then(
+      import('./pages/formations/formations-list/formations-page.component').then(
         (m) => m.FormationsPageComponent,
       ),
   },
   {
     path: 'carrieres',
     loadComponent: () =>
-      import('./pages/carrieres-page.component').then(
+      import('./pages/carrieres/carrieres-list/carrieres-page.component').then(
         (m) => m.CarrieresPageComponent,
       ),
   },
   {
     path: 'carrieres/:id/postuler',
     loadComponent: () =>
-      import('./pages/carrieres-candidature-page.component').then(
+      import('./pages/carrieres/carrieres-candidature/carrieres-candidature-page.component').then(
         (m) => m.CarrieresCandidaturePage,
       ),
   },
   {
     path: 'carrieres/:id',
     loadComponent: () =>
-      import('./pages/carrieres-detail-page.component').then(
+      import('./pages/carrieres/carrieres-detail/carrieres-detail-page.component').then(
         (m) => m.CarrieresDetailPageComponent,
       ),
   },
   {
     path: 'mentions-legales',
     loadComponent: () =>
-      import('./pages/legal-page.component').then((m) => m.LegalPageComponent),
+      import('./pages/info/legal/legal-page.component').then(
+        (m) => m.LegalPageComponent,
+      ),
   },
   {
     path: 'politique-de-confidentialite',
     loadComponent: () =>
-      import('./pages/politique-confidentialite-page.component').then(
+      import('./pages/info/politique-confidentialite/politique-confidentialite-page.component').then(
         (m) => m.PolitiqueConfidentialitePageComponent,
       ),
   },

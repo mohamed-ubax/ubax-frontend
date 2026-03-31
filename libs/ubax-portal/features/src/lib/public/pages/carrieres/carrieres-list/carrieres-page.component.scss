@@ -61,6 +61,7 @@ $c-placeholder: #b3b3b3;
   position: absolute;
   flex: 0 0 auto;
   top: 6.5%;
+  left: 3%;
   width: 400px;
   height: 300px;
 }
@@ -893,7 +894,64 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ RESPONSIVE ═════════════════════════════════════════════════════════════
+
+// ── Info section : image sous le texte (≤ 1380 px) ─────────────────────────
+// L'image est le 1er enfant du DOM → order:1 la place après titre/sous-titre/
+// cartes (qui gardent l'ordre par défaut à 0).
+@media (max-width: 1380px) {
+  .info-section__inner {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+    padding-bottom: 0;       // le bas de la carte colle à l'image
+    overflow: hidden;        // coupe l'image aux coins arrondis de la carte
+  }
+
+  .info-section__deco {
+    order: 1;                // après tous les enfants à order:0
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    max-width: 100%;
+    height: 380px;
+    pointer-events: none;
+    object-fit: cover;
+    object-position: center top;
+    margin-top: 40px;
+  }
+
+  .info-section__title,
+  .info-section__subtitle {
+    max-width: 100%;
+  }
+
+  .info-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1300px) {
+  .hero {
+    &__content {
+      right: 11.5%;
+    }
+    &__visual {
+      left: 2%;
+    }
+    &__notch {
+      left: -1%;
+    }
+  }
+}
+
 @media (max-width: 1280px) {
+  .hero {
+    &__content {
+      right: 10.5%;
+    }
+  }
+
   .culture {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto auto;
@@ -946,61 +1004,336 @@ $c-placeholder: #b3b3b3;
   }
 }
 
-@media (max-width: 900px) {
-  .cta-bottom {
-    flex-direction: column;
-    overflow: hidden;
-    margin-top: 0;
-    min-height: auto;
-  }
-
-  .cta-bottom__visual {
-    position: relative;
-    top: auto;
-    width: 100%;
-    height: 280px;
-  }
-
-  .cta-bottom__content {
-    padding: 32px;
-    margin-left: 0;
+@media (max-width: 1245px) {
+  .hero {
+    &__visual {
+      left: 1%;
+    }
+    &__notch {
+      left: -2%;
+    }
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1230px) {
+  .hero {
+    &__content {
+      right: 8%;
+    }
+  }
+}
+
+@media (max-width: 1170px) {
+  .hero {
+    &__visual {
+      left: 0%;
+    }
+    &__notch {
+      left: -3%;
+    }
+  }
+}
+
+@media (max-width: 1155px) {
+  .hero {
+    &__content {
+      right: 5%;
+    }
+  }
+}
+
+@media (max-width: 1112px) {
+  .hero {
+    &__content {
+      right: 2.5%;
+    }
+  }
+}
+
+@media (max-width: 1100px) {
+  .hero {
+    &__visual {
+      left: -2%;
+    }
+    &__notch {
+      left: -5%;
+    }
+  }
+}
+
+@media (max-width: 1060px) {
+  .hero {
+    &__content {
+      right: -2.5%;
+    }
+  }
+}
+
+@media (max-width: 1026px) {
+  .hero {
+    &__visual {
+      left: -3%;
+    }
+    &__notch {
+      left: -6%;
+    }
+  }
+}
+
+@media (max-width: 1000px) {
+  .hero {
+    &__content {
+      right: -4.5%;
+    }
+  }
+}
+
+@media (max-width: 986px) {
+  .hero {
+    &__visual {
+      left: -4.25%;
+    }
+    &__notch {
+      left: -7.25%;
+    }
+  }
+}
+
+// ══ HERO — REDESIGN COMPLET (≤ 980 px) ════════════════════════════════════
+// En dessous de ce seuil le hero passe en layout normal-flow vertical centré.
+// Tous les nudges en pourcentage au-dessus sont désormais sans effet.
+@media (max-width: 980px) {
   .hero {
     flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
     min-height: auto;
-    padding: 48px 24px 48px;
-    gap: 32px;
-    border-radius: 16px;
-  }
+    margin: 1.5rem var(--_gutter);
+    padding: 6rem 28px;
+    border-radius: 24px;
 
-  .hero__notch {
-    display: none;
+    &::before {
+      mask-image: none;
+      -webkit-mask-image: none;
+      border-radius: 24px;
+      background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
+      center / cover no-repeat;
+    }
   }
 
   .hero__visual {
-    width: 220px;
-    height: 260px;
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 200px;
+    height: 220px;
+    margin: 0 auto 28px;
+    flex-shrink: 0;
+  }
+
+  .hero__content {
+    position: relative;
+    top: auto;
+    right: auto;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
   }
 
   .hero__title {
-    font-size: 2rem;
+    font-size: clamp(1.75rem, 5vw, 2.25rem);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero__subtitle {
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+
+    br {
+      display: none;
+    }
   }
 
   .hero__search {
     width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .hero__notch {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    width: auto;
     height: auto;
+    margin-top: 28px;
+    justify-content: center;
+  }
+}
+
+// ── Téléphones portrait (≤ 480 px) ────────────────────────────────────────
+@media (max-width: 480px) {
+  .hero__visual {
+    width: 160px;
+    height: 180px;
+    margin-bottom: 20px;
+  }
+
+  .hero__search-input
+  {
+    padding: 1rem;
+  }
+
+  .hero__content{
+    margin: 2rem 0;
+  }
+
+  .hero__title {
+    font-size: 1.625rem;
+  }
+
+  .hero__search {
     flex-wrap: wrap;
-    padding: 8px;
-    gap: 8px;
+    height: auto;
   }
 
   .hero__search-field {
     width: 100%;
   }
 
+  .hero__search-btn {
+    width: 100%;
+    height: 44px;
+  }
+}
+
+// ── Téléphones paysage (largeur ≤ 896 px, hauteur ≤ 500 px) ───────────────
+@media (max-width: 896px) and (orientation: landscape) and (max-height: 500px) {
+  .hero {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    gap: 28px;
+    padding: 24px 32px;
+  }
+
+  .hero__visual {
+    width: 130px;
+    height: 150px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .hero__content {
+    text-align: left;
+    max-width: none;
+    flex: 1;
+  }
+
+  .hero__title {
+    font-size: 1.375rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .hero__subtitle {
+    font-size: 0.8125rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .hero__notch {
+    margin-top: 12px;
+    justify-content: flex-start;
+  }
+}
+
+// ══ CTA BOTTOM — REDESIGN RESPONSIVE (≤ 1024 px) ══════════════════════════
+// Logique (valeurs explicites, pas de bottom: calc dynamique) :
+//   height  = 320px  |  top = -264px  →  264px déborde au-dessus de la carte
+//   overlap = 320 - 264 = 56px entrent dans la carte par le haut
+//   margin-top carte  = 264 + 28 breathing = 292px
+//   padding-top contenu = 56 overlap + 24 gap = 80px
+@media (max-width: 1024px) {
+  .cta-bottom {
+    flex-direction: column;
+    overflow: visible;
+    margin: 292px var(--_gutter) 80px;
+    min-height: auto;
+    align-items: center;
+    text-align: center;
+  }
+
+  .cta-bottom__visual {
+    position: absolute;
+    top: -264px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    height: 320px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  // Reset complet du positionnement absolu + pourcentages du base style.
+  // object-fit: contain → image entière sans distorsion ni rognage.
+  .cta-bottom__img {
+    position: relative;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    object-position: center bottom;
+  }
+
+  .cta-bottom__content {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 80px 48px 48px;
+    margin-left: 0;
+  }
+
+  .cta-bottom__title,
+  .cta-bottom__text {
+    max-width: 100%;
+  }
+}
+
+// ── Tablettes étroites (≤ 640 px) ──────────────────────────────────────────
+// height 280px | top -228px | overlap 52px | margin 228+28=256 | padding 52+24=76
+@media (max-width: 640px) {
+  .cta-bottom {
+    margin-top: 256px;
+  }
+
+  .cta-bottom__visual {
+    top: -228px;
+    width: 220px;
+    height: 280px;
+  }
+
+  .cta-bottom__content {
+    padding: 76px 28px 40px;
+  }
+}
+
+// ── Téléphones portrait (≤ 480 px) ─────────────────────────────────────────
+// height 240px | top -192px | overlap 48px | margin 192+28=220 | padding 48+24=72
+@media (max-width: 480px) {
+  .cta-bottom {
+    margin-top: 220px;
+  }
+
+  .cta-bottom__visual {
+    top: -192px;
+    width: 190px;
+    height: 240px;
+  }
+
+  .cta-bottom__content {
+    padding: 72px 20px 36px;
+  }
+}
+
+@media (max-width: 768px) {
   .culture {
     grid-template-columns: 1fr;
     padding: 48px var(--_gutter);
