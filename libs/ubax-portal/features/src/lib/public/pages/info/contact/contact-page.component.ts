@@ -11,7 +11,7 @@ import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { COUNTRY_CODES, type CountryCode } from '../shared/country-codes';
+import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
