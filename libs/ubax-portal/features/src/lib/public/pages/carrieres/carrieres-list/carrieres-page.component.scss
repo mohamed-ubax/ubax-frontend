@@ -894,6 +894,43 @@ $c-placeholder: #b3b3b3;
 }
 
 // ══ RESPONSIVE ═════════════════════════════════════════════════════════════
+
+// ── Info section : image sous le texte (≤ 1380 px) ─────────────────────────
+// L'image est le 1er enfant du DOM → order:1 la place après titre/sous-titre/
+// cartes (qui gardent l'ordre par défaut à 0).
+@media (max-width: 1380px) {
+  .info-section__inner {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+    padding-bottom: 0;       // le bas de la carte colle à l'image
+    overflow: hidden;        // coupe l'image aux coins arrondis de la carte
+  }
+
+  .info-section__deco {
+    order: 1;                // après tous les enfants à order:0
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    max-width: 100%;
+    height: 380px;
+    pointer-events: none;
+    object-fit: cover;
+    object-position: center top;
+    margin-top: 40px;
+  }
+
+  .info-section__title,
+  .info-section__subtitle {
+    max-width: 100%;
+  }
+
+  .info-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 1300px) {
   .hero {
     &__content {
