@@ -1,0 +1,168 @@
+<ubax-public-shell>
+
+  <!-- ══ PAGE HERO ══════════════════════════════════════════════════════════ -->
+  <div class="page-hero">
+    <div class="page-hero__icon-box" aria-hidden="true">
+      <i class="pi pi-upload page-hero__icon"></i>
+    </div>
+    <h1 class="page-hero__title">Candidature</h1>
+  </div>
+
+  <!-- ══ CONTENT ════════════════════════════════════════════════════════════ -->
+  <div class="candidature-layout">
+
+    <!-- Left: form -->
+    <div class="candidature-main">
+      <div class="candidature-main__card">
+        <h2 class="candidature-main__title">
+          Restez informé des opportunités qui vous correspondent
+        </h2>
+        <p class="candidature-main__subtitle">
+          Remplissez ce formulaire en quelques minutes. Dès qu'une offre correspondant à votre
+          profil est disponible, vous serez contacté directement.
+        </p>
+
+        <form class="candidature-form" (ngSubmit)="submitForm($event)" #f="ngForm">
+          <!-- Row 1: Nom, Email, Téléphone -->
+          <div class="form-row form-row--three">
+            <div class="form-field">
+              <label class="form-field__label" for="nom">Nom complet</label>
+              <input
+                id="nom"
+                type="text"
+                class="form-field__input"
+                placeholder="Ex: Jean-Marc Bédi"
+                [(ngModel)]="form.nom"
+                name="nom"
+                autocomplete="name"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                class="form-field__input"
+                placeholder="Ex: Jean@gmail.com"
+                [(ngModel)]="form.email"
+                name="email"
+                autocomplete="email"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="telephone">Téléphone</label>
+              <input
+                id="telephone"
+                type="tel"
+                class="form-field__input"
+                placeholder="+225 xxxxxxxxxxx"
+                [(ngModel)]="form.telephone"
+                name="telephone"
+                autocomplete="tel"
+              />
+            </div>
+          </div>
+
+          <!-- Row 2: Métier, Niveau -->
+          <div class="form-row form-row--two">
+            <div class="form-field">
+              <label class="form-field__label" for="metier">Métier recherché</label>
+              <input
+                id="metier"
+                type="text"
+                class="form-field__input"
+                placeholder="Ex: Comptable"
+                [(ngModel)]="form.metier"
+                name="metier"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="niveau">Niveau d'expérience</label>
+              <div class="form-field__select-wrap">
+                <select
+                  id="niveau"
+                  class="form-field__input form-field__select"
+                  [(ngModel)]="form.niveauExperience"
+                  name="niveau"
+                >
+                  <option value="">Intermédiaire</option>
+                  @for (niveau of niveauxExperience; track niveau) {
+                    <option [value]="niveau">{{ niveau }}</option>
+                  }
+                </select>
+                <i class="pi pi-chevron-down form-field__chevron" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lettre de motivation -->
+          <div class="form-field">
+            <label class="form-field__label" for="lettre">Lettre de motivation</label>
+            <textarea
+              id="lettre"
+              class="form-field__textarea"
+              placeholder="Ecrire votre lettre de motivation"
+              [(ngModel)]="form.lettreMotivation"
+              name="lettre"
+              rows="6"
+            ></textarea>
+          </div>
+
+          <button class="candidature-form__submit" type="submit">
+            Déposer mon profil
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right: CV upload -->
+    <aside class="candidature-sidebar">
+      <div class="cv-card">
+        <div class="cv-card__avatar" aria-hidden="true">
+          <i class="pi pi-file cv-card__cv-icon"></i>
+        </div>
+        <button class="cv-card__upload" type="button">
+          <i class="pi pi-upload cv-card__upload-icon" aria-hidden="true"></i>
+          Importer votre CV
+        </button>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ══ SUCCESS MODAL ══════════════════════════════════════════════════════ -->
+  @if (successVisible()) {
+    <div class="success-overlay" (click)="closeSuccess()" role="dialog" aria-modal="true" aria-labelledby="success-title">
+      <div class="success-modal" (click)="$event.stopPropagation()">
+        <button
+          class="success-modal__close"
+          type="button"
+          (click)="closeSuccess()"
+          aria-label="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+
+        <div class="success-modal__decoration" aria-hidden="true">
+          <img [src]="elementsIcon" alt="" class="success-modal__elements" />
+        </div>
+
+        <p id="success-title" class="success-modal__text">
+          Merci&nbsp;! Votre profil a bien été enregistré. Nous vous contacterons dès qu'une
+          opportunité correspond à votre profil.
+        </p>
+
+        <a
+          class="success-modal__btn"
+          routerLink="/accueil"
+          role="button"
+        >
+          <i class="pi pi-home" aria-hidden="true"></i>
+          Retour vers l'accueil
+        </a>
+      </div>
+    </div>
+  }
+
+  <ubax-back-to-top />
+</ubax-public-shell>

@@ -29,7 +29,8 @@
   position: relative;
   z-index: 2;
   width: 7.009rem; // 112.14px
-  margin-bottom: 2rem;
+  margin-top: -10rem;
+  margin-bottom: 4rem;
   opacity: 0;
   animation: login-logo-in 0.75s cubic-bezier(0, 0, 0.2, 1) 0.15s forwards;
 
@@ -46,8 +47,8 @@
 .login-card {
   position: relative;
   z-index: 1;
-  width: min(31.1875rem, calc(100% - 2rem)); // 499px
-  min-height: 30rem; // 480px
+  width: min(26rem, calc(100% - 2rem)); // 499px
+  min-height: auto; // 480px
   border-radius: 1.25rem;
   border: 1px solid #cfcfcf;
   background: #fff;
@@ -61,7 +62,7 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  padding: 1.5394rem 2.3125rem 0.875rem;
+  padding: 1.5rem;
 }
 
 // ─── Labels ──────────────────────────────────────────────────────────────────
@@ -98,7 +99,7 @@
   display: flex;
   gap: 0.625rem;
   align-items: center;
-  margin-top: 1.625rem;
+  margin-top: 1rem;
   margin-bottom: 0;
 
   > * {
@@ -107,7 +108,7 @@
 }
 
 .field-group--phone .field-hint {
-  margin-top: 1.1094rem;
+  margin-top: 0.6rem;
 }
 
 // ─── Password field group ─────────────────────────────────────────────────────
@@ -115,11 +116,11 @@
 .field-group--password {
   display: flex;
   flex-direction: column;
-  margin-top: 1.7975rem;
+  margin-top: 1.5rem;
 }
 
 .field-group--password .field-hint {
-  margin-top: 0.77rem;
+  margin-top: 0.6rem;
 }
 
 .password-row {
@@ -129,8 +130,8 @@
   border: 1px solid #515151;
   background: #fff;
   min-height: 3.2rem; // 65.73px
-  padding: 0 2.375rem 0 1.125rem;
-  margin-top: 1.0913rem;
+  padding: 0 1rem 0 1rem;
+  margin-top: 1rem;
   margin-bottom: 0;
   overflow: hidden;
 
@@ -182,13 +183,13 @@
   flex-direction: column;
   align-items: center;
   gap: 0.77rem;
-  margin-top: 1.4rem;
+  margin-top: 1rem;
 }
 
 .reset-label {
   margin: 0;
   color: #383737;
-  font-family: 'Calibri', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.875rem;
   font-weight: 700;
   line-height: normal;
@@ -196,15 +197,16 @@
 }
 
 .help-link {
-  color: #f8961e;
+  color: #1a3047;
   font-family: 'Lexend', sans-serif;
   font-size: 0.8125rem;
-  font-weight: 700;
+  font-weight: 400;
   text-decoration: underline;
   text-align: center;
 
   &:hover {
     opacity: 0.8;
+    color: #f8961e;
   }
 }
 
@@ -611,7 +613,7 @@
 
   .login-submit-btn,
   .login-submit-btn.p-button {
-    margin-top: 1.775rem;
+    margin-top: 1.5rem;
   }
 
   .login-submit-btn.p-button {
@@ -622,15 +624,14 @@
     background: #1a3047;
     color: #fff;
     font-family: 'Lexend', sans-serif;
-    font-size: 1.25rem;
+    font-size: 1rem;
     line-height: normal;
-    font-weight: 500;
     justify-content: center;
     transition: background 160ms ease;
     box-shadow: none;
 
     &:hover {
-      background: #243f5e;
+      background: #e87d1e;
       box-shadow: none;
     }
 
@@ -731,7 +732,7 @@
   }
 
   .field-group--password {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
 
   .password-row {

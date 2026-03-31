@@ -95,6 +95,20 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'carrieres/:id/postuler',
+    loadComponent: () =>
+      import('./pages/carrieres-candidature-page.component').then(
+        (m) => m.CarrieresCandidaturePage,
+      ),
+  },
+  {
+    path: 'carrieres/:id',
+    loadComponent: () =>
+      import('./pages/carrieres-detail-page.component').then(
+        (m) => m.CarrieresDetailPageComponent,
+      ),
+  },
+  {
     path: 'mentions-legales',
     loadComponent: () =>
       import('./pages/legal-page.component').then((m) => m.LegalPageComponent),

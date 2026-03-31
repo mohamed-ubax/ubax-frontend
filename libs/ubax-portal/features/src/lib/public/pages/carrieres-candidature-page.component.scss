@@ -1,0 +1,405 @@
+// ── Local tokens ─────────────────────────────────────────────────────────────
+$c-near-black: #181818;
+$c-input-bg: #f4f4f4;
+$c-placeholder: #b3b3b3;
+
+// ── Gutter ────────────────────────────────────────────────────────────────────
+:host {
+  --_gutter: max(1.25rem, calc((100% - 1284px) / 2));
+}
+
+// ══ PAGE HERO ═════════════════════════════════════════════════════════════════
+.page-hero {
+  background: var(--ubax-brand);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px var(--_gutter);
+  gap: 16px;
+}
+
+.page-hero__icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 93px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+}
+
+.page-hero__icon {
+  font-size: 2rem;
+  color: #fff;
+}
+
+.page-hero__title {
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: #fff;
+  line-height: normal;
+  margin: 0;
+  text-align: center;
+}
+
+// ══ LAYOUT ════════════════════════════════════════════════════════════════════
+.candidature-layout {
+  display: grid;
+  grid-template-columns: 1fr 455px;
+  gap: 30px;
+  padding: 40px var(--_gutter) 80px;
+  align-items: start;
+}
+
+// ══ MAIN CARD ═════════════════════════════════════════════════════════════════
+.candidature-main__card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 46px 40px 48px;
+}
+
+.candidature-main__title {
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--ubax-brand);
+  line-height: 1.1;
+  margin: 0 0 20px;
+  max-width: 772px;
+}
+
+.candidature-main__subtitle {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: $c-near-black;
+  line-height: 1.5;
+  margin: 0 0 40px;
+  max-width: 584px;
+}
+
+// ══ FORM ══════════════════════════════════════════════════════════════════════
+.candidature-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-row {
+  display: grid;
+  gap: 16px;
+
+  &--three {
+    grid-template-columns: 265px 214px 235px;
+  }
+
+  &--two {
+    grid-template-columns: 265px 217px;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field__label {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: $c-near-black;
+  line-height: 1.5;
+}
+
+.form-field__input {
+  background: $c-input-bg;
+  border: none;
+  border-radius: 5px;
+  height: 49px;
+  padding: 0 16px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 300;
+  color: $c-near-black;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: box-shadow 150ms ease;
+
+  &::placeholder {
+    color: $c-placeholder;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(26, 48, 71, 0.25);
+  }
+}
+
+.form-field__select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-field__select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 36px;
+}
+
+.form-field__chevron {
+  position: absolute;
+  right: 14px;
+  color: var(--ubax-brand);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.form-field__textarea {
+  background: $c-input-bg;
+  border: none;
+  border-radius: 10px;
+  padding: 16px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 300;
+  color: $c-near-black;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 166px;
+  line-height: 1.5;
+  transition: box-shadow 150ms ease;
+
+  &::placeholder {
+    color: $c-placeholder;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(26, 48, 71, 0.25);
+  }
+}
+
+.candidature-form__submit {
+  align-self: center;
+  background: var(--ubax-accent);
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 32.5px;
+  padding: 16px 48px;
+  cursor: pointer;
+  transition: background 200ms ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--ubax-brand);
+  }
+}
+
+// ══ SIDEBAR — CV CARD ═════════════════════════════════════════════════════════
+.cv-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-height: 227px;
+}
+
+.cv-card__avatar {
+  width: 73px;
+  height: 73px;
+  background: var(--ubax-brand);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cv-card__cv-icon {
+  font-size: 1.75rem;
+  color: #fff;
+}
+
+.cv-card__upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ubax-page-bg);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--ubax-brand);
+  cursor: pointer;
+  transition: background 200ms ease;
+
+  &:hover {
+    background: #dce5ec;
+  }
+}
+
+.cv-card__upload-icon {
+  font-size: 1.25rem;
+  color: var(--ubax-accent);
+}
+
+// ══ SUCCESS OVERLAY & MODAL ═══════════════════════════════════════════════════
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.success-modal {
+  position: relative;
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 48px 40px;
+  width: min(635px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.success-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: background 150ms ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+}
+
+.success-modal__decoration {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-modal__elements {
+  width: 100px;
+  height: 100px;
+  scale: 3;
+  object-fit: contain;
+}
+
+.success-modal__text {
+  font-size: 1rem;
+  font-weight: 400;
+  color: $c-near-black;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 482px;
+}
+
+.success-modal__btn {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 10px;
+  background: var(--ubax-accent);
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 32.5px;
+  padding: 14px 32px;
+  transition: background 200ms ease;
+
+  &:hover {
+    background: var(--ubax-brand);
+  }
+
+  i {
+    font-size: 1.125rem;
+  }
+}
+
+// ══ RESPONSIVE ════════════════════════════════════════════════════════════════
+@media (max-width: 1100px) {
+  .candidature-layout {
+    grid-template-columns: 1fr 380px;
+  }
+
+  .form-row--three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .form-row--two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .candidature-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .candidature-sidebar {
+    order: -1;
+  }
+
+  .cv-card {
+    flex-direction: row;
+    min-height: auto;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 680px) {
+  .candidature-main__card {
+    padding: 32px 20px;
+  }
+
+  .candidature-main__title {
+    font-size: 1.75rem;
+  }
+
+  .form-row--three {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row--two {
+    grid-template-columns: 1fr;
+  }
+
+  .candidature-form__submit {
+    width: 100%;
+    text-align: center;
+  }
+}

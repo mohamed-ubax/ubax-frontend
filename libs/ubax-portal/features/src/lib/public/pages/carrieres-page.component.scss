@@ -1,9 +1,12 @@
-// ── Local tokens (non mappables sur --ubax-*) ──────────────────────────────
+// ── Local tokens ─────────────────────────────────────────────────────────────
 $c-dark-blue: #003456;
 $c-near-black: #181818;
 $c-dark-navy: #23304f;
 $c-filter-bg: #eef4ff;
 $c-divider: #cfd6dc;
+$c-red: #ff0c0c;
+$c-body: #252525;
+$c-placeholder: #b3b3b3;
 
 // ── Gutter — mirrors the header formula exactly ─────────────────────────────
 :host {
@@ -13,40 +16,112 @@ $c-divider: #cfd6dc;
 // ══ HERO ═══════════════════════════════════════════════════════════════════
 .hero {
   position: relative;
-  height: 580px;
-  overflow: hidden;
-  background:
-    linear-gradient(rgba(26, 48, 71, 0.96), rgba(26, 48, 71, 0.96)),
-    url('/assets/portal-assets/careers/images/Image Gradient.webp') center / cover no-repeat;
+  isolation: isolate; // new stacking context so ::before z-index:-1 stays inside
+  min-height: 538px;
+  display: flex;
+  align-items: center;
+  margin: 3rem var(--_gutter);
+  // padding-bottom = notch height → shifts the flex centering axis into the
+  // non-notch area so title/search bar stay above the concave cutout.
+  padding: 60px 56px 200px;
+
+  // The mask is applied only to the background layer so child elements
+  // (badge, content) remain fully visible in the transparent bottom-left zone.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
+      center / cover no-repeat;
+    -webkit-mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
+    mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
 }
 
-.hero__overlay {
+// ── Concave notch (replaces ::after) ───────────────────────────────────────
+// The main page-bg rectangle sits at bottom-left.
+.hero__notch {
   position: absolute;
-  inset: 0;
-  z-index: 0;
+  bottom: 0;
+  left: 0;
+  width: 470px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Left visual area — wider to fill the notch column (~470 px)
+.hero__visual {
+  position: absolute;
+  flex: 0 0 auto;
+  top: 6.5%;
+  width: 400px;
+  height: 300px;
+}
+
+// Fix 4: dashed decorative ring around the orange circle
+.hero__dashed-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -55%);
+  width: 258px;
+  height: 258px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.32);
   pointer-events: none;
 }
 
-.hero__content {
+// Fix 3: orange circle reduced to SVG natural size (206×204)
+.hero__ellipse {
   position: absolute;
-  left: var(--_gutter);
-  top: 133px;
-  z-index: 1;
-  max-width: 650px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -55%);
+  width: 206px;
+  height: 204px;
+  pointer-events: none;
 }
 
+.hero__person {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -65%);
+  width: 122px;
+  height: 183px;
+  object-fit: cover;
+  z-index: 2;
+}
+
+// Badge — centred inside .hero__notch via its parent's flexbox
 .hero__badge {
-  display: inline-flex;
-  align-items: center;
-  background: var(--ubax-accent);
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 300;
-  line-height: 1.5;
-  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #f5f5f5;
   border-radius: 32px;
+  padding: 8px 20px;
   white-space: nowrap;
-  margin-bottom: 32px;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--ubax-brand);
+  line-height: 1.5;
+  pointer-events: auto;
+}
+
+// Right content area
+.hero__content {
+  flex: 1;
+  min-width: 0;
+  max-width: 590px;
+  position: absolute;
+  top: 25%;
+  right: 12%;
 }
 
 .hero__title {
@@ -54,25 +129,28 @@ $c-divider: #cfd6dc;
   font-weight: 700;
   color: #fff;
   line-height: normal;
-  margin: 0 0 20px;
+  margin: 0 0 2.5rem;
 }
 
 .hero__subtitle {
   font-size: 1rem;
   font-weight: 400;
   color: #fff;
+  max-width: 28rem;
   line-height: 1.5625;
-  margin: 0 0 28px;
-  max-width: 544px;
+  margin: 0 0 2.5rem;
 }
 
 .hero__search {
   display: flex;
   align-items: center;
   background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 9px;
   padding: 9px;
-  width: min(590px, 100%);
+  width: min(414px, 100%);
   height: 56px;
   box-sizing: border-box;
 }
@@ -83,13 +161,14 @@ $c-divider: #cfd6dc;
   flex: 1;
   gap: 8px;
   padding: 0 12px;
-  color: rgba(255, 255, 255, 0.75);
   min-width: 0;
+}
 
-  i {
-    font-size: 1rem;
-    flex-shrink: 0;
-  }
+.hero__search-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1) opacity(0.75);
 }
 
 .hero__search-input {
@@ -108,13 +187,6 @@ $c-divider: #cfd6dc;
   }
 }
 
-.hero__search-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.35);
-  flex-shrink: 0;
-}
-
 .hero__search-btn {
   background: var(--ubax-accent);
   color: #fff;
@@ -123,7 +195,7 @@ $c-divider: #cfd6dc;
   font-weight: 300;
   border: none;
   border-radius: 9px;
-  height: 38px;
+  height: 40px;
   padding: 0 20px;
   white-space: nowrap;
   cursor: pointer;
@@ -135,159 +207,207 @@ $c-divider: #cfd6dc;
   }
 }
 
-.hero__visual {
-  position: absolute;
-  right: var(--_gutter);
-  top: 50%;
-  transform: translateY(-55%);
-  width: 380px;
-  height: 420px;
-  z-index: 1;
+// ══ NOTRE CULTURE ══════════════════════════════════════════════════════════
+.culture {
+  display: grid;
+  // Figma: 3 equal columns (~435px each). Using 1fr so they scale together.
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 30px;
+  row-gap: 44px;
+  padding: 64px var(--_gutter);
+  align-items: start;
+  overflow: visible;
 }
 
-.hero__ellipse {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-
-  &--lg {
-    width: 349px;
-    height: 341px;
-  }
-
-  &--md {
-    width: 312px;
-    height: 308px;
-  }
-
-  &--sm {
-    width: 265px;
-    height: 254px;
-  }
-}
-
-.hero__person {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -60%);
-  width: 232px;
-  height: 348px;
-  object-fit: cover;
-  z-index: 2;
-}
-
-.hero__talents-card {
-  position: absolute;
-  top: 85px;
-  left: 48%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 15px;
+.culture__left {
+  grid-column: 1;
+  // Row 1 only — row 2 col-1 is occupied by the third card (La Transparence).
+  // Previously grid-row: 1/3 caused culture__left to overlap the row-2 cards.
+  grid-row: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 225px;
-  z-index: 2;
+  gap: 20px;
+  padding-right: 24px;
 }
 
-.hero__talents-label {
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 400;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.hero__avatars {
-  display: flex;
-  align-items: center;
-}
-
-.hero__avatar {
-  width: 41px;
-  height: 41px;
-  border-radius: 50%;
-  background: var(--ubax-support-soft);
-  border: 2px solid #fff;
-  margin-left: -12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.875rem;
-  color: var(--ubax-brand);
-  font-weight: 600;
-  flex-shrink: 0;
-
-  &:first-child {
-    margin-left: 0;
-  }
-
-  &--plus {
-    background: var(--ubax-accent);
-    color: #fff;
-    font-size: 1rem;
-  }
-}
-
-.hero__companies-stat {
-  position: absolute;
-  right: var(--_gutter);
-  bottom: 80px;
-  text-align: center;
-  color: #fff;
-  z-index: 2;
-}
-
-.hero__stat-number,
-.hero__stat-label {
-  display: block;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-// ══ ABOUT ══════════════════════════════════════════════════════════════════
-.about {
-  display: flex;
-  align-items: flex-start;
-  gap: 60px;
-  padding: 80px var(--_gutter) 64px;
-}
-
-.about__text-col {
-  flex: 0 0 auto;
-  max-width: 660px;
-}
-
-.about__breadcrumb {
-  list-style: disc;
-  margin: 0 0 12px 24px;
-  padding: 0;
-  color: $c-dark-blue;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-.about__description {
-  font-size: 0.9375rem;
-  font-weight: 400;
-  color: #252525;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.about__heading {
-  flex: 1;
-  font-size: clamp(1.75rem, 3.5vw, 3rem);
+// Fix 1: title left-aligned in its column (was text-align: right which
+// made it appear horizontally centered in the left grid column)
+.culture__heading {
+  font-size: clamp(2rem, 3.5vw, 2.5rem);
   font-weight: 400;
   color: var(--ubax-brand);
   line-height: 1.1;
-  text-align: right;
   margin: 0;
+  text-align: left;
+}
+
+.culture__desc {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: $c-body;
+  line-height: 1.5;
+  margin: 0;
+}
+
+// Fix 2–5: grid placement via :nth-child (offset +1 for .culture__left),
+// default featured state on card 0, smooth hover transfer between cards.
+// Previously used :first-of-type/:nth-of-type which counted .culture__left
+// as the first div and produced wrong placement with no orange card at all.
+.culture__card {
+  background: #fff;
+  border-radius: 15px;
+  padding: 28px 24px;
+  min-height: 292px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition:
+    background 300ms ease,
+    transform 300ms ease,
+    box-shadow 300ms ease;
+
+  // ── Grid placement (.culture__left is nth-child(1), cards are 2–6) ──
+  // nth-child(2) = L'Audace Technologique: col 2, row 1, default featured
+  &:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+    background: var(--ubax-accent);
+    transform: rotate(-3deg);
+    transform-origin: center;
+
+    .culture__card-title {
+      color: #fff;
+    }
+    .culture__card-body {
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+  &:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  &:nth-child(4) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  &:nth-child(5) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  &:nth-child(6) {
+    grid-column: 3;
+    grid-row: 2;
+  }
+}
+
+.culture__card-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: $c-body;
+  line-height: 1.1;
+  margin: 0;
+  transition: color 300ms ease;
+}
+
+.culture__card-body {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: $c-body;
+  line-height: 1.5;
+  margin: 0;
+  transition: color 300ms ease;
+}
+
+// ── Featured hover behaviour ────────────────────────────────────────────────
+// When a card OTHER than the default is hovered → revert default to neutral.
+// :has(.culture__card:not(:nth-child(2)):hover) ensures hovering card 0
+// itself leaves it in the featured state.
+.culture:has(.culture__card:not(:nth-child(2)):hover)
+  .culture__card:nth-child(2) {
+  background: #fff;
+  transform: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+  .culture__card-title {
+    color: $c-body;
+  }
+  .culture__card-body {
+    color: $c-body;
+  }
+}
+
+// Any hovered card takes the featured style
+.culture__card:hover {
+  background: var(--ubax-accent);
+  transform: rotate(-3deg);
+  transform-origin: center;
+  box-shadow: 0 8px 28px rgba(248, 150, 30, 0.32);
+
+  .culture__card-title {
+    color: #fff;
+  }
+  .culture__card-body {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+// ══ NOTRE MISSION ══════════════════════════════════════════════════════════
+.mission {
+  position: relative;
+  margin: 0 var(--_gutter) 64px;
+  background:
+    url('/assets/portal-assets/careers/images/ligne-deco.png') center / cover
+      no-repeat,
+    var(--ubax-brand);
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 52px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 434px;
+}
+
+.mission__icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 111px;
+  height: 98px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.mission__icon {
+  width: 58px;
+  height: 58px;
+  filter: brightness(0) invert(1);
+}
+
+.mission__title {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+
+.mission__text {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: #fff;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 1256px;
 }
 
 // ══ INFO SECTION ═══════════════════════════════════════════════════════════
@@ -296,63 +416,68 @@ $c-divider: #cfd6dc;
   margin: 0 0 84px;
 }
 
-.info-card-wrap {
+.info-section__inner {
+  position: relative;
   background: #fff;
-  border-radius: 49px;
-  padding: 33px;
-  display: grid;
-  grid-template-columns: 570px 1fr;
-  gap: 40px;
-  min-height: 559px;
-  align-items: stretch;
+  border-radius: 20px;
+  padding: 64px 48px 48px;
+  overflow: hidden;
+  min-height: 573px;
 }
 
-.info-photo {
-  width: 570px;
-  height: 486px;
-  object-fit: cover;
-  border-radius: 31px;
-  display: block;
+// Fix 4: image starts at top:33px (not top:0) and uses Figma exact size,
+// eliminating the overlap with the title area
+.info-section__deco {
+  position: absolute;
+  right: 3.5%;
+  top: 33px;
+  width: 536px;
+  height: 498px;
+  pointer-events: none;
 }
 
-.info-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.info-heading-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.info-heading {
+// Fix 1–2: title left-aligned in its column (was text-align:center + margin:auto
+// which made it appear centered and caused visual collision with the image)
+.info-section__title {
   font-size: 2.5rem;
   font-weight: 400;
-  color: $c-dark-blue;
+  color: var(--ubax-brand);
   line-height: 1.1;
-  margin: 0;
-  max-width: 423px;
+  margin: 0 0 20px;
+  text-align: left;
+  max-width: 571px;
 }
 
-.info-start-btn {
-  flex-shrink: 0;
-  align-self: flex-start;
-  margin-top: 4px;
+.info-section__subtitle {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: $c-body;
+  line-height: 1.5;
+  margin: 0 0 48px;
+  max-width: 531px;
 }
 
 .info-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 39px;
+  grid-template-columns: 295px 295px;
+  gap: 24px;
 }
 
 .info-card {
-  --ubax-card-radius: 20px;
-  --ubax-card-padding: 24px;
-  min-height: 257px;
+  background: var(--ubax-brand);
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  min-height: 248px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Fix 5: icon and label on the same horizontal line (was flex-direction:column)
+.info-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .info-card__icon {
@@ -363,11 +488,12 @@ $c-divider: #cfd6dc;
   height: 40px;
   background: var(--ubax-accent);
   border-radius: 15px;
-  margin-bottom: 12px;
+  flex-shrink: 0;
 
-  i {
-    font-size: 1.25rem;
-    color: #fff;
+  img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
   }
 }
 
@@ -376,7 +502,7 @@ $c-divider: #cfd6dc;
   font-weight: 500;
   color: #fff;
   line-height: 1.5;
-  margin: 0 0 8px;
+  margin: 0;
 }
 
 .info-card__body {
@@ -409,7 +535,6 @@ $c-divider: #cfd6dc;
   color: var(--ubax-brand);
   line-height: 1.1;
   margin: 0;
-  max-width: 650px;
 }
 
 // ══ SEARCH BAR ═════════════════════════════════════════════════════════════
@@ -528,8 +653,10 @@ $c-divider: #cfd6dc;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
 
-  i {
-    font-size: 1.125rem;
+  img {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1);
   }
 }
 
@@ -537,15 +664,16 @@ $c-divider: #cfd6dc;
 .jobs-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 441px));
-  gap: 49px;
+  gap: 24px;
   justify-content: center;
   padding: 0 var(--_gutter);
   margin: 0 0 48px;
 }
 
 .job-card {
-  --ubax-card-radius: 20px;
-  --ubax-card-padding: 24px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
 }
@@ -561,15 +689,16 @@ $c-divider: #cfd6dc;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 58px;
+  width: 51px;
+  height: 49px;
   background: var(--ubax-accent);
   border-radius: 46px;
   flex-shrink: 0;
 
-  i {
-    font-size: 1.375rem;
-    color: #fff;
+  img {
+    width: 22px;
+    height: 27px;
+    object-fit: contain;
   }
 }
 
@@ -584,6 +713,7 @@ $c-divider: #cfd6dc;
   font-weight: 600;
   color: $c-dark-navy;
   line-height: normal;
+  font-family: 'Outfit', sans-serif;
 }
 
 .job-card__type {
@@ -595,55 +725,80 @@ $c-divider: #cfd6dc;
 
 .job-card__title {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--ubax-brand);
   line-height: normal;
   margin: 0 0 8px;
 }
 
 .job-card__location {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   font-size: 0.9375rem;
   font-weight: 300;
   color: $c-near-black;
-  margin: 0 0 24px;
+  margin: 0 0 20px;
+  line-height: normal;
+}
 
-  i {
-    font-size: 0.875rem;
+.job-card__details {
+  margin: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.job-card__detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.job-card__detail-label {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: $c-near-black;
+  flex-shrink: 0;
+  min-width: 0;
+
+  &--red {
+    color: $c-red;
   }
 }
 
-.job-card__skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.job-card__skill-tag {
-  background: var(--ubax-page-bg);
-  color: var(--ubax-brand);
+.job-card__detail-value {
   font-size: 0.9375rem;
-  font-weight: 400;
-  padding: 9px 12px;
-  border-radius: 9px;
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
+  font-weight: 300;
+  color: $c-near-black;
+
+  &--red {
+    color: $c-red;
+    font-weight: 400;
+  }
 }
 
 .job-card__apply {
   display: block;
-  margin-bottom: 16px;
-  margin-top: auto;
+  background: #f8961e;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 9px;
+  padding: 14px 20px;
+  margin-top: 24px;
+  transition: opacity 200ms ease;
+
+  &:hover {
+    opacity: 0.88;
+  }
 }
 
 .job-card__divider {
   border: none;
   border-top: 1px solid $c-divider;
-  margin: 0 0 12px;
+  margin: 16px auto 12px;
+  width: 50%;
 }
 
 .job-card__posted {
@@ -651,91 +806,126 @@ $c-divider: #cfd6dc;
   font-weight: 400;
   color: $c-near-black;
   margin: 0;
+  text-align: center;
 }
 
 // ══ PAGINATION ═════════════════════════════════════════════════════════════
-.pagination {
+.pagination-wrapper {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 10px;
   padding: 0 var(--_gutter);
   margin: 0 0 80px;
 }
 
-.pagination__arrow {
+// ══ BOTTOM CTA ═════════════════════════════════════════════════════════════
+.cta-bottom {
+  position: relative;
+  margin: 125px var(--_gutter) 80px;
+  background: var(--ubax-brand);
+  border-radius: 20px;
+  overflow: visible;
+  min-height: 392px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 50px;
-  background: var(--ubax-accent);
-  border: 1px solid $c-divider;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #fff;
-  transition: opacity 200ms ease;
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  i {
-    font-size: 1.125rem;
-  }
 }
 
-.pagination__page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid $c-divider;
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--ubax-brand);
-  cursor: pointer;
-  transition:
-    background 200ms ease,
-    color 200ms ease,
-    border-color 200ms ease;
+// Absolute: out of flex flow, overflows 125px above the card top.
+.cta-bottom__visual {
+  position: absolute;
+  top: -125px;
+  left: 53px;
+  width: 530px;
+  height: 517px;
+  overflow: hidden;
+  pointer-events: none;
+}
 
-  &--active {
-    background: var(--ubax-accent);
-    color: #fff;
-    font-weight: 600;
-    font-size: 1.25rem;
-    border-color: transparent;
+.cta-bottom__img {
+  position: absolute;
+  top: 0;
+  left: -16.04%;
+  width: 172.99%;
+  height: 100%;
+  max-width: none;
+}
+
+// margin-left replaces the flex space the visual used to occupy.
+.cta-bottom__content {
+  flex: 1;
+  padding: 48px 48px 48px 32px;
+  min-width: 0;
+  margin-left: 545px;
+}
+
+.cta-bottom__title {
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0 0 2.5rem;
+  max-width: 698px;
+}
+
+.cta-bottom__text {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: #fff;
+  line-height: 1.5;
+  margin: 0 0 2.5rem;
+  max-width: 673px;
+}
+
+.cta-bottom__btn {
+  display: inline-block;
+  background: var(--ubax-accent);
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  text-decoration: none;
+  border-radius: 9px;
+  padding: 12px 32px;
+  transition: opacity 200ms ease;
+
+  &:hover {
+    opacity: 0.88;
   }
 }
 
 // ══ RESPONSIVE ═════════════════════════════════════════════════════════════
 @media (max-width: 1280px) {
-  .hero__visual {
-    right: var(--_gutter);
-    width: 300px;
-    height: 340px;
+  .culture {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
   }
 
-  .hero__talents-card {
-    left: 40%;
+  .culture__left {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    padding-right: 0;
   }
 
-  .about {
-    gap: 40px;
-  }
-
-  .info-card-wrap {
-    grid-template-columns: 1fr;
-  }
-
-  .info-photo {
-    width: 100%;
-    height: 320px;
+  .culture__card {
+    &:nth-child(2) {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    &:nth-child(3) {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    &:nth-child(4) {
+      grid-column: 1;
+      grid-row: 3;
+    }
+    &:nth-child(5) {
+      grid-column: 2;
+      grid-row: 3;
+    }
+    &:nth-child(6) {
+      grid-column: 1 / -1;
+      grid-row: 4;
+    }
   }
 
   .search-bar {
@@ -756,18 +946,43 @@ $c-divider: #cfd6dc;
   }
 }
 
-@media (max-width: 768px) {
-  .hero {
-    height: auto;
-    min-height: 560px;
-    padding-bottom: 48px;
+@media (max-width: 900px) {
+  .cta-bottom {
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 0;
+    min-height: auto;
   }
 
-  .hero__content {
-    left: var(--_gutter);
-    right: var(--_gutter);
-    top: 80px;
-    max-width: 100%;
+  .cta-bottom__visual {
+    position: relative;
+    top: auto;
+    width: 100%;
+    height: 280px;
+  }
+
+  .cta-bottom__content {
+    padding: 32px;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    min-height: auto;
+    padding: 48px 24px 48px;
+    gap: 32px;
+    border-radius: 16px;
+  }
+
+  .hero__notch {
+    display: none;
+  }
+
+  .hero__visual {
+    width: 220px;
+    height: 260px;
   }
 
   .hero__title {
@@ -786,58 +1001,46 @@ $c-divider: #cfd6dc;
     width: 100%;
   }
 
-  .hero__search-divider {
-    display: none;
+  .culture {
+    grid-template-columns: 1fr;
+    padding: 48px var(--_gutter);
   }
 
-  .hero__visual,
-  .hero__talents-card,
-  .hero__companies-stat {
-    display: none;
+  .culture__left {
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  .about {
-    flex-direction: column;
-    padding-top: 48px;
-    padding-bottom: 48px;
-    gap: 24px;
-  }
-
-  .about__heading {
+  .culture__heading {
     text-align: left;
-    font-size: 1.75rem;
+  }
+
+  .culture__card {
+    &:nth-child(n + 2) {
+      grid-column: 1;
+      grid-row: auto;
+    }
+  }
+
+  .mission {
+    margin: 0 var(--_gutter) 48px;
+    padding: 40px 24px;
   }
 
   .info-section {
     margin-bottom: 48px;
   }
 
-  .info-card-wrap {
-    border-radius: 24px;
-    padding: 20px;
-    grid-template-columns: 1fr;
+  .info-section__inner {
+    padding: 40px 24px;
   }
 
-  .info-photo {
-    width: 100%;
-    height: 220px;
-  }
-
-  .info-heading-row {
-    flex-direction: column;
-  }
-
-  .info-heading {
-    font-size: 1.5rem;
-    max-width: 100%;
+  .info-section__deco {
+    display: none;
   }
 
   .info-cards {
     grid-template-columns: 1fr;
-  }
-
-  .explore {
-    margin-bottom: 24px;
   }
 
   .explore__heading {
@@ -861,20 +1064,5 @@ $c-divider: #cfd6dc;
   .jobs-grid {
     grid-template-columns: 1fr;
     gap: 24px;
-  }
-
-  .pagination {
-    gap: 6px;
-  }
-
-  .pagination__page {
-    width: 44px;
-    height: 44px;
-    font-size: 0.875rem;
-  }
-
-  .pagination__arrow {
-    width: 44px;
-    height: 44px;
   }
 }
