@@ -1210,24 +1210,89 @@ $c-placeholder: #b3b3b3;
   }
 }
 
-@media (max-width: 900px) {
+// ══ CTA BOTTOM — REDESIGN RESPONSIVE (≤ 1024 px) ══════════════════════════
+// Logique (valeurs explicites, pas de bottom: calc dynamique) :
+//   height  = 320px  |  top = -264px  →  264px déborde au-dessus de la carte
+//   overlap = 320 - 264 = 56px entrent dans la carte par le haut
+//   margin-top carte  = 264 + 28 breathing = 292px
+//   padding-top contenu = 56 overlap + 24 gap = 80px
+@media (max-width: 1024px) {
   .cta-bottom {
     flex-direction: column;
-    overflow: hidden;
-    margin-top: 0;
+    overflow: visible;
+    margin: 292px var(--_gutter) 80px;
     min-height: auto;
+    align-items: center;
+    text-align: center;
   }
 
   .cta-bottom__visual {
+    position: absolute;
+    top: -264px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    height: 320px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  // Reset complet du positionnement absolu + pourcentages du base style.
+  // object-fit: contain → image entière sans distorsion ni rognage.
+  .cta-bottom__img {
     position: relative;
-    top: auto;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    object-position: center bottom;
+  }
+
+  .cta-bottom__content {
     width: 100%;
+    box-sizing: border-box;
+    padding: 80px 48px 48px;
+    margin-left: 0;
+  }
+
+  .cta-bottom__title,
+  .cta-bottom__text {
+    max-width: 100%;
+  }
+}
+
+// ── Tablettes étroites (≤ 640 px) ──────────────────────────────────────────
+// height 280px | top -228px | overlap 52px | margin 228+28=256 | padding 52+24=76
+@media (max-width: 640px) {
+  .cta-bottom {
+    margin-top: 256px;
+  }
+
+  .cta-bottom__visual {
+    top: -228px;
+    width: 220px;
     height: 280px;
   }
 
   .cta-bottom__content {
-    padding: 32px;
-    margin-left: 0;
+    padding: 76px 28px 40px;
+  }
+}
+
+// ── Téléphones portrait (≤ 480 px) ─────────────────────────────────────────
+// height 240px | top -192px | overlap 48px | margin 192+28=220 | padding 48+24=72
+@media (max-width: 480px) {
+  .cta-bottom {
+    margin-top: 220px;
+  }
+
+  .cta-bottom__visual {
+    top: -192px;
+    width: 190px;
+    height: 240px;
+  }
+
+  .cta-bottom__content {
+    padding: 72px 20px 36px;
   }
 }
 
