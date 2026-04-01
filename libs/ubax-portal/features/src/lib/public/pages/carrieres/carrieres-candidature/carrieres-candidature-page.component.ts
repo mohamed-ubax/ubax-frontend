@@ -1,6 +1,11 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  NgZone,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -9,6 +14,8 @@ import {
   BackToTopComponent,
   PublicShellComponent,
 } from '@ubax-workspace/ubax-portal-layout';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface CandidatureForm {
   nom: string;
@@ -27,6 +34,11 @@ interface CandidatureForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarrieresCandidaturePage {
+  private readonly elRef = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly zone = inject(NgZone);
+  private gsapCtx: gsap.Context | undefined;
+
   protected readonly successVisible = signal(false);
   protected readonly elementsIcon =
     'assets/portal-assets/careers/icons/Elements.svg';
@@ -48,6 +60,55 @@ export class CarrieresCandidaturePage {
     niveauExperience: '',
     lettreMotivation: '',
   };
+
+  constructor() {
+    afterNextRender(() => {
+      this.zone.runOutsideAngular(() => {
+        gsap.registerPlugin(ScrollTrigger);
+        this.gsapCtx = gsap.context(
+          () => this.initAnimations(),
+          this.elRef.nativeElement,
+        );
+      });
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.gsapCtx?.revert();
+    });
+  }
+
+  private initAnimations(): void {
+    const ease = 'power3.out';
+
+    // ── Page hero ───────────────────────────────────────────────────────────
+    gsap.timeline({ defaults: { ease } })
+      .from('.page-hero__icon-box', {
+        scale: 0, opacity: 0, duration: 0.7, ease: 'back.out(1.7)',
+      })
+      .from('.page-hero__title', { y: 28, opacity: 0, duration: 0.75 }, '-=0.35');
+
+    // ── Main form card ──────────────────────────────────────────────────────
+    gsap.from('.candidature-main__card', {
+      scrollTrigger: { trigger: '.candidature-layout', start: 'top 88%' },
+      y: 45, opacity: 0, duration: 0.85, ease,
+    });
+    gsap.from(['.candidature-main__title', '.candidature-main__subtitle'], {
+      scrollTrigger: { trigger: '.candidature-main__card', start: 'top 85%' },
+      y: 25, opacity: 0, duration: 0.7, stagger: 0.12, ease,
+    });
+
+    // ── Form fields staggered reveal ────────────────────────────────────────
+    gsap.from('.form-field', {
+      scrollTrigger: { trigger: '.candidature-form', start: 'top 88%' },
+      y: 22, opacity: 0, duration: 0.5, stagger: 0.07, ease,
+    });
+
+    // ── CV sidebar slides in from the right ─────────────────────────────────
+    gsap.from('.cv-card', {
+      scrollTrigger: { trigger: '.candidature-layout', start: 'top 88%' },
+      x: 55, opacity: 0, duration: 0.85, delay: 0.22, ease,
+    });
+  }
 
   protected submitForm(event: Event): void {
     event.preventDefault();
