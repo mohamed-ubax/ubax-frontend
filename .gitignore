@@ -49,3 +49,5 @@ __screenshots__/
 
 .claude
 instructions.md
+.vercel
+.env*.local
