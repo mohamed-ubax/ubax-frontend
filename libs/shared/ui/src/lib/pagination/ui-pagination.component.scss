@@ -1,0 +1,168 @@
+// ── Default variant (carrieres style) ──────────────────────────────────────
+
+.ui-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ui-pagination__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 50px;
+  background: var(--ubax-accent, #e87d1e);
+  border: 1px solid #cfd6dc;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 200ms ease;
+  flex-shrink: 0;
+
+  img {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.88;
+  }
+}
+
+.ui-pagination__page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #cfd6dc;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ubax-brand, #1a3047);
+  cursor: pointer;
+  transition:
+    background 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
+
+  &--active {
+    background: var(--ubax-accent, #e87d1e);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.25rem;
+    border-color: transparent;
+  }
+
+  &:not(.ui-pagination__page--active):hover {
+    border-color: #b0bcc8;
+  }
+}
+
+// ── Glass variant (formations style) ───────────────────────────────────────
+
+.ui-pagination--glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  border-radius: 45px;
+  padding: 0.5rem 1.5rem;
+  gap: 0.7rem;
+  width: fit-content;
+  justify-content: center;
+
+  .ui-pagination__arrow {
+    width: 2rem;
+    height: 2rem;
+
+    img {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .ui-pagination__page {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+
+    &--active {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// ── Light variant (carrieres style — light pill container) ─────────────────
+
+.ui-pagination--light {
+  background: rgba(236, 242, 247, 0.13);
+  border: 1px solid rgba(236, 242, 247, 0.35);
+  box-shadow:
+    0 4px 24px rgba(26, 48, 71, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 45px;
+  padding: 0.5rem 1.5rem;
+  gap: 0.7rem;
+  width: fit-content;
+  justify-content: center;
+
+  .ui-pagination__arrow {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+
+    img {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .ui-pagination__page {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+
+    &--active {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .ui-pagination {
+    gap: 6px;
+  }
+
+  .ui-pagination__page {
+    width: 44px;
+    height: 44px;
+    font-size: 0.875rem;
+  }
+
+  .ui-pagination__arrow {
+    width: 44px;
+    height: 44px;
+  }
+
+  .ui-pagination--glass {
+    .ui-pagination__page {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+}

@@ -1,0 +1,82 @@
+@if (guide) {
+  <ubax-public-shell>
+
+    <!-- ── 1. HERO ─────────────────────────────────────────────── -->
+    <section class="fdp-hero">
+      <div class="fdp-hero__img-wrap">
+        <img
+          [src]="guide.heroImage"
+          [alt]="guide.title"
+          class="fdp-hero__img"
+          decoding="async"
+        />
+        <div class="fdp-hero__overlay" aria-hidden="true"></div>
+        <h1 class="fdp-hero__title">{{ guide.title }}</h1>
+      </div>
+
+      <!-- Date dans l'encoche concave (en dehors du mask) -->
+      <div class="fdp-hero__date">
+        <img
+          src="assets/portal-assets/formation-details/icons/stash_data-date-light.svg"
+          alt=""
+          aria-hidden="true"
+          class="fdp-hero__date-icon"
+        />
+        <span>{{ guide.date }}</span>
+      </div>
+    </section>
+
+    <!-- ── 2. CONTENT ──────────────────────────────────────────── -->
+    <section class="fdp-content">
+      <div class="fdp-content__container">
+        <div class="fdp-content__layout">
+
+          <!-- Article body -->
+          <article class="fdp-article">
+            @for (section of guide.sections; track $index) {
+              @if (section.heading) {
+                <h2 class="fdp-article__heading">{{ section.heading }}</h2>
+              }
+              @for (para of section.paragraphs; track $index) {
+                <p class="fdp-article__para">{{ para }}</p>
+              }
+              @if (section.list) {
+                <ul class="fdp-article__list">
+                  @for (item of section.list; track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              }
+            }
+          </article>
+
+          <!-- Sidebar -->
+          <aside class="fdp-sidebar">
+            <h3 class="fdp-sidebar__title">Autres formations</h3>
+
+            @for (rel of relatedGuides; track rel.slug) {
+              <a
+                [routerLink]="['/formations', rel.slug]"
+                class="fdp-sidebar-card"
+              >
+                <img
+                  [src]="rel.image"
+                  [alt]="rel.title"
+                  class="fdp-sidebar-card__img"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="fdp-sidebar-card__body">
+                  <h4 class="fdp-sidebar-card__title">{{ rel.title }}</h4>
+                  <p class="fdp-sidebar-card__excerpt">{{ rel.excerpt }}</p>
+                </div>
+              </a>
+            }
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+  </ubax-public-shell>
+}

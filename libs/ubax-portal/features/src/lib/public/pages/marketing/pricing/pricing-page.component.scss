@@ -1,0 +1,240 @@
+.pricing-wrap {
+  width: min(1550px, calc(100% - 2rem));
+  margin: 0 auto 10rem auto;
+  background: #ecf2f7;
+  border-radius: 20px;
+  padding: 3rem 2.5rem 3.5rem;
+  font-family: 'Lexend', sans-serif;
+}
+
+.pricing-header {
+  text-align: center;
+  margin-bottom: 2.2rem;
+
+  h1 {
+    margin: 0 0 1.1rem;
+    color: #1a3047;
+    font-size: clamp(1.75rem, 3.5vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.1125rem;
+    line-height: 1.2;
+  }
+
+  p {
+    color: #151515;
+    font-size: 1.25rem;
+    font-weight: 300;
+    max-width: 72ch;
+    margin: 0 auto;
+    line-height: 2rem;
+  }
+}
+
+.toggle {
+  margin: 2rem auto;
+  width: fit-content;
+  background: #dcedfb;
+  border: 1px solid #b7d0e5;
+  border-radius: 999px;
+  padding: 0.42rem;
+  display: flex;
+  gap: 0;
+  position: relative;
+
+  // Sliding pill — morphs under the active tab
+  &__pill {
+    position: absolute;
+    top: 0.42rem;
+    left: 0.42rem;
+    height: calc(100% - 0.84rem);
+    width: calc(50% - 0.42rem);
+    background: #fff;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &--annuel &__pill {
+    transform: translateX(100%);
+  }
+
+  &__tab {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 1.2rem 2rem;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: #1a3047;
+    font: inherit;
+    font-size: 0.94rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 250ms ease;
+
+    &--active {
+      color: #343434;
+      font-weight: 600;
+    }
+  }
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+  gap: 1.4rem;
+  align-items: start;
+}
+
+.plan {
+  --ubax-card-radius: 25px;
+  --ubax-card-padding: 2.21rem 1.0625rem 1.48rem;
+  height: 40.8125rem;
+
+  &--featured {
+    // elevation and float managed by GSAP
+  }
+}
+
+.plan__name {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: normal;
+  color: #1a3047;
+
+  .plan--featured & {
+    color: #fff;
+  }
+}
+
+.plan__subtitle {
+  color: #151515;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.5625rem;
+  height: 4.22156rem;
+  margin: 0 0 1.07rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .plan--featured & {
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+.plan__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  margin-bottom: 1.94rem;
+}
+
+.plan__amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a3047;
+
+  .plan--featured & {
+    color: #fff;
+  }
+}
+
+.plan__period {
+  font-size: 0.94rem;
+  font-weight: 400;
+  color: #6c7b89;
+
+  .plan--featured & {
+    color: rgba(255, 255, 255, 0.65);
+  }
+}
+
+.plan ubax-ui-button {
+  display: block;
+  margin-bottom: 1.34rem;
+}
+
+.plan__features {
+  list-style: none;
+  margin: 0;
+  padding: 2.21rem 1.5625rem 1.68rem;
+  border-radius: 20px;
+  background: #ecf2f7;
+  display: grid;
+  gap: 1rem;
+
+  .plan--featured & {
+    background: #fff;
+  }
+}
+
+.plan__feature {
+  display: flex;
+  align-items: center;
+  gap: 1.3125rem;
+  font-size: 1rem;
+  color: #181818;
+}
+
+.plan__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.21rem;
+  height: 2.21rem;
+  border-radius: 50%;
+  background: #fefefe;
+  color: #181818;
+
+  svg {
+    width: 1.035rem;
+    height: 1.035rem;
+  }
+
+  .plan--featured & {
+    background: #ecf2f7;
+    color: #181818;
+  }
+}
+
+@media (max-width: 1180px) {
+  .plan {
+    height: auto;
+    --ubax-card-padding: 1.75rem 0.875rem 1.25rem;
+  }
+
+  .plans {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .pricing-wrap {
+    width: calc(100% - 1rem);
+    padding: 1.6rem 1rem 2.5rem;
+  }
+
+  .pricing-header {
+    h1 {
+      font-size: clamp(1.75rem, 5.5vw, 3rem);
+      line-height: 1.3;
+      letter-spacing: -0.05rem;
+    }
+
+    p {
+      font-size: clamp(1rem, 3.5vw, 1.25rem);
+      max-width: 100%;
+    }
+  }
+
+  .toggle {
+    margin-bottom: 2.5rem;
+  }
+}

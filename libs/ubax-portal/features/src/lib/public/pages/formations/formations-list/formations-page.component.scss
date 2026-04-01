@@ -1,0 +1,523 @@
+// ─── 1. HERO ─────────────────────────────────────────────────────────────────
+
+.fp-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(380px, 48vw, 560px);
+  background-color: rgba(236, 242, 247, 0.98);
+  overflow: hidden;
+  border-radius: 0 0 24px 24px;
+  padding: clamp(4rem, 8vw, 10rem) clamp(1.5rem, 4vw, 3rem);
+
+  &__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 30%;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 36px;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    padding: 0 1rem;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e87d1e;
+    margin-bottom: 3.75rem;
+    box-shadow:
+      0px 3px 3px 0px rgba(0, 0, 0, 0.14),
+      inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7),
+      inset 0px -3px 0px 0px #e9e9e9;
+  }
+
+  &__badge-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e87d1e;
+    font-size: 0;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: -0.03em;
+    color: #1a3047;
+    margin: 0 0 1.5rem;
+  }
+
+  &__desc {
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.9;
+    color: #09090b;
+    margin: 0 0 2.25rem;
+    max-width: 52ch;
+  }
+
+  &__cta {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+// Floating icon cards
+.fp-float-card {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 11.5px;
+
+  img {
+    width: 55%;
+    height: 55%;
+    object-fit: contain;
+  }
+}
+
+// Positions matching Figma layout — class names match what the component emits
+// Sizes, rotations and shadows per Figma node 370:614
+.fp-float--tl {
+  top: 18%;
+  left: 32%;
+  width: 103px;
+  height: 103px;
+  transform: rotate(30deg);
+  box-shadow: 4.298px 18.625px 28.654px rgba(0, 0, 0, 0.1);
+}
+.fp-float--ml {
+  top: 50%;
+  left: 26%;
+  width: 80px;
+  height: 80px;
+  transform: translateY(-50%) rotate(-15deg);
+  box-shadow: -8.596px 14.327px 28.654px rgba(0, 0, 0, 0.1);
+}
+.fp-float--bl {
+  bottom: 18%;
+  left: 30%;
+  width: 91px;
+  height: 91px;
+  transform: rotate(-15deg);
+  box-shadow: -8.596px 14.327px 28.654px rgba(0, 0, 0, 0.1);
+}
+.fp-float--tr {
+  top: 19%;
+  right: 34%;
+  width: 91px;
+  height: 91px;
+  transform: rotate(-15deg);
+  box-shadow: 4.298px 18.625px 28.654px rgba(0, 0, 0, 0.1);
+}
+.fp-float--mr {
+  top: 50%;
+  right: 27%;
+  width: 91px;
+  height: 91px;
+  transform: translateY(-50%) rotate(6deg);
+  box-shadow: -8.596px 14.327px 28.654px rgba(0, 0, 0, 0.1);
+}
+.fp-float--br {
+  bottom: 18%;
+  right: 30%;
+  width: 103px;
+  height: 103px;
+  transform: rotate(30deg);
+  box-shadow: 4.298px 18.625px 28.654px rgba(0, 0, 0, 0.1);
+}
+
+// ─── 2. GUIDES IMMOBILIERS ────────────────────────────────────────────────────
+
+.fp-guides {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #1a3047;
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 4vw, 4rem)
+    clamp(3.5rem, 7vw, 6rem);
+
+  // ── Light container (Figma node 370:658) ───────────────────
+  &__light {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 21.875rem; // 350px
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden; // clip les bords du blur CSS
+  }
+
+  // Beam / glow (Figma node 370:659)
+  // fill: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%)
+  // Les bords étendus cachent le cutoff du filtre gaussien
+  &__beam {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: none;
+    display: block;
+    filter: blur(2px);
+  }
+
+  // Lamp fixture (Figma node 370:660)
+  &__lamp {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 670px;
+    max-width: 90%;
+    height: 68px;
+    display: block;
+    filter: drop-shadow(0 7.77px 16px rgba(0, 0, 0, 0.06))
+      drop-shadow(0 16px 11px rgba(0, 0, 0, 0.2));
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    background: linear-gradient(133.38deg, #ffffff 1.91%, #eaeaea 43.92%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin: 3rem 0 clamp(2rem, 4vw, 5.5rem);
+    position: relative;
+    z-index: 1;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// ─── Guide card ───────────────────────────────────────────────────────────────
+
+.fp-guide-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.45); // Figma: glass/ice border — net, non blurry
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3); // top highlight — effet réfraction ice
+  border-radius: 20px;
+  overflow: hidden;
+
+  &__img-wrap {
+    margin: 9px 10px 0; // Figma: image inset 9px top, 10px sides
+    border-radius: 15px; // Figma: rounded-[15px]
+    aspect-ratio: 355 / 224; // Figma: 355×224px
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  &:hover &__img {
+    transform: scale(1.04);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0.625rem 0.9375rem 1.375rem; // Figma: ~10px top, 15px sides, 22px bottom
+    gap: 0.5625rem; // Figma: ~9px entre éléments
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    font-weight: 500; // Figma: Medium
+    line-height: 1.5; // Figma: 24px / 16px = 1.5
+    color: #ffffff;
+    text-align: center;
+    margin: 0;
+  }
+
+  &__excerpt {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 300;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    flex: 1;
+
+    // Clamp at 3 lines
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    margin-top: auto;
+  }
+
+  &__author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: #ffffff;
+    }
+  }
+
+  &__author-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #ffffff; // Figma: Ellipse 21897 — cercle blanc
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__author-logo {
+    width: 60%;
+    height: 60%;
+    object-fit: contain; // logo sombre Group 1171274746-1 sur fond blanc
+  }
+}
+
+// Link wrapper around button
+.fp-guide-card__link {
+  text-decoration: none;
+  display: inline-flex;
+}
+
+// Smaller "Lire la suite" button + arrow icon inside it
+.fp-guide-card ubax-ui-button {
+  --btn-pad: 0.5rem 0.9rem;
+  font-size: 0.8125rem;
+}
+
+.fp-btn-arrow {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  filter: brightness(10);
+}
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+// Button styles live in the shared UiPaginationComponent.
+// Apply top spacing and centering from the guides section context.
+ubax-ui-pagination {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  align-self: center;
+}
+
+// ─── 3. CTA ──────────────────────────────────────────────────────────────────
+
+.fp-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(3.5rem, 7vw, 6rem) clamp(1.5rem, 4vw, 3rem);
+  background: #ecf2f7;
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1a3047;
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.04rem;
+  }
+
+  &__desc {
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: #3a4a5c;
+    margin: 0 0 2rem;
+    max-width: 48ch;
+  }
+
+  &__btn {
+    a {
+      text-decoration: none;
+    }
+  }
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+
+@media (max-width: 1973px) {
+  .fp-hero__content {
+    max-width: 50%;
+  }
+
+  .fp-float-card {
+    margin: -1rem;
+  }
+}
+
+@media (max-width: 1845px) {
+  .fp-float-card {
+    margin: -4rem;
+  }
+}
+
+@media (max-width: 1543px) {
+  .fp-float-card {
+    margin: -6rem;
+  }
+}
+
+@media (max-width: 1440px) {
+  .fp-float--br,
+  .fp-float--bl {
+    bottom: 28%;
+  }
+}
+
+@media (max-width: 1212px) {
+  .fp-hero__content {
+    max-width: 80%;
+  }
+  .fp-float-card {
+    margin: -9rem;
+  }
+  .fp-float--tl {
+    top: 28%;
+  }
+  .fp-float--tr {
+    top: 28%;
+  }
+  .fp-float--ml {
+    top: 66%;
+    left: 20%;
+  }
+  .fp-float--mr {
+    top: 66%;
+    right: 19%;
+  }
+  .fp-float--bl {
+    bottom: 36%;
+  }
+  .fp-float--br {
+    bottom: 36%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .fp-guides__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .fp-hero {
+    padding: 5rem 1.5rem 4rem;
+  }
+
+  // Hide outer floating cards on mobile, keep only 2 for visual interest
+  .fp-float--ml,
+  .fp-float--bl,
+  .fp-float--mr,
+  .fp-float--br {
+    display: none;
+  }
+
+  .fp-float--tl {
+    width: 72px;
+    height: 72px;
+    top: 10%;
+    left: 4%;
+  }
+
+  .fp-float--tr {
+    width: 72px;
+    height: 72px;
+    top: 10%;
+    right: 4%;
+  }
+
+  .fp-guides__grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+
+  .fp-guide-card__footer {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 725px) {
+  .fp-guides {
+    &__lamp {
+      top: -8px;
+      max-width: 70%;
+      height: auto; // preserve aspect ratio as width shrinks
+    }
+    &__beam {
+      // anchor to top so cone apex stays under the lamp
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      // scale beam proportionally with the lamp:
+      // lamp = 70vw, beam intrinsic = 1003px vs lamp intrinsic = 670px
+      // → beam_width = 70vw × (1003 / 670) ≈ 104.8vw
+      width: calc(70vw * 1.498);
+      height: auto;
+    }
+    &__title {
+      margin: 3rem 0 clamp(2rem, 4vw, 5.5rem);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .fp-float-card {
+    display: none;
+  }
+
+}
