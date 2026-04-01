@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 // ── Local tokens ─────────────────────────────────────────────────────────────
 $c-near-black: #181818;
 $c-input-bg: #f4f4f4;
@@ -139,7 +141,7 @@ $c-placeholder: #b3b3b3;
 
   &--prefilled,
   &:disabled {
-    background: darken($c-input-bg, 4%);
+    background: color.adjust($c-input-bg, $lightness: -4%);
     color: #6b7280;
     cursor: not-allowed;
 
