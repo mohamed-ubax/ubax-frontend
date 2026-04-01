@@ -66,6 +66,12 @@ $c-placeholder: #b3b3b3;
   height: 300px;
 }
 
+// Infinite spin for the dashed ring (triggered by JS after entry animation)
+@keyframes ubax-spin-ring {
+  from { transform: translate(-50%, -55%) rotate(0deg); }
+  to   { transform: translate(-50%, -55%) rotate(360deg); }
+}
+
 // Fix 4: dashed decorative ring around the orange circle
 .hero__dashed-ring {
   position: absolute;
@@ -77,6 +83,10 @@ $c-placeholder: #b3b3b3;
   border-radius: 50%;
   border: 2px dashed rgba(255, 255, 255, 0.32);
   pointer-events: none;
+
+  &--spinning {
+    animation: ubax-spin-ring 22s linear infinite;
+  }
 }
 
 // Fix 3: orange circle reduced to SVG natural size (206×204)

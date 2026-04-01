@@ -154,47 +154,112 @@ export class CarrieresPageComponent {
   private initAnimations(): void {
     const ease = 'power3.out';
 
-    gsap.from('.hero__title', { y: 30, opacity: 0, duration: 0.8, ease });
-    gsap.from('.hero__subtitle', { y: 20, opacity: 0, duration: 0.7, delay: 0.15, ease });
-    gsap.from('.hero__search', { y: 20, opacity: 0, duration: 0.7, delay: 0.3, ease });
-    gsap.from('.hero__visual', { x: -50, opacity: 0, duration: 0.9, delay: 0.2, ease });
+    // ── Hero timeline ───────────────────────────────────────────────────────
+    const heroTl = gsap.timeline({
+      defaults: { ease },
+      onComplete: () => {
+        // Start infinite dashed-ring rotation only after entry finishes
+        this.elRef.nativeElement
+          .querySelector('.hero__dashed-ring')
+          ?.classList.add('hero__dashed-ring--spinning');
+      },
+    });
 
+    heroTl
+      .from('.hero__visual', { x: -70, opacity: 0, duration: 1, ease: 'power2.out' })
+      .from('.hero__title', { y: 45, opacity: 0, duration: 0.85 }, '-=0.55')
+      .from('.hero__subtitle', { y: 28, opacity: 0, duration: 0.75 }, '-=0.45')
+      .from('.hero__search', { y: 22, opacity: 0, duration: 0.65 }, '-=0.35')
+      .from('.hero__badge', { y: 18, opacity: 0, duration: 0.5 }, '-=0.25');
+
+    // ── Culture section ─────────────────────────────────────────────────────
+    const cultureTrigger = { trigger: '.culture', start: 'top 80%' };
+
+    gsap.from('.culture__heading', {
+      scrollTrigger: cultureTrigger,
+      x: -35, opacity: 0, duration: 0.75, ease,
+    });
+    gsap.from('.culture__desc', {
+      scrollTrigger: cultureTrigger,
+      x: -25, opacity: 0, duration: 0.7, delay: 0.15, ease,
+    });
     gsap.from('.culture__card', {
-      scrollTrigger: { trigger: '.culture', start: 'top 80%' },
-      y: 50,
-      opacity: 0,
-      duration: 0.7,
-      stagger: 0.12,
-      ease,
-      // Clear inline transform after animation so CSS rotate(-3deg) on the
-      // featured card (nth-child 2) is not overridden by GSAP's residual style.
+      scrollTrigger: { trigger: '.culture', start: 'top 75%' },
+      y: 65, opacity: 0, rotateX: 8,
+      duration: 0.75, stagger: 0.12, ease,
+      // Preserve CSS rotate(-3deg) on the accent card
       clearProps: 'transform',
     });
 
+    // ── Mission section ─────────────────────────────────────────────────────
+    const missionTrigger = { trigger: '.mission', start: 'top 82%' };
+
+    gsap.from('.mission__icon-box', {
+      scrollTrigger: missionTrigger,
+      scale: 0, rotation: -90, opacity: 0, duration: 0.8, ease: 'back.out(1.7)',
+    });
     gsap.from('.mission__title', {
-      scrollTrigger: { trigger: '.mission', start: 'top 82%' },
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease,
+      scrollTrigger: missionTrigger,
+      y: 30, opacity: 0, duration: 0.8, delay: 0.18, ease,
+    });
+    gsap.from('.mission__text', {
+      scrollTrigger: missionTrigger,
+      y: 22, opacity: 0, duration: 0.75, delay: 0.32, ease,
     });
 
+    // ── Info section ────────────────────────────────────────────────────────
+    const infoTrigger = { trigger: '.info-section', start: 'top 82%' };
+
+    gsap.from('.info-section__title', {
+      scrollTrigger: infoTrigger,
+      y: 30, opacity: 0, duration: 0.8, ease,
+    });
+    gsap.from('.info-section__subtitle', {
+      scrollTrigger: infoTrigger,
+      y: 20, opacity: 0, duration: 0.7, delay: 0.14, ease,
+    });
     gsap.from('.info-card', {
-      scrollTrigger: { trigger: '.info-section', start: 'top 82%' },
-      y: 50,
-      opacity: 0,
-      duration: 0.75,
-      stagger: 0.15,
-      ease,
+      scrollTrigger: { trigger: '.info-section', start: 'top 80%' },
+      y: 55, opacity: 0, duration: 0.75, stagger: 0.16, ease,
     });
 
+    // ── Explore + jobs ──────────────────────────────────────────────────────
+    gsap.from('.explore__heading', {
+      scrollTrigger: { trigger: '.explore', start: 'top 85%' },
+      y: 30, opacity: 0, duration: 0.8, ease,
+    });
     gsap.from('.job-card', {
       scrollTrigger: { trigger: '.jobs-grid', start: 'top 82%' },
-      y: 60,
-      opacity: 0,
-      duration: 0.75,
-      stagger: 0.12,
-      ease,
+      y: 65, opacity: 0, scale: 0.96,
+      duration: 0.75, stagger: 0.13, ease,
+      clearProps: 'transform',
+    });
+
+    // ── Bottom CTA ──────────────────────────────────────────────────────────
+    // Use 'top bottom' so the trigger fires as soon as the section enters
+    // the viewport. Each element has its own tween to avoid array/stagger
+    // issues leaving any element permanently at opacity:0.
+    const ctaTrigger = { trigger: '.cta-bottom', start: 'top bottom' };
+
+    // Animate y only — the visual has `transform: translateX(-50%)` on mobile
+    // so animating x would override that CSS transform and leave the image
+    // off-centre after the tween completes. clearProps restores CSS ownership.
+    gsap.from('.cta-bottom__visual', {
+      scrollTrigger: ctaTrigger,
+      y: -30, opacity: 0, duration: 0.95, ease,
+      clearProps: 'transform',
+    });
+    gsap.from('.cta-bottom__title', {
+      scrollTrigger: ctaTrigger,
+      x: 50, opacity: 0, duration: 0.75, ease,
+    });
+    gsap.from('.cta-bottom__text', {
+      scrollTrigger: ctaTrigger,
+      x: 50, opacity: 0, duration: 0.75, delay: 0.13, ease,
+    });
+    gsap.from('.cta-bottom__btn', {
+      scrollTrigger: ctaTrigger,
+      y: 18, opacity: 0, duration: 0.6, delay: 0.26, ease: 'back.out(1.4)',
     });
   }
 

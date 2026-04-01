@@ -1,9 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  NgZone,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   BackToTopComponent,
   PublicShellComponent,
 } from '@ubax-workspace/ubax-portal-layout';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface JobSection {
   label: string;
@@ -168,6 +178,11 @@ const DEFAULT_JOB = JOB_DATABASE[0];
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarrieresDetailPageComponent {
+  private readonly elRef = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly zone = inject(NgZone);
+  private gsapCtx: gsap.Context | undefined;
+
   protected readonly ubaxIcon =
     'assets/portal-assets/careers/icons/Group 1171274746-2.svg';
 
@@ -179,5 +194,53 @@ export class CarrieresDetailPageComponent {
     const id = Number(route.snapshot.paramMap.get('id'));
     this.job = JOB_DATABASE.find((j) => j.id === id) ?? DEFAULT_JOB;
     this.sections = this.job.sections;
+
+    afterNextRender(() => {
+      this.zone.runOutsideAngular(() => {
+        gsap.registerPlugin(ScrollTrigger);
+        this.gsapCtx = gsap.context(
+          () => this.initAnimations(),
+          this.elRef.nativeElement,
+        );
+      });
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.gsapCtx?.revert();
+    });
+  }
+
+  private initAnimations(): void {
+    const ease = 'power3.out';
+
+    // ── Page hero ───────────────────────────────────────────────────────────
+    gsap.timeline({ defaults: { ease } })
+      .from('.page-hero__icon-box', {
+        scale: 0, opacity: 0, duration: 0.7, ease: 'back.out(1.7)',
+      })
+      .from('.page-hero__title', { y: 28, opacity: 0, duration: 0.75 }, '-=0.35');
+
+    // ── Main card + sections ────────────────────────────────────────────────
+    gsap.from('.detail-main__card', {
+      scrollTrigger: { trigger: '.detail-layout', start: 'top 88%' },
+      y: 45, opacity: 0, duration: 0.85, ease,
+    });
+    gsap.from('.detail-section', {
+      scrollTrigger: { trigger: '.detail-main__card', start: 'top 85%' },
+      y: 28, opacity: 0, duration: 0.6, stagger: 0.09, ease,
+    });
+
+    // ── Sidebar slides in from the right ────────────────────────────────────
+    gsap.from('.detail-sidebar', {
+      scrollTrigger: { trigger: '.detail-layout', start: 'top 88%' },
+      x: 55, opacity: 0, duration: 0.85, delay: 0.2, ease,
+    });
+
+    // ── CTA button subtle glow pulse ────────────────────────────────────────
+    gsap.to('.detail-sidebar__cta', {
+      boxShadow: '0 8px 28px rgba(232, 125, 30, 0.4)',
+      duration: 1.4, repeat: -1, yoyo: true, ease: 'sine.inOut',
+      delay: 1.2,
+    });
   }
 }
