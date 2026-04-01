@@ -8,7 +8,7 @@ import {
   NgZone,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   BackToTopComponent,
@@ -25,6 +25,13 @@ interface CandidatureForm {
   niveauExperience: string;
   lettreMotivation: string;
 }
+
+// Minimal job title map — mirrors the data in carrieres-detail
+const JOB_TITLES: Record<number, string> = {
+  1: 'Responsable Commercial',
+  2: 'Assistant(e) Comptable',
+  3: 'Assistante de Direction',
+};
 
 @Component({
   selector: 'ubax-carrieres-candidature-page',
@@ -45,6 +52,9 @@ export class CarrieresCandidaturePage {
   protected readonly cvIcon =
     'assets/portal-assets/careers/icons/Ellipse 1.svg';
 
+  /** Job title resolved from the route :id param, or null if not found. */
+  protected readonly jobTitle: string | null;
+
   protected readonly niveauxExperience = [
     'Débutant',
     'Intermédiaire',
@@ -52,16 +62,22 @@ export class CarrieresCandidaturePage {
     'Expert',
   ];
 
-  protected readonly form: CandidatureForm = {
-    nom: '',
-    email: '',
-    telephone: '',
-    metier: '',
-    niveauExperience: '',
-    lettreMotivation: '',
-  };
+  protected readonly form: CandidatureForm;
 
   constructor() {
+    const route = inject(ActivatedRoute);
+    const id = Number(route.snapshot.paramMap.get('id'));
+    this.jobTitle = JOB_TITLES[id] ?? null;
+
+    this.form = {
+      nom: '',
+      email: '',
+      telephone: '',
+      metier: this.jobTitle ?? '',
+      niveauExperience: '',
+      lettreMotivation: '',
+    };
+
     afterNextRender(() => {
       this.zone.runOutsideAngular(() => {
         gsap.registerPlugin(ScrollTrigger);
