@@ -136,6 +136,17 @@ $c-placeholder: #b3b3b3;
   &:focus {
     box-shadow: 0 0 0 2px rgba(26, 48, 71, 0.25);
   }
+
+  &--prefilled,
+  &:disabled {
+    background: darken($c-input-bg, 4%);
+    color: #6b7280;
+    cursor: not-allowed;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
 }
 
 .form-field__select-wrap {
