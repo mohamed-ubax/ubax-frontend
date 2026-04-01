@@ -140,7 +140,7 @@ $c-placeholder: #b3b3b3;
   &--prefilled,
   &:disabled {
     background: darken($c-input-bg, 4%);
-    color: $c-placeholder;
+    color: #6b7280;
     cursor: not-allowed;
 
     &:focus {
