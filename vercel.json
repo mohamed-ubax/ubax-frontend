@@ -3,6 +3,7 @@
   "outputDirectory": "dist/apps/ubax-portal/browser",
   "installCommand": "npm ci",
   "framework": null,
+  "nodeVersion": "22",
   "headers": [
     {
       "source": "/(.*)",
