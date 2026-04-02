@@ -5,3 +5,16 @@
 /offres
 /temoignages
 /mentions-legales
+/politique-de-confidentialite
+/fonctionnalites
+/formations
+/connexion
+/mot-de-passe-oublie
+/carrieres
+/carrieres/postuler
+/carrieres/1
+/carrieres/1/postuler
+/carrieres/2
+/carrieres/2/postuler
+/carrieres/3
+/carrieres/3/postuler

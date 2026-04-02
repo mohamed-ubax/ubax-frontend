@@ -174,7 +174,7 @@
                   channel.label === 'SMS / WhatsApp' ? 'noreferrer' : null
                 "
               >
-                <img [src]="channel.icon" [alt]="''" aria-hidden="true" />
+                <img [src]="channel.icon" [alt]="''" aria-hidden="true" loading="lazy" decoding="async" width="24" height="24" />
                 <span class="support-channel__text">
                   <span class="support-channel__label">{{
                     channel.label
@@ -192,7 +192,7 @@
             <div class="contact-support__social-list">
               @for (social of socialLinks; track social.label) {
                 <a [href]="social.href" [attr.aria-label]="social.label">
-                  <img [src]="social.icon" [alt]="''" aria-hidden="true" />
+                  <img [src]="social.icon" [alt]="''" aria-hidden="true" loading="lazy" decoding="async" width="24" height="24" />
                 </a>
               }
             </div>

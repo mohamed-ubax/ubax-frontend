@@ -4,7 +4,7 @@
     <!-- Floating icon cards -->
     @for (icon of floatingIcons; track icon.cls) {
       <div class="fp-float-card {{ icon.cls }}" aria-hidden="true">
-        <img [src]="icon.src" [alt]="icon.alt" loading="lazy" decoding="async" />
+        <img [src]="icon.src" [alt]="icon.alt" loading="eager" decoding="async" width="56" height="56" />
       </div>
     }
 
@@ -208,6 +208,8 @@
               class="fp-guide-card__img"
               loading="lazy"
               decoding="async"
+              width="359"
+              height="224"
             />
           </div>
           <div class="fp-guide-card__body">
@@ -220,6 +222,10 @@
                     src="assets/portal-assets/formations/icons/Group 1171274746-1.svg"
                     alt=""
                     class="fp-guide-card__author-logo"
+                    loading="lazy"
+                    decoding="async"
+                    width="21"
+                    height="21"
                   />
                 </div>
                 <span>Ubax</span>
@@ -235,6 +241,10 @@
                     alt=""
                     class="fp-btn-arrow"
                     aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
+                    width="14"
+                    height="14"
                   />
                 </ubax-ui-button>
               </a>
