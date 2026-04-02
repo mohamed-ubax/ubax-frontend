@@ -268,6 +268,113 @@ $c-placeholder: #b3b3b3;
   color: var(--ubax-accent);
 }
 
+.cv-card__upload--replace {
+  font-size: 0.8125rem;
+  padding: 8px 16px;
+}
+
+.cv-card__hint {
+  font-size: 0.75rem;
+  color: $c-placeholder;
+  margin: 0;
+  text-align: center;
+}
+
+.cv-card__input {
+  display: none;
+}
+
+// ── Aperçu fichier sélectionné ────────────────────────────────────────────────
+.cv-preview {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ubax-page-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.cv-preview__icon-wrap {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: var(--ubax-accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cv-preview__icon {
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.cv-preview__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cv-preview__name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: $c-near-black;
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cv-preview__size {
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: $c-placeholder;
+  margin: 0;
+}
+
+.cv-preview__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.cv-preview__view,
+.cv-preview__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 150ms ease, color 150ms ease;
+  text-decoration: none;
+}
+
+.cv-preview__view {
+  background: rgba(26, 48, 71, 0.08);
+  color: var(--ubax-brand);
+
+  &:hover {
+    background: var(--ubax-brand);
+    color: #fff;
+  }
+}
+
+.cv-preview__remove {
+  background: rgba(185, 0, 0, 0.08);
+  color: #b90000;
+
+  &:hover {
+    background: #b90000;
+    color: #fff;
+  }
+}
+
 // ══ SUCCESS OVERLAY & MODAL ═══════════════════════════════════════════════════
 @keyframes ubax-overlay-in {
   from { opacity: 0; }

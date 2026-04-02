@@ -122,13 +122,64 @@
     <!-- Right: CV upload -->
     <aside class="candidature-sidebar">
       <div class="cv-card">
-        <div class="cv-card__avatar" aria-hidden="true">
-          <i class="pi pi-file cv-card__cv-icon"></i>
-        </div>
-        <button class="cv-card__upload" type="button">
-          <i class="pi pi-upload cv-card__upload-icon" aria-hidden="true"></i>
-          Importer votre CV
-        </button>
+
+        <!-- État vide : aucun fichier sélectionné -->
+        @if (!cvFile()) {
+          <div class="cv-card__avatar" aria-hidden="true">
+            <i class="pi pi-file cv-card__cv-icon"></i>
+          </div>
+          <p class="cv-card__hint">Formats acceptés : PDF · 5 Mo max</p>
+          <button class="cv-card__upload" type="button" (click)="cvInput.click()">
+            <i class="pi pi-upload cv-card__upload-icon" aria-hidden="true"></i>
+            Importer votre CV
+          </button>
+        }
+
+        <!-- État rempli : aperçu du fichier -->
+        @if (cvFile()) {
+          <div class="cv-preview">
+            <div class="cv-preview__icon-wrap" aria-hidden="true">
+              <i class="pi pi-file-pdf cv-preview__icon"></i>
+            </div>
+            <div class="cv-preview__info">
+              <p class="cv-preview__name">{{ cvFile()!.name }}</p>
+              <p class="cv-preview__size">{{ cvFileSizeLabel() }}</p>
+            </div>
+            <div class="cv-preview__actions">
+              <a
+                class="cv-preview__view"
+                [href]="cvObjectUrl()"
+                target="_blank"
+                rel="noopener"
+                aria-label="Visualiser le CV"
+              >
+                <i class="pi pi-eye"></i>
+              </a>
+              <button
+                class="cv-preview__remove"
+                type="button"
+                (click)="removeCv()"
+                aria-label="Supprimer le CV"
+              >
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+          </div>
+          <button class="cv-card__upload cv-card__upload--replace" type="button" (click)="cvInput.click()">
+            <i class="pi pi-refresh cv-card__upload-icon" aria-hidden="true"></i>
+            Remplacer le CV
+          </button>
+        }
+
+        <!-- Input masqué — PDF uniquement -->
+        <input
+          #cvInput
+          type="file"
+          accept="application/pdf"
+          class="cv-card__input"
+          aria-label="Importer votre CV (PDF)"
+          (change)="onCvSelected($event)"
+        />
       </div>
     </aside>
 
