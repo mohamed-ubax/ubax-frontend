@@ -103,6 +103,13 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'carrieres/postuler',
+    loadComponent: () =>
+      import('./pages/carrieres/carrieres-candidature/carrieres-candidature-page.component').then(
+        (m) => m.CarrieresCandidaturePage,
+      ),
+  },
+  {
     path: 'carrieres/:id/postuler',
     loadComponent: () =>
       import('./pages/carrieres/carrieres-candidature/carrieres-candidature-page.component').then(

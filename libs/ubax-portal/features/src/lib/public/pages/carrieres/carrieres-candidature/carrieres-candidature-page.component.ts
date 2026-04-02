@@ -52,6 +52,19 @@ export class CarrieresCandidaturePage {
   protected readonly cvIcon =
     'assets/portal-assets/careers/icons/Ellipse 1.svg';
 
+  // ── CV upload ───────────────────────────────────────────────────────────────
+  protected readonly cvFile = signal<File | null>(null);
+  protected readonly cvObjectUrl = signal<string>('');
+
+  protected readonly cvFileSizeLabel = () => {
+    const file = this.cvFile();
+    if (!file) return '';
+    const kb = file.size / 1024;
+    return kb < 1024
+      ? `${Math.round(kb)} Ko`
+      : `${(kb / 1024).toFixed(1)} Mo`;
+  };
+
   /** Job title resolved from the route :id param, or null if not found. */
   protected readonly jobTitle: string | null;
 
@@ -90,6 +103,8 @@ export class CarrieresCandidaturePage {
 
     this.destroyRef.onDestroy(() => {
       this.gsapCtx?.revert();
+      const url = this.cvObjectUrl();
+      if (url) URL.revokeObjectURL(url);
     });
   }
 
@@ -124,6 +139,29 @@ export class CarrieresCandidaturePage {
       scrollTrigger: { trigger: '.candidature-layout', start: 'top 88%' },
       x: 55, opacity: 0, duration: 0.85, delay: 0.22, ease,
     });
+  }
+
+  protected onCvSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // Révoquer l'ancienne URL objet avant d'en créer une nouvelle
+    const prev = this.cvObjectUrl();
+    if (prev) URL.revokeObjectURL(prev);
+
+    this.cvFile.set(file);
+    this.cvObjectUrl.set(URL.createObjectURL(file));
+
+    // Réinitialiser l'input pour permettre de re-sélectionner le même fichier
+    input.value = '';
+  }
+
+  protected removeCv(): void {
+    const url = this.cvObjectUrl();
+    if (url) URL.revokeObjectURL(url);
+    this.cvFile.set(null);
+    this.cvObjectUrl.set('');
   }
 
   protected submitForm(event: Event): void {
