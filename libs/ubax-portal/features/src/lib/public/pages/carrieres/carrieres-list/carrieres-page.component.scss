@@ -32,10 +32,10 @@ $c-placeholder: #b3b3b3;
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
+    background: url('/assets/portal-assets/careers/images/hero-bg.webp')
       center / cover no-repeat;
-    -webkit-mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
-    mask-image: url('/assets/portal-assets/careers/images/mask-group.png');
+    -webkit-mask-image: url('/assets/portal-assets/careers/images/mask-group.webp');
+    mask-image: url('/assets/portal-assets/careers/images/mask-group.webp');
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
@@ -370,7 +370,7 @@ $c-placeholder: #b3b3b3;
   position: relative;
   margin: 0 var(--_gutter) 64px;
   background:
-    url('/assets/portal-assets/careers/images/ligne-deco.png') center / cover
+    url('/assets/portal-assets/careers/images/ligne-deco.webp') center / cover
       no-repeat,
     var(--ubax-brand);
   border-radius: 20px;

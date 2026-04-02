@@ -1,4 +1,5 @@
 import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import {
   provideRouter,
   withPreloading,
@@ -46,6 +47,7 @@ const UbaxPreset = definePreset(Aura, {
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideHttpClient(withFetch()),
     provideRouter(appRoutes, withViewTransitions(), withPreloading(SelectivePreloadStrategy)),
     providePrimeNG({
       theme: {

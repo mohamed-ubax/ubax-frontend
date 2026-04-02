@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
   BackToTopComponent,
@@ -37,7 +38,7 @@ interface CultureCard {
 
 @Component({
   selector: 'ubax-carrieres-page',
-  imports: [PublicShellComponent, BackToTopComponent, RouterLink, UiPaginationComponent],
+  imports: [PublicShellComponent, BackToTopComponent, RouterLink, UiPaginationComponent, NgOptimizedImage],
   templateUrl: './carrieres-page.component.html',
   styleUrl: './carrieres-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,7 +54,7 @@ export class CarrieresPageComponent {
 
   // ── Assets ─────────────────────────────────────────────────────────────
   protected readonly heroPersonImg =
-    "assets/portal-assets/careers/images/ab90ad05-1ffc-4cfb-a21a-0b3bc3fbb1ca-2026-03-25 1.png";
+    'assets/portal-assets/careers/images/hero-person.webp';
   protected readonly heroEllipseOuter =
     'assets/portal-assets/careers/icons/Ellipse 1.svg';
   protected readonly searchIcon =
@@ -65,9 +66,9 @@ export class CarrieresPageComponent {
   protected readonly starIcon =
     'assets/portal-assets/careers/icons/material-symbols_star.svg';
   protected readonly subtractImg =
-    'assets/portal-assets/careers/images/Subtract.png';
+    'assets/portal-assets/careers/images/Subtract.webp';
   protected readonly womanImg =
-    'assets/portal-assets/careers/images/woman-looking-through-magnifying-glass.png';
+    'assets/portal-assets/careers/images/woman.webp';
   protected readonly arrowLeftIcon =
     'assets/portal-assets/careers/icons/Alt Arrow Left.svg';
   protected readonly arrowRightIcon =
