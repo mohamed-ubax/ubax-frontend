@@ -6,7 +6,7 @@
       <i class="pi pi-upload page-hero__icon"></i>
     </div>
     <h1 class="page-hero__title">
-      Candidature@if (jobTitle) {&nbsp;: {{ jobTitle }}}
+      @if (jobTitle) { Candidature&nbsp;: {{ jobTitle }} } @else { Candidature spontanée }
     </h1>
   </div>
 
