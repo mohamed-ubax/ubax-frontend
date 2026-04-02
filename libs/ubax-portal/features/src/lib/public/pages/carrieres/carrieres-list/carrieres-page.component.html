@@ -4,7 +4,14 @@
     <div class="hero__visual" aria-hidden="true">
       <div class="hero__dashed-ring"></div>
       <img class="hero__ellipse" [src]="heroEllipseOuter" alt="" />
-      <img class="hero__person" [src]="heroPersonImg" alt="" />
+      <img
+        class="hero__person"
+        [ngSrc]="heroPersonImg"
+        alt=""
+        width="122"
+        height="183"
+        priority
+      />
     </div>
 
     <div class="hero__content">
@@ -80,9 +87,11 @@
     <div class="info-section__inner">
       <img
         class="info-section__deco"
-        [src]="subtractImg"
+        [ngSrc]="subtractImg"
         alt=""
         aria-hidden="true"
+        width="536"
+        height="498"
       />
       <h2 id="info-heading" class="info-section__title">
         Le métier idéal vous attend
@@ -200,7 +209,7 @@
   <!-- ══ BOTTOM CTA ═════════════════════════════════════════════════════════ -->
   <section class="cta-bottom" aria-labelledby="cta-heading">
     <div class="cta-bottom__visual" aria-hidden="true">
-      <img [src]="womanImg" alt="" class="cta-bottom__img" />
+      <img [src]="womanImg" alt="" class="cta-bottom__img" loading="lazy" width="530" height="517" />
     </div>
     <div class="cta-bottom__content">
       <h2 id="cta-heading" class="cta-bottom__title">
