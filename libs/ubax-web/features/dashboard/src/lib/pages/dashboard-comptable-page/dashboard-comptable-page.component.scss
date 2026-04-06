@@ -42,9 +42,15 @@
   min-width: 220px;
   transition: border-color 0.15s;
 
-  &:focus-within { border-color: #1a3047; }
+  &:focus-within {
+    border-color: #1a3047;
+  }
 
-  i { color: #888; font-size: 14px; flex-shrink: 0; }
+  i {
+    color: #888;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
 
   input {
     border: none;
@@ -55,7 +61,9 @@
     font-weight: 300;
     color: #222;
     width: 100%;
-    &::placeholder { color: #aaa; }
+    &::placeholder {
+      color: #aaa;
+    }
   }
 
   &--btn {
@@ -68,7 +76,9 @@
       color: #aaa;
       white-space: nowrap;
     }
-    &:hover { border-color: #1a3047; }
+    &:hover {
+      border-color: #1a3047;
+    }
   }
 }
 
@@ -89,8 +99,12 @@
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s;
-  &:hover { background: #f8faff; }
-  i { font-size: 15px; }
+  &:hover {
+    background: #f8faff;
+  }
+  i {
+    font-size: 15px;
+  }
 }
 
 /* ── Hero + KPI wrapper card ──────────────────────────────────────── */
@@ -163,9 +177,14 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    transform 0.1s;
 
-  &:hover { background: #ff7402; transform: translateY(-1px); }
+  &:hover {
+    background: #ff7402;
+    transform: translateY(-1px);
+  }
 
   &__icon {
     display: flex;
@@ -183,7 +202,7 @@
 
 /* Right — balance card (#1AA456 green) */
 .balance-card {
-  background: #1AA456;
+  background: #1aa456;
   width: 300px;
   flex-shrink: 0;
   align-self: stretch;
@@ -240,9 +259,14 @@
   flex-shrink: 0;
   transition: background 0.12s;
 
-  &:hover { background: rgba(255 255 255 / 0.2); color: #fff; }
+  &:hover {
+    background: rgba(255 255 255 / 0.2);
+    color: #fff;
+  }
 
-  i { font-size: 15px; }
+  i {
+    font-size: 15px;
+  }
 }
 
 /* ── KPI cards ────────────────────────────────────────────────────── */
@@ -270,7 +294,9 @@
     height: 50px;
     border-radius: 50%;
     background: #fff;
-    i { font-size: 22px; }
+    i {
+      font-size: 22px;
+    }
   }
 
   &__body {
@@ -353,7 +379,9 @@
   flex-shrink: 0;
   text-decoration: none;
   transition: background 0.15s;
-  &:hover { background: #eef1f8; }
+  &:hover {
+    background: #eef1f8;
+  }
 }
 
 /* ── Period toggle ────────────────────────────────────────────────── */
@@ -376,10 +404,15 @@
   font-weight: 400;
   color: #777;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   white-space: nowrap;
 
-  &:hover { background: rgba(255 255 255 / 0.6); color: #1a3047; }
+  &:hover {
+    background: rgba(255 255 255 / 0.6);
+    color: #1a3047;
+  }
 
   &.is-active {
     background: #fff;
@@ -392,12 +425,16 @@
 /* ── Charts row ───────────────────────────────────────────────────── */
 .charts-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.45fr 1fr;
   gap: 20px;
+  align-items: stretch;
 }
 
 /* ── Line chart card ──────────────────────────────────────────────── */
-.line-card { display: flex; flex-direction: column; }
+.line-card {
+  display: flex;
+  flex-direction: column;
+}
 
 .line-chart-wrapper {
   padding: 0 24px 24px;
@@ -405,21 +442,37 @@
 }
 
 /* ── Distribution half-donut card ────────────────────────────────── */
-.dist-card { display: flex; flex-direction: column; }
-
-.dist-chart-wrapper {
-  padding: 0 24px 12px;
+.dist-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.dist-header-sep {
+  height: 1px;
+  background: #f0f2f6;
+  margin: 0 24px;
 }
 
 .dist-legend {
   display: flex;
   justify-content: center;
   gap: 24px;
-  padding: 0 24px 24px;
+  padding: 14px 24px 12px;
   flex-wrap: wrap;
+}
+
+.dist-chart-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 260px;
+
+  /* make the p-chart canvas fill the wrapper */
+  ::ng-deep canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
 }
 
 .dist-legend-item {
@@ -457,7 +510,9 @@
 }
 
 /* ── Transactions card ────────────────────────────────────────────── */
-.tx-card { overflow: hidden; }
+.tx-card {
+  overflow: hidden;
+}
 
 .tx-list {
   padding: 0 14px 16px;
@@ -546,7 +601,10 @@
   background: #ddfff4;
   border-radius: 12px;
   padding: 3px 8px;
-  i { font-size: 8px; color: #065f32; }
+  i {
+    font-size: 8px;
+    color: #065f32;
+  }
   span {
     font-family: 'Lexend', sans-serif;
     font-size: 10px;
@@ -706,25 +764,59 @@
   cursor: pointer;
   transition: opacity 0.15s;
   white-space: nowrap;
-  &:hover { opacity: 0.85; }
+  &:hover {
+    opacity: 0.85;
+  }
 
-  &--details  { background: #1a3047; color: #fff; }
-  &--relancer { background: #ffe0e0; color: #ff383c; }
+  &--details {
+    background: #1a3047;
+    color: #fff;
+  }
+  &--relancer {
+    background: #ffe0e0;
+    color: #ff383c;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════
    Add Expense Modal
    ════════════════════════════════════════════════════════════════════ */
 
-@keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
-@keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes overlayOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
 @keyframes modalIn {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.93); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1);    }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 @keyframes modalOut {
-  from { opacity: 1; transform: translate(-50%, -50%) scale(1);    }
-  to   { opacity: 0; transform: translate(-50%, -50%) scale(0.93); }
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.93);
+  }
 }
 
 .ae-overlay {
@@ -734,7 +826,9 @@
   background: rgba(0 0 0 / 0.5);
   animation: overlayIn 0.2s ease forwards;
 
-  &.is-closing { animation: overlayOut 0.2s ease forwards; }
+  &.is-closing {
+    animation: overlayOut 0.2s ease forwards;
+  }
 }
 
 .ae-modal {
@@ -751,7 +845,9 @@
   overflow: hidden;
   animation: modalIn 0.25s cubic-bezier(0.34, 1.1, 0.64, 1) forwards;
 
-  &.is-closing { animation: modalOut 0.2s ease forwards; }
+  &.is-closing {
+    animation: modalOut 0.2s ease forwards;
+  }
 }
 
 /* Modal header */
@@ -786,7 +882,9 @@
   font-size: 13px;
   transition: background 0.12s;
   flex-shrink: 0;
-  &:hover { background: rgba(255 255 255 / 0.22); }
+  &:hover {
+    background: rgba(255 255 255 / 0.22);
+  }
 }
 
 /* Modal body */
@@ -853,8 +951,12 @@
   transition: border-color 0.15s;
   box-sizing: border-box;
 
-  &:focus { border-color: #1a3047; }
-  &::placeholder { color: #aaa; }
+  &:focus {
+    border-color: #1a3047;
+  }
+  &::placeholder {
+    color: #aaa;
+  }
 
   &[type='date']::-webkit-calendar-picker-indicator {
     opacity: 0;
@@ -866,7 +968,9 @@
   }
 }
 
-.ae-input-wrap--icon .ae-input { padding-right: 44px; }
+.ae-input-wrap--icon .ae-input {
+  padding-right: 44px;
+}
 
 .ae-input-icon {
   position: absolute;
@@ -897,7 +1001,9 @@
     appearance: none;
     cursor: pointer;
     transition: border-color 0.15s;
-    &:focus { border-color: #1a3047; }
+    &:focus {
+      border-color: #1a3047;
+    }
   }
 
   i {
@@ -929,7 +1035,9 @@
   color: #333;
   user-select: none;
 
-  input[type='radio'] { display: none; }
+  input[type='radio'] {
+    display: none;
+  }
 
   &__dot {
     width: 18px;
@@ -955,7 +1063,9 @@
 
   &.is-checked .ae-radio__dot {
     border-color: #e87d1e;
-    &::after { opacity: 1; }
+    &::after {
+      opacity: 1;
+    }
   }
 }
 
@@ -1012,7 +1122,9 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.12s;
-  &:hover { background: #ffc5c5; }
+  &:hover {
+    background: #ffc5c5;
+  }
 }
 
 .ae-upload-btn {
@@ -1030,8 +1142,13 @@
   font-weight: 400;
   color: #888;
   cursor: pointer;
-  transition: border-color 0.12s, color 0.12s;
-  &:hover { border-color: #1a3047; color: #1a3047; }
+  transition:
+    border-color 0.12s,
+    color 0.12s;
+  &:hover {
+    border-color: #1a3047;
+    color: #1a3047;
+  }
 }
 
 /* ── Modal footer ─────────────────────────────────────────────────── */
@@ -1055,8 +1172,17 @@
   cursor: pointer;
   padding: 0 32px;
   transition: opacity 0.15s;
-  &:hover { opacity: 0.88; }
+  &:hover {
+    opacity: 0.88;
+  }
 
-  &--cancel { background: #ecf2f7; color: #1a3047; }
-  &--save   { background: #e87d1e; color: #fff; min-width: 220px; }
+  &--cancel {
+    background: #ecf2f7;
+    color: #1a3047;
+  }
+  &--save {
+    background: #e87d1e;
+    color: #fff;
+    min-width: 220px;
+  }
 }

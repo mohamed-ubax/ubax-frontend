@@ -110,10 +110,9 @@
         </div>
       </div>
 
-      <div class="dist-chart-wrapper">
-        <p-chart type="doughnut" [data]="distData" [options]="distOptions" height="200px" />
-      </div>
+      <div class="dist-header-sep"></div>
 
+      <!-- Legend ABOVE the chart -->
       <div class="dist-legend">
         @for (item of distLegend; track item.label) {
           <div class="dist-legend-item">
@@ -122,6 +121,11 @@
             <span class="legend-pct" [style.color]="item.color">{{ item.pct }}</span>
           </div>
         }
+      </div>
+
+      <!-- Chart fills remaining height -->
+      <div class="dist-chart-wrapper">
+        <p-chart type="doughnut" [data]="distData" [options]="distOptions" />
       </div>
     </div>
 
