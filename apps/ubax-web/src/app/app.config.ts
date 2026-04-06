@@ -24,7 +24,7 @@ function provideMockUserInDev() {
             nom: 'Kouassi',
             prenom: 'Jean-Marc',
             email: 'jm.kouassi@ubax.io',
-            role: Role.DG,
+            role: Role.COMPTABLE,
           });
         }
       };
