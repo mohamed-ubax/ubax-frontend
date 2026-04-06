@@ -1,0 +1,86 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ChartModule } from 'primeng/chart';
+
+@Component({
+  selector: 'ubax-facturation-page',
+  standalone: true,
+  imports: [ChartModule, RouterLink],
+  templateUrl: './facturation-page.component.html',
+  styleUrl: './facturation-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class FacturationPageComponent {
+  activePeriod = 'Année';
+
+  readonly statsData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    datasets: [
+      {
+        label: 'Revenus',
+        data: [3200, 2000, 2200, 4600, 2600, 2600, 2500, 2300, 2300, 3800, 4700, 4200],
+        borderColor: '#16b55b', backgroundColor: 'transparent',
+        tension: 0.4, pointRadius: 4, pointBackgroundColor: '#16b55b', borderWidth: 2,
+      },
+      {
+        label: 'Dépenses',
+        data: [1500, 2000, 1200, 2800, 1500, 1500, 1600, 1500, 2200, 2000, 3200, 2700],
+        borderColor: '#fa191d', backgroundColor: 'transparent',
+        tension: 0.4, pointRadius: 4, pointBackgroundColor: '#fa191d', borderWidth: 2,
+      },
+    ],
+  };
+
+  readonly statsOptions = {
+    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false },
+           ticks: { font: { family: 'Poppins', size: 13, weight: '300' }, color: '#262626' } },
+      y: { grid: { color: '#efefef' }, border: { display: false }, min: 0, max: 5000,
+           ticks: { stepSize: 1000, font: { family: 'Poppins', size: 12, weight: '300' }, color: '#262626' } },
+    },
+    responsive: true, maintainAspectRatio: false,
+  };
+
+  readonly miniBarData = {
+    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sa', 'Dim'],
+    datasets: [{ data: [42, 58, 146, 95, 138, 68, 154], backgroundColor: '#16b55b',
+      borderRadius: 23, borderSkipped: false, barPercentage: 0.5, categoryPercentage: 0.7 }],
+  };
+
+  readonly miniBarOptions = {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false },
+           ticks: { font: { family: 'Inter', size: 12 }, color: '#222' } },
+      y: { grid: { color: '#f0f0f0' }, border: { display: false }, min: 0,
+           ticks: { font: { family: 'Inter', size: 12 }, color: '#222',
+                    callback: (v: number) => v === 0 ? '0' : v >= 1000 ? v / 1000 + 'k' : String(v) } },
+    },
+    responsive: true, maintainAspectRatio: false,
+  };
+
+  readonly donutData = {
+    datasets: [{ data: [29.5, 8.5, 62], backgroundColor: ['#e87d1e', '#fa191d', '#34c759'], borderWidth: 0 }],
+  };
+
+  readonly donutOptions = {
+    cutout: '65%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    responsive: false, maintainAspectRatio: false, animation: false,
+  };
+
+  readonly newReservations = [
+    { id: 1, name: 'Aïcha Kouadio', dates: '16 - 19 Avril 2026', guests: 2, image: 'https://www.figma.com/api/mcp/asset/2dd68695-985e-4e91-afa3-9fcdce876bc8' },
+    { id: 2, name: 'Aïcha Kouadio', dates: '18 - 21 Avril 2026', guests: 2, image: 'https://www.figma.com/api/mcp/asset/8dd5c306-542d-4262-9e3c-eb68f2df0227' },
+    { id: 3, name: 'Aïcha Kouadio', dates: '21 - 27 Avril 2026', guests: 2, image: 'https://www.figma.com/api/mcp/asset/20d06aa3-cb55-4f07-b0f4-b162a2bc2e35' },
+    { id: 4, name: 'Aïcha Kouadio', dates: '22 - 25 Avril 2026', guests: 2, image: 'https://www.figma.com/api/mcp/asset/17ab835d-968c-4268-b475-3be396f3bca8' },
+  ];
+
+  readonly transactions = [
+    { id: '49503', name: 'Dianne Russell', date: 'Jul 01, 2022', method: 'Master Card', total: '-$167.50', statut: 'success' },
+    { id: '29475', name: 'Ralph Edwards', date: 'Jul 01, 2022', method: 'Visa', total: '+$251.43', statut: 'failed' },
+    { id: '95884', name: 'Wade Warren', date: 'Jul 01, 2022', method: 'Paypal', total: '+$102.78', statut: 'success' },
+    { id: '75849', name: 'Kathryn Murphy', date: 'Jul 01, 2022', method: 'Paypal', total: '+$12.78', statut: 'success' },
+  ];
+}

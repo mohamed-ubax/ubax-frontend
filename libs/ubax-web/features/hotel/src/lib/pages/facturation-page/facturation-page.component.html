@@ -1,0 +1,212 @@
+<div class="fact-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <div class="fact-header">
+    <h1 class="fact-title">Facturation</h1>
+    <button class="add-btn">
+      <i class="pi pi-plus"></i>
+      Ajouter une dépense
+    </button>
+  </div>
+
+  <!-- ── KPI Row ────────────────────────────────────────────────── -->
+  <div class="kpi-row">
+
+    <div class="kpi-card">
+      <div class="kpi-text">
+        <p class="kpi-label">Revenus total</p>
+        <p class="kpi-value">18 650 000 FCFA</p>
+        <div class="kpi-growth kpi-growth--down">
+          <span class="trend-arrow trend-arrow--down">↙</span>
+          <span>-2%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-text">
+        <p class="kpi-label">Nombre de reservations</p>
+        <p class="kpi-value kpi-value--lg">850</p>
+        <div class="kpi-growth kpi-growth--up">
+          <span class="trend-arrow trend-arrow--up">↗</span>
+          <span>+7%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-text">
+        <p class="kpi-label">Dépenses</p>
+        <p class="kpi-value">5 550 000 FCFA</p>
+        <div class="kpi-growth kpi-growth--down">
+          <span class="trend-arrow trend-arrow--down">↙</span>
+          <span>-5%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--green">
+      <div class="kpi-balance">
+        <p class="kpi-balance__label">Solde disponible</p>
+        <p class="kpi-balance__value">16 850 000 FCFA</p>
+      </div>
+      <div class="kpi-balance__icon">
+        <i class="pi pi-send"></i>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Content Grid : stats | nouvelles réservations ─────────── -->
+  <div class="content-grid">
+
+    <!-- Statistiques -->
+    <div class="stats-card card">
+      <div class="stats-top">
+        <h3 class="stats-title">Statistiques</h3>
+        <a routerLink="/hotel/facturation/recettes" class="historique-link">
+          <i class="pi pi-list"></i>
+          Historique des transactions
+        </a>
+      </div>
+      <div class="stats-controls">
+        <div class="stats-legend">
+          <span class="legend-item">
+            <span class="legend-dot legend-dot--green"></span>Revenus
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot legend-dot--red"></span>Dépenses
+          </span>
+        </div>
+        <div class="period-filter">
+          @for (p of ['Semaine', 'Moi', 'Année']; track p) {
+            <button
+              class="period-btn"
+              [class.period-btn--active]="activePeriod === p"
+              (click)="activePeriod = p"
+            >{{ p }}</button>
+          }
+        </div>
+      </div>
+      <div class="stats-chart-area">
+        <p-chart type="line" [data]="statsData" [options]="statsOptions" height="315px" />
+      </div>
+    </div>
+
+    <!-- Nouvelles réservations -->
+    <div class="new-res-card card">
+      <div class="card-head">
+        <h3 class="card-head__title">Nouvelles réservations</h3>
+        <a href="#" class="tout-voir-link">Tout voir</a>
+      </div>
+      <div class="new-res-list">
+        @for (r of newReservations; track r.id) {
+          <div class="new-res-item">
+            <img class="new-res-img" [src]="r.image" [alt]="r.name" />
+            <div class="new-res-info">
+              <p class="new-res-name">{{ r.name }}</p>
+              <div class="new-res-meta">
+                <span class="new-res-date">
+                  <i class="pi pi-calendar"></i> {{ r.dates }}
+                </span>
+                <span class="new-res-guests">
+                  <i class="pi pi-user"></i> {{ r.guests }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Bottom Grid : mini chart | transactions | donut ────────── -->
+  <div class="bottom-grid">
+
+    <!-- Mini bar chart -->
+    <div class="mini-card card">
+      <div class="mini-card__head">
+        <div>
+          <p class="mini-card__title">Revenus</p>
+          <p class="mini-card__sub">Par jour</p>
+        </div>
+        <span class="date-range-pill">Du 01 avril 2026 au 07 avril 2026</span>
+      </div>
+      <div class="mini-card__chart">
+        <p-chart type="bar" [data]="miniBarData" [options]="miniBarOptions" height="200px" />
+      </div>
+    </div>
+
+    <!-- Transactions table -->
+    <div class="trans-card card">
+      <div class="trans-card__head">
+        <h3 class="trans-card__title">Historique des transactions</h3>
+        <button class="more-btn"><i class="pi pi-ellipsis-h" style="transform:rotate(90deg)"></i></button>
+      </div>
+      <div class="trans-scroll">
+        <table class="trans-table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Nom complet</th>
+              <th>Date</th>
+              <th>Méthode</th>
+              <th>Total</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of transactions; track t.id) {
+              <tr>
+                <td>{{ t.id }}</td>
+                <td class="td-name">{{ t.name }}</td>
+                <td>{{ t.date }}</td>
+                <td>{{ t.method }}</td>
+                <td class="td-total" [class.td-total--neg]="t.total.startsWith('-')">{{ t.total }}</td>
+                <td>
+                  <span class="statut-badge" [class]="'statut-badge--' + t.statut">
+                    <span class="badge-dot"></span>
+                    {{ t.statut === 'success' ? 'Success' : 'Failed' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Donut chart -->
+    <div class="donut-card card">
+      <div class="donut-head">
+        <h3 class="donut-title">Aperçu des reservations</h3>
+        <button class="more-btn"><i class="pi pi-ellipsis-h"></i></button>
+      </div>
+      <div class="donut-area">
+        <div class="donut-wrap">
+          <p-chart type="doughnut" [data]="donutData" [options]="donutOptions" width="176px" height="176px" />
+          <div class="donut-center">
+            <p class="donut-center__value">2,859</p>
+            <p class="donut-center__label">Total des réservations</p>
+          </div>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="donut-legend__item">
+          <span class="donut-bar donut-bar--orange"></span>
+          <div><p class="legend-pct">29.5%</p><p class="legend-txt">reservés</p></div>
+        </div>
+        <div class="donut-legend__item">
+          <span class="donut-bar donut-bar--red"></span>
+          <div><p class="legend-pct">8.5%</p><p class="legend-txt">Annulées</p></div>
+        </div>
+        <div class="donut-legend__item">
+          <span class="donut-bar donut-bar--green"></span>
+          <div><p class="legend-pct">62%</p><p class="legend-txt">Terminées</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

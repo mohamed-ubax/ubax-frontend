@@ -36,4 +36,25 @@ export const hotelRoutes: Route[] = [
         (m) => m.EmployeDetailPageComponent,
       ),
   },
+  {
+    path: 'facturation',
+    loadComponent: () =>
+      import('./pages/facturation-page/facturation-page.component').then(
+        (m) => m.FacturationPageComponent,
+      ),
+  },
+  {
+    path: 'facturation/recettes',
+    loadComponent: () =>
+      import('./pages/historique-recettes-page/historique-recettes-page.component').then(
+        (m) => m.HistoriqueRecettesPageComponent,
+      ),
+  },
+  {
+    path: 'facturation/depenses',
+    loadComponent: () =>
+      import('./pages/historique-depenses-page/historique-depenses-page.component').then(
+        (m) => m.HistoriqueDepensesPageComponent,
+      ),
+  },
 ];
