@@ -1,0 +1,13 @@
+{
+  "name": "ubax-web-immobilier",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ubax-web/features/immobilier/src",
+  "prefix": "ubax",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

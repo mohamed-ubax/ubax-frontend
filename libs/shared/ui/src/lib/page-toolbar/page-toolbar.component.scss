@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  margin-bottom: 24px;
+}
+
+.page-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &__search {
+    position: relative;
+    flex: 0 0 220px;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--p-surface-400);
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &__search-input {
+    width: 100%;
+    padding-left: 36px !important;
+  }
+
+  // Surcharge du datepicker pour aligner la hauteur
+  ::ng-deep .page-toolbar__datepicker {
+    .p-datepicker-input {
+      min-width: 180px;
+    }
+  }
+
+  &__export {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    color: var(--p-surface-600) !important;
+    border-color: var(--p-surface-300) !important;
+
+    i { font-size: 14px; }
+  }
+}

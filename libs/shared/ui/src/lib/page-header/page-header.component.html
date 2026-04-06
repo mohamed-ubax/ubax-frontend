@@ -1,0 +1,14 @@
+<div class="page-header">
+  <div class="page-header__left">
+    @if (backLink()) {
+      <a [routerLink]="backLink()" class="page-header__back" [attr.aria-label]="backLabel()">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+    }
+    <h1 class="page-header__title">{{ title() }}</h1>
+  </div>
+
+  <div class="page-header__actions">
+    <ng-content />
+  </div>
+</div>

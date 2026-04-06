@@ -2,4 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* You can add global styles to this file, and also import other style files */
+@import 'primeicons/primeicons.css';
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ── PrimeNG component token overrides (Ubax Design) ──────────────────────── */
+:root {
+  --p-button-border-radius: 8px;
+  --p-inputtext-border-radius: 8px;
+  --p-select-border-radius: 8px;
+  --p-datepicker-border-radius: 8px;
+  --p-card-border-radius: 12px;
+  --p-card-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.08);
+  --p-dialog-border-radius: 16px;
+  --p-badge-border-radius: 6px;
+}
+
+/* ── Reset global ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Lexend', 'Inter', system-ui, -apple-system, sans-serif;
+  background: #ecf2f7;
+  color: #222;
+}

@@ -1,0 +1,39 @@
+import { Route } from '@angular/router';
+
+export const hotelRoutes: Route[] = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./pages/hotel-overview-page/hotel-overview-page.component').then(
+        (m) => m.HotelOverviewPageComponent,
+      ),
+  },
+  {
+    path: 'chambres/ajouter',
+    loadComponent: () =>
+      import('./pages/chambre-add-page/chambre-add-page.component').then(
+        (m) => m.ChambreAddPageComponent,
+      ),
+  },
+  {
+    path: 'employes',
+    loadComponent: () =>
+      import('./pages/employes-list-page/employes-list-page.component').then(
+        (m) => m.EmployesListPageComponent,
+      ),
+  },
+  {
+    path: 'employes/ajouter',
+    loadComponent: () =>
+      import('./pages/employe-add-page/employe-add-page.component').then(
+        (m) => m.EmployeAddPageComponent,
+      ),
+  },
+  {
+    path: 'employes/:id',
+    loadComponent: () =>
+      import('./pages/employe-detail-page/employe-detail-page.component').then(
+        (m) => m.EmployeDetailPageComponent,
+      ),
+  },
+];
