@@ -1,9 +1,37 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, inject, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { authInterceptor, UbaxPreset } from '@ubax-workspace/ubax-web-shell';
+import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
+
+/**
+ * En dev, initialise l'utilisateur mock AVANT que le router évalue les
+ * canMatch guards — garantit que authStore.role() !== null dès le premier
+ * chargement de la page.
+ */
+function provideMockUserInDev() {
+  if (!isDevMode()) return [];
+  return [{
+    provide: APP_INITIALIZER,
+    useFactory: () => {
+      const authStore = inject(AuthStore);
+      return () => {
+        if (authStore.token() && !authStore.user()) {
+          authStore.setUser({
+            id: 'dev-001',
+            nom: 'Kouassi',
+            prenom: 'Jean-Marc',
+            email: 'jm.kouassi@ubax.io',
+            role: Role.DG,
+          });
+        }
+      };
+    },
+    multi: true,
+  }];
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,5 +48,6 @@ export const appConfig: ApplicationConfig = {
       },
       ripple: true,
     }),
+    ...provideMockUserInDev(),
   ],
 };
