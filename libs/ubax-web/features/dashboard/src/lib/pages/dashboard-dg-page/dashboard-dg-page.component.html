@@ -8,10 +8,10 @@
         <i class="pi pi-search"></i>
         <input type="text" placeholder="Recherche ..." />
       </div>
-      <div class="search-field">
+      <button class="search-field search-field--btn" (click)="datePickerOpen.set(true)">
         <i class="pi pi-calendar"></i>
-        <input type="text" placeholder="Sélectionner une date" readonly />
-      </div>
+        <span>{{ selectedRange() ? (selectedRange()!.start | date:'dd/MM/yy') + ' – ' + (selectedRange()!.end | date:'dd/MM/yy') : 'Sélectionner une date' }}</span>
+      </button>
       <button class="export-btn">
         <i class="pi pi-upload"></i>
         Exporter les données
@@ -303,3 +303,9 @@
   }
 
 </div>
+
+<!-- ── Date range picker (fixed overlay) ─────────────────────────── -->
+<ubax-date-range-picker
+  [(isOpen)]="datePickerOpen"
+  (applied)="onDateRangeApplied($event)"
+/>

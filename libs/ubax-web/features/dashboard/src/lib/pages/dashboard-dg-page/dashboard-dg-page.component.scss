@@ -73,6 +73,21 @@
     background: #ecf2f7;
     border-color: transparent;
   }
+
+  &--btn {
+    cursor: pointer;
+    user-select: none;
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: #aaa;
+      white-space: nowrap;
+    }
+
+    &:hover { border-color: #1a3047; }
+  }
 }
 
 /* ── Export button ────────────────────────────────────────────────── */

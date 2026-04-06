@@ -1,21 +1,30 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import { DateRange, DateRangePickerComponent, UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 
 const PAGE_SIZE = 5;
 
 @Component({
   selector: 'ubax-dashboard-dg-page',
   standalone: true,
-  imports: [RouterLink, ChartModule, UbaxPaginatorComponent],
+  imports: [RouterLink, ChartModule, UbaxPaginatorComponent, DateRangePickerComponent, DatePipe],
   templateUrl: './dashboard-dg-page.component.html',
   styleUrl: './dashboard-dg-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardDgPageComponent {
   readonly authStore = inject(AuthStore);
+
+  // ── Date range picker ─────────────────────────────────────────────────
+  readonly datePickerOpen = signal(false);
+  readonly selectedRange  = signal<DateRange | null>(null);
+
+  onDateRangeApplied(range: DateRange): void {
+    this.selectedRange.set(range);
+  }
 
   // ── Full-list toggle ──────────────────────────────────────────────────
   readonly showFullList = signal(false);
