@@ -215,10 +215,17 @@
   flex-direction: column;
 }
 
-.chart-legend {
+.revenue-legend-row {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 0 20px 10px;
+}
+
+.revenue-divider {
+  height: 1px;
+  background: #f0f2f6;
+  margin: 1rem 20px 3rem;
 }
 
 .legend-dot {
@@ -301,14 +308,14 @@
   border-collapse: collapse;
 
   thead tr {
-    background: #f5f7fa;
+    background: #1a3047;
   }
 
   th {
     font-family: 'Lexend', sans-serif;
     font-size: 12px;
     font-weight: 500;
-    color: #888;
+    color: #fff;
     padding: 10px 16px;
     text-align: left;
     white-space: nowrap;
@@ -379,18 +386,20 @@
 
 .voir-btn {
   border: none;
-  background: transparent;
+  background: #ecf2f7;
+  border-radius: 20px;
+  padding: 5px 14px;
   font-family: 'Lexend', sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: #1a3047;
   cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
 
   &:hover {
-    color: #e87d1e;
+    background: #dce8f2;
   }
 }
 

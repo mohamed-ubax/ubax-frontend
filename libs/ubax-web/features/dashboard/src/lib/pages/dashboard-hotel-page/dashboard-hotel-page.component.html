@@ -68,11 +68,12 @@
           <div class="card revenue-card">
             <div class="card-header">
               <h3 class="card-title">Revenus</h3>
-              <div class="chart-legend">
-                <span class="legend-dot"></span>
-                <span class="legend-label">Villa</span>
-              </div>
             </div>
+            <div class="revenue-legend-row">
+              <span class="legend-dot"></span>
+              <span class="legend-label">Villa</span>
+            </div>
+            <div class="revenue-divider"></div>
             <div class="bar-chart-wrap">
               <p-chart type="bar" [data]="revenueData" [options]="revenueOptions" height="240px" />
             </div>

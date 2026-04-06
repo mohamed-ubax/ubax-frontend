@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChartModule } from 'primeng/chart';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -12,24 +12,25 @@ import { DatePickerModule } from 'primeng/datepicker';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardHotelPageComponent {
-
   // ── KPI values ────────────────────────────────────────────────────────
   readonly occupancyRate = 82;
-  readonly arriveeCount  = 8;
-  readonly departCount   = 3;
-  readonly revenusJour   = '750 000 FCFA';
+  readonly arriveeCount = 8;
+  readonly departCount = 3;
+  readonly revenusJour = '750 000 FCFA';
 
   // ── Calendar ──────────────────────────────────────────────────────────
   calendarDate = new Date();
 
   // ── Taux d'occupation donut ───────────────────────────────────────────
   readonly occupancyDonutData = {
-    datasets: [{
-      data: [82, 18],
-      backgroundColor: ['#16b55b', '#e5e7eb'],
-      borderWidth: 0,
-      hoverBorderWidth: 0,
-    }],
+    datasets: [
+      {
+        data: [82, 18],
+        backgroundColor: ['#16b55b', '#e5e7eb'],
+        borderWidth: 0,
+        hoverBorderWidth: 0,
+      },
+    ],
   };
 
   readonly occupancyDonutOptions = {
@@ -43,14 +44,16 @@ export class DashboardHotelPageComponent {
   // ── Revenue bar chart ─────────────────────────────────────────────────
   readonly revenueData = {
     labels: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
-    datasets: [{
-      data: [1100, 1430, 620, 1600, 2030, 900, 810],
-      backgroundColor: '#1a3047',
-      borderRadius: 8,
-      borderSkipped: false,
-      barPercentage: 0.55,
-      categoryPercentage: 0.75,
-    }],
+    datasets: [
+      {
+        data: [1100, 1430, 620, 1600, 2030, 900, 810],
+        backgroundColor: '#1a3047',
+        borderRadius: 8,
+        borderSkipped: false,
+        barPercentage: 0.55,
+        categoryPercentage: 0.75,
+      },
+    ],
   };
 
   readonly revenueOptions = {
@@ -59,7 +62,11 @@ export class DashboardHotelPageComponent {
       x: {
         grid: { display: false },
         border: { display: false },
-        ticks: { font: { family: 'Lexend', size: 11 }, color: '#aaa', maxRotation: 0 },
+        ticks: {
+          font: { family: 'Lexend', size: 11 },
+          color: '#aaa',
+          maxRotation: 0,
+        },
       },
       y: {
         grid: { color: '#f0f2f6' },
@@ -82,34 +89,39 @@ export class DashboardHotelPageComponent {
   };
 
   // ── Reservations line chart ───────────────────────────────────────────
-  readonly reservationsCount  = 58;
+  readonly reservationsCount = 58;
   readonly reservationsGrowth = '23%';
 
   readonly months = [
-    { label: 'Jan',  active: false },
-    { label: 'Fev',  active: false },
-    { label: 'mars', active: true  },
-    { label: 'Avr',  active: false },
-    { label: 'Mai',  active: false },
+    { label: 'Jan', active: false },
+    { label: 'Fev', active: false },
+    { label: 'mars', active: true },
+    { label: 'Avr', active: false },
+    { label: 'Mai', active: false },
     { label: 'Juin', active: false },
   ];
 
   readonly reservationsData = {
     labels: ['Jan', 'Fev', 'mars', 'Avr', 'Mai', 'Juin'],
-    datasets: [{
-      data: [28, 44, 58, 38, 32, 48],
-      borderColor: '#e87d1e',
-      backgroundColor: 'rgba(232, 125, 30, 0.12)',
-      fill: true,
-      tension: 0.45,
-      pointRadius: 0,
-      pointHoverRadius: 5,
-      borderWidth: 2,
-    }],
+    datasets: [
+      {
+        data: [28, 44, 58, 38, 32, 48],
+        borderColor: '#e87d1e',
+        backgroundColor: 'rgba(232, 125, 30, 0.12)',
+        fill: true,
+        tension: 0.45,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        borderWidth: 2,
+      },
+    ],
   };
 
   readonly reservationsOptions = {
-    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+    plugins: {
+      legend: { display: false },
+      tooltip: { mode: 'index', intersect: false },
+    },
     scales: {
       x: { display: false },
       y: { display: false },
@@ -126,7 +138,7 @@ export class DashboardHotelPageComponent {
       icon: 'pi-bell',
       title: 'Nouvelle réservation',
       sub: 'Résidence Plateau - App 12',
-      time: 'Il y\'a 5 minutes',
+      time: "Il y'a 5 minutes",
     },
     {
       id: 2,
@@ -134,7 +146,7 @@ export class DashboardHotelPageComponent {
       icon: 'pi-times-circle',
       title: 'Réservation Annulée',
       sub: 'Résidence Plateau - App 12',
-      time: 'Il y\'a 15 minutes',
+      time: "Il y'a 15 minutes",
     },
     {
       id: 3,
@@ -142,7 +154,7 @@ export class DashboardHotelPageComponent {
       icon: 'pi-check-circle',
       title: 'Paiement confirmé',
       sub: 'Résidence Plateau - App 12',
-      time: 'Il y\'a 35 minutes',
+      time: "Il y'a 35 minutes",
     },
     {
       id: 4,
@@ -150,7 +162,7 @@ export class DashboardHotelPageComponent {
       icon: 'pi-bell',
       title: 'Nouvelle réservation',
       sub: 'Résidence Plateau - App 12',
-      time: 'Il y\'a 5 minutes',
+      time: "Il y'a 5 minutes",
     },
     {
       id: 5,
@@ -158,17 +170,57 @@ export class DashboardHotelPageComponent {
       icon: 'pi-check-circle',
       title: 'Paiement confirmé',
       sub: 'Résidence Plateau - App 12',
-      time: 'Il y\'a 35 minutes',
+      time: "Il y'a 35 minutes",
     },
   ];
 
   // ── Reservations table ────────────────────────────────────────────────
   readonly reservations = [
-    { id: 1, initials: 'KI', guest: 'Koné Ibrahim',    chambre: 'Résidence Plateau', duree: '2 jours', dates: '14 /04 / 2026 - 18 / 04 2026', statut: 'Confirmé' },
-    { id: 2, initials: 'KI', guest: 'Koné Ibrahim',    chambre: 'Résidence Plateau', duree: '2 jours', dates: '14 /04 / 2026 - 18 / 04 2026', statut: 'Confirmé' },
-    { id: 3, initials: 'KI', guest: 'Koné Ibrahim',    chambre: 'Résidence Plateau', duree: '2 jours', dates: '14 /04 / 2026 - 18 / 04 2026', statut: 'Confirmé' },
-    { id: 4, initials: 'KI', guest: 'Koné Ibrahim',    chambre: 'Résidence Plateau', duree: '2 jours', dates: '14 /04 / 2026 - 18 / 04 2026', statut: 'Confirmé' },
-    { id: 5, initials: 'KI', guest: 'Koné Ibrahim',    chambre: 'Résidence Plateau', duree: '2 jours', dates: '14 /04 / 2026 - 18 / 04 2026', statut: 'Confirmé' },
+    {
+      id: 1,
+      initials: 'KI',
+      guest: 'Koné Ibrahim',
+      chambre: 'Résidence Plateau',
+      duree: '2 jours',
+      dates: '14 /04 / 2026 - 18 / 04 2026',
+      statut: 'Confirmé',
+    },
+    {
+      id: 2,
+      initials: 'KI',
+      guest: 'Koné Ibrahim',
+      chambre: 'Résidence Plateau',
+      duree: '2 jours',
+      dates: '14 /04 / 2026 - 18 / 04 2026',
+      statut: 'Confirmé',
+    },
+    {
+      id: 3,
+      initials: 'KI',
+      guest: 'Koné Ibrahim',
+      chambre: 'Résidence Plateau',
+      duree: '2 jours',
+      dates: '14 /04 / 2026 - 18 / 04 2026',
+      statut: 'Confirmé',
+    },
+    {
+      id: 4,
+      initials: 'KI',
+      guest: 'Koné Ibrahim',
+      chambre: 'Résidence Plateau',
+      duree: '2 jours',
+      dates: '14 /04 / 2026 - 18 / 04 2026',
+      statut: 'Confirmé',
+    },
+    {
+      id: 5,
+      initials: 'KI',
+      guest: 'Koné Ibrahim',
+      chambre: 'Résidence Plateau',
+      duree: '2 jours',
+      dates: '14 /04 / 2026 - 18 / 04 2026',
+      statut: 'Confirmé',
+    },
   ];
 
   // ── Available properties ──────────────────────────────────────────────
@@ -178,8 +230,10 @@ export class DashboardHotelPageComponent {
       name: 'Immeuble kalia',
       location: 'Abidjan, Cocody',
       type: 'Location',
-      image: 'https://www.figma.com/api/mcp/asset/403c48dc-2834-43b0-a056-06fc1d7df9c4',
-      tenantAvatar: 'https://www.figma.com/api/mcp/asset/b794a5ad-dc26-4721-b608-71bffef0e92f',
+      image:
+        'https://www.figma.com/api/mcp/asset/403c48dc-2834-43b0-a056-06fc1d7df9c4',
+      tenantAvatar:
+        'https://www.figma.com/api/mcp/asset/b794a5ad-dc26-4721-b608-71bffef0e92f',
       tenantName: 'Aïcha Kouadio',
       tenantRole: 'Locataire',
       price: '400 000 FCFA',
@@ -189,8 +243,10 @@ export class DashboardHotelPageComponent {
       name: 'Immeuble kalia',
       location: 'Abidjan, Cocody',
       type: 'Location',
-      image: 'https://www.figma.com/api/mcp/asset/5347f272-41aa-4973-9971-c0640ceccbb0',
-      tenantAvatar: 'https://www.figma.com/api/mcp/asset/e13c9334-8117-45c0-b18b-6dbe39380647',
+      image:
+        'https://www.figma.com/api/mcp/asset/5347f272-41aa-4973-9971-c0640ceccbb0',
+      tenantAvatar:
+        'https://www.figma.com/api/mcp/asset/e13c9334-8117-45c0-b18b-6dbe39380647',
       tenantName: 'Patrick Koffi',
       tenantRole: 'Locataire',
       price: '350 000 FCFA',
@@ -200,8 +256,10 @@ export class DashboardHotelPageComponent {
       name: 'Résidence Plateau',
       location: 'Abidjan, Plateau',
       type: 'Location',
-      image: 'https://www.figma.com/api/mcp/asset/403c48dc-2834-43b0-a056-06fc1d7df9c4',
-      tenantAvatar: 'https://www.figma.com/api/mcp/asset/b794a5ad-dc26-4721-b608-71bffef0e92f',
+      image:
+        'https://www.figma.com/api/mcp/asset/403c48dc-2834-43b0-a056-06fc1d7df9c4',
+      tenantAvatar:
+        'https://www.figma.com/api/mcp/asset/b794a5ad-dc26-4721-b608-71bffef0e92f',
       tenantName: 'Koné Ibrahim',
       tenantRole: 'Locataire',
       price: '250 000 FCFA',
@@ -211,8 +269,10 @@ export class DashboardHotelPageComponent {
       name: 'Villa Riviera',
       location: 'Abidjan, Riviera',
       type: 'Location',
-      image: 'https://www.figma.com/api/mcp/asset/5347f272-41aa-4973-9971-c0640ceccbb0',
-      tenantAvatar: 'https://www.figma.com/api/mcp/asset/e13c9334-8117-45c0-b18b-6dbe39380647',
+      image:
+        'https://www.figma.com/api/mcp/asset/5347f272-41aa-4973-9971-c0640ceccbb0',
+      tenantAvatar:
+        'https://www.figma.com/api/mcp/asset/e13c9334-8117-45c0-b18b-6dbe39380647',
       tenantName: 'Koffi Didier',
       tenantRole: 'Locataire',
       price: '600 000 FCFA',
