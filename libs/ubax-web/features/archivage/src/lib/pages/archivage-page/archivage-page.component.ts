@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PageHeaderComponent, PageToolbarComponent, PageTabsComponent, FilterBarComponent, PageTab } from '@ubax-workspace/shared-ui';
+import { PageHeaderComponent, PageTabsComponent, FilterBarComponent, PageTab } from '@ubax-workspace/shared-ui';
 
 @Component({
   selector: 'ubax-archivage-page',
   standalone: true,
-  imports: [PageHeaderComponent, PageToolbarComponent, PageTabsComponent, FilterBarComponent],
+  imports: [PageHeaderComponent, PageTabsComponent, FilterBarComponent],
   template: `
     <ubax-page-header title="Biens Archivés">
     </ubax-page-header>

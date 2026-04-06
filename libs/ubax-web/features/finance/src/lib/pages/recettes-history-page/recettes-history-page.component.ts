@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { PageHeaderComponent, PageToolbarComponent, FilterBarComponent } from '@ubax-workspace/shared-ui';
+import { PageHeaderComponent, PageToolbarComponent } from '@ubax-workspace/shared-ui';
 
 @Component({
   selector: 'ubax-recettes-history-page',
   standalone: true,
-  imports: [PageHeaderComponent, PageToolbarComponent, FilterBarComponent],
+  imports: [PageHeaderComponent, PageToolbarComponent],
   template: `
     <ubax-page-header title="Finance" />
     <ubax-page-toolbar />
