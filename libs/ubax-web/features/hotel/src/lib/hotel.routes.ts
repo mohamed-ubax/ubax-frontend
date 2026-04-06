@@ -57,4 +57,11 @@ export const hotelRoutes: Route[] = [
         (m) => m.HistoriqueDepensesPageComponent,
       ),
   },
+  {
+    path: 'facturation/ajouter-depense',
+    loadComponent: () =>
+      import('./pages/ajouter-depense-page/ajouter-depense-page.component').then(
+        (m) => m.AjouterDepensePageComponent,
+      ),
+  },
 ];

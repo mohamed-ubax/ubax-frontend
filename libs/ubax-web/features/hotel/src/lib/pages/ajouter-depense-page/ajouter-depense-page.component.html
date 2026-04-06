@@ -1,0 +1,208 @@
+<div class="add-dep-page">
+
+  <!-- ── Page header ─────────────────────────────────────────────── -->
+  <h1 class="page-title">Ajouter une dépense</h1>
+
+  <!-- ── Stepper ─────────────────────────────────────────────────── -->
+  <div class="stepper">
+    @for (step of steps; track step.num; let last = $last) {
+      <div class="stepper__item"
+        [class.stepper__item--active]="isStepActive(step.num)"
+        [class.stepper__item--done]="isStepDone(step.num)"
+        (click)="activeStep = step.num"
+      >
+        <div class="stepper__circle">
+          @if (isStepDone(step.num) || isStepActive(step.num)) {
+            <i class="pi pi-check"></i>
+          } @else {
+            {{ step.num }}
+          }
+        </div>
+        <span class="stepper__label">{{ step.label }}</span>
+      </div>
+      @if (!last) {
+        <div class="stepper__line" [class.stepper__line--done]="step.num < activeStep"></div>
+      }
+    }
+  </div>
+
+  <!-- ── Two-column layout ────────────────────────────────────────── -->
+  <div class="form-layout">
+
+    <!-- Main form card -->
+    <div class="form-card">
+
+      <!-- Orange section header -->
+      <div class="section-header">
+        <div class="section-header__icon">
+          <i class="pi {{ sectionIcon }}"></i>
+        </div>
+        <div>
+          <p class="section-header__title">{{ sectionTitle }}</p>
+          <p class="section-header__sub">{{ sectionSubtitle }}</p>
+        </div>
+      </div>
+
+      <!-- White form body -->
+      <div class="form-body">
+
+        <!-- ── STEP 1 ───────────────────────────── -->
+        @if (activeStep === 1) {
+
+          <div class="field">
+            <label class="field__label" for="dep-nom">Nom</label>
+            <input id="dep-nom" class="field__input" type="text" placeholder="Ex: Réparation climatiseur" />
+          </div>
+
+          <div class="field">
+            <span class="field__label">Catégorie</span>
+            <fieldset class="category-chips">
+              <legend class="sr-only">Catégorie</legend>
+              @for (cat of categories; track cat.label) {
+                <button
+                  class="cat-chip"
+                  [class.cat-chip--active]="selectedCategory === cat.label"
+                  (click)="selectedCategory = cat.label"
+                >
+                  <span class="cat-chip__dot" [style.background]="cat.color"></span>
+                  {{ cat.label }}
+                </button>
+              }
+            </fieldset>
+          </div>
+
+          <div class="field-row">
+            <div class="field field--half">
+              <label class="field__label" for="dep-date">Date de la dépense</label>
+              <div class="field__input-wrap">
+                <input id="dep-date" class="field__input" type="text" value="09 Mars 2026" />
+                <i class="pi pi-calendar field__icon"></i>
+              </div>
+            </div>
+            <div class="field field--half">
+              <label class="field__label" for="dep-ref">N de référence</label>
+              <input id="dep-ref" class="field__input" type="text" value="FAC-00123" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-suivant" (click)="nextStep()">Suivant</button>
+          </div>
+        }
+
+        <!-- ── STEP 2 ───────────────────────────── -->
+        @if (activeStep === 2) {
+
+          <div class="field-row">
+            <div class="field field--narrow">
+              <label class="field__label" for="dep-fournisseur">Fournisseur</label>
+              <div class="field__input-wrap">
+                <input id="dep-fournisseur" class="field__input" type="text" placeholder="Sélectionner" />
+                <i class="pi pi-chevron-down field__icon"></i>
+              </div>
+            </div>
+            <div class="field field--wide">
+              <label class="field__label" for="dep-paiement">Mode de paiement</label>
+              <div class="field__input-wrap">
+                <input id="dep-paiement" class="field__input" type="text" placeholder="Sélectionner" />
+                <i class="pi pi-chevron-down field__icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field field--montant">
+              <label class="field__label" for="dep-montant">Montant HT</label>
+              <div class="field__input-wrap">
+                <input id="dep-montant" class="field__input" type="text" value="0" />
+                <span class="field__unit">FCFA</span>
+              </div>
+            </div>
+            <div class="field field--tva">
+              <label class="field__label" for="dep-tva">TVA (%)</label>
+              <input id="dep-tva" class="field__input" type="text" value="18%" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="dep-desc">Description</label>
+            <textarea id="dep-desc" class="field__textarea" placeholder="Détails supplémentaires contexte et observations"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-suivant" (click)="nextStep()">Suivant</button>
+          </div>
+        }
+
+        <!-- ── STEP 3 ───────────────────────────── -->
+        @if (activeStep === 3) {
+
+          <div class="drop-zone" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)">
+            <i class="pi pi-paperclip drop-zone__icon"></i>
+            <p class="drop-zone__text">
+              <span class="drop-zone__text--orange">Cliquer pour importer</span>
+              &nbsp;ou glisser-déposer
+            </p>
+            <p class="drop-zone__sub">PDF, PNG, JPG, XLSX — max 10 Mo par fichier</p>
+          </div>
+
+          <div class="form-actions form-actions--double">
+            <button class="btn-draft">Enregistrer brouillon</button>
+            <button class="btn-save">Enregistrer la dépense</button>
+          </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- ── Summary panel ─────────────────────────────────────────── -->
+    <div class="summary-panel">
+
+      <div class="summary-header">
+        <p class="summary-header__label">Aperçu de la dépense</p>
+        <p class="summary-header__amount">0 FCFA</p>
+        <p class="summary-header__title">Aucune intitulé</p>
+        <p class="summary-header__date">02 Mars 2026</p>
+      </div>
+
+      <div class="summary-body">
+        <div class="summary-rows">
+          @for (row of [
+            { label: 'Catégories',   value: '—' },
+            { label: 'Fournisseur',  value: '—' },
+            { label: 'Paiement',     value: '—' },
+            { label: 'TVA incluse',  value: '0 FCFA' },
+            { label: 'Pièces jointes', value: 'Aucune' }
+          ]; track row.label) {
+            <div class="summary-row">
+              <span class="summary-row__label">{{ row.label }}</span>
+              <span class="summary-row__value">{{ row.value }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="status-section">
+          @for (s of statuses; track s.key) {
+            <button
+              class="status-option"
+              [class.status-option--active]="activeStatus === s.key"
+              (click)="activeStatus = s.key"
+            >
+              <div class="status-option__radio">
+                @if (activeStatus === s.key) {
+                  <div class="status-option__dot" [style.background]="s.color"></div>
+                }
+              </div>
+              <div>
+                <p class="status-option__label" [style.color]="activeStatus === s.key ? s.color : '#222'">{{ s.label }}</p>
+                <p class="status-option__sub">{{ s.sub }}</p>
+              </div>
+            </button>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
