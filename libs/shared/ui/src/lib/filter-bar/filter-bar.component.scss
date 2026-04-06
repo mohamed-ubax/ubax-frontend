@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  &__keyword {
+    flex: 0 0 160px;
+  }
+
+  ::ng-deep {
+    .filter-bar__date .p-datepicker-input { min-width: 148px; }
+    .filter-bar__select .p-select { min-width: 160px; }
+  }
+
+  &__btn {
+    background: var(--p-primary-500, #f4602a) !important;
+    border-color: var(--p-primary-500, #f4602a) !important;
+    color: #fff !important;
+    font-weight: 600;
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+}

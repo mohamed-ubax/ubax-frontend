@@ -1,0 +1,53 @@
+<div class="filter-bar">
+  @if (showKeyword()) {
+    <input
+      pInputText
+      type="text"
+      class="filter-bar__keyword"
+      [placeholder]="keywordPlaceholder()"
+      [(ngModel)]="keyword"
+    />
+  }
+
+  @if (showDateRange()) {
+    <p-datepicker
+      [(ngModel)]="dateDebut"
+      placeholder="Date de début"
+      [showIcon]="true"
+      appendTo="body"
+      styleClass="filter-bar__date"
+    />
+    <p-datepicker
+      [(ngModel)]="dateFin"
+      placeholder="Date de fin"
+      [showIcon]="true"
+      appendTo="body"
+      styleClass="filter-bar__date"
+    />
+  }
+
+  @for (sel of selects(); track sel.key) {
+    <p-select
+      [options]="sel.options"
+      [ngModel]="selectValues()[sel.key]"
+      (ngModelChange)="onSelectChange(sel.key, $event)"
+      [placeholder]="sel.placeholder"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+      styleClass="filter-bar__select"
+    />
+  }
+
+  <!-- Slot pour selects ou filtres supplémentaires -->
+  <ng-content />
+
+  <button
+    pButton
+    type="button"
+    class="filter-bar__btn"
+    (click)="onFilter()"
+  >
+    Filtrer
+  </button>
+</div>

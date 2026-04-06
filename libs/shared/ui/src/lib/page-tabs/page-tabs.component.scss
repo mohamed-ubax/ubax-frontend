@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.page-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  &__item {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--p-surface-500, #64748b);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+
+    &:hover:not(.is-active) {
+      background: var(--p-surface-100);
+      color: var(--p-surface-700);
+    }
+
+    &.is-active {
+      background: var(--p-surface-800, #1e293b);
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+}

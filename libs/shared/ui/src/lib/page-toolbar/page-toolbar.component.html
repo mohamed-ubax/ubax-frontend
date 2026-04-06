@@ -1,0 +1,40 @@
+<div class="page-toolbar">
+  @if (showSearch()) {
+    <div class="page-toolbar__search">
+      <i class="pi pi-search page-toolbar__search-icon"></i>
+      <input
+        pInputText
+        type="text"
+        class="page-toolbar__search-input"
+        [placeholder]="searchPlaceholder()"
+        [(ngModel)]="searchValue"
+      />
+    </div>
+  }
+
+  @if (showDate()) {
+    <p-datepicker
+      [(ngModel)]="dateValue"
+      [showIcon]="true"
+      placeholder="Sélectionner une date"
+      styleClass="page-toolbar__datepicker"
+      appendTo="body"
+    />
+  }
+
+  @if (showExport()) {
+    <button
+      pButton
+      type="button"
+      class="page-toolbar__export p-button-outlined"
+      (click)="onExport()"
+      aria-label="Exporter les données"
+    >
+      <i class="pi pi-upload"></i>
+      <span>Exporter les données</span>
+    </button>
+  }
+
+  <!-- Slot pour actions supplémentaires -->
+  <ng-content />
+</div>

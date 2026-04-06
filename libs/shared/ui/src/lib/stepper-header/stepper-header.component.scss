@@ -1,0 +1,83 @@
+:host {
+  display: block;
+  margin-bottom: 32px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+
+  &__step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--p-surface-300, #cbd5e1);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--p-surface-400, #94a3b8);
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+
+  &__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--p-surface-400, #94a3b8);
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+
+  &__line {
+    flex: 1;
+    min-width: 80px;
+    height: 2px;
+    background: var(--p-surface-200, #e2e8f0);
+    margin-bottom: 24px; // aligns with the circle center
+    transition: background 0.2s;
+
+    &.is-done {
+      background: var(--p-primary-500, #f4602a);
+    }
+  }
+
+  // Étape active
+  .is-active {
+    .stepper__circle {
+      background: var(--p-primary-500, #f4602a);
+      border-color: var(--p-primary-500, #f4602a);
+      color: #fff;
+    }
+
+    .stepper__label {
+      color: var(--p-primary-500, #f4602a);
+      font-weight: 600;
+    }
+  }
+
+  // Étapes terminées
+  .is-done {
+    .stepper__circle {
+      background: var(--p-primary-500, #f4602a);
+      border-color: var(--p-primary-500, #f4602a);
+      color: #fff;
+    }
+
+    .stepper__label {
+      color: var(--p-surface-600, #475569);
+    }
+  }
+}

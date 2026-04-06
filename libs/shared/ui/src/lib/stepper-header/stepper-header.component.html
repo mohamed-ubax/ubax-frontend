@@ -1,0 +1,18 @@
+<div class="stepper">
+  @for (step of steps(); track $index) {
+    <div class="stepper__step" [class.is-active]="$index === activeStep()" [class.is-done]="$index < activeStep()">
+      <div class="stepper__circle">
+        @if ($index < activeStep()) {
+          <i class="pi pi-check"></i>
+        } @else {
+          {{ $index + 1 }}
+        }
+      </div>
+      <span class="stepper__label">{{ step.label }}</span>
+    </div>
+
+    @if (!$last) {
+      <div class="stepper__line" [class.is-done]="$index < activeStep()"></div>
+    }
+  }
+</div>

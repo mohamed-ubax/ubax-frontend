@@ -1,0 +1,29 @@
+<div class="paginator">
+
+  <button
+    class="paginator-arrow"
+    (click)="prev()"
+    [disabled]="currentPage() === 1"
+    aria-label="Page précédente"
+  >
+    <i class="pi pi-chevron-left"></i>
+  </button>
+
+  @for (page of pages(); track page) {
+    <button
+      class="paginator-page"
+      [class.is-active]="page === currentPage()"
+      (click)="goTo(page)"
+    >{{ page }}</button>
+  }
+
+  <button
+    class="paginator-arrow"
+    (click)="next()"
+    [disabled]="currentPage() === totalPages()"
+    aria-label="Page suivante"
+  >
+    <i class="pi pi-chevron-right"></i>
+  </button>
+
+</div>

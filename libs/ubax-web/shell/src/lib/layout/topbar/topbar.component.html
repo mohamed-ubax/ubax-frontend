@@ -1,0 +1,44 @@
+<header class="ubax-topbar">
+  <div class="topbar-inner">
+
+    <!-- Logo -->
+    <a routerLink="/tableau-de-bord" class="topbar-logo" aria-label="Accueil Ubax">
+      <img src="header/header-logo.png" alt="Ubax" />
+    </a>
+
+    <!-- Navigation principale -->
+    <nav class="topbar-nav" aria-label="Navigation principale">
+      @for (item of visibleItems(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="is-active"
+          class="topbar-nav__item"
+        >{{ item.label }}</a>
+      }
+    </nav>
+
+    <!-- Actions droite -->
+    <div class="topbar-actions">
+      <button class="topbar-icon-btn" aria-label="Notifications" pBadge value="3">
+        <i class="pi pi-bell"></i>
+      </button>
+      <button class="topbar-icon-btn" aria-label="Paramètres">
+        <i class="pi pi-cog"></i>
+      </button>
+
+      <div class="topbar-user">
+        <p-avatar
+          [image]="authStore.user()?.avatar"
+          [label]="!authStore.user()?.avatar ? authStore.user()?.prenom?.charAt(0) : undefined"
+          shape="circle"
+          size="normal"
+        />
+        <div class="topbar-user__info">
+          <span class="topbar-user__name">{{ authStore.fullName() }}</span>
+          <span class="topbar-user__role">{{ roleLabel() }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</header>
