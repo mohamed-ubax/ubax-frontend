@@ -1,0 +1,932 @@
+/* ── Dashboard ────────────────────────────────────────────────────── */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep {
+  .p-motion {
+    width: 100%;
+  }
+}
+
+/* ── Card base ────────────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border: 1px solid #f1f3f7;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(25, 33, 61, 0.05);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 12px;
+}
+
+.card-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a3047;
+  margin: 0;
+
+  &--sm {
+    font-size: 14px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MAIN GRID  — col principale (left+middle) | panneau droit
+   ════════════════════════════════════════════════════════════════════ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 16px;
+  align-items: start;
+}
+
+.main-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   KPI ROW
+   ════════════════════════════════════════════════════════════════════ */
+.kpi-outer {
+  padding: 14px;
+}
+
+.kpi-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 10px;
+  padding: 14px 16px;
+  min-height: 101px;
+
+  &--light {
+    background: #ecf2f7;
+  }
+  &--purple {
+    background: #dad8ff;
+  }
+  &--peach {
+    background: #ffecdb;
+  }
+  &--blue {
+    background: #d2ebff;
+  }
+}
+
+/* Donut occupation */
+.kpi-donut {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ::ng-deep canvas {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  &__pct {
+    position: absolute;
+    font-family: 'Lexend', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #16b55b;
+    pointer-events: none;
+  }
+}
+
+/* Icon circles */
+.kpi-icon-wrap {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 22px;
+  }
+
+  &--purple {
+    background:
+      url('https://www.figma.com/api/mcp/asset/030a896b-b588-4434-acad-c4445bee4979')
+        center/cover no-repeat,
+      #dad8ff;
+  }
+  &--orange {
+    background:
+      url('https://www.figma.com/api/mcp/asset/6550f3c1-13f5-428c-8e57-9658c03f3a1a')
+        center/cover no-repeat,
+      #ffecdb;
+  }
+  &--blue {
+    background:
+      url('https://www.figma.com/api/mcp/asset/0625c501-9466-4b5a-918d-21eb7d0aa42e')
+        center/cover no-repeat,
+      #d2ebff;
+  }
+}
+
+/* KPI text */
+.kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.kpi-label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.kpi-value {
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  &--green {
+    color: #16b55b;
+  }
+  &--purple {
+    color: #6059ff;
+  }
+  &--orange {
+    color: #e87d1e;
+  }
+  &--navy {
+    color: #1a3047;
+  }
+  &--sm {
+    font-size: 16px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CONTENT GRID — left col | middle col
+   Ratio Figma : 700px / 366px ≈ 1.91
+   ════════════════════════════════════════════════════════════════════ */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.91fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ── Left column ──────────────────────────────────────────────────── */
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Bar chart */
+.revenue-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9b8fe8;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: #9291a5;
+}
+
+.bar-chart-wrap {
+  padding: 0 18px 18px;
+}
+
+/* Table card */
+.table-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 12px;
+  gap: 12px;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ecf2f7;
+  border-radius: 50px;
+  padding: 0 14px;
+  height: 36px;
+  min-width: 140px;
+
+  i {
+    color: #aaa;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: #333;
+    width: 100%;
+
+    &::placeholder {
+      color: #bbb;
+    }
+  }
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.res-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead tr {
+    background: #f5f7fa;
+  }
+
+  th {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+    padding: 10px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: #444;
+    padding: 11px 16px;
+    border-bottom: 1px solid #f5f7fa;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  tbody tr:hover td {
+    background: #fafbff;
+  }
+}
+
+.guest-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guest-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1a3047;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lexend', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &--confirmé {
+    background: #d1fae5;
+    color: #059669;
+  }
+  &--attente {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  &--annulé {
+    background: #ffe0e0;
+    color: #ff383c;
+  }
+}
+
+.voir-btn {
+  border: none;
+  background: transparent;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a3047;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: #e87d1e;
+  }
+}
+
+.table-footer {
+  display: flex;
+  justify-content: center;
+  padding: 14px 20px 18px;
+}
+
+.voir-plus-btn {
+  background: #1a3047;
+  border: none;
+  border-radius: 50px;
+  padding: 9px 36px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #243f5f;
+  }
+}
+
+/* ── Middle column ────────────────────────────────────────────────── */
+.middle-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* CTA card — image hotel + overlay dark navy */
+.cta-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 113px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(rgba(26, 48, 71, 0.9), rgba(26, 48, 71, 0.9)),
+    url('https://www.figma.com/api/mcp/asset/16de8ef6-a0bc-46e1-9390-79253f7f2602')
+      center / cover no-repeat;
+  background-color: #1a3047;
+}
+
+.add-res-btn {
+  position: relative;
+  z-index: 1;
+  background: #e87d1e;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+
+  &:hover {
+    background: #d06a0e;
+    transform: translateY(-1px);
+  }
+}
+
+/* Reservations line chart card */
+.res-chart-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f2f6;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+
+  i {
+    font-size: 10px;
+    color: #888;
+  }
+  &:hover {
+    background: #e4e8f0;
+  }
+}
+
+.res-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 20px 8px;
+
+  &__value {
+    font-family: 'Lexend', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a3047;
+    line-height: 1;
+  }
+
+  &__growth {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #16b55b;
+
+    i {
+      font-size: 10px;
+    }
+  }
+}
+
+.line-chart-wrap {
+  padding: 0 14px;
+}
+
+.months-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 14px 14px;
+}
+
+.month-label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  color: #aaa;
+
+  &--active {
+    background: #e87d1e;
+    color: #fff;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 3px 9px;
+  }
+}
+
+/* ── Notifications ────────────────────────────────────────────────── */
+.notifications-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-list {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+}
+
+.notif-sep {
+  height: 1px;
+  background: #f0f2f6;
+}
+
+.notif-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 13px;
+  }
+
+  &--new {
+    background: #1a3047;
+    color: #fff;
+  }
+  &--cancel {
+    background: #ffe0e0;
+    color: #ff383c;
+  }
+  &--confirm {
+    background: #d1fae5;
+    color: #059669;
+  }
+}
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notif-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--new {
+    color: #1a3047;
+  }
+  &--cancel {
+    color: #ff383c;
+  }
+  &--confirm {
+    color: #059669;
+  }
+}
+
+.notif-sub {
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notif-time {
+  font-family: 'Lexend', sans-serif;
+  font-size: 10px;
+  font-weight: 300;
+  color: #bbb;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   RIGHT PANEL — calendrier + biens disponibles
+   ════════════════════════════════════════════════════════════════════ */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Calendrier */
+.calendar-card {
+  padding: 14px;
+
+  ::ng-deep .hotel-calendar {
+    width: 100% !important;
+    border: none;
+    font-family: 'Lexend', sans-serif;
+
+    .p-datepicker {
+      width: 100% !important;
+    }
+
+    table {
+      width: 100% !important;
+    }
+
+    .p-datepicker-header {
+      background: transparent;
+      border: none;
+      padding: 0 0 10px;
+      font-weight: 600;
+      color: #1a3047;
+    }
+
+    .p-datepicker-title {
+      font-family: 'Lexend', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a3047;
+    }
+
+    .p-datepicker-day-cell-inner {
+      border-radius: 50%;
+      font-family: 'Lexend', sans-serif;
+      font-size: 12px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .p-datepicker-day-selected .p-datepicker-day-cell-inner,
+    .p-datepicker-day-today .p-datepicker-day-cell-inner {
+      background: #e87d1e !important;
+      color: #fff !important;
+    }
+
+    .p-datepicker-weekday-cell {
+      font-family: 'Lexend', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: #aaa;
+    }
+
+    .p-datepicker-other-month .p-datepicker-day-cell-inner {
+      color: #ccc;
+    }
+  }
+}
+
+/* Biens disponibles */
+.properties-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tout-voir-link {
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #e87d1e;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Scrollable list */
+.properties-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 14px 14px;
+  max-height: 540px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #dde3eb;
+    border-radius: 4px;
+  }
+}
+
+/* ── Property card (glassmorphism) ────────────────────────────────── */
+.property-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  aspect-ratio: 485 / 431;
+  flex-shrink: 0;
+
+  &__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 20px;
+    left: 26px;
+    background: #e87d1e;
+    color: #fff;
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    z-index: 1;
+  }
+
+  &__glass {
+    position: absolute;
+    top: 64.18%;
+    left: 3.31%;
+    right: 3.59%;
+    bottom: 3.15%;
+    background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+  }
+}
+
+.glass-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.glass-name-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.glass-name {
+  font-family: 'Lexend', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #000;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.glass-location {
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  color: #020202;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  i {
+    font-size: 11px;
+    color: #e87d1e;
+  }
+}
+
+.glass-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s;
+
+  &:hover {
+    background: #fff;
+  }
+
+  i {
+    font-size: 12px;
+    color: #1a3047;
+    display: inline-block;
+    transform: rotate(45deg);
+  }
+}
+
+.glass-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.glass-tenant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  &__avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #fff;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #222;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__role {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: #e87d1e;
+    display: block;
+  }
+}
+
+.glass-price {
+  font-family: 'Lexend', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
+}
