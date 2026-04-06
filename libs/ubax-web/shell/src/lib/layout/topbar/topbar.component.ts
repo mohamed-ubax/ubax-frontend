@@ -8,7 +8,6 @@ import { ButtonModule } from 'primeng/button';
 interface NavItem {
   label: string;
   path: string;
-  roles?: Role[];
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -35,21 +34,34 @@ export class TopbarComponent {
     return role ? (ROLE_LABELS[role] ?? role) : '';
   }
 
-  protected readonly navItems: NavItem[] = [
-    { label: 'Tableau de bord',   path: '/tableau-de-bord' },
-    { label: 'Biens',             path: '/biens' },
-    { label: 'Réservations',      path: '/reservations' },
+  private readonly agencyNavItems: NavItem[] = [
+    { label: 'Tableau de bord',     path: '/tableau-de-bord' },
+    { label: 'Biens',               path: '/biens' },
+    { label: 'Réservations',        path: '/reservations' },
     { label: 'Demandes clientèles', path: '/demandes' },
-    { label: 'Finances',          path: '/finances' },
-    { label: 'Archivages',        path: '/archivages' },
-    { label: 'Hôtel',             path: '/hotel', roles: [Role.HOTEL] },
+    { label: 'Finances',            path: '/finances' },
+    { label: 'Archivages',          path: '/archivages' },
+  ];
+
+  private readonly hotelNavItems: NavItem[] = [
+    { label: 'Tableau de bord', path: '/tableau-de-bord' },
+    { label: 'Réservations',    path: '/reservations' },
+    { label: 'Espaces',         path: '/hotel/espaces' },
+    { label: 'Clients',         path: '/hotel/clients' },
+    { label: 'Employés',        path: '/hotel/employes' },
+    { label: 'Facturation',     path: '/hotel/facturation' },
   ];
 
   protected visibleItems(): NavItem[] {
-    const role = this.authStore.role();
-    return this.navItems.filter(
-      (item) => !item.roles?.length || (role && item.roles.includes(role)),
-    );
+    return this.authStore.role() === Role.HOTEL
+      ? this.hotelNavItems
+      : this.agencyNavItems;
+  }
+
+  protected logoSrc(): string {
+    return this.authStore.role() === Role.HOTEL
+      ? 'header/header-hotel-logo.png'
+      : 'header/header-logo.png';
   }
 
   protected logout(): void {
