@@ -13,3 +13,4 @@ export * from './lib/filter-bar/filter-bar.component';
 export * from './lib/page-tabs/page-tabs.component';
 export * from './lib/stepper-header/stepper-header.component';
 export * from './lib/detail-layout/detail-layout.component';
+export * from './lib/ubax-paginator/ubax-paginator.component';

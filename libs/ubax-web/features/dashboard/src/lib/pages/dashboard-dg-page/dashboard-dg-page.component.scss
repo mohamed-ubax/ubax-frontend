@@ -598,6 +598,7 @@
 .see-all-btn {
   display: flex;
   align-items: center;
+  gap: 8px;
   background: #1a3047;
   border: none;
   border-radius: 50px;
@@ -742,4 +743,20 @@
   color: #1a3047;
   flex-shrink: 0;
   opacity: 0.5;
+}
+
+/* ── Full list view ───────────────────────────────────────────────── */
+.full-table-card {
+  padding-bottom: 0;
+}
+
+.paginator-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.see-all-btn--back {
+  background: #ecf2f7;
+  color: #1a3047;
+  border: 1px solid #cfd6dc;
 }

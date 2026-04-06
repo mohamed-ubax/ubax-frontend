@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
+import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+
+const PAGE_SIZE = 5;
 
 @Component({
   selector: 'ubax-dashboard-dg-page',
   standalone: true,
-  imports: [RouterLink, ChartModule],
+  imports: [RouterLink, ChartModule, UbaxPaginatorComponent],
   templateUrl: './dashboard-dg-page.component.html',
   styleUrl: './dashboard-dg-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,6 +17,41 @@ import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
 export class DashboardDgPageComponent {
   readonly authStore = inject(AuthStore);
 
+  // ── Full-list toggle ──────────────────────────────────────────────────
+  readonly showFullList = signal(false);
+  readonly currentPage  = signal(1);
+
+  readonly propertiesFull = [
+    { id: 'UBX-001', nom: 'Immeuble Kalia',      type: 'Appartement', localisation: 'Abidjan, Cocody',   prix: '450 000 FCFA/mois', locataire: 'Koné Ibrahim',    statut: 'Actif' },
+    { id: 'UBX-002', nom: 'Villa Riviera',        type: 'Villa',       localisation: 'Abidjan, Riviera',  prix: '600 000 FCFA/mois', locataire: 'Koffi Didier',    statut: 'Actif' },
+    { id: 'UBX-003', nom: 'Villa Riviera',        type: 'Villa',       localisation: 'Abidjan, Riviera',  prix: '600 000 FCFA/mois', locataire: 'Kouamé Patrick',  statut: 'Actif' },
+    { id: 'UBX-004', nom: 'Résidence Plateau',    type: 'Appartement', localisation: 'Abidjan, Plateau',  prix: '250 000 FCFA/mois', locataire: 'Konan Olivier',   statut: 'Actif' },
+    { id: 'UBX-005', nom: 'Villa Riviera',        type: 'Villa',       localisation: 'Abidjan, Riviera',  prix: '600 000 FCFA/mois', locataire: 'Konan Olivier',   statut: 'Actif' },
+    { id: 'UBX-006', nom: 'Appt. Deux Plateaux',  type: 'Appartement', localisation: 'Abidjan, 2 Plx',   prix: '350 000 FCFA/mois', locataire: 'Bamba Seydou',    statut: 'Actif' },
+    { id: 'UBX-007', nom: 'Maison Yopougon',      type: 'Maison',      localisation: 'Abidjan, Yopougon', prix: '180 000 FCFA/mois', locataire: 'Touré Mamadou',   statut: 'Actif' },
+    { id: 'UBX-008', nom: 'Studio Marcory',       type: 'Studio',      localisation: 'Abidjan, Marcory',  prix: '120 000 FCFA/mois', locataire: 'Diomandé Fatoum', statut: 'Actif' },
+    { id: 'UBX-009', nom: 'Duplex Cocody',        type: 'Duplex',      localisation: 'Abidjan, Cocody',   prix: '750 000 FCFA/mois', locataire: 'N\'Goran Eric',   statut: 'Actif' },
+    { id: 'UBX-010', nom: 'Villa Angré',          type: 'Villa',       localisation: 'Abidjan, Angré',    prix: '800 000 FCFA/mois', locataire: 'Coulibaly Inza',  statut: 'Actif' },
+  ];
+
+  /** Preview (first 5) shown in the bottom-row dashboard view */
+  readonly properties = this.propertiesFull.slice(0, PAGE_SIZE);
+
+  readonly totalPages = computed(() =>
+    Math.ceil(this.propertiesFull.length / PAGE_SIZE)
+  );
+
+  readonly pagedProperties = computed(() => {
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return this.propertiesFull.slice(start, start + PAGE_SIZE);
+  });
+
+  toggleFullList(): void {
+    this.showFullList.update(v => !v);
+    this.currentPage.set(1);
+  }
+
+  // ── Charts ────────────────────────────────────────────────────────────
   readonly donutData = {
     labels: ['Occupés', 'Disponibles', 'Réservés', 'En maintenance'],
     datasets: [
@@ -90,14 +128,6 @@ export class DashboardDgPageComponent {
     { color: '#2388ff', label: 'Disponibles',    count: 6  },
     { color: '#e87d1e', label: 'Réservés',       count: 12 },
     { color: '#ff383c', label: 'En maintenance', count: 2  },
-  ];
-
-  readonly properties = [
-    { id: 'UBX-001', nom: 'Immeuble Kalia',     type: 'Appartement', localisation: 'Abidjan, Cocody',  prix: '450 000 FCFA/mois', locataire: 'Koné Ibrahim',    statut: 'Actif' },
-    { id: 'UBX-002', nom: 'Villa Riviera',       type: 'Villa',       localisation: 'Abidjan, Riviera', prix: '600 000 FCFA/mois', locataire: 'Koffi Didier',    statut: 'Actif' },
-    { id: 'UBX-003', nom: 'Villa Riviera',       type: 'Villa',       localisation: 'Abidjan, Riviera', prix: '600 000 FCFA/mois', locataire: 'Kouamé Patrick',  statut: 'Actif' },
-    { id: 'UBX-004', nom: 'Résidence Plateau',   type: 'Appartement', localisation: 'Abidjan, Plateau', prix: '250 000 FCFA/mois', locataire: 'Konan Olivier',   statut: 'Actif' },
-    { id: 'UBX-005', nom: 'Villa Riviera',       type: 'Villa',       localisation: 'Abidjan, Riviera', prix: '600 000 FCFA/mois', locataire: 'Konan Olivier',   statut: 'Actif' },
   ];
 
   readonly transactions = [
