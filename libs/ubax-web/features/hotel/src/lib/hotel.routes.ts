@@ -2,6 +2,13 @@ import { Route } from '@angular/router';
 
 export const hotelRoutes: Route[] = [
   {
+    path: 'reservations',
+    loadComponent: () =>
+      import('./pages/calendrier-page/calendrier-page.component').then(
+        (m) => m.CalendrierPageComponent,
+      ),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./pages/hotel-overview-page/hotel-overview-page.component').then(

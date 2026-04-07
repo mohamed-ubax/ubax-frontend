@@ -45,7 +45,7 @@ export class TopbarComponent {
 
   private readonly hotelNavItems: NavItem[] = [
     { label: 'Tableau de bord', path: '/tableau-de-bord' },
-    { label: 'Réservations',    path: '/reservations' },
+    { label: 'Réservations',    path: '/hotel/reservations' },
     { label: 'Espaces',         path: '/hotel/espaces' },
     { label: 'Clients',         path: '/hotel/clients' },
     { label: 'Employés',        path: '/hotel/employes' },
