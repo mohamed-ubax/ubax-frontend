@@ -161,24 +161,29 @@
       <div class="summary-header">
         <p class="summary-header__label">Aperçu de la dépense</p>
         <p class="summary-header__amount">0 FCFA</p>
-        <p class="summary-header__title">Aucune intitulé</p>
+        <p class="summary-header__name">Aucune intitulé</p>
         <p class="summary-header__date">02 Mars 2026</p>
       </div>
 
       <div class="summary-body">
         <div class="summary-rows">
-          @for (row of [
-            { label: 'Catégories',   value: '—' },
-            { label: 'Fournisseur',  value: '—' },
-            { label: 'Paiement',     value: '—' },
-            { label: 'TVA incluse',  value: '0 FCFA' },
-            { label: 'Pièces jointes', value: 'Aucune' }
-          ]; track row.label) {
+          <!-- TVA incluse: label + value -->
+          <div class="summary-row">
+            <span class="summary-row__label">TVA incluse</span>
+            <span class="summary-row__value">0 FCFA</span>
+          </div>
+          <!-- Empty rows: label + minus icon -->
+          @for (lbl of ['Catégories', 'Fournisseur', 'Paiement']; track lbl) {
             <div class="summary-row">
-              <span class="summary-row__label">{{ row.label }}</span>
-              <span class="summary-row__value">{{ row.value }}</span>
+              <span class="summary-row__label">{{ lbl }}</span>
+              <i class="pi pi-minus summary-row__icon"></i>
             </div>
           }
+          <!-- Pièces jointes: label + "Aucune" -->
+          <div class="summary-row summary-row--last">
+            <span class="summary-row__label">Pièces jointes</span>
+            <span class="summary-row__empty">Aucune</span>
+          </div>
         </div>
 
         <div class="status-section">
@@ -188,14 +193,18 @@
               [class.status-option--active]="activeStatus === s.key"
               (click)="activeStatus = s.key"
             >
-              <div class="status-option__radio">
-                @if (activeStatus === s.key) {
-                  <div class="status-option__dot" [style.background]="s.color"></div>
-                }
-              </div>
-              <div>
+              <!-- Left: colored dot -->
+              <span class="status-option__dot" [style.background]="activeStatus === s.key ? s.color : '#c4c4c4'"></span>
+              <!-- Center: text -->
+              <div class="status-option__text">
                 <p class="status-option__label" [style.color]="activeStatus === s.key ? s.color : '#222'">{{ s.label }}</p>
                 <p class="status-option__sub">{{ s.sub }}</p>
+              </div>
+              <!-- Right: radio circle -->
+              <div class="status-option__radio" [class.status-option__radio--active]="activeStatus === s.key">
+                @if (activeStatus === s.key) {
+                  <div class="status-option__radio-dot" [style.background]="s.color"></div>
+                }
               </div>
             </button>
           }

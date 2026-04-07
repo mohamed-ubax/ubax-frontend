@@ -440,12 +440,12 @@
 
 .summary-header {
   background: #1a3047;
-  padding: 32px 32px 28px;
+  padding: 32px 28px 28px;
   min-height: 249px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 
   &__label {
     font-family: 'Lexend', sans-serif;
@@ -455,15 +455,7 @@
     margin: 0;
   }
 
-  &__amount {
-    font-family: 'Lexend', sans-serif;
-    font-size: 32px;
-    font-weight: 500;
-    color: #e87d1e;
-    margin: 0;
-  }
-
-  &__title {
+  &__name {
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 300;
@@ -475,8 +467,16 @@
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 300;
-    color: #fff;
+    color: rgba(255,255,255,0.7);
     margin: 0;
+  }
+
+  &__amount {
+    font-family: 'Lexend', sans-serif;
+    font-size: 32px;
+    font-weight: 500;
+    color: #e87d1e;
+    margin: 0 0 8px;
   }
 }
 
@@ -494,14 +494,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 32px;
-  border-bottom: 1px solid #f0f2f6;
+  padding: 13px 28px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 28px;
+    right: 28px;
+    height: 1px;
+    background: #f0f2f6;
+  }
+
+  &--last::after { display: none; }
 
   &__label {
     font-family: 'Lexend', sans-serif;
     font-size: 16px;
     font-weight: 400;
-    color: #696969;
+    color: #222;
   }
 
   &__value {
@@ -510,54 +522,62 @@
     font-weight: 400;
     color: #222;
   }
+
+  &__empty {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #696969;
+  }
+
+  &__icon {
+    font-size: 12px;
+    color: #222;
+  }
 }
 
 /* ── Payment status options ──────────────────────────────────────── */
 .status-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 20px 32px 0;
+  gap: 8px;
+  padding: 16px 28px 24px;
 }
 
 .status-option {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   height: 51px;
   width: 100%;
   background: #ecf2f7;
   border: 1.5px solid transparent;
   border-radius: 10px;
-  padding: 0 20px;
+  padding: 0 16px;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background 0.15s;
 
   &--active {
     border-color: #e87d1e;
     background: #fff8f3;
   }
 
-  &__radio {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 2px solid #c4c4c4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-
-    .status-option--active & {
-      border-color: #e87d1e;
-    }
-  }
-
+  /* Left: colored dot */
   &__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  /* Center: text block */
+  &__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   &__label {
@@ -573,6 +593,27 @@
     font-size: 11px;
     font-weight: 300;
     color: #696969;
-    margin: 2px 0 0;
+    margin: 0;
+  }
+
+  /* Right: radio circle */
+  &__radio {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #c4c4c4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+
+    &--active { border-color: #e87d1e; }
+  }
+
+  &__radio-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
   }
 }
