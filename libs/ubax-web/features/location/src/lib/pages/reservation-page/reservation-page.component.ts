@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface Reservation {
   id: string;
@@ -13,7 +14,7 @@ interface Reservation {
 @Component({
   selector: 'ubax-reservation-page',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './reservation-page.component.html',
   styleUrl: './reservation-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

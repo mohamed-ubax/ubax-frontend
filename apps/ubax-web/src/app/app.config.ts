@@ -33,7 +33,10 @@ function provideMockUserInDev() {
       useFactory: () => {
         const authStore = inject(AuthStore);
         return () => {
-          if (authStore.token() && !authStore.user()) {
+          if (!authStore.token()) {
+            authStore.setToken('dev-mock-token');
+          }
+          if (!authStore.user()) {
             authStore.setUser({
               id: 'dev-001',
               nom: 'Kouassi',

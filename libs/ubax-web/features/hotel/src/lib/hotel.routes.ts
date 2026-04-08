@@ -9,6 +9,27 @@ export const hotelRoutes: Route[] = [
       ),
   },
   {
+    path: 'espaces',
+    loadComponent: () =>
+      import(
+        '../../../espaces/src/lib/pages/espaces-list-page/espaces-list-page.component'
+      ).then((m) => m.EspacesListPageComponent),
+  },
+  {
+    path: 'espaces/ajouter',
+    loadComponent: () =>
+      import(
+        '../../../espaces/src/lib/pages/espace-add-page/espace-add-page.component'
+      ).then((m) => m.EspaceAddPageComponent),
+  },
+  {
+    path: 'espaces/:id',
+    loadComponent: () =>
+      import(
+        '../../../espaces/src/lib/pages/espace-detail-page/espace-detail-page.component'
+      ).then((m) => m.EspaceDetailPageComponent),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./pages/hotel-overview-page/hotel-overview-page.component').then(
@@ -53,22 +74,22 @@ export const hotelRoutes: Route[] = [
   {
     path: 'facturation/recettes',
     loadComponent: () =>
-      import('./pages/historique-recettes-page/historique-recettes-page.component').then(
-        (m) => m.HistoriqueRecettesPageComponent,
-      ),
+      import(
+        './pages/historique-recettes-page/historique-recettes-page.component'
+      ).then((m) => m.HistoriqueRecettesPageComponent),
   },
   {
     path: 'facturation/depenses',
     loadComponent: () =>
-      import('./pages/historique-depenses-page/historique-depenses-page.component').then(
-        (m) => m.HistoriqueDepensesPageComponent,
-      ),
+      import(
+        './pages/historique-depenses-page/historique-depenses-page.component'
+      ).then((m) => m.HistoriqueDepensesPageComponent),
   },
   {
     path: 'facturation/ajouter-depense',
     loadComponent: () =>
-      import('./pages/ajouter-depense-page/ajouter-depense-page.component').then(
-        (m) => m.AjouterDepensePageComponent,
-      ),
+      import(
+        './pages/ajouter-depense-page/ajouter-depense-page.component'
+      ).then((m) => m.AjouterDepensePageComponent),
   },
 ];
