@@ -124,6 +124,13 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'adhesion',
+    loadComponent: () =>
+      import('./pages/adhesion/adhesion-form-page.component').then(
+        (m) => m.AdhesionFormPageComponent,
+      ),
+  },
+  {
     path: 'mentions-legales',
     loadComponent: () =>
       import('./pages/info/legal/legal-page.component').then(
