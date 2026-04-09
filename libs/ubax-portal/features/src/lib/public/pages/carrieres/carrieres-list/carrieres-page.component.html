@@ -37,9 +37,22 @@
         <button class="hero__search-btn" type="submit">Rechercher</button>
       </form>
     </div>
-    <!-- Concave notch with inverted corners and centred badge -->
-    <div class="hero__notch" aria-hidden="true">
-      <span class="hero__badge">Portail carrière et recrutement</span>
+
+    <div class="hero__notch">
+      <div class="hero__community">
+        <div class="hero__avatars" aria-hidden="true">
+          @for (avatar of heroCommunityAvatars; track avatar; let i = $index) {
+            <img
+              [ngSrc]="avatar"
+              [class]="'hero__avatar hero__avatar--' + (i + 1)"
+              alt=""
+              width="55"
+              height="55"
+            />
+          }
+        </div>
+        <p class="hero__community-text">+10 000 utilisateurs actifs</p>
+      </div>
     </div>
   </section>
 
@@ -85,14 +98,47 @@
   <!-- ══ INFO SECTION ═══════════════════════════════════════════════════════ -->
   <section class="info-section" aria-labelledby="info-heading">
     <div class="info-section__inner">
-      <img
-        class="info-section__deco"
-        [ngSrc]="subtractImg"
-        alt=""
-        aria-hidden="true"
-        width="536"
-        height="498"
-      />
+      <div class="info-section__visual" aria-hidden="true">
+        <img
+          class="info-section__deco"
+          [ngSrc]="subtractImg"
+          alt=""
+          width="536"
+          height="498"
+        />
+        <div class="info-section__orbit">
+          <div class="info-section__orbit-shell"></div>
+          <div class="info-section__orbit-pulses">
+            <span
+              class="info-section__orbit-pulse info-section__orbit-pulse--1"
+            ></span>
+            <span
+              class="info-section__orbit-pulse info-section__orbit-pulse--2"
+            ></span>
+          </div>
+          <div class="info-section__orbit-logo-wrap">
+            <img
+              class="info-section__orbit-logo"
+              [src]="infoOrbitLogo"
+              alt=""
+            />
+          </div>
+          <div class="info-section__orbiters">
+            <span
+              class="info-section__orbiter info-section__orbiter--left"
+            ></span>
+            <span
+              class="info-section__orbiter info-section__orbiter--top-right"
+            ></span>
+            <span
+              class="info-section__orbiter info-section__orbiter--bottom"
+            ></span>
+            <span
+              class="info-section__orbiter info-section__orbiter--bottom-right"
+            ></span>
+          </div>
+        </div>
+      </div>
       <h2 id="info-heading" class="info-section__title">
         Le métier idéal vous attend
       </h2>
@@ -209,7 +255,14 @@
   <!-- ══ BOTTOM CTA ═════════════════════════════════════════════════════════ -->
   <section class="cta-bottom" aria-labelledby="cta-heading">
     <div class="cta-bottom__visual" aria-hidden="true">
-      <img [src]="womanImg" alt="" class="cta-bottom__img" loading="lazy" width="530" height="517" />
+      <img
+        [src]="womanImg"
+        alt=""
+        class="cta-bottom__img"
+        loading="lazy"
+        width="530"
+        height="517"
+      />
     </div>
     <div class="cta-bottom__content">
       <h2 id="cta-heading" class="cta-bottom__title">

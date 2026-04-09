@@ -67,10 +67,6 @@ export class AdhesionFormPageComponent {
   protected readonly typesPartenaire = [
     { label: 'Hôtel', value: 'hotel' },
     { label: 'Agence immobilière', value: 'agence_immo' },
-    { label: 'Location meublée', value: 'location_meublee' },
-    { label: 'Résidence touristique', value: 'residence_touristique' },
-    { label: 'Auberge / Guest house', value: 'auberge' },
-    { label: 'Autre', value: 'autre' },
   ];
 
   protected readonly paysList = [
@@ -105,13 +101,23 @@ export class AdhesionFormPageComponent {
     'Casablanca',
   ];
 
-  protected readonly typesEtablissement = [
-    { label: 'Hôtel', value: 'hotel' },
-    { label: 'Résidence', value: 'residence' },
-    { label: 'Appartement meublé', value: 'appartement' },
-    { label: 'Agence de voyage', value: 'agence_voyage' },
-    { label: 'Location de voiture', value: 'location_voiture' },
-    { label: 'Autre', value: 'autre' },
+  protected readonly statutsJuridiques = [
+    {
+      label: 'SARL (très répandue pour les agences)',
+      value: 'sarl',
+    },
+    {
+      label: 'SCI (gestion de patrimoine familial)',
+      value: 'sci',
+    },
+    {
+      label: 'SAS / SASU (flexibilité)',
+      value: 'sas_sasu',
+    },
+    {
+      label: 'SCCV (promotion immobilière)',
+      value: 'sccv',
+    },
   ];
 
   // ── Reactive form ─────────────────────────────────────────────────────────
@@ -129,7 +135,7 @@ export class AdhesionFormPageComponent {
     quartier: ['', Validators.required],
     // Section 2 — Informations établissement
     description: [''],
-    typeEtablissement: ['', Validators.required],
+    statutJuridique: ['', Validators.required],
     numeroAgrement: [''],
     acceptTerms: [false, Validators.requiredTrue],
   });
