@@ -765,45 +765,5 @@
   </div>
   <!-- /adhesion-form-wrapper -->
 
-  <!-- ══ SUCCESS MODAL ══════════════════════════════════════════════════════ -->
-  @if (successVisible()) {
-    <div
-      class="success-overlay"
-      (click)="closeSuccess()"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="success-title"
-    >
-      <div class="success-modal" (click)="$event.stopPropagation()">
-        <button
-          class="success-modal__close"
-          type="button"
-          (click)="closeSuccess()"
-          aria-label="Fermer"
-        >
-          <i class="pi pi-times"></i>
-        </button>
-
-        <div class="success-modal__icon-wrap" aria-hidden="true">
-          <i class="pi pi-check-circle success-modal__check"></i>
-        </div>
-
-        <h2 id="success-title" class="success-modal__title">
-          Demande envoyée avec succès&nbsp;!
-        </h2>
-        <p class="success-modal__text">
-          Merci pour votre demande d'adhésion. Notre équipe vous contactera dans
-          les plus brefs délais pour finaliser votre intégration sur la
-          plateforme UBAX.
-        </p>
-
-        <a class="success-modal__btn" routerLink="/accueil" role="button">
-          <i class="pi pi-home" aria-hidden="true"></i>
-          Retour vers l'accueil
-        </a>
-      </div>
-    </div>
-  }
-
   <ubax-back-to-top />
 </ubax-public-shell>

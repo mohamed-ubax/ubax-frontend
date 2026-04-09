@@ -27,9 +27,9 @@ export const publicRoutes: Routes = [
   {
     path: 'mot-de-passe-oublie',
     loadComponent: () =>
-      import('./pages/auth/forgot-password/forgot-password-page.component').then(
-        (m) => m.ForgotPasswordPageComponent,
-      ),
+      import(
+        './pages/auth/forgot-password/forgot-password-page.component'
+      ).then((m) => m.ForgotPasswordPageComponent),
   },
   {
     path: 'verification-code',
@@ -49,9 +49,9 @@ export const publicRoutes: Routes = [
     path: 'fonctionnalites',
     data: { preload: true },
     loadComponent: () =>
-      import('./pages/marketing/fonctionnalites/fonctionnalites-page.component').then(
-        (m) => m.FonctionnalitesPageComponent,
-      ),
+      import(
+        './pages/marketing/fonctionnalites/fonctionnalites-page.component'
+      ).then((m) => m.FonctionnalitesPageComponent),
   },
   {
     path: 'faq',
@@ -84,16 +84,16 @@ export const publicRoutes: Routes = [
   {
     path: 'formations/:slug',
     loadComponent: () =>
-      import('./pages/formations/formation-detail/formation-detail-page.component').then(
-        (m) => m.FormationDetailPageComponent,
-      ),
+      import(
+        './pages/formations/formation-detail/formation-detail-page.component'
+      ).then((m) => m.FormationDetailPageComponent),
   },
   {
     path: 'formations',
     loadComponent: () =>
-      import('./pages/formations/formations-list/formations-page.component').then(
-        (m) => m.FormationsPageComponent,
-      ),
+      import(
+        './pages/formations/formations-list/formations-page.component'
+      ).then((m) => m.FormationsPageComponent),
   },
   {
     path: 'carrieres',
@@ -105,30 +105,37 @@ export const publicRoutes: Routes = [
   {
     path: 'carrieres/postuler',
     loadComponent: () =>
-      import('./pages/carrieres/carrieres-candidature/carrieres-candidature-page.component').then(
-        (m) => m.CarrieresCandidaturePage,
-      ),
+      import(
+        './pages/carrieres/carrieres-candidature/carrieres-candidature-page.component'
+      ).then((m) => m.CarrieresCandidaturePage),
   },
   {
     path: 'carrieres/:id/postuler',
     loadComponent: () =>
-      import('./pages/carrieres/carrieres-candidature/carrieres-candidature-page.component').then(
-        (m) => m.CarrieresCandidaturePage,
-      ),
+      import(
+        './pages/carrieres/carrieres-candidature/carrieres-candidature-page.component'
+      ).then((m) => m.CarrieresCandidaturePage),
   },
   {
     path: 'carrieres/:id',
     loadComponent: () =>
-      import('./pages/carrieres/carrieres-detail/carrieres-detail-page.component').then(
-        (m) => m.CarrieresDetailPageComponent,
-      ),
+      import(
+        './pages/carrieres/carrieres-detail/carrieres-detail-page.component'
+      ).then((m) => m.CarrieresDetailPageComponent),
   },
   {
     path: 'adhesion',
     loadComponent: () =>
-      import('./pages/adhesion/adhesion-form-page.component').then(
-        (m) => m.AdhesionFormPageComponent,
-      ),
+      import(
+        './pages/adhesion/adhesion-form/adhesion-form-page.component'
+      ).then((m) => m.AdhesionFormPageComponent),
+  },
+  {
+    path: 'adhesion/validation',
+    loadComponent: () =>
+      import(
+        './pages/adhesion/adhesion-validation/adhesion-validation-page.component'
+      ).then((m) => m.AdhesionValidationPageComponent),
   },
   {
     path: 'mentions-legales',
@@ -140,9 +147,9 @@ export const publicRoutes: Routes = [
   {
     path: 'politique-de-confidentialite',
     loadComponent: () =>
-      import('./pages/info/politique-confidentialite/politique-confidentialite-page.component').then(
-        (m) => m.PolitiqueConfidentialitePageComponent,
-      ),
+      import(
+        './pages/info/politique-confidentialite/politique-confidentialite-page.component'
+      ).then((m) => m.PolitiqueConfidentialitePageComponent),
   },
   {
     path: '**',

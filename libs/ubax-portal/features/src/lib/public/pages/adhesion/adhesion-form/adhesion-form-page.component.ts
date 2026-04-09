@@ -14,14 +14,14 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   BackToTopComponent,
   LenisService,
   PublicShellComponent,
 } from '@ubax-workspace/ubax-portal-layout';
 import { Select } from 'primeng/select';
-import { COUNTRY_CODES, type CountryCode } from '../../shared/country-codes';
+import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -45,13 +45,14 @@ export class AdhesionFormPageComponent {
   private readonly _el = inject(ElementRef<HTMLElement>);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _lenis = inject(LenisService);
+  private readonly _router = inject(Router);
   private readonly _zone = inject(NgZone);
   private _gsapCtx: gsap.Context | null = null;
+  private _submitTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ── UI state ─────────────────────────────────────────────────────────────
   protected readonly submitted = signal(false);
   protected readonly loading = signal(false);
-  protected readonly successVisible = signal(false);
   protected readonly serverError = signal<string | null>(null);
 
   // ── File state ────────────────────────────────────────────────────────────
@@ -147,6 +148,11 @@ export class AdhesionFormPageComponent {
     this._destroyRef.onDestroy(() => {
       this._gsapCtx?.revert();
       this._gsapCtx = null;
+
+      if (this._submitTimer) {
+        clearTimeout(this._submitTimer);
+        this._submitTimer = null;
+      }
     });
   }
 
@@ -340,13 +346,10 @@ export class AdhesionFormPageComponent {
     this.loading.set(true);
 
     // Wire to real API endpoint here — simulate for now
-    setTimeout(() => {
+    this._submitTimer = setTimeout(() => {
       this.loading.set(false);
-      this.successVisible.set(true);
+      this._submitTimer = null;
+      void this._router.navigateByUrl('/adhesion/validation');
     }, 1200);
-  }
-
-  protected closeSuccess(): void {
-    this.successVisible.set(false);
   }
 }
