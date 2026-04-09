@@ -1,0 +1,123 @@
+<div class="emp-page">
+
+  <!-- ── Toolbar ─────────────────────────────────────────────────── -->
+  <div class="emp-toolbar">
+    <h1 class="emp-title">Liste des employés</h1>
+    <div class="toolbar-right">
+      <div class="search-pill">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Rechercher" class="search-input" />
+      </div>
+      <button class="add-btn" routerLink="ajouter">
+        <i class="pi pi-plus"></i>
+        Ajouter un employé
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Tab bar ─────────────────────────────────────────────────── -->
+  <div class="tab-bar">
+    @for (tab of tabs; track tab.id) {
+      <button
+        class="tab-btn"
+        [class.tab-btn--active]="activeTab() === tab.id"
+        (click)="setTab(tab.id)">
+        {{ tab.label }} ({{ tab.count }})
+        @if (activeTab() === tab.id) {
+          <span class="tab-indicator"></span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- ── Table card ──────────────────────────────────────────────── -->
+  <div class="table-card">
+    <div class="table-scroll">
+      <table class="emp-table">
+        <thead>
+          <tr>
+            <th class="th-check"><span class="checkbox"></span></th>
+            <th>Employé</th>
+            <th>Description</th>
+            <th>Planning</th>
+            <th>Contact</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of filteredEmployes(); track e.id) {
+            <tr class="emp-row">
+              <td class="td-check"><span class="checkbox"></span></td>
+
+              <!-- Employee -->
+              <td class="td-emp">
+                <div class="emp-avatar">
+                  <span class="emp-avatar__initials">{{ e.avatarInitials }}</span>
+                </div>
+                <div class="emp-info">
+                  <span class="emp-name">{{ e.nom }}</span>
+                  <span class="emp-role">{{ e.role }}</span>
+                </div>
+              </td>
+
+              <!-- Description -->
+              <td class="td-desc">{{ e.description }}</td>
+
+              <!-- Planning -->
+              <td class="td-planning">
+                <span class="planning-days">{{ e.joursTravail }}</span>
+                <span class="planning-hours">{{ e.horaires }}</span>
+              </td>
+
+              <!-- Contact -->
+              <td class="td-contact">
+                <div class="contact-circle">
+                  <i class="pi pi-phone"></i>
+                </div>
+                <span class="contact-phone">{{ e.telephone }}</span>
+              </td>
+
+              <!-- Statut -->
+              <td class="td-status">
+                <span
+                  class="status-badge"
+                  [class.status-badge--active]="e.status === 'Actif'"
+                  [class.status-badge--inactive]="e.status === 'Inactif'">
+                  {{ e.status }}
+                </span>
+              </td>
+
+              <!-- Action -->
+              <td class="td-actions">
+                <button class="action-icon-btn" [routerLink]="['/hotel/employes', e.id]">
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button class="action-icon-btn">
+                  <i class="pi pi-pencil"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Pagination ──────────────────────────────────────────── -->
+    <div class="table-footer">
+      <div class="pagination">
+        <button class="page-btn page-btn--arrow">&lt;</button>
+        @for (p of pages; track p) {
+          <button
+            class="page-btn"
+            [class.page-btn--active]="activePage() === p"
+            (click)="activePage.set(p)">
+            {{ p }}
+          </button>
+        }
+        <button class="page-btn page-btn--arrow">&gt;</button>
+      </div>
+    </div>
+  </div>
+
+</div>

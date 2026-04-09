@@ -1,0 +1,9 @@
+<div class="detail-layout" [style.--sidebar-width.px]="sidebarWidth()">
+  <aside class="detail-layout__sidebar">
+    <ng-content select="[slot=sidebar]" />
+  </aside>
+
+  <div class="detail-layout__main">
+    <ng-content select="[slot=main]" />
+  </div>
+</div>

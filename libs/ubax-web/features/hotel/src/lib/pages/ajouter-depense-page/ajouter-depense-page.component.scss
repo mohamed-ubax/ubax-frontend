@@ -1,0 +1,619 @@
+/* ── Page ─────────────────────────────────────────────────────────── */
+.add-dep-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1516px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.page-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+  text-align: center;
+}
+
+/* ── Stepper ─────────────────────────────────────────────────────── */
+.stepper {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: transparent;
+  margin: 2rem 10rem;
+}
+
+.stepper__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.stepper__circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lexend', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  .stepper__item--active &,
+  .stepper__item--done & {
+    border-color: #e87d1e;
+    background: #e87d1e;
+    color: #fff;
+  }
+}
+
+.stepper__label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #555;
+  white-space: nowrap;
+
+  .stepper__item--active & {
+    color: #e87d1e;
+    font-weight: 500;
+  }
+  .stepper__item--done & {
+    color: #e87d1e;
+  }
+}
+
+.stepper__line {
+  flex: 1;
+  height: 3px;
+  background: #333;
+  margin: 0 12px;
+  min-width: 60px;
+
+  &--done {
+    background: #e87d1e;
+  }
+}
+
+/* ── Two-column form layout ─────────────────────────────────────── */
+.form-layout {
+  display: grid;
+  grid-template-columns: 1fr 522px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Form card ───────────────────────────────────────────────────── */
+.form-card {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* ── Section header (orange) ─────────────────────────────────────── */
+.section-header {
+  background: #e87d1e;
+  padding: 0 40px;
+  height: 137px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 28px;
+      color: #fff;
+    }
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #fff;
+    margin: 0;
+  }
+
+  &__sub {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 6px 0 0;
+  }
+}
+
+/* ── Form body (white) ───────────────────────────────────────────── */
+.form-body {
+  background: #fff;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-height: 488px;
+}
+
+/* ── Fields ──────────────────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  &--half {
+    flex: 1;
+  }
+  &--narrow {
+    width: 399px;
+    flex-shrink: 0;
+  }
+  &--wide {
+    flex: 1;
+  }
+  &--montant {
+    flex: 1.6;
+  }
+  &--tva {
+    flex: 1;
+  }
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+    margin: 0;
+  }
+
+  &__input {
+    height: 65px;
+    width: 100%;
+    border: 1px solid #929292;
+    border-radius: 10px;
+    padding: 0 20px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    color: #222;
+    background: #fff;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s;
+
+    &::placeholder {
+      color: #b0b0b0;
+    }
+    &:focus {
+      border-color: #e87d1e;
+    }
+  }
+
+  &__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .field__input {
+      padding-right: 48px;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    right: 18px;
+    font-size: 18px;
+    color: #929292;
+    pointer-events: none;
+  }
+
+  &__unit {
+    position: absolute;
+    right: 18px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #929292;
+    pointer-events: none;
+  }
+
+  &__textarea {
+    height: 114px;
+    width: 100%;
+    border: 1px solid #929292;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    color: #222;
+    background: #fff;
+    box-sizing: border-box;
+    outline: none;
+    resize: none;
+    transition: border-color 0.15s;
+
+    &::placeholder {
+      color: #b0b0b0;
+    }
+    &:focus {
+      border-color: #e87d1e;
+    }
+  }
+}
+
+.field-row {
+  display: flex;
+  gap: 24px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Category chips ──────────────────────────────────────────────── */
+.category-chips {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cat-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 49px;
+  padding: 0 20px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #222;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+
+  &--active {
+    border-color: #e87d1e;
+    background: #fff8f3;
+  }
+
+  &:hover:not(.cat-chip--active) {
+    background: #f9f9f9;
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+
+/* ── Drop zone ───────────────────────────────────────────────────── */
+.drop-zone {
+  border: 2px dashed #222;
+  border-radius: 10px;
+  background: #ecf2f7;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #dce8f2;
+  }
+
+  &__icon {
+    font-size: 58px;
+    color: #222;
+  }
+
+  &__text {
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+    margin: 0;
+    text-align: center;
+
+    &--orange {
+      color: #e87d1e;
+      font-weight: 500;
+    }
+  }
+
+  &__sub {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: #222;
+    margin: 0;
+  }
+}
+
+/* ── Form actions ────────────────────────────────────────────────── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+
+  &--double {
+    gap: 16px;
+    justify-content: flex-end;
+  }
+}
+
+.btn-suivant {
+  width: 161px;
+  height: 61px;
+  background: #e87d1e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #cf6a12;
+  }
+}
+
+.btn-draft {
+  width: 283px;
+  height: 61px;
+  background: #ecf2f7;
+  color: #222;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #dce8f2;
+  }
+}
+
+.btn-save {
+  width: 283px;
+  height: 61px;
+  background: #e87d1e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #cf6a12;
+  }
+}
+
+/* ── Summary panel ───────────────────────────────────────────────── */
+.summary-panel {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.summary-header {
+  background: #1a3047;
+  padding: 32px 28px 28px;
+  min-height: 249px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #fff;
+    margin: 0;
+  }
+
+  &__name {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: #fff;
+    margin: 0;
+  }
+
+  &__date {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.7);
+    margin: 0;
+  }
+
+  &__amount {
+    font-family: 'Lexend', sans-serif;
+    font-size: 32px;
+    font-weight: 500;
+    color: #e87d1e;
+    margin: 0 0 8px;
+  }
+}
+
+.summary-body {
+  background: #fff;
+  padding: 0 0 24px;
+}
+
+.summary-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 28px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 28px;
+    right: 28px;
+    height: 1px;
+    background: #f0f2f6;
+  }
+
+  &--last::after { display: none; }
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #222;
+  }
+
+  &__value {
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #222;
+  }
+
+  &__empty {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #696969;
+  }
+
+  &__icon {
+    font-size: 12px;
+    color: #222;
+  }
+}
+
+/* ── Payment status options ──────────────────────────────────────── */
+.status-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 28px 24px;
+}
+
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 51px;
+  width: 100%;
+  background: #ecf2f7;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  padding: 0 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+
+  &--active {
+    border-color: #e87d1e;
+    background: #fff8f3;
+  }
+
+  /* Left: colored dot */
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  /* Center: text block */
+  &__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    margin: 0;
+    transition: color 0.15s;
+  }
+
+  &__sub {
+    font-family: 'Lexend', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    color: #696969;
+    margin: 0;
+  }
+
+  /* Right: radio circle */
+  &__radio {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #c4c4c4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+
+    &--active { border-color: #e87d1e; }
+  }
+
+  &__radio-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+}

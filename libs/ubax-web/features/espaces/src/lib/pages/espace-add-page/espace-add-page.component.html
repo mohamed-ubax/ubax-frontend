@@ -1,0 +1,345 @@
+<div class="add-page">
+  <!-- ── Header ──────────────────────────────────────────────────── -->
+  <div class="add-header">
+    <a class="back-btn" routerLink="/hotel/espaces">
+      <i class="pi pi-arrow-left"></i>
+    </a>
+    <h1 class="add-title">Ajouter un espace</h1>
+  </div>
+
+  <!-- ── Type selector ───────────────────────────────────────────── -->
+  <div class="type-selector">
+    <button
+      class="type-btn"
+      [class.type-btn--active]="espaceType() === 'chambre'"
+      (click)="espaceType.set('chambre')"
+    >
+      <i class="pi pi-home"></i>
+      Chambre / Appartement
+    </button>
+    <button
+      class="type-btn"
+      [class.type-btn--active]="espaceType() === 'salle'"
+      (click)="espaceType.set('salle')"
+    >
+      <i class="pi pi-building"></i>
+      Salle de réunion / Événement
+    </button>
+  </div>
+
+  <!-- ── Stepper ─────────────────────────────────────────────────── -->
+  <div class="stepper-bar">
+    @for (step of steps; track $index) {
+      <div
+        class="stepper-step"
+        [class.stepper-step--active]="currentStep() === $index + 1"
+        [class.stepper-step--done]="currentStep() > $index + 1"
+      >
+        <div class="stepper-circle">
+          @if (currentStep() > $index + 1) {
+            <i class="pi pi-check"></i>
+          } @else {
+            {{ $index + 1 }}
+          }
+        </div>
+        <span class="stepper-label">{{ step.label }}</span>
+      </div>
+      @if ($index < steps.length - 1) {
+        <div
+          class="stepper-line"
+          [class.stepper-line--done]="currentStep() > $index + 1"
+        ></div>
+      }
+    }
+  </div>
+
+  <!-- ── Main card ───────────────────────────────────────────────── -->
+  <div class="add-card">
+    <!-- Sidebar -->
+    <div class="add-sidebar">
+      <div class="sidebar-icon">
+        <i class="pi {{ currentSidebar.icon }}"></i>
+      </div>
+      <p class="sidebar-title">{{ currentSidebar.title }}</p>
+      <p class="sidebar-desc">{{ currentSidebar.desc }}</p>
+    </div>
+
+    <!-- Form content -->
+    <div class="add-form">
+      <!-- ── Step 1: Informations générales ─────────────────────── -->
+      @if (currentStep() === 1) {
+        <div class="form-grid">
+          <div class="field-group field-group--full">
+            <label class="field-label" for="titre">Titre de l'espace</label>
+            <input
+              id="titre"
+              class="field-input"
+              type="text"
+              placeholder="Ex: Chambre Queen Deluxe A-101"
+              [value]="titre()"
+              (input)="titre.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="superficie">Superficie (m²)</label>
+            <input
+              id="superficie"
+              class="field-input"
+              type="text"
+              placeholder="Ex: 35"
+              [value]="superficie()"
+              (input)="superficie.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="capacite">
+              @if (espaceType() === 'chambre') {
+                Capacité (personnes)
+              } @else {
+                Capacité (participants)
+              }
+            </label>
+            <input
+              id="capacite"
+              class="field-input"
+              type="text"
+              placeholder="Ex: 2"
+              [value]="capacite()"
+              (input)="capacite.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="etage">Étage</label>
+            <input
+              id="etage"
+              class="field-input"
+              type="text"
+              placeholder="Ex: 3ème étage"
+              [value]="etage()"
+              (input)="etage.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="location">Localisation</label>
+            <input
+              id="location"
+              class="field-input"
+              type="text"
+              placeholder="Ex: Abidjan, Cocody"
+              [value]="location()"
+              (input)="location.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field-group field-group--full">
+            <label class="field-label" for="description">Description</label>
+            <textarea
+              id="description"
+              class="field-input field-textarea"
+              placeholder="Décrivez votre espace..."
+              rows="4"
+              [value]="description()"
+              (input)="description.set($any($event.target).value)"
+            ></textarea>
+          </div>
+        </div>
+      }
+
+      <!-- ── Step 2: Photos & Équipements ──────────────────────── -->
+      @if (currentStep() === 2) {
+        <div class="step2-layout">
+          <!-- Photo upload -->
+          <div class="field-group field-group--full">
+            <p class="field-label">Photos</p>
+            <button type="button" id="photos" class="upload-zone">
+              <i class="pi pi-cloud-upload upload-zone__icon"></i>
+              <span class="upload-zone__text"
+                >Cliquer pour importer des photos</span
+              >
+              <span class="upload-zone__hint"
+                >JPG, PNG, WEBP · max 5 Mo par photo</span
+              >
+            </button>
+          </div>
+
+          <!-- Équipements chambre -->
+          @if (espaceType() === 'chambre') {
+            <div class="field-group field-group--full">
+              <p class="field-label">Équipements disponibles</p>
+              <div class="equipements-picker">
+                @for (eq of equipementsDisponibles; track eq) {
+                  <button
+                    class="eq-chip"
+                    [class.eq-chip--selected]="equipements().includes(eq)"
+                    (click)="toggleEquipement(eq)"
+                  >
+                    @if (equipements().includes(eq)) {
+                      <i class="pi pi-check"></i>
+                    }
+                    {{ eq }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Équipements salle -->
+          @if (espaceType() === 'salle') {
+            <div class="field-group field-group--full">
+              <p class="field-label">Équipements disponibles</p>
+              <div class="equipements-picker">
+                @for (eq of equipSalleDisponibles; track eq) {
+                  <button
+                    class="eq-chip"
+                    [class.eq-chip--selected]="equipSalle().includes(eq)"
+                    (click)="toggleEquipSalle(eq)"
+                  >
+                    @if (equipSalle().includes(eq)) {
+                      <i class="pi pi-check"></i>
+                    }
+                    {{ eq }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── Step 3: Tarification ───────────────────────────────── -->
+      @if (currentStep() === 3) {
+        <div class="form-grid">
+          @if (espaceType() === 'chambre') {
+            <div class="field-group">
+              <label class="field-label" for="prix-nuit"
+                >Prix par nuit (FCFA)</label
+              >
+              <input
+                id="prix-nuit"
+                class="field-input"
+                type="text"
+                placeholder="Ex: 65 000"
+                [value]="prixNuit()"
+                (input)="prixNuit.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="prix-semaine"
+                >Prix par semaine (FCFA)</label
+              >
+              <input
+                id="prix-semaine"
+                class="field-input"
+                type="text"
+                placeholder="Ex: 390 000"
+                [value]="prixSemaine()"
+                (input)="prixSemaine.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="prix-mois"
+                >Prix par mois (FCFA)</label
+              >
+              <input
+                id="prix-mois"
+                class="field-input"
+                type="text"
+                placeholder="Ex: 1 500 000"
+                [value]="prixMois()"
+                (input)="prixMois.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="caution-chambre"
+                >Caution (FCFA)</label
+              >
+              <input
+                id="caution-chambre"
+                class="field-input"
+                type="text"
+                placeholder="Ex: 100 000"
+                [value]="caution()"
+                (input)="caution.set($any($event.target).value)"
+              />
+            </div>
+          }
+
+          @if (espaceType() === 'salle') {
+            <div class="field-group">
+              <label class="field-label" for="prix-heure"
+                >Prix par heure (FCFA)</label
+              >
+              <input
+                id="prix-heure"
+                class="field-input"
+                type="text"
+                placeholder="Ex: 25 000"
+                [value]="prixHeure()"
+                (input)="prixHeure.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="prix-journee"
+                >Prix à la journée (FCFA)</label
+              >
+              <input
+                id="prix-journee"
+                class="field-input"
+                type="text"
+                placeholder="Ex: 150 000"
+                [value]="prixJournee()"
+                (input)="prixJournee.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="caution-salle"
+                >Caution (FCFA)</label
+              >
+              <input
+                id="caution-salle"
+                class="field-input"
+                type="text"
+                placeholder="Ex: 100 000"
+                [value]="caution()"
+                (input)="caution.set($any($event.target).value)"
+              />
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── Navigation buttons ──────────────────────────────────── -->
+      <div class="form-nav">
+        @if (currentStep() > 1) {
+          <button class="nav-btn nav-btn--prev" (click)="prevStep()">
+            <i class="pi pi-arrow-left"></i>
+            Précédent
+          </button>
+        } @else {
+          <div></div>
+        }
+
+        @if (currentStep() < 3) {
+          <button class="nav-btn nav-btn--next" (click)="nextStep()">
+            Suivant
+            <i class="pi pi-arrow-right"></i>
+          </button>
+        } @else {
+          <button class="nav-btn nav-btn--submit">
+            <i class="pi pi-check"></i>
+            Enregistrer l'espace
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

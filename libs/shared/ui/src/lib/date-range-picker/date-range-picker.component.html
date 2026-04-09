@@ -1,0 +1,112 @@
+@if (isOpen()) {
+
+  <!-- ── Overlay ────────────────────────────────────────────────────── -->
+  <div class="dp-overlay" [class.is-closing]="isClosing()" (click)="cancel()"></div>
+
+  <!-- ── Modal ──────────────────────────────────────────────────────── -->
+  <div class="dp-modal" [class.is-closing]="isClosing()" (click)="stopPropagation($event)">
+
+    <!-- Left sidebar — quick presets -->
+    <aside class="dp-sidebar">
+      @for (preset of presets; track preset.label) {
+        <button
+          class="dp-preset"
+          [class.is-active]="activePreset() === preset.label"
+          (click)="applyPreset(preset.label, preset.getValue())"
+        >{{ preset.label }}</button>
+      }
+    </aside>
+
+    <!-- Right — calendar content -->
+    <div class="dp-content">
+
+      <!-- Header -->
+      <div class="dp-header">
+        <h3 class="dp-title">Sélectionner une date</h3>
+        <button class="dp-close" (click)="cancel()" aria-label="Fermer">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Dual calendars -->
+      <div class="dp-calendars">
+
+        @for (side of ['left', 'right']; track side) {
+          <div class="dp-calendar">
+
+            <!-- Calendar header -->
+            <div class="dp-cal-header">
+              <span class="dp-month-label">
+                {{ side === 'left' ? leftMonthLabel() : rightMonthLabel() }}
+              </span>
+              @if (side === 'left') {
+                <div class="dp-nav">
+                  <button class="dp-nav-btn" (click)="prevMonth()" aria-label="Mois précédent">
+                    <i class="pi pi-chevron-left"></i>
+                  </button>
+                  <button class="dp-nav-btn" (click)="nextMonth()" aria-label="Mois suivant">
+                    <i class="pi pi-chevron-right"></i>
+                  </button>
+                </div>
+              } @else {
+                <div class="dp-nav">
+                  <button class="dp-nav-btn" (click)="prevMonth()" aria-label="Mois précédent">
+                    <i class="pi pi-chevron-left"></i>
+                  </button>
+                  <button class="dp-nav-btn" (click)="nextMonth()" aria-label="Mois suivant">
+                    <i class="pi pi-chevron-right"></i>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <!-- Day names row -->
+            <div class="dp-day-names">
+              @for (name of dayNames; track name) {
+                <span class="dp-day-name">{{ name }}</span>
+              }
+            </div>
+
+            <!-- Weeks -->
+            <div class="dp-weeks">
+              @for (week of (side === 'left' ? leftWeeks() : rightWeeks()); track $index) {
+                <div class="dp-week">
+                  @for (day of week; track day.date.toISOString()) {
+                    <button
+                      class="dp-day"
+                      [class.is-other-month]="!day.isCurrentMonth"
+                      [class.is-selected]="isStart(day.date) || isEnd(day.date)"
+                      [class.is-in-range]="isInRange(day.date)"
+                      [class.is-today]="isToday(day.date) && !isStart(day.date) && !isEnd(day.date)"
+                      (click)="selectDay(day.date)"
+                      (mouseenter)="hoverDay(day.date)"
+                      (mouseleave)="leaveDay()"
+                    >{{ day.dayNum }}</button>
+                  }
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+
+      </div>
+
+      <!-- Date inputs -->
+      <div class="dp-inputs">
+        <div class="dp-input-field">{{ startLabel() }}</div>
+        <span class="dp-input-sep">–</span>
+        <div class="dp-input-field">{{ endLabel() }}</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="dp-footer">
+        <button class="dp-btn dp-btn--cancel" (click)="cancel()">Annuler</button>
+        <button class="dp-btn dp-btn--apply"  (click)="apply()">Appliquer</button>
+      </div>
+
+    </div>
+
+  </div>
+
+}

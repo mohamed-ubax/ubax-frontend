@@ -1,0 +1,13 @@
+{
+  "name": "ubax-web-dashboard",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ubax-web/features/dashboard/src",
+  "prefix": "ubax",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

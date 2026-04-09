@@ -1,0 +1,507 @@
+// ── Figma tokens (node 633:3113 – Détails bien) ───────────────────────────
+:host {
+  --accent: #e87d1e;
+  --navy: #1a3047;
+  --green: #16b55b;
+  --red: #fa181d;
+  --text: #222;
+  --muted: #888;
+  display: block;
+  padding: 0 41px 40px;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.det-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.det-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+.back-btn {
+  width: 67px;
+  height: 67px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ededed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  i {
+    font-size: 18px;
+    color: var(--text);
+  }
+  &:hover {
+    background: #f0f4f8;
+  }
+}
+
+.det-title {
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 62px;
+  padding: 0 28px;
+  border-radius: 50px;
+  border: none;
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+
+  &--edit {
+    background: var(--navy);
+    color: #fff;
+  }
+  &--archive {
+    background: rgba(26, 48, 71, 0.08);
+    color: var(--navy);
+  }
+}
+
+// ── Layout two-column ─────────────────────────────────────────────────────
+.top-section {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+// ── Profile card (left) ───────────────────────────────────────────────────
+.profile-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-badges {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.badge {
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 400;
+
+  &--tag {
+    background: rgba(26, 48, 71, 0.1);
+    color: var(--navy);
+  }
+  &--disponible {
+    background: rgba(22, 181, 91, 0.12);
+    color: var(--green);
+  }
+  &--reserve {
+    background: rgba(250, 24, 29, 0.1);
+    color: var(--red);
+  }
+  &--occupe {
+    background: rgba(232, 125, 30, 0.1);
+    color: var(--accent);
+  }
+}
+
+.profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  background: #ecf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  i {
+    font-size: 48px;
+    color: var(--muted);
+  }
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  text-align: center;
+}
+
+.profile-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--muted);
+  .pi {
+    color: var(--accent);
+  }
+}
+
+.profile-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  .pi-star-fill {
+    color: #f5c542;
+  }
+}
+
+.profile-contacts {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contact-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ecf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  i {
+    font-size: 16px;
+    color: var(--navy);
+  }
+}
+
+.contact-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.contact-value {
+  font-size: 14px;
+  color: var(--text);
+  &--price {
+    font-weight: 600;
+    color: var(--accent);
+  }
+}
+
+// Propriétaire
+.owner-section {
+  width: 100%;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+  margin-top: 4px;
+
+  &__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.owner-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.owner-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.owner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.owner-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.owner-role {
+  font-size: 13px;
+  color: var(--accent);
+}
+
+// ── Right panel ───────────────────────────────────────────────────────────
+.det-right {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 28px;
+  min-height: 400px;
+}
+
+// ── Tab bar ───────────────────────────────────────────────────────────────
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 28px;
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+
+  &--active {
+    color: var(--navy);
+    font-weight: 500;
+    border-bottom-color: var(--navy);
+  }
+  &:hover:not(.tab-btn--active) {
+    color: var(--text);
+  }
+}
+
+// ── Réservations table ────────────────────────────────────────────────────
+.reservations-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1.5fr 1.2fr;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 8px;
+}
+
+.table-header {
+  background: #f7f9fb;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.table-row {
+  border-bottom: 1px solid #f4f4f4;
+  font-size: 14px;
+  color: var(--text);
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.client-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.client-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.montant {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.resa-badge {
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 13px;
+  white-space: nowrap;
+
+  &--confirmee {
+    background: rgba(22, 181, 91, 0.12);
+    color: var(--green);
+  }
+  &--attente {
+    background: rgba(232, 125, 30, 0.1);
+    color: var(--accent);
+  }
+  &--annulee {
+    background: rgba(250, 24, 29, 0.1);
+    color: var(--red);
+  }
+}
+
+// ── Détails & Équipements ─────────────────────────────────────────────────
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.detail-block {
+  &__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 12px 0;
+  }
+  &__text {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0;
+  }
+}
+
+.equipements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.equipement-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f7f9fb;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.equipement-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ecf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  i {
+    font-size: 16px;
+    color: var(--navy);
+  }
+}
+
+// ── Avis ──────────────────────────────────────────────────────────────────
+.avis-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.avis-summary {
+  text-align: center;
+}
+
+.avis-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  &__value {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  &__stars {
+    display: flex;
+    gap: 4px;
+    font-size: 22px;
+    .pi-star-fill {
+      color: #f5c542;
+    }
+    .pi-star {
+      color: #ddd;
+    }
+  }
+
+  &__total {
+    font-size: 14px;
+    color: var(--muted);
+  }
+}
+
+.avis-empty {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}

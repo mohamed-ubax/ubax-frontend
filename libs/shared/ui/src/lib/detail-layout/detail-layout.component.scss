@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 320px) 1fr;
+  gap: 24px;
+  align-items: start;
+
+  &__sidebar {
+    position: sticky;
+    top: 88px; // topbar height + padding
+  }
+
+  &__main {
+    min-width: 0; // évite le dépassement en grid
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+
+    &__sidebar {
+      position: static;
+    }
+  }
+}

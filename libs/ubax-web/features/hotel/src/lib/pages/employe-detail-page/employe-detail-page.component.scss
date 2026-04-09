@@ -1,0 +1,574 @@
+/* ── Page wrapper ────────────────────────────────────────────────── */
+.det-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 4px;
+}
+
+/* ── Page header ─────────────────────────────────────────────────── */
+.det-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 67px;
+  height: 67px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ededed;
+  text-decoration: none;
+  transition: background 0.15s;
+  flex-shrink: 0;
+
+  i { font-size: 18px; color: #222; }
+
+  &:hover { background: #f0f4f8; }
+}
+
+.det-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 65px;
+  border-radius: 50px;
+  border: none;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  padding: 0 28px;
+
+  &:hover { opacity: 0.85; }
+
+  &--edit {
+    background: #1a3047;
+    color: #fff;
+    width: 191px;
+  }
+
+  &--archive {
+    background: #ffe3e3;
+    color: #fa191d;
+    width: 203px;
+  }
+}
+
+/* ── Top section ─────────────────────────────────────────────────── */
+.top-section {
+  display: grid;
+  grid-template-columns: 548px 1fr 480px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ── Profile card ────────────────────────────────────────────────── */
+.profile-card {
+  background: #1a3047;
+  border-radius: 10px;
+  padding: 28px 30px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  min-height: 540px;
+}
+
+.profile-badges {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  border-radius: 50px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: #fff;
+  padding: 0 16px;
+  white-space: nowrap;
+
+  &--service  { background: #16b55b; }
+  &--shift    { background: #008bff; }
+}
+
+.profile-avatar {
+  display: flex;
+  align-self: center;
+  margin-bottom: 16px;
+}
+
+.profile-avatar__circle {
+  width: 109px;
+  height: 109px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i { font-size: 48px; color: #fff; }
+}
+
+.profile-name {
+  font-family: 'Lexend', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 8px;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.profile-role {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #e87d1e;
+  margin: 0 0 28px;
+  align-self: center;
+}
+
+.profile-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.contact-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i { font-size: 18px; color: #fff; }
+}
+
+.contact-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.contact-value {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ── Documents card ──────────────────────────────────────────────── */
+.docs-card {
+  background: #ecf2f7;
+  border-radius: 10px;
+  padding: 20px 24px;
+  min-height: 313px;
+}
+
+.docs-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222;
+  margin: 0 0 10px;
+}
+
+.docs-divider {
+  height: 1px;
+  background: #d2d8e8;
+  margin-bottom: 20px;
+}
+
+.docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.doc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.doc-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 22px;
+  height: 48px;
+  width: 317px;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.doc-pill__icon { font-size: 16px; color: #444; }
+
+.doc-pill__name {
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #222;
+}
+
+.doc-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-action-circle {
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+  background: #dce8f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  i { font-size: 15px; color: #1a3047; }
+
+  &:hover { background: #c8d9ea; }
+}
+
+/* ── Salary card ─────────────────────────────────────────────────── */
+.salary-card {
+  background: #ecf2f7;
+  border-radius: 10px;
+  padding: 20px 24px;
+  min-height: 476px;
+  display: flex;
+  flex-direction: column;
+}
+
+.salary-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222;
+  margin: 0 0 10px;
+}
+
+.salary-divider {
+  height: 1px;
+  background: #d2d8e8;
+  margin-bottom: 16px;
+}
+
+.salary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.salary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 10px;
+  height: 74px;
+  padding: 0 14px;
+}
+
+.salary-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #1a3047;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.salary-logo__text {
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #e87d1e;
+}
+
+.salary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.salary-label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: #1a3047;
+}
+
+.salary-date {
+  font-family: 'Lexend', sans-serif;
+  font-size: 8px;
+  font-weight: 300;
+  color: #000;
+}
+
+.salary-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.salary-amount {
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e87d1e;
+  white-space: nowrap;
+}
+
+.salary-month-badge {
+  background: #ddfff4;
+  color: #34c759;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  white-space: nowrap;
+}
+
+.salary-arrow-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #888;
+
+  i { font-size: 16px; }
+}
+
+.voir-plus-btn {
+  background: transparent;
+  border: none;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a3047;
+  cursor: pointer;
+  text-align: right;
+  margin-top: 12px;
+  align-self: flex-end;
+
+  &:hover { text-decoration: underline; }
+}
+
+/* ── Calendar card ───────────────────────────────────────────────── */
+.calendar-card {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  padding: 24px 30px 0;
+  gap: 32px;
+}
+
+.cal-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cal-month-label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+}
+
+.cal-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #444;
+
+  i { font-size: 16px; }
+
+  &:hover { color: #e87d1e; }
+}
+
+.cal-views {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+  justify-content: center;
+}
+
+.cal-view-btn {
+  background: transparent;
+  border: none;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #5f5f5f;
+  cursor: pointer;
+  padding: 0 0 8px;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s;
+
+  &--active {
+    color: #e87d1e;
+    font-weight: 600;
+    border-bottom-color: #e87d1e;
+  }
+
+  &:hover:not(.cal-view-btn--active) { color: #333; }
+}
+
+.cal-section-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Grid */
+.cal-grid-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid #adadad;
+  margin-top: 16px;
+}
+
+.cal-col-header {
+  padding: 12px 16px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222;
+  border-right: 1px solid #adadad;
+
+  &:last-child { border-right: none; }
+}
+
+.cal-grid-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  min-height: 144px;
+}
+
+.cal-cell {
+  border-right: 1px solid #adadad;
+  border-bottom: 1px solid #adadad;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &:last-child { border-right: none; }
+
+  &--ghost .cal-date { color: #bababa; }
+}
+
+.cal-week:last-child .cal-cell { border-bottom: none; }
+
+.cal-date {
+  font-family: 'Lexend', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #222;
+}
+
+.cal-event {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 57px;
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  padding: 0 6px;
+
+  &--shift { background: #16b55b; }
+  &--conge { background: #008bff; }
+}

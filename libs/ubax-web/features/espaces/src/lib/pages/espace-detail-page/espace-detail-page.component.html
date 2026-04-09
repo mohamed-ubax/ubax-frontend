@@ -1,0 +1,218 @@
+<div class="det-page">
+  <!-- ── Header ──────────────────────────────────────────────────── -->
+  <div class="det-header">
+    <div class="det-header__left">
+      <a class="back-btn" routerLink="/hotel/espaces">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <h1 class="det-title">Détails de l'espace</h1>
+    </div>
+    <div class="det-header__right">
+      <button class="action-btn action-btn--edit">
+        <i class="pi pi-pencil"></i>
+        Modifier
+      </button>
+      <button class="action-btn action-btn--archive">
+        <i class="pi pi-inbox"></i>
+        Archiver
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Top section ─────────────────────────────────────────────── -->
+  <div class="top-section">
+    <!-- Left: espace profile card -->
+    <div class="profile-card">
+      <div class="profile-badges">
+        <span class="badge badge--tag">{{ espace.tag }}</span>
+        <span
+          class="badge"
+          [class.badge--disponible]="espace.statut === 'Disponible'"
+          [class.badge--reserve]="espace.statut === 'Réservé'"
+          [class.badge--occupe]="espace.statut === 'Occupé'"
+        >
+          {{ espace.statut }}
+        </span>
+      </div>
+
+      <!-- Image placeholder -->
+      <div class="profile-img">
+        <i class="pi pi-home"></i>
+      </div>
+
+      <p class="profile-name">{{ espace.titre }}</p>
+
+      <div class="profile-location">
+        <i class="pi pi-map-marker"></i>
+        {{ espace.location }}
+      </div>
+
+      <div class="profile-rating">
+        <i class="pi pi-star-fill"></i>
+        <span>{{ espace.rating }}</span>
+      </div>
+
+      <div class="profile-contacts">
+        <div class="contact-row">
+          <div class="contact-icon-wrap"><i class="pi pi-arrows-alt"></i></div>
+          <div class="contact-text">
+            <span class="contact-label">Superficie</span>
+            <span class="contact-value">{{ espace.superficie }}</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon-wrap"><i class="pi pi-users"></i></div>
+          <div class="contact-text">
+            <span class="contact-label">Capacité</span>
+            <span class="contact-value">{{ espace.capacite }}</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon-wrap"><i class="pi pi-building"></i></div>
+          <div class="contact-text">
+            <span class="contact-label">Étage</span>
+            <span class="contact-value">{{ espace.etage }}</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon-wrap"><i class="pi pi-tag"></i></div>
+          <div class="contact-text">
+            <span class="contact-label">Prix par nuit</span>
+            <span class="contact-value contact-value--price">{{
+              espace.prix
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Propriétaire -->
+      <div class="owner-section">
+        <p class="owner-section__label">Propriétaire</p>
+        <div class="owner-row">
+          <div class="owner-avatar">{{ espace.proprietaire.nom[0] }}</div>
+          <div class="owner-info">
+            <span class="owner-name">{{ espace.proprietaire.nom }}</span>
+            <span class="owner-role">{{ espace.proprietaire.role }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: tabs + content -->
+    <div class="det-right">
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button
+          class="tab-btn"
+          [class.tab-btn--active]="activeTab() === 'reservations'"
+          (click)="activeTab.set('reservations')"
+        >
+          Réservations
+        </button>
+        <button
+          class="tab-btn"
+          [class.tab-btn--active]="activeTab() === 'details'"
+          (click)="activeTab.set('details')"
+        >
+          Détails & Équipements
+        </button>
+        <button
+          class="tab-btn"
+          [class.tab-btn--active]="activeTab() === 'avis'"
+          (click)="activeTab.set('avis')"
+        >
+          Avis
+        </button>
+      </div>
+
+      <!-- ── Tab: Réservations ─────────────────────────── -->
+      @if (activeTab() === 'reservations') {
+        <div class="reservations-section">
+          <div class="reservations-table">
+            <div class="table-header">
+              <span>Client</span>
+              <span>Arrivée</span>
+              <span>Départ</span>
+              <span>Nuits</span>
+              <span>Montant</span>
+              <span>Statut</span>
+            </div>
+            @for (r of reservations; track r.id) {
+              <div class="table-row">
+                <div class="client-cell">
+                  <div class="client-avatar">{{ r.client[0] }}</div>
+                  <span>{{ r.client }}</span>
+                </div>
+                <span>{{ r.dateArrivee }}</span>
+                <span>{{ r.dateDepart }}</span>
+                <span>{{ r.nuits }} nuits</span>
+                <span class="montant">{{ r.montant }}</span>
+                <span
+                  class="resa-badge"
+                  [class.resa-badge--confirmee]="r.statut === 'confirmee'"
+                  [class.resa-badge--attente]="r.statut === 'en-attente'"
+                  [class.resa-badge--annulee]="r.statut === 'annulee'"
+                >
+                  @if (r.statut === 'confirmee') {
+                    Confirmée
+                  }
+                  @if (r.statut === 'en-attente') {
+                    En attente
+                  }
+                  @if (r.statut === 'annulee') {
+                    Annulée
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ── Tab: Détails & Équipements ────────────────── -->
+      @if (activeTab() === 'details') {
+        <div class="details-section">
+          <div class="detail-block">
+            <h3 class="detail-block__title">Description</h3>
+            <p class="detail-block__text">{{ espace.description }}</p>
+          </div>
+          <div class="detail-block">
+            <h3 class="detail-block__title">Équipements</h3>
+            <div class="equipements-grid">
+              @for (eq of espace.equipements; track eq.label) {
+                <div class="equipement-item">
+                  <div class="equipement-icon">
+                    <i class="pi {{ eq.icon }}"></i>
+                  </div>
+                  <span>{{ eq.label }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ── Tab: Avis ──────────────────────────────────── -->
+      @if (activeTab() === 'avis') {
+        <div class="avis-section">
+          <div class="avis-summary">
+            <div class="avis-score">
+              <span class="avis-score__value">{{ espace.rating }}</span>
+              <div class="avis-score__stars">
+                @for (i of [1, 2, 3, 4, 5]; track i) {
+                  <i
+                    class="pi"
+                    [class.pi-star-fill]="i <= espace.rating"
+                    [class.pi-star]="i > espace.rating"
+                  ></i>
+                }
+              </div>
+              <span class="avis-score__total">sur 5</span>
+            </div>
+          </div>
+          <p class="avis-empty">Aucun avis pour le moment.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

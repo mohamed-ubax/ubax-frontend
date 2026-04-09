@@ -1,0 +1,47 @@
+<ubax-public-shell>
+  <section
+    class="adhesion-validation"
+    aria-labelledby="adhesionValidationTitle"
+  >
+    <div class="adhesion-validation__card">
+      <div class="adhesion-validation__art" aria-hidden="true">
+        <img
+          class="adhesion-validation__orbit"
+          [src]="orbitAsset"
+          alt=""
+          width="198"
+          height="192"
+          decoding="async"
+        />
+
+        <img
+          class="adhesion-validation__art-elements"
+          [src]="elementsAsset"
+          alt=""
+          width="156"
+          height="128"
+          decoding="async"
+        />
+      </div>
+
+      <h1 id="adhesionValidationTitle" class="adhesion-validation__message">
+        Votre demande est en cours de validation. Réponse sous 24 à 48h.
+      </h1>
+
+      <a class="adhesion-validation__cta" routerLink="/accueil">
+        <span>Retour vers l’accueil</span>
+        <img
+          class="adhesion-validation__cta-icon"
+          [src]="homeAsset"
+          alt=""
+          aria-hidden="true"
+          width="24"
+          height="24"
+          decoding="async"
+        />
+      </a>
+    </div>
+  </section>
+
+  <ubax-back-to-top />
+</ubax-public-shell>

@@ -1,0 +1,14 @@
+<div class="page-tabs" role="tablist">
+  @for (tab of tabs(); track tab.value) {
+    <button
+      type="button"
+      role="tab"
+      class="page-tabs__item"
+      [class.is-active]="activeTab() === tab.value"
+      [attr.aria-selected]="activeTab() === tab.value"
+      (click)="select(tab.value)"
+    >
+      {{ tab.label }}
+    </button>
+  }
+</div>

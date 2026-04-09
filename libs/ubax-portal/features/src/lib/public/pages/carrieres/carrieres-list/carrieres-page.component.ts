@@ -38,7 +38,13 @@ interface CultureCard {
 
 @Component({
   selector: 'ubax-carrieres-page',
-  imports: [PublicShellComponent, BackToTopComponent, RouterLink, UiPaginationComponent, NgOptimizedImage],
+  imports: [
+    PublicShellComponent,
+    BackToTopComponent,
+    RouterLink,
+    UiPaginationComponent,
+    NgOptimizedImage,
+  ],
   templateUrl: './carrieres-page.component.html',
   styleUrl: './carrieres-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,6 +63,12 @@ export class CarrieresPageComponent {
     'assets/portal-assets/careers/images/hero-person.webp';
   protected readonly heroEllipseOuter =
     'assets/portal-assets/careers/icons/Ellipse 1.svg';
+  protected readonly heroCommunityAvatars = [
+    'assets/portal-assets/careers/images/image.png',
+    'assets/portal-assets/careers/images/image-1.png',
+    'assets/portal-assets/careers/images/image-2.png',
+    'assets/portal-assets/careers/images/image-3.png',
+  ];
   protected readonly searchIcon =
     'assets/portal-assets/careers/icons/mynaui_search.svg';
   protected readonly ubaxIcon =
@@ -67,6 +79,8 @@ export class CarrieresPageComponent {
     'assets/portal-assets/careers/icons/material-symbols_star.svg';
   protected readonly subtractImg =
     'assets/portal-assets/careers/images/Subtract.webp';
+  protected readonly infoOrbitLogo =
+    'assets/portal-assets/careers/icons/Group 1171274746-2.svg';
   protected readonly womanImg =
     'assets/portal-assets/careers/images/woman.webp';
   protected readonly arrowLeftIcon =
@@ -91,7 +105,7 @@ export class CarrieresPageComponent {
     },
     {
       title: "L'Obsession du Succès Client",
-      body: "Chaque ligne de code écrite et chaque stratégie commerciale élaborée ont pour unique but ultime de générer une valeur mesurable pour ceux qui utilisent nos services. Nous écoutons activement les besoins du terrain pour que la plateforme Ubax soit un véritable partenaire de croissance pour les entreprises.",
+      body: 'Chaque ligne de code écrite et chaque stratégie commerciale élaborée ont pour unique but ultime de générer une valeur mesurable pour ceux qui utilisent nos services. Nous écoutons activement les besoins du terrain pour que la plateforme Ubax soit un véritable partenaire de croissance pour les entreprises.',
     },
     {
       title: "L'Esprit de Corps et Diversité",
@@ -167,27 +181,43 @@ export class CarrieresPageComponent {
     });
 
     heroTl
-      .from('.hero__visual', { x: -70, opacity: 0, duration: 1, ease: 'power2.out' })
+      .from('.hero__visual', {
+        x: -70,
+        opacity: 0,
+        duration: 1,
+        ease: 'power2.out',
+      })
       .from('.hero__title', { y: 45, opacity: 0, duration: 0.85 }, '-=0.55')
       .from('.hero__subtitle', { y: 28, opacity: 0, duration: 0.75 }, '-=0.45')
       .from('.hero__search', { y: 22, opacity: 0, duration: 0.65 }, '-=0.35')
-      .from('.hero__badge', { y: 18, opacity: 0, duration: 0.5 }, '-=0.25');
+      .from('.hero__community', { y: 18, opacity: 0, duration: 0.5 }, '-=0.25');
 
     // ── Culture section ─────────────────────────────────────────────────────
     const cultureTrigger = { trigger: '.culture', start: 'top 80%' };
 
     gsap.from('.culture__heading', {
       scrollTrigger: cultureTrigger,
-      x: -35, opacity: 0, duration: 0.75, ease,
+      x: -35,
+      opacity: 0,
+      duration: 0.75,
+      ease,
     });
     gsap.from('.culture__desc', {
       scrollTrigger: cultureTrigger,
-      x: -25, opacity: 0, duration: 0.7, delay: 0.15, ease,
+      x: -25,
+      opacity: 0,
+      duration: 0.7,
+      delay: 0.15,
+      ease,
     });
     gsap.from('.culture__card', {
       scrollTrigger: { trigger: '.culture', start: 'top 75%' },
-      y: 65, opacity: 0, rotateX: 8,
-      duration: 0.75, stagger: 0.12, ease,
+      y: 65,
+      opacity: 0,
+      rotateX: 8,
+      duration: 0.75,
+      stagger: 0.12,
+      ease,
       // Preserve CSS rotate(-3deg) on the accent card
       clearProps: 'transform',
     });
@@ -197,15 +227,27 @@ export class CarrieresPageComponent {
 
     gsap.from('.mission__icon-box', {
       scrollTrigger: missionTrigger,
-      scale: 0, rotation: -90, opacity: 0, duration: 0.8, ease: 'back.out(1.7)',
+      scale: 0,
+      rotation: -90,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'back.out(1.7)',
     });
     gsap.from('.mission__title', {
       scrollTrigger: missionTrigger,
-      y: 30, opacity: 0, duration: 0.8, delay: 0.18, ease,
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      delay: 0.18,
+      ease,
     });
     gsap.from('.mission__text', {
       scrollTrigger: missionTrigger,
-      y: 22, opacity: 0, duration: 0.75, delay: 0.32, ease,
+      y: 22,
+      opacity: 0,
+      duration: 0.75,
+      delay: 0.32,
+      ease,
     });
 
     // ── Info section ────────────────────────────────────────────────────────
@@ -213,26 +255,53 @@ export class CarrieresPageComponent {
 
     gsap.from('.info-section__title', {
       scrollTrigger: infoTrigger,
-      y: 30, opacity: 0, duration: 0.8, ease,
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease,
     });
     gsap.from('.info-section__subtitle', {
       scrollTrigger: infoTrigger,
-      y: 20, opacity: 0, duration: 0.7, delay: 0.14, ease,
+      y: 20,
+      opacity: 0,
+      duration: 0.7,
+      delay: 0.14,
+      ease,
     });
     gsap.from('.info-card', {
       scrollTrigger: { trigger: '.info-section', start: 'top 80%' },
-      y: 55, opacity: 0, duration: 0.75, stagger: 0.16, ease,
+      y: 55,
+      opacity: 0,
+      duration: 0.75,
+      stagger: 0.16,
+      ease,
+    });
+    gsap.from('.info-section__orbit', {
+      scrollTrigger: infoTrigger,
+      scale: 0.86,
+      opacity: 0,
+      duration: 0.82,
+      delay: 0.18,
+      ease: 'back.out(1.4)',
+      clearProps: 'transform',
     });
 
     // ── Explore + jobs ──────────────────────────────────────────────────────
     gsap.from('.explore__heading', {
       scrollTrigger: { trigger: '.explore', start: 'top 85%' },
-      y: 30, opacity: 0, duration: 0.8, ease,
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease,
     });
     gsap.from('.job-card', {
       scrollTrigger: { trigger: '.jobs-grid', start: 'top 82%' },
-      y: 65, opacity: 0, scale: 0.96,
-      duration: 0.75, stagger: 0.13, ease,
+      y: 65,
+      opacity: 0,
+      scale: 0.96,
+      duration: 0.75,
+      stagger: 0.13,
+      ease,
       clearProps: 'transform',
     });
 
@@ -247,20 +316,34 @@ export class CarrieresPageComponent {
     // off-centre after the tween completes. clearProps restores CSS ownership.
     gsap.from('.cta-bottom__visual', {
       scrollTrigger: ctaTrigger,
-      y: -30, opacity: 0, duration: 0.95, ease,
+      y: -30,
+      opacity: 0,
+      duration: 0.95,
+      ease,
       clearProps: 'transform',
     });
     gsap.from('.cta-bottom__title', {
       scrollTrigger: ctaTrigger,
-      x: 50, opacity: 0, duration: 0.75, ease,
+      x: 50,
+      opacity: 0,
+      duration: 0.75,
+      ease,
     });
     gsap.from('.cta-bottom__text', {
       scrollTrigger: ctaTrigger,
-      x: 50, opacity: 0, duration: 0.75, delay: 0.13, ease,
+      x: 50,
+      opacity: 0,
+      duration: 0.75,
+      delay: 0.13,
+      ease,
     });
     gsap.from('.cta-bottom__btn', {
       scrollTrigger: ctaTrigger,
-      y: 18, opacity: 0, duration: 0.6, delay: 0.26, ease: 'back.out(1.4)',
+      y: 18,
+      opacity: 0,
+      duration: 0.6,
+      delay: 0.26,
+      ease: 'back.out(1.4)',
     });
   }
 

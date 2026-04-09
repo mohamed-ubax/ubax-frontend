@@ -1,0 +1,490 @@
+<div class="dashboard">
+
+  <!-- ── Page header ──────────────────────────────────────────────── -->
+  <div class="page-header">
+    @if (view() === 'techDetail') {
+      <div class="page-header__back">
+        <button class="back-btn" (click)="goBack()">
+          <i class="pi pi-arrow-left"></i>
+        </button>
+        <h1 class="page-title">Détails Technicien</h1>
+      </div>
+    } @else {
+      <h1 class="page-title">Tableau de bord</h1>
+    }
+    <div class="page-actions">
+      <div class="search-field">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Recherche ..." />
+      </div>
+      <button class="search-field search-field--btn" (click)="datePickerOpen.set(true)">
+        <i class="pi pi-calendar"></i>
+        <span>{{ selectedRange() ? (selectedRange()!.start | date:'dd/MM/yy') + ' – ' + (selectedRange()!.end | date:'dd/MM/yy') : 'Sélectionner une date' }}</span>
+      </button>
+      <button class="export-btn">
+        <i class="pi pi-upload"></i>
+        Exporter les données
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TECH DETAIL VIEW
+  ════════════════════════════════════════════════════════════ -->
+  @if (view() === 'techDetail' && selectedTech()) {
+    <div class="tech-detail-layout">
+
+      <!-- Left — profile card -->
+      <div class="profile-card">
+        <div class="profile-card__top">
+          <div class="profile-avatar" [style.background]="selectedTech()!.color">
+            {{ selectedTech()!.initials }}
+          </div>
+          <h2 class="profile-name">{{ selectedTech()!.name }}</h2>
+          <p class="profile-specialty">{{ selectedTech()!.specialty }}</p>
+        </div>
+
+        <div class="profile-card__bottom">
+          <div class="profile-contact">
+            <span><i class="pi pi-phone"></i> {{ selectedTech()!.phone }}</span>
+            <span><i class="pi pi-id-card"></i> {{ selectedTech()!.id }}</span>
+          </div>
+
+          <div class="profile-info-box">
+            <div class="profile-info-item">
+              <i class="pi pi-calendar"></i>
+              <span>Inscription : 12 Janvier 2025</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="status-dot status-dot--active"></span>
+              <span>Contrat : Actif</span>
+            </div>
+          </div>
+
+          <button class="profile-edit-btn">
+            <i class="pi pi-pencil"></i>
+            Modifier
+          </button>
+        </div>
+      </div>
+
+      <!-- Right — stats + history -->
+      <div class="tech-detail-right">
+
+        <!-- Stat cards -->
+        <div class="tech-stat-row">
+          <div class="tech-stat-card tech-stat-card--green">
+            <div class="tech-stat-card__icon">
+              <i class="pi pi-check-circle"></i>
+            </div>
+            <div>
+              <p class="tech-stat-card__label">Tickets résolus</p>
+              <span class="tech-stat-card__value">09</span>
+            </div>
+          </div>
+          <div class="tech-stat-card tech-stat-card--orange">
+            <div class="tech-stat-card__icon">
+              <i class="pi pi-wallet"></i>
+            </div>
+            <div>
+              <p class="tech-stat-card__label">Total versés</p>
+              <span class="tech-stat-card__value">178 000 FCFA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Intervention history -->
+        <div class="card history-card">
+          <div class="card-header">
+            <h3 class="card-title">Historique d'interventions</h3>
+            <div class="search-field search-field--sm">
+              <i class="pi pi-search"></i>
+              <input type="text" placeholder="Recherche ..." />
+            </div>
+          </div>
+          <div class="history-grid">
+            @for (tk of techInterventions; track tk.id) {
+              <div class="history-item">
+                <div class="history-item__header">
+                  <span class="history-id">{{ tk.id }}</span>
+                  <span class="status-badge status-badge--resolu">
+                    <i class="pi pi-check"></i> Résolu
+                  </span>
+                </div>
+                <p class="history-problem">{{ tk.probleme }}</p>
+                <div class="history-divider"></div>
+                <div class="history-client">
+                  <div class="mini-avatar">{{ tk.initials }}</div>
+                  <span>{{ tk.client }}</span>
+                </div>
+                <p class="history-location">{{ tk.bien }}</p>
+                <p class="history-date">{{ tk.date }}</p>
+                <button class="history-btn">Voir le ticket</button>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAIN + TECHNICIANS VIEWS (banner + KPIs always visible)
+  ════════════════════════════════════════════════════════════ -->
+  @if (view() !== 'techDetail') {
+
+    <!-- Hero banner -->
+    <div class="hero-kpi-card">
+      <div class="hero-banner">
+        <div class="hero-text">
+          <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
+          <p>Bienvenue sur votre espace SAV. Suivez les tickets, gérez les interventions et supervisez votre équipe de techniciens.</p>
+        </div>
+        <button class="hero-cta" (click)="openAddTech()">
+          Ajouter un technicien
+          <span class="hero-cta__icon">
+            <i class="pi pi-user-plus"></i>
+          </span>
+        </button>
+      </div>
+
+      <div class="kpi-row">
+        @for (card of kpiCards; track card.label) {
+          <div class="kpi-card" [style.background]="card.bg">
+            <div class="kpi-card__icon" [style.color]="card.color">
+              <i class="pi {{ card.icon }}"></i>
+            </div>
+            <div class="kpi-card__body">
+              <p class="kpi-card__label">{{ card.label }}</p>
+              <span class="kpi-card__value">{{ card.value }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── MAIN DASHBOARD VIEW ──────────────────────────────── -->
+    @if (view() === 'main') {
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="filter-select">
+          <select (change)="filterStatut.set($any($event.target).value)">
+            <option value="">Statut</option>
+            <option>Résolu</option>
+            <option>En cours</option>
+            <option>En attente</option>
+          </select>
+          <i class="pi pi-chevron-down"></i>
+        </div>
+        <div class="filter-select">
+          <select (change)="filterPriorite.set($any($event.target).value)">
+            <option value="">Priorité</option>
+            <option>Urgent</option>
+            <option>Normal</option>
+          </select>
+          <i class="pi pi-chevron-down"></i>
+        </div>
+        <div class="filter-select">
+          <select (change)="filterType.set($any($event.target).value)">
+            <option value="">Type de problème</option>
+            <option>Fuite d'eau</option>
+            <option>Problème électrique</option>
+            <option>Porte cassée</option>
+          </select>
+          <i class="pi pi-chevron-down"></i>
+        </div>
+        <div class="filter-date">
+          <i class="pi pi-calendar"></i>
+          <span>Date</span>
+          <i class="pi pi-chevron-down"></i>
+        </div>
+        <button class="filter-btn">Filtrer</button>
+      </div>
+
+      <!-- Middle row: ticket table + notifications -->
+      <div class="middle-row">
+
+        <!-- Ticket table -->
+        <div class="card ticket-card">
+          <div class="table-header">
+            <h3 class="card-title">Liste des tickets</h3>
+            <div class="table-actions">
+              <div class="search-field search-field--sm">
+                <i class="pi pi-search"></i>
+                <input type="text" placeholder="Recherche ..." />
+              </div>
+              <button class="see-all-btn">Tout voir</button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID Ticket</th>
+                  <th>Client</th>
+                  <th>Biens concernés</th>
+                  <th>Problème</th>
+                  <th>Priorité</th>
+                  <th>Crée le</th>
+                  <th>Statut</th>
+                  <th>Détails</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (tk of tickets; track tk.id) {
+                  <tr>
+                    <td class="cell-id">{{ tk.id }}</td>
+                    <td>
+                      <div class="client-cell">
+                        <div class="mini-avatar">{{ tk.initials }}</div>
+                        <span>{{ tk.client }}</span>
+                      </div>
+                    </td>
+                    <td>{{ tk.bien }}</td>
+                    <td>{{ tk.probleme }}</td>
+                    <td>
+                      <span class="priority-badge" [class.priority-badge--urgent]="tk.priorite === 'Urgent'">
+                        {{ tk.priorite }}
+                      </span>
+                    </td>
+                    <td>{{ tk.date }}</td>
+                    <td>
+                      <span class="status-badge"
+                            [class.status-badge--resolu]="tk.statut === 'Résolu'"
+                            [class.status-badge--encours]="tk.statut === 'En cours'"
+                            [class.status-badge--attente]="tk.statut === 'En attente'">
+                        {{ tk.statut }}
+                      </span>
+                    </td>
+                    <td>
+                      <button class="detail-btn">Détails</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Notifications panel -->
+        <div class="card notif-card">
+          <div class="card-header">
+            <h3 class="card-title">Dernières notifications</h3>
+            <button class="outline-btn">Voir plus</button>
+          </div>
+          <div class="notif-list">
+            @for (n of notifications; track n.ticketId + n.timeAgo) {
+              <div class="notif-item">
+                <div class="notif-icon" [style.color]="n.color" [style.background]="n.color + '1a'">
+                  <i class="pi {{ n.icon }}"></i>
+                </div>
+                <div class="notif-body">
+                  <p class="notif-type" [style.color]="n.color">{{ n.type }}</p>
+                  <span class="notif-property">{{ n.property }}</span>
+                  <div class="notif-meta">
+                    <span class="notif-id">{{ n.ticketId }}</span>
+                    <span class="notif-time">{{ n.timeAgo }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom row: chart + technician grid -->
+      <div class="bottom-row">
+
+        <!-- Interventions donut chart -->
+        <div class="card interventions-card">
+          <div class="card-header">
+            <h3 class="card-title">Les interventions</h3>
+            <button class="filter-pill">Mois en cours <i class="pi pi-chevron-down"></i></button>
+          </div>
+
+          <div class="interventions-chart-wrapper">
+            <p-chart type="doughnut" [data]="interventionsData" [options]="interventionsOptions" />
+            <div class="interventions-center">
+              <span class="interventions-center__label">Total</span>
+              <span class="interventions-center__count">/ 48</span>
+            </div>
+          </div>
+
+          <div class="interventions-legend">
+            @for (item of interventionsLegend; track item.label) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="item.color"></span>
+                <span class="legend-count">{{ item.count }}</span>
+                <span class="legend-label">{{ item.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Technician grid -->
+        <div class="card techs-card">
+          <div class="card-header">
+            <h3 class="card-title">Techniciens en activité</h3>
+            <button class="see-all-btn" (click)="showTechList()">Voir plus</button>
+          </div>
+          <div class="tech-grid tech-grid--dashboard">
+            @for (tech of dashboardTechs; track tech.id) {
+              <div class="tech-card">
+                <div class="tech-card__avatar" [style.background]="tech.color">{{ tech.initials }}</div>
+                <p class="tech-card__name">{{ tech.name }}</p>
+                <p class="tech-card__specialty">{{ tech.specialty }}</p>
+                <div class="tech-card__stars">
+                  @for (s of stars(tech.rating); track $index) {
+                    <i class="pi" [class.pi-star-fill]="s === 'full'" [class.pi-star-half-fill]="s === 'half'" [class.pi-star]="s === 'empty'"></i>
+                  }
+                  <span>{{ tech.rating }}</span>
+                </div>
+                <div class="tech-card__tickets">
+                  <i class="pi pi-comment"></i>
+                  <span>Ticket en cours : {{ tech.tickets }}</span>
+                </div>
+                <div class="tech-card__phone">
+                  <i class="pi pi-phone"></i>
+                  <span>{{ tech.phone }}</span>
+                </div>
+                <button class="tech-card__btn" (click)="showTechDetail(tech)">Voir fiche</button>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- ── TECHNICIANS LIST VIEW ─────────────────────────────── -->
+    @if (view() === 'techs') {
+      <div class="card tech-list-card">
+        <div class="card-header">
+          <h3 class="card-title">Liste des techniciens</h3>
+          <div class="search-field search-field--sm">
+            <i class="pi pi-search"></i>
+            <input type="text" placeholder="Recherche ..." />
+          </div>
+        </div>
+        <div class="tech-grid tech-grid--full">
+          @for (tech of technicians; track tech.id) {
+            <div class="tech-card">
+              <div class="tech-card__avatar" [style.background]="tech.color">{{ tech.initials }}</div>
+              <p class="tech-card__name">{{ tech.name }}</p>
+              <p class="tech-card__specialty">{{ tech.specialty }}</p>
+              <div class="tech-card__stars">
+                @for (s of stars(tech.rating); track $index) {
+                  <i class="pi" [class.pi-star-fill]="s === 'full'" [class.pi-star-half-fill]="s === 'half'" [class.pi-star]="s === 'empty'"></i>
+                }
+                <span>{{ tech.rating }}</span>
+              </div>
+              <div class="tech-card__tickets">
+                <i class="pi pi-comment"></i>
+                <span>Ticket en cours : {{ tech.tickets }}</span>
+              </div>
+              <div class="tech-card__phone">
+                <i class="pi pi-phone"></i>
+                <span>{{ tech.phone }}</span>
+              </div>
+              <button class="tech-card__btn" (click)="showTechDetail(tech)">Voir fiche</button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+  }
+
+</div>
+
+<!-- ── Date range picker ──────────────────────────────────────────── -->
+<ubax-date-range-picker
+  [(isOpen)]="datePickerOpen"
+  (applied)="onDateRangeApplied($event)"
+/>
+
+<!-- ── Add Technician Modal ───────────────────────────────────────── -->
+@if (addTechOpen()) {
+
+  <div class="at-overlay" [class.is-closing]="addTechClosing()" (click)="closeAddTech()"></div>
+
+  <div class="at-modal" [class.is-closing]="addTechClosing()" (click)="stopPropagation($event)">
+
+    <div class="at-header">
+      <h2 class="at-title">Ajouter un technicien</h2>
+      <button class="at-close" (click)="closeAddTech()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="at-body">
+
+      <!-- Photo upload -->
+      <div class="at-photo">
+        <div class="at-photo__circle">
+          <i class="pi pi-user"></i>
+        </div>
+        <button class="at-photo__link">Modifier la photo</button>
+      </div>
+
+      <!-- Form grid -->
+      <div class="at-form">
+
+        <div class="at-field">
+          <label class="at-label">Prénom</label>
+          <input class="at-input" type="text" placeholder="Prénom"
+                 [value]="newPrenom()" (input)="newPrenom.set($any($event.target).value)" />
+        </div>
+
+        <div class="at-field">
+          <label class="at-label">Nom</label>
+          <input class="at-input" type="text" placeholder="Nom"
+                 [value]="newNom()" (input)="newNom.set($any($event.target).value)" />
+        </div>
+
+        <div class="at-field">
+          <label class="at-label">Numéro de téléphone</label>
+          <div class="at-phone-wrap">
+            <span class="at-phone-flag">🇨🇮</span>
+            <input class="at-input at-input--phone" type="tel" placeholder="+225 07 XX XX XX XX"
+                   [value]="newPhone()" (input)="newPhone.set($any($event.target).value)" />
+          </div>
+        </div>
+
+        <div class="at-field">
+          <label class="at-label">Domaine de compétence</label>
+          <div class="at-select">
+            <select [value]="newSpecialty()" (change)="newSpecialty.set($any($event.target).value)">
+              @for (s of specialties; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+            <i class="pi pi-chevron-down"></i>
+          </div>
+        </div>
+
+        <div class="at-field at-field--half">
+          <label class="at-label">Moyen de paiement souhaité</label>
+          <div class="at-select">
+            <select [value]="newPayment()" (change)="newPayment.set($any($event.target).value)">
+              @for (p of paymentMethods; track p) {
+                <option [value]="p">{{ p }}</option>
+              }
+            </select>
+            <i class="pi pi-chevron-down"></i>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="at-footer">
+      <button class="at-btn at-btn--cancel" (click)="closeAddTech()">Annuler</button>
+      <button class="at-btn at-btn--save" (click)="saveTech()">Enregistrer</button>
+    </div>
+
+  </div>
+
+}

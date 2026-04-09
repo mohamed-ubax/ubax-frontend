@@ -93,76 +93,21 @@
       aria-label="Formulaire de connexion"
       novalidate
     >
-      <!-- Phone number field -->
-      <div class="field-group--phone">
-        <label class="field-label" for="phone-input">Numéro de téléphone</label>
-        <div class="phone-row">
-          <!-- Country code dropdown (PrimeNG Select) -->
-          <p-select
-            [(ngModel)]="selectedCountry"
-            name="countryCode"
-            inputId="country-code-input"
-            [options]="countries"
-            optionLabel="name"
-            [filter]="true"
-            filterBy="name,dialCode,iso2"
-            filterPlaceholder="Rechercher un pays..."
-            appendTo="body"
-            styleClass="country-picker"
-            panelStyleClass="country-picker-overlay"
-            [showClear]="false"
-            aria-label="Indicatif téléphonique"
-          >
-            <ng-template #selectedItem let-country>
-              <div class="cp-trigger">
-                <span class="cp-flag-badge" aria-hidden="true">
-                  <img
-                    class="cp-flag-image"
-                    [src]="country?.flagUrl"
-                    [alt]="''"
-                  />
-                </span>
-                <span class="cp-dial">+{{ country?.dialCode }}</span>
-              </div>
-            </ng-template>
-            <ng-template #dropdownicon>
-              <img
-                class="cp-dropdown-icon"
-                src="assets/portal-assets/login/icons/solar_alt-arrow-down-linear.svg"
-                alt=""
-                aria-hidden="true"
-              />
-            </ng-template>
-            <ng-template #item let-country>
-              <div class="cp-item">
-                <span
-                  class="cp-flag-badge cp-flag-badge--option"
-                  aria-hidden="true"
-                >
-                  <img
-                    class="cp-flag-image"
-                    [src]="country.flagUrl"
-                    [alt]="''"
-                  />
-                </span>
-                <span class="cp-item-name">{{ country.name }}</span>
-                <span class="cp-item-dial">+{{ country.dialCode }}</span>
-              </div>
-            </ng-template>
-          </p-select>
-          <!-- Phone number input -->
-          <input
-            pInputText
-            id="phone-input"
-            class="phone-input"
-            type="tel"
-            placeholder="07 12 34 56 78"
-            autocomplete="tel"
-            [(ngModel)]="phone"
-            name="phone"
-          />
-        </div>
-        <span class="field-hint">Entrez votre numéro de téléphone</span>
+      <!-- Email field -->
+      <div class="field-group--email">
+        <label class="field-label" for="email-input">Email</label>
+        <input
+          pInputText
+          id="email-input"
+          class="email-input"
+          type="email"
+          inputmode="email"
+          placeholder="xxxxxxxxxxxxx@gmail.com"
+          autocomplete="email"
+          [(ngModel)]="email"
+          name="email"
+        />
+        <span class="field-hint">Entrez votre adresse email</span>
       </div>
 
       <!-- Password field -->

@@ -21,7 +21,34 @@
       "@ubax-workspace/ubax-portal-features": [
         "libs/ubax-portal/features/src/index.ts"
       ],
-      "@ubax-workspace/shared-ui": ["libs/shared/ui/src/index.ts"]
+      "@ubax-workspace/shared-ui": ["libs/shared/ui/src/index.ts"],
+      "@ubax-workspace/ubax-web-shell": [
+        "libs/ubax-web/shell/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-data-access": [
+        "libs/ubax-web/data-access/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-dashboard": [
+        "libs/ubax-web/features/dashboard/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-immobilier": [
+        "libs/ubax-web/features/immobilier/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-location": [
+        "libs/ubax-web/features/location/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-finance": [
+        "libs/ubax-web/features/finance/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-hotel": [
+        "libs/ubax-web/features/hotel/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-demandes": [
+        "libs/ubax-web/features/demandes/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-archivage": [
+        "libs/ubax-web/features/archivage/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

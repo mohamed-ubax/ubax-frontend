@@ -1,0 +1,191 @@
+<div class="dashboard">
+
+  <!-- ── Page header ──────────────────────────────────────────────── -->
+  <div class="page-header">
+    <h1 class="page-title">Tableau de bord</h1>
+    <div class="page-actions">
+      <div class="search-field">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Recherche ..." />
+      </div>
+      <button class="search-field search-field--btn" (click)="datePickerOpen.set(true)">
+        <i class="pi pi-calendar"></i>
+        <span>{{ selectedRange() ? (selectedRange()!.start | date:'dd/MM/yy') + ' – ' + (selectedRange()!.end | date:'dd/MM/yy') : 'Sélectionner une date' }}</span>
+      </button>
+      <button class="export-btn">
+        <i class="pi pi-upload"></i>
+        Exporter les données
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Hero + KPI wrapper card ──────────────────────────────────── -->
+  <div class="hero-kpi-card">
+
+    <!-- Hero banner -->
+    <div class="hero-banner">
+      <div class="hero-content">
+        <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
+        <p>Consultez rapidement les indicateurs clés de votre portefeuille et gérez vos biens en toute simplicité.</p>
+      </div>
+      <button class="hero-cta">
+        Ajouter un bien
+        <span class="hero-cta__icon">
+          <i class="pi pi-plus"></i>
+        </span>
+      </button>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-row">
+      @for (card of kpiCards; track card.label) {
+        <div class="kpi-card" [style.background]="card.bg">
+          <div class="kpi-card__icon" [style.color]="card.color">
+            <i class="pi {{ card.icon }}"></i>
+          </div>
+          <div class="kpi-card__body">
+            <p class="kpi-card__label">{{ card.label }}</p>
+            <span class="kpi-card__value">{{ card.value }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── Appointments calendar ────────────────────────────────────── -->
+  <div class="card calendar-card">
+
+    <div class="calendar-header">
+      <div>
+        <p class="card-pretitle">Planning</p>
+        <h3 class="card-title">Demandes de Rendez-vous</h3>
+      </div>
+      <div class="calendar-nav">
+        <div class="cal-legend">
+          <span class="cal-dot cal-dot--confirmed"></span><span class="cal-legend-label">Confirmé</span>
+          <span class="cal-dot cal-dot--upcoming"></span><span class="cal-legend-label">À venir</span>
+          <span class="cal-dot cal-dot--cancelled"></span><span class="cal-legend-label">Annulé</span>
+        </div>
+        <div class="cal-nav-btns">
+          <button class="cal-nav-btn"><i class="pi pi-chevron-left"></i></button>
+          <span class="cal-week-label">Avr. 07 – 13, 2026</span>
+          <button class="cal-nav-btn"><i class="pi pi-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar grid -->
+    <div class="cal-grid-wrapper">
+
+      <!-- Time column -->
+      <div class="cal-times">
+        <div class="cal-times__header"></div>
+        @for (slot of timeSlots; track slot) {
+          <div class="cal-time-cell">{{ slot }}</div>
+        }
+      </div>
+
+      <!-- Day columns -->
+      @for (day of weekDays; track day.label; let di = $index) {
+        <div class="cal-day-col">
+          <div class="cal-day-header">
+            <span class="cal-day-name">{{ day.label }}</span>
+            <span class="cal-day-date">{{ day.date }}</span>
+          </div>
+          @for (slot of timeSlots; track slot; let si = $index) {
+            <div class="cal-slot">
+              @for (ev of getEventsForSlot(di, si); track ev.label) {
+                <div class="cal-event" [class]="'cal-event--' + ev.status"
+                     [style.height.px]="ev.span * 56 - 6">
+                  {{ ev.label }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+
+  </div>
+
+  <!-- ── Bottom row ────────────────────────────────────────────────── -->
+  <div class="bottom-row">
+
+    <!-- Prospects bar chart -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <div>
+          <p class="card-pretitle">Statistiques</p>
+          <h3 class="card-title">Prospects</h3>
+        </div>
+        <button class="filter-pill">Cette semaine <i class="pi pi-chevron-down"></i></button>
+      </div>
+      <div class="bar-chart-wrapper">
+        <p-chart type="bar" [data]="prospectsData" [options]="prospectsOptions" height="240px" />
+      </div>
+    </div>
+
+    <!-- Etat des biens -->
+    <div class="card etat-card">
+      <div class="card-header">
+        <h3 class="card-title">État des biens</h3>
+        <button class="outline-btn">Voir plus</button>
+      </div>
+
+      <div class="etat-total">
+        <span class="etat-total__count">Tous les biens</span>
+        <span class="etat-total__value">120</span>
+      </div>
+
+      <div class="etat-progress">
+        @for (stat of bienStats; track stat.label) {
+          <div class="progress-segment" [style.flex]="stat.percent" [style.background]="stat.color"></div>
+        }
+      </div>
+
+      <div class="etat-list">
+        @for (stat of bienStats; track stat.label) {
+          <div class="etat-item">
+            <span class="etat-dot" [style.background]="stat.color"></span>
+            <span class="etat-label">{{ stat.label }}</span>
+            <span class="etat-count">{{ stat.count }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Explorer les biens ─────────────────────────────────────────── -->
+  <div class="explorer-section">
+    <div class="explorer-header">
+      <h3 class="card-title">Explorer les biens</h3>
+      <button class="outline-btn">Voir tout</button>
+    </div>
+
+    <div class="explorer-grid">
+      @for (prop of properties; track prop.title) {
+        <div class="prop-card">
+          <img class="prop-card__img" [src]="prop.image" [alt]="prop.title" loading="lazy" />
+          <div class="prop-card__overlay">
+            <span class="prop-badge">{{ prop.badge }}</span>
+            <div class="prop-info">
+              <p class="prop-title">{{ prop.title }}</p>
+              <p class="prop-location"><i class="pi pi-map-marker"></i> {{ prop.location }}</p>
+              <p class="prop-price">{{ prop.price }}</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Date range picker (fixed overlay) ─────────────────────────── -->
+<ubax-date-range-picker
+  [(isOpen)]="datePickerOpen"
+  (applied)="onDateRangeApplied($event)"
+/>

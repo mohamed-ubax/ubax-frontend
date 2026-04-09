@@ -1,0 +1,13 @@
+{
+  "name": "ubax-web-hotel",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ubax-web/features/hotel/src",
+  "prefix": "ubax",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

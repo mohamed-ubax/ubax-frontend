@@ -1,0 +1,89 @@
+<div class="res-page">
+  <div class="res-card">
+
+    <!-- ── Toolbar ─────────────────────────────────────────────── -->
+    <div class="res-toolbar">
+      <h1 class="res-title">Liste de réservations</h1>
+      <div class="toolbar-right">
+        <div class="search-pill">
+          <i class="pi pi-search"></i>
+          <input type="text" placeholder="Rechercher" class="search-input" />
+        </div>
+        <div class="date-pill">
+          <span class="date-label">Sélectionner une date</span>
+          <div class="date-icon-wrap">
+            <i class="pi pi-calendar"></i>
+          </div>
+        </div>
+        <button class="add-btn" routerLink="ajouter">Ajouter une réservation</button>
+      </div>
+    </div>
+
+    <!-- ── Table ───────────────────────────────────────────────── -->
+    <div class="table-scroll">
+      <table class="res-table">
+        <thead>
+          <tr>
+            <th>Invité</th>
+            <th>Biens</th>
+            <th>Durée</th>
+            <th>Arrivée &nbsp;–&nbsp; Départ</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of reservations; track r.id) {
+            <tr>
+              <td class="td-guest">
+                <div class="guest-avatar">
+                  <i class="pi pi-user"></i>
+                </div>
+                <span class="guest-name">{{ r.guest }}</span>
+              </td>
+              <td>{{ r.property }}</td>
+              <td>{{ r.duration }}</td>
+              <td>{{ r.arrival }} &nbsp;– {{ r.departure }}</td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.status--confirmed]="r.status === 'Confirmé'"
+                  [class.status--pending]="r.status === 'En attente'"
+                  [class.status--cancelled]="r.status === 'Annulé'">
+                  {{ r.status }}
+                </span>
+              </td>
+              <td class="td-actions">
+                <button class="action-icon-btn">
+                  <i class="pi pi-eye"></i>
+                </button>
+                <span class="action-label">Voir</span>
+                <button class="action-icon-btn">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <span class="action-label">Modifier</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Pagination ──────────────────────────────────────────── -->
+    <div class="table-footer">
+      <div class="pagination">
+        <button class="page-btn page-btn--arrow">&lt;</button>
+        @for (p of pages; track p) {
+          <button
+            class="page-btn"
+            [class.page-btn--active]="activePage === p"
+            (click)="activePage = p">
+            {{ p }}
+          </button>
+        }
+        <button class="page-btn page-btn--arrow">&gt;</button>
+      </div>
+    </div>
+
+  </div>
+</div>
