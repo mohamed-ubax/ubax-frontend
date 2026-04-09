@@ -1,6 +1,6 @@
 <div class="fact-page">
 
-  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <!-- ── Header ─────────────────────────────────────────────────────── -->
   <div class="fact-header">
     <h1 class="fact-title">Facturation</h1>
     <a routerLink="/hotel/facturation/ajouter-depense" class="add-btn">
@@ -17,9 +17,12 @@
         <p class="kpi-label">Revenus total</p>
         <p class="kpi-value">18 650 000 FCFA</p>
         <div class="kpi-growth kpi-growth--down">
-          <span class="trend-arrow trend-arrow--down">↙</span>
+          <span class="trend-arrow">↙</span>
           <span>-2%</span>
         </div>
+      </div>
+      <div class="kpi-chart-mini">
+        <p-chart type="doughnut" [data]="kpiRevenusChartData" [options]="kpiChartOptions" width="81px" height="81px" />
       </div>
     </div>
 
@@ -28,9 +31,12 @@
         <p class="kpi-label">Nombre de reservations</p>
         <p class="kpi-value kpi-value--lg">850</p>
         <div class="kpi-growth kpi-growth--up">
-          <span class="trend-arrow trend-arrow--up">↗</span>
+          <span class="trend-arrow">↗</span>
           <span>+7%</span>
         </div>
+      </div>
+      <div class="kpi-chart-mini">
+        <p-chart type="doughnut" [data]="kpiReservChartData" [options]="kpiChartOptions" width="81px" height="81px" />
       </div>
     </div>
 
@@ -39,16 +45,26 @@
         <p class="kpi-label">Dépenses</p>
         <p class="kpi-value">5 550 000 FCFA</p>
         <div class="kpi-growth kpi-growth--down">
-          <span class="trend-arrow trend-arrow--down">↙</span>
+          <span class="trend-arrow">↙</span>
           <span>-5%</span>
         </div>
+      </div>
+      <div class="kpi-chart-mini">
+        <p-chart type="doughnut" [data]="kpiDepensesChartData" [options]="kpiChartOptions" width="81px" height="81px" />
       </div>
     </div>
 
     <div class="kpi-card kpi-card--green">
       <div class="kpi-balance">
         <p class="kpi-balance__label">Solde disponible</p>
-        <p class="kpi-balance__value">16 850 000 FCFA</p>
+        <div class="kpi-balance__value-row">
+          <p class="kpi-balance__value">
+            {{ showBalance ? '16 850 000 FCFA' : '•••••••••••' }}
+          </p>
+          <button class="kpi-balance__eye" type="button" (click)="toggleBalance()">
+            <i [class]="showBalance ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+          </button>
+        </div>
       </div>
       <div class="kpi-balance__icon">
         <i class="pi pi-send"></i>
@@ -62,31 +78,31 @@
 
     <!-- Statistiques -->
     <div class="stats-card card">
-      <div class="stats-top">
+      <div class="stats-header">
         <h3 class="stats-title">Statistiques</h3>
-        <a routerLink="/hotel/facturation/recettes" class="historique-link">
-          <i class="pi pi-list"></i>
-          Historique des transactions
-        </a>
       </div>
       <div class="stats-controls">
-        <div class="stats-legend">
+        <div class="stats-legend-group">
           <span class="legend-item">
             <span class="legend-dot legend-dot--green"></span>Revenus
           </span>
           <span class="legend-item">
             <span class="legend-dot legend-dot--red"></span>Dépenses
           </span>
+          <div class="period-filter">
+            @for (p of ['Semaine', 'Moi', 'Année']; track p) {
+              <button
+                class="period-btn"
+                [class.period-btn--active]="activePeriod === p"
+                (click)="activePeriod = p"
+              >{{ p }}</button>
+            }
+          </div>
         </div>
-        <div class="period-filter">
-          @for (p of ['Semaine', 'Moi', 'Année']; track p) {
-            <button
-              class="period-btn"
-              [class.period-btn--active]="activePeriod === p"
-              (click)="activePeriod = p"
-            >{{ p }}</button>
-          }
-        </div>
+        <a routerLink="/hotel/facturation/recettes" class="historique-link">
+          <i class="pi pi-list"></i>
+          Historique des transactions
+        </a>
       </div>
       <div class="stats-chart-area">
         <p-chart type="line" [data]="statsData" [options]="statsOptions" height="315px" />
@@ -124,7 +140,7 @@
   <!-- ── Bottom Grid : mini chart | transactions | donut ────────── -->
   <div class="bottom-grid">
 
-    <!-- Mini bar chart -->
+    <!-- Mini bar chart (Revenus) -->
     <div class="mini-card card">
       <div class="mini-card__head">
         <div>
@@ -142,7 +158,7 @@
     <div class="trans-card card">
       <div class="trans-card__head">
         <h3 class="trans-card__title">Historique des transactions</h3>
-        <button class="more-btn"><i class="pi pi-ellipsis-h" style="transform:rotate(90deg)"></i></button>
+        <button class="more-btn"><i class="pi pi-ellipsis-v"></i></button>
       </div>
       <div class="trans-scroll">
         <table class="trans-table">
