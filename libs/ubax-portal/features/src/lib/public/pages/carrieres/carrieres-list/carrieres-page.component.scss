@@ -48,12 +48,11 @@ $c-placeholder: #b3b3b3;
 .hero__notch {
   position: absolute;
   bottom: 0;
-  left: 0;
-  width: 470px;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: -18.157px;
+  width: 507.403px;
+  height: 199.654px;
+  padding: 51px 0 0 111px;
+  box-sizing: border-box;
 }
 
 // Left visual area — wider to fill the notch column (~470 px)
@@ -68,8 +67,12 @@ $c-placeholder: #b3b3b3;
 
 // Infinite spin for the dashed ring (triggered by JS after entry animation)
 @keyframes ubax-spin-ring {
-  from { transform: translate(-50%, -55%) rotate(0deg); }
-  to   { transform: translate(-50%, -55%) rotate(360deg); }
+  from {
+    transform: translate(-50%, -55%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -55%) rotate(360deg);
+  }
 }
 
 // Fix 4: dashed decorative ring around the orange circle
@@ -111,18 +114,52 @@ $c-placeholder: #b3b3b3;
   z-index: 2;
 }
 
-// Badge — centred inside .hero__notch via its parent's flexbox
-.hero__badge {
-  background: #fff;
-  border: 1px solid #f5f5f5;
-  border-radius: 32px;
-  padding: 8px 20px;
-  white-space: nowrap;
-  font-size: 0.9375rem;
-  font-weight: 400;
-  color: var(--ubax-brand);
+.hero__community {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 261px;
+}
+
+.hero__avatars {
+  position: relative;
+  width: 173.443px;
+  height: 55.159px;
+  margin-left: 14px;
+}
+
+.hero__avatar {
+  position: absolute;
+  top: 0;
+  width: 54.772px;
+  height: 55.159px;
+  object-fit: contain;
+
+  &--1 {
+    left: 0;
+  }
+
+  &--2 {
+    left: 39.558px;
+  }
+
+  &--3 {
+    left: 69.114px;
+  }
+
+  &--4 {
+    left: 120.671px;
+  }
+}
+
+.hero__community-text {
+  margin: 0;
+  font-family: 'Poppins', 'Lexend', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1.5;
-  pointer-events: auto;
+  color: #000;
+  text-transform: capitalize;
 }
 
 // Right content area
@@ -438,13 +475,206 @@ $c-placeholder: #b3b3b3;
 
 // Fix 4: image starts at top:33px (not top:0) and uses Figma exact size,
 // eliminating the overlap with the title area
-.info-section__deco {
+.info-section__visual {
   position: absolute;
   right: 3.5%;
   top: 33px;
   width: 536px;
   height: 498px;
   pointer-events: none;
+}
+
+.info-section__deco {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.info-section__orbit {
+  position: absolute;
+  left: 29.008px;
+  top: 338.162px;
+  width: 145.187px;
+  aspect-ratio: 145.187 / 140.838;
+}
+
+.info-section__orbit-shell {
+  position: absolute;
+  inset: 0;
+  border-radius: 145.187px;
+  border: 0.3px solid #fff;
+  background: #ecf2f7;
+  z-index: 1;
+}
+
+.info-section__orbit-pulses {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.info-section__orbit-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 68%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0) 34%,
+    rgba(255, 255, 255, 0.84) 56%,
+    rgba(255, 255, 255, 0.42) 69%,
+    rgba(255, 255, 255, 0.16) 82%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  mix-blend-mode: screen;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.18);
+  filter: blur(0.15px);
+  will-change: transform, opacity;
+
+  &--1 {
+    animation: carrieres-info-orbit-ripple 6.4s ease-out infinite;
+  }
+
+  &--2 {
+    animation: carrieres-info-orbit-ripple 6.4s ease-out 3.2s infinite;
+  }
+}
+
+.info-section__orbit-logo-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52.902px;
+  height: 52.178px;
+  transform: translate(-50%, -50%);
+  border-radius: 52.902px;
+  border: 2px solid #fff;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  backdrop-filter: blur(7.5px);
+  -webkit-backdrop-filter: blur(7.5px);
+}
+
+.info-section__orbit-logo {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+
+.info-section__orbiters {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.info-section__orbiter {
+  position: absolute;
+  width: clamp(4px, 0.32vw, 6px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #f8961e;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 1.5px rgba(248, 150, 30, 0.08),
+    0 0 8px rgba(248, 150, 30, 0.18);
+
+  &--left {
+    left: 8%;
+    top: 54%;
+  }
+
+  &--top-right {
+    left: 76%;
+    top: 8%;
+  }
+
+  &--bottom {
+    left: 22%;
+    top: 92%;
+  }
+
+  &--bottom-right {
+    left: 95%;
+    top: 74%;
+  }
+}
+
+@supports (offset-path: ellipse(48% 47% at 50% 50%)) {
+  .info-section__orbiter {
+    left: 0;
+    top: 0;
+    transform: none;
+    offset-path: ellipse(48% 47% at 50% 50%);
+    offset-rotate: 0deg;
+    will-change: offset-distance;
+    animation: carrieres-info-orbit-follow 14s linear infinite;
+  }
+
+  .info-section__orbiter--top-right {
+    animation-delay: -3.5s;
+  }
+
+  .info-section__orbiter--bottom {
+    animation-delay: -10.5s;
+  }
+
+  .info-section__orbiter--bottom-right {
+    animation-delay: -7s;
+  }
+
+  .info-section__orbiter--left {
+    animation-delay: 0s;
+  }
+}
+
+@keyframes carrieres-info-orbit-follow {
+  from {
+    offset-distance: 0%;
+  }
+
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes carrieres-info-orbit-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.58;
+  }
+
+  18% {
+    opacity: 0.32;
+  }
+
+  52% {
+    transform: translate(-50%, -50%) scale(2.28);
+    opacity: 0;
+  }
+
+  52.1%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-section__orbit-pulse,
+  .info-section__orbiter {
+    animation: none;
+  }
 }
 
 // Fix 1–2: title left-aligned in its column (was text-align:center + margin:auto
@@ -913,12 +1143,12 @@ $c-placeholder: #b3b3b3;
     display: flex;
     flex-direction: column;
     min-height: auto;
-    padding-bottom: 0;       // le bas de la carte colle à l'image
-    overflow: hidden;        // coupe l'image aux coins arrondis de la carte
+    padding-bottom: 0; // le bas de la carte colle à l'image
+    overflow: hidden; // coupe l'image aux coins arrondis de la carte
   }
 
-  .info-section__deco {
-    order: 1;                // après tous les enfants à order:0
+  .info-section__visual {
+    order: 1; // après tous les enfants à order:0
     position: relative;
     top: auto;
     right: auto;
@@ -926,9 +1156,18 @@ $c-placeholder: #b3b3b3;
     max-width: 100%;
     height: 380px;
     pointer-events: none;
+    margin-top: 40px;
+  }
+
+  .info-section__deco {
     object-fit: cover;
     object-position: center top;
-    margin-top: 40px;
+  }
+
+  .info-section__orbit {
+    left: 5.4119%;
+    top: 67.904%;
+    width: clamp(112px, 27.436%, 145.187px);
   }
 
   .info-section__title,
@@ -1128,7 +1367,7 @@ $c-placeholder: #b3b3b3;
       -webkit-mask-image: none;
       border-radius: 24px;
       background: url('/assets/portal-assets/careers/images/unsplash_jpfLtHmQFek.png')
-      center / cover no-repeat;
+        center / cover no-repeat;
     }
   }
 
@@ -1177,8 +1416,21 @@ $c-placeholder: #b3b3b3;
     left: auto;
     width: auto;
     height: auto;
+    padding: 0;
     margin-top: 28px;
-    justify-content: center;
+  }
+
+  .hero__community {
+    width: auto;
+    align-items: center;
+  }
+
+  .hero__avatars {
+    margin-left: 0;
+  }
+
+  .hero__community-text {
+    text-align: center;
   }
 }
 
@@ -1190,12 +1442,11 @@ $c-placeholder: #b3b3b3;
     margin-bottom: 20px;
   }
 
-  .hero__search-input
-  {
+  .hero__search-input {
     padding: 1rem;
   }
 
-  .hero__content{
+  .hero__content {
     margin: 2rem 0;
   }
 

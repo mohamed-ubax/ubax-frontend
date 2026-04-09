@@ -1,0 +1,166 @@
+<div class="hist-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <div class="hist-header">
+    <h1 class="hist-title">Historique des Recettes</h1>
+    <div class="hist-actions">
+      <a routerLink="/hotel/facturation/recettes" class="tab-btn tab-btn--green">
+        <i class="pi pi-arrow-down-left"></i>
+        Recettes
+      </a>
+      <a routerLink="/hotel/facturation/depenses" class="tab-btn tab-btn--outline">
+        <i class="pi pi-send"></i>
+        Dépenses
+      </a>
+      <a routerLink="/hotel/facturation/ajouter-depense" class="add-btn">
+        <i class="pi pi-plus"></i>
+        Ajouter une dépense
+      </a>
+    </div>
+  </div>
+
+  <!-- ── KPI Row ────────────────────────────────────────────────── -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-text">
+        <p class="kpi-label">Revenus total</p>
+        <p class="kpi-value">18 650 000 FCFA</p>
+        <div class="kpi-growth kpi-growth--up">
+          <span class="trend-arrow">↗</span><span>+7%</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-text">
+        <p class="kpi-label">Transaction</p>
+        <p class="kpi-value kpi-value--lg">110</p>
+        <div class="kpi-growth kpi-growth--up">
+          <span class="trend-arrow">↗</span><span>+5%</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-text">
+        <p class="kpi-label">Moyenne / transaction</p>
+        <p class="kpi-value">55 000 FCFA</p>
+        <div class="kpi-growth kpi-growth--down">
+          <span class="trend-arrow">↙</span><span>-3%</span>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-card--green">
+      <div class="kpi-balance">
+        <p class="kpi-balance__label">Solde disponible</p>
+        <p class="kpi-balance__value">16 850 000 FCFA</p>
+      </div>
+      <div class="kpi-balance__icon">
+        <i class="pi pi-send"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chart Row ─────────────────────────────────────────────── -->
+  <div class="chart-row">
+    <!-- Line chart -->
+    <div class="line-card card">
+      <div class="line-card__top">
+        <h3 class="line-card__title">Recettes</h3>
+        <div class="period-filter">
+          @for (p of ['Semaine', 'Moi', 'Année']; track p) {
+            <button class="period-btn" [class.period-btn--active]="activePeriod === p" (click)="activePeriod = p">{{ p }}</button>
+          }
+        </div>
+      </div>
+      <div class="line-card__chart">
+        <p-chart type="line" [data]="lineData" [options]="lineOptions" height="315px" />
+      </div>
+    </div>
+
+    <!-- Mini bar chart -->
+    <div class="mini-card card">
+      <div class="mini-card__head">
+        <div>
+          <p class="mini-card__title">Revenus</p>
+          <p class="mini-card__sub">Par jour</p>
+        </div>
+        <span class="date-range-pill">Du 01 avril 2026 au 07 avril 2026</span>
+      </div>
+      <div class="mini-card__chart">
+        <p-chart type="bar" [data]="miniBarData" [options]="miniBarOptions" height="200px" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Table section ─────────────────────────────────────────── -->
+  <div class="table-section card">
+
+    <div class="table-section__top">
+      <div>
+        <h3 class="table-section__title">Historique des Recettes</h3>
+        <p class="table-section__sub">312 transactions au total</p>
+      </div>
+      <div class="table-section__actions">
+        <button class="action-pill">
+          <i class="pi pi-search"></i>
+          Rechercher
+        </button>
+        <button class="action-pill">
+          <i class="pi pi-upload"></i>
+          Exporter
+        </button>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Transaction ID</th>
+            <th>Nom complet</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Méthode</th>
+            <th>Total</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of recettes; track r.id + r.name) {
+            <tr>
+              <td class="td-id">{{ r.id }}</td>
+              <td>
+                <div class="td-avatar-name">
+                  <img class="row-avatar" [src]="r.avatar" [alt]="r.name" />
+                  <span>{{ r.name }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="type-badge type-badge--gray">{{ r.type }}</span>
+              </td>
+              <td>{{ r.date }}</td>
+              <td>{{ r.method }}</td>
+              <td class="td-total td-total--pos">{{ r.total }}</td>
+              <td>
+                <span class="statut-badge statut-badge--success">
+                  <span class="badge-dot"></span>{{ r.statut }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p class="table-footer__info">Affichage de 8 sur 8 résultats</p>
+      <div class="pagination">
+        <button class="page-btn page-btn--arrow">&lt;</button>
+        @for (p of pages; track p) {
+          <button class="page-btn" [class.page-btn--active]="activePage === p" (click)="activePage = p">{{ p }}</button>
+        }
+        <button class="page-btn page-btn--arrow">&gt;</button>
+      </div>
+    </div>
+
+  </div>
+</div>

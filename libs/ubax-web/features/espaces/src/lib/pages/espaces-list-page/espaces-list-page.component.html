@@ -1,0 +1,130 @@
+<ubax-page-header title="Mes chambres">
+  <button class="add-space-btn" routerLink="ajouter">
+    <i class="pi pi-plus"></i>
+    Ajouter une espace
+  </button>
+</ubax-page-header>
+
+<div class="espaces-controls">
+  <div class="espaces-filters">
+    <ubax-filter-bar
+      [showDateRange]="false"
+      [selects]="filterSelects"
+    ></ubax-filter-bar>
+  </div>
+</div>
+
+<div class="espaces-summary">
+  <div class="summary-card">
+    <div class="summary-icon summary-icon--all">
+      <i class="pi pi-home"></i>
+    </div>
+    <div class="summary-info">
+      <span class="summary-label">Tous les espaces</span>
+      <span class="summary-value">45</span>
+    </div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-icon summary-icon--reserved">
+      <i class="pi pi-home"></i>
+    </div>
+    <div class="summary-info">
+      <span class="summary-label">Espaces réservés</span>
+      <span class="summary-value">25</span>
+    </div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-icon summary-icon--online">
+      <i class="pi pi-wifi"></i>
+    </div>
+    <div class="summary-info">
+      <span class="summary-label">Espaces en ligne</span>
+      <span class="summary-value">15</span>
+    </div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-icon summary-icon--occupied">
+      <i class="pi pi-building"></i>
+    </div>
+    <div class="summary-info">
+      <span class="summary-label">Espaces Occupés</span>
+      <span class="summary-value">10</span>
+    </div>
+  </div>
+  <div class="summary-card summary-card--revenue">
+    <div class="summary-icon summary-icon--revenue">
+      <i class="pi pi-send"></i>
+    </div>
+    <div class="summary-info">
+      <span class="summary-label">Revenus du jour</span>
+      <span class="summary-value summary-value--revenue">750 000 FCFA</span>
+    </div>
+  </div>
+</div>
+
+<div class="espaces-toolbar">
+  <div class="view-btns">
+    <button class="view-btn view-btn--active" aria-label="Vue grille">
+      <i class="pi pi-th-large"></i>
+    </button>
+    <button class="view-btn" aria-label="Vue liste">
+      <i class="pi pi-list"></i>
+    </button>
+  </div>
+</div>
+
+<section class="espaces-grid">
+  @for (s of spaces; track s.id) {
+    <div class="espaces-card" [routerLink]="[s.id]">
+      <div class="card-media">
+        <div class="type-badge">{{ s.tag }}</div>
+        <div
+          class="status-pill"
+          [class.status-pill--reserved]="s.status === 'Réservé'"
+          [class.status-pill--disponible]="s.status === 'Disponible'"
+        >
+          {{ s.status }}
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="card-footer__top">
+          <h3 class="card-name">{{ s.title }}</h3>
+          <button class="card-arrow" aria-label="Voir détails">
+            <i class="pi pi-arrow-up-right"></i>
+          </button>
+        </div>
+        <div class="card-location">
+          <i class="pi pi-map-marker"></i>
+          {{ s.location }}
+        </div>
+        <div class="card-bottom">
+          <div class="card-owner">
+            <div class="card-avatar">{{ s.owner[0] }}</div>
+            <div class="card-owner-info">
+              <span class="card-owner-name">{{ s.owner }}</span>
+              <span class="card-owner-role">Cliente</span>
+            </div>
+          </div>
+          <div class="card-price">{{ s.price }}</div>
+        </div>
+      </div>
+    </div>
+  }
+</section>
+
+<div class="espaces-pagination">
+  <div class="pagination-inner">
+    <button class="page-btn page-btn--nav">
+      <i class="pi pi-chevron-left"></i>
+    </button>
+    @for (p of pages; track p) {
+      <button class="page-btn" [class.page-btn--active]="p === activePage()">
+        {{ p }}
+      </button>
+    }
+    <button class="page-btn page-btn--nav">
+      <i class="pi pi-chevron-right"></i>
+    </button>
+  </div>
+</div>

@@ -1,6 +1,20 @@
-import { APP_INITIALIZER, ApplicationConfig, inject, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  inject,
+  isDevMode,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withViewTransitions,
+} from '@angular/router';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { authInterceptor, UbaxPreset } from '@ubax-workspace/ubax-web-shell';
@@ -13,37 +27,49 @@ import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
  */
 function provideMockUserInDev() {
   if (!isDevMode()) return [];
-  return [{
-    provide: APP_INITIALIZER,
-    useFactory: () => {
-      const authStore = inject(AuthStore);
-      return () => {
-        if (authStore.token() && !authStore.user()) {
-          authStore.setUser({
-            id: 'dev-001',
-            nom: 'Kouassi',
-            prenom: 'Jean-Marc',
-            email: 'jm.kouassi@ubax.io',
-            role: Role.SAV,
-          });
-        }
-      };
+  return [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => {
+        const authStore = inject(AuthStore);
+        return () => {
+          if (!authStore.token()) {
+            authStore.setToken('dev-mock-token');
+          }
+          if (!authStore.user()) {
+            authStore.setUser({
+              id: 'dev-001',
+              nom: 'Kouassi',
+              prenom: 'Jean-Marc',
+              email: 'jm.kouassi@ubax.io',
+              role: Role.HOTEL,
+            });
+          }
+        };
+      },
+      multi: true,
     },
-    multi: true,
-  }];
+  ];
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(appRoutes, withComponentInputBinding(), withViewTransitions()),
+    provideRouter(
+      appRoutes,
+      withComponentInputBinding(),
+      withViewTransitions(),
+    ),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     providePrimeNG({
       theme: {
         preset: UbaxPreset,
         options: {
           darkModeSelector: '.dark',
-          cssLayer: { name: 'primeng', order: 'tailwind-base, primeng, tailwind-utilities' },
+          cssLayer: {
+            name: 'primeng',
+            order: 'tailwind-base, primeng, tailwind-utilities',
+          },
         },
       },
       ripple: true,

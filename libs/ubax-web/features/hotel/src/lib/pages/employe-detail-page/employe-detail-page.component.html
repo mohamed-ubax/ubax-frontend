@@ -1,0 +1,189 @@
+<div class="det-page">
+
+  <!-- ── Page header ─────────────────────────────────────────────── -->
+  <div class="det-header">
+    <div class="det-header__left">
+      <a class="back-btn" routerLink="/hotel/employes">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <h1 class="det-title">Détails employés</h1>
+    </div>
+    <div class="det-header__right">
+      <button class="action-btn action-btn--edit">
+        <i class="pi pi-pencil"></i>
+        Editer
+      </button>
+      <button class="action-btn action-btn--archive">
+        <i class="pi pi-inbox"></i>
+        Archiver
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Top section ─────────────────────────────────────────────── -->
+  <div class="top-section">
+
+    <!-- Left: employee profile card -->
+    <div class="profile-card">
+      <div class="profile-badges">
+        <span class="badge badge--service">{{ employe.statut }}</span>
+        <span class="badge badge--shift">{{ employe.shift }}</span>
+      </div>
+
+      <div class="profile-avatar">
+        <div class="profile-avatar__circle">
+          <i class="pi pi-user"></i>
+        </div>
+      </div>
+
+      <p class="profile-name">{{ employe.nom }}</p>
+      <p class="profile-role">{{ employe.role }}</p>
+
+      <div class="profile-contacts">
+        <div class="contact-row">
+          <div class="contact-icon-wrap">
+            <i class="pi pi-phone"></i>
+          </div>
+          <div class="contact-text">
+            <span class="contact-label">Téléphone</span>
+            <span class="contact-value">{{ employe.telephone }}</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon-wrap">
+            <i class="pi pi-envelope"></i>
+          </div>
+          <div class="contact-text">
+            <span class="contact-label">Email</span>
+            <span class="contact-value">{{ employe.email }}</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon-wrap">
+            <i class="pi pi-file"></i>
+          </div>
+          <div class="contact-text">
+            <span class="contact-label">Type de contrat</span>
+            <span class="contact-value">{{ employe.contrat }}</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon-wrap">
+            <i class="pi pi-calendar"></i>
+          </div>
+          <div class="contact-text">
+            <span class="contact-label">Date d'embauche</span>
+            <span class="contact-value">{{ employe.dateEmbauche }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: documents card -->
+    <div class="docs-card">
+      <p class="docs-title">Documents</p>
+      <div class="docs-divider"></div>
+      <div class="docs-list">
+        @for (doc of documents; track doc.nom) {
+          <div class="doc-row">
+            <div class="doc-pill">
+              <i class="pi pi-file doc-pill__icon"></i>
+              <span class="doc-pill__name">{{ doc.nom }}</span>
+            </div>
+            <div class="doc-actions">
+              <div class="doc-action-circle">
+                <i class="pi pi-eye"></i>
+              </div>
+              <div class="doc-action-circle">
+                <i class="pi pi-download"></i>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right: salary history -->
+    <div class="salary-card">
+      <p class="salary-title">Historique de virement de salaire</p>
+      <div class="salary-divider"></div>
+      <div class="salary-list">
+        @for (p of payments; track p.mois) {
+          <div class="salary-row">
+            <div class="salary-logo">
+              <span class="salary-logo__text">W</span>
+            </div>
+            <div class="salary-info">
+              <span class="salary-label">{{ p.label }}</span>
+              <span class="salary-date">{{ p.date }}</span>
+            </div>
+            <div class="salary-right">
+              <span class="salary-amount">{{ p.montant }}</span>
+              <span class="salary-month-badge">{{ p.mois }}</span>
+            </div>
+            <button class="salary-arrow-btn">
+              <i class="pi pi-angle-right"></i>
+            </button>
+          </div>
+        }
+      </div>
+      <button class="voir-plus-btn">Voir plus</button>
+    </div>
+
+  </div>
+
+  <!-- ── Calendar section ─────────────────────────────────────────── -->
+  <div class="calendar-card">
+
+    <div class="cal-header">
+      <div class="cal-month-nav">
+        <span class="cal-month-label">{{ currentMonthLabel() }}</span>
+        <button class="cal-nav-btn"><i class="pi pi-angle-left"></i></button>
+        <button class="cal-nav-btn"><i class="pi pi-angle-right"></i></button>
+      </div>
+
+      <div class="cal-views">
+        @for (v of calendarViews; track v.id) {
+          <button
+            class="cal-view-btn"
+            [class.cal-view-btn--active]="calendarView() === v.id"
+            (click)="calendarView.set(v.id)">
+            {{ v.label }}
+          </button>
+        }
+      </div>
+
+      <p class="cal-section-title">Emploie du temps</p>
+    </div>
+
+    <!-- Grid header -->
+    <div class="cal-grid-head">
+      @for (day of weekDays; track day) {
+        <div class="cal-col-header">{{ day }}</div>
+      }
+    </div>
+
+    <!-- Grid body -->
+    <div class="cal-grid-body">
+      @for (week of calendarWeeks; track $index) {
+        <div class="cal-week">
+          @for (day of week; track $index) {
+            <div class="cal-cell" [class.cal-cell--ghost]="day.isGhost">
+              <span class="cal-date">{{ day.date }}</span>
+              @for (event of day.events; track $index) {
+                <div
+                  class="cal-event"
+                  [class.cal-event--shift]="event.type === 'shift'"
+                  [class.cal-event--conge]="event.type === 'conge'">
+                  {{ event.label }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+
+</div>

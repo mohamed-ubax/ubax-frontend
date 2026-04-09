@@ -9,6 +9,13 @@ export const locationRoutes: Route[] = [
       ),
   },
   {
+    path: 'ajouter',
+    loadComponent: () =>
+      import('./pages/ajouter-reservation-page/ajouter-reservation-page.component').then(
+        (m) => m.AjouterReservationPageComponent,
+      ),
+  },
+  {
     path: 'locataires/:id',
     loadComponent: () =>
       import('./pages/locataire-detail-page/locataire-detail-page.component').then(

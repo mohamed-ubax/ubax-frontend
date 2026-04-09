@@ -39,7 +39,7 @@ export const webRoutes: Route[] = [
         loadChildren: () =>
           import('@ubax-workspace/ubax-web-location').then((m) => m.locationRoutes),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMMERCIAL, Role.SAV] },
+        data: { roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.HOTEL] },
       },
 
       // ── Demandes clients ────────────────────────────────────────────────────
