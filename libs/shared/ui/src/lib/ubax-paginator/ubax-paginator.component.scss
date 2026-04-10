@@ -1,11 +1,20 @@
 .paginator {
+  --paginator-edge-gap: 39px;
+  --paginator-page-gap: 11px;
+
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 58px;
-  padding: 0 16px;
+  gap: var(--paginator-edge-gap);
+  padding: 16px 25px;
   background: #ecf2f7;
   border-radius: 50px;
+  box-sizing: border-box;
+}
+
+.paginator-pages {
+  display: flex;
+  align-items: center;
+  gap: var(--paginator-page-gap);
 }
 
 .paginator-page {
@@ -28,6 +37,7 @@
   justify-content: center;
   padding: 0;
   line-height: 1;
+  flex-shrink: 0;
 
   &:hover:not(.is-active) {
     background: #e0e8ef;
@@ -54,6 +64,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
+  flex-shrink: 0;
 
   i {
     font-size: 12px;
@@ -66,5 +77,24 @@
   &:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+}
+
+@media (max-width: 768px) {
+  .paginator {
+    --paginator-edge-gap: 12px;
+    --paginator-page-gap: 6px;
+    min-height: 64px;
+    padding: 10px 14px;
+  }
+
+  .paginator-page {
+    width: 42px;
+    height: 42px;
+  }
+
+  .paginator-arrow {
+    width: 40px;
+    height: 40px;
   }
 }

@@ -23,7 +23,7 @@
   align-items: center;
   padding: 0;
   background: transparent;
-  margin: 2rem 10rem;
+  margin: 1.5rem 10rem 2.5rem;
 }
 
 .stepper__item {
@@ -176,7 +176,7 @@
 
   &__label {
     font-family: 'Lexend', sans-serif;
-    font-size: 20px;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #222;
     margin: 0;
@@ -441,7 +441,6 @@
 .summary-header {
   background: #1a3047;
   padding: 32px 28px 28px;
-  min-height: 249px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -467,7 +466,7 @@
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 300;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
     margin: 0;
   }
 
@@ -476,7 +475,6 @@
     font-size: 32px;
     font-weight: 500;
     color: #e87d1e;
-    margin: 0 0 8px;
   }
 }
 
@@ -507,7 +505,9 @@
     background: #f0f2f6;
   }
 
-  &--last::after { display: none; }
+  &--last::after {
+    display: none;
+  }
 
   &__label {
     font-family: 'Lexend', sans-serif;
@@ -556,7 +556,9 @@
   padding: 0 16px;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 
   &--active {
     border-color: #e87d1e;
@@ -608,7 +610,9 @@
     flex-shrink: 0;
     transition: border-color 0.15s;
 
-    &--active { border-color: #e87d1e; }
+    &--active {
+      border-color: #e87d1e;
+    }
   }
 
   &__radio-dot {
