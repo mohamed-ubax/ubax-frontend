@@ -1,8 +1,11 @@
 <header class="ubax-topbar">
   <div class="topbar-inner">
-
     <!-- Logo -->
-    <a routerLink="/tableau-de-bord" class="topbar-logo" aria-label="Accueil Ubax">
+    <a
+      routerLink="/tableau-de-bord"
+      class="topbar-logo"
+      aria-label="Accueil Ubax"
+    >
       <img [src]="logoSrc()" alt="Ubax" />
     </a>
 
@@ -11,15 +14,21 @@
       @for (item of visibleItems(); track item.path) {
         <a
           [routerLink]="item.path"
-          routerLinkActive="is-active"
+          [class.is-active]="isItemActive(item)"
           class="topbar-nav__item"
-        >{{ item.label }}</a>
+          >{{ item.label }}</a
+        >
       }
     </nav>
 
     <!-- Actions droite -->
     <div class="topbar-actions">
-      <button class="topbar-icon-btn" aria-label="Notifications" pBadge value="3">
+      <button
+        class="topbar-icon-btn"
+        aria-label="Notifications"
+        pBadge
+        value="3"
+      >
         <i class="pi pi-bell"></i>
       </button>
       <button class="topbar-icon-btn" aria-label="Paramètres">
@@ -29,7 +38,11 @@
       <div class="topbar-user">
         <p-avatar
           [image]="authStore.user()?.avatar"
-          [label]="!authStore.user()?.avatar ? authStore.user()?.prenom?.charAt(0) : undefined"
+          [label]="
+            !authStore.user()?.avatar
+              ? authStore.user()?.prenom?.charAt(0)
+              : undefined
+          "
           shape="circle"
           size="normal"
         />
@@ -39,6 +52,5 @@
         </div>
       </div>
     </div>
-
   </div>
 </header>
