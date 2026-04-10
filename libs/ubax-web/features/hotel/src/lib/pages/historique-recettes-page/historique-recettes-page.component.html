@@ -51,7 +51,14 @@
     <div class="kpi-card kpi-card--green">
       <div class="kpi-balance">
         <p class="kpi-balance__label">Solde disponible</p>
-        <p class="kpi-balance__value">16 850 000 FCFA</p>
+        <div class="kpi-balance__value-row">
+          <p class="kpi-balance__value">
+            {{ showBalance ? '16 850 000 FCFA' : '•••••••••••' }}
+          </p>
+          <button class="kpi-balance__eye" type="button" (click)="toggleBalance()">
+            <i [class]="showBalance ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+          </button>
+        </div>
       </div>
       <div class="kpi-balance__icon">
         <i class="pi pi-send"></i>
@@ -153,12 +160,12 @@
 
     <div class="table-footer">
       <p class="table-footer__info">Affichage de 8 sur 8 résultats</p>
-      <div class="pagination">
-        <button class="page-btn page-btn--arrow">&lt;</button>
-        @for (p of pages; track p) {
-          <button class="page-btn" [class.page-btn--active]="activePage === p" (click)="activePage = p">{{ p }}</button>
-        }
-        <button class="page-btn page-btn--arrow">&gt;</button>
+      <div class="pagination-wrapper">
+        <ubax-ui-pagination
+          [currentPage]="currentPage"
+          [totalPages]="totalPages"
+          (pageChange)="onPageChange($event)"
+        />
       </div>
     </div>
 

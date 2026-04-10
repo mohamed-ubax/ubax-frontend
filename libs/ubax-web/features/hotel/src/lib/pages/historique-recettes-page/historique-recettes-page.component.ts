@@ -1,17 +1,29 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
+import { UiPaginationComponent } from '@ubax-workspace/shared-ui';
 
 @Component({
   selector: 'ubax-historique-recettes-page',
   standalone: true,
-  imports: [ChartModule, RouterLink],
+  imports: [ChartModule, RouterLink, UiPaginationComponent],
   templateUrl: './historique-recettes-page.component.html',
   styleUrl: './historique-recettes-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistoriqueRecettesPageComponent {
   activePeriod = 'Année';
+  showBalance = true;
+  currentPage = 3;
+  readonly totalPages = 5;
+
+  toggleBalance(): void {
+    this.showBalance = !this.showBalance;
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
 
   readonly lineData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -27,9 +39,9 @@ export class HistoriqueRecettesPageComponent {
     plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
     scales: {
       x: { grid: { display: false }, border: { display: false },
-           ticks: { font: { family: 'Poppins', size: 13, weight: '300' }, color: '#262626' } },
+           ticks: { font: { family: 'Lexend', size: 13, weight: '300' }, color: '#262626' } },
       y: { grid: { color: '#efefef' }, border: { display: false }, min: 0, max: 5000,
-           ticks: { stepSize: 1000, font: { family: 'Poppins', size: 12, weight: '300' }, color: '#262626' } },
+           ticks: { stepSize: 1000, font: { family: 'Lexend', size: 12, weight: '300' }, color: '#262626' } },
     },
     responsive: true, maintainAspectRatio: false,
   };
@@ -44,10 +56,14 @@ export class HistoriqueRecettesPageComponent {
     plugins: { legend: { display: false } },
     scales: {
       x: { grid: { display: false }, border: { display: false },
-           ticks: { font: { family: 'Inter', size: 12 }, color: '#222' } },
+           ticks: { font: { family: 'Lexend', size: 12 }, color: '#222' } },
       y: { grid: { color: '#f0f0f0' }, border: { display: false }, min: 0,
-           ticks: { font: { family: 'Inter', size: 12 }, color: '#222',
-                    callback: (v: number) => v === 0 ? '0' : v >= 1000 ? v/1000+'k' : String(v) } },
+           ticks: { font: { family: 'Lexend', size: 12 }, color: '#222',
+                    callback: (v: number) => {
+                      if (v === 0) return '0';
+                      if (v >= 1000) return v / 1000 + 'k';
+                      return String(v);
+                    } } },
     },
     responsive: true, maintainAspectRatio: false,
   };
@@ -59,7 +75,4 @@ export class HistoriqueRecettesPageComponent {
     { id: 'R-10237', avatar: 'https://www.figma.com/api/mcp/asset/78de620e-3a7c-4390-8a41-18b9f53a5394', name: 'Aïcha Kouadio', type: 'Réservation Suite', date: '16 Avr 2026', method: 'Orange money', total: '+850 000 FCFA', statut: 'Réussi' },
     { id: 'R-10238', avatar: 'https://www.figma.com/api/mcp/asset/771fbaef-bbc8-4bb4-9318-69a37becbfb9', name: 'Aïcha Kouadio', type: 'Réservation Deluxe', date: '16 Avr 2026', method: 'Visa', total: '+850 000 FCFA', statut: 'Réussi' },
   ];
-
-  readonly pages = [1, 2, 3, 4, 5];
-  activePage = 3;
 }
