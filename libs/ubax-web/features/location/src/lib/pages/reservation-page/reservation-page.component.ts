@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 
 interface Reservation {
   id: string;
@@ -14,23 +15,87 @@ interface Reservation {
 @Component({
   selector: 'ubax-reservation-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, UbaxPaginatorComponent],
   templateUrl: './reservation-page.component.html',
   styleUrl: './reservation-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReservationPageComponent {
   readonly reservations: Reservation[] = [
-    { id: '1', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
-    { id: '2', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
-    { id: '3', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
-    { id: '4', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
-    { id: '5', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
-    { id: '6', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
-    { id: '7', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
-    { id: '8', guest: 'Koné Ibrahim', property: 'Résidence Plateau', duration: '2 jours', arrival: '14 / 04 / 2026', departure: '18 / 04 / 2026', status: 'Confirmé' },
+    {
+      id: '1',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
+    {
+      id: '2',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
+    {
+      id: '3',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
+    {
+      id: '4',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
+    {
+      id: '5',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
+    {
+      id: '6',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
+    {
+      id: '7',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
+    {
+      id: '8',
+      guest: 'Koné Ibrahim',
+      property: 'Résidence Plateau',
+      duration: '2 jours',
+      arrival: '14 / 04 / 2026',
+      departure: '18 / 04 / 2026',
+      status: 'Confirmé',
+    },
   ];
 
-  readonly pages = [1, 2, 3, 4, 5];
-  activePage = 1;
+  readonly totalPages = 5;
+  readonly currentPage = signal(1);
 }
