@@ -120,7 +120,7 @@
 }
 
 .kpi-label {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 16px;
   font-weight: 400;
   color: #878787;
@@ -128,7 +128,7 @@
 }
 
 .kpi-value {
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: #222;
@@ -144,7 +144,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 16px;
   font-weight: 700;
 
@@ -162,18 +162,43 @@
   gap: 10px;
 
   &__label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 16px;
     color: #fff;
     margin: 0;
   }
+
+  &__value-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   &__value {
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 24px;
     font-weight: 700;
     color: #fff;
     margin: 0;
     white-space: nowrap;
+  }
+
+  &__eye {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 2px;
+    display: flex;
+    align-items: center;
+
+    i {
+      font-size: 18px;
+    }
+
+    &:hover {
+      color: #fff;
+    }
   }
 
   &__icon {
@@ -197,7 +222,7 @@
   display: grid;
   grid-template-columns: 1fr 403px;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .line-card {
@@ -213,7 +238,7 @@
   }
 
   &__title {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 22px;
     font-weight: 600;
     color: #202226;
@@ -237,7 +262,7 @@
   border: none;
   background: transparent;
   padding: 8px 25px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: #202226;
@@ -270,20 +295,30 @@
   }
 
   &__title {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 600;
     color: #202226;
     margin: 0;
   }
   &__sub {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 12px;
     color: #222;
     margin: 4px 0 0;
   }
   &__chart {
     padding: 8px 16px 16px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    ::ng-deep .p-chart {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
   }
 }
 
@@ -291,7 +326,7 @@
   background: #ecf2f7;
   border-radius: 15px;
   padding: 6px 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 8px;
   color: #222;
   white-space: nowrap;
@@ -361,11 +396,13 @@
 
 .table-scroll {
   overflow-x: auto;
+  padding: 0 35px;
 }
 
 .hist-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 
   thead tr {
     background: #1a3047;
@@ -373,12 +410,20 @@
 
   th {
     font-family: 'Lexend', sans-serif;
-    font-size: 20px;
+    font-size: 1rem;
     font-weight: 500;
     color: #fff;
     padding: 16px 20px;
     text-align: left;
     white-space: nowrap;
+
+    &:first-child {
+      border-radius: 10px 0 0 10px;
+    }
+
+    &:last-child {
+      border-radius: 0 10px 10px 0;
+    }
   }
 
   td {
@@ -476,50 +521,5 @@
     font-weight: 300;
     color: #777;
     margin: 0;
-  }
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #ecf2f7;
-  border-radius: 50px;
-  padding: 16px 24px;
-}
-
-.page-btn {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  border: 1px solid #cfd6dc;
-  background: #fff;
-  font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #1a3047;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-
-  &--active {
-    background: #1a3047;
-    color: #fff;
-    border-color: #1a3047;
-    font-weight: 600;
-    font-size: 20px;
-  }
-
-  &--arrow {
-    border-radius: 10px;
-    width: auto;
-    padding: 0 14px;
-    font-size: 18px;
-  }
-
-  &:hover:not(.page-btn--active) {
-    background: #f0f2f6;
   }
 }
