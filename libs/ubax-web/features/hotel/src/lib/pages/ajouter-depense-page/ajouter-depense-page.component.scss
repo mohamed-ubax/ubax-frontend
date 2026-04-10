@@ -90,13 +90,16 @@
   display: grid;
   grid-template-columns: 1fr 522px;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* ── Form card ───────────────────────────────────────────────────── */
 .form-card {
+  display: flex;
+  flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
+  min-height: 748px;
 }
 
 /* ── Section header (orange) ─────────────────────────────────────── */
@@ -148,7 +151,8 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  min-height: 488px;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ── Fields ──────────────────────────────────────────────────────── */
@@ -369,12 +373,45 @@
 /* ── Form actions ────────────────────────────────────────────────── */
 .form-actions {
   display: flex;
+  align-items: center;
+  gap: 16px;
   justify-content: flex-end;
+  margin-top: auto;
   padding-top: 8px;
+
+  &--split,
+  &--final {
+    justify-content: space-between;
+  }
 
   &--double {
     gap: 16px;
     justify-content: flex-end;
+  }
+
+  &__group {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+.btn-prev {
+  width: 161px;
+  height: 61px;
+  background: #ecf2f7;
+  color: #222;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #dce8f2;
   }
 }
 
@@ -434,8 +471,11 @@
 
 /* ── Summary panel ───────────────────────────────────────────────── */
 .summary-panel {
+  display: flex;
+  flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
+  min-height: 748px;
 }
 
 .summary-header {
@@ -480,6 +520,9 @@
 
 .summary-body {
   background: #fff;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 0 0 24px;
 }
 
@@ -541,6 +584,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: auto;
   padding: 16px 28px 24px;
 }
 
