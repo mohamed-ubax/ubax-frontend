@@ -1,8 +1,10 @@
 <div class="cal-page">
+  <header class="page-header">
+    <h1 class="page-title">Calendrier</h1>
+  </header>
 
   <!-- ── Stats Bar ──────────────────────────────────────────────── -->
   <div class="stats-bar">
-
     <div class="stats-card stats-card--grey">
       <div class="stats-icon-wrap">
         <i class="pi pi-home"></i>
@@ -42,28 +44,50 @@
         <p class="stats-value stats-value--dark">750 000 FCFA</p>
       </div>
     </div>
-
   </div>
 
   <!-- ── Calendar Panel ─────────────────────────────────────────── -->
   <div class="cal-panel">
-
     <!-- Controls bar -->
     <div class="cal-controls">
       <div class="cal-nav">
-        <button class="nav-btn" (click)="prevMonth()" aria-label="Mois précédent">
-          <i class="pi pi-chevron-left"></i>
-        </button>
-        <h2 class="month-label">{{ monthLabel() }}</h2>
-        <button class="nav-btn" (click)="nextMonth()" aria-label="Mois suivant">
-          <i class="pi pi-chevron-right"></i>
-        </button>
+        <div class="month-switcher">
+          <h2 class="month-label">{{ monthLabel() }}</h2>
+          <div class="month-switcher__actions">
+            <button
+              class="nav-btn"
+              (click)="prevMonth()"
+              aria-label="Mois précédent"
+            >
+              <img
+                class="nav-btn__icon"
+                src="/calendar/icons/raphael_arrow_left.svg"
+                alt=""
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              class="nav-btn"
+              (click)="nextMonth()"
+              aria-label="Mois suivant"
+            >
+              <img
+                class="nav-btn__icon"
+                src="/calendar/icons/raphael_arrow_right.svg"
+                alt=""
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+        </div>
+
         <div class="view-tabs">
           @for (view of views; track view) {
             <button
               class="view-tab"
               [class.view-tab--active]="activeView() === view"
-              (click)="activeView.set(view)">
+              (click)="activeView.set(view)"
+            >
               {{ view }}
             </button>
           }
@@ -77,13 +101,14 @@
         <a routerLink="/reservations" class="see-all-link">
           Voir toutes les reservations
         </a>
-        <button class="add-res-btn">Nouvelle réservation</button>
+        <button class="add-res-btn" routerLink="/reservations/ajouter">
+          Nouvelle réservation
+        </button>
       </div>
     </div>
 
     <!-- Calendar grid -->
     <div class="cal-grid">
-
       <!-- Day name header row -->
       <div class="cal-day-names">
         @for (name of dayNames; track name; let last = $last) {
@@ -93,15 +118,19 @@
 
       <!-- Week rows -->
       @for (week of weeksWithEvents(); track $index; let last = $last) {
-        <div class="cal-week" [class.cal-week--last]="last">
-
+        <div
+          class="cal-week"
+          [class.cal-week--last]="last"
+          [style.--week-height]="week.minHeight + 'px'"
+        >
           <!-- Day cells -->
           @for (day of week.days; track $index; let lastCol = $last) {
             <div
               class="cal-day"
               [class.cal-day--other]="!day.isCurrentMonth"
               [class.cal-day--today]="day.isToday"
-              [class.cal-day--last-col]="lastCol">
+              [class.cal-day--last-col]="lastCol"
+            >
               @if (day.isToday) {
                 <span class="today-marker">{{ day.dayNumber }}</span>
               } @else {
@@ -114,8 +143,12 @@
           @for (event of week.events; track event.id) {
             <div
               class="cal-event cal-event--{{ event.color }}"
+              [class.cal-event--compact]="event.spanDays <= 2"
+              [class.cal-event--mini]="event.spanDays === 1"
               [style.left.%]="(event.startCol / 7) * 100"
-              [style.width.%]="((event.endCol - event.startCol + 1) / 7) * 100">
+              [style.width.%]="(event.spanDays / 7) * 100"
+              [style.top.px]="48 + event.row * 82"
+            >
               <div class="event-avatar">
                 <i class="pi pi-user"></i>
               </div>
@@ -129,11 +162,8 @@
               </div>
             </div>
           }
-
         </div>
       }
-
     </div>
   </div>
-
 </div>
