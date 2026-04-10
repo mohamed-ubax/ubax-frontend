@@ -70,6 +70,9 @@ export class AjouterReservationPageComponent {
     'https://www.figma.com/api/mcp/asset/67d222df-23aa-4e25-8acd-c3fedd0abd68',
     'https://www.figma.com/api/mcp/asset/b854eabc-1ef0-4e74-bf67-d13c581e6feb',
     'https://www.figma.com/api/mcp/asset/4b37b6d8-78d3-49e2-bccf-7a8b52d29f70',
+    'https://www.figma.com/api/mcp/asset/67d222df-23aa-4e25-8acd-c3fedd0abd68',
+    'https://www.figma.com/api/mcp/asset/b854eabc-1ef0-4e74-bf67-d13c581e6feb',
+    'https://www.figma.com/api/mcp/asset/4b37b6d8-78d3-49e2-bccf-7a8b52d29f70',
   ];
 
   // Computed
@@ -96,6 +99,13 @@ export class AjouterReservationPageComponent {
     return `linear-gradient(to right, #e87d1e 0%, #e87d1e ${p}%, #1a3047 ${p}%, #1a3047 100%)`;
   });
 
+  // Carousel step 5
+  photoOffset = signal(0);
+  readonly photosTranslate = computed(() => {
+    const step = 310 + 14; // photo width + gap
+    return `translateX(-${this.photoOffset() * step}px)`;
+  });
+
   readonly selectedOptionNames = computed(() =>
     this.EXTRA_OPTIONS.filter((_, i) => this.selectedOptions()[i]).join(', ')
   );
@@ -115,6 +125,20 @@ export class AjouterReservationPageComponent {
   adjustNights(d: number): void { this.nights.update(v => Math.max(1, v + d)); }
   adjustAdults(d: number): void { this.adults.update(v => Math.max(1, v + d)); }
   adjustChildren(d: number): void { this.children.update(v => Math.max(0, v + d)); }
+
+  nextPhoto(): void {
+    this.photoOffset.update(i => (i + 1) % this.roomPhotos.length);
+  }
+
+  prevPhoto(): void {
+    this.photoOffset.update(i => Math.max(0, i - 1));
+  }
+
+  goToStep(step: number): void {
+    if (step < this.currentStep()) {
+      this.currentStep.set(step);
+    }
+  }
 
   toggleOption(i: number): void {
     this.selectedOptions.update(opts => {

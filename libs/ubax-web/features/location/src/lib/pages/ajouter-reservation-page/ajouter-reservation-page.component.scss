@@ -10,15 +10,16 @@
 .ajout-header {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 20px;
 }
 
+/* back-btn : fond blanc conforme au Figma */
 .back-btn {
   width: 67px;
   height: 67px;
   border-radius: 50%;
-  background: #1a3047;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,10 +29,15 @@
 
   i {
     font-size: 20px;
-    color: #fff;
+    color: #1a3047;
   }
 
-  &:hover { background: #243f5f; }
+  &:hover {
+    i {
+      color: #fff;
+    }
+    background: #1a3047;
+  }
 }
 
 .ajout-title {
@@ -42,12 +48,26 @@
   margin: 0;
 }
 
+/* ── Body ──────────────────────────────────────────────────────── */
+.ajout-body {
+  display: flex;
+  gap: 24px;
+  align-items: stretch; /* sidebar = hauteur de la colonne droite */
+}
+
+/* ── Colonne droite (type-tabs + card) ─────────────────────────── */
+.ajout-right-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 /* ── Type tabs (step 1) ────────────────────────────────────────── */
 .type-tabs {
   display: flex;
   gap: 16px;
-  margin-left: 430px;
-  margin-bottom: 16px;
 }
 
 .type-tab {
@@ -62,19 +82,14 @@
   color: #222;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 
   &--active {
     background: #e87d1e;
     color: #fff;
   }
-}
-
-/* ── Body ──────────────────────────────────────────────────────── */
-.ajout-body {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
 }
 
 /* ── Sidebar ───────────────────────────────────────────────────── */
@@ -83,7 +98,7 @@
   flex-shrink: 0;
   background: #1a3047;
   border-radius: 20px;
-  padding: 40px 36px 40px;
+  padding: 40px 36px;
 }
 
 .sidebar-title {
@@ -144,7 +159,18 @@
   width: 2px;
   height: 45px;
   background: rgba(255, 255, 255, 0.3);
-  margin: 4px 0;
+
+  &--done {
+    background: #e87d1e;
+  }
+}
+
+.step-row--clickable {
+  cursor: pointer;
+
+  &:hover .step-label {
+    color: #fff;
+  }
 }
 
 .step-label {
@@ -166,7 +192,7 @@
   flex: 1;
   background: #fff;
   border-radius: 20px;
-  padding: 32px 40px 32px;
+  padding: 32px 40px;
   display: flex;
   flex-direction: column;
   min-height: 630px;
@@ -185,7 +211,10 @@
   color: #1a3047;
   margin: 0 0 24px 0;
 
-  &--sm { font-size: 16px; margin-bottom: 16px; }
+  &--sm {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
 }
 
 /* ── Shared form elements ──────────────────────────────────────── */
@@ -198,7 +227,9 @@
   margin-bottom: 8px;
 }
 
-.req { color: #e87d1e; }
+.req {
+  color: #e87d1e;
+}
 
 .form-input {
   width: 100%;
@@ -213,7 +244,12 @@
   outline: none;
   box-sizing: border-box;
 
-  &:focus { border-color: #1a3047; }
+  &::placeholder {
+    color: #b0b0b0;
+  }
+  &:focus {
+    border-color: #1a3047;
+  }
 }
 
 /* ── STEP 1 ────────────────────────────────────────────────────── */
@@ -221,13 +257,13 @@
   display: flex;
   gap: 24px;
   flex: 1;
+  align-items: flex-start;
 }
 
 .s1-form {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .form-row {
@@ -244,7 +280,6 @@
 
 .docs-list-group {
   justify-content: flex-end;
-  padding-bottom: 0;
 }
 
 .upload-zone {
@@ -276,6 +311,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  align-items: flex-start; /* items ne s'étirent pas à 100% */
 }
 
 .doc-item {
@@ -286,6 +322,9 @@
   border-radius: 25px;
   height: 50px;
   padding: 0 16px;
+  width: 100%;
+  max-width: 260px; /* raccourcir la largeur, aligné sur l'upload-zone */
+  box-sizing: border-box;
 }
 
 .doc-icon {
@@ -299,6 +338,9 @@
   font-family: 'Lexend', sans-serif;
   font-size: 14px;
   color: #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .doc-remove {
@@ -309,15 +351,34 @@
   display: flex;
   align-items: center;
   color: #555;
+  flex-shrink: 0;
 
-  i { font-size: 16px; }
-  &:hover { color: #fa191d; }
+  i {
+    font-size: 16px;
+  }
+  &:hover {
+    color: #fa191d;
+  }
 }
 
-/* Room panel */
-.room-panel {
+/* ── Room panel ────────────────────────────────────────────────── */
+.room-panel-wrapper {
   width: 283px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Titre "Choisir une chambre" hors du card, aligné avec les labels */
+.room-panel-title-outside {
+  font-family: 'Lexend', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #222;
+  margin: 0 0 8px 0;
+}
+
+.room-panel {
   background: #ecf2f7;
   border-radius: 20px;
   padding: 16px;
@@ -325,14 +386,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.room-panel-title {
-  font-family: 'Lexend', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: #222;
-  margin: 0;
+  flex: 1;
 }
 
 .room-panel-img {
@@ -365,9 +419,14 @@
     color: #222;
   }
 
-  i { font-size: 14px; color: #555; }
+  i {
+    font-size: 14px;
+    color: #555;
+  }
 
-  &--num span { font-size: 10px; }
+  &--num span {
+    font-size: 10px;
+  }
 }
 
 /* ── STEP 2 ────────────────────────────────────────────────────── */
@@ -375,13 +434,14 @@
   display: flex;
   gap: 24px;
   flex: 1;
+  align-items: stretch; /* cost-panel = hauteur de s2-form */
 }
 
 .s2-form {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 3rem;
 }
 
 .dates-row {
@@ -413,7 +473,10 @@
     color: #222;
   }
 
-  i { font-size: 22px; color: #1a3047; }
+  i {
+    font-size: 22px;
+    color: #1a3047;
+  }
 }
 
 .counters-row {
@@ -426,7 +489,7 @@
   background: #ecf2f7;
   border-radius: 15px;
   height: 118px;
-  padding: 14px 14px 14px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -459,7 +522,9 @@
   cursor: pointer;
   flex-shrink: 0;
 
-  i { font-size: 14px; }
+  i {
+    font-size: 14px;
+  }
 
   &--minus {
     background: rgba(255, 255, 255, 0.75);
@@ -563,7 +628,7 @@
   margin-top: 8px;
 }
 
-/* Cost panel */
+/* ── Cost panel ────────────────────────────────────────────────── */
 .cost-panel {
   width: 364px;
   flex-shrink: 0;
@@ -573,6 +638,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  /* height est contrôlé par align-items: stretch sur .s2-layout */
 }
 
 .cost-header {
@@ -622,7 +688,8 @@
   }
 
   &--total {
-    span, strong {
+    span,
+    strong {
       font-family: 'Lexend', sans-serif;
       font-size: 15px;
       color: #222;
@@ -636,12 +703,14 @@
   font-weight: 600;
   color: #222;
 
-  &--orange { color: #e87d1e; }
+  &--orange {
+    color: #e87d1e;
+  }
 }
 
 .cost-detail {
   font-family: 'Lexend', sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 300;
   color: #959595;
   margin: 0;
@@ -661,7 +730,7 @@
 
 .cost-sub {
   font-family: 'Lexend', sans-serif;
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 300;
   color: #222;
   margin: 0;
@@ -670,22 +739,95 @@
 .cost-per-night {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   background: #ecf2f7;
   border-radius: 5px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   margin-top: 4px;
 
   span {
     font-family: 'Lexend', sans-serif;
-    font-size: 8px;
+    font-size: 12px;
     font-weight: 300;
     color: #222;
   }
 
   .cost-amt--orange {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
   }
+}
+
+/* ── Répartition du coût (Step 2) ──────────────────────────────── */
+.cost-repartition {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.cost-repartition-lbl {
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  color: #222;
+  margin: 0;
+}
+
+.cost-repartition-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.repartition-fill {
+  height: 100%;
+
+  &--adults {
+    flex: 4;
+    background: #e87d1e;
+    border-radius: 20px 0 0 20px;
+  }
+
+  &--children {
+    flex: 1;
+    background: #1a3047;
+    border-radius: 0 20px 20px 0;
+  }
+}
+
+.cost-legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-swatch {
+  width: 9px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+
+  &--orange {
+    background: #e87d1e;
+  }
+  &--dark {
+    background: #1a3047;
+  }
+}
+
+.legend-text {
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  color: #222;
 }
 
 .cost-warning {
@@ -697,11 +839,15 @@
   padding: 8px 10px;
   margin-top: 6px;
 
-  i { font-size: 14px; color: #e87d1e; flex-shrink: 0; }
+  i {
+    font-size: 14px;
+    color: #e87d1e;
+    flex-shrink: 0;
+  }
 
   span {
     font-family: 'Lexend', sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     color: #e87d1e;
   }
 }
@@ -710,8 +856,9 @@
 .options-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px 24px;
+  gap: 36px 40px; /* row-gap fidèle au Figma */
   flex: 1;
+  align-content: start;
 }
 
 .option-item {
@@ -775,6 +922,12 @@
       color: #222;
     }
   }
+
+  /* Mode de paiement : côte à côte avec gap, pas space-between */
+  &--payment {
+    justify-content: flex-start;
+    gap: 20px;
+  }
 }
 
 .pricing-divider {
@@ -788,8 +941,9 @@
   }
 }
 
+/* Taxes input élargi */
 .taxes-input {
-  width: 137px;
+  width: 200px;
   height: 45px;
   background: #fff;
   border: none;
@@ -801,6 +955,10 @@
   outline: none;
   text-align: right;
   box-sizing: border-box;
+
+  &::placeholder {
+    color: #929292;
+  }
 }
 
 .discount-pills {
@@ -820,7 +978,9 @@
   font-size: 13px;
   color: #222;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   white-space: nowrap;
 
   &--active {
@@ -857,8 +1017,12 @@
   color: #adadad;
   outline: none;
 
-  &::placeholder { color: #adadad; }
-  &:focus { color: #222; }
+  &::placeholder {
+    color: #adadad;
+  }
+  &:focus {
+    color: #222;
+  }
 }
 
 .promo-apply-btn {
@@ -875,7 +1039,9 @@
   white-space: nowrap;
   flex-shrink: 0;
 
-  &:hover { background: #243f5f; }
+  &:hover {
+    background: #243f5f;
+  }
 }
 
 .payment-select {
@@ -884,8 +1050,9 @@
   gap: 10px;
   background: #f6fbff;
   border-radius: 50px;
-  padding: 8px 16px 8px 10px;
+  padding: 8px 20px 8px 10px;
   cursor: pointer;
+  min-width: 365px;
 
   span {
     font-family: 'Lexend', sans-serif;
@@ -893,7 +1060,11 @@
     color: #222;
   }
 
-  i { font-size: 18px; color: #555; }
+  i {
+    font-size: 18px;
+    color: #555;
+    margin-left: auto;
+  }
 }
 
 .wave-logo {
@@ -916,10 +1087,9 @@
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.03);
-  padding: 24px 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 2rem;
   flex: 1;
 }
 
@@ -946,13 +1116,16 @@
   justify-content: center;
   flex-shrink: 0;
 
-  i { font-size: 32px; color: #e87d1e; }
+  i {
+    font-size: 32px;
+    color: #e87d1e;
+  }
 }
 
 .recap-room-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .recap-booking-id {
@@ -962,7 +1135,8 @@
   margin: 0;
 }
 
-.recap-room-name, .recap-guest {
+.recap-room-name,
+.recap-guest {
   font-family: 'Poppins', sans-serif;
   font-size: 20px;
   font-weight: 500;
@@ -979,35 +1153,36 @@
   align-items: center;
   gap: 6px;
 
-  i { font-size: 18px; }
+  i {
+    font-size: 18px;
+  }
 }
 
+/* ── Meta stats : icon + label en haut, valeur en bas ──────────── */
 .recap-meta {
   display: flex;
-  gap: 32px;
+  gap: 3rem;
   align-items: flex-start;
   flex-shrink: 0;
 }
 
 .meta-stat {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
   align-items: flex-start;
 }
 
-.meta-icon {
-  font-size: 20px;
-  color: #555;
-  margin-top: 2px;
-  flex-shrink: 0;
+.meta-top-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.meta-value {
-  font-family: 'Poppins', sans-serif;
+.meta-icon {
   font-size: 18px;
-  font-weight: 600;
-  color: #222;
-  margin: 0;
+  color: #555;
+  flex-shrink: 0;
 }
 
 .meta-lbl {
@@ -1016,6 +1191,15 @@
   color: #686868;
 }
 
+.meta-value {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+/* ── Options supplémentaires : icône à droite, couleur orange ──── */
 .recap-options-row {
   display: flex;
   align-items: flex-start;
@@ -1027,7 +1211,7 @@
 .recap-options-label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   white-space: nowrap;
   flex-shrink: 0;
 
@@ -1038,7 +1222,10 @@
     color: #222;
   }
 
-  i { font-size: 18px; color: #888; }
+  i {
+    font-size: 18px;
+    color: #e87d1e; /* couleur orange conformément au Figma */
+  }
 }
 
 .recap-options-list {
@@ -1049,11 +1236,23 @@
   flex: 1;
 }
 
+/* ── Carousel photos ───────────────────────────────────────────── */
 .room-photos {
   display: flex;
   gap: 14px;
+  padding: 2rem 0;
   align-items: center;
+}
+
+.photos-wrapper {
+  flex: 1;
   overflow: hidden;
+}
+
+.photos-track {
+  display: flex;
+  gap: 14px;
+  transition: transform 0.35s ease;
 }
 
 .room-photo {
@@ -1064,21 +1263,33 @@
   flex-shrink: 0;
 }
 
+/* gallery-btn : circulaire, fond blanc, icône sombre — similaire au back-btn */
 .gallery-btn {
-  width: 60px;
-  height: 60px;
+  width: 67px;
+  height: 67px;
   border-radius: 50%;
-  background: #1a3047;
+  background: #ffffff;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
+  transition: background 0.15s;
 
-  i { font-size: 20px; color: #fff; }
+  i {
+    font-size: 20px;
+    color: #1a3047;
+  }
 
-  &:hover { background: #243f5f; }
+  &:hover {
+    background: #f0f4f8;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
 }
 
 /* ── Action bar ────────────────────────────────────────────────── */
@@ -1089,7 +1300,9 @@
   padding-top: 28px;
   margin-top: auto;
 
-  &--end { justify-content: flex-end; }
+  &--end {
+    justify-content: flex-end;
+  }
 }
 
 .btn-prev {
@@ -1107,7 +1320,9 @@
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #dce8f2; }
+  &:hover {
+    background: #dce8f2;
+  }
 }
 
 .btn-next {
@@ -1122,7 +1337,9 @@
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #d06e15; }
+  &:hover {
+    background: #d06e15;
+  }
 }
 
 .step4-actions {
@@ -1144,7 +1361,9 @@
   white-space: nowrap;
   transition: background 0.15s;
 
-  &:hover { background: #243f5f; }
+  &:hover {
+    background: #243f5f;
+  }
 }
 
 .btn-validate {
@@ -1159,5 +1378,7 @@
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #d06e15; }
+  &:hover {
+    background: #d06e15;
+  }
 }
