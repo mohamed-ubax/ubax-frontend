@@ -310,7 +310,17 @@
   &__chart {
     padding: 8px 16px 16px;
     flex: 1;
-    min-height: 200px;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    /* p-chart wrapper div must fill the flex container so chart.js
+       can measure it and resize the canvas responsively */
+    ::ng-deep .p-chart {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
   }
 }
 
@@ -531,7 +541,3 @@
   }
 }
 
-/* Override UiPaginationComponent accent colour to match the page theme */
-.pagination-wrapper {
-  --ubax-accent: #1a3047;
-}

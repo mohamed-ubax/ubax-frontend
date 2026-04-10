@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
-import { UiPaginationComponent } from '@ubax-workspace/shared-ui';
+import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 
 @Component({
   selector: 'ubax-historique-recettes-page',
   standalone: true,
-  imports: [ChartModule, RouterLink, UiPaginationComponent],
+  imports: [ChartModule, RouterLink, UbaxPaginatorComponent],
   templateUrl: './historique-recettes-page.component.html',
   styleUrl: './historique-recettes-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,15 +14,11 @@ import { UiPaginationComponent } from '@ubax-workspace/shared-ui';
 export class HistoriqueRecettesPageComponent {
   activePeriod = 'Année';
   showBalance = true;
-  currentPage = 3;
+  readonly currentPage = signal(3);
   readonly totalPages = 5;
 
   toggleBalance(): void {
     this.showBalance = !this.showBalance;
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
   }
 
   readonly lineData = {

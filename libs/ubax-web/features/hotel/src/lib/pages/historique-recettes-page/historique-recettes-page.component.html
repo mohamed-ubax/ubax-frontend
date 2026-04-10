@@ -93,7 +93,7 @@
         <span class="date-range-pill">Du 01 avril 2026 au 07 avril 2026</span>
       </div>
       <div class="mini-card__chart">
-        <p-chart type="bar" [data]="miniBarData" [options]="miniBarOptions" height="200px" />
+        <p-chart type="bar" [data]="miniBarData" [options]="miniBarOptions" />
       </div>
     </div>
   </div>
@@ -160,13 +160,7 @@
 
     <div class="table-footer">
       <p class="table-footer__info">Affichage de 8 sur 8 résultats</p>
-      <div class="pagination-wrapper">
-        <ubax-ui-pagination
-          [currentPage]="currentPage"
-          [totalPages]="totalPages"
-          (pageChange)="onPageChange($event)"
-        />
-      </div>
+      <ubax-paginator [(currentPage)]="currentPage" [totalPages]="totalPages" />
     </div>
 
   </div>
