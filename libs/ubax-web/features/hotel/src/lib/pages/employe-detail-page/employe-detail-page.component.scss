@@ -18,7 +18,7 @@
   &__left {
     display: flex;
     align-items: center;
-    gap: 49px;
+    gap: 24px;
   }
 
   &__right {
@@ -491,7 +491,7 @@
   cursor: pointer;
   text-align: right;
   margin-top: 12px;
-  align-self: flex-end;
+  align-self: center;
 
   &:hover {
     text-decoration: underline;
