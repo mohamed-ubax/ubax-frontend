@@ -1,3 +1,5 @@
+@use './styles/variables';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,11 +20,20 @@
 }
 
 /* ── Reset global ─────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
-  font-family: 'Lexend', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Lexend',
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
   background: #ecf2f7;
   color: #222;
 }

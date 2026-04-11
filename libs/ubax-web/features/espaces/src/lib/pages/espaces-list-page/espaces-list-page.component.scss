@@ -1,425 +1,879 @@
-// ── Figma tokens – node 599:3216 ──────────────────────────────────────────
-// Background page: rgb(236,242,247) → appliqué dans styles.scss
-// Card: 485×431px, radius 20px
-// Card image section: full height sauf footer 140.785px → overlay
-// Overlay: inset 16.077px LR, height 140.785px, bg rgba(255,255,255,0.9), radius 10px
-// Type badge: 104×37px, radius 50px, bg rgba(26,48,71,0.5)
-// Status Disponible: 108×41px, radius 50px, bg #16B55B
-// Status Réservé: bg #F9191C
-// Font global: Lexend
-
 :host {
-  --espaces-accent: #e87d1e; // orange
-  --espaces-green: #16b55b; // disponible
-  --espaces-red: #fa181d; // réservé
-  --espaces-navy: #1a3047; // dark brand
-  --espaces-text: #222222;
-  --espaces-text-light: #888;
-  --espaces-card-r: 20px;
-  --espaces-overlay-r: 10px;
   display: block;
-  padding: 0 41px 40px;
+  padding-bottom: 48px;
 }
 
-// ── Bouton "Ajouter" ───────────────────────────────────────────────────────
-.add-space-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 24px;
-  height: 62px;
-  background: var(--espaces-navy);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  &:hover {
-    opacity: 0.9;
-  }
+.rooms-page {
+  color: #222;
 }
 
-// ── Contrôles (filters + view) ─────────────────────────────────────────────
-.espaces-controls {
-  margin-top: 16px;
+.rooms-page__title {
+  margin: 0 0 2.2rem;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-// ── Summary strip (statistiques) ──────────────────────────────────────────
-// Figma: Rectangle 25543, h=151px, radius à déterminer (white bg)
-.espaces-summary {
-  display: flex;
-  align-items: stretch;
-  gap: 16px;
-  margin: 24px 0;
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) 336px;
+  gap: 21px;
+  padding: 18px;
   background: #fff;
-  border-radius: 12px;
-  padding: 16px 24px;
+  border-radius: 20px;
 }
 
 .summary-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex: 1;
-  padding: 12px 16px;
-  background: #fff;
+  gap: 21px;
+  min-height: 115px;
+  padding: 24px 22px;
+  background: #ecf2f7;
   border-radius: 10px;
-  border: 1px solid rgba(26, 48, 71, 0.08);
-
-  &--revenue {
-    background: var(--espaces-navy);
-    border-color: transparent;
-    .summary-label,
-    .summary-value {
-      color: #fff;
-    }
-    .summary-icon--revenue {
-      background: #2c4e6e;
-      color: #fff;
-    }
-  }
 }
 
-.summary-icon {
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
+.summary-card__icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
-
-  &--all {
-    background: rgba(26, 48, 71, 0.08);
-    color: var(--espaces-navy);
-  }
-  &--reserved {
-    background: rgba(250, 24, 29, 0.1);
-    color: var(--espaces-red);
-  }
-  &--online {
-    background: rgba(22, 181, 91, 0.12);
-    color: var(--espaces-green);
-  }
-  &--occupied {
-    background: rgba(232, 125, 30, 0.1);
-    color: var(--espaces-accent);
-  }
-  &--revenue {
-    background: #2c4e6e;
-    color: #fff;
-  }
+  width: 62px;
+  height: 62px;
+  flex: 0 0 62px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 8px 18px rgba(26, 48, 71, 0.08);
 }
 
-.summary-info {
+.summary-card__icon {
+  width: 37px;
+  height: 37px;
+  object-fit: contain;
+}
+
+.summary-card__content {
+  min-width: 0;
+}
+
+.summary-card__label,
+.summary-card__value {
+  margin: 0;
+}
+
+.summary-card__label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #222;
+}
+
+.summary-card__value {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.summary-card--all .summary-card__value {
+  color: #16b55b;
+}
+
+.summary-card--reserved .summary-card__value {
+  color: #6059ff;
+}
+
+.summary-card--online .summary-card__value {
+  color: #e87d1e;
+}
+
+.summary-card--occupied .summary-card__value {
+  color: #008bff;
+}
+
+.summary-card--revenue {
+  background: #16b55b;
+}
+
+.summary-card--revenue .summary-card__icon-wrap {
+  background: #fff;
+  box-shadow: none;
+}
+
+.summary-card--revenue .summary-card__label,
+.summary-card--revenue .summary-card__value {
+  color: #fff;
+}
+
+.rooms-panel {
+  margin-top: 20px;
+  padding: 30px 44px 40px;
+  background: #fff;
+  border-radius: 20px;
+}
+
+.rooms-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 34px;
 }
 
-.summary-label {
-  font-size: 14px;
-  color: var(--espaces-text-light);
+.rooms-toolbar__filters,
+.rooms-toolbar__actions {
+  display: flex;
+  align-items: center;
+}
+
+.rooms-toolbar__filters {
+  gap: 26px;
+}
+
+.rooms-toolbar__actions {
+  gap: 20px;
+}
+
+.filter-pill {
+  position: relative;
+  width: 239px;
+  height: 56px;
+  background: #ecf2f7;
+  border: 1px solid #f1f1f1;
+  border-radius: 50px;
+}
+
+.filter-pill--status {
+  width: 172px;
+}
+
+.filter-pill__field {
+  width: 100%;
+  height: 100%;
+  padding: 0 58px 0 29px;
+  border: 0;
+  background: transparent;
+  color: #000;
+  font:
+    300 16px/1 'Lexend',
+    sans-serif;
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.filter-pill__chevron {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  width: 35px;
+  height: 36px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.filter-action {
+  width: 142px;
+  height: 56px;
+  border: 1px solid #1a3047;
+  border-radius: 50px;
+  background: #1a3047;
+  color: #fff;
+  font:
+    400 15px/1 'Lexend',
+    sans-serif;
+  cursor: pointer;
+}
+
+.view-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #ecf2f7;
+  cursor: pointer;
+}
+
+.view-toggle__icon {
+  display: block;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.view-toggle__icon--list {
+  transform: translateX(-3px);
+}
+
+.view-toggle--active {
+  background: #e87d1e;
+}
+
+.view-toggle--active .view-toggle__icon--grid {
+  width: 27px;
+  height: 27px;
+}
+
+.view-toggle--active .view-toggle__icon--list {
+  width: 30px;
+  height: 30px;
+  transform: translateX(-3px);
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
+.add-space-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 225px;
+  min-width: 225px;
+  height: 62px;
+  padding: 0 24px;
+  border-radius: 50px;
+  background: #e87d1e;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.75;
   white-space: nowrap;
 }
 
-.summary-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--espaces-text);
-  line-height: 1.1;
-
-  &--revenue {
-    font-size: 20px;
-  }
-}
-
-// ── Toolbar grille/liste ───────────────────────────────────────────────────
-.espaces-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
-}
-
-.view-btns {
-  display: flex;
-  gap: 8px;
-}
-
-.view-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(26, 48, 71, 0.08);
-  color: var(--espaces-text-light);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-
-  &--active {
-    background: var(--espaces-accent);
-    color: #fff;
-  }
-  &:hover:not(.view-btn--active) {
-    background: rgba(26, 48, 71, 0.15);
-  }
-}
-
-// ── Grille des cartes ──────────────────────────────────────────────────────
-// Figma: 3 colonnes, gap ≈ 45px (positions: 88, 618, 1148 → 618-88-485=45)
-.espaces-grid {
+.rooms-grid {
   display: grid;
-  grid-template-columns: repeat(3, 485px);
-  gap: 45px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 40px;
+  row-gap: 40px;
 }
 
-// ── Carte ──────────────────────────────────────────────────────────────────
-.espaces-card {
-  width: 485px;
-  height: 431px;
-  border-radius: var(--espaces-card-r);
-  overflow: hidden;
+.rooms-grid--list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 18px;
+  row-gap: 18px;
+}
+
+.room-list-card {
   position: relative;
-  cursor: pointer;
-  background: #c8c8c8; // placeholder avant vrai image
-  transition: transform 0.2s;
-
-  &:hover {
-    transform: translateY(-3px);
-  }
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 18px;
+  width: 100%;
+  min-height: 160px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #ecf2f7;
+  color: #222;
+  text-decoration: none;
+  box-shadow: 0 10px 18px rgba(26, 48, 71, 0.04);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-// Zone image (toute la carte = fond, overlay positionné par-dessus)
-.card-media {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--espaces-card-r);
-  background: linear-gradient(160deg, #c8d0d8 0%, #a8b2bc 100%);
-  // Image réelle : ajouter [style.background-image]="'url('+s.image+')'" + background-size:cover
+.room-list-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(26, 48, 71, 0.08);
 }
 
-// ── Badge type (Chambre / Appartement) ────────────────────────────────────
-// Figma: x=26 y=20, w=104 h=37, radius=50px, bg=rgba(26,48,71,0.5)
-.type-badge {
+.room-list-card__media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #d4dde4;
+}
+
+.room-list-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 132px;
+  object-fit: cover;
+}
+
+.room-list-card__type {
   position: absolute;
-  left: 26px;
-  top: 20px;
-  width: 104px;
-  height: 37px;
-  background: rgba(26, 48, 71, 0.5);
-  color: #fff;
-  border-radius: 50px;
-  display: flex;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
-  font-weight: 400;
-  z-index: 1;
-}
-
-// ── Pill statut ────────────────────────────────────────────────────────────
-// Figma Disponible: x=348 y=18, w=108 h=41, radius=50px, bg=#16B55B
-// Figma Réservé: bg=#F9191C
-.status-pill {
-  position: absolute;
-  right: 18px;
-  top: 18px;
-  min-width: 108px;
-  height: 41px;
-  border-radius: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  font-weight: 400;
+  min-width: 84px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #e87d1e;
   color: #fff;
-  padding: 0 16px;
-  z-index: 1;
-
-  &--disponible {
-    background: var(--espaces-green);
-  }
-  &--reserved {
-    background: var(--espaces-red);
-  }
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
 }
 
-// ── Footer overlay blanc semi-transparent ─────────────────────────────────
-// Figma: Rectangle 25228: x=16.077 y=276.63 w=451.5 h=140.785 radius=10 bg=rgba(255,255,255,0.9)
-.card-footer {
-  position: absolute;
-  left: 16px; // Figma: inset 16.077px
-  right: 16px;
-  bottom: 14px; // Figma: y=276.63, h=140.78 → 431-(276.63+140.78)≈13.6px
-  height: 140.78px; // Figma: 140.7851px
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: var(--espaces-overlay-r);
-  padding: 14px 18px 16px;
+.room-list-card__content {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  min-width: 0;
+  padding: 4px 4px 4px 0;
 }
 
-.card-footer__top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-// Figma: "Chambre Queen A-2345" - fontSize:18, Lexend Regular, color:#000
-.card-name {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 400;
-  color: #000;
-  line-height: 1.3;
-}
-
-// Bouton flèche en haut droite du footer
-// Figma: Ellipse 111 w=41 h=39 + arrow icon
-.card-arrow {
-  width: 41px;
-  height: 39px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid rgba(26, 48, 71, 0.12);
+.room-list-card__top-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  cursor: pointer;
-  color: var(--espaces-navy);
-  font-size: 14px;
-  &:hover {
-    background: var(--espaces-navy);
-    color: #fff;
-  }
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-// Figma: "Abidjan, Cocody" - fontSize:13, Lexend Light, color≈#020202
-.card-location {
+.room-list-card__title,
+.room-list-card__location,
+.room-list-card__owner-name,
+.room-list-card__owner-role,
+.room-list-card__price {
+  margin: 0;
+}
+
+.room-list-card__title {
+  flex: 1 1 220px;
+  min-width: 0;
+  color: #1a3047;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.room-list-card__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 98px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #16b55b;
+  color: #fff;
   font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.room-list-card__status--reserved {
+  background: #fa191d;
+}
+
+.room-list-card__price {
+  margin-left: auto;
+  color: #222;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.room-list-card__price small {
+  margin-left: 4px;
+  font-size: 12px;
   font-weight: 300;
-  color: rgba(2, 2, 2, 0.9);
+}
+
+.room-list-card__location {
   display: flex;
   align-items: center;
   gap: 6px;
-
-  .pi {
-    color: var(--espaces-accent);
-    font-size: 14px;
-  }
-}
-
-.card-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-owner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-// Avatar propriétaire (Ellipse 110 w=45 h=47)
-.card-avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: var(--espaces-navy);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
-  border: 1.5px solid rgba(26, 48, 71, 0.12);
-  flex-shrink: 0;
-}
-
-.card-owner-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-// Figma: "Aïcha Kouadio" fontSize:15 Lexend Regular color:#222
-.card-owner-name {
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--espaces-text);
-}
-
-// Figma: "Cliente" fontSize:13 Lexend Light color:orange
-.card-owner-role {
+  margin-top: 12px;
+  color: #020202;
   font-size: 13px;
   font-weight: 300;
-  color: var(--espaces-accent);
+  line-height: 1.25;
 }
 
-// Figma: "65 000 FCFA/nuit" color:#222
-.card-price {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--espaces-text);
-  text-align: right;
+.room-list-card__location img {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
 }
 
-// ── Pagination ─────────────────────────────────────────────────────────────
-// Figma: Rectangle 25230 x=582 y=2476, w=585 h=90, radius→ same as card
-.espaces-pagination {
-  margin-top: 45px;
+.room-list-card__bottom-row {
   display: flex;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: auto;
 }
 
-.pagination-inner {
+.room-list-card__owner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.room-list-card__avatar {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.room-list-card__owner-meta {
+  min-width: 0;
+}
+
+.room-list-card__owner-name {
+  color: #222;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-list-card__owner-role {
+  margin-top: 2px;
+  color: #e87d1e;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.room-list-card__side {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.room-list-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #222;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.room-list-card__rating img {
+  width: 14px;
+  height: 14px;
+}
+
+.room-list-card__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  background: #fff;
+  border: 1px solid #eef1f4;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(26, 48, 71, 0.08);
+}
+
+.room-list-card__arrow-icon {
+  display: block;
+  width: 11px;
+  height: 14px;
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
+.room-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 485 / 431;
+  overflow: hidden;
+  border-radius: 20px;
+  text-decoration: none;
+  color: #222;
+  background: #d4dde4;
+  box-shadow: 0 14px 24px rgba(26, 48, 71, 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.room-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 28px rgba(26, 48, 71, 0.08);
+}
+
+.room-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.room-card__type,
+.room-card__status {
+  position: absolute;
+  top: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.room-card__type {
+  left: 26px;
+  width: 104px;
+  height: 37px;
+  background: rgba(26, 48, 71, 0.5);
+}
+
+.room-card__status {
+  right: 29px;
+  width: 108px;
+  height: 41px;
+  background: #16b55b;
+}
+
+.room-card__status--reserved {
+  background: #fa191d;
+}
+
+.room-card__details {
+  position: absolute;
+  right: 17px;
+  bottom: 14px;
+  left: 16px;
+  min-height: 141px;
+  padding: 13px 17px 14px 18px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.room-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.room-card__title,
+.room-card__location,
+.room-card__owner-name,
+.room-card__owner-role,
+.room-card__price {
+  margin: 0;
+}
+
+.room-card__title {
+  max-width: 285px;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: #000;
+}
+
+.room-card__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 41px;
+  height: 39px;
+  flex: 0 0 41px;
+  background: #fff;
+  border: 1px solid #eef1f4;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(26, 48, 71, 0.08);
+}
+
+.room-card__arrow-icon {
+  display: block;
+  width: 11px;
+  height: 14px;
+  transform: rotate(45deg);
+  transform-origin: center;
+}
+
+.room-card__location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  color: #020202;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.25;
+}
+
+.room-card__location img {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+}
+
+.room-card__bottom-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.room-card__owner {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px 24px;
+  min-width: 0;
 }
 
-.page-btn {
-  width: 58px;
-  height: 58px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
+.room-card__avatar {
+  width: 45px;
+  height: 47px;
+  flex: 0 0 45px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.room-card__owner-meta {
+  min-width: 0;
+}
+
+.room-card__owner-name {
+  color: #222;
   font-size: 15px;
-  cursor: pointer;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-card__owner-role {
+  margin-top: 2px;
+  color: #e87d1e;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.room-card__price-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 118px;
+}
+
+.room-card__rating {
   display: flex;
   align-items: center;
+  gap: 4px;
+  color: #222;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.room-card__rating img {
+  width: 14px;
+  height: 14px;
+}
+
+.room-card__price {
+  color: #222;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.room-card__price small {
+  margin-left: 4px;
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.pagination-wrapper {
+  display: flex;
   justify-content: center;
-  color: var(--espaces-text);
-  font-family: inherit;
+  margin-top: 4rem;
+}
 
-  &:hover {
-    background: rgba(26, 48, 71, 0.06);
+ubax-paginator {
+  display: block;
+}
+
+@media (max-width: 1700px) {
+  .summary-strip {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
-  &--active {
-    background: var(--espaces-navy);
-    color: #fff;
+  .rooms-panel {
+    padding-right: 28px;
+    padding-left: 28px;
   }
 
-  &--nav {
-    width: 52px;
-    height: 50px;
-    background: rgba(26, 48, 71, 0.06);
-    border-radius: 8px;
-    color: var(--espaces-navy);
-    font-size: 13px;
+  .rooms-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 28px;
+    row-gap: 28px;
+  }
+
+  .room-card {
+    max-width: none;
+  }
+}
+
+@media (max-width: 1320px) {
+  .summary-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rooms-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rooms-toolbar__filters,
+  .rooms-toolbar__actions {
+    justify-content: space-between;
+  }
+
+  .rooms-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  :host {
+    padding-bottom: 32px;
+  }
+
+  .rooms-page__title {
+    font-size: 30px;
+  }
+
+  .summary-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rooms-panel {
+    padding: 24px 18px 28px;
+  }
+
+  .rooms-toolbar__filters,
+  .rooms-toolbar__actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .filter-pill,
+  .filter-pill--status,
+  .filter-action,
+  .add-space-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .view-toggle {
+    width: 62px;
+    height: 62px;
+  }
+
+  .rooms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rooms-grid--list {
+    grid-template-columns: 1fr;
+    row-gap: 16px;
+  }
+
+  .room-list-card {
+    grid-template-columns: 108px minmax(0, 1fr);
+    gap: 14px;
+    min-height: 148px;
+    padding: 12px;
+  }
+
+  .room-list-card__content {
+    padding: 2px 0;
+  }
+
+  .room-list-card__price {
+    margin-left: 0;
+  }
+
+  .room-card__title {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .summary-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card {
+    padding: 20px;
+  }
+
+  .room-list-card {
+    grid-template-columns: 1fr;
+  }
+
+  .room-list-card__media,
+  .room-list-card__image {
+    min-height: 172px;
+  }
+
+  .room-list-card__top-row {
+    align-items: flex-start;
+  }
+
+  .room-list-card__bottom-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .room-list-card__side {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .room-card__type {
+    left: 16px;
+  }
+
+  .room-card__status {
+    right: 16px;
+  }
+
+  .room-card__details {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    padding: 12px 14px;
+  }
+
+  .room-card__bottom-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .room-card__price-block {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .pagination-wrapper {
+    margin-top: 20px;
   }
 }

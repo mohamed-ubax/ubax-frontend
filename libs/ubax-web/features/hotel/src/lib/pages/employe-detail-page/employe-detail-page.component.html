@@ -1,85 +1,92 @@
 <div class="det-page">
-
-  <!-- ── Page header ─────────────────────────────────────────────── -->
   <div class="det-header">
     <div class="det-header__left">
-      <a class="back-btn" routerLink="/hotel/employes">
+      <a
+        class="back-btn"
+        routerLink="/hotel/employes"
+        aria-label="Retour à la liste des employés"
+      >
         <i class="pi pi-arrow-left"></i>
       </a>
       <h1 class="det-title">Détails employés</h1>
     </div>
     <div class="det-header__right">
-      <button class="action-btn action-btn--edit">
-        <i class="pi pi-pencil"></i>
-        Editer
-      </button>
-      <button class="action-btn action-btn--archive">
-        <i class="pi pi-inbox"></i>
-        Archiver
-      </button>
+      @for (action of pageActions; track action.label) {
+        <button
+          class="action-btn"
+          [class.action-btn--edit]="action.variant === 'edit'"
+          [class.action-btn--archive]="action.variant === 'archive'"
+          type="button"
+        >
+          <img
+            class="action-btn__icon"
+            [src]="action.iconSrc"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span>{{ action.label }}</span>
+        </button>
+      }
     </div>
   </div>
 
-  <!-- ── Top section ─────────────────────────────────────────────── -->
-  <div class="top-section">
-
-    <!-- Left: employee profile card -->
-    <div class="profile-card">
+  <section
+    class="top-section"
+    aria-label="Informations principales de l'employé"
+  >
+    <article class="profile-card">
       <div class="profile-badges">
         <span class="badge badge--service">{{ employe.statut }}</span>
         <span class="badge badge--shift">{{ employe.shift }}</span>
       </div>
 
       <div class="profile-avatar">
-        <div class="profile-avatar__circle">
-          <i class="pi pi-user"></i>
-        </div>
+        <img
+          class="profile-avatar__image"
+          [src]="employe.avatarSrc"
+          [alt]="employe.nom"
+          loading="eager"
+          decoding="async"
+        />
       </div>
 
-      <p class="profile-name">{{ employe.nom }}</p>
+      <h2 class="profile-name">{{ employe.nom }}</h2>
       <p class="profile-role">{{ employe.role }}</p>
 
       <div class="profile-contacts">
-        <div class="contact-row">
-          <div class="contact-icon-wrap">
-            <i class="pi pi-phone"></i>
+        @for (contact of profileContacts; track contact.label) {
+          <div class="profile-contact">
+            <div class="profile-contact__icon-wrap">
+              @if (contact.hasFramedIcon) {
+                <img
+                  class="profile-contact__icon-frame"
+                  [src]="contact.iconSrc"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              } @else {
+                <span class="profile-contact__icon-circle">
+                  <img
+                    class="profile-contact__icon"
+                    [src]="contact.iconSrc"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+              }
+            </div>
+            <div class="profile-contact__content">
+              <span class="profile-contact__label">{{ contact.label }}</span>
+              <span class="profile-contact__value">{{ contact.value }}</span>
+            </div>
           </div>
-          <div class="contact-text">
-            <span class="contact-label">Téléphone</span>
-            <span class="contact-value">{{ employe.telephone }}</span>
-          </div>
-        </div>
-        <div class="contact-row">
-          <div class="contact-icon-wrap">
-            <i class="pi pi-envelope"></i>
-          </div>
-          <div class="contact-text">
-            <span class="contact-label">Email</span>
-            <span class="contact-value">{{ employe.email }}</span>
-          </div>
-        </div>
-        <div class="contact-row">
-          <div class="contact-icon-wrap">
-            <i class="pi pi-file"></i>
-          </div>
-          <div class="contact-text">
-            <span class="contact-label">Type de contrat</span>
-            <span class="contact-value">{{ employe.contrat }}</span>
-          </div>
-        </div>
-        <div class="contact-row">
-          <div class="contact-icon-wrap">
-            <i class="pi pi-calendar"></i>
-          </div>
-          <div class="contact-text">
-            <span class="contact-label">Date d'embauche</span>
-            <span class="contact-value">{{ employe.dateEmbauche }}</span>
-          </div>
-        </div>
+        }
       </div>
-    </div>
+    </article>
 
-    <!-- Center: documents card -->
     <div class="docs-card">
       <p class="docs-title">Documents</p>
       <div class="docs-divider"></div>
@@ -103,7 +110,6 @@
       </div>
     </div>
 
-    <!-- Right: salary history -->
     <div class="salary-card">
       <p class="salary-title">Historique de virement de salaire</p>
       <div class="salary-divider"></div>
@@ -129,12 +135,9 @@
       </div>
       <button class="voir-plus-btn">Voir plus</button>
     </div>
+  </section>
 
-  </div>
-
-  <!-- ── Calendar section ─────────────────────────────────────────── -->
   <div class="calendar-card">
-
     <div class="cal-header">
       <div class="cal-month-nav">
         <span class="cal-month-label">{{ currentMonthLabel() }}</span>
@@ -147,13 +150,14 @@
           <button
             class="cal-view-btn"
             [class.cal-view-btn--active]="calendarView() === v.id"
-            (click)="calendarView.set(v.id)">
+            (click)="calendarView.set(v.id)"
+          >
             {{ v.label }}
           </button>
         }
       </div>
 
-      <p class="cal-section-title">Emploie du temps</p>
+      <p class="cal-section-title">Emploi du temps</p>
     </div>
 
     <!-- Grid header -->
@@ -174,7 +178,8 @@
                 <div
                   class="cal-event"
                   [class.cal-event--shift]="event.type === 'shift'"
-                  [class.cal-event--conge]="event.type === 'conge'">
+                  [class.cal-event--conge]="event.type === 'conge'"
+                >
                   {{ event.label }}
                 </div>
               }
@@ -183,7 +188,5 @@
         </div>
       }
     </div>
-
   </div>
-
 </div>

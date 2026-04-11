@@ -1,35 +1,76 @@
-<header class="ubax-topbar">
-  <div class="topbar-inner">
-
+<header
+  class="ubax-topbar"
+  [class.ubax-topbar--compact]="isCompactNav()"
+  [class.ubax-topbar--menu-open]="isCompactNav() && isMobileNavOpen()"
+>
+  <div class="topbar-inner" #topbarInner>
     <!-- Logo -->
-    <a routerLink="/tableau-de-bord" class="topbar-logo" aria-label="Accueil Ubax">
+    <a
+      routerLink="/tableau-de-bord"
+      class="topbar-logo"
+      #topbarLogo
+      aria-label="Accueil Ubax"
+      (click)="closeMobileMenu()"
+    >
       <img [src]="logoSrc()" alt="Ubax" />
     </a>
 
     <!-- Navigation principale -->
-    <nav class="topbar-nav" aria-label="Navigation principale">
-      @for (item of visibleItems(); track item.path) {
-        <a
-          [routerLink]="item.path"
-          routerLinkActive="is-active"
-          class="topbar-nav__item"
-        >{{ item.label }}</a>
-      }
-    </nav>
+    <div class="topbar-nav-shell" #navShell>
+      <nav class="topbar-nav" #navList aria-label="Navigation principale">
+        @for (item of visibleItems(); track item.path) {
+          <a
+            [routerLink]="item.path"
+            [class.is-active]="isItemActive(item)"
+            class="topbar-nav__item"
+            (click)="closeMobileMenu()"
+            >{{ item.label }}</a
+          >
+        }
+      </nav>
+    </div>
 
     <!-- Actions droite -->
-    <div class="topbar-actions">
-      <button class="topbar-icon-btn" aria-label="Notifications" pBadge value="3">
+    <div class="topbar-actions" #topbarActions>
+      @if (isCompactNav()) {
+        <button
+          class="topbar-icon-btn topbar-menu-btn"
+          #menuButton
+          type="button"
+          [attr.aria-expanded]="isMobileNavOpen()"
+          [attr.aria-label]="
+            isMobileNavOpen() ? 'Fermer la navigation' : 'Ouvrir la navigation'
+          "
+          (click)="toggleMobileMenu()"
+        >
+          <i
+            class="pi"
+            [class.pi-bars]="!isMobileNavOpen()"
+            [class.pi-times]="isMobileNavOpen()"
+          ></i>
+        </button>
+      }
+      <button
+        class="topbar-icon-btn"
+        type="button"
+        aria-label="Notifications"
+        pBadge
+        value="3"
+      >
         <i class="pi pi-bell"></i>
       </button>
-      <button class="topbar-icon-btn" aria-label="Paramètres">
+      <button class="topbar-icon-btn" type="button" aria-label="Paramètres">
         <i class="pi pi-cog"></i>
       </button>
 
       <div class="topbar-user">
         <p-avatar
           [image]="authStore.user()?.avatar"
-          [label]="!authStore.user()?.avatar ? authStore.user()?.prenom?.charAt(0) : undefined"
+          [label]="
+            !authStore.user()?.avatar
+              ? authStore.user()?.prenom?.charAt(0)
+              : undefined
+          "
           shape="circle"
           size="normal"
         />
@@ -39,6 +80,5 @@
         </div>
       </div>
     </div>
-
   </div>
 </header>

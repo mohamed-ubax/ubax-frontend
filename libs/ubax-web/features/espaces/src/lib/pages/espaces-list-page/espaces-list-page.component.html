@@ -1,130 +1,301 @@
-<ubax-page-header title="Mes chambres">
-  <button class="add-space-btn" routerLink="ajouter">
-    <i class="pi pi-plus"></i>
-    Ajouter une espace
-  </button>
-</ubax-page-header>
+<div class="rooms-page">
+  <h1 class="rooms-page__title">Mes chambres</h1>
 
-<div class="espaces-controls">
-  <div class="espaces-filters">
-    <ubax-filter-bar
-      [showDateRange]="false"
-      [selects]="filterSelects"
-    ></ubax-filter-bar>
-  </div>
-</div>
-
-<div class="espaces-summary">
-  <div class="summary-card">
-    <div class="summary-icon summary-icon--all">
-      <i class="pi pi-home"></i>
-    </div>
-    <div class="summary-info">
-      <span class="summary-label">Tous les espaces</span>
-      <span class="summary-value">45</span>
-    </div>
-  </div>
-  <div class="summary-card">
-    <div class="summary-icon summary-icon--reserved">
-      <i class="pi pi-home"></i>
-    </div>
-    <div class="summary-info">
-      <span class="summary-label">Espaces réservés</span>
-      <span class="summary-value">25</span>
-    </div>
-  </div>
-  <div class="summary-card">
-    <div class="summary-icon summary-icon--online">
-      <i class="pi pi-wifi"></i>
-    </div>
-    <div class="summary-info">
-      <span class="summary-label">Espaces en ligne</span>
-      <span class="summary-value">15</span>
-    </div>
-  </div>
-  <div class="summary-card">
-    <div class="summary-icon summary-icon--occupied">
-      <i class="pi pi-building"></i>
-    </div>
-    <div class="summary-info">
-      <span class="summary-label">Espaces Occupés</span>
-      <span class="summary-value">10</span>
-    </div>
-  </div>
-  <div class="summary-card summary-card--revenue">
-    <div class="summary-icon summary-icon--revenue">
-      <i class="pi pi-send"></i>
-    </div>
-    <div class="summary-info">
-      <span class="summary-label">Revenus du jour</span>
-      <span class="summary-value summary-value--revenue">750 000 FCFA</span>
-    </div>
-  </div>
-</div>
-
-<div class="espaces-toolbar">
-  <div class="view-btns">
-    <button class="view-btn view-btn--active" aria-label="Vue grille">
-      <i class="pi pi-th-large"></i>
-    </button>
-    <button class="view-btn" aria-label="Vue liste">
-      <i class="pi pi-list"></i>
-    </button>
-  </div>
-</div>
-
-<section class="espaces-grid">
-  @for (s of spaces; track s.id) {
-    <div class="espaces-card" [routerLink]="[s.id]">
-      <div class="card-media">
-        <div class="type-badge">{{ s.tag }}</div>
-        <div
-          class="status-pill"
-          [class.status-pill--reserved]="s.status === 'Réservé'"
-          [class.status-pill--disponible]="s.status === 'Disponible'"
-        >
-          {{ s.status }}
+  <section class="summary-strip" aria-label="Résumé des espaces">
+    @for (summary of summaryCards; track summary.label) {
+      <article
+        class="summary-card"
+        [class.summary-card--all]="summary.theme === 'all'"
+        [class.summary-card--reserved]="summary.theme === 'reserved'"
+        [class.summary-card--online]="summary.theme === 'online'"
+        [class.summary-card--occupied]="summary.theme === 'occupied'"
+        [class.summary-card--revenue]="summary.theme === 'revenue'"
+      >
+        <div class="summary-card__icon-wrap">
+          <img
+            class="summary-card__icon"
+            [src]="summary.icon"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
         </div>
-      </div>
 
-      <div class="card-footer">
-        <div class="card-footer__top">
-          <h3 class="card-name">{{ s.title }}</h3>
-          <button class="card-arrow" aria-label="Voir détails">
-            <i class="pi pi-arrow-up-right"></i>
-          </button>
+        <div class="summary-card__content">
+          <p class="summary-card__label">{{ summary.label }}</p>
+          <p class="summary-card__value">{{ summary.value }}</p>
         </div>
-        <div class="card-location">
-          <i class="pi pi-map-marker"></i>
-          {{ s.location }}
-        </div>
-        <div class="card-bottom">
-          <div class="card-owner">
-            <div class="card-avatar">{{ s.owner[0] }}</div>
-            <div class="card-owner-info">
-              <span class="card-owner-name">{{ s.owner }}</span>
-              <span class="card-owner-role">Cliente</span>
-            </div>
-          </div>
-          <div class="card-price">{{ s.price }}</div>
-        </div>
-      </div>
-    </div>
-  }
-</section>
-
-<div class="espaces-pagination">
-  <div class="pagination-inner">
-    <button class="page-btn page-btn--nav">
-      <i class="pi pi-chevron-left"></i>
-    </button>
-    @for (p of pages; track p) {
-      <button class="page-btn" [class.page-btn--active]="p === activePage()">
-        {{ p }}
-      </button>
+      </article>
     }
-    <button class="page-btn page-btn--nav">
-      <i class="pi pi-chevron-right"></i>
-    </button>
-  </div>
+  </section>
+
+  <section class="rooms-panel">
+    <div class="rooms-toolbar">
+      <div class="rooms-toolbar__filters">
+        <label class="filter-pill">
+          <select
+            class="filter-pill__field"
+            [value]="selectedType()"
+            (change)="updateType($any($event.target).value)"
+          >
+            @for (option of typeOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+
+          <img
+            class="filter-pill__chevron"
+            src="rooms/icons/chevron-down.svg"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </label>
+
+        <label class="filter-pill filter-pill--status">
+          <select
+            class="filter-pill__field"
+            [value]="selectedStatus()"
+            (change)="updateStatus($any($event.target).value)"
+          >
+            @for (option of statusOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+
+          <img
+            class="filter-pill__chevron"
+            src="rooms/icons/chevron-down.svg"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </label>
+
+        <button class="filter-action" type="button">Filtrer</button>
+      </div>
+
+      <div class="rooms-toolbar__actions">
+        <button
+          class="view-toggle"
+          [class.view-toggle--active]="viewMode() === 'grid'"
+          type="button"
+          aria-label="Vue grille"
+          [attr.aria-pressed]="viewMode() === 'grid'"
+          (click)="setViewMode('grid')"
+        >
+          <img
+            class="view-toggle__icon view-toggle__icon--grid"
+            src="rooms/icons/view-grid.svg"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </button>
+
+        <button
+          class="view-toggle"
+          type="button"
+          aria-label="Vue liste"
+          [class.view-toggle--active]="viewMode() === 'list'"
+          [attr.aria-pressed]="viewMode() === 'list'"
+          (click)="setViewMode('list')"
+        >
+          <img
+            class="view-toggle__icon view-toggle__icon--list"
+            src="rooms/icons/view-list.svg"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </button>
+
+        <a class="add-space-button" routerLink="ajouter">Ajouter une espace</a>
+      </div>
+    </div>
+
+    <div class="rooms-grid" [class.rooms-grid--list]="viewMode() === 'list'">
+      @for (space of visibleSpaces(); track space.id; let index = $index) {
+        @if (viewMode() === 'grid') {
+          <a class="room-card" [routerLink]="[space.id]">
+            <img
+              class="room-card__image"
+              [src]="space.image"
+              [alt]="space.title"
+              [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+              decoding="async"
+            />
+
+            <span class="room-card__type">{{ space.typeLabel }}</span>
+
+            <span
+              class="room-card__status"
+              [class.room-card__status--reserved]="space.status === 'Réservé'"
+            >
+              {{ space.status }}
+            </span>
+
+            <div class="room-card__details">
+              <div class="room-card__heading">
+                <h2 class="room-card__title">{{ space.title }}</h2>
+
+                <span class="room-card__arrow" aria-hidden="true">
+                  <img
+                    class="room-card__arrow-icon"
+                    src="rooms/icons/card-arrow.svg"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+              </div>
+
+              <p class="room-card__location">
+                <img
+                  src="rooms/icons/location.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>{{ space.location }}</span>
+              </p>
+
+              <div class="room-card__bottom-row">
+                <div class="room-card__owner">
+                  <img
+                    class="room-card__avatar"
+                    [src]="space.avatar"
+                    [alt]="space.owner"
+                    loading="lazy"
+                    decoding="async"
+                  />
+
+                  <div class="room-card__owner-meta">
+                    <p class="room-card__owner-name">{{ space.owner }}</p>
+                    <p class="room-card__owner-role">{{ space.ownerRole }}</p>
+                  </div>
+                </div>
+
+                <div class="room-card__price-block">
+                  <div class="room-card__rating" aria-label="Note 4.1 sur 5">
+                    @for (star of stars; track $index) {
+                      <img
+                        src="rooms/icons/star.svg"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    }
+                    <span>{{ space.rating }}</span>
+                  </div>
+
+                  <p class="room-card__price">
+                    <span>{{ space.priceValue }}</span>
+                    <small>{{ space.priceUnit }}</small>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </a>
+        } @else {
+          <a class="room-list-card" [routerLink]="[space.id]">
+            <div class="room-list-card__media">
+              <img
+                class="room-list-card__image"
+                [src]="space.image"
+                [alt]="space.title"
+                [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+                decoding="async"
+              />
+
+              <span class="room-list-card__type">{{ space.typeLabel }}</span>
+            </div>
+
+            <div class="room-list-card__content">
+              <div class="room-list-card__top-row">
+                <h2 class="room-list-card__title">{{ space.title }}</h2>
+
+                <span
+                  class="room-list-card__status"
+                  [class.room-list-card__status--reserved]="
+                    space.status === 'Réservé'
+                  "
+                >
+                  {{ space.status }}
+                </span>
+
+                <p class="room-list-card__price">
+                  <span>{{ space.priceValue }}</span>
+                  <small>{{ space.priceUnit }}</small>
+                </p>
+              </div>
+
+              <p class="room-list-card__location">
+                <img
+                  src="rooms/icons/location.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>{{ space.location }}</span>
+              </p>
+
+              <div class="room-list-card__bottom-row">
+                <div class="room-list-card__owner">
+                  <img
+                    class="room-list-card__avatar"
+                    [src]="space.avatar"
+                    [alt]="space.owner"
+                    loading="lazy"
+                    decoding="async"
+                  />
+
+                  <div class="room-list-card__owner-meta">
+                    <p class="room-list-card__owner-name">{{ space.owner }}</p>
+                    <p class="room-list-card__owner-role">
+                      {{ space.ownerRole }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="room-list-card__side">
+                  <div
+                    class="room-list-card__rating"
+                    aria-label="Note 4.1 sur 5"
+                  >
+                    @for (star of stars; track $index) {
+                      <img
+                        src="rooms/icons/star.svg"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    }
+                    <span>{{ space.rating }}</span>
+                  </div>
+
+                  <span class="room-list-card__arrow" aria-hidden="true">
+                    <img
+                      class="room-list-card__arrow-icon"
+                      src="rooms/icons/card-arrow.svg"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+        }
+      }
+    </div>
+
+    <div class="pagination-wrapper">
+      <ubax-paginator
+        [(currentPage)]="activePage"
+        [totalPages]="totalPages()"
+      />
+    </div>
+  </section>
 </div>
