@@ -2,7 +2,6 @@
 .ajout-page {
   background: #ecf2f7;
   border-radius: 20px;
-  padding: 24px 24px 32px;
   min-height: 100%;
 }
 
@@ -10,8 +9,8 @@
 .ajout-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 24px;
+  margin-bottom: 28px;
 }
 
 /* back-btn : fond blanc conforme au Figma */
@@ -51,7 +50,7 @@
 /* ── Body ──────────────────────────────────────────────────────── */
 .ajout-body {
   display: flex;
-  gap: 24px;
+  gap: 36px;
   align-items: stretch; /* sidebar = hauteur de la colonne droite */
 }
 
