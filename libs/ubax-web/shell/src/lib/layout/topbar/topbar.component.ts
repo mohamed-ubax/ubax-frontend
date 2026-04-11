@@ -4,11 +4,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
+import { filter, map } from 'rxjs';
 
 interface NavItem {
   label: string;
@@ -24,6 +26,10 @@ const ROLE_LABELS: Record<string, string> = {
   HOTEL: 'Responsable hôtel',
 };
 
+function normalizeUrl(url: string): string {
+  return url.split('?')[0].split('#')[0];
+}
+
 @Component({
   selector: 'ubax-topbar',
   standalone: true,
@@ -36,6 +42,13 @@ export class TopbarComponent {
   readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
   protected readonly isMobileNavOpen = signal(false);
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => normalizeUrl(event.urlAfterRedirects)),
+    ),
+    { initialValue: normalizeUrl(this.router.url) },
+  );
 
   protected roleLabel(): string {
     const role = this.authStore.user()?.role;
@@ -77,7 +90,7 @@ export class TopbarComponent {
   }
 
   protected isItemActive(item: NavItem): boolean {
-    const currentUrl = this.router.url.split('?')[0].split('#')[0];
+    const currentUrl = this.currentUrl();
     const activePaths = item.activePaths ?? [item.path];
 
     return activePaths.some(
