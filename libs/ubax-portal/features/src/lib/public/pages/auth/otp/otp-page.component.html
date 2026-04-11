@@ -1,45 +1,45 @@
 <section class="recovery-flow recovery-flow--otp">
-    <div class="recovery-flow__intro">
-      <h1 class="recovery-flow__title">Vérification du code</h1>
-      <p class="recovery-flow__description">
-        Saisissez le code à 6 chiffres envoyé par mail sur xxxxxxxxxxxxx@gmail.com
-      </p>
-    </div>
+  <div class="recovery-flow__intro">
+    <h1 class="recovery-flow__title">Vérification du code</h1>
+    <p class="recovery-flow__description">
+      Saisissez le code à 6 chiffres envoyé par mail sur {{ recoveryEmail }}
+    </p>
+  </div>
 
-    <article class="recovery-card recovery-card--otp">
-      <form
-        class="recovery-form"
-        (ngSubmit)="onSubmit()"
-        aria-label="Vérification du code reçu par mail"
-        novalidate
-      >
-        <p-inputotp
-          class="recovery-otp-wrapper"
-          [(ngModel)]="otpCode"
-          name="otpCode"
-          [length]="6"
-          [integerOnly]="true"
-          [autofocus]="true"
-          styleClass="recovery-otp"
-        ></p-inputotp>
+  <article class="recovery-card recovery-card--otp">
+    <form
+      class="recovery-form"
+      (ngSubmit)="onSubmit()"
+      aria-label="Vérification du code reçu par mail"
+      novalidate
+    >
+      <p-inputotp
+        class="recovery-otp-wrapper"
+        [(ngModel)]="otpCode"
+        name="otpCode"
+        [length]="6"
+        [integerOnly]="true"
+        [autofocus]="true"
+        styleClass="recovery-otp"
+      ></p-inputotp>
 
-        <div class="recovery-actions">
-          <p-button
-            type="submit"
-            styleClass="recovery-btn"
-            [fluid]="true"
-            label="Vérifier"
-            [disabled]="!canVerifyCode"
-          ></p-button>
+      <div class="recovery-actions">
+        <p-button
+          type="submit"
+          styleClass="recovery-btn"
+          [fluid]="true"
+          label="Vérifier"
+          [disabled]="!canVerifyCode"
+        ></p-button>
 
-          <p-button
-            type="button"
-            styleClass="recovery-btn recovery-btn--accent"
-            [fluid]="true"
-            label="Renvoyer le code"
-            (onClick)="onResendCode()"
-          ></p-button>
-        </div>
-      </form>
-    </article>
-  </section>
+        <p-button
+          type="button"
+          styleClass="recovery-btn recovery-btn--accent"
+          [fluid]="true"
+          label="Renvoyer le code"
+          (onClick)="onResendCode()"
+        ></p-button>
+      </div>
+    </form>
+  </article>
+</section>
