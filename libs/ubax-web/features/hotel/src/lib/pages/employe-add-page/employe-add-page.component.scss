@@ -6,7 +6,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 70px;
+  gap: 38px;
 }
 
 .add-header {
@@ -27,10 +27,6 @@
   text-decoration: none;
   transition: transform 0.15s ease;
   flex-shrink: 0;
-
-  .pi-arrow-left {
-    font-size: 20px;
-  }
 
   &:hover {
     transform: translateX(-1px);
@@ -59,6 +55,24 @@
   grid-template-columns: 486px minmax(0, 1fr);
   column-gap: 28px;
   padding: 22px 38px 23px 18px;
+}
+
+.add-card--wizard {
+  display: block;
+  min-height: auto;
+  overflow: visible;
+  position: relative;
+}
+
+.add-card--step2 {
+  min-height: 594px;
+  padding: 22px 53px 24px 18px;
+}
+
+.add-card--step3,
+.add-card--step4 {
+  min-height: 577px;
+  padding: 22px 53px 19px 18px;
 }
 
 .add-sidebar {
@@ -124,6 +138,8 @@
 
 .step1-shell {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .step1-main {
@@ -131,6 +147,109 @@
   grid-template-columns: 660px 344px;
   column-gap: 54px;
   align-items: start;
+}
+
+.wizard-shell {
+  display: grid;
+  grid-template-columns: 453px minmax(0, 667px) 339px;
+  column-gap: 61px;
+  align-items: start;
+}
+
+.wizard-sidebar {
+  background: var(--ubax-navy);
+  border-radius: var(--ubax-radius-xl);
+  padding: 120px 36px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.add-card--step2 .wizard-sidebar {
+  min-height: 548px;
+}
+
+.add-card--step3 .wizard-sidebar,
+.add-card--step4 .wizard-sidebar {
+  min-height: 536px;
+}
+
+.wizard-sidebar__asset {
+  width: 94px;
+  height: 94px;
+  object-fit: contain;
+}
+
+.sidebar-title--wizard {
+  margin-top: 59px;
+}
+
+.sidebar-desc--wizard {
+  margin-top: 28px;
+  max-width: 378px;
+}
+
+.wizard-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.wizard-main--step2 {
+  padding-top: 62px;
+}
+
+.wizard-main--step3 {
+  padding-top: 62px;
+}
+
+.wizard-main--step4 {
+  padding-top: 78px;
+}
+
+.form-grid--step2 {
+  width: 651px;
+  padding-left: 0;
+  margin-top: 0;
+  grid-template-columns: 310px 310px;
+  column-gap: 31px;
+  row-gap: 50px;
+}
+
+.add-card--wizard .field-group {
+  gap: 0;
+}
+
+.add-card--wizard .field-label {
+  line-height: 34px;
+}
+
+.wizard-fields--step3 {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  max-width: 651px;
+}
+
+.wizard-fields__row--step3-top {
+  display: grid;
+  grid-template-columns: 310px 310px;
+  column-gap: 31px;
+}
+
+.wizard-fields__row--step3-middle {
+  display: grid;
+  grid-template-columns: 187px 180px 217px;
+  column-gap: 33px;
+}
+
+.field-group--notes {
+  max-width: 552px;
+}
+
+.field-group--notes .field-textarea {
+  height: 77px;
 }
 
 .add-form {
@@ -239,7 +358,7 @@
   position: relative;
 
   .field-input {
-    padding-right: 44px;
+    padding-right: 56px;
     width: 100%;
     box-sizing: border-box;
   }
@@ -253,6 +372,18 @@
   font-size: 18px;
   color: #777;
   pointer-events: none;
+}
+
+.field-icon--image {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.field-icon--time {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .field-textarea {
@@ -419,24 +550,30 @@
 
 /* ── Role panel ──────────────────────────────────────────────────── */
 .role-panel {
-  width: 339px;
   background: #ecf2f7;
   border-radius: 20px;
-  padding: 20px 20px;
-  margin-left: 32px;
+}
+
+.role-panel--wizard {
+  width: 339px;
+  min-height: 302px;
+  padding: 25px 22px 17px;
+  margin-left: 0;
+  margin-top: 71px;
   align-self: flex-start;
 }
 
 .role-panel__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 17px;
+}
 
-  i {
-    font-size: 18px;
-    color: #555;
-  }
+.role-panel__header-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .role-panel__title {
@@ -450,17 +587,18 @@
   background: #d2dfea;
   border: 1.5px dashed #e87d1e;
   border-radius: 20px;
-  padding: 14px 12px;
+  min-height: 209px;
+  padding: 24px 16px 15px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .role-option {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 47px;
+  min-height: 47px;
   background: #fff;
   border: none;
   border-radius: 10px;
@@ -477,7 +615,7 @@
   width: 23px;
   height: 23px;
   border-radius: 50%;
-  border: 2px solid #ccc;
+  border: 1.5px solid #c7c7c7;
   flex-shrink: 0;
   transition:
     background 0.15s,
@@ -498,21 +636,24 @@
 
 /* ── Step 4 layout ───────────────────────────────────────────────── */
 .step4-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 49px;
+}
+
+.step4-content--wizard {
+  max-width: 667px;
 }
 
 .days-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .days-row {
   display: flex;
-  gap: 10px;
+  gap: 13px;
   flex-wrap: wrap;
 }
 
@@ -524,9 +665,9 @@
   width: 84px;
   height: 59px;
   border-radius: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #929292;
   background: #fff;
-  padding: 8px 6px;
+  padding: 10px 6px 9px;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -553,7 +694,7 @@
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: #ccc;
+  background: #c6c6c6;
   transition: background 0.15s;
 
   &--active {
@@ -564,29 +705,39 @@
 .hours-row {
   display: grid;
   grid-template-columns: 310px 310px;
-  gap: 40px;
+  gap: 41px;
+}
+
+.hours-row--step4 {
+  max-width: 661px;
 }
 
 /* ── Resume panel ────────────────────────────────────────────────── */
 .resume-panel {
-  width: 339px;
   background: #ecf2f7;
   border-radius: 20px;
-  padding: 20px;
-  margin-left: 32px;
+}
+
+.resume-panel--wizard {
+  width: 339px;
+  min-height: 316px;
+  padding: 25px 22px 22px;
+  margin-left: 0;
+  margin-top: 62px;
   align-self: flex-start;
 }
 
 .resume-panel__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 17px;
+}
 
-  i {
-    font-size: 18px;
-    color: #555;
-  }
+.resume-panel__header-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .resume-panel__title {
@@ -600,17 +751,18 @@
   background: #d2dfea;
   border: 1.5px dashed #e87d1e;
   border-radius: 20px;
-  padding: 16px 18px;
+  min-height: 220px;
+  padding: 29px 21px 24px 22px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 17px;
 }
 
 .resume-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .resume-key {
@@ -627,41 +779,67 @@
   font-weight: 400;
   color: #e87d1e;
   text-align: right;
+  max-width: 140px;
 }
 
 /* ── Navigation buttons ──────────────────────────────────────────── */
 .form-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 17px;
+}
 
-  &--coords {
-    width: 100%;
-    justify-content: flex-end;
-    margin-top: 16px;
-    align-self: flex-end;
-    grid-column: 1 / -1;
-  }
+.form-actions--step1-shell {
+  width: 100%;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
 
-  &--step1 {
-    width: 100%;
-    justify-content: flex-end;
-    margin-top: 24px;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-  }
+.form-actions--wizard {
+  width: 100%;
+  justify-content: flex-end;
+}
 
-  &--step4 {
-    width: 100%;
-    justify-content: flex-end;
-    margin-top: 16px;
-  }
+.form-actions--wizard-step2 {
+  margin-top: 0;
+}
+
+.form-actions--wizard-step3 {
+  margin-top: 0;
+}
+
+.form-actions--wizard-step4 {
+  margin-top: 0;
+}
+
+.wizard-actions {
+  position: absolute;
+  right: 56px;
+  z-index: 1;
+}
+
+.wizard-actions--step2,
+.wizard-actions--step3 {
+  gap: 41px;
+}
+
+.wizard-actions--step2 {
+  bottom: 64px;
+}
+
+.wizard-actions--step3 {
+  bottom: 29px;
+}
+
+.wizard-actions--step4 {
+  bottom: 71px;
+  gap: 40px;
 }
 
 .nav-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   height: 65px;
   border-radius: 10px;
@@ -670,7 +848,8 @@
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
-  padding: 0 28px;
+  padding: 0 24px;
+  white-space: nowrap;
   transition: opacity 0.15s;
 
   &:hover {
@@ -678,26 +857,40 @@
   }
 
   &--prev {
-    background: #f0f4f7;
+    width: 211px;
+    background: #ecf2f7;
     color: #222;
-    min-width: 182px;
   }
 
   &--next {
+    width: 182px;
     background: #e87d1e;
     color: #fff;
-    min-width: 182px;
   }
 
   &--step1 {
-    align-self: flex-end;
+    width: 182px;
   }
 
   &--save {
+    width: 309px;
     background: #e87d1e;
     color: #fff;
-    min-width: 260px;
   }
+}
+
+.nav-btn__icon {
+  object-fit: contain;
+}
+
+.nav-btn__icon--prev {
+  width: 26.521px;
+  height: 26.521px;
+}
+
+.nav-btn__chevron {
+  font-size: 22px;
+  line-height: 1;
 }
 
 @media (max-width: 1500px) {
@@ -735,6 +928,70 @@
   .photo-panel,
   .photo-drop-zone {
     width: 100%;
+  }
+
+  .add-card--wizard {
+    padding: 22px 24px 24px 18px;
+  }
+
+  .wizard-shell {
+    grid-template-columns: 360px minmax(0, 1fr) 300px;
+    column-gap: 24px;
+  }
+
+  .wizard-sidebar {
+    width: 100%;
+    min-width: 0;
+    padding: 96px 24px 32px;
+  }
+
+  .wizard-main--step2,
+  .wizard-main--step3,
+  .wizard-main--step4 {
+    padding-top: 24px;
+  }
+
+  .form-grid--step2,
+  .wizard-fields--step3,
+  .step4-content--wizard {
+    width: 100%;
+    max-width: none;
+  }
+
+  .form-grid--step2,
+  .hours-row--step4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 20px;
+  }
+
+  .wizard-fields__row--step3-top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+
+  .wizard-fields__row--step3-middle {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 16px;
+  }
+
+  .field-group--notes {
+    max-width: none;
+  }
+
+  .role-panel--wizard,
+  .resume-panel--wizard {
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .wizard-actions {
+    right: 24px;
+  }
+
+  .role-options,
+  .resume-content {
+    width: auto;
   }
 }
 
@@ -858,6 +1115,86 @@
     width: 20px;
     height: 20px;
   }
+
+  .add-card--wizard {
+    padding: 22px;
+  }
+
+  .wizard-shell {
+    grid-template-columns: 275px minmax(0, 1fr);
+    column-gap: 20px;
+  }
+
+  .wizard-sidebar {
+    min-height: 376px;
+    padding: 60px 20px 34px;
+  }
+
+  .wizard-sidebar__asset {
+    width: 72px;
+    height: 72px;
+  }
+
+  .sidebar-title--wizard {
+    margin-top: 24px;
+    font-size: 17px;
+  }
+
+  .sidebar-desc--wizard {
+    margin-top: 14px;
+    max-width: 235px;
+    font-size: 13px;
+    line-height: 22px;
+  }
+
+  .wizard-main--step2,
+  .wizard-main--step3,
+  .wizard-main--step4 {
+    padding-top: 0;
+  }
+
+  .form-grid--step2,
+  .wizard-fields__row--step3-top,
+  .hours-row--step4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wizard-fields__row--step3-middle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wizard-fields__row--step3-middle .field-group:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .role-panel--wizard,
+  .resume-panel--wizard {
+    grid-column: 2;
+    max-width: 339px;
+  }
+
+  .wizard-actions {
+    position: static;
+    grid-column: 2;
+    justify-self: stretch;
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .wizard-actions--step2,
+  .wizard-actions--step3,
+  .wizard-actions--step4 {
+    gap: 17px;
+  }
+
+  .form-actions--wizard-step2,
+  .form-actions--wizard-step3,
+  .form-actions--wizard-step4,
+  .wizard-actions--step2,
+  .wizard-actions--step3,
+  .wizard-actions--step4 {
+    margin-top: 32px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -889,6 +1226,61 @@
   }
 
   .photo-panel {
+    max-width: none;
+  }
+
+  .add-card--wizard {
+    padding: 20px;
+  }
+
+  .wizard-shell {
+    grid-template-columns: 1fr;
+    row-gap: 24px;
+  }
+
+  .wizard-sidebar,
+  .role-panel--wizard,
+  .resume-panel--wizard {
+    max-width: none;
+    width: 100%;
+  }
+
+  .role-panel--wizard,
+  .resume-panel--wizard {
+    grid-column: auto;
+  }
+
+  .wizard-actions {
+    position: static;
+    grid-column: auto;
+    width: 100%;
+  }
+
+  .form-grid--step2,
+  .wizard-fields__row--step3-top,
+  .wizard-fields__row--step3-middle,
+  .hours-row--step4 {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-fields__row--step3-middle .field-group:last-child {
+    grid-column: auto;
+  }
+
+  .form-actions--step1-shell,
+  .form-actions--wizard,
+  .wizard-actions,
+  .form-actions--wizard-step4 {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .nav-btn {
+    width: 100%;
+  }
+
+  .day-toggle {
+    width: calc(50% - 7px);
     max-width: none;
   }
 }
