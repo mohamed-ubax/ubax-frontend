@@ -157,61 +157,63 @@
             </div>
           </div>
 
-          <aside class="photo-panel" aria-label="Photo de profil">
-            <div class="photo-panel__header">
-              <img
-                class="photo-panel__header-icon"
-                src="employe-add/icons/user-panel.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
+          <div class="step1-side-column">
+            <aside class="photo-panel" aria-label="Photo de profil">
+              <div class="photo-panel__header">
+                <img
+                  class="photo-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="photo-panel__title">Photo de profil</span>
+              </div>
+
+              <input
+                #profilePhotoInput
+                hidden
+                type="file"
+                accept=".png,.jpg,.jpeg"
               />
-              <span class="photo-panel__title">Photo de profil</span>
+
+              <button
+                class="photo-drop-zone"
+                type="button"
+                (click)="profilePhotoInput.click()"
+              >
+                <span class="photo-drop-zone__badge">
+                  <img
+                    class="photo-drop-zone__circle"
+                    src="employe-add/icons/photo-circle.png"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <img
+                    class="photo-drop-zone__icon"
+                    src="employe-add/icons/user-panel-large.svg"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="photo-drop-zone__text">Cliquer pour importer</span>
+                <span class="photo-drop-zone__hint">JPG, PNG · max 5 Mo</span>
+              </button>
+            </aside>
+
+            <div class="form-actions form-actions--step1-shell">
+              <button
+                class="nav-btn nav-btn--next nav-btn--step1"
+                type="button"
+                (click)="nextStep()"
+              >
+                <span>Suivant</span>
+                <i class="pi pi-angle-right nav-btn__chevron"></i>
+              </button>
             </div>
-
-            <input
-              #profilePhotoInput
-              hidden
-              type="file"
-              accept=".png,.jpg,.jpeg"
-            />
-
-            <button
-              class="photo-drop-zone"
-              type="button"
-              (click)="profilePhotoInput.click()"
-            >
-              <span class="photo-drop-zone__badge">
-                <img
-                  class="photo-drop-zone__circle"
-                  src="employe-add/icons/photo-circle.png"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-                <img
-                  class="photo-drop-zone__icon"
-                  src="employe-add/icons/user-panel-large.svg"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-              <span class="photo-drop-zone__text">Cliquer pour importer</span>
-              <span class="photo-drop-zone__hint">JPG, PNG · max 5 Mo</span>
-            </button>
-          </aside>
-        </div>
-
-        <div class="form-actions form-actions--step1-shell">
-          <button
-            class="nav-btn nav-btn--next nav-btn--step1"
-            type="button"
-            (click)="nextStep()"
-          >
-            <span>Suivant</span>
-            <i class="pi pi-angle-right nav-btn__chevron"></i>
-          </button>
+          </div>
         </div>
       </div>
     } @else {
@@ -305,60 +307,64 @@
             </div>
           </section>
 
-          <aside class="role-panel role-panel--wizard" aria-label="Rôle">
-            <div class="role-panel__header">
-              <img
-                class="role-panel__header-icon"
-                src="employe-add/icons/user-panel.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <span class="role-panel__title">Rôle</span>
-            </div>
-            <div class="role-options">
-              @for (r of roles; track r.id) {
-                <button
-                  class="role-option"
-                  [class.role-option--active]="selectedRole() === r.id"
-                  type="button"
-                  (click)="selectedRole.set(r.id)"
-                >
-                  <span
-                    class="role-option__radio"
-                    [class.role-option__radio--active]="selectedRole() === r.id"
-                  ></span>
-                  <span class="role-option__label">{{ r.label }}</span>
-                </button>
-              }
-            </div>
-          </aside>
+          <div class="wizard-side-column wizard-side-column--step2">
+            <aside class="role-panel role-panel--wizard" aria-label="Rôle">
+              <div class="role-panel__header">
+                <img
+                  class="role-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="role-panel__title">Rôle</span>
+              </div>
+              <div class="role-options">
+                @for (r of roles; track r.id) {
+                  <button
+                    class="role-option"
+                    [class.role-option--active]="selectedRole() === r.id"
+                    type="button"
+                    (click)="selectedRole.set(r.id)"
+                  >
+                    <span
+                      class="role-option__radio"
+                      [class.role-option__radio--active]="
+                        selectedRole() === r.id
+                      "
+                    ></span>
+                    <span class="role-option__label">{{ r.label }}</span>
+                  </button>
+                }
+              </div>
+            </aside>
 
-          <div
-            class="form-actions form-actions--wizard form-actions--wizard-step2 wizard-actions wizard-actions--step2"
-          >
-            <button
-              class="nav-btn nav-btn--prev"
-              type="button"
-              (click)="prevStep()"
+            <div
+              class="form-actions form-actions--wizard form-actions--wizard-step2 wizard-actions wizard-actions--step2"
             >
-              <img
-                class="nav-btn__icon nav-btn__icon--prev"
-                src="employe-add/icons/nav-prev.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <span>Précédent</span>
-            </button>
-            <button
-              class="nav-btn nav-btn--next"
-              type="button"
-              (click)="nextStep()"
-            >
-              <span>Suivant</span>
-              <i class="pi pi-angle-right nav-btn__chevron"></i>
-            </button>
+              <button
+                class="nav-btn nav-btn--prev"
+                type="button"
+                (click)="prevStep()"
+              >
+                <img
+                  class="nav-btn__icon nav-btn__icon--prev"
+                  src="employe-add/icons/nav-prev.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>Précédent</span>
+              </button>
+              <button
+                class="nav-btn nav-btn--next"
+                type="button"
+                (click)="nextStep()"
+              >
+                <span>Suivant</span>
+                <i class="pi pi-angle-right nav-btn__chevron"></i>
+              </button>
+            </div>
           </div>
         }
 
@@ -470,60 +476,64 @@
             </div>
           </section>
 
-          <aside class="role-panel role-panel--wizard" aria-label="Rôle">
-            <div class="role-panel__header">
-              <img
-                class="role-panel__header-icon"
-                src="employe-add/icons/user-panel.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <span class="role-panel__title">Rôle</span>
-            </div>
-            <div class="role-options">
-              @for (r of roles; track r.id) {
-                <button
-                  class="role-option"
-                  [class.role-option--active]="selectedRole() === r.id"
-                  type="button"
-                  (click)="selectedRole.set(r.id)"
-                >
-                  <span
-                    class="role-option__radio"
-                    [class.role-option__radio--active]="selectedRole() === r.id"
-                  ></span>
-                  <span class="role-option__label">{{ r.label }}</span>
-                </button>
-              }
-            </div>
-          </aside>
+          <div class="wizard-side-column wizard-side-column--step3">
+            <aside class="role-panel role-panel--wizard" aria-label="Rôle">
+              <div class="role-panel__header">
+                <img
+                  class="role-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="role-panel__title">Rôle</span>
+              </div>
+              <div class="role-options">
+                @for (r of roles; track r.id) {
+                  <button
+                    class="role-option"
+                    [class.role-option--active]="selectedRole() === r.id"
+                    type="button"
+                    (click)="selectedRole.set(r.id)"
+                  >
+                    <span
+                      class="role-option__radio"
+                      [class.role-option__radio--active]="
+                        selectedRole() === r.id
+                      "
+                    ></span>
+                    <span class="role-option__label">{{ r.label }}</span>
+                  </button>
+                }
+              </div>
+            </aside>
 
-          <div
-            class="form-actions form-actions--wizard form-actions--wizard-step3 wizard-actions wizard-actions--step3"
-          >
-            <button
-              class="nav-btn nav-btn--prev"
-              type="button"
-              (click)="prevStep()"
+            <div
+              class="form-actions form-actions--wizard form-actions--wizard-step3 wizard-actions wizard-actions--step3"
             >
-              <img
-                class="nav-btn__icon nav-btn__icon--prev"
-                src="employe-add/icons/nav-prev.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <span>Précédent</span>
-            </button>
-            <button
-              class="nav-btn nav-btn--next"
-              type="button"
-              (click)="nextStep()"
-            >
-              <span>Suivant</span>
-              <i class="pi pi-angle-right nav-btn__chevron"></i>
-            </button>
+              <button
+                class="nav-btn nav-btn--prev"
+                type="button"
+                (click)="prevStep()"
+              >
+                <img
+                  class="nav-btn__icon nav-btn__icon--prev"
+                  src="employe-add/icons/nav-prev.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>Précédent</span>
+              </button>
+              <button
+                class="nav-btn nav-btn--next"
+                type="button"
+                (click)="nextStep()"
+              >
+                <span>Suivant</span>
+                <i class="pi pi-angle-right nav-btn__chevron"></i>
+              </button>
+            </div>
           </div>
         }
 
@@ -600,64 +610,66 @@
             </div>
           </section>
 
-          <aside
-            class="resume-panel resume-panel--wizard"
-            aria-label="Résumé du profil"
-          >
-            <div class="resume-panel__header">
-              <img
-                class="resume-panel__header-icon"
-                src="employe-add/icons/user-panel.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <span class="resume-panel__title">Résumé du profil</span>
-            </div>
-            <div class="resume-content">
-              <div class="resume-row">
-                <span class="resume-key">Nom complet :</span>
-                <span class="resume-val">{{ fullNameSummary() }}</span>
-              </div>
-              <div class="resume-row">
-                <span class="resume-key">Département :</span>
-                <span class="resume-val">{{ departmentSummary() }}</span>
-              </div>
-              <div class="resume-row">
-                <span class="resume-key">Contrat :</span>
-                <span class="resume-val">{{ contractSummary() }}</span>
-              </div>
-              <div class="resume-row">
-                <span class="resume-key">Planning :</span>
-                <span class="resume-val">{{ selectedDaysSummary() }}</span>
-              </div>
-              <div class="resume-row">
-                <span class="resume-key">Horaire :</span>
-                <span class="resume-val">{{ scheduleSummary() }}</span>
-              </div>
-            </div>
-          </aside>
-
-          <div
-            class="form-actions form-actions--wizard form-actions--wizard-step4 wizard-actions wizard-actions--step4"
-          >
-            <button
-              class="nav-btn nav-btn--prev"
-              type="button"
-              (click)="prevStep()"
+          <div class="wizard-side-column wizard-side-column--step4">
+            <aside
+              class="resume-panel resume-panel--wizard"
+              aria-label="Résumé du profil"
             >
-              <img
-                class="nav-btn__icon nav-btn__icon--prev"
-                src="employe-add/icons/nav-prev.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <span>Précédent</span>
-            </button>
-            <button class="nav-btn nav-btn--save" type="button">
-              Enregistrer l'employé
-            </button>
+              <div class="resume-panel__header">
+                <img
+                  class="resume-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="resume-panel__title">Résumé du profil</span>
+              </div>
+              <div class="resume-content">
+                <div class="resume-row">
+                  <span class="resume-key">Nom complet :</span>
+                  <span class="resume-val">{{ fullNameSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Département :</span>
+                  <span class="resume-val">{{ departmentSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Contrat :</span>
+                  <span class="resume-val">{{ contractSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Planning :</span>
+                  <span class="resume-val">{{ selectedDaysSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Horaire :</span>
+                  <span class="resume-val">{{ scheduleSummary() }}</span>
+                </div>
+              </div>
+            </aside>
+
+            <div
+              class="form-actions form-actions--wizard form-actions--wizard-step4 wizard-actions wizard-actions--step4"
+            >
+              <button
+                class="nav-btn nav-btn--prev"
+                type="button"
+                (click)="prevStep()"
+              >
+                <img
+                  class="nav-btn__icon nav-btn__icon--prev"
+                  src="employe-add/icons/nav-prev.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>Précédent</span>
+              </button>
+              <button class="nav-btn nav-btn--save" type="button">
+                Enregistrer l'employé
+              </button>
+            </div>
           </div>
         }
       </div>

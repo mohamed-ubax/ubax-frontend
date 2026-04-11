@@ -65,12 +65,18 @@
 }
 
 .add-card--step2 {
+  --wizard-sidebar-height: 548px;
+  --wizard-actions-right: 53px;
+  --wizard-side-panel-width: 339px;
   min-height: 594px;
   padding: 22px 53px 24px 18px;
 }
 
 .add-card--step3,
 .add-card--step4 {
+  --wizard-sidebar-height: 536px;
+  --wizard-actions-right: 53px;
+  --wizard-side-panel-width: 339px;
   min-height: 577px;
   padding: 22px 53px 19px 18px;
 }
@@ -149,11 +155,28 @@
   align-items: start;
 }
 
+.step1-side-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+}
+
 .wizard-shell {
   display: grid;
-  grid-template-columns: 453px minmax(0, 667px) 339px;
+  grid-template-columns: 453px minmax(0, 1fr) var(
+      --wizard-side-panel-width,
+      339px
+    );
   column-gap: 61px;
   align-items: start;
+}
+
+.wizard-side-column {
+  position: relative;
+  grid-column: 3;
+  justify-self: end;
+  width: var(--wizard-side-panel-width, 339px);
 }
 
 .wizard-sidebar {
@@ -555,7 +578,7 @@
 }
 
 .role-panel--wizard {
-  width: 339px;
+  width: 100%;
   min-height: 302px;
   padding: 25px 22px 17px;
   margin-left: 0;
@@ -719,7 +742,7 @@
 }
 
 .resume-panel--wizard {
-  width: 339px;
+  width: 100%;
   min-height: 316px;
   padding: 25px 22px 22px;
   margin-left: 0;
@@ -792,7 +815,7 @@
 .form-actions--step1-shell {
   width: 100%;
   justify-content: flex-end;
-  margin-top: 28px;
+  margin-top: auto;
 }
 
 .form-actions--wizard {
@@ -814,7 +837,9 @@
 
 .wizard-actions {
   position: absolute;
-  right: 56px;
+  right: 0;
+  top: calc(var(--wizard-sidebar-height) - 65px);
+  width: auto;
   z-index: 1;
 }
 
@@ -823,16 +848,7 @@
   gap: 41px;
 }
 
-.wizard-actions--step2 {
-  bottom: 64px;
-}
-
-.wizard-actions--step3 {
-  bottom: 29px;
-}
-
 .wizard-actions--step4 {
-  bottom: 71px;
   gap: 40px;
 }
 
@@ -873,7 +889,7 @@
   }
 
   &--save {
-    width: 309px;
+    width: min(309px, var(--wizard-side-panel-width, 309px));
     background: #e87d1e;
     color: #fff;
   }
@@ -934,8 +950,18 @@
     padding: 22px 24px 24px 18px;
   }
 
+  .add-card--step2,
+  .add-card--step3,
+  .add-card--step4 {
+    --wizard-actions-right: 24px;
+    --wizard-side-panel-width: 300px;
+  }
+
   .wizard-shell {
-    grid-template-columns: 360px minmax(0, 1fr) 300px;
+    grid-template-columns: 360px minmax(0, 1fr) var(
+        --wizard-side-panel-width,
+        300px
+      );
     column-gap: 24px;
   }
 
@@ -983,10 +1009,6 @@
   .resume-panel--wizard {
     width: 100%;
     margin-top: 24px;
-  }
-
-  .wizard-actions {
-    right: 24px;
   }
 
   .role-options,
@@ -1120,9 +1142,21 @@
     padding: 22px;
   }
 
+  .add-card--step2,
+  .add-card--step3,
+  .add-card--step4 {
+    --wizard-actions-right: 22px;
+    --wizard-side-panel-width: 339px;
+  }
+
   .wizard-shell {
     grid-template-columns: 275px minmax(0, 1fr);
     column-gap: 20px;
+  }
+
+  .wizard-side-column {
+    grid-column: 2;
+    width: min(100%, var(--wizard-side-panel-width, 339px));
   }
 
   .wizard-sidebar {
@@ -1169,15 +1203,11 @@
 
   .role-panel--wizard,
   .resume-panel--wizard {
-    grid-column: 2;
     max-width: 339px;
   }
 
   .wizard-actions {
     position: static;
-    grid-column: 2;
-    justify-self: stretch;
-    width: 100%;
     margin-top: 24px;
   }
 
@@ -1185,15 +1215,6 @@
   .wizard-actions--step3,
   .wizard-actions--step4 {
     gap: 17px;
-  }
-
-  .form-actions--wizard-step2,
-  .form-actions--wizard-step3,
-  .form-actions--wizard-step4,
-  .wizard-actions--step2,
-  .wizard-actions--step3,
-  .wizard-actions--step4 {
-    margin-top: 32px;
   }
 }
 
@@ -1245,14 +1266,13 @@
     width: 100%;
   }
 
-  .role-panel--wizard,
-  .resume-panel--wizard {
+  .wizard-side-column {
     grid-column: auto;
+    width: 100%;
   }
 
   .wizard-actions {
     position: static;
-    grid-column: auto;
     width: 100%;
   }
 
