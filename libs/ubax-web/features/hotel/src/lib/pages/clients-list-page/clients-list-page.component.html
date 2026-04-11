@@ -1,0 +1,140 @@
+<div class="clients-page">
+  <header class="clients-toolbar">
+    <div class="clients-toolbar__copy">
+      <h1 class="clients-title">Liste des clients</h1>
+      <p class="clients-subtitle">
+        Suivez les séjours en cours, les arrivées à venir et l'historique des
+        clients depuis une vue unique.
+      </p>
+    </div>
+
+    <label class="clients-search" aria-label="Recherche client">
+      <i class="pi pi-search" aria-hidden="true"></i>
+      <input
+        type="search"
+        placeholder="Rechercher un client"
+        [value]="searchValue()"
+        (input)="updateSearch($event)"
+      />
+    </label>
+  </header>
+
+  <div class="clients-tabs" aria-label="Filtres client">
+    @for (tab of tabs(); track tab.id) {
+      <button
+        class="clients-tabs__button"
+        type="button"
+        [class.clients-tabs__button--active]="activeTab() === tab.id"
+        (click)="setTab(tab.id)"
+      >
+        <span>{{ tab.label }}</span>
+        <span class="clients-tabs__count">{{ tab.count }}</span>
+      </button>
+    }
+  </div>
+
+  <section class="clients-table-card" aria-label="Liste des clients">
+    <div class="clients-table-wrap">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th scope="col">Client</th>
+            <th scope="col">Contact</th>
+            <th scope="col">Séjour</th>
+            <th scope="col">Localisation</th>
+            <th scope="col">Montant</th>
+            <th scope="col">Statut</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (clientRow of filteredClients(); track clientRow.id) {
+            <tr>
+              <td class="clients-table__client-cell">
+                <div class="clients-table__client">
+                  <div class="clients-avatar">{{ clientRow.initials }}</div>
+
+                  <div class="clients-table__client-copy">
+                    <span class="clients-table__client-name">{{
+                      clientRow.name
+                    }}</span>
+                    <span class="clients-table__client-code">{{
+                      clientRow.code
+                    }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <td class="clients-table__stacked-cell">
+                <div class="clients-table__stacked">
+                  <span class="clients-table__primary">{{
+                    clientRow.phone
+                  }}</span>
+                  <span class="clients-table__secondary">{{
+                    clientRow.email
+                  }}</span>
+                </div>
+              </td>
+
+              <td class="clients-table__stacked-cell">
+                <div class="clients-table__stacked">
+                  <span class="clients-table__primary">{{
+                    clientRow.roomLabel
+                  }}</span>
+                  <span class="clients-table__secondary">{{
+                    clientRow.stayPeriod
+                  }}</span>
+                </div>
+              </td>
+
+              <td class="clients-table__stacked-cell">
+                <div class="clients-table__stacked">
+                  <span class="clients-table__primary">{{
+                    clientRow.address
+                  }}</span>
+                </div>
+              </td>
+
+              <td class="clients-table__amount">{{ clientRow.total }}</td>
+
+              <td>
+                <span
+                  class="clients-table__status"
+                  [class.clients-table__status--active]="
+                    clientRow.tone === 'active'
+                  "
+                  [class.clients-table__status--upcoming]="
+                    clientRow.tone === 'upcoming'
+                  "
+                  [class.clients-table__status--archived]="
+                    clientRow.tone === 'archived'
+                  "
+                >
+                  {{ clientRow.status }}
+                </span>
+              </td>
+
+              <td>
+                <a
+                  class="clients-table__action"
+                  [routerLink]="['/hotel/clients', clientRow.id]"
+                  [queryParams]="{ spaceId: clientRow.primarySpaceId }"
+                >
+                  <i class="pi pi-eye" aria-hidden="true"></i>
+                  <span>Voir</span>
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="clients-table__empty" colspan="7">
+                Aucun client ne correspond au filtre courant.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

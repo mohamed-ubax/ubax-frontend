@@ -51,6 +51,20 @@ export const hotelRoutes: Route[] = [
       ),
   },
   {
+    path: 'clients',
+    loadComponent: () =>
+      import('./pages/clients-list-page/clients-list-page.component').then(
+        (m) => m.ClientsListPageComponent,
+      ),
+  },
+  {
+    path: 'clients/:id',
+    loadComponent: () =>
+      import('./pages/client-detail-page/client-detail-page.component').then(
+        (m) => m.ClientDetailPageComponent,
+      ),
+  },
+  {
     path: 'employes/ajouter',
     loadComponent: () =>
       import('./pages/employe-add-page/employe-add-page.component').then(

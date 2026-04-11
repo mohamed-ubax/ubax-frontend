@@ -1,10 +1,11 @@
-<header class="ubax-topbar">
+<header class="ubax-topbar" [class.ubax-topbar--menu-open]="isMobileNavOpen()">
   <div class="topbar-inner">
     <!-- Logo -->
     <a
       routerLink="/tableau-de-bord"
       class="topbar-logo"
       aria-label="Accueil Ubax"
+      (click)="closeMobileMenu()"
     >
       <img [src]="logoSrc()" alt="Ubax" />
     </a>
@@ -16,6 +17,7 @@
           [routerLink]="item.path"
           [class.is-active]="isItemActive(item)"
           class="topbar-nav__item"
+          (click)="closeMobileMenu()"
           >{{ item.label }}</a
         >
       }
@@ -24,14 +26,30 @@
     <!-- Actions droite -->
     <div class="topbar-actions">
       <button
+        class="topbar-icon-btn topbar-menu-btn"
+        type="button"
+        [attr.aria-expanded]="isMobileNavOpen()"
+        [attr.aria-label]="
+          isMobileNavOpen() ? 'Fermer la navigation' : 'Ouvrir la navigation'
+        "
+        (click)="toggleMobileMenu()"
+      >
+        <i
+          class="pi"
+          [class.pi-bars]="!isMobileNavOpen()"
+          [class.pi-times]="isMobileNavOpen()"
+        ></i>
+      </button>
+      <button
         class="topbar-icon-btn"
+        type="button"
         aria-label="Notifications"
         pBadge
         value="3"
       >
         <i class="pi pi-bell"></i>
       </button>
-      <button class="topbar-icon-btn" aria-label="Paramètres">
+      <button class="topbar-icon-btn" type="button" aria-label="Paramètres">
         <i class="pi pi-cog"></i>
       </button>
 

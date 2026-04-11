@@ -14,22 +14,29 @@
   <section class="reservation-detail-page__hero">
     <div class="reservation-detail-page__sidebar">
       <article class="guest-card">
-        <div class="guest-card__avatar-frame">
-          <div class="guest-card__avatar-inner">
-            <img
-              class="guest-card__avatar"
-              [src]="guest().avatar"
-              [alt]="guest().name"
-              loading="eager"
-              decoding="async"
-            />
+        <a
+          class="guest-card__link"
+          [routerLink]="['/hotel/clients', guest().clientId]"
+          [queryParams]="{ spaceId: detailId() }"
+          aria-label="Voir les détails du client actuel"
+        >
+          <div class="guest-card__avatar-frame">
+            <div class="guest-card__avatar-inner">
+              <img
+                class="guest-card__avatar"
+                [src]="guest().avatar"
+                [alt]="guest().name"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
           </div>
-        </div>
 
-        <div class="guest-card__content">
-          <h2 class="guest-card__name">{{ guest().name }}</h2>
-          <p class="guest-card__code">{{ guest().code }}</p>
-        </div>
+          <div class="guest-card__content">
+            <h2 class="guest-card__name">{{ guest().name }}</h2>
+            <p class="guest-card__code">{{ guest().code }}</p>
+          </div>
+        </a>
 
         <button
           class="guest-card__menu"
@@ -240,13 +247,14 @@
               </div>
 
               <div class="history-table__actions">
-                <button
+                <a
                   class="history-table__action history-table__action--view"
-                  type="button"
+                  [routerLink]="['/hotel/clients', row.clientId]"
+                  [queryParams]="{ spaceId: detailId() }"
                 >
                   <i class="pi pi-eye"></i>
                   <span>Voir</span>
-                </button>
+                </a>
 
                 <button
                   class="history-table__action history-table__action--edit"

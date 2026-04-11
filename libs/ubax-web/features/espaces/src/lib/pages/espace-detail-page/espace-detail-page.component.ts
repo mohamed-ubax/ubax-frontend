@@ -10,6 +10,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 interface GuestProfile {
+  readonly clientId: string;
   readonly name: string;
   readonly code: string;
   readonly avatar: string;
@@ -33,6 +34,7 @@ interface GalleryPhoto {
 
 interface HistoryRow {
   readonly id: number;
+  readonly clientId: string;
   readonly guestName: string;
   readonly property: string;
   readonly duration: string;
@@ -63,6 +65,7 @@ function createHistoryRows(
 const SPACE_DETAILS: Record<string, SpaceDetailData> = {
   '1': {
     guest: {
+      clientId: '1',
       name: 'Landry Bamba',
       code: '#G-001234125',
       avatar: 'room-detail/avatars/guest-landry.png',
@@ -105,6 +108,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
     ],
     historyRows: createHistoryRows([
       {
+        clientId: '2',
         guestName: 'Koné Ibrahim',
         property: 'Résidence Plateau',
         duration: '2 jours',
@@ -113,6 +117,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-01.png',
       },
       {
+        clientId: '3',
         guestName: 'Soro Mireille',
         property: 'Résidence Plateau',
         duration: '2 jours',
@@ -121,6 +126,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-02.png',
       },
       {
+        clientId: '4',
         guestName: 'Bamba Ismael',
         property: 'Résidence Plateau',
         duration: '3 jours',
@@ -129,6 +135,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-03.png',
       },
       {
+        clientId: '5',
         guestName: 'Yao Charline',
         property: 'Résidence Plateau',
         duration: '1 jour',
@@ -137,6 +144,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-04.png',
       },
       {
+        clientId: '6',
         guestName: 'Boni Jordan',
         property: 'Résidence Plateau',
         duration: '4 jours',
@@ -148,6 +156,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
   },
   '2': {
     guest: {
+      clientId: '3',
       name: 'Clarisse Kouamé',
       code: '#G-001234126',
       avatar: 'room-detail/avatars/history-02.png',
@@ -190,6 +199,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
     ],
     historyRows: createHistoryRows([
       {
+        clientId: '2',
         guestName: 'Hermann Guei',
         property: 'Hotel Azalai',
         duration: '4 jours',
@@ -198,6 +208,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-01.png',
       },
       {
+        clientId: '5',
         guestName: 'Assita Koffi',
         property: 'Hotel Azalai',
         duration: '2 jours',
@@ -206,6 +217,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-03.png',
       },
       {
+        clientId: '6',
         guestName: 'Mariam Coulibaly',
         property: 'Hotel Azalai',
         duration: '1 jour',
@@ -214,6 +226,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-04.png',
       },
       {
+        clientId: '4',
         guestName: 'Serge Zadi',
         property: 'Hotel Azalai',
         duration: '3 jours',
@@ -225,6 +238,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
   },
   '3': {
     guest: {
+      clientId: '5',
       name: 'Nadia Touré',
       code: '#G-001234127',
       avatar: 'room-detail/avatars/history-04.png',
@@ -267,6 +281,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
     ],
     historyRows: createHistoryRows([
       {
+        clientId: '2',
         guestName: 'Béatrice Niamké',
         property: 'Hotel Azalai',
         duration: '5 jours',
@@ -275,6 +290,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-02.png',
       },
       {
+        clientId: '3',
         guestName: 'Cédric Yéo',
         property: 'Hotel Azalai',
         duration: '2 jours',
@@ -283,6 +299,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-01.png',
       },
       {
+        clientId: '4',
         guestName: 'Lydie Mian',
         property: 'Hotel Azalai',
         duration: '3 jours',
@@ -291,6 +308,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         avatar: 'room-detail/avatars/history-05.png',
       },
       {
+        clientId: '6',
         guestName: 'Georges Yapi',
         property: 'Hotel Azalai',
         duration: '1 jour',

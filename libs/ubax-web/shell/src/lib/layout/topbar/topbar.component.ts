@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
 import { AvatarModule } from 'primeng/avatar';
@@ -30,6 +35,7 @@ const ROLE_LABELS: Record<string, string> = {
 export class TopbarComponent {
   readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  protected readonly isMobileNavOpen = signal(false);
 
   protected roleLabel(): string {
     const role = this.authStore.user()?.role;
@@ -77,6 +83,14 @@ export class TopbarComponent {
     return activePaths.some(
       (path) => currentUrl === path || currentUrl.startsWith(`${path}/`),
     );
+  }
+
+  protected toggleMobileMenu(): void {
+    this.isMobileNavOpen.update((isOpen) => !isOpen);
+  }
+
+  protected closeMobileMenu(): void {
+    this.isMobileNavOpen.set(false);
   }
 
   protected logout(): void {
