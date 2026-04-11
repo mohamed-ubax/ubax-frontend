@@ -1,218 +1,265 @@
-<div class="det-page">
-  <!-- ── Header ──────────────────────────────────────────────────── -->
-  <div class="det-header">
-    <div class="det-header__left">
-      <a class="back-btn" routerLink="/hotel/espaces">
-        <i class="pi pi-arrow-left"></i>
-      </a>
-      <h1 class="det-title">Détails de l'espace</h1>
-    </div>
-    <div class="det-header__right">
-      <button class="action-btn action-btn--edit">
-        <i class="pi pi-pencil"></i>
-        Modifier
-      </button>
-      <button class="action-btn action-btn--archive">
-        <i class="pi pi-inbox"></i>
-        Archiver
-      </button>
-    </div>
-  </div>
+<div class="reservation-detail-page">
+  <header class="reservation-detail-page__header">
+    <a
+      class="reservation-detail-page__back"
+      routerLink="/hotel/espaces"
+      aria-label="Retour vers la liste des espaces"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </a>
 
-  <!-- ── Top section ─────────────────────────────────────────────── -->
-  <div class="top-section">
-    <!-- Left: espace profile card -->
-    <div class="profile-card">
-      <div class="profile-badges">
-        <span class="badge badge--tag">{{ espace.tag }}</span>
-        <span
-          class="badge"
-          [class.badge--disponible]="espace.statut === 'Disponible'"
-          [class.badge--reserve]="espace.statut === 'Réservé'"
-          [class.badge--occupe]="espace.statut === 'Occupé'"
-        >
-          {{ espace.statut }}
-        </span>
-      </div>
+    <h1 class="reservation-detail-page__title">Détails réservations</h1>
+  </header>
 
-      <!-- Image placeholder -->
-      <div class="profile-img">
-        <i class="pi pi-home"></i>
-      </div>
-
-      <p class="profile-name">{{ espace.titre }}</p>
-
-      <div class="profile-location">
-        <i class="pi pi-map-marker"></i>
-        {{ espace.location }}
-      </div>
-
-      <div class="profile-rating">
-        <i class="pi pi-star-fill"></i>
-        <span>{{ espace.rating }}</span>
-      </div>
-
-      <div class="profile-contacts">
-        <div class="contact-row">
-          <div class="contact-icon-wrap"><i class="pi pi-arrows-alt"></i></div>
-          <div class="contact-text">
-            <span class="contact-label">Superficie</span>
-            <span class="contact-value">{{ espace.superficie }}</span>
+  <section class="reservation-detail-page__hero">
+    <div class="reservation-detail-page__sidebar">
+      <article class="guest-card">
+        <div class="guest-card__avatar-frame">
+          <div class="guest-card__avatar-inner">
+            <img
+              class="guest-card__avatar"
+              [src]="guest().avatar"
+              [alt]="guest().name"
+              loading="eager"
+              decoding="async"
+            />
           </div>
         </div>
-        <div class="contact-row">
-          <div class="contact-icon-wrap"><i class="pi pi-users"></i></div>
-          <div class="contact-text">
-            <span class="contact-label">Capacité</span>
-            <span class="contact-value">{{ espace.capacite }}</span>
-          </div>
-        </div>
-        <div class="contact-row">
-          <div class="contact-icon-wrap"><i class="pi pi-building"></i></div>
-          <div class="contact-text">
-            <span class="contact-label">Étage</span>
-            <span class="contact-value">{{ espace.etage }}</span>
-          </div>
-        </div>
-        <div class="contact-row">
-          <div class="contact-icon-wrap"><i class="pi pi-tag"></i></div>
-          <div class="contact-text">
-            <span class="contact-label">Prix par nuit</span>
-            <span class="contact-value contact-value--price">{{
-              espace.prix
-            }}</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- Propriétaire -->
-      <div class="owner-section">
-        <p class="owner-section__label">Propriétaire</p>
-        <div class="owner-row">
-          <div class="owner-avatar">{{ espace.proprietaire.nom[0] }}</div>
-          <div class="owner-info">
-            <span class="owner-name">{{ espace.proprietaire.nom }}</span>
-            <span class="owner-role">{{ espace.proprietaire.role }}</span>
-          </div>
+        <div class="guest-card__content">
+          <h2 class="guest-card__name">{{ guest().name }}</h2>
+          <p class="guest-card__code">{{ guest().code }}</p>
         </div>
-      </div>
-    </div>
 
-    <!-- Right: tabs + content -->
-    <div class="det-right">
-      <!-- Tab bar -->
-      <div class="tab-bar">
         <button
-          class="tab-btn"
-          [class.tab-btn--active]="activeTab() === 'reservations'"
-          (click)="activeTab.set('reservations')"
+          class="guest-card__menu"
+          type="button"
+          aria-label="Plus d'options"
         >
-          Réservations
+          <i class="pi pi-ellipsis-h"></i>
         </button>
-        <button
-          class="tab-btn"
-          [class.tab-btn--active]="activeTab() === 'details'"
-          (click)="activeTab.set('details')"
-        >
-          Détails & Équipements
-        </button>
-        <button
-          class="tab-btn"
-          [class.tab-btn--active]="activeTab() === 'avis'"
-          (click)="activeTab.set('avis')"
-        >
-          Avis
-        </button>
-      </div>
+      </article>
 
-      <!-- ── Tab: Réservations ─────────────────────────── -->
-      @if (activeTab() === 'reservations') {
-        <div class="reservations-section">
-          <div class="reservations-table">
-            <div class="table-header">
-              <span>Client</span>
-              <span>Arrivée</span>
-              <span>Départ</span>
-              <span>Nuits</span>
-              <span>Montant</span>
-              <span>Statut</span>
+      <article class="booking-card">
+        <h2 class="booking-card__title">{{ reservation().title }}</h2>
+
+        <div class="booking-card__dual-grid booking-card__dual-grid--summary">
+          <div class="booking-card__metric">
+            <p class="booking-card__label">Type</p>
+            <div class="booking-card__metric-row">
+              <img
+                class="booking-card__asset-icon booking-card__asset-icon--bed"
+                src="space-add/icons/bed-double.svg"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+              <span class="booking-card__metric-value">{{
+                reservation().type
+              }}</span>
             </div>
-            @for (r of reservations; track r.id) {
-              <div class="table-row">
-                <div class="client-cell">
-                  <div class="client-avatar">{{ r.client[0] }}</div>
-                  <span>{{ r.client }}</span>
-                </div>
-                <span>{{ r.dateArrivee }}</span>
-                <span>{{ r.dateDepart }}</span>
-                <span>{{ r.nuits }} nuits</span>
-                <span class="montant">{{ r.montant }}</span>
-                <span
-                  class="resa-badge"
-                  [class.resa-badge--confirmee]="r.statut === 'confirmee'"
-                  [class.resa-badge--attente]="r.statut === 'en-attente'"
-                  [class.resa-badge--annulee]="r.statut === 'annulee'"
-                >
-                  @if (r.statut === 'confirmee') {
-                    Confirmée
-                  }
-                  @if (r.statut === 'en-attente') {
-                    En attente
-                  }
-                  @if (r.statut === 'annulee') {
-                    Annulée
-                  }
+          </div>
+
+          <div class="booking-card__metric booking-card__metric--capacity">
+            <p class="booking-card__label">Capacité chambre</p>
+            <div class="booking-card__metric-row">
+              <span class="booking-card__pi-icon" aria-hidden="true">
+                <i class="pi pi-user"></i>
+              </span>
+              <span class="booking-card__metric-value">{{
+                reservation().capacity
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-card__dual-grid booking-card__dual-grid--booking">
+          <div class="booking-card__metric booking-card__metric--booking-date">
+            <p class="booking-card__label">Date de reservation</p>
+            <div
+              class="booking-card__metric-row booking-card__metric-row--stacked"
+            >
+              <span class="booking-card__pi-icon" aria-hidden="true">
+                <i class="pi pi-calendar"></i>
+              </span>
+              <div class="booking-card__booking-copy">
+                <span class="booking-card__metric-value">{{
+                  reservation().bookingDate
+                }}</span>
+                <span class="booking-card__booking-time">{{
+                  reservation().bookingTime
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-card__metric booking-card__metric--duration">
+            <p class="booking-card__label booking-card__label--spacer">Durée</p>
+            <div class="booking-card__metric-row">
+              <span class="booking-card__pi-icon" aria-hidden="true">
+                <i class="pi pi-clock"></i>
+              </span>
+              <span class="booking-card__metric-value">{{
+                reservation().stayDuration
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-card__facilities">
+          <p class="booking-card__label">Facilities</p>
+
+          <div class="booking-card__facility-grid">
+            @for (facility of reservation().facilities; track facility) {
+              <div class="booking-card__facility-item">
+                <span class="booking-card__facility-check" aria-hidden="true">
+                  <img
+                    src="space-add/icons/check.svg"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </span>
+                <span class="booking-card__facility-label">{{ facility }}</span>
               </div>
             }
           </div>
         </div>
-      }
 
-      <!-- ── Tab: Détails & Équipements ────────────────── -->
-      @if (activeTab() === 'details') {
-        <div class="details-section">
-          <div class="detail-block">
-            <h3 class="detail-block__title">Description</h3>
-            <p class="detail-block__text">{{ espace.description }}</p>
-          </div>
-          <div class="detail-block">
-            <h3 class="detail-block__title">Équipements</h3>
-            <div class="equipements-grid">
-              @for (eq of espace.equipements; track eq.label) {
-                <div class="equipement-item">
-                  <div class="equipement-icon">
-                    <i class="pi {{ eq.icon }}"></i>
-                  </div>
-                  <span>{{ eq.label }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- ── Tab: Avis ──────────────────────────────────── -->
-      @if (activeTab() === 'avis') {
-        <div class="avis-section">
-          <div class="avis-summary">
-            <div class="avis-score">
-              <span class="avis-score__value">{{ espace.rating }}</span>
-              <div class="avis-score__stars">
-                @for (i of [1, 2, 3, 4, 5]; track i) {
-                  <i
-                    class="pi"
-                    [class.pi-star-fill]="i <= espace.rating"
-                    [class.pi-star]="i > espace.rating"
-                  ></i>
-                }
-              </div>
-              <span class="avis-score__total">sur 5</span>
-            </div>
-          </div>
-          <p class="avis-empty">Aucun avis pour le moment.</p>
-        </div>
-      }
+        <button class="booking-card__more" type="button">
+          <span>voir plus</span>
+          <i class="pi pi-angle-down"></i>
+        </button>
+      </article>
     </div>
-  </div>
+
+    <section class="gallery-panel" aria-label="Galerie de la chambre">
+      <div class="gallery-panel__main">
+        <img
+          class="gallery-panel__main-image"
+          [src]="activeGalleryPhoto().src"
+          [alt]="reservation().title"
+          loading="eager"
+          decoding="async"
+        />
+
+        <div class="gallery-panel__nav">
+          <button
+            class="gallery-panel__nav-button"
+            type="button"
+            aria-label="Image précédente"
+            (click)="previousGalleryImage()"
+          >
+            <i class="pi pi-angle-left"></i>
+          </button>
+
+          <span class="gallery-panel__nav-count">{{
+            galleryCounterLabel()
+          }}</span>
+
+          <button
+            class="gallery-panel__nav-button"
+            type="button"
+            aria-label="Image suivante"
+            (click)="nextGalleryImage()"
+          >
+            <i class="pi pi-angle-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="gallery-panel__thumbs">
+        @for (photo of galleryPhotos(); track photo.src; let index = $index) {
+          <button
+            class="gallery-thumb"
+            [class.gallery-thumb--active]="activeGalleryIndex() === index"
+            type="button"
+            [attr.aria-label]="'Afficher ' + photo.alt"
+            (click)="selectGalleryImage(index)"
+          >
+            <img
+              class="gallery-thumb__image"
+              [src]="photo.src"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+
+            @if (photo.previewCount) {
+              <span class="gallery-thumb__overlay">
+                <i class="pi pi-images"></i>
+                <span>{{ photo.previewCount }}</span>
+              </span>
+            }
+          </button>
+        }
+      </div>
+    </section>
+  </section>
+
+  <section class="history-card" aria-label="Historique des clients">
+    <h2 class="history-card__title">Historique des clients</h2>
+
+    <div class="history-card__table-wrap">
+      <div class="history-table">
+        <div class="history-table__head">
+          <span>Invité</span>
+          <span>Biens</span>
+          <span>Durée</span>
+          <span>Arrivée&nbsp;&nbsp;-&nbsp;&nbsp;Départ</span>
+          <span>Statut</span>
+          <span>Actions</span>
+        </div>
+
+        <div class="history-table__body">
+          @for (row of historyRows(); track row.id) {
+            <div class="history-table__row">
+              <div class="history-table__guest">
+                <img
+                  class="history-table__guest-avatar"
+                  [src]="row.avatar"
+                  [alt]="row.guestName"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="history-table__guest-name">{{
+                  row.guestName
+                }}</span>
+              </div>
+
+              <span class="history-table__text">{{ row.property }}</span>
+              <span class="history-table__text">{{ row.duration }}</span>
+              <span class="history-table__text history-table__text--period">{{
+                row.period
+              }}</span>
+
+              <div class="history-table__status">
+                <span class="history-table__status-badge">{{
+                  row.status
+                }}</span>
+              </div>
+
+              <div class="history-table__actions">
+                <button
+                  class="history-table__action history-table__action--view"
+                  type="button"
+                >
+                  <i class="pi pi-eye"></i>
+                  <span>Voir</span>
+                </button>
+
+                <button
+                  class="history-table__action history-table__action--edit"
+                  type="button"
+                >
+                  <i class="pi pi-pencil"></i>
+                  <span>Modifier</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
