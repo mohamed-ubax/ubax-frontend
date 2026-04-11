@@ -1,5 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  model,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+type UbaxPaginatorVariant = 'default' | 'white';
 
 @Component({
   selector: 'ubax-paginator',
@@ -12,9 +20,10 @@ import { CommonModule } from '@angular/common';
 export class UbaxPaginatorComponent {
   readonly currentPage = model<number>(1);
   readonly totalPages = input.required<number>();
+  readonly variant = input<UbaxPaginatorVariant>('default');
 
   readonly pages = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, i) => i + 1)
+    Array.from({ length: this.totalPages() }, (_, i) => i + 1),
   );
 
   goTo(page: number): void {
@@ -23,6 +32,10 @@ export class UbaxPaginatorComponent {
     }
   }
 
-  prev(): void { this.goTo(this.currentPage() - 1); }
-  next(): void { this.goTo(this.currentPage() + 1); }
+  prev(): void {
+    this.goTo(this.currentPage() - 1);
+  }
+  next(): void {
+    this.goTo(this.currentPage() + 1);
+  }
 }
