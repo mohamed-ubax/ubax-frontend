@@ -1,314 +1,678 @@
 <div class="add-page">
-
-  <!-- ── Page header ─────────────────────────────────────────────── -->
   <div class="add-header">
-    <a class="back-btn" routerLink="/hotel/employes">
+    <a
+      class="back-btn"
+      routerLink="/hotel/employes"
+      aria-label="Retour à la liste des employés"
+    >
       <i class="pi pi-arrow-left"></i>
     </a>
     <h1 class="add-title">Ajouter un employé</h1>
   </div>
 
-  <!-- ── Main card ───────────────────────────────────────────────── -->
-  <div class="add-card">
+  <div
+    class="add-card"
+    [class.add-card--step1]="currentStep() === 1"
+    [class.add-card--wizard]="currentStep() > 1"
+    [class.add-card--step2]="currentStep() === 2"
+    [class.add-card--step3]="currentStep() === 3"
+    [class.add-card--step4]="currentStep() === 4"
+  >
+    @if (currentStep() === 1) {
+      <aside
+        class="add-sidebar add-sidebar--step1"
+        aria-label="Étape 1 : Informations personnelles"
+      >
+        <img
+          class="add-sidebar__illustration"
+          src="employe-add/images/step-personal-illustration.svg"
+          alt=""
+          loading="eager"
+          decoding="async"
+        />
+        <p class="sidebar-title">{{ currentSidebar().title }}</p>
+        <p class="sidebar-desc">{{ currentSidebar().desc }}</p>
+      </aside>
 
-    <!-- Sidebar -->
-    <div class="add-sidebar">
-      <div class="sidebar-icon">
-        <i class="pi {{ currentSidebar().icon }}"></i>
-      </div>
-      <p class="sidebar-title">{{ currentSidebar().title }}</p>
-      <p class="sidebar-desc">{{ currentSidebar().desc }}</p>
-    </div>
-
-    <!-- Form content -->
-    <div class="add-form">
-
-      <!-- ── Step 1: Informations personnelles ─────────────────── -->
-      @if (currentStep() === 1) {
-        <div class="form-grid">
-
-          <div class="field-group">
-            <label class="field-label">Prénom</label>
-            <input class="field-input" type="text" placeholder="Ex: Marie" [value]="prenom()" (input)="prenom.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Nom de famille</label>
-            <input class="field-input" type="text" placeholder="Ex: Koffi" [value]="nomFamille()" (input)="nomFamille.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Date de naissance</label>
-            <input class="field-input" type="text" placeholder="JJ/MM/AA" [value]="dateNaissance()" (input)="dateNaissance.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Nationalité</label>
-            <input class="field-input" type="text" placeholder="Ivoirienne" [value]="nationalite()" (input)="nationalite.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Genre</label>
-            <div class="field-select-wrap">
-              <input class="field-input" type="text" placeholder="Femme" [value]="genre()" (input)="genre.set($any($event.target).value)" />
-              <i class="pi pi-angle-down field-select-arrow"></i>
+      <div class="step1-shell">
+        <div class="step1-main">
+          <div class="form-grid form-grid--step1">
+            <div class="field-group">
+              <label class="field-label" for="employee-first-name"
+                >Prénom</label
+              >
+              <input
+                id="employee-first-name"
+                class="field-input"
+                type="text"
+                placeholder="Ex:Marie"
+                [value]="prenom()"
+                (input)="prenom.set($any($event.target).value)"
+              />
             </div>
-          </div>
 
-          <div class="field-group">
-            <label class="field-label">Adresse</label>
-            <input class="field-input" type="text" placeholder="Cocody" [value]="adresse()" (input)="adresse.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group field-group--full">
-            <label class="field-label">Documents</label>
-            <div class="upload-zone">
-              <button class="upload-btn">
-                <i class="pi pi-upload"></i>
-                Cliquer pour importer
-              </button>
+            <div class="field-group">
+              <label class="field-label" for="employee-last-name"
+                >Nom de famille</label
+              >
+              <input
+                id="employee-last-name"
+                class="field-input"
+                type="text"
+                placeholder="Ex:Koffi"
+                [value]="nomFamille()"
+                (input)="nomFamille.set($any($event.target).value)"
+              />
             </div>
-          </div>
 
-        </div>
-
-        <!-- Photo de profil panel -->
-        <div class="photo-panel">
-          <div class="photo-panel__header">
-            <i class="pi pi-user"></i>
-            <span class="photo-panel__title">Photo de profil</span>
-          </div>
-          <div class="photo-drop-zone">
-            <i class="pi pi-user photo-drop-zone__icon"></i>
-            <span class="photo-drop-zone__text">Cliquer pour importer</span>
-            <span class="photo-drop-zone__hint">JPG, PNG · max 5 Mo</span>
-          </div>
-        </div>
-      }
-
-      <!-- ── Step 2: Coordonnées ─────────────────────────────── -->
-      @if (currentStep() === 2) {
-        <div class="form-grid">
-
-          <div class="field-group">
-            <label class="field-label">Email professionnel</label>
-            <input class="field-input" type="email" placeholder="Ex: Marie@gmail.com" [value]="email()" (input)="email.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Téléphone</label>
-            <input class="field-input" type="tel" placeholder="Ex: Koffi" [value]="telephone()" (input)="telephone.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Contact urgence</label>
-            <input class="field-input" type="text" placeholder="JJ/MM/AA" [value]="contactUrgence()" (input)="contactUrgence.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Tél. urgence</label>
-            <input class="field-input" type="tel" placeholder="Ivoirienne" [value]="telUrgence()" (input)="telUrgence.set($any($event.target).value)" />
-          </div>
-
-        </div>
-
-        <!-- Rôle panel -->
-        <div class="role-panel">
-          <div class="role-panel__header">
-            <i class="pi pi-user"></i>
-            <span class="role-panel__title">Rôle</span>
-          </div>
-          <div class="role-options">
-            @for (r of roles; track r.id) {
-              <button
-                class="role-option"
-                [class.role-option--active]="selectedRole() === r.id"
-                (click)="selectedRole.set(r.id)">
-                <span class="role-option__radio" [class.role-option__radio--active]="selectedRole() === r.id"></span>
-                <span class="role-option__label">{{ r.label }}</span>
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="form-actions form-actions--coords">
-          <button class="nav-btn nav-btn--prev" (click)="prevStep()">
-            <i class="pi pi-angle-left"></i>
-            Précédent
-          </button>
-          <button class="nav-btn nav-btn--next" (click)="nextStep()">
-            Suivant
-            <i class="pi pi-angle-right"></i>
-          </button>
-        </div>
-      }
-
-      <!-- ── Step 3: Informations de poste ─────────────────────── -->
-      @if (currentStep() === 3) {
-        <div class="form-grid">
-
-          <div class="field-group">
-            <label class="field-label">Département</label>
-            <div class="field-select-wrap">
-              <input class="field-input" type="text" placeholder="Réception" [value]="departement()" (input)="departement.set($any($event.target).value)" />
-              <i class="pi pi-angle-down field-select-arrow"></i>
+            <div class="field-group">
+              <label class="field-label" for="employee-birth-date"
+                >Date de naissance</label
+              >
+              <input
+                id="employee-birth-date"
+                class="field-input"
+                type="text"
+                placeholder="JJ/MM/AA"
+                [value]="dateNaissance()"
+                (input)="dateNaissance.set($any($event.target).value)"
+              />
             </div>
-          </div>
 
-          <div class="field-group">
-            <label class="field-label">Intitulé du poste</label>
-            <input class="field-input" type="text" placeholder="Réceptionniste" [value]="intitulePoste()" (input)="intitulePoste.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Contrat</label>
-            <input class="field-input" type="text" placeholder="JJ/MM/AA" [value]="contrat()" (input)="contrat.set($any($event.target).value)" />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label">Date d'entrée</label>
-            <div class="field-input-icon">
-              <input class="field-input" type="text" placeholder="JJ/MM/AA" [value]="dateEntree()" (input)="dateEntree.set($any($event.target).value)" />
-              <i class="pi pi-calendar field-icon"></i>
+            <div class="field-group">
+              <label class="field-label" for="employee-nationality"
+                >Nationalité</label
+              >
+              <input
+                id="employee-nationality"
+                class="field-input"
+                type="text"
+                placeholder="Ivoirienne"
+                [value]="nationalite()"
+                (input)="nationalite.set($any($event.target).value)"
+              />
             </div>
-          </div>
 
-          <div class="field-group">
-            <label class="field-label">Salaire</label>
-            <input class="field-input" type="text" placeholder="500 000 FCFA" [value]="salaire()" (input)="salaire.set($any($event.target).value)" />
-          </div>
+            <div class="field-group">
+              <label class="field-label" for="employee-gender">Genre</label>
+              <div class="field-select-wrap">
+                <input
+                  id="employee-gender"
+                  class="field-input"
+                  type="text"
+                  placeholder="Femme"
+                  [value]="genre()"
+                  (input)="genre.set($any($event.target).value)"
+                />
+                <img
+                  class="field-select-arrow"
+                  src="employe-add/icons/dropdown.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </div>
 
-          <div class="field-group field-group--full">
-            <label class="field-label">Notes</label>
-            <textarea class="field-textarea" placeholder="Informations complémentaire" [value]="notes()" (input)="notes.set($any($event.target).value)"></textarea>
-          </div>
+            <div class="field-group">
+              <label class="field-label" for="employee-address">Adresse</label>
+              <input
+                id="employee-address"
+                class="field-input"
+                type="text"
+                placeholder="Cocody"
+                [value]="adresse()"
+                (input)="adresse.set($any($event.target).value)"
+              />
+            </div>
 
-        </div>
-
-        <!-- Rôle panel -->
-        <div class="role-panel">
-          <div class="role-panel__header">
-            <i class="pi pi-user"></i>
-            <span class="role-panel__title">Rôle</span>
-          </div>
-          <div class="role-options">
-            @for (r of roles; track r.id) {
-              <button
-                class="role-option"
-                [class.role-option--active]="selectedRole() === r.id"
-                (click)="selectedRole.set(r.id)">
-                <span class="role-option__radio" [class.role-option__radio--active]="selectedRole() === r.id"></span>
-                <span class="role-option__label">{{ r.label }}</span>
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="form-actions form-actions--coords">
-          <button class="nav-btn nav-btn--prev" (click)="prevStep()">
-            <i class="pi pi-angle-left"></i>
-            Précédent
-          </button>
-          <button class="nav-btn nav-btn--next" (click)="nextStep()">
-            Suivant
-            <i class="pi pi-angle-right"></i>
-          </button>
-        </div>
-      }
-
-      <!-- ── Step 4: Jours de travail ───────────────────────────── -->
-      @if (currentStep() === 4) {
-        <div class="step4-content">
-
-          <div class="days-section">
-            <label class="field-label">Jours de travail</label>
-            <div class="days-row">
-              @for (d of days(); track d.id) {
+            <div class="field-group field-group--full field-group--documents">
+              <label class="field-label" for="employee-documents"
+                >Documents</label
+              >
+              <div class="upload-zone">
+                <input
+                  id="employee-documents"
+                  #documentsInput
+                  hidden
+                  type="file"
+                  multiple
+                  accept=".pdf,.png,.jpg,.jpeg"
+                />
                 <button
-                  class="day-toggle"
-                  [class.day-toggle--active]="d.selected"
-                  (click)="toggleDay(d.id)">
-                  <span class="day-toggle__label">{{ d.label }}</span>
-                  <span class="day-toggle__dot" [class.day-toggle__dot--active]="d.selected"></span>
+                  class="upload-btn"
+                  type="button"
+                  (click)="documentsInput.click()"
+                >
+                  <img
+                    class="upload-btn__icon"
+                    src="employe-add/icons/upload.svg"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span>Cliquer pour importer</span>
                 </button>
-              }
-            </div>
-          </div>
-
-          <div class="hours-row">
-            <div class="field-group">
-              <label class="field-label">Heure d'arrivée</label>
-              <div class="field-input-icon">
-                <input class="field-input" type="text" placeholder="08 : 00" [value]="heureArrivee()" (input)="heureArrivee.set($any($event.target).value)" />
-                <i class="pi pi-clock field-icon"></i>
-              </div>
-            </div>
-            <div class="field-group">
-              <label class="field-label">Heure de départ</label>
-              <div class="field-input-icon">
-                <input class="field-input" type="text" placeholder="18 : 00" [value]="heureDepart()" (input)="heureDepart.set($any($event.target).value)" />
-                <i class="pi pi-clock field-icon"></i>
               </div>
             </div>
           </div>
 
-        </div>
+          <div class="step1-side-column">
+            <aside class="photo-panel" aria-label="Photo de profil">
+              <div class="photo-panel__header">
+                <img
+                  class="photo-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="photo-panel__title">Photo de profil</span>
+              </div>
 
-        <!-- Résumé du profil panel -->
-        <div class="resume-panel">
-          <div class="resume-panel__header">
-            <i class="pi pi-user"></i>
-            <span class="resume-panel__title">Résumé du profil</span>
+              <input
+                #profilePhotoInput
+                hidden
+                type="file"
+                accept=".png,.jpg,.jpeg"
+              />
+
+              <button
+                class="photo-drop-zone"
+                type="button"
+                (click)="profilePhotoInput.click()"
+              >
+                <span class="photo-drop-zone__badge">
+                  <img
+                    class="photo-drop-zone__circle"
+                    src="employe-add/icons/photo-circle.png"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <img
+                    class="photo-drop-zone__icon"
+                    src="employe-add/icons/user-panel-large.svg"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="photo-drop-zone__text">Cliquer pour importer</span>
+                <span class="photo-drop-zone__hint">JPG, PNG · max 5 Mo</span>
+              </button>
+            </aside>
+
+            <div class="form-actions form-actions--step1-shell">
+              <button
+                class="nav-btn nav-btn--next nav-btn--step1"
+                type="button"
+                (click)="nextStep()"
+              >
+                <span>Suivant</span>
+                <i class="pi pi-angle-right nav-btn__chevron"></i>
+              </button>
+            </div>
           </div>
-          <div class="resume-content">
-            <div class="resume-row">
-              <span class="resume-key">Nom complet :</span>
-              <span class="resume-val">{{ prenom() }} {{ nomFamille() }}</span>
+        </div>
+      </div>
+    } @else {
+      <div
+        class="wizard-shell"
+        [class.wizard-shell--step4]="currentStep() === 4"
+      >
+        <aside
+          class="wizard-sidebar"
+          [attr.aria-label]="
+            'Étape ' + currentStep() + ' : ' + currentSidebar().title
+          "
+        >
+          <img
+            class="wizard-sidebar__asset"
+            [src]="
+              currentStep() === 2
+                ? 'employe-add/icons/contact-phone.svg'
+                : 'employe-add/icons/work-outline.svg'
+            "
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <p class="sidebar-title sidebar-title--wizard">
+            {{ currentSidebar().title }}
+          </p>
+          <p class="sidebar-desc sidebar-desc--wizard">
+            {{ currentSidebar().desc }}
+          </p>
+        </aside>
+
+        @if (currentStep() === 2) {
+          <section class="wizard-main wizard-main--step2">
+            <div class="form-grid form-grid--step2">
+              <div class="field-group">
+                <label class="field-label" for="employee-email"
+                  >Email professionnel</label
+                >
+                <input
+                  id="employee-email"
+                  class="field-input"
+                  type="email"
+                  placeholder="Ex:Marie@gmail.com"
+                  [value]="email()"
+                  (input)="email.set($any($event.target).value)"
+                />
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="employee-phone"
+                  >Téléphone</label
+                >
+                <input
+                  id="employee-phone"
+                  class="field-input"
+                  type="tel"
+                  placeholder="Ex:Koffi"
+                  [value]="telephone()"
+                  (input)="telephone.set($any($event.target).value)"
+                />
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="employee-emergency-contact"
+                  >Contact urgence</label
+                >
+                <input
+                  id="employee-emergency-contact"
+                  class="field-input"
+                  type="text"
+                  placeholder="JJ/MM/AA"
+                  [value]="contactUrgence()"
+                  (input)="contactUrgence.set($any($event.target).value)"
+                />
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="employee-emergency-phone"
+                  >Tél. urgence</label
+                >
+                <input
+                  id="employee-emergency-phone"
+                  class="field-input"
+                  type="tel"
+                  placeholder="Ivoirienne"
+                  [value]="telUrgence()"
+                  (input)="telUrgence.set($any($event.target).value)"
+                />
+              </div>
             </div>
-            <div class="resume-row">
-              <span class="resume-key">Département :</span>
-              <span class="resume-val">{{ departement() || 'Réception' }}</span>
-            </div>
-            <div class="resume-row">
-              <span class="resume-key">Contrat :</span>
-              <span class="resume-val">{{ contrat() || 'CDI' }}</span>
-            </div>
-            <div class="resume-row">
-              <span class="resume-key">Planning :</span>
-              <span class="resume-val">{{ selectedDays() }}</span>
-            </div>
-            <div class="resume-row">
-              <span class="resume-key">Horaire :</span>
-              <span class="resume-val">{{ heureArrivee() || '08:00' }} – {{ heureDepart() || '18:00' }}</span>
+          </section>
+
+          <div class="wizard-side-column wizard-side-column--step2">
+            <aside class="role-panel role-panel--wizard" aria-label="Rôle">
+              <div class="role-panel__header">
+                <img
+                  class="role-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="role-panel__title">Rôle</span>
+              </div>
+              <div class="role-options">
+                @for (r of roles; track r.id) {
+                  <button
+                    class="role-option"
+                    [class.role-option--active]="selectedRole() === r.id"
+                    type="button"
+                    (click)="selectedRole.set(r.id)"
+                  >
+                    <span
+                      class="role-option__radio"
+                      [class.role-option__radio--active]="
+                        selectedRole() === r.id
+                      "
+                    ></span>
+                    <span class="role-option__label">{{ r.label }}</span>
+                  </button>
+                }
+              </div>
+            </aside>
+
+            <div
+              class="form-actions form-actions--wizard form-actions--wizard-step2 wizard-actions wizard-actions--step2"
+            >
+              <button
+                class="nav-btn nav-btn--prev"
+                type="button"
+                (click)="prevStep()"
+              >
+                <img
+                  class="nav-btn__icon nav-btn__icon--prev"
+                  src="employe-add/icons/nav-prev.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>Précédent</span>
+              </button>
+              <button
+                class="nav-btn nav-btn--next"
+                type="button"
+                (click)="nextStep()"
+              >
+                <span>Suivant</span>
+                <i class="pi pi-angle-right nav-btn__chevron"></i>
+              </button>
             </div>
           </div>
-        </div>
+        }
 
-        <!-- Navigation -->
-        <div class="form-actions form-actions--step4">
-          <button class="nav-btn nav-btn--prev" (click)="prevStep()">
-            <i class="pi pi-angle-left"></i>
-            Précédent
-          </button>
-          <button class="nav-btn nav-btn--save">
-            Enregistrer l'employé
-          </button>
-        </div>
-      }
+        @if (currentStep() === 3) {
+          <section class="wizard-main wizard-main--step3">
+            <div class="wizard-fields wizard-fields--step3">
+              <div class="wizard-fields__row wizard-fields__row--step3-top">
+                <div class="field-group">
+                  <label class="field-label" for="employee-department"
+                    >Département</label
+                  >
+                  <div class="field-select-wrap">
+                    <input
+                      id="employee-department"
+                      class="field-input"
+                      type="text"
+                      placeholder="Réception"
+                      [value]="departement()"
+                      (input)="departement.set($any($event.target).value)"
+                    />
+                    <img
+                      class="field-select-arrow"
+                      src="employe-add/icons/dropdown.svg"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
 
-      <!-- Step 1 navigation (placed after photo panel via absolute/flex) -->
-      @if (currentStep() === 1) {
-        <div class="form-actions form-actions--step1">
-          <button class="nav-btn nav-btn--next nav-btn--step1" (click)="nextStep()">
-            Suivant
-            <i class="pi pi-angle-right"></i>
-          </button>
-        </div>
-      }
+                <div class="field-group">
+                  <label class="field-label" for="employee-job-title"
+                    >Intitulé du poste</label
+                  >
+                  <input
+                    id="employee-job-title"
+                    class="field-input"
+                    type="text"
+                    placeholder="Réceptionniste"
+                    [value]="intitulePoste()"
+                    (input)="intitulePoste.set($any($event.target).value)"
+                  />
+                </div>
+              </div>
 
-    </div>
+              <div class="wizard-fields__row wizard-fields__row--step3-middle">
+                <div class="field-group">
+                  <label class="field-label" for="employee-contract"
+                    >Contrat</label
+                  >
+                  <input
+                    id="employee-contract"
+                    class="field-input"
+                    type="text"
+                    placeholder="JJ/MM/AA"
+                    [value]="contrat()"
+                    (input)="contrat.set($any($event.target).value)"
+                  />
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="employee-entry-date"
+                    >Date d'entrée</label
+                  >
+                  <div class="field-input-icon">
+                    <input
+                      id="employee-entry-date"
+                      class="field-input"
+                      type="text"
+                      placeholder="JJ/MM/AA"
+                      [value]="dateEntree()"
+                      (input)="dateEntree.set($any($event.target).value)"
+                    />
+                    <img
+                      class="field-icon field-icon--image"
+                      src="employe-add/icons/calendar-linear.svg"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="employee-salary"
+                    >Salaire</label
+                  >
+                  <input
+                    id="employee-salary"
+                    class="field-input"
+                    type="text"
+                    placeholder="500 000 FCFA"
+                    [value]="salaire()"
+                    (input)="salaire.set($any($event.target).value)"
+                  />
+                </div>
+              </div>
+
+              <div class="field-group field-group--notes">
+                <label class="field-label" for="employee-notes">Notes</label>
+                <textarea
+                  id="employee-notes"
+                  class="field-textarea"
+                  placeholder="Informations complémentaire"
+                  [value]="notes()"
+                  (input)="notes.set($any($event.target).value)"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+
+          <div class="wizard-side-column wizard-side-column--step3">
+            <aside class="role-panel role-panel--wizard" aria-label="Rôle">
+              <div class="role-panel__header">
+                <img
+                  class="role-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="role-panel__title">Rôle</span>
+              </div>
+              <div class="role-options">
+                @for (r of roles; track r.id) {
+                  <button
+                    class="role-option"
+                    [class.role-option--active]="selectedRole() === r.id"
+                    type="button"
+                    (click)="selectedRole.set(r.id)"
+                  >
+                    <span
+                      class="role-option__radio"
+                      [class.role-option__radio--active]="
+                        selectedRole() === r.id
+                      "
+                    ></span>
+                    <span class="role-option__label">{{ r.label }}</span>
+                  </button>
+                }
+              </div>
+            </aside>
+
+            <div
+              class="form-actions form-actions--wizard form-actions--wizard-step3 wizard-actions wizard-actions--step3"
+            >
+              <button
+                class="nav-btn nav-btn--prev"
+                type="button"
+                (click)="prevStep()"
+              >
+                <img
+                  class="nav-btn__icon nav-btn__icon--prev"
+                  src="employe-add/icons/nav-prev.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>Précédent</span>
+              </button>
+              <button
+                class="nav-btn nav-btn--next"
+                type="button"
+                (click)="nextStep()"
+              >
+                <span>Suivant</span>
+                <i class="pi pi-angle-right nav-btn__chevron"></i>
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (currentStep() === 4) {
+          <section class="wizard-main wizard-main--step4">
+            <div class="step4-content step4-content--wizard">
+              <div class="days-section">
+                <p class="field-label">Jours de travail</p>
+                <div class="days-row">
+                  @for (d of days(); track d.id) {
+                    <button
+                      class="day-toggle"
+                      [class.day-toggle--active]="d.selected"
+                      type="button"
+                      (click)="toggleDay(d.id)"
+                    >
+                      <span class="day-toggle__label">{{ d.label }}</span>
+                      <span
+                        class="day-toggle__dot"
+                        [class.day-toggle__dot--active]="d.selected"
+                      ></span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="hours-row hours-row--step4">
+                <div class="field-group">
+                  <label class="field-label" for="employee-arrival-time"
+                    >Heure d'arrivée</label
+                  >
+                  <div class="field-input-icon">
+                    <input
+                      id="employee-arrival-time"
+                      class="field-input"
+                      type="text"
+                      placeholder="08 : 00"
+                      [value]="heureArrivee()"
+                      (input)="heureArrivee.set($any($event.target).value)"
+                    />
+                    <img
+                      class="field-icon field-icon--time"
+                      src="employe-add/icons/time-light.svg"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="employee-departure-time"
+                    >Heure de départ</label
+                  >
+                  <div class="field-input-icon">
+                    <input
+                      id="employee-departure-time"
+                      class="field-input"
+                      type="text"
+                      placeholder="18 : 00"
+                      [value]="heureDepart()"
+                      (input)="heureDepart.set($any($event.target).value)"
+                    />
+                    <img
+                      class="field-icon field-icon--time"
+                      src="employe-add/icons/time-light.svg"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="wizard-side-column wizard-side-column--step4">
+            <aside
+              class="resume-panel resume-panel--wizard"
+              aria-label="Résumé du profil"
+            >
+              <div class="resume-panel__header">
+                <img
+                  class="resume-panel__header-icon"
+                  src="employe-add/icons/user-panel.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="resume-panel__title">Résumé du profil</span>
+              </div>
+              <div class="resume-content">
+                <div class="resume-row">
+                  <span class="resume-key">Nom complet :</span>
+                  <span class="resume-val">{{ fullNameSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Département :</span>
+                  <span class="resume-val">{{ departmentSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Contrat :</span>
+                  <span class="resume-val">{{ contractSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Planning :</span>
+                  <span class="resume-val">{{ selectedDaysSummary() }}</span>
+                </div>
+                <div class="resume-row">
+                  <span class="resume-key">Horaire :</span>
+                  <span class="resume-val">{{ scheduleSummary() }}</span>
+                </div>
+              </div>
+            </aside>
+
+            <div
+              class="form-actions form-actions--wizard form-actions--wizard-step4 wizard-actions wizard-actions--step4"
+            >
+              <button
+                class="nav-btn nav-btn--prev"
+                type="button"
+                (click)="prevStep()"
+              >
+                <img
+                  class="nav-btn__icon nav-btn__icon--prev"
+                  src="employe-add/icons/nav-prev.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>Précédent</span>
+              </button>
+              <button class="nav-btn nav-btn--save" type="button">
+                Enregistrer l'employé
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
-
 </div>

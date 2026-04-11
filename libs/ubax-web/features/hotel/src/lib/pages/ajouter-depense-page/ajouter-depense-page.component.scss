@@ -23,7 +23,7 @@
   align-items: center;
   padding: 0;
   background: transparent;
-  margin: 2rem 10rem;
+  margin: 1.5rem 10rem 2.5rem;
 }
 
 .stepper__item {
@@ -90,13 +90,16 @@
   display: grid;
   grid-template-columns: 1fr 522px;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* ── Form card ───────────────────────────────────────────────────── */
 .form-card {
+  display: flex;
+  flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
+  min-height: 748px;
 }
 
 /* ── Section header (orange) ─────────────────────────────────────── */
@@ -148,7 +151,8 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  min-height: 488px;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ── Fields ──────────────────────────────────────────────────────── */
@@ -176,7 +180,7 @@
 
   &__label {
     font-family: 'Lexend', sans-serif;
-    font-size: 20px;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #222;
     margin: 0;
@@ -369,12 +373,45 @@
 /* ── Form actions ────────────────────────────────────────────────── */
 .form-actions {
   display: flex;
+  align-items: center;
+  gap: 16px;
   justify-content: flex-end;
+  margin-top: auto;
   padding-top: 8px;
+
+  &--split,
+  &--final {
+    justify-content: space-between;
+  }
 
   &--double {
     gap: 16px;
     justify-content: flex-end;
+  }
+
+  &__group {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+.btn-prev {
+  width: 161px;
+  height: 61px;
+  background: #ecf2f7;
+  color: #222;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #dce8f2;
   }
 }
 
@@ -434,14 +471,16 @@
 
 /* ── Summary panel ───────────────────────────────────────────────── */
 .summary-panel {
+  display: flex;
+  flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
+  min-height: 748px;
 }
 
 .summary-header {
   background: #1a3047;
   padding: 32px 28px 28px;
-  min-height: 249px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -467,7 +506,7 @@
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 300;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
     margin: 0;
   }
 
@@ -476,12 +515,14 @@
     font-size: 32px;
     font-weight: 500;
     color: #e87d1e;
-    margin: 0 0 8px;
   }
 }
 
 .summary-body {
   background: #fff;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 0 0 24px;
 }
 
@@ -507,7 +548,9 @@
     background: #f0f2f6;
   }
 
-  &--last::after { display: none; }
+  &--last::after {
+    display: none;
+  }
 
   &__label {
     font-family: 'Lexend', sans-serif;
@@ -541,6 +584,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: auto;
   padding: 16px 28px 24px;
 }
 
@@ -556,7 +600,9 @@
   padding: 0 16px;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 
   &--active {
     border-color: #e87d1e;
@@ -608,7 +654,9 @@
     flex-shrink: 0;
     transition: border-color 0.15s;
 
-    &--active { border-color: #e87d1e; }
+    &--active {
+      border-color: #e87d1e;
+    }
   }
 
   &__radio-dot {

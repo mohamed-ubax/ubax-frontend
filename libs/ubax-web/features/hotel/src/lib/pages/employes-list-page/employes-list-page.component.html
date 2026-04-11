@@ -1,123 +1,197 @@
-<div class="emp-page">
+<div class="employees-page">
+  <header class="employees-heading">
+    <a class="employees-back-button" routerLink="/hotel" aria-label="Retour">
+      <i class="pi pi-arrow-left" aria-hidden="true"></i>
+    </a>
 
-  <!-- ── Toolbar ─────────────────────────────────────────────────── -->
-  <div class="emp-toolbar">
-    <h1 class="emp-title">Liste des employés</h1>
-    <div class="toolbar-right">
-      <div class="search-pill">
-        <i class="pi pi-search"></i>
-        <input type="text" placeholder="Rechercher" class="search-input" />
-      </div>
-      <button class="add-btn" routerLink="ajouter">
-        <i class="pi pi-plus"></i>
-        Ajouter un employé
-      </button>
+    <h1 class="employees-title">Employés</h1>
+  </header>
+
+  <section
+    class="employees-controls"
+    aria-label="Filtres de la liste des employés"
+  >
+    <div class="employees-tabs" role="tablist" aria-label="Filtres employés">
+      @for (tab of tabs; track tab.id) {
+        <button
+          class="employees-tabs__button"
+          type="button"
+          role="tab"
+          [attr.aria-selected]="activeTab() === tab.id"
+          [class.employees-tabs__button--active]="activeTab() === tab.id"
+          (click)="setTab(tab.id)"
+        >
+          <span>{{ tab.label }} ({{ tab.count }})</span>
+
+          @if (activeTab() === tab.id) {
+            <span class="employees-tabs__indicator" aria-hidden="true"></span>
+          }
+        </button>
+      }
     </div>
-  </div>
 
-  <!-- ── Tab bar ─────────────────────────────────────────────────── -->
-  <div class="tab-bar">
-    @for (tab of tabs; track tab.id) {
-      <button
-        class="tab-btn"
-        [class.tab-btn--active]="activeTab() === tab.id"
-        (click)="setTab(tab.id)">
-        {{ tab.label }} ({{ tab.count }})
-        @if (activeTab() === tab.id) {
-          <span class="tab-indicator"></span>
-        }
-      </button>
-    }
-  </div>
+    <div class="employees-controls__actions">
+      <label class="employees-search" aria-label="Recherche employé">
+        <div class="employees-search__field">
+          <input
+            type="search"
+            placeholder="Rechercher"
+            [value]="searchValue()"
+            (input)="updateSearch($event)"
+          />
+          <i class="pi pi-search" aria-hidden="true"></i>
+        </div>
+      </label>
 
-  <!-- ── Table card ──────────────────────────────────────────────── -->
-  <div class="table-card">
-    <div class="table-scroll">
-      <table class="emp-table">
+      <a class="employees-add-button" routerLink="/hotel/employes/ajouter">
+        <span>Ajouter un employé</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="employees-table-card" aria-label="Liste des employés">
+    <div class="employees-table-wrap">
+      <table class="employees-table">
+        <colgroup>
+          <col class="employees-table__col employees-table__col--check" />
+          <col class="employees-table__col employees-table__col--name" />
+          <col class="employees-table__col employees-table__col--role" />
+          <col class="employees-table__col employees-table__col--planning" />
+          <col class="employees-table__col employees-table__col--contact" />
+          <col class="employees-table__col employees-table__col--status" />
+          <col class="employees-table__col employees-table__col--actions" />
+        </colgroup>
+
         <thead>
           <tr>
-            <th class="th-check"><span class="checkbox"></span></th>
-            <th>Employé</th>
-            <th>Description</th>
-            <th>Planning</th>
-            <th>Contact</th>
-            <th>Statut</th>
-            <th>Action</th>
+            <th scope="col" class="employees-table__check-cell">
+              <input
+                class="employees-checkbox"
+                type="checkbox"
+                aria-label="Sélectionner tous les employés"
+              />
+            </th>
+            <th scope="col">
+              <span class="employees-table__heading-with-sort">
+                <span>Nom complet</span>
+                <span class="employees-table__sort" aria-hidden="true"></span>
+              </span>
+            </th>
+            <th scope="col">Role</th>
+            <th scope="col">
+              <span class="employees-table__heading-with-sort">
+                <span>Planning</span>
+                <span class="employees-table__sort" aria-hidden="true"></span>
+              </span>
+            </th>
+            <th scope="col">Contact</th>
+            <th scope="col">
+              <span class="employees-table__heading-with-sort">
+                <span>Statut</span>
+                <span class="employees-table__sort" aria-hidden="true"></span>
+              </span>
+            </th>
+            <th scope="col" aria-label="Actions"></th>
           </tr>
         </thead>
+
         <tbody>
-          @for (e of filteredEmployes(); track e.id) {
-            <tr class="emp-row">
-              <td class="td-check"><span class="checkbox"></span></td>
+          @for (employe of filteredEmployes(); track employe.id) {
+            <tr>
+              <td class="employees-table__check-cell">
+                <input
+                  class="employees-checkbox"
+                  type="checkbox"
+                  [attr.aria-label]="'Sélectionner ' + employe.nom"
+                />
+              </td>
 
-              <!-- Employee -->
-              <td class="td-emp">
-                <div class="emp-avatar">
-                  <span class="emp-avatar__initials">{{ e.avatarInitials }}</span>
-                </div>
-                <div class="emp-info">
-                  <span class="emp-name">{{ e.nom }}</span>
-                  <span class="emp-role">{{ e.role }}</span>
+              <td>
+                <div class="employees-table__employee">
+                  <img
+                    class="employees-table__avatar"
+                    [src]="employe.avatarSrc"
+                    [alt]="employe.nom"
+                  />
+
+                  <div class="employees-table__employee-copy">
+                    <span class="employees-table__name">{{ employe.nom }}</span>
+                    <span class="employees-table__poste">{{
+                      employe.poste
+                    }}</span>
+                  </div>
                 </div>
               </td>
 
-              <!-- Description -->
-              <td class="td-desc">{{ e.description }}</td>
-
-              <!-- Planning -->
-              <td class="td-planning">
-                <span class="planning-days">{{ e.joursTravail }}</span>
-                <span class="planning-hours">{{ e.horaires }}</span>
+              <td class="employees-table__role-cell">
+                <p class="employees-table__description">
+                  {{ employe.description }}
+                </p>
               </td>
 
-              <!-- Contact -->
-              <td class="td-contact">
-                <div class="contact-circle">
-                  <i class="pi pi-phone"></i>
+              <td class="employees-table__planning-cell">
+                <div class="employees-table__planning">
+                  <span class="employees-table__planning-days">{{
+                    employe.joursTravail
+                  }}</span>
+                  <span class="employees-table__planning-hours">{{
+                    employe.horaires
+                  }}</span>
                 </div>
-                <span class="contact-phone">{{ e.telephone }}</span>
               </td>
 
-              <!-- Statut -->
-              <td class="td-status">
+              <td class="employees-table__contact-cell">
+                <div class="employees-table__contact">
+                  <span
+                    class="employees-table__contact-icon"
+                    aria-hidden="true"
+                  >
+                    <i class="pi pi-phone"></i>
+                  </span>
+                  <span class="employees-table__phone">{{
+                    employe.telephone
+                  }}</span>
+                </div>
+              </td>
+
+              <td class="employees-table__status-cell">
                 <span
-                  class="status-badge"
-                  [class.status-badge--active]="e.status === 'Actif'"
-                  [class.status-badge--inactive]="e.status === 'Inactif'">
-                  {{ e.status }}
+                  class="employees-table__status"
+                  [class.employees-table__status--inactive]="
+                    employe.statusTone === 'inactive'
+                  "
+                >
+                  {{ employe.statusTone === 'active' ? 'ACTIVE' : 'INACTIVE' }}
                 </span>
               </td>
 
-              <!-- Action -->
-              <td class="td-actions">
-                <button class="action-icon-btn" [routerLink]="['/hotel/employes', e.id]">
-                  <i class="pi pi-eye"></i>
-                </button>
-                <button class="action-icon-btn">
-                  <i class="pi pi-pencil"></i>
-                </button>
+              <td class="employees-table__action-cell">
+                <a
+                  class="employees-table__menu-button"
+                  [routerLink]="['/hotel/employes', employe.id]"
+                  [attr.aria-label]="'Voir les détails de ' + employe.nom"
+                >
+                  <span aria-hidden="true">...</span>
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="employees-table__empty" colspan="7">
+                Aucun employé ne correspond à la recherche en cours.
               </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+  </section>
 
-    <!-- ── Pagination ──────────────────────────────────────────── -->
-    <div class="table-footer">
-      <div class="pagination">
-        <button class="page-btn page-btn--arrow">&lt;</button>
-        @for (p of pages; track p) {
-          <button
-            class="page-btn"
-            [class.page-btn--active]="activePage() === p"
-            (click)="activePage.set(p)">
-            {{ p }}
-          </button>
-        }
-        <button class="page-btn page-btn--arrow">&gt;</button>
-      </div>
-    </div>
-  </div>
-
+  <footer class="employees-pagination">
+    <ubax-paginator
+      [(currentPage)]="currentPage"
+      [totalPages]="totalPages"
+      variant="white"
+    />
+  </footer>
 </div>

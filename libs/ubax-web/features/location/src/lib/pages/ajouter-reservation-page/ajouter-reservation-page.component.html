@@ -8,18 +8,6 @@
     <h1 class="ajout-title">Ajouter une réservation</h1>
   </div>
 
-  <!-- ── Type tabs (step 1 only) ────────────────────────── -->
-  @if (currentStep() === 1) {
-    <div class="type-tabs">
-      <button class="type-tab" [class.type-tab--active]="roomType() === 'chambre'"
-        (click)="roomType.set('chambre')">Chambre</button>
-      <button class="type-tab" [class.type-tab--active]="roomType() === 'conference'"
-        (click)="roomType.set('conference')">Salle de conférence</button>
-      <button class="type-tab" [class.type-tab--active]="roomType() === 'evenement'"
-        (click)="roomType.set('evenement')">Salle d'évènement</button>
-    </div>
-  }
-
   <!-- ── Body ──────────────────────────────────────────── -->
   <div class="ajout-body">
 
@@ -29,7 +17,9 @@
 
       <div class="steps-list">
         @for (label of STEP_LABELS; track $index; let i = $index, last = $last) {
-          <div class="step-row">
+          <div class="step-row"
+            [class.step-row--clickable]="i + 1 < currentStep()"
+            (click)="goToStep(i + 1)">
             <div class="step-col">
               <div class="step-circle" [class.step-circle--done]="i + 1 <= currentStep()">
                 @if (i + 1 <= currentStep()) {
@@ -39,7 +29,7 @@
                 }
               </div>
               @if (!last) {
-                <div class="step-connector"></div>
+                <div class="step-connector" [class.step-connector--done]="i + 2 <= currentStep()"></div>
               }
             </div>
             <span class="step-label" [class.step-label--active]="i + 1 === currentStep()">
@@ -50,398 +40,446 @@
       </div>
     </aside>
 
-    <!-- Form card -->
-    <div class="ajout-card">
+    <!-- Right column: type-tabs (step 1 only) + form card -->
+    <div class="ajout-right-col">
 
-      <!-- ── STEP 1: Informations client ─────────────────── -->
+      <!-- ── Type tabs (step 1 only) ────────────────────────── -->
       @if (currentStep() === 1) {
-        <div class="step-content">
-          <p class="step-section-title step-section-title--sm">Informations client</p>
+        <div class="type-tabs">
+          <button class="type-tab" [class.type-tab--active]="roomType() === 'chambre'"
+            (click)="roomType.set('chambre')">Chambre</button>
+          <button class="type-tab" [class.type-tab--active]="roomType() === 'conference'"
+            (click)="roomType.set('conference')">Salle de conférence</button>
+          <button class="type-tab" [class.type-tab--active]="roomType() === 'evenement'"
+            (click)="roomType.set('evenement')">Salle d'évènement</button>
+        </div>
+      }
 
-          <div class="s1-layout">
-            <div class="s1-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Nom <span class="req">*</span></label>
-                  <input class="form-input" type="text" [value]="nom()"
-                    (input)="nom.set($any($event.target).value)" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Prénom <span class="req">*</span></label>
-                  <input class="form-input" type="text" [value]="prenom()"
-                    (input)="prenom.set($any($event.target).value)" />
-                </div>
-              </div>
+      <!-- Form card -->
+      <div class="ajout-card">
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Téléphone <span class="req">*</span></label>
-                  <input class="form-input" type="text" [value]="telephone()"
-                    (input)="telephone.set($any($event.target).value)" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Email <span class="req">*</span></label>
-                  <input class="form-input" type="email" [value]="email()"
-                    (input)="email.set($any($event.target).value)" />
-                </div>
-              </div>
+        <!-- ── STEP 1: Informations client ─────────────────── -->
+        @if (currentStep() === 1) {
+          <div class="step-content">
+            <p class="step-section-title step-section-title--sm">Informations client</p>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Documents <span class="req">*</span></label>
-                  <div class="upload-zone">
-                    <i class="pi pi-cloud-upload upload-icon"></i>
-                    <span class="upload-label">Ajouter des documents</span>
+            <div class="s1-layout">
+              <div class="s1-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Nom <span class="req">*</span></label>
+                    <input class="form-input" type="text" placeholder="Saisir votre nom"
+                      [value]="nom()" (input)="nom.set($any($event.target).value)" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Prénom <span class="req">*</span></label>
+                    <input class="form-input" type="text" placeholder="Saisir votre prénom"
+                      [value]="prenom()" (input)="prenom.set($any($event.target).value)" />
                   </div>
                 </div>
-                <div class="form-group docs-list-group">
-                  <div class="docs-list">
-                    @for (doc of uploadedDocs(); track $index; let di = $index) {
-                      <div class="doc-item">
-                        <i class="pi pi-file doc-icon"></i>
-                        <span class="doc-name">{{ doc }}</span>
-                        <button class="doc-remove" (click)="removeDoc(di)">
-                          <i class="pi pi-times"></i>
-                        </button>
-                      </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Téléphone <span class="req">*</span></label>
+                    <input class="form-input" type="text" placeholder="+225 00 00 00 00"
+                      [value]="telephone()" (input)="telephone.set($any($event.target).value)" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email <span class="req">*</span></label>
+                    <input class="form-input" type="email" placeholder="exemple@email.com"
+                      [value]="email()" (input)="email.set($any($event.target).value)" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Documents <span class="req">*</span></label>
+                    <div class="upload-zone">
+                      <i class="pi pi-cloud-upload upload-icon"></i>
+                      <span class="upload-label">Ajouter des documents</span>
+                    </div>
+                  </div>
+                  <div class="form-group docs-list-group">
+                    <div class="docs-list">
+                      @for (doc of uploadedDocs(); track $index; let di = $index) {
+                        <div class="doc-item">
+                          <i class="pi pi-file doc-icon"></i>
+                          <span class="doc-name">{{ doc }}</span>
+                          <button class="doc-remove" (click)="removeDoc(di)">
+                            <i class="pi pi-times"></i>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Room selector panel -->
+              <div class="room-panel-wrapper">
+                <p class="room-panel-title-outside">Choisir une chambre</p>
+                <div class="room-panel">
+                  <img class="room-panel-img" [src]="roomPreviewImg" alt="Chambre" />
+                  <p class="room-panel-label">Type de chambre</p>
+                  <div class="room-select">
+                    <span>Chambre deluxe</span>
+                    <i class="pi pi-chevron-down"></i>
+                  </div>
+                  <div class="room-select room-select--num">
+                    <span>301</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── STEP 2: Détails du séjour ───────────────────── -->
+        @if (currentStep() === 2) {
+          <div class="step-content">
+            <p class="step-section-title">Détails du séjour</p>
+
+            <div class="s2-layout">
+              <div class="s2-form">
+
+                <!-- Dates row -->
+                <div class="dates-row">
+                  <div class="date-group">
+                    <label class="form-label">Date d'arrivée</label>
+                    <div class="date-input">
+                      <span>{{ arrivalDate() }}</span>
+                      <i class="pi pi-calendar"></i>
+                    </div>
+                  </div>
+                  <div class="date-group">
+                    <label class="form-label">Date de départ</label>
+                    <div class="date-input">
+                      <span>{{ departureDate() }}</span>
+                      <i class="pi pi-calendar"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Counters row -->
+                <div class="counters-row">
+                  <div class="counter-card">
+                    <label class="counter-label">Nombre de nuits</label>
+                    <div class="counter-ctrl">
+                      <button class="counter-btn counter-btn--minus" (click)="adjustNights(-1)">
+                        <i class="pi pi-minus"></i>
+                      </button>
+                      <span class="counter-val">{{ nights() }}</span>
+                      <button class="counter-btn counter-btn--plus" (click)="adjustNights(1)">
+                        <i class="pi pi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="counter-card">
+                    <label class="counter-label">Nombre d'adultes</label>
+                    <div class="counter-ctrl">
+                      <button class="counter-btn counter-btn--minus" (click)="adjustAdults(-1)">
+                        <i class="pi pi-minus"></i>
+                      </button>
+                      <span class="counter-val">{{ adults() }}</span>
+                      <button class="counter-btn counter-btn--plus" (click)="adjustAdults(1)">
+                        <i class="pi pi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="counter-card">
+                    <label class="counter-label">Nombre d'enfants</label>
+                    <div class="counter-ctrl">
+                      <button class="counter-btn counter-btn--minus" (click)="adjustChildren(-1)">
+                        <i class="pi pi-minus"></i>
+                      </button>
+                      <span class="counter-val">{{ children() }}</span>
+                      <button class="counter-btn counter-btn--plus" (click)="adjustChildren(1)">
+                        <i class="pi pi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Rate slider -->
+                <div class="rate-card">
+                  <div class="rate-header">
+                    <span class="rate-label">Taux tarifaire adulte</span>
+                    <span class="rate-value">{{ adultRate() }}%</span>
+                  </div>
+                  <p class="rate-subtitle">Entre 20% et 60% du tarif adulte ({{ fmt(BASE_NIGHT_PRICE) }} FCFA)</p>
+                  <div class="slider-wrap">
+                    <input
+                      type="range"
+                      class="rate-slider"
+                      min="20" max="60"
+                      [value]="adultRate()"
+                      [style.background]="sliderBg()"
+                      (input)="adultRate.set(+$any($event.target).value)" />
+                  </div>
+                  <div class="rate-minmax">
+                    <span>20 % Minimum</span>
+                    <span>60% Maximum</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Cost estimation panel -->
+              <div class="cost-panel">
+                <div class="cost-header">
+                  <span class="cost-title">Estimation du coût</span>
+                  <div class="live-badge">
+                    <span class="live-dot"></span>
+                    <span class="live-text">Live</span>
+                  </div>
+                </div>
+
+                <div class="cost-row">
+                  <span class="cost-lbl">Adultes</span>
+                  <span class="cost-amt">{{ fmt(adultsTotal()) }} FCFA</span>
+                </div>
+                <p class="cost-detail">{{ fmt(BASE_NIGHT_PRICE) }} FCFA x {{ adults() }} adultes&nbsp; x {{ nights() }} nuits</p>
+                <div class="cost-divider"></div>
+
+                <div class="cost-row">
+                  <span class="cost-lbl">Enfants ({{ adultRate() }}%)</span>
+                  <span class="cost-amt cost-amt--orange">{{ fmt(childrenTotal()) }} FCFA</span>
+                </div>
+                <p class="cost-detail">{{ fmt(childrenNightPrice()) }} FCFA x {{ children() }} enfant&nbsp; x {{ nights() }} nuits</p>
+                <div class="cost-divider"></div>
+
+                <div class="cost-divider cost-divider--heavy"></div>
+
+                <div class="cost-row cost-row--total">
+                  <span>Total estimé</span>
+                  <strong>{{ fmt(subtotal()) }} FCFA</strong>
+                </div>
+                <p class="cost-sub">Montant hors taxes</p>
+
+                <div class="cost-per-night">
+                  <span>Soit par nuit</span>
+                  <span class="cost-amt--orange">{{ fmt(perNight()) }} FCFA</span>
+                </div>
+
+                <!-- Répartition du coût -->
+                <div class="cost-repartition">
+                  <p class="cost-repartition-lbl">Répartition du coût</p>
+                  <div class="cost-repartition-bar">
+                    <span class="repartition-fill repartition-fill--adults"></span>
+                    <span class="repartition-fill repartition-fill--children"></span>
+                  </div>
+                  <div class="cost-legend">
+                    <div class="legend-item">
+                      <span class="legend-swatch legend-swatch--orange"></span>
+                      <span class="legend-text">réduction {{ adultRate() }} %</span>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-swatch legend-swatch--dark"></span>
+                      <span class="legend-text">réduction {{ adultRate() }} %</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cost-warning">
+                  <i class="pi pi-exclamation-triangle"></i>
+                  <span>Estimation indicative. Tarif confirmé à l'étape suivante.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── STEP 3: Options supplémentaires ─────────────── -->
+        @if (currentStep() === 3) {
+          <div class="step-content">
+            <p class="step-section-title">Options supplémentaires</p>
+            <div class="options-grid">
+              @for (opt of EXTRA_OPTIONS; track $index; let i = $index) {
+                <div class="option-item" (click)="toggleOption(i)">
+                  <div class="option-circle" [class.option-circle--checked]="selectedOptions()[i]"></div>
+                  <span class="option-label">{{ opt }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ── STEP 4: Tarification et paiement ────────────── -->
+        @if (currentStep() === 4) {
+          <div class="step-content">
+            <p class="step-section-title">Tarification et paiement</p>
+
+            <div class="pricing-container">
+              <div class="pricing-row">
+                <span>Par nuit</span>
+                <span>{{ fmt(BASE_NIGHT_PRICE) }} FCFA X {{ nights() }}</span>
+              </div>
+              <div class="pricing-divider"></div>
+
+              <div class="pricing-row">
+                <span>Sous total</span>
+                <span>{{ fmt(subtotal()) }} FCFA</span>
+              </div>
+              <div class="pricing-divider"></div>
+
+              <div class="pricing-row">
+                <span>Taxes et frais</span>
+                <input class="taxes-input" type="number" placeholder="Saisie le montant"
+                  [value]="taxes() || ''"
+                  (input)="taxes.set(+$any($event.target).value || 0)" />
+              </div>
+              <div class="pricing-divider"></div>
+
+              <div class="pricing-row">
+                <span>Réduction</span>
+                <span>{{ fmt(discountAmount()) }} FCFA</span>
+              </div>
+
+              <!-- Discount pills -->
+              <div class="discount-pills">
+                <button class="disc-pill" [class.disc-pill--active]="discount() === 'none'"
+                  (click)="discount.set('none')">Aucune remise</button>
+                <button class="disc-pill" [class.disc-pill--active]="discount() === '5'"
+                  (click)="discount.set('5')">5%</button>
+                <button class="disc-pill" [class.disc-pill--active]="discount() === '10'"
+                  (click)="discount.set('10')">10%</button>
+                <button class="disc-pill" [class.disc-pill--active]="discount() === '15'"
+                  (click)="discount.set('15')">15%</button>
+                <button class="disc-pill" [class.disc-pill--active]="discount() === '30'"
+                  (click)="discount.set('30')">30%</button>
+                <button class="disc-pill disc-pill--promo" [class.disc-pill--active]="discount() === 'promo'"
+                  (click)="discount.set('promo')">Code promotionnel</button>
+              </div>
+
+              <!-- Promo code row -->
+              <div class="promo-row">
+                <input class="promo-input" type="text" placeholder="Entrer votre code promo"
+                  [value]="promoCode()"
+                  (input)="promoCode.set($any($event.target).value)" />
+                <button class="promo-apply-btn">Appliquer</button>
+              </div>
+
+              <!-- Total — heavy divider AFTER -->
+              <div class="pricing-row pricing-row--total">
+                <strong>Total à payer</strong>
+                <strong>{{ fmt(totalToPay()) }} FCFA</strong>
+              </div>
+              <div class="pricing-divider pricing-divider--heavy"></div>
+
+              <!-- Payment method — side by side -->
+              <div class="pricing-row pricing-row--payment">
+                <span>Mode de paiement</span>
+                <div class="payment-select">
+                  <span class="wave-logo">W</span>
+                  <span>Wave</span>
+                  <i class="pi pi-chevron-down"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── STEP 5: Récapitulatif ────────────────────────── -->
+        @if (currentStep() === 5) {
+          <div class="step-content">
+            <p class="step-section-title">Récapitulatif</p>
+
+            <div class="recap-card">
+              <div class="recap-top-row">
+                <div class="recap-icon-col">
+                  <div class="recap-room-icon">
+                    <i class="pi pi-key"></i>
+                  </div>
+                  <div class="recap-room-info">
+                    <p class="recap-booking-id">Booking ID #0052466623</p>
+                    <p class="recap-room-name">Queen Room Deluxe A09244</p>
+                    <p class="recap-guest">Valentin Kouadio</p>
+                    <p class="recap-phone"><i class="pi pi-phone"></i>&nbsp; +225 07 58 23 41 89</p>
+                  </div>
+                </div>
+
+                <div class="recap-meta">
+                  <div class="meta-stat">
+                    <div class="meta-top-row">
+                      <i class="pi pi-user meta-icon"></i>
+                      <small class="meta-lbl">Nombre d'adultes</small>
+                    </div>
+                    <p class="meta-value">{{ adults() }}</p>
+                  </div>
+                  <div class="meta-stat">
+                    <div class="meta-top-row">
+                      <i class="pi pi-inbox meta-icon"></i>
+                      <small class="meta-lbl">type de lit</small>
+                    </div>
+                    <p class="meta-value">Double</p>
+                  </div>
+                  <div class="meta-stat">
+                    <div class="meta-top-row">
+                      <i class="pi pi-calendar meta-icon"></i>
+                      <small class="meta-lbl">Date de reservation</small>
+                    </div>
+                    <p class="meta-value">{{ arrivalDate() }} – {{ departureDate() }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="recap-options-row">
+                <div class="recap-options-label">
+                  <span>Options supplémentaires</span>
+                  <i class="pi pi-info-circle"></i>
+                </div>
+                <span class="recap-options-list">
+                  {{ selectedOptionNames() || 'Aucune option sélectionnée' }}
+                </span>
+              </div>
+
+              <div class="room-photos">
+                <button class="gallery-btn" (click)="prevPhoto()" [disabled]="photoOffset() === 0">
+                  <i class="pi pi-arrow-left"></i>
+                </button>
+                <div class="photos-wrapper">
+                  <div class="photos-track" [style.transform]="photosTranslate()">
+                    @for (photo of roomPhotos; track photo) {
+                      <img class="room-photo" [src]="photo" alt="" />
                     }
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Room selector panel -->
-            <div class="room-panel">
-              <p class="room-panel-title">Choisir une chambre</p>
-              <img class="room-panel-img" [src]="roomPreviewImg" alt="Chambre" />
-              <p class="room-panel-label">Type de chambre</p>
-              <div class="room-select">
-                <span>Chambre deluxe</span>
-                <i class="pi pi-chevron-down"></i>
-              </div>
-              <div class="room-select room-select--num">
-                <span>301</span>
+                <button class="gallery-btn" (click)="nextPhoto()">
+                  <i class="pi pi-arrow-right"></i>
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      }
+        }
 
-      <!-- ── STEP 2: Détails du séjour ───────────────────── -->
-      @if (currentStep() === 2) {
-        <div class="step-content">
-          <p class="step-section-title">Détails du séjour</p>
+        <!-- ── Action bar ──────────────────────────────────── -->
+        @if (currentStep() < 5) {
+          <div class="action-bar" [class.action-bar--end]="currentStep() === 1">
+            @if (currentStep() > 1) {
+              <button class="btn-prev" (click)="prevStep()">
+                <i class="pi pi-arrow-left"></i>&nbsp; Précédent
+              </button>
+            }
 
-          <div class="s2-layout">
-            <div class="s2-form">
-
-              <!-- Dates row -->
-              <div class="dates-row">
-                <div class="date-group">
-                  <label class="form-label">Date d'arrivée</label>
-                  <div class="date-input">
-                    <span>{{ arrivalDate() }}</span>
-                    <i class="pi pi-calendar"></i>
-                  </div>
-                </div>
-                <div class="date-group">
-                  <label class="form-label">Date de départ</label>
-                  <div class="date-input">
-                    <span>{{ departureDate() }}</span>
-                    <i class="pi pi-calendar"></i>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Counters row -->
-              <div class="counters-row">
-                <div class="counter-card">
-                  <label class="counter-label">Nombre de nuits</label>
-                  <div class="counter-ctrl">
-                    <button class="counter-btn counter-btn--minus" (click)="adjustNights(-1)">
-                      <i class="pi pi-minus"></i>
-                    </button>
-                    <span class="counter-val">{{ nights() }}</span>
-                    <button class="counter-btn counter-btn--plus" (click)="adjustNights(1)">
-                      <i class="pi pi-plus"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="counter-card">
-                  <label class="counter-label">Nombre d'adultes</label>
-                  <div class="counter-ctrl">
-                    <button class="counter-btn counter-btn--minus" (click)="adjustAdults(-1)">
-                      <i class="pi pi-minus"></i>
-                    </button>
-                    <span class="counter-val">{{ adults() }}</span>
-                    <button class="counter-btn counter-btn--plus" (click)="adjustAdults(1)">
-                      <i class="pi pi-plus"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="counter-card">
-                  <label class="counter-label">Nombre d'enfants</label>
-                  <div class="counter-ctrl">
-                    <button class="counter-btn counter-btn--minus" (click)="adjustChildren(-1)">
-                      <i class="pi pi-minus"></i>
-                    </button>
-                    <span class="counter-val">{{ children() }}</span>
-                    <button class="counter-btn counter-btn--plus" (click)="adjustChildren(1)">
-                      <i class="pi pi-plus"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Rate slider -->
-              <div class="rate-card">
-                <div class="rate-header">
-                  <span class="rate-label">Taux tarifaire adulte</span>
-                  <span class="rate-value">{{ adultRate() }}%</span>
-                </div>
-                <p class="rate-subtitle">Entre 20% et 60% du tarif adulte ({{ fmt(BASE_NIGHT_PRICE) }} FCFA)</p>
-                <div class="slider-wrap">
-                  <input
-                    type="range"
-                    class="rate-slider"
-                    min="20" max="60"
-                    [value]="adultRate()"
-                    [style.background]="sliderBg()"
-                    (input)="adultRate.set(+$any($event.target).value)" />
-                </div>
-                <div class="rate-minmax">
-                  <span>20 % Minimum</span>
-                  <span>60% Maximum</span>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Cost estimation panel -->
-            <div class="cost-panel">
-              <div class="cost-header">
-                <span class="cost-title">Estimation du coût</span>
-                <div class="live-badge">
-                  <span class="live-dot"></span>
-                  <span class="live-text">Live</span>
-                </div>
-              </div>
-
-              <div class="cost-row">
-                <span class="cost-lbl">Adultes</span>
-                <span class="cost-amt">{{ fmt(adultsTotal()) }} FCFA</span>
-              </div>
-              <p class="cost-detail">{{ fmt(BASE_NIGHT_PRICE) }} FCFA x {{ adults() }} adultes&nbsp; x {{ nights() }} nuits</p>
-              <div class="cost-divider"></div>
-
-              <div class="cost-row">
-                <span class="cost-lbl">Enfants ({{ adultRate() }}%)</span>
-                <span class="cost-amt cost-amt--orange">{{ fmt(childrenTotal()) }} FCFA</span>
-              </div>
-              <p class="cost-detail">{{ fmt(childrenNightPrice()) }} FCFA x {{ children() }} enfant&nbsp; x {{ nights() }} nuits</p>
-              <div class="cost-divider"></div>
-
-              <div class="cost-divider cost-divider--heavy"></div>
-
-              <div class="cost-row cost-row--total">
-                <span>Total estimé</span>
-                <strong>{{ fmt(subtotal()) }} FCFA</strong>
-              </div>
-              <p class="cost-sub">Montant hors taxes</p>
-
-              <div class="cost-per-night">
-                <span>Soit par nuit</span>
-                <span class="cost-amt--orange">{{ fmt(perNight()) }} FCFA</span>
-              </div>
-
-              <div class="cost-warning">
-                <i class="pi pi-exclamation-triangle"></i>
-                <span>Estimation indicative. Tarif confirmé à l'étape suivante.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- ── STEP 3: Options supplémentaires ─────────────── -->
-      @if (currentStep() === 3) {
-        <div class="step-content">
-          <p class="step-section-title">Options supplémentaires</p>
-          <div class="options-grid">
-            @for (opt of EXTRA_OPTIONS; track $index; let i = $index) {
-              <div class="option-item" (click)="toggleOption(i)">
-                <div class="option-circle" [class.option-circle--checked]="selectedOptions()[i]"></div>
-                <span class="option-label">{{ opt }}</span>
+            @if (currentStep() < 4) {
+              <button class="btn-next" (click)="nextStep()">Continuer</button>
+            } @else {
+              <div class="step4-actions">
+                <button class="btn-draft">Enregistrer comme brouillon</button>
+                <button class="btn-validate" (click)="nextStep()">Valider</button>
               </div>
             }
           </div>
-        </div>
-      }
-
-      <!-- ── STEP 4: Tarification et paiement ────────────── -->
-      @if (currentStep() === 4) {
-        <div class="step-content">
-          <p class="step-section-title">Tarification et paiement</p>
-
-          <div class="pricing-container">
-            <div class="pricing-row">
-              <span>Par nuit</span>
-              <span>{{ fmt(BASE_NIGHT_PRICE) }} FCFA X {{ nights() }}</span>
-            </div>
-            <div class="pricing-divider"></div>
-
-            <div class="pricing-row">
-              <span>Sous total</span>
-              <span>{{ fmt(subtotal()) }} FCFA</span>
-            </div>
-            <div class="pricing-divider"></div>
-
-            <div class="pricing-row">
-              <span>Taxes et frais</span>
-              <input class="taxes-input" type="number" placeholder="Saisie le montant"
-                [value]="taxes() || ''"
-                (input)="taxes.set(+$any($event.target).value || 0)" />
-            </div>
-            <div class="pricing-divider"></div>
-
-            <div class="pricing-row">
-              <span>Réduction</span>
-              <span>{{ fmt(discountAmount()) }} FCFA</span>
-            </div>
-
-            <!-- Discount pills -->
-            <div class="discount-pills">
-              <button class="disc-pill" [class.disc-pill--active]="discount() === 'none'"
-                (click)="discount.set('none')">Aucune remise</button>
-              <button class="disc-pill" [class.disc-pill--active]="discount() === '5'"
-                (click)="discount.set('5')">5%</button>
-              <button class="disc-pill" [class.disc-pill--active]="discount() === '10'"
-                (click)="discount.set('10')">10%</button>
-              <button class="disc-pill" [class.disc-pill--active]="discount() === '15'"
-                (click)="discount.set('15')">15%</button>
-              <button class="disc-pill" [class.disc-pill--active]="discount() === '30'"
-                (click)="discount.set('30')">30%</button>
-              <button class="disc-pill disc-pill--promo" [class.disc-pill--active]="discount() === 'promo'"
-                (click)="discount.set('promo')">Code promotionnel</button>
-            </div>
-
-            <!-- Promo code row -->
-            <div class="promo-row">
-              <input class="promo-input" type="text" placeholder="Entrer votre code promo"
-                [value]="promoCode()"
-                (input)="promoCode.set($any($event.target).value)" />
-              <button class="promo-apply-btn">Appliquer</button>
-            </div>
-
-            <div class="pricing-divider pricing-divider--heavy"></div>
-
-            <div class="pricing-row pricing-row--total">
-              <strong>Total à payer</strong>
-              <strong>{{ fmt(totalToPay()) }} FCFA</strong>
-            </div>
-            <div class="pricing-divider"></div>
-
-            <!-- Payment method -->
-            <div class="pricing-row">
-              <span>Mode de paiement</span>
-              <div class="payment-select">
-                <span class="wave-logo">W</span>
-                <span>Wave</span>
-                <i class="pi pi-chevron-down"></i>
-              </div>
-            </div>
+        } @else {
+          <div class="action-bar">
+            <button class="btn-prev" (click)="prevStep()">
+              <i class="pi pi-arrow-left"></i>&nbsp; Précédent
+            </button>
+            <button class="btn-next">Enregistrer</button>
           </div>
-        </div>
-      }
+        }
 
-      <!-- ── STEP 5: Récapitulatif ────────────────────────── -->
-      @if (currentStep() === 5) {
-        <div class="step-content">
-          <p class="step-section-title">Récapitulatif</p>
-
-          <div class="recap-card">
-            <div class="recap-top-row">
-              <div class="recap-icon-col">
-                <div class="recap-room-icon">
-                  <i class="pi pi-key"></i>
-                </div>
-                <div class="recap-room-info">
-                  <p class="recap-booking-id">Booking ID #0052466623</p>
-                  <p class="recap-room-name">Queen Room Deluxe A09244</p>
-                  <p class="recap-guest">Valentin Kouadio</p>
-                  <p class="recap-phone"><i class="pi pi-phone"></i>&nbsp; +225 07 58 23 41 89</p>
-                </div>
-              </div>
-
-              <div class="recap-meta">
-                <div class="meta-stat">
-                  <i class="pi pi-user meta-icon"></i>
-                  <div>
-                    <p class="meta-value">{{ adults() }}</p>
-                    <small class="meta-lbl">Nombre d'adultes</small>
-                  </div>
-                </div>
-                <div class="meta-stat">
-                  <i class="pi pi-inbox meta-icon"></i>
-                  <div>
-                    <p class="meta-value">Double</p>
-                    <small class="meta-lbl">type de lit</small>
-                  </div>
-                </div>
-                <div class="meta-stat">
-                  <i class="pi pi-calendar meta-icon"></i>
-                  <div>
-                    <p class="meta-value">{{ arrivalDate() }} – {{ departureDate() }}</p>
-                    <small class="meta-lbl">Date de reservation</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="recap-options-row">
-              <div class="recap-options-label">
-                <i class="pi pi-info-circle"></i>
-                <span>Options supplémentaires</span>
-              </div>
-              <span class="recap-options-list">
-                {{ selectedOptionNames() || 'Aucune option sélectionnée' }}
-              </span>
-            </div>
-
-            <div class="room-photos">
-              @for (photo of roomPhotos; track photo) {
-                <img class="room-photo" [src]="photo" alt="" />
-              }
-              <button class="gallery-btn">
-                <i class="pi pi-arrow-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- ── Action bar ──────────────────────────────────── -->
-      @if (currentStep() < 5) {
-        <div class="action-bar">
-          <button class="btn-prev" (click)="prevStep()">
-            <i class="pi pi-arrow-left"></i>&nbsp; Précédent
-          </button>
-
-          @if (currentStep() < 4) {
-            <button class="btn-next" (click)="nextStep()">Continuer</button>
-          } @else {
-            <div class="step4-actions">
-              <button class="btn-draft">Enregistrer comme brouillon</button>
-              <button class="btn-validate" (click)="nextStep()">Valider</button>
-            </div>
-          }
-        </div>
-      } @else {
-        <div class="action-bar action-bar--end">
-          <button class="btn-next">Enregistrer</button>
-        </div>
-      }
-
-    </div><!-- /ajout-card -->
+      </div><!-- /ajout-card -->
+    </div><!-- /ajout-right-col -->
   </div><!-- /ajout-body -->
 </div>

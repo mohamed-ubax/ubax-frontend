@@ -1,0 +1,518 @@
+<div class="client-detail-page">
+  <header class="client-detail-page__header">
+    <button
+      class="client-detail-page__back"
+      type="button"
+      aria-label="Retour à la page précédente"
+      (click)="goBack()"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </button>
+
+    <h1 class="client-detail-page__title">Détails client</h1>
+  </header>
+
+  <section
+    class="client-overview-card"
+    aria-label="Informations principales du client"
+  >
+    <div class="client-overview-card__media-column">
+      <img
+        class="client-overview-card__portrait"
+        [src]="client().identity.portrait"
+        [alt]="client().identity.name"
+        loading="eager"
+        decoding="async"
+      />
+
+      <div class="client-documents">
+        @for (document of client().identity.documents; track document.label) {
+          <div class="client-documents__row">
+            <div class="client-documents__file-pill">
+              <img
+                class="client-documents__file-icon"
+                src="client-detail/icons/document.svg"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+              <span class="client-documents__file-label">{{
+                document.label
+              }}</span>
+            </div>
+
+            <div class="client-documents__actions">
+              <button
+                class="client-documents__action"
+                type="button"
+                aria-label="Prévisualiser le document"
+              >
+                <img
+                  src="client-detail/icons/eye.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+
+              <button
+                class="client-documents__action"
+                type="button"
+                aria-label="Télécharger le document"
+              >
+                <img
+                  src="client-detail/icons/download.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="client-overview-card__details-column">
+      <h2 class="client-overview-card__name">{{ client().identity.name }}</h2>
+
+      <div class="client-overview-card__contacts">
+        <div
+          class="client-overview-card__contact client-overview-card__contact--phone"
+        >
+          <img
+            src="client-detail/icons/phone.svg"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span>{{ client().identity.phone }}</span>
+        </div>
+
+        <div
+          class="client-overview-card__contact client-overview-card__contact--mail"
+        >
+          <img
+            src="client-detail/icons/mail.svg"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span>{{ client().identity.email }}</span>
+        </div>
+      </div>
+
+      <div class="client-overview-card__details-grid">
+        <div
+          class="client-overview-card__detail client-overview-card__detail--arrival"
+        >
+          <p class="client-overview-card__detail-label">Arrivée</p>
+          <div class="client-overview-card__date-row">
+            <img
+              src="client-detail/icons/calendar.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="client-overview-card__date-value">{{
+              client().stay.arrival
+            }}</span>
+          </div>
+        </div>
+
+        <div
+          class="client-overview-card__detail client-overview-card__detail--departure"
+        >
+          <p class="client-overview-card__detail-label">Départ</p>
+          <div class="client-overview-card__date-row">
+            <img
+              src="client-detail/icons/calendar.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="client-overview-card__date-value">{{
+              client().stay.departure
+            }}</span>
+          </div>
+        </div>
+
+        <div class="client-overview-card__detail">
+          <p class="client-overview-card__detail-label">Invité</p>
+          <span
+            class="client-overview-card__detail-value client-overview-card__detail-value--regular"
+            >{{ client().stay.guestCount }}</span
+          >
+        </div>
+
+        <div class="client-overview-card__detail">
+          <p class="client-overview-card__detail-label">Type de chambre</p>
+          <span
+            class="client-overview-card__detail-value client-overview-card__detail-value--regular"
+            >{{ client().stay.roomType }}</span
+          >
+        </div>
+
+        <div class="client-overview-card__detail">
+          <p class="client-overview-card__detail-label">Numéro de chambre</p>
+          <span
+            class="client-overview-card__detail-value client-overview-card__detail-value--regular"
+            >{{ client().stay.roomNumber }}</span
+          >
+        </div>
+
+        <div class="client-overview-card__detail">
+          <p class="client-overview-card__detail-label">Prix</p>
+          <span class="client-overview-card__detail-value">{{
+            client().stay.rate
+          }}</span>
+        </div>
+
+        <div class="client-overview-card__detail">
+          <p class="client-overview-card__detail-label">Catégorie</p>
+          <span class="client-overview-card__detail-value">{{
+            client().stay.category
+          }}</span>
+        </div>
+
+        <div class="client-overview-card__detail">
+          <p class="client-overview-card__detail-label">Adresse</p>
+          <span class="client-overview-card__detail-value">{{
+            client().stay.address
+          }}</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="reservation-summary-card">
+      <h2 class="reservation-summary-card__title">Résumé de la reservation</h2>
+
+      <div class="reservation-summary-card__thumbs">
+        @for (thumb of client().summary.thumbnails; track thumb) {
+          <img
+            class="reservation-summary-card__thumb"
+            [src]="thumb"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        }
+      </div>
+
+      <div class="reservation-summary-card__charges">
+        @for (charge of client().summary.charges; track charge.label) {
+          <div class="reservation-summary-card__charge-row">
+            <span class="reservation-summary-card__charge-label">{{
+              charge.label
+            }}</span>
+            <span class="reservation-summary-card__charge-amount">{{
+              charge.amount
+            }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="reservation-summary-card__subtotal-row">
+        <span class="reservation-summary-card__subtotal-label">Sous total</span>
+        <span class="reservation-summary-card__subtotal-amount">{{
+          client().summary.subtotal
+        }}</span>
+      </div>
+
+      <div class="reservation-summary-card__total-row">
+        <span class="reservation-summary-card__total-label">total</span>
+        <span class="reservation-summary-card__total-amount">{{
+          client().summary.total
+        }}</span>
+      </div>
+
+      <div class="reservation-summary-card__payment-block">
+        <p class="reservation-summary-card__payment-label">Payé avec</p>
+
+        <div class="reservation-summary-card__payment-pill">
+          <img
+            class="reservation-summary-card__payment-logo"
+            [src]="client().summary.paymentLogo"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+
+          <span class="reservation-summary-card__payment-method">{{
+            client().summary.paymentMethod
+          }}</span>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section
+    class="reservation-history-card"
+    aria-label="Historique de reservations"
+  >
+    <div class="reservation-history-card__header">
+      <h2 class="reservation-history-card__title">
+        Historique de reservations
+      </h2>
+
+      <div class="reservation-history-card__tools">
+        <label
+          class="reservation-history-card__search"
+          aria-label="Recherche dans l'historique des reservations"
+        >
+          <input
+            type="search"
+            placeholder="Recherche"
+            [value]="historySearchValue()"
+            (input)="updateHistorySearch($event)"
+          />
+          <i class="pi pi-search" aria-hidden="true"></i>
+        </label>
+
+        <button
+          class="reservation-history-card__sort"
+          type="button"
+          (click)="toggleHistorySort()"
+        >
+          <span>{{ historySortLabel() }}</span>
+          <i
+            class="pi pi-angle-down reservation-history-card__sort-icon"
+            aria-hidden="true"
+            [class.reservation-history-card__sort-icon--flipped]="
+              isHistorySortedBy('bookingDate') &&
+              historySortDirectionFor('bookingDate') === 'asc'
+            "
+          ></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="reservation-history-card__table-wrap">
+      @if (historyRows().length) {
+        <table
+          class="reservation-history-table"
+          aria-label="Historique de reservations du client"
+        >
+          <thead class="reservation-history-table__head">
+            <tr>
+              <th scope="col" class="reservation-history-table__check-column">
+                <button
+                  class="reservation-history-table__check-button"
+                  type="button"
+                  aria-label="Sélectionner toutes les reservations"
+                  [class.reservation-history-table__check-button--selected]="
+                    allHistoryRowsSelected()
+                  "
+                  [class.reservation-history-table__check-button--partial]="
+                    partiallySelectedHistoryRows()
+                  "
+                  (click)="toggleAllHistorySelections()"
+                ></button>
+              </th>
+              <th scope="col" [attr.aria-sort]="historyAriaSort('space')">
+                <button
+                  class="reservation-history-table__head-button"
+                  type="button"
+                  (click)="setHistorySort('space')"
+                >
+                  <span>Espaces</span>
+                  <span
+                    class="reservation-history-table__sort-indicator"
+                    [class.reservation-history-table__sort-indicator--active]="
+                      isHistorySortedBy('space')
+                    "
+                    [class.reservation-history-table__sort-indicator--asc]="
+                      historySortDirectionFor('space') === 'asc'
+                    "
+                    [class.reservation-history-table__sort-indicator--desc]="
+                      historySortDirectionFor('space') === 'desc'
+                    "
+                  ></span>
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="historyAriaSort('bookingDate')">
+                <button
+                  class="reservation-history-table__head-button"
+                  type="button"
+                  (click)="setHistorySort('bookingDate')"
+                >
+                  <span>Réservation</span>
+                  <span
+                    class="reservation-history-table__sort-indicator"
+                    [class.reservation-history-table__sort-indicator--active]="
+                      isHistorySortedBy('bookingDate')
+                    "
+                    [class.reservation-history-table__sort-indicator--asc]="
+                      historySortDirectionFor('bookingDate') === 'asc'
+                    "
+                    [class.reservation-history-table__sort-indicator--desc]="
+                      historySortDirectionFor('bookingDate') === 'desc'
+                    "
+                  ></span>
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="historyAriaSort('stayPeriod')">
+                <button
+                  class="reservation-history-table__head-button"
+                  type="button"
+                  (click)="setHistorySort('stayPeriod')"
+                >
+                  <span>Séjour</span>
+                  <span
+                    class="reservation-history-table__sort-indicator"
+                    [class.reservation-history-table__sort-indicator--active]="
+                      isHistorySortedBy('stayPeriod')
+                    "
+                    [class.reservation-history-table__sort-indicator--asc]="
+                      historySortDirectionFor('stayPeriod') === 'asc'
+                    "
+                    [class.reservation-history-table__sort-indicator--desc]="
+                      historySortDirectionFor('stayPeriod') === 'desc'
+                    "
+                  ></span>
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="historyAriaSort('amount')">
+                <button
+                  class="reservation-history-table__head-button"
+                  type="button"
+                  (click)="setHistorySort('amount')"
+                >
+                  <span>Montant</span>
+                  <span
+                    class="reservation-history-table__sort-indicator"
+                    [class.reservation-history-table__sort-indicator--active]="
+                      isHistorySortedBy('amount')
+                    "
+                    [class.reservation-history-table__sort-indicator--asc]="
+                      historySortDirectionFor('amount') === 'asc'
+                    "
+                    [class.reservation-history-table__sort-indicator--desc]="
+                      historySortDirectionFor('amount') === 'desc'
+                    "
+                  ></span>
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="historyAriaSort('status')">
+                <button
+                  class="reservation-history-table__head-button"
+                  type="button"
+                  (click)="setHistorySort('status')"
+                >
+                  <span>Statut</span>
+                  <span
+                    class="reservation-history-table__sort-indicator"
+                    [class.reservation-history-table__sort-indicator--active]="
+                      isHistorySortedBy('status')
+                    "
+                    [class.reservation-history-table__sort-indicator--asc]="
+                      historySortDirectionFor('status') === 'asc'
+                    "
+                    [class.reservation-history-table__sort-indicator--desc]="
+                      historySortDirectionFor('status') === 'desc'
+                    "
+                  ></span>
+                </button>
+              </th>
+              <th scope="col" class="reservation-history-table__action-column">
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody class="reservation-history-table__body">
+            @for (entry of historyRows(); track entry.id) {
+              <tr class="reservation-history-table__row">
+                <td class="reservation-history-table__check-column">
+                  <button
+                    class="reservation-history-table__check-button"
+                    type="button"
+                    [attr.aria-label]="
+                      'Sélectionner la reservation ' + entry.title
+                    "
+                    [class.reservation-history-table__check-button--selected]="
+                      isHistoryRowSelected(entry.id)
+                    "
+                    (click)="toggleHistorySelection(entry.id)"
+                  ></button>
+                </td>
+
+                <td class="reservation-history-table__space-cell">
+                  <div class="reservation-history-table__space">
+                    <img
+                      class="reservation-history-table__space-thumb"
+                      [src]="entry.thumbnail"
+                      [alt]="entry.title"
+                      loading="lazy"
+                      decoding="async"
+                    />
+
+                    <div class="reservation-history-table__space-copy">
+                      <h3 class="reservation-history-table__space-title">
+                        {{ entry.title }}
+                      </h3>
+                      <p class="reservation-history-table__space-subtitle">
+                        {{ entry.subtitle }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="reservation-history-table__text-cell">
+                  <span class="reservation-history-table__text">
+                    {{ entry.bookingDate }}
+                  </span>
+                </td>
+                <td class="reservation-history-table__text-cell">
+                  <span
+                    class="reservation-history-table__text reservation-history-table__text--period"
+                  >
+                    {{ entry.stayPeriod }}
+                  </span>
+                </td>
+                <td class="reservation-history-table__amount-cell">
+                  <span class="reservation-history-table__amount">{{
+                    entry.amount
+                  }}</span>
+                </td>
+
+                <td class="reservation-history-table__status-cell">
+                  <span
+                    class="reservation-history-table__status-badge"
+                    [class.reservation-history-table__status-badge--active]="
+                      entry.tone === 'active'
+                    "
+                    [class.reservation-history-table__status-badge--completed]="
+                      entry.tone === 'completed'
+                    "
+                    [class.reservation-history-table__status-badge--cancelled]="
+                      entry.tone === 'cancelled'
+                    "
+                  >
+                    {{ entry.status }}
+                  </span>
+                </td>
+
+                <td class="reservation-history-table__actions-cell">
+                  <a
+                    class="reservation-history-table__menu-action"
+                    [routerLink]="['/hotel/espaces', entry.spaceId]"
+                    [attr.aria-label]="
+                      'Voir les détails de l\'espace ' + entry.title
+                    "
+                  >
+                    <i class="pi pi-ellipsis-v" aria-hidden="true"></i>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="reservation-history-table__empty">
+          Aucune reservation ne correspond a votre recherche.
+        </div>
+      }
+    </div>
+  </section>
+</div>

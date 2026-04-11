@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 interface CalReservation {
@@ -19,9 +24,18 @@ interface CalendarDay {
   isToday: boolean;
 }
 
+interface CalendarWeekEvent extends CalReservation {
+  startCol: number;
+  endCol: number;
+  row: number;
+  spanDays: number;
+}
+
 interface WeekWithEvents {
   days: CalendarDay[];
-  events: Array<CalReservation & { startCol: number; endCol: number }>;
+  events: CalendarWeekEvent[];
+  rowCount: number;
+  minHeight: number;
 }
 
 @Component({
@@ -35,17 +49,37 @@ interface WeekWithEvents {
 export class CalendrierPageComponent {
   activeView = signal<'Jour' | 'Semaine' | 'Mois' | 'Année'>('Mois');
 
+  private readonly weekBaseHeight = 156;
+  private readonly weekRowOffset = 82;
+
   private readonly today = new Date();
-  currentDate = signal(new Date(this.today.getFullYear(), this.today.getMonth(), 1));
+  currentDate = signal(
+    new Date(this.today.getFullYear(), this.today.getMonth(), 1),
+  );
 
   readonly monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
   ];
 
   readonly dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
-  readonly views: Array<'Jour' | 'Semaine' | 'Mois' | 'Année'> = ['Jour', 'Semaine', 'Mois', 'Année'];
+  readonly views: Array<'Jour' | 'Semaine' | 'Mois' | 'Année'> = [
+    'Jour',
+    'Semaine',
+    'Mois',
+    'Année',
+  ];
 
   readonly monthLabel = computed(() => {
     const d = this.currentDate();
@@ -54,57 +88,93 @@ export class CalendrierPageComponent {
 
   private readonly reservations: CalReservation[] = [
     {
-      id: '1', guest: 'Konan Olivier', property: 'résidence Plateau',
-      amount: '150 000 FCFA', dateRange: '06 - 08 avr.',
-      start: new Date(2026, 3, 6), end: new Date(2026, 3, 8),
+      id: '1',
+      guest: 'Konan Olivier',
+      property: 'résidence Plateau',
+      amount: '150 000 FCFA',
+      dateRange: '06 - 08 avr.',
+      start: new Date(2026, 3, 6),
+      end: new Date(2026, 3, 8),
       color: 'green',
     },
     {
-      id: '2', guest: 'Konan Olivier', property: 'résidence Plateau',
-      amount: '150 000 FCFA', dateRange: '20 - 22 avr.',
-      start: new Date(2026, 3, 20), end: new Date(2026, 3, 22),
+      id: '2',
+      guest: 'Konan Olivier',
+      property: 'résidence Plateau',
+      amount: '150 000 FCFA',
+      dateRange: '20 - 22 avr.',
+      start: new Date(2026, 3, 20),
+      end: new Date(2026, 3, 22),
       color: 'green',
     },
     {
-      id: '3', guest: 'Konan Olivier', property: 'Villa Riviera',
-      amount: '150 000 FCFA', dateRange: '09 - 11 avr.',
-      start: new Date(2026, 3, 9), end: new Date(2026, 3, 11),
+      id: '3',
+      guest: 'Konan Olivier',
+      property: 'Villa Riviera',
+      amount: '150 000 FCFA',
+      dateRange: '09 - 11 avr.',
+      start: new Date(2026, 3, 9),
+      end: new Date(2026, 3, 11),
       color: 'blue',
     },
     {
-      id: '4', guest: 'Konan Olivier', property: 'Villa Riviera',
-      amount: '150 000 FCFA', dateRange: '14 - 16 avr.',
-      start: new Date(2026, 3, 14), end: new Date(2026, 3, 16),
+      id: '4',
+      guest: 'Konan Olivier',
+      property: 'Villa Riviera',
+      amount: '150 000 FCFA',
+      dateRange: '14 - 16 avr.',
+      start: new Date(2026, 3, 14),
+      end: new Date(2026, 3, 16),
       color: 'blue',
     },
     {
-      id: '5', guest: 'Konan Olivier', property: 'Villa Riviera',
-      amount: '150 000 FCFA', dateRange: '23 - 25 avr.',
-      start: new Date(2026, 3, 23), end: new Date(2026, 3, 25),
+      id: '5',
+      guest: 'Konan Olivier',
+      property: 'Villa Riviera',
+      amount: '150 000 FCFA',
+      dateRange: '23 - 25 avr.',
+      start: new Date(2026, 3, 23),
+      end: new Date(2026, 3, 25),
       color: 'blue',
     },
     {
-      id: '6', guest: 'Konan Olivier', property: 'Villa Riviera',
-      amount: '150 000 FCFA', dateRange: '28 - 30 avr.',
-      start: new Date(2026, 3, 28), end: new Date(2026, 3, 30),
+      id: '6',
+      guest: 'Konan Olivier',
+      property: 'Villa Riviera',
+      amount: '150 000 FCFA',
+      dateRange: '28 - 30 avr.',
+      start: new Date(2026, 3, 28),
+      end: new Date(2026, 3, 30),
       color: 'blue',
     },
     {
-      id: '7', guest: 'Konan Olivier', property: 'Appartement meublé',
-      amount: '150 000 FCFA', dateRange: '02 - 04 avr.',
-      start: new Date(2026, 3, 2), end: new Date(2026, 3, 4),
+      id: '7',
+      guest: 'Konan Olivier',
+      property: 'Appartement meublé',
+      amount: '150 000 FCFA',
+      dateRange: '02 - 04 avr.',
+      start: new Date(2026, 3, 2),
+      end: new Date(2026, 3, 4),
       color: 'orange',
     },
     {
-      id: '8', guest: 'Konan Olivier', property: 'Appartement meublé',
-      amount: '150 000 FCFA', dateRange: '17 - 19 avr.',
-      start: new Date(2026, 3, 17), end: new Date(2026, 3, 19),
+      id: '8',
+      guest: 'Konan Olivier',
+      property: 'Appartement meublé',
+      amount: '150 000 FCFA',
+      dateRange: '17 - 19 avr.',
+      start: new Date(2026, 3, 17),
+      end: new Date(2026, 3, 19),
       color: 'orange',
     },
     {
-      id: '9', guest: 'Konan Olivier', property: 'Appartement meublé',
-      amount: '150 000 FCFA', dateRange: '26 - 28 avr.',
-      start: new Date(2026, 3, 26), end: new Date(2026, 3, 28),
+      id: '9',
+      guest: 'Konan Olivier',
+      property: 'Appartement meublé',
+      amount: '150 000 FCFA',
+      dateRange: '26 - 28 avr.',
+      start: new Date(2026, 3, 26),
+      end: new Date(2026, 3, 28),
       color: 'orange',
     },
   ];
@@ -129,13 +199,23 @@ export class CalendrierPageComponent {
     const startDow = firstDay.getDay();
     for (let i = startDow - 1; i >= 0; i--) {
       const date = new Date(year, month, -i);
-      days.push({ date, dayNumber: date.getDate(), isCurrentMonth: false, isToday: false });
+      days.push({
+        date,
+        dayNumber: date.getDate(),
+        isCurrentMonth: false,
+        isToday: false,
+      });
     }
 
     // Current month
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
-      days.push({ date, dayNumber: day, isCurrentMonth: true, isToday: date.toDateString() === todayStr });
+      days.push({
+        date,
+        dayNumber: day,
+        isCurrentMonth: true,
+        isToday: date.toDateString() === todayStr,
+      });
     }
 
     // Fill remaining cells to complete last row
@@ -143,7 +223,12 @@ export class CalendrierPageComponent {
     if (remainder !== 0) {
       for (let i = 1; i <= 7 - remainder; i++) {
         const date = new Date(year, month + 1, i);
-        days.push({ date, dayNumber: i, isCurrentMonth: false, isToday: false });
+        days.push({
+          date,
+          dayNumber: i,
+          isCurrentMonth: false,
+          isToday: false,
+        });
       }
     }
 
@@ -155,25 +240,75 @@ export class CalendrierPageComponent {
       const wEnd = this.normalize(week[6].date);
 
       const events = this.reservations
-        .filter(r => this.normalize(r.start) <= wEnd && this.normalize(r.end) >= wStart)
-        .map(r => {
+        .filter(
+          (r) =>
+            this.normalize(r.start) <= wEnd && this.normalize(r.end) >= wStart,
+        )
+        .map((r) => {
           const rStart = this.normalize(r.start);
           const rEnd = this.normalize(r.end);
 
-          const startColIdx = rStart < wStart
-            ? 0
-            : week.findIndex(day => this.normalize(day.date).getTime() === rStart.getTime());
-          const startCol = startColIdx < 0 ? 0 : startColIdx;
+          const startColIdx =
+            rStart < wStart
+              ? 0
+              : week.findIndex(
+                  (day) =>
+                    this.normalize(day.date).getTime() === rStart.getTime(),
+                );
+          const startCol = Math.max(0, startColIdx);
 
-          const endColIdx = rEnd > wEnd
-            ? 6
-            : week.findIndex(day => this.normalize(day.date).getTime() === rEnd.getTime());
+          const endColIdx =
+            rEnd > wEnd
+              ? 6
+              : week.findIndex(
+                  (day) =>
+                    this.normalize(day.date).getTime() === rEnd.getTime(),
+                );
           const endCol = endColIdx < 0 ? 6 : endColIdx;
 
-          return { ...r, startCol, endCol };
+          return {
+            ...r,
+            startCol,
+            endCol,
+            row: 0,
+            spanDays: endCol - startCol + 1,
+          };
+        })
+        .sort((left, right) => {
+          if (left.startCol !== right.startCol) {
+            return left.startCol - right.startCol;
+          }
+
+          if (left.endCol !== right.endCol) {
+            return right.endCol - left.endCol;
+          }
+
+          return left.start.getTime() - right.start.getTime();
         });
 
-      weeks.push({ days: week, events });
+      const rowEndCols: number[] = [];
+      const placedEvents = events.map((event) => {
+        let row = rowEndCols.findIndex(
+          (lastEndCol) => event.startCol > lastEndCol,
+        );
+
+        if (row === -1) {
+          row = rowEndCols.length;
+        }
+
+        rowEndCols[row] = event.endCol;
+
+        return {
+          ...event,
+          row,
+        };
+      });
+
+      const rowCount = Math.max(1, rowEndCols.length);
+      const minHeight =
+        this.weekBaseHeight + (rowCount - 1) * this.weekRowOffset;
+
+      weeks.push({ days: week, events: placedEvents, rowCount, minHeight });
     }
 
     return weeks;
@@ -190,6 +325,8 @@ export class CalendrierPageComponent {
   }
 
   goToToday(): void {
-    this.currentDate.set(new Date(this.today.getFullYear(), this.today.getMonth(), 1));
+    this.currentDate.set(
+      new Date(this.today.getFullYear(), this.today.getMonth(), 1),
+    );
   }
 }
