@@ -1,345 +1,506 @@
-<div class="add-page">
-  <!-- ── Header ──────────────────────────────────────────────────── -->
-  <div class="add-header">
-    <a class="back-btn" routerLink="/hotel/espaces">
-      <i class="pi pi-arrow-left"></i>
-    </a>
-    <h1 class="add-title">Ajouter un espace</h1>
-  </div>
+<div class="espace-add-page">
+  <h1 class="espace-add-page__title">Nouvel espace</h1>
 
-  <!-- ── Type selector ───────────────────────────────────────────── -->
-  <div class="type-selector">
-    <button
-      class="type-btn"
-      [class.type-btn--active]="espaceType() === 'chambre'"
-      (click)="espaceType.set('chambre')"
-    >
-      <i class="pi pi-home"></i>
-      Chambre / Appartement
-    </button>
-    <button
-      class="type-btn"
-      [class.type-btn--active]="espaceType() === 'salle'"
-      (click)="espaceType.set('salle')"
-    >
-      <i class="pi pi-building"></i>
-      Salle de réunion / Événement
-    </button>
-  </div>
-
-  <!-- ── Stepper ─────────────────────────────────────────────────── -->
-  <div class="stepper-bar">
-    @for (step of steps; track $index) {
-      <div
-        class="stepper-step"
-        [class.stepper-step--active]="currentStep() === $index + 1"
-        [class.stepper-step--done]="currentStep() > $index + 1"
+  <div class="type-cards">
+    @for (option of typeCards; track option.value) {
+      <button
+        class="type-card"
+        [class.type-card--active]="espaceType() === option.value"
+        type="button"
+        (click)="setEspaceType(option.value)"
       >
-        <div class="stepper-circle">
-          @if (currentStep() > $index + 1) {
-            <i class="pi pi-check"></i>
-          } @else {
-            {{ $index + 1 }}
-          }
-        </div>
-        <span class="stepper-label">{{ step.label }}</span>
-      </div>
-      @if ($index < steps.length - 1) {
-        <div
-          class="stepper-line"
-          [class.stepper-line--done]="currentStep() > $index + 1"
-        ></div>
-      }
+        <span class="type-card__head">
+          <span class="type-card__icon-wrap" aria-hidden="true">
+            <img [src]="option.icon" alt="" />
+          </span>
+
+          <span
+            class="type-card__check"
+            [class.type-card__check--active]="espaceType() === option.value"
+            aria-hidden="true"
+          >
+            @if (espaceType() === option.value) {
+              <img src="space-add/icons/check.svg" alt="" />
+            }
+          </span>
+        </span>
+
+        <span class="type-card__content">
+          <span class="type-card__title">{{ option.title }}</span>
+          <span class="type-card__description">{{ option.description }}</span>
+        </span>
+      </button>
     }
   </div>
 
-  <!-- ── Main card ───────────────────────────────────────────────── -->
-  <div class="add-card">
-    <!-- Sidebar -->
-    <div class="add-sidebar">
-      <div class="sidebar-icon">
-        <i class="pi {{ currentSidebar.icon }}"></i>
-      </div>
-      <p class="sidebar-title">{{ currentSidebar.title }}</p>
-      <p class="sidebar-desc">{{ currentSidebar.desc }}</p>
-    </div>
+  <div class="page-layout">
+    <div class="main-column">
+      <section class="section-card section-card--identity">
+        <header class="section-card__header">
+          <span class="section-card__icon" aria-hidden="true">
+            <img src="space-add/icons/file-document.svg" alt="" />
+          </span>
 
-    <!-- Form content -->
-    <div class="add-form">
-      <!-- ── Step 1: Informations générales ─────────────────────── -->
-      @if (currentStep() === 1) {
-        <div class="form-grid">
-          <div class="field-group field-group--full">
-            <label class="field-label" for="titre">Titre de l'espace</label>
-            <input
-              id="titre"
-              class="field-input"
-              type="text"
-              placeholder="Ex: Chambre Queen Deluxe A-101"
-              [value]="titre()"
-              (input)="titre.set($any($event.target).value)"
-            />
+          <div class="section-card__heading">
+            <h2>Identité de l'espace</h2>
+            <p>Nom, numéro, localisation</p>
+          </div>
+        </header>
+
+        <div class="section-card__body section-card__body--identity">
+          <div class="identity-grid">
+            <div class="field-box">
+              <label class="field-box__label" for="espace-code"
+                >Numéro / Code</label
+              >
+              <div class="field-box__control">
+                <input
+                  id="espace-code"
+                  class="field-box__input"
+                  type="text"
+                  [value]="draft.code"
+                  (input)="updateDraftField('code', $any($event.target).value)"
+                />
+              </div>
+            </div>
+
+            <div class="field-box">
+              <label class="field-box__label" for="espace-name"
+                >Nom de l'espace</label
+              >
+              <div class="field-box__control">
+                <input
+                  id="espace-name"
+                  class="field-box__input"
+                  type="text"
+                  [value]="draft.name"
+                  (input)="updateDraftField('name', $any($event.target).value)"
+                />
+              </div>
+            </div>
+
+            <div class="field-box field-box--full field-box--types">
+              <p class="field-box__label">{{ currentTypeFieldLabel }}</p>
+
+              <div class="type-manager">
+                <div class="type-manager__hint">{{ draft.typeHint }}</div>
+
+                <div class="type-manager__list">
+                  @for (item of draft.typeItems; track item.id) {
+                    <div class="type-manager__row">
+                      <span class="type-manager__item">{{ item.label }}</span>
+
+                      <div class="type-manager__actions">
+                        <button
+                          class="type-manager__icon-btn"
+                          type="button"
+                          aria-label="Modifier le type"
+                        >
+                          <img src="space-add/icons/edit.svg" alt="" />
+                        </button>
+                        <button
+                          class="type-manager__icon-btn"
+                          type="button"
+                          aria-label="Supprimer le type"
+                        >
+                          <img src="space-add/icons/delete.svg" alt="" />
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <button class="type-manager__add" type="button">
+                  <img src="space-add/icons/add.svg" alt="" />
+                  <span>Ajouter un type</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-box field-box--full">
+              <p class="field-box__label">Etage</p>
+
+              <div class="floor-selector">
+                @for (floor of floorOptions; track floor) {
+                  <button
+                    class="floor-selector__chip"
+                    [class.floor-selector__chip--active]="
+                      draft.selectedFloor === floor
+                    "
+                    type="button"
+                    (click)="selectFloor(floor)"
+                  >
+                    {{ floor }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="section-card"
+        [class.section-card--capacity-room]="isRoom"
+        [class.section-card--capacity-hall]="!isRoom"
+      >
+        <header class="section-card__header">
+          <span class="section-card__icon" aria-hidden="true">
+            <img src="space-add/icons/file-document.svg" alt="" />
+          </span>
+
+          <div class="section-card__heading">
+            <h2>Identité Capacité &amp; Superficie de l'espace</h2>
+            <p>Dimensions et occupation</p>
+          </div>
+        </header>
+
+        <div class="section-card__body section-card__body--capacity">
+          @if (isRoom) {
+            <div class="capacity-grid capacity-grid--room">
+              <div class="field-box">
+                <label class="field-box__label" for="room-adults"
+                  >Capacité adultes</label
+                >
+                <div class="field-box__control">
+                  <input
+                    id="room-adults"
+                    class="field-box__input"
+                    type="text"
+                    [value]="roomDraft.adults"
+                    (input)="
+                      updateRoomField('adults', $any($event.target).value)
+                    "
+                  />
+                </div>
+              </div>
+
+              <div class="field-box field-box--select">
+                <label class="field-box__label" for="room-children"
+                  >Lits enfants</label
+                >
+                <div class="field-box__control field-box__control--select">
+                  <input
+                    id="room-children"
+                    class="field-box__input"
+                    type="text"
+                    [value]="roomDraft.children"
+                    (input)="
+                      updateRoomField('children', $any($event.target).value)
+                    "
+                  />
+                  <img
+                    class="field-box__select-icon"
+                    src="space-add/icons/select.svg"
+                    alt=""
+                  />
+                </div>
+              </div>
+
+              <div class="field-box field-box--unit">
+                <label class="field-box__label" for="room-area"
+                  >Superficie</label
+                >
+                <div class="field-box__control field-box__control--unit">
+                  <input
+                    id="room-area"
+                    class="field-box__input"
+                    type="text"
+                    [value]="roomDraft.area"
+                    (input)="updateRoomField('area', $any($event.target).value)"
+                  />
+                  <span class="field-box__unit">m2</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bed-options">
+              <p class="field-box__label">Type de lit</p>
+
+              <div class="bed-options__list">
+                @for (option of roomDraft.bedOptions; track option) {
+                  <button
+                    class="bed-options__item"
+                    [class.bed-options__item--active]="
+                      roomDraft.bedType === option
+                    "
+                    type="button"
+                    (click)="selectBedType(option)"
+                  >
+                    <span>{{ option }}</span>
+                    <span class="bed-options__marker"></span>
+                  </button>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="capacity-grid capacity-grid--hall">
+              <div class="field-box field-box--select">
+                <label class="field-box__label" for="hall-people"
+                  >Capacité personne</label
+                >
+                <div class="field-box__control field-box__control--select">
+                  <input
+                    id="hall-people"
+                    class="field-box__input"
+                    type="text"
+                    [value]="hallDraft.people"
+                    (input)="
+                      updateHallField('people', $any($event.target).value)
+                    "
+                  />
+                  <img
+                    class="field-box__select-icon"
+                    src="space-add/icons/select.svg"
+                    alt=""
+                  />
+                </div>
+              </div>
+
+              <div class="field-box field-box--unit">
+                <label class="field-box__label" for="hall-area"
+                  >Superficie</label
+                >
+                <div class="field-box__control field-box__control--unit">
+                  <input
+                    id="hall-area"
+                    class="field-box__input"
+                    type="text"
+                    [value]="hallDraft.area"
+                    (input)="updateHallField('area', $any($event.target).value)"
+                  />
+                  <span class="field-box__unit">m2</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="section-card section-card--equipments">
+        <header class="section-card__header">
+          <span
+            class="section-card__icon section-card__icon--sparkle"
+            aria-hidden="true"
+            >✨</span
+          >
+
+          <div class="section-card__heading">
+            <h2>Équipements &amp; Services</h2>
+            <p>Sélectionner les équipements disponibles</p>
+          </div>
+        </header>
+
+        <div class="section-card__body section-card__body--equipments">
+          <p class="section-body__label">Équipements</p>
+
+          <div class="equipment-grid">
+            @for (item of equipmentItems; track item.id) {
+              <button
+                class="equipment-card"
+                [class.equipment-card--active]="isEquipmentSelected(item.id)"
+                [attr.aria-pressed]="isEquipmentSelected(item.id)"
+                type="button"
+                (click)="toggleEquipment(item.id)"
+              >
+                <span class="equipment-card__left">
+                  <img src="space-add/icons/mode-cool.svg" alt="" />
+                  <span>{{ item.label }}</span>
+                </span>
+                <span
+                  class="equipment-card__action"
+                  [class.equipment-card__action--active]="
+                    isEquipmentSelected(item.id)
+                  "
+                  aria-hidden="true"
+                >
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card section-card--pricing">
+        <header class="section-card__header">
+          <span class="section-card__icon" aria-hidden="true">
+            <img src="space-add/icons/file-document.svg" alt="" />
+          </span>
+
+          <div class="section-card__heading">
+            <h2>Tarification</h2>
+            <p>Prix selon les saisons et conditions</p>
+          </div>
+        </header>
+
+        <div class="section-card__body section-card__body--pricing">
+          <div class="pricing-row">
+            <label class="pricing-row__label" for="price-standard"
+              >Tarif standard (nuit)</label
+            >
+            <div class="pricing-row__control">
+              <input
+                id="price-standard"
+                class="pricing-row__input"
+                type="text"
+                [value]="draft.standardRate"
+                (input)="
+                  updateDraftField('standardRate', $any($event.target).value)
+                "
+              />
+              <span class="pricing-row__unit">FCFA</span>
+            </div>
           </div>
 
-          <div class="field-group">
-            <label class="field-label" for="superficie">Superficie (m²)</label>
-            <input
-              id="superficie"
-              class="field-input"
-              type="text"
-              placeholder="Ex: 35"
-              [value]="superficie()"
-              (input)="superficie.set($any($event.target).value)"
-            />
+          <div class="pricing-row">
+            <label class="pricing-row__label" for="price-weekend"
+              >Tarif week-end (nuit)</label
+            >
+            <div class="pricing-row__control">
+              <input
+                id="price-weekend"
+                class="pricing-row__input"
+                type="text"
+                [value]="draft.weekendRate"
+                (input)="
+                  updateDraftField('weekendRate', $any($event.target).value)
+                "
+              />
+              <span class="pricing-row__unit">FCFA</span>
+            </div>
           </div>
 
-          <div class="field-group">
-            <label class="field-label" for="capacite">
-              @if (espaceType() === 'chambre') {
-                Capacité (personnes)
-              } @else {
-                Capacité (participants)
-              }
-            </label>
-            <input
-              id="capacite"
-              class="field-input"
-              type="text"
-              placeholder="Ex: 2"
-              [value]="capacite()"
-              (input)="capacite.set($any($event.target).value)"
-            />
+          <div class="pricing-row pricing-row--last">
+            <label class="pricing-row__label" for="price-longstay"
+              >Tarif long séjour (nuit)</label
+            >
+            <div class="pricing-row__control">
+              <input
+                id="price-longstay"
+                class="pricing-row__input"
+                type="text"
+                [value]="draft.longStayRate"
+                (input)="
+                  updateDraftField('longStayRate', $any($event.target).value)
+                "
+              />
+              <span class="pricing-row__unit">FCFA</span>
+            </div>
           </div>
 
-          <div class="field-group">
-            <label class="field-label" for="etage">Étage</label>
-            <input
-              id="etage"
-              class="field-input"
-              type="text"
-              placeholder="Ex: 3ème étage"
-              [value]="etage()"
-              (input)="etage.set($any($event.target).value)"
-            />
-          </div>
-
-          <div class="field-group">
-            <label class="field-label" for="location">Localisation</label>
-            <input
-              id="location"
-              class="field-input"
-              type="text"
-              placeholder="Ex: Abidjan, Cocody"
-              [value]="location()"
-              (input)="location.set($any($event.target).value)"
-            />
-          </div>
-
-          <div class="field-group field-group--full">
-            <label class="field-label" for="description">Description</label>
+          <div class="notes-block">
+            <label class="notes-block__label" for="price-notes"
+              >Description &amp; notes internes</label
+            >
             <textarea
-              id="description"
-              class="field-input field-textarea"
-              placeholder="Décrivez votre espace..."
+              id="price-notes"
+              class="notes-block__textarea"
               rows="4"
-              [value]="description()"
-              (input)="description.set($any($event.target).value)"
+              [value]="draft.notes"
+              (input)="updateDraftField('notes', $any($event.target).value)"
             ></textarea>
           </div>
         </div>
-      }
+      </section>
 
-      <!-- ── Step 2: Photos & Équipements ──────────────────────── -->
-      @if (currentStep() === 2) {
-        <div class="step2-layout">
-          <!-- Photo upload -->
-          <div class="field-group field-group--full">
-            <p class="field-label">Photos</p>
-            <button type="button" id="photos" class="upload-zone">
-              <i class="pi pi-cloud-upload upload-zone__icon"></i>
-              <span class="upload-zone__text"
-                >Cliquer pour importer des photos</span
-              >
-              <span class="upload-zone__hint"
-                >JPG, PNG, WEBP · max 5 Mo par photo</span
-              >
-            </button>
+      <section class="section-card section-card--gallery">
+        <header class="section-card__header">
+          <span class="section-card__icon" aria-hidden="true">
+            <img src="space-add/icons/file-document.svg" alt="" />
+          </span>
+
+          <div class="section-card__heading">
+            <h2>Galerie photo</h2>
+            <p>Ajouter jusqu'à 8 photos (JPG, PNG — max 5 Mo)</p>
           </div>
+        </header>
 
-          <!-- Équipements chambre -->
-          @if (espaceType() === 'chambre') {
-            <div class="field-group field-group--full">
-              <p class="field-label">Équipements disponibles</p>
-              <div class="equipements-picker">
-                @for (eq of equipementsDisponibles; track eq) {
-                  <button
-                    class="eq-chip"
-                    [class.eq-chip--selected]="equipements().includes(eq)"
-                    (click)="toggleEquipement(eq)"
-                  >
-                    @if (equipements().includes(eq)) {
-                      <i class="pi pi-check"></i>
-                    }
-                    {{ eq }}
-                  </button>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- Équipements salle -->
-          @if (espaceType() === 'salle') {
-            <div class="field-group field-group--full">
-              <p class="field-label">Équipements disponibles</p>
-              <div class="equipements-picker">
-                @for (eq of equipSalleDisponibles; track eq) {
-                  <button
-                    class="eq-chip"
-                    [class.eq-chip--selected]="equipSalle().includes(eq)"
-                    (click)="toggleEquipSalle(eq)"
-                  >
-                    @if (equipSalle().includes(eq)) {
-                      <i class="pi pi-check"></i>
-                    }
-                    {{ eq }}
-                  </button>
-                }
-              </div>
-            </div>
-          }
+        <div class="section-card__body section-card__body--gallery">
+          <div class="gallery-grid">
+            @for (image of draft.gallery; track image) {
+              <figure class="gallery-grid__item">
+                <img [src]="image" alt="Vue de l'espace" />
+              </figure>
+            }
+          </div>
         </div>
-      }
+      </section>
 
-      <!-- ── Step 3: Tarification ───────────────────────────────── -->
-      @if (currentStep() === 3) {
-        <div class="form-grid">
-          @if (espaceType() === 'chambre') {
-            <div class="field-group">
-              <label class="field-label" for="prix-nuit"
-                >Prix par nuit (FCFA)</label
-              >
-              <input
-                id="prix-nuit"
-                class="field-input"
-                type="text"
-                placeholder="Ex: 65 000"
-                [value]="prixNuit()"
-                (input)="prixNuit.set($any($event.target).value)"
-              />
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="prix-semaine"
-                >Prix par semaine (FCFA)</label
-              >
-              <input
-                id="prix-semaine"
-                class="field-input"
-                type="text"
-                placeholder="Ex: 390 000"
-                [value]="prixSemaine()"
-                (input)="prixSemaine.set($any($event.target).value)"
-              />
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="prix-mois"
-                >Prix par mois (FCFA)</label
-              >
-              <input
-                id="prix-mois"
-                class="field-input"
-                type="text"
-                placeholder="Ex: 1 500 000"
-                [value]="prixMois()"
-                (input)="prixMois.set($any($event.target).value)"
-              />
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="caution-chambre"
-                >Caution (FCFA)</label
-              >
-              <input
-                id="caution-chambre"
-                class="field-input"
-                type="text"
-                placeholder="Ex: 100 000"
-                [value]="caution()"
-                (input)="caution.set($any($event.target).value)"
-              />
-            </div>
-          }
-
-          @if (espaceType() === 'salle') {
-            <div class="field-group">
-              <label class="field-label" for="prix-heure"
-                >Prix par heure (FCFA)</label
-              >
-              <input
-                id="prix-heure"
-                class="field-input"
-                type="text"
-                placeholder="Ex: 25 000"
-                [value]="prixHeure()"
-                (input)="prixHeure.set($any($event.target).value)"
-              />
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="prix-journee"
-                >Prix à la journée (FCFA)</label
-              >
-              <input
-                id="prix-journee"
-                class="field-input"
-                type="text"
-                placeholder="Ex: 150 000"
-                [value]="prixJournee()"
-                (input)="prixJournee.set($any($event.target).value)"
-              />
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="caution-salle"
-                >Caution (FCFA)</label
-              >
-              <input
-                id="caution-salle"
-                class="field-input"
-                type="text"
-                placeholder="Ex: 100 000"
-                [value]="caution()"
-                (input)="caution.set($any($event.target).value)"
-              />
-            </div>
-          }
-        </div>
-      }
-
-      <!-- ── Navigation buttons ──────────────────────────────────── -->
-      <div class="form-nav">
-        @if (currentStep() > 1) {
-          <button class="nav-btn nav-btn--prev" (click)="prevStep()">
-            <i class="pi pi-arrow-left"></i>
-            Précédent
-          </button>
-        } @else {
-          <div></div>
-        }
-
-        @if (currentStep() < 3) {
-          <button class="nav-btn nav-btn--next" (click)="nextStep()">
-            Suivant
-            <i class="pi pi-arrow-right"></i>
-          </button>
-        } @else {
-          <button class="nav-btn nav-btn--submit">
-            <i class="pi pi-check"></i>
-            Enregistrer l'espace
-          </button>
-        }
+      <div class="save-action">
+        <button class="save-action__button" type="button">
+          Enregistrer l’espace
+        </button>
       </div>
     </div>
+
+    <aside class="side-column">
+      <section class="preview-card">
+        <div class="preview-card__media">
+          <img
+            class="preview-card__hero-image"
+            [src]="draft.heroImage"
+            alt="Aperçu de l'espace"
+          />
+          <div class="preview-card__overlay" aria-hidden="true">
+            <img
+              class="preview-card__overlay-icon"
+              [src]="currentPreviewOverlayIcon"
+              alt=""
+            />
+          </div>
+          <span class="preview-card__badge">{{ draft.previewTag }}</span>
+        </div>
+
+        <div class="preview-card__body">
+          <h2 class="preview-card__title">{{ draft.name }}</h2>
+          <p class="preview-card__subtitle">{{ currentPreviewSubtitle }}</p>
+
+          <dl class="preview-card__stats">
+            <div class="preview-card__stat">
+              <dt>Superficie</dt>
+              <dd>{{ draft.area }}m2</dd>
+            </div>
+            <div class="preview-card__stat">
+              <dt>Capacité</dt>
+              <dd>{{ draft.previewCapacity }}</dd>
+            </div>
+            <div class="preview-card__stat">
+              <dt>Tarif / nuit</dt>
+              <dd>{{ draft.previewRate }}</dd>
+            </div>
+            <div class="preview-card__stat">
+              <dt>Equipements</dt>
+              <dd>{{ draft.previewEquipments }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="status-card">
+        <div class="status-card__header">
+          <span class="status-card__switch" aria-hidden="true">
+            <span class="status-card__switch-dot"></span>
+          </span>
+
+          <div class="status-card__heading">
+            <h2>Statut initial</h2>
+            <p>Disponibilité à la création</p>
+          </div>
+        </div>
+
+        <div class="status-card__body">
+          @for (status of initialStatusOptions; track status) {
+            <button
+              class="status-card__option"
+              [class.status-card__option--active]="initialStatus() === status"
+              type="button"
+              (click)="selectInitialStatus(status)"
+            >
+              {{ status }}
+            </button>
+          }
+        </div>
+      </section>
+    </aside>
   </div>
 </div>
