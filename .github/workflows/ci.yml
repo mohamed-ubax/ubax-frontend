@@ -21,9 +21,7 @@ on:
 
 jobs:
 
-  # ═══════════════════════════════════════════════════════════════
   # STAGE 0 – Lint
-  # ═══════════════════════════════════════════════════════════════
   lint:
     name: 🔍 Stage 0 – Lint
     runs-on: ubuntu-latest
@@ -48,9 +46,7 @@ jobs:
       - name: Lint ubax-web
         run: npx nx lint ubax-web
 
-  # ═══════════════════════════════════════════════════════════════
   # STAGE 1 – Build check (les deux apps)
-  # ═══════════════════════════════════════════════════════════════
   build:
     name: 🏗️ Stage 1 – Build Check
     runs-on: ubuntu-latest

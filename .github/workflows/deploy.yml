@@ -11,9 +11,7 @@ on:
 
 jobs:
 
-  # ═══════════════════════════════════════════════════════════════
   # STAGE 1 – Build & Push Docker Hub (matrix : portail + admin)
-  # ═══════════════════════════════════════════════════════════════
   build-push:
     name: 🐳 Stage 1 – Build & Push ${{ matrix.app.name }}
     runs-on: ubuntu-latest
@@ -78,9 +76,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.app.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app.name }}
 
-  # ═══════════════════════════════════════════════════════════════
   # STAGE 2 – Deploy to VPS
-  # ═══════════════════════════════════════════════════════════════
   deploy:
     name: 🚀 Stage 2 – Deploy to VPS
     runs-on: ubuntu-latest
@@ -97,9 +93,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           use_insecure_cipher: true
-          source: >-
-            docker/docker-compose.frontend.vps.yml,
-            docker/nginx/nginx.conf
+          source: "docker/docker-compose.frontend.vps.yml"
           target: /opt/ubax/
           strip_components: 1
           overwrite: true
@@ -149,6 +143,10 @@ jobs:
             # Démarrer / mettre à jour les services frontend
             docker compose -f docker-compose.frontend.vps.yml up -d --remove-orphans
 
+            # Attendre que les conteneurs soient healthy avant de recharger nginx
+            echo "==> Attente démarrage des conteneurs frontend (15s)..."
+            sleep 15
+
             # Recharger nginx pour activer les nouveaux upstreams frontend
             docker exec ubax-nginx-prod nginx -s reload || true
 
@@ -157,27 +155,40 @@ jobs:
 
             echo "==> Déploiement frontend terminé ✓"
 
-  # ═══════════════════════════════════════════════════════════════
   # STAGE 3 – Health Check post-déploiement
-  # ═══════════════════════════════════════════════════════════════
   health-check:
     name: 🏥 Stage 3 – Health Check
     runs-on: ubuntu-latest
     needs: deploy
 
     steps:
+      - name: Health check – nginx (/)
+        run: |
+          echo "Vérification que nginx répond (max 2 min)..."
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
+              http://${{ secrets.VPS_HOST }}/health)
+            echo "Attempt $i/12 – HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ nginx healthy"
+              break
+            fi
+            [ $i -eq 12 ] && echo "❌ nginx ne répond pas après 2 min" && exit 1
+            sleep 10
+          done
+
       - name: Health check – ubax-portail (/)
         run: |
           echo "Vérification du portail (max 2 min)..."
           for i in $(seq 1 12); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
               http://${{ secrets.VPS_HOST }}/)
             echo "Attempt $i/12 – HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
               echo "✅ Portail healthy"
               break
             fi
-            [ $i -eq 12 ] && echo "⚠️  Portail non disponible après 2 min"
+            [ $i -eq 12 ] && echo "⚠️  Portail non disponible après 2 min (HTTP $STATUS)"
             sleep 10
           done
 
@@ -185,7 +196,7 @@ jobs:
         run: |
           echo "Vérification de l'admin (max 2 min)..."
           for i in $(seq 1 12); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
               http://${{ secrets.VPS_HOST }}/admin/)
             echo "Attempt $i/12 – HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
