@@ -1,0 +1,62 @@
+# ===================================================================
+# UBAX Platform – Frontend Services (PRODUCTION – VPS)
+# ===================================================================
+#
+# Services           | Port hôte  | Accès
+# —————————————————— | ————————— | ————————————————————————————————
+# ubax-portail       | (interne)  | http://<VPS_IP>/
+# ubax-web (admin)   | (interne)  | http://<VPS_IP>/admin/
+#
+# Images Docker Hub :
+#   ubaxproject/ubax-portail  → Frontend Portail Angular
+#   ubaxproject/ubax-admin    → Frontend Admin Angular (ubax-web)
+#
+# Prérequis VPS :
+#   docker-compose.vps.yml déjà démarré (réseau ubax-prod-net créé)
+#   nginx/nginx.conf mis à jour (inclut upstreams portail & web-admin)
+#   .env contient PORTAIL_TAG et ADMIN_TAG
+#
+# Démarrage :
+#   cd /opt/ubax && docker compose -f docker-compose.frontend.vps.yml up -d
+# ===================================================================
+
+services:
+
+  # ─────────────────────────────────────────────────────────────────
+  # ubax-portail – Frontend Portail public (route /)
+  # ─────────────────────────────────────────────────────────────────
+  portail:
+    image: ubaxproject/ubax-portail:${PORTAIL_TAG:-latest}
+    container_name: ubax-portail-prod
+    restart: unless-stopped
+    networks:
+      - ubax-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ─────────────────────────────────────────────────────────────────
+  # ubax-web-admin – Frontend Admin (route /admin/)
+  # ─────────────────────────────────────────────────────────────────
+  web-admin:
+    image: ubaxproject/ubax-admin:${ADMIN_TAG:-latest}
+    container_name: ubax-web-prod
+    restart: unless-stopped
+    networks:
+      - ubax-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+# ─── Réseau partagé avec les services backend ────────────────────
+# Le réseau ubax-prod-net est créé par docker-compose.vps.yml
+networks:
+  ubax-net:
+    external: true
+    name: ubax-prod-net
