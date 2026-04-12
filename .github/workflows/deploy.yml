@@ -93,9 +93,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           use_insecure_cipher: true
-          source: >-
-            docker/docker-compose.frontend.vps.yml,
-            docker/nginx/nginx.conf
+          source: "docker/docker-compose.frontend.vps.yml"
           target: /opt/ubax/
           strip_components: 1
           overwrite: true
