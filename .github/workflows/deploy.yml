@@ -141,7 +141,9 @@ jobs:
             done
 
             # Démarrer / mettre à jour les services frontend
-            docker compose -f docker-compose.frontend.vps.yml up -d --remove-orphans
+            # -p ubax-frontend isole ce projet du projet backend (ubax)
+            # sans ça, --remove-orphans tuerait nginx, dozzle, keycloak, etc.
+            docker compose -p ubax-frontend -f docker-compose.frontend.vps.yml up -d --remove-orphans
 
             # Attendre que les conteneurs soient healthy avant de recharger nginx
             echo "==> Attente démarrage des conteneurs frontend (15s)..."
