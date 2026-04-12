@@ -13,7 +13,7 @@ WORKDIR /app
 # Copier les fichiers de dépendances en premier pour le cache Docker
 # (npm ci ne se relance que si package.json / package-lock.json changent)
 COPY package*.json ./
-RUN npm ci --no-audit
+RUN npm ci --no-audit --no-fund --legacy-peer-deps
 
 # Copier tout le monorepo
 COPY . .
