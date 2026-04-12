@@ -1,57 +1,198 @@
-name: Deploy to Vercel
+name: CI – Build & Deploy
 
 on:
   push:
     branches:
       - main
       - develop
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
 
 jobs:
-  deploy:
+
+  # ═══════════════════════════════════════════════════════════════
+  # STAGE 1 – Build & Push Docker Hub (matrix : portail + admin)
+  # ═══════════════════════════════════════════════════════════════
+  build-push:
+    name: 🐳 Stage 1 – Build & Push ${{ matrix.app.name }}
     runs-on: ubuntu-latest
-    env:
-      NX_NO_CLOUD: true
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false   # si un build échoue, l'autre continue
+      matrix:
+        app:
+          - name: ubax-portail
+            image: ubaxproject/ubax-portail
+            dockerfile: apps/ubax-portal/Dockerfile
+          - name: ubax-admin
+            image: ubaxproject/ubax-admin
+            dockerfile: apps/ubax-web/Dockerfile
+
+    outputs:
+      image-tag: ${{ steps.tag.outputs.value }}
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel environment info
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-      - name: Build ubax-portal
-        run: npx nx build ubax-portal --configuration=production
-
-      - name: Prepare Vercel output structure
+      - name: Resolve image tag
+        id: tag
         run: |
-          mkdir -p .vercel/output/static
-          cp -r dist/apps/ubax-portal/browser/. .vercel/output/static/
-          cat > .vercel/output/config.json << 'EOF'
-          {
-            "version": 3,
-            "routes": [
-              { "handle": "filesystem" },
-              { "src": "/(.*)", "dest": "/index.html" }
-            ]
-          }
-          EOF
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "value=latest" >> $GITHUB_OUTPUT
+          else
+            echo "value=develop" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Deploy to Vercel (production)
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ matrix.app.image }}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=sha-,format=short,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push ${{ matrix.app.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.app.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha,scope=${{ matrix.app.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app.name }}
+
+  # ═══════════════════════════════════════════════════════════════
+  # STAGE 2 – Deploy to VPS
+  # ═══════════════════════════════════════════════════════════════
+  deploy:
+    name: 🚀 Stage 2 – Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build-push
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync config files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          use_insecure_cipher: true
+          source: >-
+            docker/docker-compose.frontend.vps.yml,
+            docker/nginx/nginx.conf
+          target: /opt/ubax/
+          strip_components: 1
+          overwrite: true
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          timeout: 180s
+          use_insecure_cipher: true
+          script: |
+            set -e
+            cd /opt/ubax
+
+            TAG="${{ needs.build-push.outputs.image-tag }}"
+            echo "==> Déploiement tag : $TAG"
+
+            # Mettre à jour les tags dans .env (ajouter si absent)
+            grep -q "^PORTAIL_TAG=" .env \
+              && sed -i "s/^PORTAIL_TAG=.*/PORTAIL_TAG=$TAG/" .env \
+              || echo "PORTAIL_TAG=$TAG" >> .env
+
+            grep -q "^ADMIN_TAG=" .env \
+              && sed -i "s/^ADMIN_TAG=.*/ADMIN_TAG=$TAG/" .env \
+              || echo "ADMIN_TAG=$TAG" >> .env
+
+            # Connexion Docker Hub
+            echo "${{ secrets.DOCKER_HUB_TOKEN }}" | \
+              docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+            # Pull nouvelles images frontend (retry x3 en cas d'erreur réseau)
+            for IMAGE in ubaxproject/ubax-portail:$TAG ubaxproject/ubax-admin:$TAG; do
+              pulled=false
+              for attempt in 1 2 3; do
+                echo "==> Pull $IMAGE tentative $attempt/3"
+                if docker pull $IMAGE; then
+                  pulled=true
+                  break
+                fi
+                [ $attempt -lt 3 ] && echo "Retry dans 15s..." && sleep 15
+              done
+              $pulled || { echo "❌ Pull $IMAGE échoué après 3 tentatives"; exit 1; }
+            done
+
+            # Démarrer / mettre à jour les services frontend
+            docker compose -f docker-compose.frontend.vps.yml up -d --remove-orphans
+
+            # Recharger nginx pour activer les nouveaux upstreams frontend
+            docker exec ubax-nginx-prod nginx -s reload || true
+
+            # Nettoyage des anciennes images
+            docker image prune -f
+
+            echo "==> Déploiement frontend terminé ✓"
+
+  # ═══════════════════════════════════════════════════════════════
+  # STAGE 3 – Health Check post-déploiement
+  # ═══════════════════════════════════════════════════════════════
+  health-check:
+    name: 🏥 Stage 3 – Health Check
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Health check – ubax-portail (/)
+        run: |
+          echo "Vérification du portail (max 2 min)..."
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              http://${{ secrets.VPS_HOST }}/)
+            echo "Attempt $i/12 – HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Portail healthy"
+              break
+            fi
+            [ $i -eq 12 ] && echo "⚠️  Portail non disponible après 2 min"
+            sleep 10
+          done
+
+      - name: Health check – ubax-admin (/admin/)
+        run: |
+          echo "Vérification de l'admin (max 2 min)..."
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              http://${{ secrets.VPS_HOST }}/admin/)
+            echo "Attempt $i/12 – HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Admin healthy"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "❌ Admin health check failed après 2 min"
+          exit 1

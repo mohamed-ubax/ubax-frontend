@@ -1,32 +1,88 @@
-name: CI
+name: CI – Branch Check
 
 on:
   push:
     branches:
+      - 'feature/**'
+      - 'hotfix/**'
+      - 'bugfix/**'
+    paths-ignore:
+      - '**.md'
+      - 'docker/**'
+      - '.gitignore'
+  pull_request:
+    branches:
       - main
       - develop
-  pull_request:
-
-permissions:
-  actions: read
-  contents: read
+    paths-ignore:
+      - '**.md'
+      - 'docker/**'
+      - '.gitignore'
 
 jobs:
-  main:
+
+  # ═══════════════════════════════════════════════════════════════
+  # STAGE 0 – Lint
+  # ═══════════════════════════════════════════════════════════════
+  lint:
+    name: 🔍 Stage 0 – Lint
     runs-on: ubuntu-latest
     env:
       NX_NO_CLOUD: true
+
     steps:
       - uses: actions/checkout@v4
         with:
-          filter: tree:0
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'npm'
 
       - run: npm ci
 
-      - run: npx nx build ubax-portal --configuration=production
+      - name: Lint ubax-portal
+        run: npx nx lint ubax-portal
+
+      - name: Lint ubax-web
+        run: npx nx lint ubax-web
+
+  # ═══════════════════════════════════════════════════════════════
+  # STAGE 1 – Build check (les deux apps)
+  # ═══════════════════════════════════════════════════════════════
+  build:
+    name: 🏗️ Stage 1 – Build Check
+    runs-on: ubuntu-latest
+    needs: lint
+    env:
+      NX_NO_CLOUD: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build ubax-portal
+        run: npx nx build ubax-portal --configuration=production
+
+      - name: Build ubax-web
+        run: npx nx build ubax-web --configuration=production
+
+      - name: Publier les artefacts de build
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-check-${{ github.run_id }}
+          path: |
+            dist/apps/ubax-portal/
+            dist/apps/ubax-web/
+          if-no-files-found: ignore
+          retention-days: 3
