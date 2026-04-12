@@ -1,13 +1,3 @@
-# ===================================================================
-# UBAX Frontend – CI branches de développement
-# ===================================================================
-# Déclenché sur : feature/*, hotfix/*, bugfix/*
-# Stages        : Lint → Build check
-# ❌ Pas de build Docker
-# ❌ Pas de déploiement VPS
-# But : vérifier la qualité du code avant la PR (fail fast)
-# ===================================================================
-
 name: CI – Branch Check
 
 on:
