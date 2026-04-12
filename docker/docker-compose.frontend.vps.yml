@@ -1,8 +1,6 @@
 services:
 
-  # ─────────────────────────────────────────────────────────────────
   # ubax-portail – Frontend Portail public (route /)
-  # ─────────────────────────────────────────────────────────────────
   portail:
     image: ubaxproject/ubax-portail:${PORTAIL_TAG:-latest}
     container_name: ubax-portail-prod
@@ -16,9 +14,7 @@ services:
       retries: 3
       start_period: 10s
 
-  # ─────────────────────────────────────────────────────────────────
   # ubax-web-admin – Frontend Admin (route /admin/)
-  # ─────────────────────────────────────────────────────────────────
   web-admin:
     image: ubaxproject/ubax-admin:${ADMIN_TAG:-latest}
     container_name: ubax-web-prod
@@ -32,7 +28,7 @@ services:
       retries: 3
       start_period: 10s
 
-# ─── Réseau partagé avec les services backend ────────────────────
+# Réseau partagé avec les services backend
 # Le réseau ubax-prod-net est créé par docker-compose.vps.yml
 networks:
   ubax-net:
