@@ -78,8 +78,6 @@ $brand-dark: #192e44;
   color: $brand;
 }
 
-
-
 .fnc-hero__subtitle {
   font-size: clamp(0.8125rem, 1vw, 0.9375rem);
   font-weight: 400;
@@ -273,8 +271,13 @@ $brand-dark: #192e44;
 }
 
 @keyframes fnc-pill-shine {
-  0%    { left: -60%; }
-  35%, 100% { left: 120%; }
+  0% {
+    left: -60%;
+  }
+  35%,
+  100% {
+    left: 120%;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -615,7 +618,7 @@ $brand-dark: #192e44;
   font-weight: 400;
   line-height: 3.5rem;
   color: #fff;
-  margin: 0;
+  margin-top: -10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

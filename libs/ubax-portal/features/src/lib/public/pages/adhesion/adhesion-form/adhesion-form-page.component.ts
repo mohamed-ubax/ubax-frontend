@@ -103,19 +103,23 @@ export class AdhesionFormPageComponent {
 
   protected readonly statutsJuridiques = [
     {
-      label: 'SARL (très répandue pour les agences)',
+      label: 'SARL',
       value: 'sarl',
     },
     {
-      label: 'SCI (gestion de patrimoine familial)',
+      label: 'SCI',
       value: 'sci',
     },
     {
-      label: 'SAS / SASU (flexibilité)',
-      value: 'sas_sasu',
+      label: 'SAS',
+      value: 'sas',
     },
     {
-      label: 'SCCV (promotion immobilière)',
+      label: 'SA',
+      value: 'sa',
+    },
+    {
+      label: 'SCCV',
       value: 'sccv',
     },
   ];

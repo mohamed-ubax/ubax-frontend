@@ -1,6 +1,7 @@
 import {
   afterNextRender,
   ChangeDetectionStrategy,
+  computed,
   Component,
   DestroyRef,
   ElementRef,
@@ -16,7 +17,6 @@ import {
   BackToTopComponent,
   PublicShellComponent,
 } from '@ubax-workspace/ubax-portal-layout';
-import { UiPaginationComponent } from '@ubax-workspace/shared-ui';
 
 interface JobOffer {
   id: number;
@@ -42,7 +42,6 @@ interface CultureCard {
     PublicShellComponent,
     BackToTopComponent,
     RouterLink,
-    UiPaginationComponent,
     NgOptimizedImage,
   ],
   templateUrl: './carrieres-page.component.html',
@@ -55,8 +54,8 @@ export class CarrieresPageComponent {
   private readonly zone = inject(NgZone);
   private gsapCtx: gsap.Context | undefined;
 
-  protected readonly currentPage = signal(1);
-  protected readonly totalPages = 5;
+  protected readonly offersCarouselIndex = signal(0);
+  protected readonly isCarouselAnimating = signal(false);
 
   // ── Assets ─────────────────────────────────────────────────────────────
   protected readonly heroPersonImg =
@@ -71,8 +70,8 @@ export class CarrieresPageComponent {
   ];
   protected readonly searchIcon =
     'assets/portal-assets/careers/icons/mynaui_search.svg';
-  protected readonly ubaxIcon =
-    'assets/portal-assets/careers/icons/Group 1171274746.svg';
+  protected readonly offerLogo =
+    'assets/portal-assets/careers/images/offer-logo.svg';
   protected readonly goalsIcon =
     'assets/portal-assets/careers/icons/mage_goals.svg';
   protected readonly starIcon =
@@ -83,10 +82,6 @@ export class CarrieresPageComponent {
     'assets/portal-assets/careers/icons/Group 1171274746-2.svg';
   protected readonly womanImg =
     'assets/portal-assets/careers/images/woman.webp';
-  protected readonly arrowLeftIcon =
-    'assets/portal-assets/careers/icons/Alt Arrow Left.svg';
-  protected readonly arrowRightIcon =
-    'assets/portal-assets/careers/icons/Alt Arrow Right.svg';
 
   // ── Culture cards ───────────────────────────────────────────────────────
   protected readonly cultureCards: CultureCard[] = [
@@ -149,6 +144,14 @@ export class CarrieresPageComponent {
       postedAt: "Posté il y'a 2 jours",
     },
   ];
+
+  protected readonly displayedOffers = computed(() => {
+    const startIndex = this.offersCarouselIndex();
+
+    return this.offers.map(
+      (_, index) => this.offers[(startIndex + index) % this.offers.length],
+    );
+  });
 
   constructor() {
     afterNextRender(() => {
@@ -295,7 +298,7 @@ export class CarrieresPageComponent {
       ease,
     });
     gsap.from('.job-card', {
-      scrollTrigger: { trigger: '.jobs-grid', start: 'top 82%' },
+      scrollTrigger: { trigger: '.jobs-carousel', start: 'top 82%' },
       y: 65,
       opacity: 0,
       scale: 0.96,
@@ -347,9 +350,55 @@ export class CarrieresPageComponent {
     });
   }
 
-  protected goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage.set(page);
+  protected cycleOffers(direction: 'prev' | 'next'): void {
+    if (this.offers.length < 2 || this.isCarouselAnimating()) {
+      return;
     }
+
+    const track = this.elRef.nativeElement.querySelector(
+      '.jobs-carousel__track',
+    ) as HTMLElement | null;
+
+    if (!track) {
+      this.shiftOffers(direction);
+      return;
+    }
+
+    const offset = direction === 'next' ? -88 : 88;
+
+    this.isCarouselAnimating.set(true);
+    gsap.killTweensOf(track);
+
+    gsap.to(track, {
+      x: offset,
+      opacity: 0,
+      duration: 0.18,
+      ease: 'power2.in',
+      onComplete: () => {
+        this.zone.run(() => this.shiftOffers(direction));
+        gsap.set(track, { x: -offset, opacity: 0 });
+        gsap.to(track, {
+          x: 0,
+          opacity: 1,
+          duration: 0.28,
+          ease: 'power3.out',
+          clearProps: 'transform',
+          onComplete: () => {
+            this.zone.run(() => this.isCarouselAnimating.set(false));
+          },
+        });
+      },
+      onInterrupt: () => {
+        this.zone.run(() => this.isCarouselAnimating.set(false));
+      },
+    });
+  }
+
+  private shiftOffers(direction: 'prev' | 'next'): void {
+    this.offersCarouselIndex.update((currentIndex) => {
+      const delta = direction === 'next' ? 1 : -1;
+
+      return (currentIndex + delta + this.offers.length) % this.offers.length;
+    });
   }
 }

@@ -76,18 +76,6 @@
   line-height: normal;
 }
 
-// ─── Hints ───────────────────────────────────────────────────────────────────
-
-.field-hint {
-  display: block;
-  color: #6c6c6c;
-  font-family: 'Lexend', sans-serif;
-  font-size: 0.825rem;
-  font-weight: 400;
-  line-height: normal;
-  margin-top: 0;
-}
-
 // ─── Email field group ───────────────────────────────────────────────────────
 
 .field-group--email {
@@ -107,20 +95,12 @@
   }
 }
 
-.field-group--email .field-hint {
-  margin-top: 0.6rem;
-}
-
 // ─── Password field group ─────────────────────────────────────────────────────
 
 .field-group--password {
   display: flex;
   flex-direction: column;
   margin-top: 1.5rem;
-}
-
-.field-group--password .field-hint {
-  margin-top: 0.6rem;
 }
 
 .password-row {
@@ -789,11 +769,6 @@
     font-size: 0.875rem;
   }
 
-  .field-hint {
-    font-size: 0.75rem;
-    line-height: 1.35;
-  }
-
   .phone-row {
     flex-direction: column;
     align-items: stretch;
@@ -801,16 +776,8 @@
     margin-top: 1rem;
   }
 
-  .field-group--email .field-hint {
-    margin-top: 0.625rem;
-  }
-
   .field-group--password {
     margin-top: 1.25rem;
-  }
-
-  .field-group--password .field-hint {
-    margin-top: 0.625rem;
   }
 
   .email-input,
@@ -901,10 +868,6 @@
 
   .field-label {
     font-size: 0.8125rem;
-  }
-
-  .field-hint {
-    font-size: 0.6875rem;
   }
 
   :host ::ng-deep .cp-trigger {

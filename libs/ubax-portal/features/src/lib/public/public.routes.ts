@@ -61,6 +61,14 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'a-propos',
+    data: { preload: true },
+    loadComponent: () =>
+      import('./pages/info/about/about-page.component').then(
+        (m) => m.AboutPageComponent,
+      ),
+  },
+  {
     path: 'contact',
     loadComponent: () =>
       import('./pages/info/contact/contact-page.component').then(
