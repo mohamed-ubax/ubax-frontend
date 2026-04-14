@@ -188,69 +188,82 @@
     </h2>
   </section>
 
-  <!-- ══ JOBS GRID ══════════════════════════════════════════════════════════ -->
-  <div class="jobs-grid" aria-label="Liste des offres d'emploi">
-    @for (offer of offers; track offer.id) {
-      <div class="job-card">
-        <div class="job-card__header">
-          <div class="job-card__logo" aria-hidden="true">
-            <img [src]="ubaxIcon" alt="" />
-          </div>
-          <div class="job-card__meta">
-            <span class="job-card__company">{{ offer.company }}</span>
-            <span class="job-card__type">{{ offer.type }}</span>
-          </div>
-        </div>
+  <!-- ══ JOBS CAROUSEL ══════════════════════════════════════════════════════ -->
+  <section class="jobs-carousel" aria-label="Liste des offres d'emploi">
+    <button
+      class="jobs-carousel__nav jobs-carousel__nav--prev"
+      type="button"
+      aria-label="Afficher les offres précédentes"
+      [disabled]="isCarouselAnimating() || offers.length < 2"
+      (click)="cycleOffers('prev')"
+    >
+      <span
+        class="jobs-carousel__chevron jobs-carousel__chevron--left"
+        aria-hidden="true"
+      ></span>
+    </button>
 
-        <h3 class="job-card__title">{{ offer.title }}</h3>
+    <div class="jobs-carousel__viewport">
+      <div class="jobs-carousel__track">
+        @for (offer of displayedOffers(); track offer.id) {
+          <div class="job-card">
+            <div class="job-card__header">
+              <div class="job-card__logo" aria-hidden="true">
+                <img [src]="offerLogo" alt="" />
+              </div>
+              <div class="job-card__meta">
+                <span class="job-card__company">{{ offer.company }}</span>
+                <span class="job-card__type">{{ offer.type }}</span>
+              </div>
+            </div>
 
-        <p class="job-card__location">{{ offer.location }}</p>
+            <h3 class="job-card__title">{{ offer.title }}</h3>
 
-        <dl class="job-card__details">
-          <div class="job-card__detail-row">
-            <dt class="job-card__detail-label">Langue :</dt>
-            <dd class="job-card__detail-value">{{ offer.langue }}</dd>
+            <p class="job-card__location">{{ offer.location }}</p>
+
+            <dl class="job-card__details">
+              <div class="job-card__detail-row">
+                <dt class="job-card__detail-label">Langue :</dt>
+                <dd class="job-card__detail-value">{{ offer.langue }}</dd>
+              </div>
+              <div class="job-card__detail-row">
+                <dt class="job-card__detail-label">Sexe :</dt>
+                <dd class="job-card__detail-value">{{ offer.sexe }}</dd>
+              </div>
+              <div class="job-card__detail-row">
+                <dt class="job-card__detail-label job-card__detail-label--red">
+                  Echéance :
+                </dt>
+                <dd class="job-card__detail-value job-card__detail-value--red">
+                  {{ offer.echeance }}
+                </dd>
+              </div>
+            </dl>
+
+            <a class="job-card__apply" [routerLink]="['/carrieres', offer.id]">
+              Postuler
+            </a>
+
+            <hr class="job-card__divider" aria-hidden="true" />
+            <p class="job-card__posted">{{ offer.postedAt }}</p>
           </div>
-          <div class="job-card__detail-row">
-            <dt class="job-card__detail-label">Sexe :</dt>
-            <dd class="job-card__detail-value">{{ offer.sexe }}</dd>
-          </div>
-          <div class="job-card__detail-row">
-            <dt class="job-card__detail-label job-card__detail-label--red">
-              Echéance :
-            </dt>
-            <dd class="job-card__detail-value job-card__detail-value--red">
-              {{ offer.echeance }}
-            </dd>
-          </div>
-        </dl>
-
-        <a
-          class="job-card__apply"
-          [routerLink]="['/carrieres', offer.id]"
-          role="button"
-        >
-          Postuler
-        </a>
-
-        <hr class="job-card__divider" aria-hidden="true" />
-        <p class="job-card__posted">{{ offer.postedAt }}</p>
+        }
       </div>
-    }
-  </div>
+    </div>
 
-  <!-- ══ PAGINATION ════════════════════════════════════════════════════════ -->
-  <div class="pagination-wrapper">
-    <ubax-ui-pagination
-      variant="light"
-      [currentPage]="currentPage()"
-      [totalPages]="totalPages"
-      [arrowLeftSrc]="arrowLeftIcon"
-      [arrowRightSrc]="arrowRightIcon"
-      ariaLabel="Pagination des offres d'emploi"
-      (pageChange)="goToPage($event)"
-    />
-  </div>
+    <button
+      class="jobs-carousel__nav jobs-carousel__nav--next"
+      type="button"
+      aria-label="Afficher les offres suivantes"
+      [disabled]="isCarouselAnimating() || offers.length < 2"
+      (click)="cycleOffers('next')"
+    >
+      <span
+        class="jobs-carousel__chevron jobs-carousel__chevron--right"
+        aria-hidden="true"
+      ></span>
+    </button>
+  </section>
 
   <!-- ══ BOTTOM CTA ═════════════════════════════════════════════════════════ -->
   <section class="cta-bottom" aria-labelledby="cta-heading">

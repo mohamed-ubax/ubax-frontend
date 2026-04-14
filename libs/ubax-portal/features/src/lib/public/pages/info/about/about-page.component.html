@@ -1,0 +1,152 @@
+<ubax-public-shell>
+  <div class="about-page">
+    <section class="about-hero" aria-labelledby="about-hero-title">
+      <div class="about-page__gutter about-hero__gutter">
+        <div class="about-hero__content">
+          <h1 id="about-hero-title" class="about-hero__title">
+            Ubax, la plateforme qui révolutionne la gestion immobilière et
+            connecte tous les acteurs du marché
+          </h1>
+          <p class="about-hero__description">
+            Ubax simplifie la mise en relation entre propriétaires, agences et
+            locataires en offrant une solution digitale fluide, rapide et
+            accessible pour gérer, louer et suivre les biens en toute confiance.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-story" aria-labelledby="about-story-title">
+      <div class="about-page__gutter">
+        <div class="about-story__intro">
+          <figure class="about-story__intro-media">
+            <img
+              src="assets/portal-assets/about/about-team.webp"
+              alt="L’équipe Ubax dans ses bureaux"
+            />
+          </figure>
+
+          <div class="about-story__intro-copy">
+            <div class="about-story__intro-head">
+              <h2 id="about-story-title" class="about-story__title">
+                Qui sommes-nous ?
+              </h2>
+
+              <p class="about-story__lead">
+                UBAX est une plateforme web et mobile dédiée à la digitalisation
+                du secteur immobilier en Afrique. Elle connecte particuliers,
+                agences et bailleurs à travers une expérience simple, rapide et
+                sécurisée, afin de faciliter toutes les interactions liées à
+                l’immobilier.
+              </p>
+            </div>
+
+            <div class="about-story__points">
+              @for (point of points; track point.title) {
+                <article class="about-point">
+                  <span class="about-point__bullet" aria-hidden="true">{{
+                    point.emoji
+                  }}</span>
+
+                  <div class="about-point__content">
+                    <h3 class="about-point__title">{{ point.title }}</h3>
+                    <p class="about-point__text">{{ point.description }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+        </div>
+
+        <article class="about-story__feature about-story__feature--mission">
+          <div class="about-story__feature-copy">
+            <span class="about-story__badge">Notre mission</span>
+            <h3 class="about-story__feature-title">
+              Devenir la référence de l’immobilier digital en Afrique
+            </h3>
+            <p class="about-story__feature-text">
+              Nous aspirons à transformer durablement le secteur immobilier
+              grâce à la technologie, en créant un écosystème digital fiable,
+              performant et accessible à grande échelle.
+            </p>
+            <p class="about-story__feature-text">
+              Ubax vise à connecter efficacement tous les acteurs du marché
+              immobilier et à redéfinir les standards de gestion et de location.
+            </p>
+          </div>
+
+          <figure class="about-story__feature-media">
+            <img
+              src="assets/portal-assets/about/about-mission-visual.webp"
+              alt="Visualisation Ubax autour de l’Afrique"
+            />
+          </figure>
+        </article>
+
+        <article class="about-story__feature about-story__feature--vision">
+          <figure class="about-story__feature-media">
+            <img
+              src="assets/portal-assets/about/about-vision-visual.webp"
+              alt="Vue d’un espace de travail Ubax"
+            />
+          </figure>
+
+          <div class="about-story__feature-copy">
+            <span class="about-story__badge">Notre vision</span>
+            <h3 class="about-story__feature-title">
+              Simplifier et moderniser l’immobilier
+            </h3>
+            <p class="about-story__feature-text">
+              Notre objectif est de rendre la gestion immobilière plus simple,
+              rapide et accessible à tous.
+            </p>
+            <p class="about-story__feature-text">
+              Nous aidons les propriétaires et les agences à mieux gérer leurs
+              biens, tout en offrant aux locataires une expérience fluide,
+              transparente et sécurisée.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="about-platform" aria-labelledby="about-platform-title">
+      <div class="about-page__gutter">
+        <h2 id="about-platform-title" class="about-platform__title">
+          Une plateforme unique pour gérer l’immobilier, les agences et
+          l’hôtellerie.
+        </h2>
+
+        <div class="about-platform__grid">
+          @for (card of platformCards; track card.title) {
+            <article
+              class="about-platform-card"
+              [class.about-platform-card--dark]="card.theme === 'dark'"
+            >
+              <div class="about-platform-card__header">
+                <span
+                  class="about-platform-card__icon-wrap"
+                  [class.about-platform-card__icon-wrap--white]="
+                    card.iconSurface === 'white'
+                  "
+                >
+                  <span class="about-platform-card__emoji" aria-hidden="true">{{
+                    card.emoji
+                  }}</span>
+                </span>
+
+                <h3 class="about-platform-card__title">{{ card.title }}</h3>
+              </div>
+
+              <p class="about-platform-card__description">
+                {{ card.description }}
+              </p>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
+    <ubax-about-cta-section class="about-page__cta" />
+  </div>
+</ubax-public-shell>

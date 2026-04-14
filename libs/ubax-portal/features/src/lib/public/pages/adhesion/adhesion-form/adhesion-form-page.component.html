@@ -646,44 +646,126 @@
               </div>
             </div>
 
-            <div class="form-field">
-              <label class="form-field__label" for="documentInput">
-                Piéces justificatifs ( RCCM, DFE, Contrat de Bail)
-              </label>
-              <div class="upload-file-row">
-                <button
-                  type="button"
-                  class="upload-file-row__btn"
-                  (click)="documentInput.click()"
-                >
-                  Choisir un fichier
-                </button>
-                <span class="upload-file-row__name">
-                  {{
-                    documentFile()
-                      ? documentFile()!.name
-                      : 'Aucun fichier choisi'
-                  }}
-                </span>
-                @if (documentFile()) {
+            <div class="documents-field">
+              <div class="form-field">
+                <label class="form-field__label" for="documentInput">
+                  RCCM
+                </label>
+                <div class="upload-file-row">
                   <button
                     type="button"
-                    class="upload-file-row__remove"
-                    (click)="removeDocument()"
-                    aria-label="Supprimer le document"
+                    class="upload-file-row__btn"
+                    (click)="documentInput.click()"
                   >
-                    <i class="pi pi-times"></i>
+                    Choisir un fichier
                   </button>
-                }
-                <input
-                  #documentInput
-                  id="documentInput"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  class="upload-file-row__input"
-                  (change)="onDocumentSelected($event)"
-                  aria-label="Choisir un document officiel"
-                />
+                  <span class="upload-file-row__name">
+                    {{
+                      documentFile()
+                        ? documentFile()!.name
+                        : 'Aucun fichier choisi'
+                    }}
+                  </span>
+                  @if (documentFile()) {
+                    <button
+                      type="button"
+                      class="upload-file-row__remove"
+                      (click)="removeDocument()"
+                      aria-label="Supprimer le document"
+                    >
+                      <i class="pi pi-times"></i>
+                    </button>
+                  }
+                  <input
+                    #documentInput
+                    id="documentInput"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="upload-file-row__input"
+                    (change)="onDocumentSelected($event)"
+                    aria-label="Choisir un document officiel"
+                  />
+                </div>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="documentInput">
+                  DFE
+                </label>
+                <div class="upload-file-row">
+                  <button
+                    type="button"
+                    class="upload-file-row__btn"
+                    (click)="documentInput.click()"
+                  >
+                    Choisir un fichier
+                  </button>
+                  <span class="upload-file-row__name">
+                    {{
+                      documentFile()
+                        ? documentFile()!.name
+                        : 'Aucun fichier choisi'
+                    }}
+                  </span>
+                  @if (documentFile()) {
+                    <button
+                      type="button"
+                      class="upload-file-row__remove"
+                      (click)="removeDocument()"
+                      aria-label="Supprimer le document"
+                    >
+                      <i class="pi pi-times"></i>
+                    </button>
+                  }
+                  <input
+                    #documentInput
+                    id="documentInput"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="upload-file-row__input"
+                    (change)="onDocumentSelected($event)"
+                    aria-label="Choisir un document officiel"
+                  />
+                </div>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="documentInput">
+                  Contrat de bail
+                </label>
+                <div class="upload-file-row">
+                  <button
+                    type="button"
+                    class="upload-file-row__btn"
+                    (click)="documentInput.click()"
+                  >
+                    Choisir un fichier
+                  </button>
+                  <span class="upload-file-row__name">
+                    {{
+                      documentFile()
+                        ? documentFile()!.name
+                        : 'Aucun fichier choisi'
+                    }}
+                  </span>
+                  @if (documentFile()) {
+                    <button
+                      type="button"
+                      class="upload-file-row__remove"
+                      (click)="removeDocument()"
+                      aria-label="Supprimer le document"
+                    >
+                      <i class="pi pi-times"></i>
+                    </button>
+                  }
+                  <input
+                    #documentInput
+                    id="documentInput"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="upload-file-row__input"
+                    (change)="onDocumentSelected($event)"
+                    aria-label="Choisir un document officiel"
+                  />
+                </div>
               </div>
             </div>
           </div>
