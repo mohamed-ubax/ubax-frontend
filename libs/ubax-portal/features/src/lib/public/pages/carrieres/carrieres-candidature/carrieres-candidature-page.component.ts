@@ -60,13 +60,15 @@ export class CarrieresCandidaturePage {
     const file = this.cvFile();
     if (!file) return '';
     const kb = file.size / 1024;
-    return kb < 1024
-      ? `${Math.round(kb)} Ko`
-      : `${(kb / 1024).toFixed(1)} Mo`;
+    return kb < 1024 ? `${Math.round(kb)} Ko` : `${(kb / 1024).toFixed(1)} Mo`;
   };
 
   /** Job title resolved from the route :id param, or null if not found. */
   protected readonly jobTitle: string | null;
+  protected readonly formTitle: string;
+  protected readonly formSubtitle: string;
+  protected readonly submitLabel: string;
+  protected readonly successMessage: string;
 
   protected readonly niveauxExperience = [
     'Débutant',
@@ -81,6 +83,22 @@ export class CarrieresCandidaturePage {
     const route = inject(ActivatedRoute);
     const id = Number(route.snapshot.paramMap.get('id'));
     this.jobTitle = JOB_TITLES[id] ?? null;
+
+    const isSpecificApplication = this.jobTitle !== null;
+
+    this.formTitle = isSpecificApplication
+      ? 'Déposez votre candidature pour ce poste'
+      : 'Restez informé des opportunités qui vous correspondent';
+    this.formSubtitle = isSpecificApplication
+      ? 'Remplissez ce formulaire en quelques minutes et joignez votre CV. Notre équipe de recrutement analysera votre dossier avec attention.'
+      : "Remplissez ce formulaire en quelques minutes. Dès qu'une offre correspondant à votre profil est disponible, vous serez contacté directement.";
+    this.submitLabel = isSpecificApplication
+      ? 'Déposer ma candidature'
+      : 'Déposer mon profil';
+    this.successMessage = isSpecificApplication
+      ? `Merci ! Votre candidature a bien été reçue avec succès.
+Nous vous remercions pour l’intérêt que vous portez à notre offre.`
+      : 'Merci ! Votre profil a bien été enregistré. Nous vous contacterons dès qu’une opportunité correspond à votre profil.';
 
     this.form = {
       nom: '',
@@ -112,32 +130,55 @@ export class CarrieresCandidaturePage {
     const ease = 'power3.out';
 
     // ── Page hero ───────────────────────────────────────────────────────────
-    gsap.timeline({ defaults: { ease } })
+    gsap
+      .timeline({ defaults: { ease } })
       .from('.page-hero__icon-box', {
-        scale: 0, opacity: 0, duration: 0.7, ease: 'back.out(1.7)',
+        scale: 0,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'back.out(1.7)',
       })
-      .from('.page-hero__title', { y: 28, opacity: 0, duration: 0.75 }, '-=0.35');
+      .from(
+        '.page-hero__title',
+        { y: 28, opacity: 0, duration: 0.75 },
+        '-=0.35',
+      );
 
     // ── Main form card ──────────────────────────────────────────────────────
     gsap.from('.candidature-main__card', {
       scrollTrigger: { trigger: '.candidature-layout', start: 'top 88%' },
-      y: 45, opacity: 0, duration: 0.85, ease,
+      y: 45,
+      opacity: 0,
+      duration: 0.85,
+      ease,
     });
     gsap.from(['.candidature-main__title', '.candidature-main__subtitle'], {
       scrollTrigger: { trigger: '.candidature-main__card', start: 'top 85%' },
-      y: 25, opacity: 0, duration: 0.7, stagger: 0.12, ease,
+      y: 25,
+      opacity: 0,
+      duration: 0.7,
+      stagger: 0.12,
+      ease,
     });
 
     // ── Form fields staggered reveal ────────────────────────────────────────
     gsap.from('.form-field', {
       scrollTrigger: { trigger: '.candidature-form', start: 'top 88%' },
-      y: 22, opacity: 0, duration: 0.5, stagger: 0.07, ease,
+      y: 22,
+      opacity: 0,
+      duration: 0.5,
+      stagger: 0.07,
+      ease,
     });
 
     // ── CV sidebar slides in from the right ─────────────────────────────────
     gsap.from('.cv-card', {
       scrollTrigger: { trigger: '.candidature-layout', start: 'top 88%' },
-      x: 55, opacity: 0, duration: 0.85, delay: 0.22, ease,
+      x: 55,
+      opacity: 0,
+      duration: 0.85,
+      delay: 0.22,
+      ease,
     });
   }
 

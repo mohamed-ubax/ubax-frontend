@@ -351,7 +351,9 @@ $c-placeholder: #b3b3b3;
   border: none;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
   text-decoration: none;
 }
 
@@ -366,8 +368,8 @@ $c-placeholder: #b3b3b3;
 }
 
 .cv-preview__remove {
-  background: rgba(185, 0, 0, 0.08);
-  color: #b90000;
+  background: #fbeaea;
+  color: #5f0000;
 
   &:hover {
     background: #b90000;
@@ -377,14 +379,26 @@ $c-placeholder: #b3b3b3;
 
 // ══ SUCCESS OVERLAY & MODAL ═══════════════════════════════════════════════════
 @keyframes ubax-overlay-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes ubax-modal-pop {
-  0%   { opacity: 0; transform: scale(0.78) translateY(24px); }
-  70%  { transform: scale(1.03) translateY(-4px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+  0% {
+    opacity: 0;
+    transform: scale(0.78) translateY(24px);
+  }
+  70% {
+    transform: scale(1.03) translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .success-overlay {
@@ -395,8 +409,18 @@ $c-placeholder: #b3b3b3;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
   padding: 24px;
+  border: none;
   animation: ubax-overlay-in 0.28s ease-out forwards;
+
+  &::backdrop {
+    background: transparent;
+  }
 }
 
 .success-modal {
@@ -459,6 +483,7 @@ $c-placeholder: #b3b3b3;
   line-height: 1.5;
   margin: 0;
   max-width: 482px;
+  white-space: pre-line;
 }
 
 .success-modal__btn {

@@ -27,22 +27,26 @@
           </figure>
 
           <div class="about-story__intro-copy">
-            <h2 id="about-story-title" class="about-story__title">
-              Qui sommes-nous ?
-            </h2>
+            <div class="about-story__intro-head">
+              <h2 id="about-story-title" class="about-story__title">
+                Qui sommes-nous ?
+              </h2>
 
-            <p class="about-story__lead">
-              UBAX est une plateforme web et mobile dédiée à la digitalisation
-              du secteur immobilier en Afrique. Elle connecte particuliers,
-              agences et bailleurs à travers une expérience simple, rapide et
-              sécurisée, afin de faciliter toutes les interactions liées à
-              l’immobilier.
-            </p>
+              <p class="about-story__lead">
+                UBAX est une plateforme web et mobile dédiée à la digitalisation
+                du secteur immobilier en Afrique. Elle connecte particuliers,
+                agences et bailleurs à travers une expérience simple, rapide et
+                sécurisée, afin de faciliter toutes les interactions liées à
+                l’immobilier.
+              </p>
+            </div>
 
             <div class="about-story__points">
               @for (point of points; track point.title) {
                 <article class="about-point">
-                  <span class="about-point__bullet" aria-hidden="true"></span>
+                  <span class="about-point__bullet" aria-hidden="true">{{
+                    point.emoji
+                  }}</span>
 
                   <div class="about-point__content">
                     <h3 class="about-point__title">{{ point.title }}</h3>
@@ -143,23 +147,6 @@
       </div>
     </section>
 
-    <section class="about-cta" aria-labelledby="about-cta-title">
-      <div class="about-page__gutter">
-        <div class="about-cta__surface">
-          <div class="about-cta__content">
-            <span class="about-cta__badge">Formulaire d’adhésion</span>
-            <h2 id="about-cta-title" class="about-cta__title">
-              Rejoignez Ubax dès aujourd’hui
-            </h2>
-            <p class="about-cta__description">
-              L’inscription est rapide et gratuite. Notre équipe vous accompagne
-              à chaque étape.
-            </p>
-
-            <a class="about-cta__button" routerLink="/adhesion">S’inscrire</a>
-          </div>
-        </div>
-      </div>
-    </section>
+    <ubax-about-cta-section class="about-page__cta" />
   </div>
 </ubax-public-shell>

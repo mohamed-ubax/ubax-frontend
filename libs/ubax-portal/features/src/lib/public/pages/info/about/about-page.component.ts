@@ -6,12 +6,13 @@ import {
   afterNextRender,
   inject,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { AboutCtaSectionComponent } from '../../../shared/about-cta-section.component';
 
 interface AboutPoint {
+  readonly emoji: string;
   readonly title: string;
   readonly description: string;
 }
@@ -27,7 +28,7 @@ interface AboutPlatformCard {
 @Component({
   selector: 'ubax-about-page',
   standalone: true,
-  imports: [PublicShellComponent, RouterLink],
+  imports: [PublicShellComponent, AboutCtaSectionComponent],
   templateUrl: './about-page.component.html',
   styleUrl: './about-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,16 +44,19 @@ export class AboutPageComponent {
 
   protected readonly points: readonly AboutPoint[] = [
     {
+      emoji: '🧩',
       title: 'Une solution tout-en-un',
       description:
         'Gérez vos biens, vos locataires et vos paiements depuis une seule plateforme simple et intuitive.',
     },
     {
+      emoji: '🤝',
       title: 'Une mise en relation efficace',
       description:
         'Nous facilitons les échanges entre propriétaires, agences et locataires pour des transactions rapides et sécurisées.',
     },
     {
+      emoji: '💡',
       title: 'Une innovation au service de l’immobilier',
       description:
         'Ubax utilise la technologie pour moderniser et améliorer l’expérience immobilière au quotidien.',
@@ -200,7 +204,7 @@ export class AboutPageComponent {
       });
 
       gsap.from(
-        '.about-cta__badge, .about-cta__title, .about-cta__description, .about-cta__button',
+        '.about-cta__badge, .about-cta__title, .about-cta__description, .about-cta__actions',
         {
           y: 26,
           opacity: 0,
