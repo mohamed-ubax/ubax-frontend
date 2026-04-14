@@ -14,10 +14,16 @@ import {
 } from '@ubax-workspace/shared-ui';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'ubax-faq-page',
-  imports: [PublicShellComponent, UiAccordionComponent, UiButtonComponent],
+  imports: [
+    PublicShellComponent,
+    UiAccordionComponent,
+    UiButtonComponent,
+    RouterLink,
+  ],
   templateUrl: './faq-page.component.html',
   styleUrl: './faq-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

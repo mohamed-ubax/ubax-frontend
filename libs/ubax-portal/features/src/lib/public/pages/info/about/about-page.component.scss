@@ -1,3 +1,7 @@
+* {
+  font-family: 'Lexend', sans-serif;
+}
+
 :host {
   display: block;
 }
@@ -165,7 +169,7 @@
 .about-story__title {
   margin: 0;
   color: var(--ubax-brand);
-  font-family: 'Poppins', 'Lexend', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 2.5rem;
   font-weight: 700;
   line-height: 3rem;
@@ -217,9 +221,7 @@
   border-radius: 50%;
   background: var(--ubax-surface-white);
   box-shadow: 0 0.625rem 1.75rem rgba(26, 48, 71, 0.05);
-  font-family:
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 1.625rem;
   line-height: 1;
 }
@@ -231,7 +233,7 @@
 .about-point__title {
   margin: 0;
   color: var(--ubax-brand);
-  font-family: 'Poppins', 'Lexend', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.2;
@@ -356,9 +358,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family:
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 2.125rem;
   line-height: 1;
   transform: translateY(0.0625rem);
@@ -555,14 +555,20 @@
     line-height: 1.7;
   }
 }
+@media (max-width: 1070px) {
+  .about-story__intro-head {
+    top: -1.5rem;
+  }
+}
 
 @media (max-width: 1024px) {
-  .about-page__gutter {
-    padding-inline: 1rem;
+  .about-page {
+    margin-inline: clamp(0rem, calc((100vw - 20rem) / 32), 1rem);
+    padding-bottom: 5rem;
   }
 
-  .about-page {
-    padding-bottom: 5rem;
+  .about-page__gutter {
+    padding-inline: 1rem;
   }
 
   .about-story,
