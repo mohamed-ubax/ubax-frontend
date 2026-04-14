@@ -304,19 +304,51 @@
 }
 
 .about-platform-card {
+  --about-platform-ripple-size: 14.5rem;
+  --about-platform-ripple-x: 5rem;
+  --about-platform-ripple-y: 5.125rem;
+  position: relative;
   display: grid;
   min-height: 22.125rem;
   align-content: start;
   gap: 2.375rem;
   padding: 3rem 1.875rem 2.5rem;
   border-radius: 3.125rem;
+  overflow: hidden;
   background: var(--ubax-surface-white);
   color: var(--ubax-brand);
+  isolation: isolate;
   transition:
     background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
     color 320ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: var(--about-platform-ripple-x);
+    top: var(--about-platform-ripple-y);
+    width: var(--about-platform-ripple-size);
+    height: var(--about-platform-ripple-size);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.48) 0%,
+      rgba(255, 255, 255, 0.3) 18%,
+      rgba(255, 255, 255, 0.16) 36%,
+      rgba(255, 255, 255, 0.07) 54%,
+      rgba(255, 255, 255, 0) 76%
+    );
+    filter: blur(1px);
+    transform: translate(-50%, -50%) scale(0.42);
+    transition: opacity 220ms ease;
+  }
 
   &:hover {
     background: var(--ubax-brand);
@@ -324,6 +356,21 @@
     transform: translateY(-0.375rem);
     box-shadow: 0 1.625rem 3.5rem rgba(17, 33, 49, 0.22);
   }
+
+  &:hover::before,
+  &:hover::after {
+    opacity: 1;
+    animation: about-platform-card-ripple 2.6s infinite;
+  }
+
+  &:hover::after {
+    animation-delay: 1.3s;
+  }
+}
+
+.about-platform-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .about-platform-card--dark {
@@ -416,6 +463,22 @@
 
   to {
     transform: translate3d(-2rem, -1.25rem, 0);
+  }
+}
+
+@keyframes about-platform-card-ripple {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.42);
+  }
+
+  28% {
+    opacity: 0.34;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.72);
   }
 }
 
@@ -704,6 +767,9 @@
   }
 
   .about-platform-card {
+    --about-platform-ripple-size: 10.5rem;
+    --about-platform-ripple-x: 4rem;
+    --about-platform-ripple-y: 4.125rem;
     min-height: auto;
     padding: 1.5rem;
     border-radius: 2rem;
@@ -730,6 +796,12 @@
   .about-story__intro-media img,
   .about-story__feature-media img,
   .about-platform-card {
+    transition: none;
+  }
+
+  .about-platform-card::before,
+  .about-platform-card::after {
+    animation: none;
     transition: none;
   }
 }
