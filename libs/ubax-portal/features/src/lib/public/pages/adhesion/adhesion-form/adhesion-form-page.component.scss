@@ -51,6 +51,12 @@ $c-error: #dc2626; // error state (WCAG accessible red)
   border-radius: 16px;
 }
 
+.documents-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 // ── UBAX logo + cercle décoratif — node 672:1571 (w=187px, h=179px)
 // Figma position relative à la card (1341×421) :
 //   left = 57.9px → 57.9/1341 = 4.32%
