@@ -96,7 +96,7 @@ export class CarrieresCandidaturePage {
       ? 'Déposer ma candidature'
       : 'Déposer mon profil';
     this.successMessage = isSpecificApplication
-      ? `Merci ! Votre candidature a bien été reçue avec succès.
+      ? `Merci ! Votre candidature a bien été envoyée avec succès.
 Nous vous remercions pour l’intérêt que vous portez à notre offre.`
       : 'Merci ! Votre profil a bien été enregistré. Nous vous contacterons dès qu’une opportunité correspond à votre profil.';
 
