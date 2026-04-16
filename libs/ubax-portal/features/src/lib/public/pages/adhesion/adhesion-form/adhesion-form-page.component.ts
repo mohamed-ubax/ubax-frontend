@@ -107,6 +107,10 @@ export class AdhesionFormPageComponent {
       value: 'sarl',
     },
     {
+      label: 'Entreprise individuelle',
+      value: 'entreprise_individuelle',
+    },
+    {
       label: 'SCI',
       value: 'sci',
     },

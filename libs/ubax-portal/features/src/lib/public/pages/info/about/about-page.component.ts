@@ -21,8 +21,6 @@ interface AboutPlatformCard {
   readonly title: string;
   readonly description: string;
   readonly emoji: string;
-  readonly theme: 'light' | 'dark';
-  readonly iconSurface: 'accent' | 'white';
 }
 
 @Component({
@@ -69,32 +67,24 @@ export class AboutPageComponent {
       description:
         'Centralisez l’ensemble des opérations de votre hôtel : gestion des chambres, suivi des réservations, disponibilité en temps réel et encaissement des paiements. Tout est automatisé pour améliorer l’efficacité et l’expérience client.',
       emoji: '🏨',
-      theme: 'light',
-      iconSurface: 'accent',
     },
     {
       title: 'Pilotage complet des agences immobilières',
       description:
         'Gérez vos biens immobiliers, mandats, clients et annonces depuis un tableau de bord unique. Ubax vous aide à structurer votre activité et à optimiser la gestion de vos locations.',
       emoji: '🏢',
-      theme: 'dark',
-      iconSurface: 'white',
     },
     {
       title: 'Application mobile de location simplifiée',
       description:
         'Une application pensée pour les utilisateurs permettant de louer facilement une maison ou un appartement au mois ou à l’année, avec une expérience rapide, intuitive et accessible partout.',
       emoji: '📱',
-      theme: 'light',
-      iconSurface: 'accent',
     },
     {
       title: 'Réservations courte durée',
       description:
         'Proposez ou réservez des logements pour des séjours courts en toute simplicité. Système de réservation instantanée, paiement sécurisé et gestion fluide des disponibilités.',
       emoji: '🏠',
-      theme: 'light',
-      iconSurface: 'accent',
     },
   ];
 

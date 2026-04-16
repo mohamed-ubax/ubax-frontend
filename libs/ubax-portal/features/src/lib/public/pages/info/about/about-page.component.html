@@ -119,17 +119,9 @@
 
         <div class="about-platform__grid">
           @for (card of platformCards; track card.title) {
-            <article
-              class="about-platform-card"
-              [class.about-platform-card--dark]="card.theme === 'dark'"
-            >
+            <article class="about-platform-card">
               <div class="about-platform-card__header">
-                <span
-                  class="about-platform-card__icon-wrap"
-                  [class.about-platform-card__icon-wrap--white]="
-                    card.iconSurface === 'white'
-                  "
-                >
+                <span class="about-platform-card__icon-wrap">
                   <span class="about-platform-card__emoji" aria-hidden="true">{{
                     card.emoji
                   }}</span>
