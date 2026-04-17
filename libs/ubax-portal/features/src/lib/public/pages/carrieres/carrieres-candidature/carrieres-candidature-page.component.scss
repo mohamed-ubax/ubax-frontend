@@ -416,6 +416,8 @@ $c-placeholder: #b3b3b3;
   margin: 0;
   padding: 24px;
   border: none;
+  overflow: hidden;
+  overscroll-behavior: contain;
   animation: ubax-overlay-in 0.28s ease-out forwards;
 
   &::backdrop {

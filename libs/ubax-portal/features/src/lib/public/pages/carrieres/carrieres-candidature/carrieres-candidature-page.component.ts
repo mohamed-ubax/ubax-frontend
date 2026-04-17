@@ -8,6 +8,7 @@ import {
   NgZone,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -41,10 +42,20 @@ const JOB_TITLES: Record<number, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarrieresCandidaturePage {
+  private readonly document = inject(DOCUMENT);
   private readonly elRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly zone = inject(NgZone);
   private gsapCtx: gsap.Context | undefined;
+  private scrollLockState: {
+    readonly htmlOverflow: string;
+    readonly bodyOverflow: string;
+    readonly bodyTouchAction: string;
+    readonly bodyPosition: string;
+    readonly bodyTop: string;
+    readonly bodyWidth: string;
+    readonly scrollY: number;
+  } | null = null;
 
   protected readonly successVisible = signal(false);
   protected readonly elementsIcon =
@@ -121,6 +132,7 @@ Nous vous remercions pour l’intérêt que vous portez à notre offre.`
 
     this.destroyRef.onDestroy(() => {
       this.gsapCtx?.revert();
+      this.unlockPageScroll();
       const url = this.cvObjectUrl();
       if (url) URL.revokeObjectURL(url);
     });
@@ -207,10 +219,60 @@ Nous vous remercions pour l’intérêt que vous portez à notre offre.`
 
   protected submitForm(event: Event): void {
     event.preventDefault();
+    this.lockPageScroll();
     this.successVisible.set(true);
   }
 
   protected closeSuccess(): void {
     this.successVisible.set(false);
+    this.unlockPageScroll();
+  }
+
+  private lockPageScroll(): void {
+    if (this.scrollLockState) {
+      return;
+    }
+
+    this.scrollLockState = {
+      htmlOverflow: this.document.documentElement.style.overflow,
+      bodyOverflow: this.document.body.style.overflow,
+      bodyTouchAction: this.document.body.style.touchAction,
+      bodyPosition: this.document.body.style.position,
+      bodyTop: this.document.body.style.top,
+      bodyWidth: this.document.body.style.width,
+      scrollY:
+        this.document.defaultView?.scrollY ??
+        this.document.documentElement.scrollTop ??
+        0,
+    };
+
+    this.document.documentElement.style.overflow = 'hidden';
+    this.document.body.style.overflow = 'hidden';
+    this.document.body.style.touchAction = 'none';
+    this.document.body.style.position = 'fixed';
+    this.document.body.style.top = `-${this.scrollLockState.scrollY}px`;
+    this.document.body.style.width = '100%';
+  }
+
+  private unlockPageScroll(): void {
+    if (!this.scrollLockState) {
+      return;
+    }
+
+    this.document.documentElement.style.overflow =
+      this.scrollLockState.htmlOverflow;
+    this.document.body.style.overflow = this.scrollLockState.bodyOverflow;
+    this.document.body.style.touchAction = this.scrollLockState.bodyTouchAction;
+    this.document.body.style.position = this.scrollLockState.bodyPosition;
+    this.document.body.style.top = this.scrollLockState.bodyTop;
+    this.document.body.style.width = this.scrollLockState.bodyWidth;
+
+    this.document.defaultView?.scrollTo({
+      top: this.scrollLockState.scrollY,
+      left: 0,
+      behavior: 'auto',
+    });
+
+    this.scrollLockState = null;
   }
 }
