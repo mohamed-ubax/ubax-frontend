@@ -61,8 +61,8 @@
 }
 
 .summary-card__label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1.4;
   color: #222;
 }
@@ -240,6 +240,11 @@
   font-weight: 600;
   line-height: 1.75;
   white-space: nowrap;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #ff9a43;
+  }
 }
 
 .rooms-grid {

@@ -43,7 +43,7 @@ export class DashboardHotelPageComponent {
 
   // ── Revenue bar chart ─────────────────────────────────────────────────
   readonly revenueData = {
-    labels: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
+    labels: ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'],
     datasets: [
       {
         data: [1100, 1430, 620, 1600, 2030, 900, 810],
@@ -63,8 +63,8 @@ export class DashboardHotelPageComponent {
         grid: { display: false },
         border: { display: false },
         ticks: {
-          font: { family: 'Lexend', size: 11 },
-          color: '#aaa',
+          font: { family: 'Lexend', size: 15, weight: '400' },
+          color: '#444',
           maxRotation: 0,
         },
       },
@@ -75,8 +75,8 @@ export class DashboardHotelPageComponent {
         max: 3000,
         ticks: {
           stepSize: 1000,
-          font: { family: 'Lexend', size: 11 },
-          color: '#aaa',
+          font: { family: 'Lexend', size: 15, weight: '400' },
+          color: '#444',
           callback: (v: number) => {
             if (v === 0) return '0';
             return v / 1000 + 'k';
@@ -119,12 +119,18 @@ export class DashboardHotelPageComponent {
 
   readonly reservationsOptions = {
     plugins: {
-      legend: { display: false },
+      legend: {
+        display: false,
+      },
       tooltip: { mode: 'index', intersect: false },
     },
     scales: {
-      x: { display: false },
-      y: { display: false },
+      x: {
+        display: false,
+      },
+      y: {
+        display: false,
+      },
     },
     responsive: true,
     maintainAspectRatio: false,
@@ -182,7 +188,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -191,7 +197,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -200,7 +206,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -209,7 +215,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -218,7 +224,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
   ];

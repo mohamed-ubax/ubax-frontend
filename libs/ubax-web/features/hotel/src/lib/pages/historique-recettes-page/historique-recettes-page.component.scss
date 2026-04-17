@@ -121,10 +121,11 @@
 
 .kpi-label {
   font-family: 'Lexend', sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #878787;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #222;
   margin: 0;
+  line-height: 1.4;
 }
 
 .kpi-value {
@@ -540,4 +541,3 @@
     margin: 0;
   }
 }
-
