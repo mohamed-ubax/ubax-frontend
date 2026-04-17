@@ -42,6 +42,7 @@ function provideMockUserInDev() {
               nom: 'Kouassi',
               prenom: 'Jean-Marc',
               email: 'jm.kouassi@ubax.io',
+              avatar: 'header/header-user-avatar.png',
               role: Role.HOTEL,
             });
           }

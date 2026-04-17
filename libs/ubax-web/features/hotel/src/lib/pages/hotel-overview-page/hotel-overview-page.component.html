@@ -1,0 +1,365 @@
+<section class="hotel-dashboard">
+  <div class="hotel-dashboard__main">
+    <section class="summary-strip">
+      <article class="summary-card summary-card--occupancy">
+        <div class="summary-card__progress-ring" aria-hidden="true">
+          <div class="summary-card__progress-center">
+            <img
+              src="hotel-dashboard/kpi/house-icon.svg"
+              alt=""
+              class="summary-card__progress-icon"
+            />
+          </div>
+        </div>
+        <div class="summary-card__copy">
+          <p class="summary-card__label">Taux d’occupation</p>
+          <p class="summary-card__value summary-card__value--success">
+            {{ occupancyRate }}%
+          </p>
+        </div>
+      </article>
+
+      <article class="summary-card summary-card--arrival">
+        <div class="summary-card__icon-shell">
+          <img
+            src="hotel-dashboard/kpi/arrival-circle.svg"
+            alt=""
+            class="summary-card__icon-bg"
+          />
+          <img
+            src="hotel-dashboard/kpi/arrival-icon.svg"
+            alt=""
+            class="summary-card__icon-asset summary-card__icon-asset--bag"
+          />
+        </div>
+        <div class="summary-card__copy">
+          <p class="summary-card__label">Arrivée aujourd'hui</p>
+          <p class="summary-card__value summary-card__value--lilac">
+            {{ arrivalsToday }}
+          </p>
+        </div>
+      </article>
+
+      <article class="summary-card summary-card--departure">
+        <div class="summary-card__icon-shell">
+          <img
+            src="hotel-dashboard/kpi/depart-circle.svg"
+            alt=""
+            class="summary-card__icon-bg"
+          />
+          <img
+            src="hotel-dashboard/kpi/depart-icon.svg"
+            alt=""
+            class="summary-card__icon-asset summary-card__icon-asset--bag"
+          />
+        </div>
+        <div class="summary-card__copy">
+          <p class="summary-card__label">Départ aujourd’hui</p>
+          <p class="summary-card__value summary-card__value--accent">
+            {{ departuresToday }}
+          </p>
+        </div>
+      </article>
+
+      <article class="summary-card summary-card--revenue">
+        <div class="summary-card__icon-shell">
+          <img
+            src="hotel-dashboard/kpi/revenue-circle.svg"
+            alt=""
+            class="summary-card__icon-bg"
+          />
+          <img
+            src="hotel-dashboard/kpi/revenue-icon.svg"
+            alt=""
+            class="summary-card__icon-asset summary-card__icon-asset--money"
+          />
+        </div>
+        <div class="summary-card__copy">
+          <p class="summary-card__label">Revenus du jour</p>
+          <p
+            class="summary-card__value summary-card__value--navy summary-card__value--compact"
+          >
+            {{ dailyRevenue }}
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <div class="hotel-dashboard__content-grid">
+      <div class="hotel-dashboard__left-column">
+        <section class="panel panel--revenue">
+          <div class="panel__heading panel__heading--stacked">
+            <h2 class="panel__title panel__title--revenue">Revenus</h2>
+            <div class="panel__legend">
+              <span class="panel__legend-dot"></span>
+              <span class="panel__legend-label">Villa</span>
+            </div>
+          </div>
+
+          <div class="panel__divider"></div>
+
+          <div class="revenue-chart">
+            <p-chart
+              type="bar"
+              [data]="revenueChartData"
+              [options]="revenueChartOptions"
+              height="280px"
+            />
+          </div>
+        </section>
+
+        <section class="panel panel--reservations-table">
+          <div class="reservations-header">
+            <h2 class="panel__title panel__title--small">
+              Liste de réservations
+            </h2>
+
+            <label
+              class="reservations-search"
+              aria-label="Rechercher une réservation"
+            >
+              <i class="pi pi-search"></i>
+              <input type="text" placeholder="Rechercher" />
+            </label>
+          </div>
+
+          <div class="reservations-table__head">
+            <span>Invité</span>
+            <span>Chambre</span>
+            <span>Durée</span>
+            <span>Arrivée - Départ</span>
+            <span>Statut</span>
+            <span>Action</span>
+          </div>
+
+          <div class="reservations-table__body">
+            @for (reservation of reservations; track reservation.id) {
+              <div class="reservations-table__row">
+                <div class="reservations-table__guest">
+                  <img
+                    [src]="reservation.image"
+                    [alt]="reservation.guest"
+                    class="reservations-table__guest-image"
+                  />
+                  <span class="reservations-table__guest-name">{{
+                    reservation.guest
+                  }}</span>
+                </div>
+
+                <span
+                  class="reservations-table__cell reservations-table__cell--room"
+                  >{{ reservation.room }}</span
+                >
+                <span
+                  class="reservations-table__cell reservations-table__cell--duration"
+                  >{{ reservation.duration }}</span
+                >
+                <span
+                  class="reservations-table__cell reservations-table__cell--dates"
+                  >{{ reservation.dates }}</span
+                >
+
+                <span class="reservations-table__status">{{
+                  reservation.status
+                }}</span>
+
+                <button type="button" class="reservations-table__action">
+                  voir
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="reservations-table__footer">
+            <button type="button" class="reservations-table__more">
+              Voir plus
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="hotel-dashboard__middle-column">
+        <section class="cta-banner">
+          <img
+            src="hotel-dashboard/chart/cta-banner.png"
+            alt=""
+            class="cta-banner__image"
+          />
+          <div class="cta-banner__overlay"></div>
+
+          <button type="button" class="cta-banner__button">
+            Ajouter une réservation
+          </button>
+        </section>
+
+        <section class="panel panel--trend">
+          <div class="trend-card__header">
+            <h2 class="panel__title panel__title--trend">réservations</h2>
+
+            <p-select
+              [options]="trendRangeOptions"
+              [(ngModel)]="selectedTrendRange"
+              (ngModelChange)="onTrendRangeChange($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="trend-card__filter"
+              panelStyleClass="trend-card__filter-panel"
+              aria-label="Période des réservations"
+            >
+              <ng-template #dropdownicon>
+                <i class="pi pi-chevron-down" aria-hidden="true"></i>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <div class="trend-card__metrics">
+            <span class="trend-card__count">{{ trendCount }}</span>
+            <span class="trend-card__growth">
+              <i class="pi pi-arrow-up"></i>
+              {{ trendGrowth }}
+            </span>
+          </div>
+
+          <div class="trend-card__chart">
+            <p-chart
+              type="line"
+              [data]="reservationTrendData"
+              [options]="reservationTrendOptions"
+              [plugins]="reservationTrendPlugins"
+              height="140px"
+            />
+          </div>
+
+          <div class="trend-card__months">
+            @for (month of reservationMonths; track month.label) {
+              <span
+                class="trend-card__month"
+                [class.trend-card__month--active]="month.active"
+              >
+                {{ month.label }}
+              </span>
+            }
+          </div>
+        </section>
+
+        <section class="panel panel--notifications">
+          <h2 class="panel__title panel__title--small">Notifications</h2>
+
+          <div class="notifications-list">
+            @for (notification of notifications; track notification.id) {
+              <div class="notifications-list__item">
+                <span
+                  class="notifications-list__icon"
+                  [class.notifications-list__icon--new]="
+                    notification.type === 'new'
+                  "
+                  [class.notifications-list__icon--cancel]="
+                    notification.type === 'cancel'
+                  "
+                  [class.notifications-list__icon--confirm]="
+                    notification.type === 'confirm'
+                  "
+                >
+                  <i
+                    class="pi"
+                    [class.pi-bell]="notification.type === 'new'"
+                    [class.pi-times]="notification.type === 'cancel'"
+                    [class.pi-check]="notification.type === 'confirm'"
+                  ></i>
+                </span>
+
+                <div class="notifications-list__content">
+                  <p
+                    class="notifications-list__title"
+                    [class.notifications-list__title--cancel]="
+                      notification.type === 'cancel'
+                    "
+                    [class.notifications-list__title--confirm]="
+                      notification.type === 'confirm'
+                    "
+                  >
+                    {{ notification.title }}
+                  </p>
+                  <p class="notifications-list__subtitle">
+                    {{ notification.subtitle }}
+                  </p>
+                </div>
+
+                <span class="notifications-list__time">{{
+                  notification.time
+                }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <aside class="hotel-dashboard__right-column">
+    <section class="calendar-panel">
+      <p-datepicker
+        [(ngModel)]="selectedDate"
+        [inline]="true"
+        [showWeek]="false"
+        [showOtherMonths]="true"
+        [selectOtherMonths]="true"
+        styleClass="hotel-calendar"
+      />
+    </section>
+
+    <section class="panel panel--properties">
+      <div class="properties-panel__header">
+        <h2 class="properties-panel__title">Biens disponibles</h2>
+        <a href="/hotel/espaces" class="properties-panel__link">Tout voir</a>
+      </div>
+
+      <div class="properties-panel__list">
+        @for (property of availableProperties; track property.id) {
+          <article class="property-card">
+            <img [src]="property.image" alt="" class="property-card__image" />
+
+            <span class="property-card__badge">Location</span>
+
+            <div class="property-card__glass">
+              <div class="property-card__top">
+                <div class="property-card__headline">
+                  <p class="property-card__name">Immeuble kalia</p>
+
+                  <p class="property-card__location">
+                    <img src="hotel-dashboard/icons/location-icon.svg" alt="" />
+                    Abidjan, Cocody
+                  </p>
+                </div>
+
+                <span class="property-card__arrow-shell" aria-hidden="true">
+                  <i class="pi pi-arrow-up-right"></i>
+                </span>
+              </div>
+
+              <div class="property-card__bottom">
+                <div class="property-card__tenant">
+                  <img
+                    [src]="property.tenantAvatar"
+                    [alt]="property.tenantName"
+                    class="property-card__tenant-avatar"
+                  />
+
+                  <div class="property-card__tenant-copy">
+                    <p class="property-card__tenant-name">
+                      {{ property.tenantName }}
+                    </p>
+                    <p class="property-card__tenant-role">Locataire</p>
+                  </div>
+                </div>
+
+                <span class="property-card__price">{{ property.price }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  </aside>
+</section>

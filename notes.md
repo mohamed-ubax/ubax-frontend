@@ -1,5 +1,9 @@
 UBAX HOTEL
 
+Header
+
+- Mettre l'image correspondant au niveau du profil de l'utilisateur.
+
 Page Tableau de bord
 
 - Ajuster les hauteurs.

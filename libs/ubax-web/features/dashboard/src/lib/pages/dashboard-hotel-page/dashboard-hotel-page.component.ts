@@ -107,7 +107,7 @@ export class DashboardHotelPageComponent {
       {
         data: [28, 44, 58, 38, 32, 48],
         borderColor: '#e87d1e',
-        backgroundColor: 'rgba(232, 125, 30, 0.12)',
+        backgroundColor: '#F2F2F2',
         fill: true,
         tension: 0.45,
         pointRadius: 0,
