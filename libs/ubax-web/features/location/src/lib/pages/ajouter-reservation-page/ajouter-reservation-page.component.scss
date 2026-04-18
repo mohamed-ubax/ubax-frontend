@@ -208,7 +208,7 @@
   font-size: 20px;
   font-weight: 600;
   color: #1a3047;
-  margin: 0 0 44px 0;
+  margin: 0 0 35px 0;
 
   &--sm {
     font-size: 16px;
@@ -456,25 +456,55 @@
 }
 
 .date-input {
-  height: 65px;
-  background: #ecf2f7;
-  border-radius: 10px;
-  padding: 0 18px;
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .date-input {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
+  background: #ecf2f7;
+  border-radius: 10px;
+  overflow: hidden;
 
-  span {
+  .p-inputtext {
+    width: 100%;
+    height: 65px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    padding: 0 18px;
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 500;
     color: #222;
+    box-shadow: none;
   }
 
-  i {
-    font-size: 22px;
+  .p-datepicker-trigger {
+    width: 56px;
+    height: 65px;
+    border: none;
+    background: transparent;
     color: #1a3047;
+    border-radius: 0;
+    flex-shrink: 0;
+  }
+
+  .p-datepicker-trigger-icon,
+  .p-button-icon {
+    font-size: 22px;
+  }
+
+  .p-inputtext::placeholder {
+    color: #7d8894;
+  }
+
+  &.p-focus,
+  .p-inputtext:focus {
+    box-shadow: none;
+    outline: none;
   }
 }
 
@@ -864,6 +894,57 @@
   align-content: start;
 }
 
+.options-toolbar {
+  display: flex;
+  margin-bottom: 28px;
+}
+
+.options-inline-add {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 560px);
+}
+
+.option-input {
+  flex: 1;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: #ecf2f7;
+  padding: 0 18px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  color: #222;
+  outline: none;
+
+  &::placeholder {
+    color: #7d8894;
+  }
+}
+
+.option-add-btn {
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: #1a3047;
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  padding: 0 22px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #243f5f;
+  }
+
+  &:disabled {
+    cursor: default;
+    background: #9aabba;
+  }
+}
+
 .option-item {
   display: flex;
   align-items: center;
@@ -890,6 +971,24 @@
   font-size: 15px;
   color: #222;
   line-height: 1.4;
+}
+
+.option-remove {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #ecf2f7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a3047;
+  cursor: pointer;
+
+  i {
+    font-size: 12px;
+  }
 }
 
 /* ── STEP 4 ────────────────────────────────────────────────────── */
@@ -946,10 +1045,12 @@
 
 /* Taxes input élargi */
 .taxes-input {
+  width: 165px;
   height: 45px;
   background: #fff;
   border: none;
   border-radius: 10px;
+  padding: 0 14px;
   font-family: 'Lexend', sans-serif;
   font-size: 13px;
   color: #929292;
@@ -1045,42 +1146,84 @@
   }
 }
 
-.payment-select {
+.payment-option {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #f6fbff;
-  border-radius: 50px;
-  padding: 8px 20px 8px 10px;
-  cursor: pointer;
-  min-width: 365px;
-
-  span {
-    font-family: 'Lexend', sans-serif;
-    font-size: 15px;
-    color: #222;
-  }
-
-  i {
-    font-size: 18px;
-    color: #555;
-    margin-left: auto;
-  }
+  gap: 12px;
 }
 
-.wave-logo {
+.payment-option__media {
   width: 43px;
   height: 43px;
   border-radius: 50%;
-  background: #1a3047;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: #dfeaf3;
+}
+
+.payment-option__logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.payment-option__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1a3047;
   font-family: 'Lexend', sans-serif;
-  font-size: 18px;
+  font-size: 12px;
   font-weight: 700;
   color: #fff;
-  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.payment-option__label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  color: #222;
+}
+
+:host ::ng-deep .payment-select {
+  min-width: 365px;
+  background: #f6fbff;
+  border: none;
+  border-radius: 50px;
+  box-shadow: none;
+
+  .p-select-label {
+    padding: 7px 10px;
+  }
+
+  .p-select-dropdown {
+    width: 52px;
+    color: #555;
+  }
+
+  .p-select-dropdown-icon {
+    font-size: 18px;
+  }
+}
+
+:host ::ng-deep .payment-select-overlay {
+  border-radius: 18px;
+  overflow: hidden;
+
+  .p-select-list {
+    padding: 8px;
+  }
+
+  .p-select-option {
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
 }
 
 /* ── STEP 5 ────────────────────────────────────────────────────── */
@@ -1381,5 +1524,60 @@
 
   &:hover {
     background: #d06e15;
+  }
+}
+
+@media (max-width: 1280px) {
+  .s2-layout {
+    flex-direction: column;
+  }
+
+  .cost-panel {
+    width: 100%;
+  }
+
+  .options-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricing-row--payment {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  :host ::ng-deep .payment-select {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .dates-row,
+  .counters-row,
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .options-inline-add,
+  .promo-row,
+  .pricing-row,
+  .step4-actions,
+  .action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pricing-row--payment {
+    gap: 12px;
+  }
+
+  .taxes-input,
+  .promo-apply-btn,
+  .option-add-btn,
+  .btn-prev,
+  .btn-next,
+  .btn-draft,
+  .btn-validate {
+    width: 100%;
   }
 }

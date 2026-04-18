@@ -211,17 +211,28 @@
                 <div class="dates-row">
                   <div class="date-group">
                     <label class="form-label">Date d'arrivée</label>
-                    <div class="date-input">
-                      <span>{{ arrivalDate() }}</span>
-                      <i class="pi pi-calendar"></i>
-                    </div>
+                    <p-datepicker
+                      [ngModel]="arrivalDate()"
+                      (ngModelChange)="onArrivalDateChange($event)"
+                      [showIcon]="true"
+                      appendTo="body"
+                      styleClass="date-input"
+                      inputId="arrival-date"
+                      placeholder="Sélectionner une date"
+                    />
                   </div>
                   <div class="date-group">
                     <label class="form-label">Date de départ</label>
-                    <div class="date-input">
-                      <span>{{ departureDate() }}</span>
-                      <i class="pi pi-calendar"></i>
-                    </div>
+                    <p-datepicker
+                      [ngModel]="departureDate()"
+                      (ngModelChange)="onDepartureDateChange($event)"
+                      [minDate]="minDepartureDate()"
+                      [showIcon]="true"
+                      appendTo="body"
+                      styleClass="date-input"
+                      inputId="departure-date"
+                      placeholder="Sélectionner une date"
+                    />
                   </div>
                 </div>
 
@@ -403,14 +414,48 @@
         @if (currentStep() === 3) {
           <div class="step-content">
             <p class="step-section-title">Options supplémentaires</p>
+
+            <div class="options-toolbar">
+              <div class="options-inline-add">
+                <input
+                  class="option-input"
+                  type="text"
+                  placeholder="Ajouter une option personnalisée"
+                  [value]="newOptionLabel()"
+                  (input)="newOptionLabel.set($any($event.target).value)"
+                  (keydown.enter)="addCustomOption()"
+                />
+                <button
+                  type="button"
+                  class="option-add-btn"
+                  [disabled]="!canAddOption()"
+                  (click)="addCustomOption()"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </div>
+
             <div class="options-grid">
-              @for (opt of EXTRA_OPTIONS; track $index; let i = $index) {
-                <div class="option-item" (click)="toggleOption(i)">
+              @for (opt of extraOptions(); track opt.id) {
+                <div class="option-item" (click)="toggleOption(opt.id)">
                   <div
                     class="option-circle"
-                    [class.option-circle--checked]="selectedOptions()[i]"
+                    [class.option-circle--checked]="opt.selected"
                   ></div>
-                  <span class="option-label">{{ opt }}</span>
+                  <span class="option-label">{{ opt.label }}</span>
+                  @if (opt.custom) {
+                    <button
+                      type="button"
+                      class="option-remove"
+                      aria-label="Supprimer l'option"
+                      (click)="
+                        $event.stopPropagation(); removeCustomOption(opt.id)
+                      "
+                    >
+                      <i class="pi pi-times"></i>
+                    </button>
+                  }
                 </div>
               }
             </div>
@@ -520,11 +565,61 @@
               <!-- Payment method — side by side -->
               <div class="pricing-row pricing-row--payment">
                 <span>Mode de paiement</span>
-                <div class="payment-select">
-                  <span class="wave-logo">W</span>
-                  <span>Wave</span>
-                  <i class="pi pi-chevron-down"></i>
-                </div>
+                <p-select
+                  [options]="paymentMethods"
+                  [ngModel]="selectedPaymentMethod()"
+                  (ngModelChange)="selectedPaymentMethod.set($event)"
+                  optionLabel="label"
+                  optionValue="value"
+                  appendTo="body"
+                  styleClass="payment-select"
+                  panelStyleClass="payment-select-overlay"
+                  aria-label="Mode de paiement"
+                >
+                  <ng-template #selectedItem let-method>
+                    <div class="payment-option payment-option--selected">
+                      <span class="payment-option__media">
+                        @if (method?.logoSrc) {
+                          <img
+                            class="payment-option__logo"
+                            [src]="method.logoSrc"
+                            alt=""
+                          />
+                        } @else {
+                          <span class="payment-option__badge">{{
+                            method?.badge
+                          }}</span>
+                        }
+                      </span>
+                      <span class="payment-option__label">{{
+                        method?.label
+                      }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template #item let-method>
+                    <div class="payment-option">
+                      <span class="payment-option__media">
+                        @if (method.logoSrc) {
+                          <img
+                            class="payment-option__logo"
+                            [src]="method.logoSrc"
+                            alt=""
+                          />
+                        } @else {
+                          <span class="payment-option__badge">{{
+                            method.badge
+                          }}</span>
+                        }
+                      </span>
+                      <span class="payment-option__label">{{
+                        method.label
+                      }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </ng-template>
+                </p-select>
               </div>
             </div>
           </div>
@@ -571,9 +666,7 @@
                       <i class="pi pi-calendar meta-icon"></i>
                       <small class="meta-lbl">Date de reservation</small>
                     </div>
-                    <p class="meta-value">
-                      {{ arrivalDate() }} – {{ departureDate() }}
-                    </p>
+                    <p class="meta-value">{{ stayPeriodLabel() }}</p>
                   </div>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -9,6 +10,7 @@ import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 
 type RoomStatus = 'Disponible' | 'Réservé';
 type RoomViewMode = 'grid' | 'list';
+type FilterDropdownKey = 'type' | 'status';
 
 interface SummaryCard {
   readonly label: string;
@@ -30,6 +32,12 @@ interface RoomCard {
   readonly priceUnit: string;
   readonly image: string;
   readonly avatar: string;
+}
+
+interface FilterOption {
+  readonly label: string;
+  readonly value: string;
+  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';
 }
 
 const baseRooms: Omit<RoomCard, 'id'>[] = [
@@ -205,19 +213,28 @@ export class EspacesListPageComponent {
   readonly activePage = signal(1);
   readonly selectedType = signal('all');
   readonly selectedStatus = signal('all');
+  readonly openDropdown = signal<FilterDropdownKey | null>(null);
   readonly viewMode = signal<RoomViewMode>('grid');
   readonly stars = Array.from({ length: 4 });
 
-  readonly typeOptions = [
-    { label: 'Type d’espace', value: 'all' },
-    { label: 'Chambre', value: 'Chambre' },
+  readonly typeOptions: FilterOption[] = [
+    { label: 'Type d’espace', value: 'all', tone: 'neutral' },
+    { label: 'Chambre', value: 'Chambre', tone: 'accent' },
   ];
 
-  readonly statusOptions = [
-    { label: 'Statut', value: 'all' },
-    { label: 'Disponible', value: 'Disponible' },
-    { label: 'Réservé', value: 'Réservé' },
+  readonly statusOptions: FilterOption[] = [
+    { label: 'Statut', value: 'all', tone: 'neutral' },
+    { label: 'Disponible', value: 'Disponible', tone: 'success' },
+    { label: 'Réservé', value: 'Réservé', tone: 'warning' },
   ];
+
+  readonly selectedTypeLabel = computed(() =>
+    this.getOptionLabel(this.typeOptions, this.selectedType()),
+  );
+
+  readonly selectedStatusLabel = computed(() =>
+    this.getOptionLabel(this.statusOptions, this.selectedStatus()),
+  );
 
   readonly summaryCards: SummaryCard[] = [
     {
@@ -295,7 +312,46 @@ export class EspacesListPageComponent {
     this.activePage.set(1);
   }
 
+  toggleDropdown(dropdown: FilterDropdownKey): void {
+    this.openDropdown.update((current) =>
+      current === dropdown ? null : dropdown,
+    );
+  }
+
+  selectTypeOption(value: string): void {
+    this.updateType(value);
+    this.openDropdown.set(null);
+  }
+
+  selectStatusOption(value: string): void {
+    this.updateStatus(value);
+    this.openDropdown.set(null);
+  }
+
   setViewMode(viewMode: RoomViewMode): void {
     this.viewMode.set(viewMode);
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent): void {
+    const target = event.target;
+
+    if (target instanceof HTMLElement && target.closest('.filter-dropdown')) {
+      return;
+    }
+
+    this.openDropdown.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscapeKey(): void {
+    this.openDropdown.set(null);
+  }
+
+  private getOptionLabel(options: FilterOption[], value: string): string {
+    return (
+      options.find((option) => option.value === value)?.label ??
+      options[0].label
+    );
   }
 }
