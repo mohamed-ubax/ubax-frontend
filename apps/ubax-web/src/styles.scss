@@ -38,6 +38,10 @@ body {
   color: #222;
 }
 
+body.ubax-date-picker-open ubax-topbar {
+  z-index: 0;
+}
+
 ::view-transition-old(ubax-route-stage),
 ::view-transition-new(ubax-route-stage) {
   animation-duration: 680ms;
@@ -185,7 +189,7 @@ body {
 
 [data-ubax-motion].is-visible {
   opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
+  transform: none;
   will-change: auto;
 }
 
