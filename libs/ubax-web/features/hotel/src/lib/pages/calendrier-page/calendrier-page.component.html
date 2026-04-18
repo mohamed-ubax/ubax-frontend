@@ -5,45 +5,80 @@
 
   <!-- ── Stats Bar ──────────────────────────────────────────────── -->
   <div class="stats-bar">
-    <div class="stats-card stats-card--grey">
-      <div class="stats-icon-wrap">
-        <i class="pi pi-home"></i>
+    <article class="stats-card stats-card--grey">
+      <div class="stats-progress-ring" aria-hidden="true">
+        <div class="stats-progress-center">
+          <img
+            src="/hotel-dashboard/kpi/house-icon.svg"
+            alt=""
+            class="stats-progress-icon"
+          />
+        </div>
       </div>
       <div class="stats-text">
         <p class="stats-label">Taux d'occupation</p>
         <p class="stats-value stats-value--green">82%</p>
       </div>
-    </div>
+    </article>
 
-    <div class="stats-card stats-card--purple">
-      <div class="stats-icon-wrap">
-        <i class="pi pi-sign-in"></i>
+    <article class="stats-card stats-card--purple">
+      <div class="stats-icon-shell" aria-hidden="true">
+        <img
+          src="/hotel-dashboard/kpi/arrival-circle.svg"
+          alt=""
+          class="stats-icon-bg"
+        />
+        <img
+          src="/hotel-dashboard/kpi/arrival-icon.svg"
+          alt=""
+          class="stats-icon-asset stats-icon-asset--bag"
+        />
       </div>
       <div class="stats-text">
         <p class="stats-label">Arrivée aujourd'hui</p>
         <p class="stats-value stats-value--purple">8</p>
       </div>
-    </div>
+    </article>
 
-    <div class="stats-card stats-card--peach">
-      <div class="stats-icon-wrap">
-        <i class="pi pi-sign-out"></i>
+    <article class="stats-card stats-card--peach">
+      <div class="stats-icon-shell" aria-hidden="true">
+        <img
+          src="/hotel-dashboard/kpi/depart-circle.svg"
+          alt=""
+          class="stats-icon-bg"
+        />
+        <img
+          src="/hotel-dashboard/kpi/depart-icon.svg"
+          alt=""
+          class="stats-icon-asset stats-icon-asset--bag"
+        />
       </div>
       <div class="stats-text">
         <p class="stats-label">Départ aujourd'hui</p>
         <p class="stats-value stats-value--orange">3</p>
       </div>
-    </div>
+    </article>
 
-    <div class="stats-card stats-card--blue">
-      <div class="stats-icon-wrap">
-        <i class="pi pi-wallet"></i>
+    <article class="stats-card stats-card--blue">
+      <div class="stats-icon-shell" aria-hidden="true">
+        <img
+          src="/hotel-dashboard/kpi/revenue-circle.svg"
+          alt=""
+          class="stats-icon-bg"
+        />
+        <img
+          src="/hotel-dashboard/kpi/revenue-icon.svg"
+          alt=""
+          class="stats-icon-asset stats-icon-asset--money"
+        />
       </div>
       <div class="stats-text">
         <p class="stats-label">Revenus du jour</p>
-        <p class="stats-value stats-value--dark">750 000 FCFA</p>
+        <p class="stats-value stats-value--dark stats-value--compact">
+          750 000 FCFA
+        </p>
       </div>
-    </div>
+    </article>
   </div>
 
   <!-- ── Calendar Panel ─────────────────────────────────────────── -->
@@ -55,6 +90,7 @@
           <h2 class="month-label">{{ monthLabel() }}</h2>
           <div class="month-switcher__actions">
             <button
+              type="button"
               class="nav-btn"
               (click)="prevMonth()"
               aria-label="Mois précédent"
@@ -67,6 +103,7 @@
               />
             </button>
             <button
+              type="button"
               class="nav-btn"
               (click)="nextMonth()"
               aria-label="Mois suivant"
@@ -84,6 +121,7 @@
         <div class="view-tabs">
           @for (view of views; track view) {
             <button
+              type="button"
               class="view-tab"
               [class.view-tab--active]="activeView() === view"
               (click)="activeView.set(view)"
@@ -95,75 +133,76 @@
       </div>
 
       <div class="cal-actions">
-        <button class="today-btn" (click)="goToToday()">
+        <button type="button" class="today-btn" (click)="goToToday()">
           Aujourd'hui <span class="today-count">(25)</span>
         </button>
         <a routerLink="/reservations" class="see-all-link">
           Voir toutes les reservations
         </a>
-        <button class="add-res-btn" routerLink="/reservations/ajouter">
+        <button
+          type="button"
+          class="add-res-btn"
+          routerLink="/reservations/ajouter"
+        >
           Nouvelle réservation
         </button>
       </div>
     </div>
 
     <!-- Calendar grid -->
-    <div class="cal-grid">
-      <!-- Day name header row -->
-      <div class="cal-day-names">
-        @for (name of dayNames; track name; let last = $last) {
-          <div class="day-name" [class.day-name--last]="last">{{ name }}</div>
-        }
-      </div>
-
-      <!-- Week rows -->
-      @for (week of weeksWithEvents(); track $index; let last = $last) {
-        <div
-          class="cal-week"
-          [class.cal-week--last]="last"
-          [style.--week-height]="week.minHeight + 'px'"
-        >
-          <!-- Day cells -->
-          @for (day of week.days; track $index; let lastCol = $last) {
-            <div
-              class="cal-day"
-              [class.cal-day--other]="!day.isCurrentMonth"
-              [class.cal-day--today]="day.isToday"
-              [class.cal-day--last-col]="lastCol"
-            >
-              @if (day.isToday) {
-                <span class="today-marker">{{ day.dayNumber }}</span>
-              } @else {
-                <span class="day-num">{{ day.dayNumber }}</span>
-              }
-            </div>
-          }
-
-          <!-- Reservation event blocks (absolute overlay) -->
-          @for (event of week.events; track event.id) {
-            <div
-              class="cal-event cal-event--{{ event.color }}"
-              [class.cal-event--compact]="event.spanDays <= 2"
-              [class.cal-event--mini]="event.spanDays === 1"
-              [style.left.%]="(event.startCol / 7) * 100"
-              [style.width.%]="(event.spanDays / 7) * 100"
-              [style.top.px]="48 + event.row * 82"
-            >
-              <div class="event-avatar">
-                <i class="pi pi-user"></i>
-              </div>
-              <div class="event-main">
-                <span class="event-name">{{ event.guest }}</span>
-                <span class="event-prop">{{ event.property }}</span>
-              </div>
-              <div class="event-right">
-                <span class="event-dates">{{ event.dateRange }}</span>
-                <span class="event-amount">{{ event.amount }}</span>
-              </div>
-            </div>
+    <div class="cal-grid-wrap">
+      <div class="cal-grid">
+        <!-- Day name header row -->
+        <div class="cal-day-names">
+          @for (name of dayNames; track name; let last = $last) {
+            <div class="day-name" [class.day-name--last]="last">{{ name }}</div>
           }
         </div>
-      }
+
+        <!-- Week rows -->
+        @for (week of weeksWithEvents(); track $index; let last = $last) {
+          <div [class]="getWeekClasses(week, last)">
+            <!-- Day cells -->
+            @for (day of week.days; track $index; let lastCol = $last) {
+              <div
+                class="cal-day"
+                [class.cal-day--other]="!day.isCurrentMonth"
+                [class.cal-day--today]="day.isToday"
+                [class.cal-day--last-col]="lastCol"
+              >
+                @if (day.isToday) {
+                  <span class="today-marker">{{ day.dayNumber }}</span>
+                } @else {
+                  <span class="day-num">{{ day.dayNumber }}</span>
+                }
+              </div>
+            }
+
+            <div class="cal-events-layer">
+              <!-- Reservation event blocks -->
+              @for (event of week.events; track event.id) {
+                <div [class]="getEventClasses(event)">
+                  <div class="event-avatar">
+                    <img
+                      class="event-avatar__image"
+                      [src]="event.image"
+                      [alt]="event.guest"
+                    />
+                  </div>
+                  <div class="event-main">
+                    <span class="event-name">{{ event.guest }}</span>
+                    <span class="event-prop">{{ event.property }}</span>
+                  </div>
+                  <div class="event-right">
+                    <span class="event-dates">{{ event.dateRange }}</span>
+                    <span class="event-amount">{{ event.amount }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
     </div>
   </div>
 </div>
