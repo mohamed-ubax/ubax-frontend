@@ -57,24 +57,38 @@
     <div class="ajout-right-col">
       <!-- ── Type tabs (step 1 only) ────────────────────────── -->
       @if (currentStep() === 1) {
-        <div class="type-tabs">
+        <div
+          class="type-tabs"
+          role="tablist"
+          ubaxMorphTabs
+          ubaxMorphTabsItemSelector=".type-tab"
+        >
           <button
             class="type-tab"
+            role="tab"
+            [attr.aria-selected]="roomType() === 'chambre'"
             [class.type-tab--active]="roomType() === 'chambre'"
+            [class.is-active]="roomType() === 'chambre'"
             (click)="roomType.set('chambre')"
           >
             Chambre
           </button>
           <button
             class="type-tab"
+            role="tab"
+            [attr.aria-selected]="roomType() === 'conference'"
             [class.type-tab--active]="roomType() === 'conference'"
+            [class.is-active]="roomType() === 'conference'"
             (click)="roomType.set('conference')"
           >
             Salle de conférence
           </button>
           <button
             class="type-tab"
+            role="tab"
+            [attr.aria-selected]="roomType() === 'evenement'"
             [class.type-tab--active]="roomType() === 'evenement'"
+            [class.is-active]="roomType() === 'evenement'"
             (click)="roomType.set('evenement')"
           >
             Salle d'évènement

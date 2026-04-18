@@ -1,19 +1,30 @@
-<div class="hist-page">
+<div class="hist-page hist-page--depenses">
   <!-- ── Header ─────────────────────────────────────────────────── -->
   <div class="hist-header">
     <h1 class="hist-title">Historique des dépenses</h1>
     <div class="hist-actions">
-      <a
-        routerLink="/hotel/facturation/recettes"
-        class="tab-btn tab-btn--outline"
-      >
-        <i class="pi pi-arrow-down-left"></i>
-        Recettes
-      </a>
-      <a routerLink="/hotel/facturation/depenses" class="tab-btn tab-btn--red">
-        <i class="pi pi-send"></i>
-        Dépenses
-      </a>
+      <div class="hist-tabs" ubaxMorphTabs ubaxMorphTabsItemSelector=".tab-btn">
+        <a
+          routerLink="/hotel/facturation/recettes"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          class="tab-btn"
+        >
+          <i class="pi pi-arrow-down-left"></i>
+          Recettes
+        </a>
+        <a
+          routerLink="/hotel/facturation/depenses"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          class="tab-btn"
+        >
+          <i class="pi pi-send"></i>
+          Dépenses
+        </a>
+      </div>
       <a routerLink="/hotel/facturation/ajouter-depense" class="add-btn">
         <i class="pi pi-plus"></i>
         Ajouter une dépense

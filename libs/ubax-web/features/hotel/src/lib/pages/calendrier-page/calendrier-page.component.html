@@ -118,12 +118,21 @@
           </div>
         </div>
 
-        <div class="view-tabs">
+        <div
+          class="view-tabs"
+          role="tablist"
+          ubaxMorphTabs
+          ubaxMorphTabsMode="underline"
+          ubaxMorphTabsItemSelector=".view-tab"
+        >
           @for (view of views; track view) {
             <button
               type="button"
               class="view-tab"
+              role="tab"
+              [attr.aria-selected]="activeView() === view"
               [class.view-tab--active]="activeView() === view"
+              [class.is-active]="activeView() === view"
               (click)="activeView.set(view)"
             >
               {{ view }}

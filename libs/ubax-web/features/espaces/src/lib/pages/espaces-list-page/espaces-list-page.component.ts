@@ -6,7 +6,10 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import {
+  UbaxMorphTabsDirective,
+  UbaxPaginatorComponent,
+} from '@ubax-workspace/shared-ui';
 
 type RoomStatus = 'Disponible' | 'Réservé';
 type RoomViewMode = 'grid' | 'list';
@@ -202,7 +205,7 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
 @Component({
   selector: 'ubax-espaces-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxPaginatorComponent],
+  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent],
   templateUrl: './espaces-list-page.component.html',
   styleUrls: ['./espaces-list-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

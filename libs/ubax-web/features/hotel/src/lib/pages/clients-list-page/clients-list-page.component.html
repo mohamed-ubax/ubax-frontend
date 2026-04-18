@@ -19,12 +19,21 @@
     </label>
   </header>
 
-  <div class="clients-tabs" aria-label="Filtres client">
+  <div
+    class="clients-tabs"
+    aria-label="Filtres client"
+    role="tablist"
+    ubaxMorphTabs
+    ubaxMorphTabsItemSelector=".clients-tabs__button"
+  >
     @for (tab of tabs(); track tab.id) {
       <button
         class="clients-tabs__button"
         type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab() === tab.id"
         [class.clients-tabs__button--active]="activeTab() === tab.id"
+        [class.is-active]="activeTab() === tab.id"
         (click)="setTab(tab.id)"
       >
         <span>{{ tab.label }}</span>

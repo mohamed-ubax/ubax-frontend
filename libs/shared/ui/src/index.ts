@@ -10,6 +10,7 @@ export * from './lib/pagination/ui-pagination.component';
 export * from './lib/page-header/page-header.component';
 export * from './lib/page-toolbar/page-toolbar.component';
 export * from './lib/filter-bar/filter-bar.component';
+export * from './lib/morph-tabs/morph-tabs.directive';
 export * from './lib/page-tabs/page-tabs.component';
 export * from './lib/stepper-header/stepper-header.component';
 export * from './lib/detail-layout/detail-layout.component';

@@ -1,12 +1,18 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
+import { UbaxAutoMotionDirective } from '../motion/auto-motion.directive';
 import { TopbarComponent } from '../topbar/topbar.component';
 
 @Component({
   selector: 'ubax-main-layout',
   standalone: true,
-  imports: [RouterOutlet, TopbarComponent],
+  imports: [RouterOutlet, TopbarComponent, UbaxAutoMotionDirective],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

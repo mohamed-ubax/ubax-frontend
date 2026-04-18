@@ -5,6 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 
 interface CalReservation {
   id: string;
@@ -53,7 +54,7 @@ interface WeekWithEvents {
 @Component({
   selector: 'ubax-calendrier-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, UbaxMorphTabsDirective],
   templateUrl: './calendrier-page.component.html',
   styleUrl: './calendrier-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 
@@ -73,7 +74,13 @@ function addDays(date: Date, days: number): Date {
 @Component({
   selector: 'ubax-ajouter-reservation-page',
   standalone: true,
-  imports: [RouterLink, FormsModule, DatePickerModule, SelectModule],
+  imports: [
+    RouterLink,
+    FormsModule,
+    DatePickerModule,
+    SelectModule,
+    UbaxMorphTabsDirective,
+  ],
   templateUrl: './ajouter-reservation-page.component.html',
   styleUrl: './ajouter-reservation-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

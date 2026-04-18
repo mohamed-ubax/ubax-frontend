@@ -16,6 +16,8 @@
   --p-card-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.08);
   --p-dialog-border-radius: 16px;
   --p-badge-border-radius: 6px;
+  --ubax-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ubax-motion-ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Reset global ─────────────────────────────────────────────────────────── */
@@ -34,6 +36,157 @@ body {
     sans-serif;
   background: #ecf2f7;
   color: #222;
+}
+
+::view-transition-old(ubax-route-stage),
+::view-transition-new(ubax-route-stage) {
+  animation-duration: 680ms;
+  animation-timing-function: var(--ubax-motion-ease);
+}
+
+::view-transition-old(ubax-route-stage) {
+  animation-name: ubaxRouteStageExit;
+}
+
+::view-transition-new(ubax-route-stage) {
+  animation-name: ubaxRouteStageEnter;
+}
+
+@keyframes ubaxRouteStageEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.985);
+    filter: saturate(0.94) blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: none;
+  }
+}
+
+@keyframes ubaxRouteStageExit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.992);
+    filter: saturate(0.96) blur(6px);
+  }
+}
+
+[ubaxMorphTabs] {
+  position: relative;
+  isolation: isolate;
+}
+
+[ubaxMorphTabs] > :is(a, button, [role='tab']) {
+  position: relative;
+  z-index: 2;
+}
+
+.ubax-morph-tabs__indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--ubax-morph-width, 0px);
+  height: var(--ubax-morph-height, 0px);
+  border-radius: var(--ubax-tabs-indicator-radius, 999px);
+  background: var(--ubax-tabs-indicator-bg, #1a3047);
+  box-shadow: var(
+    --ubax-tabs-indicator-shadow,
+    0 18px 30px rgb(26 48 71 / 0.12)
+  );
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transform: translate3d(var(--ubax-morph-x, 0px), var(--ubax-morph-y, 0px), 0)
+    scale(var(--ubax-morph-scale, 0.96));
+  transform-origin: center;
+  transition:
+    transform var(--ubax-morph-duration, 420ms) var(--ubax-motion-ease),
+    width var(--ubax-morph-duration, 420ms) var(--ubax-motion-ease),
+    height var(--ubax-morph-duration, 420ms) var(--ubax-motion-ease),
+    border-radius var(--ubax-morph-radius-duration, 320ms)
+      var(--ubax-motion-ease),
+    box-shadow var(--ubax-morph-surface-duration, 240ms)
+      var(--ubax-motion-ease-soft),
+    background var(--ubax-morph-surface-duration, 240ms)
+      var(--ubax-motion-ease-soft),
+    opacity var(--ubax-morph-opacity-duration, 180ms) ease;
+  will-change: transform, width, height, opacity;
+}
+
+.ubax-morph-tabs.ubax-morph-tabs--ready .ubax-morph-tabs__indicator {
+  opacity: 1;
+  --ubax-morph-scale: 1;
+}
+
+.ubax-morph-tabs[data-ubax-morph-mode='underline'] {
+  --ubax-tabs-indicator-radius: 999px;
+}
+
+.ubax-morph-tabs[data-ubax-morph-mode='underline'] .ubax-morph-tabs__indicator {
+  top: auto;
+  bottom: var(--ubax-tabs-underline-bottom, 0px);
+  height: var(--ubax-tabs-underline-height, 4px);
+  width: calc(
+    var(--ubax-morph-width, 0px) - var(--ubax-tabs-underline-inset, 0px)
+  );
+  border-radius: var(--ubax-tabs-underline-radius, 999px);
+  box-shadow: var(
+    --ubax-tabs-underline-shadow,
+    0 14px 24px rgb(232 125 30 / 0.2)
+  );
+  transform: translate3d(
+      calc(
+        var(--ubax-morph-x, 0px) + (var(--ubax-tabs-underline-inset, 0px) / 2)
+      ),
+      0,
+      0
+    )
+    scale(var(--ubax-morph-scale, 0.96));
+}
+
+[data-ubax-motion] {
+  opacity: 0.001;
+  transform: translate3d(0, var(--ubax-motion-y, 18px), 0)
+    scale(var(--ubax-motion-scale, 0.992));
+  transition:
+    opacity var(--ubax-motion-duration, 620ms) var(--ubax-motion-ease-soft)
+      var(--ubax-motion-delay, 0ms),
+    transform var(--ubax-motion-duration, 620ms) var(--ubax-motion-ease)
+      var(--ubax-motion-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-ubax-motion='page'] {
+  --ubax-motion-y: 20px;
+  --ubax-motion-scale: 0.988;
+  --ubax-motion-duration: 460ms;
+}
+
+[data-ubax-motion='surface'] {
+  --ubax-motion-y: 18px;
+  --ubax-motion-scale: 0.992;
+  --ubax-motion-duration: 640ms;
+}
+
+[data-ubax-motion='item'] {
+  --ubax-motion-y: 14px;
+  --ubax-motion-scale: 0.996;
+  --ubax-motion-duration: 560ms;
+}
+
+[data-ubax-motion].is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: auto;
 }
 
 body
@@ -77,4 +230,19 @@ body
 
 .p-component {
   font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(ubax-route-stage),
+  ::view-transition-new(ubax-route-stage),
+  [data-ubax-motion],
+  .ubax-morph-tabs__indicator {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+  }
+
+  [data-ubax-motion] {
+    transform: none !important;
+  }
 }

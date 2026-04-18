@@ -1,5 +1,13 @@
 <ubax-topbar />
 
 <main class="ubax-main-content">
-  <router-outlet />
+  <div class="ubax-main-ambient" aria-hidden="true">
+    <span class="ubax-main-ambient__blob ubax-main-ambient__blob--amber"></span>
+    <span class="ubax-main-ambient__blob ubax-main-ambient__blob--navy"></span>
+    <span class="ubax-main-ambient__mesh"></span>
+  </div>
+
+  <div class="ubax-route-stage" ubaxAutoMotion>
+    <router-outlet />
+  </div>
 </main>

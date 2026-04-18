@@ -11,7 +11,13 @@
     class="employees-controls"
     aria-label="Filtres de la liste des employés"
   >
-    <div class="employees-tabs" role="tablist" aria-label="Filtres employés">
+    <div
+      class="employees-tabs"
+      role="tablist"
+      aria-label="Filtres employés"
+      ubaxMorphTabs
+      ubaxMorphTabsItemSelector=".employees-tabs__button"
+    >
       @for (tab of tabs; track tab.id) {
         <button
           class="employees-tabs__button"
@@ -19,13 +25,10 @@
           role="tab"
           [attr.aria-selected]="activeTab() === tab.id"
           [class.employees-tabs__button--active]="activeTab() === tab.id"
+          [class.is-active]="activeTab() === tab.id"
           (click)="setTab(tab.id)"
         >
           <span>{{ tab.label }} ({{ tab.count }})</span>
-
-          @if (activeTab() === tab.id) {
-            <span class="employees-tabs__indicator" aria-hidden="true"></span>
-          }
         </button>
       }
     </div>
@@ -171,7 +174,7 @@
                   [routerLink]="['/hotel/employes', employe.id]"
                   [attr.aria-label]="'Voir les détails de ' + employe.nom"
                 >
-                  <span aria-hidden="true">...</span>
+                  <span aria-hidden="true"><i class="pi pi-eye"></i></span>
                 </a>
               </td>
             </tr>

@@ -5,6 +5,7 @@
   z-index: 100;
   padding: 16px 20px;
   background: #ecf2f7;
+  transition: padding 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Floating pill topbar */
@@ -15,6 +16,12 @@
   min-height: 72px;
   max-width: 1700px;
   margin: 0 auto;
+  box-shadow: 0 14px 36px rgb(26 48 71 / 0);
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* 3-column grid: logo | nav | actions */
@@ -25,6 +32,7 @@
   min-height: 72px;
   padding: 0 28px;
   gap: 20px;
+  transition: min-height 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .topbar-nav-shell {
@@ -47,6 +55,9 @@
 
 /* Nav — light pill container, dark active item */
 .topbar-nav {
+  --ubax-tabs-indicator-bg: linear-gradient(135deg, #16293c 0%, #29445f 100%);
+  --ubax-tabs-indicator-shadow:
+    0 16px 32px rgb(26 48 71 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.08);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -58,29 +69,33 @@
   margin: 0 auto;
   overflow: hidden;
   clip-path: inset(0 round 50px);
+  transition:
+    background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .topbar-nav__item {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 8px 18px;
   border-radius: 50px;
   font-family: 'Lexend', sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #222;
+  color: rgb(26 48 71 / 0.74);
   text-decoration: none;
   white-space: nowrap;
   transition:
-    background 0.15s,
-    color 0.15s;
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 
   &:hover {
-    background: rgba(26, 48, 71, 0.07);
+    color: #16293c;
+    transform: translateY(-1px);
   }
 
   &.is-active {
-    background: #1a3047;
     color: #fff;
     font-weight: 500;
   }
@@ -106,8 +121,9 @@
   cursor: pointer;
   color: #555;
   transition:
-    background 0.15s,
-    border-color 0.15s;
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
 
   i {
@@ -117,6 +133,7 @@
   &:hover {
     background: #f3f4f6;
     border-color: #d1d5db;
+    transform: translateY(-1px);
   }
 }
 
@@ -132,7 +149,7 @@
   color: #fff;
   font-family: 'Lexend', sans-serif;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 16px;
   text-align: center;
 }
@@ -146,11 +163,35 @@
   border-radius: 50px;
   border: 1px solid #e5e7eb;
   cursor: pointer;
-  transition: background 0.15s;
+  transition:
+    background 0.18s,
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.18s;
   background: #fff;
 
   &:hover {
     background: #f8faff;
+    transform: translateY(-1px);
+  }
+}
+
+.ubax-topbar--scrolled {
+  background: rgb(255 255 255 / 0.82);
+  border-color: rgb(232 125 30 / 0.18);
+  box-shadow: 0 18px 42px rgb(26 48 71 / 0.08);
+  transform: translateY(-1px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  .topbar-inner {
+    min-height: 68px;
+  }
+
+  .topbar-nav {
+    --ubax-tabs-indicator-shadow:
+      0 16px 34px rgb(26 48 71 / 0.16), inset 0 1px 0 rgb(255 255 255 / 0.08);
+    background: rgb(236 242 247 / 0.84);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55);
   }
 }
 
@@ -274,6 +315,10 @@
   gap: 6px;
 }
 
+.ubax-topbar--compact.ubax-topbar--menu-open .topbar-nav__item.is-active {
+  background: transparent;
+}
+
 @media (max-width: 760px) {
   :host {
     padding: 12px;
@@ -316,6 +361,22 @@
     justify-content: center;
     width: 100%;
     min-height: 42px;
-    background: #ecf2f7;
+    background: rgb(236 242 247 / 0.84);
+  }
+
+  .ubax-topbar--compact.ubax-topbar--menu-open .topbar-nav__item.is-active {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  .ubax-topbar,
+  .topbar-inner,
+  .topbar-nav,
+  .topbar-nav__item,
+  .topbar-icon-btn,
+  .topbar-user {
+    transition: none;
   }
 }

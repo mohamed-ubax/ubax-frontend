@@ -113,6 +113,8 @@
 }
 
 .clients-tabs {
+  --ubax-tabs-indicator-bg: linear-gradient(135deg, #16293c 0%, #29445f 100%);
+  --ubax-tabs-indicator-shadow: 0 16px 28px rgb(26 48 71 / 0.18);
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -134,11 +136,21 @@
   font-weight: 500;
   line-height: 24px;
   cursor: pointer;
+  transition:
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  &:hover:not(.clients-tabs__button--active):not(.is-active) {
+    transform: translateY(-1px);
+  }
 }
 
+.clients-tabs__button.is-active,
 .clients-tabs__button--active {
-  background: var(--navy);
+  background: transparent;
   color: var(--surface);
+  box-shadow: none;
 }
 
 .clients-tabs__count {
@@ -153,8 +165,12 @@
   color: var(--accent);
   font-size: 13px;
   font-weight: 600;
+  transition:
+    background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.clients-tabs__button.is-active .clients-tabs__count,
 .clients-tabs__button--active .clients-tabs__count {
   background: rgb(255 255 255 / 0.18);
   color: var(--surface);

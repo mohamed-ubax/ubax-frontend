@@ -32,7 +32,20 @@
 .hist-actions {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hist-tabs {
+  --ubax-tabs-indicator-bg: linear-gradient(135deg, #16b55b 0%, #21ca69 100%);
+  --ubax-tabs-indicator-shadow: 0 16px 28px rgb(22 181 91 / 0.22);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 12px 24px rgb(15 23 42 / 0.06);
 }
 
 .tab-btn {
@@ -42,32 +55,25 @@
   padding: 14px 24px;
   border-radius: 50px;
   border: none;
+  background: transparent;
+  color: #6b7280;
   font-family: 'Lexend', sans-serif;
   font-size: 16px;
   font-weight: 400;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  transition: opacity 0.15s;
+  transition:
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 
-  &:hover {
-    opacity: 0.88;
+  &:hover:not(.is-active) {
+    color: #1a3047;
+    transform: translateY(-1px);
   }
 
-  &--green {
-    background: #16b55b;
+  &.is-active {
     color: #fff;
-  }
-
-  &--red {
-    background: #fa191d;
-    color: #fff;
-  }
-
-  &--outline {
-    background: #fff;
-    color: #222;
-    border: 1px solid #e5e7eb;
   }
 }
 

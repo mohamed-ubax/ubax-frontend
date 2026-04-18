@@ -2,6 +2,7 @@
   class="ubax-topbar"
   [class.ubax-topbar--compact]="isCompactNav()"
   [class.ubax-topbar--menu-open]="isCompactNav() && isMobileNavOpen()"
+  [class.ubax-topbar--scrolled]="isScrolled()"
 >
   <div class="topbar-inner" #topbarInner>
     <!-- Logo -->
@@ -17,7 +18,13 @@
 
     <!-- Navigation principale -->
     <div class="topbar-nav-shell" #navShell>
-      <nav class="topbar-nav" #navList aria-label="Navigation principale">
+      <nav
+        class="topbar-nav"
+        #navList
+        aria-label="Navigation principale"
+        ubaxMorphTabs
+        ubaxMorphTabsItemSelector=".topbar-nav__item"
+      >
         @for (item of visibleItems(); track item.path) {
           <a
             [routerLink]="item.path"

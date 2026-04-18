@@ -237,6 +237,10 @@
 }
 
 .view-tabs {
+  --ubax-tabs-indicator-bg: linear-gradient(135deg, #e87d1e 0%, #f39b43 100%);
+  --ubax-tabs-underline-height: 4px;
+  --ubax-tabs-underline-inset: 18px;
+  --ubax-tabs-underline-shadow: 0 12px 24px rgb(232 125 30 / 0.16);
   display: flex;
   align-items: center;
   gap: 36px;
@@ -251,6 +255,7 @@
     height: 1px;
     background: var(--ubax-border-strong);
     border-radius: 999px;
+    z-index: 0;
   }
 }
 
@@ -258,7 +263,7 @@
   background: none;
   border: none;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   padding: 0 0 13px;
   font-family: 'Lexend', sans-serif;
   font-size: 20px;
@@ -266,27 +271,19 @@
   line-height: 1;
   color: var(--ubax-text-muted);
   cursor: pointer;
-  transition: color 0.15s;
+  transition:
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 
+  &.is-active,
   &--active {
     color: var(--ubax-accent);
     font-weight: 600;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: -1px;
-      width: 63px;
-      height: 3px;
-      background: var(--ubax-accent);
-      border-radius: 999px;
-    }
   }
 
-  &:hover:not(.view-tab--active) {
+  &:hover:not(.view-tab--active):not(.is-active) {
     color: var(--ubax-text-primary);
+    transform: translateY(-1px);
   }
 }
 

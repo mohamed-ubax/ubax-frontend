@@ -5,6 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 
 import {
   CLIENT_DETAILS,
@@ -140,7 +141,7 @@ function buildPrimarySpaceId(id: string): string {
 @Component({
   selector: 'ubax-clients-list-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, UbaxMorphTabsDirective],
   templateUrl: './clients-list-page.component.html',
   styleUrl: './clients-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

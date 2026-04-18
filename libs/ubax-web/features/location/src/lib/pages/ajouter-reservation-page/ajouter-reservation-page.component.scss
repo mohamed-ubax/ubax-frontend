@@ -65,6 +65,8 @@
 
 /* ── Type tabs (step 1) ────────────────────────────────────────── */
 .type-tabs {
+  --ubax-tabs-indicator-bg: linear-gradient(135deg, #e87d1e 0%, #f39a42 100%);
+  --ubax-tabs-indicator-shadow: 0 16px 28px rgb(232 125 30 / 0.22);
   display: flex;
   gap: 16px;
 }
@@ -82,11 +84,16 @@
   cursor: pointer;
   white-space: nowrap;
   transition:
-    background 0.15s,
-    color 0.15s;
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 
+  &:hover:not(.type-tab--active):not(.is-active) {
+    transform: translateY(-1px);
+  }
+
+  &.is-active,
   &--active {
-    background: #e87d1e;
+    background: transparent;
     color: #fff;
   }
 }

@@ -6,7 +6,10 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import {
+  UbaxMorphTabsDirective,
+  UbaxPaginatorComponent,
+} from '@ubax-workspace/shared-ui';
 
 type TabId = 'all' | 'active' | 'inactive';
 type EmployeStatusTone = 'active' | 'inactive';
@@ -129,7 +132,7 @@ function normalizeSearchText(value: string): string {
 @Component({
   selector: 'ubax-employes-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxPaginatorComponent],
+  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent],
   templateUrl: './employes-list-page.component.html',
   styleUrl: './employes-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

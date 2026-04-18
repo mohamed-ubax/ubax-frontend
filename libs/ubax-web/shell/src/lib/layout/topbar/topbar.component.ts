@@ -5,12 +5,15 @@ import {
   DestroyRef,
   ElementRef,
   NgZone,
+  PLATFORM_ID,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
 import { filter, map } from 'rxjs';
 
@@ -45,7 +48,7 @@ function readFlexGap(element: HTMLElement): number {
 @Component({
   selector: 'ubax-topbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, UbaxMorphTabsDirective],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,9 +58,11 @@ export class TopbarComponent implements AfterViewInit {
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly platformId = inject(PLATFORM_ID);
   protected readonly notificationCount = 3;
   protected readonly isMobileNavOpen = signal(false);
   protected readonly isCompactNav = signal(false);
+  protected readonly isScrolled = signal(false);
   private inlineNavRequiredWidth = 0;
   private readonly topbarInner =
     viewChild<ElementRef<HTMLElement>>('topbarInner');
@@ -129,6 +134,7 @@ export class TopbarComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.observeCompactNavState();
+    this.observeScrollState();
   }
 
   protected isItemActive(item: NavItem): boolean {
@@ -174,6 +180,35 @@ export class TopbarComponent implements AfterViewInit {
       this.destroyRef.onDestroy(() => {
         cancelAnimationFrame(animationFrameState.id);
         resizeObserver.disconnect();
+      });
+    });
+  }
+
+  private observeScrollState(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.zone.runOutsideAngular(() => {
+      const updateScrollState = () => {
+        const nextValue = globalThis.scrollY > 18;
+
+        if (nextValue === this.isScrolled()) {
+          return;
+        }
+
+        this.zone.run(() => {
+          this.isScrolled.set(nextValue);
+        });
+      };
+
+      updateScrollState();
+      globalThis.addEventListener('scroll', updateScrollState, {
+        passive: true,
+      });
+
+      this.destroyRef.onDestroy(() => {
+        globalThis.removeEventListener('scroll', updateScrollState);
       });
     });
   }
