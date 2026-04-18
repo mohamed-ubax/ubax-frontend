@@ -239,7 +239,13 @@
           @for (p of availableProperties; track p.id) {
             <div class="property-card">
               <!-- Image de fond -->
-              <img class="property-card__bg" [src]="p.image" [alt]="p.name" />
+              <img
+                class="property-card__bg"
+                [src]="p.image"
+                [alt]="p.name"
+                loading="lazy"
+                decoding="async"
+              />
               <!-- Badge type -->
               <span class="property-card__badge">{{ p.type }}</span>
               <!-- Panel glassmorphism en bas -->
@@ -262,6 +268,8 @@
                       [src]="p.tenantAvatar"
                       [alt]="p.tenantName"
                       class="glass-tenant__avatar"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div class="glass-tenant__info">
                       <p class="glass-tenant__name">{{ p.tenantName }}</p>

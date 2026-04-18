@@ -419,7 +419,12 @@
           <div class="gallery-grid">
             @for (image of draft.gallery; track image) {
               <figure class="gallery-grid__item">
-                <img [src]="image" alt="Vue de l'espace" />
+                <img
+                  [src]="image"
+                  alt="Vue de l'espace"
+                  loading="lazy"
+                  decoding="async"
+                />
               </figure>
             }
           </div>
@@ -440,6 +445,7 @@
             class="preview-card__hero-image"
             [src]="draft.heroImage"
             alt="Aperçu de l'espace"
+            decoding="async"
           />
           <div class="preview-card__overlay" aria-hidden="true">
             <img

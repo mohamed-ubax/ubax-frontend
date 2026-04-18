@@ -12,9 +12,6 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
-import { AvatarModule } from 'primeng/avatar';
-import { BadgeModule } from 'primeng/badge';
-import { ButtonModule } from 'primeng/button';
 import { filter, map } from 'rxjs';
 
 interface NavItem {
@@ -48,7 +45,7 @@ function readFlexGap(element: HTMLElement): number {
 @Component({
   selector: 'ubax-topbar',
   standalone: true,
-  imports: [RouterLink, ButtonModule, AvatarModule, BadgeModule],
+  imports: [RouterLink],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +55,7 @@ export class TopbarComponent implements AfterViewInit {
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly notificationCount = 3;
   protected readonly isMobileNavOpen = signal(false);
   protected readonly isCompactNav = signal(false);
   private inlineNavRequiredWidth = 0;
@@ -82,6 +80,17 @@ export class TopbarComponent implements AfterViewInit {
   protected roleLabel(): string {
     const role = this.authStore.user()?.role;
     return role ? (ROLE_LABELS[role] ?? role) : '';
+  }
+
+  protected avatarSrc(): string | null {
+    return this.authStore.user()?.avatar ?? null;
+  }
+
+  protected avatarLabel(): string {
+    const user = this.authStore.user();
+    const initials = `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`;
+
+    return initials || '?';
   }
 
   private readonly agencyNavItems: NavItem[] = [
@@ -114,8 +123,8 @@ export class TopbarComponent implements AfterViewInit {
 
   protected logoSrc(): string {
     return this.authStore.role() === Role.HOTEL
-      ? 'header/header-hotel-logo.png'
-      : 'header/header-logo.png';
+      ? 'header/header-hotel-logo.webp'
+      : 'header/header-logo.webp';
   }
 
   ngAfterViewInit(): void {

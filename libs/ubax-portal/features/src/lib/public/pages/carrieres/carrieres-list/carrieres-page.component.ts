@@ -63,10 +63,10 @@ export class CarrieresPageComponent {
   protected readonly heroEllipseOuter =
     'assets/portal-assets/careers/icons/Ellipse 1.svg';
   protected readonly heroCommunityAvatars = [
-    'assets/portal-assets/careers/images/image.png',
-    'assets/portal-assets/careers/images/image-1.png',
-    'assets/portal-assets/careers/images/image-2.png',
-    'assets/portal-assets/careers/images/image-3.png',
+    'assets/portal-assets/careers/images/image.webp',
+    'assets/portal-assets/careers/images/image-1.webp',
+    'assets/portal-assets/careers/images/image-2.webp',
+    'assets/portal-assets/careers/images/image-3.webp',
   ];
   protected readonly searchIcon =
     'assets/portal-assets/careers/icons/mynaui_search.svg';

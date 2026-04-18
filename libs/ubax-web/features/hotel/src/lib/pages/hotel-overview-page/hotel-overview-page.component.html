@@ -140,6 +140,8 @@
                     [src]="reservation.image"
                     [alt]="reservation.guest"
                     class="reservations-table__guest-image"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <span class="reservations-table__guest-name">{{
                     reservation.guest
@@ -181,7 +183,7 @@
       <div class="hotel-dashboard__middle-column">
         <section class="cta-banner">
           <img
-            src="hotel-dashboard/chart/cta-banner.png"
+            src="shared/rooms/room-photo-01.webp"
             alt=""
             class="cta-banner__image"
           />
@@ -318,7 +320,13 @@
       <div class="properties-panel__list">
         @for (property of availableProperties; track property.id) {
           <article class="property-card">
-            <img [src]="property.image" alt="" class="property-card__image" />
+            <img
+              [src]="property.image"
+              alt=""
+              class="property-card__image"
+              loading="lazy"
+              decoding="async"
+            />
 
             <span class="property-card__badge">Location</span>
 
@@ -344,6 +352,8 @@
                     [src]="property.tenantAvatar"
                     [alt]="property.tenantName"
                     class="property-card__tenant-avatar"
+                    loading="lazy"
+                    decoding="async"
                   />
 
                   <div class="property-card__tenant-copy">

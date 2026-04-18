@@ -75,7 +75,13 @@
             <tr>
               <td class="td-guest">
                 <div class="td-guest__content">
-                  <img [src]="r.image" [alt]="r.guest" class="guest-avatar" />
+                  <img
+                    [src]="r.image"
+                    [alt]="r.guest"
+                    class="guest-avatar"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <span class="guest-name">{{ r.guest }}</span>
                 </div>
               </td>

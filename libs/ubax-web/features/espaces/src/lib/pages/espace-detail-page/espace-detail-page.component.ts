@@ -68,7 +68,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
       clientId: '1',
       name: 'Landry Bamba',
       code: '#G-001234125',
-      avatar: 'room-detail/avatars/guest-landry.png',
+      avatar: 'shared/people/profile-01.webp',
     },
     reservation: {
       title: 'Chambre Queen A-2345 - hotel Azalai',
@@ -89,19 +89,19 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
     totalGalleryCount: 8,
     galleryPhotos: [
       {
-        src: 'room-detail/images/gallery-main.png',
+        src: 'shared/rooms/room-photo-02.webp',
         alt: 'Vue principale de la chambre',
       },
       {
-        src: 'room-detail/images/gallery-thumb-01.png',
+        src: 'shared/rooms/room-photo-03.webp',
         alt: 'Aperçu chambre angle 1',
       },
       {
-        src: 'room-detail/images/gallery-thumb-03.png',
+        src: 'shared/rooms/room-photo-04.webp',
         alt: 'Aperçu chambre angle 2',
       },
       {
-        src: 'room-detail/images/gallery-thumb-04.png',
+        src: 'shared/rooms/room-photo-05.webp',
         alt: 'Aperçu chambre angle 3',
         previewCount: 8,
       },
@@ -114,7 +114,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '2 jours',
         period: '14 Avril 2026 - 18 Avril 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-01.png',
+        avatar: 'room-detail/avatars/history-01.webp',
       },
       {
         clientId: '3',
@@ -123,7 +123,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '2 jours',
         period: '09 Avril 2026 - 11 Avril 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-02.png',
+        avatar: 'shared/people/profile-02.webp',
       },
       {
         clientId: '4',
@@ -132,7 +132,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '3 jours',
         period: '02 Avril 2026 - 05 Avril 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-03.png',
+        avatar: 'room-detail/avatars/history-03.webp',
       },
       {
         clientId: '5',
@@ -141,7 +141,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '1 jour',
         period: '28 Mars 2026 - 29 Mars 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-04.png',
+        avatar: 'room-detail/avatars/history-04.webp',
       },
       {
         clientId: '6',
@@ -150,7 +150,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '4 jours',
         period: '18 Mars 2026 - 22 Mars 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-05.png',
+        avatar: 'shared/people/profile-03.webp',
       },
     ]),
   },
@@ -159,7 +159,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
       clientId: '3',
       name: 'Clarisse Kouamé',
       code: '#G-001234126',
-      avatar: 'room-detail/avatars/history-02.png',
+      avatar: 'shared/people/profile-02.webp',
     },
     reservation: {
       title: 'Suite Premium B-1408 - hotel Azalai',
@@ -180,19 +180,19 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
     totalGalleryCount: 6,
     galleryPhotos: [
       {
-        src: 'room-detail/images/gallery-main.png',
+        src: 'shared/rooms/room-photo-02.webp',
         alt: 'Suite premium vue principale',
       },
       {
-        src: 'room-detail/images/gallery-thumb-02.png',
+        src: 'shared/rooms/room-photo-02.webp',
         alt: 'Suite premium salon',
       },
       {
-        src: 'room-detail/images/gallery-thumb-01.png',
+        src: 'shared/rooms/room-photo-03.webp',
         alt: 'Suite premium chambre',
       },
       {
-        src: 'room-detail/images/gallery-thumb-04.png',
+        src: 'shared/rooms/room-photo-05.webp',
         alt: 'Suite premium salle de bain',
         previewCount: 6,
       },
@@ -205,7 +205,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '4 jours',
         period: '24 Juin 2026 - 28 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-01.png',
+        avatar: 'room-detail/avatars/history-01.webp',
       },
       {
         clientId: '5',
@@ -214,7 +214,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '2 jours',
         period: '17 Juin 2026 - 19 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-03.png',
+        avatar: 'room-detail/avatars/history-03.webp',
       },
       {
         clientId: '6',
@@ -223,7 +223,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '1 jour',
         period: '11 Juin 2026 - 12 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-04.png',
+        avatar: 'room-detail/avatars/history-04.webp',
       },
       {
         clientId: '4',
@@ -232,7 +232,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '3 jours',
         period: '05 Juin 2026 - 08 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-05.png',
+        avatar: 'shared/people/profile-03.webp',
       },
     ]),
   },
@@ -241,7 +241,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
       clientId: '5',
       name: 'Nadia Touré',
       code: '#G-001234127',
-      avatar: 'room-detail/avatars/history-04.png',
+      avatar: 'room-detail/avatars/history-04.webp',
     },
     reservation: {
       title: 'Chambre Deluxe C-0912 - hotel Azalai',
@@ -262,19 +262,19 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
     totalGalleryCount: 5,
     galleryPhotos: [
       {
-        src: 'room-detail/images/gallery-main.png',
+        src: 'shared/rooms/room-photo-02.webp',
         alt: 'Chambre deluxe vue principale',
       },
       {
-        src: 'room-detail/images/gallery-thumb-03.png',
+        src: 'shared/rooms/room-photo-04.webp',
         alt: 'Chambre deluxe angle 1',
       },
       {
-        src: 'room-detail/images/gallery-thumb-02.png',
+        src: 'shared/rooms/room-photo-02.webp',
         alt: 'Chambre deluxe angle 2',
       },
       {
-        src: 'room-detail/images/gallery-thumb-04.png',
+        src: 'shared/rooms/room-photo-05.webp',
         alt: 'Chambre deluxe angle 3',
         previewCount: 5,
       },
@@ -287,7 +287,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '5 jours',
         period: '03 Juillet 2026 - 08 Juillet 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-02.png',
+        avatar: 'shared/people/profile-02.webp',
       },
       {
         clientId: '3',
@@ -296,7 +296,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '2 jours',
         period: '28 Juin 2026 - 30 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-01.png',
+        avatar: 'room-detail/avatars/history-01.webp',
       },
       {
         clientId: '4',
@@ -305,7 +305,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '3 jours',
         period: '20 Juin 2026 - 23 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-05.png',
+        avatar: 'shared/people/profile-03.webp',
       },
       {
         clientId: '6',
@@ -314,7 +314,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '1 jour',
         period: '15 Juin 2026 - 16 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-03.png',
+        avatar: 'room-detail/avatars/history-03.webp',
       },
     ]),
   },

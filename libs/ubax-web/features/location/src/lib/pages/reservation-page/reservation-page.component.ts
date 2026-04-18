@@ -14,8 +14,8 @@ import {
   UbaxPaginatorComponent,
 } from '@ubax-workspace/shared-ui';
 
-const PAGE_SIZE = 10;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const PAGE_SIZE = 10;
 const MONTH_NAMES = [
   'Janvier',
   'Février',
@@ -83,8 +83,6 @@ function createReservation(seed: ReservationSeed): Reservation {
     ),
   );
   const durationLabel = `${durationInDays} jour${durationInDays > 1 ? 's' : ''}`;
-  const arrivalLabel = formatTableDate(seed.arrivalDate);
-  const departureLabel = formatTableDate(seed.departureDate);
 
   return {
     ...seed,
@@ -94,8 +92,8 @@ function createReservation(seed: ReservationSeed): Reservation {
         seed.guest,
         seed.property,
         durationLabel,
-        arrivalLabel,
-        departureLabel,
+        formatTableDate(seed.arrivalDate),
+        formatTableDate(seed.departureDate),
         seed.status,
       ].join(' '),
     ),
@@ -128,7 +126,7 @@ export class ReservationPageComponent {
   readonly reservations: Reservation[] = [
     createReservation({
       id: '1',
-      image: '/hotel-dashboard/reservations/guest-01.png',
+      image: '/hotel-dashboard/reservations/guest-01.webp',
       guest: 'Koné Ibrahim',
       property: 'Résidence Plateau',
       arrivalDate: createDate(2026, 4, 14),
@@ -137,7 +135,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '2',
-      image: '/hotel-dashboard/reservations/guest-02.png',
+      image: '/hotel-dashboard/reservations/guest-02.webp',
       guest: 'Amani Natacha',
       property: 'Villa Riviera',
       arrivalDate: createDate(2026, 4, 16),
@@ -146,7 +144,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '3',
-      image: '/hotel-dashboard/reservations/guest-03.png',
+      image: '/hotel-dashboard/reservations/guest-03.webp',
       guest: 'Kouamé Sarah',
       property: 'Appartement meublé',
       arrivalDate: createDate(2026, 4, 20),
@@ -155,7 +153,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '4',
-      image: '/hotel-dashboard/reservations/guest-04.png',
+      image: '/hotel-dashboard/reservations/guest-04.webp',
       guest: 'Bamba Cédric',
       property: 'Suites des Lagunes',
       arrivalDate: createDate(2026, 4, 24),
@@ -164,7 +162,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '5',
-      image: '/hotel-dashboard/reservations/guest-05.png',
+      image: '/hotel-dashboard/reservations/guest-05.webp',
       guest: 'Diallo Fanta',
       property: 'Résidence Plateau',
       arrivalDate: createDate(2026, 4, 29),
@@ -173,7 +171,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '6',
-      image: '/hotel-dashboard/reservations/guest-02.png',
+      image: '/hotel-dashboard/reservations/guest-02.webp',
       guest: 'Touré Mireille',
       property: 'Villa Azur',
       arrivalDate: createDate(2026, 5, 3),
@@ -182,7 +180,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '7',
-      image: '/hotel-dashboard/reservations/guest-04.png',
+      image: '/hotel-dashboard/reservations/guest-04.webp',
       guest: 'N’Guessan Flora',
       property: 'Loft Cocody',
       arrivalDate: createDate(2026, 5, 8),
@@ -191,7 +189,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '8',
-      image: '/hotel-dashboard/reservations/guest-01.png',
+      image: '/hotel-dashboard/reservations/guest-01.webp',
       guest: 'Yao Christian',
       property: 'Résidence Plateau',
       arrivalDate: createDate(2026, 5, 11),
@@ -200,7 +198,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '9',
-      image: '/hotel-dashboard/reservations/guest-03.png',
+      image: '/hotel-dashboard/reservations/guest-03.webp',
       guest: 'Koffi Nadia',
       property: 'Appartement meublé',
       arrivalDate: createDate(2026, 5, 16),
@@ -209,7 +207,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '10',
-      image: '/hotel-dashboard/reservations/guest-05.png',
+      image: '/hotel-dashboard/reservations/guest-05.webp',
       guest: 'Kouassi Landry',
       property: 'Villa Riviera',
       arrivalDate: createDate(2026, 5, 18),
@@ -218,7 +216,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '11',
-      image: '/hotel-dashboard/reservations/guest-02.png',
+      image: '/hotel-dashboard/reservations/guest-02.webp',
       guest: 'Boni Grâce',
       property: 'Suites des Lagunes',
       arrivalDate: createDate(2026, 5, 22),
@@ -227,7 +225,7 @@ export class ReservationPageComponent {
     }),
     createReservation({
       id: '12',
-      image: '/hotel-dashboard/reservations/guest-04.png',
+      image: '/hotel-dashboard/reservations/guest-04.webp',
       guest: 'Ouattara Idriss',
       property: 'Villa Azur',
       arrivalDate: createDate(2026, 5, 27),

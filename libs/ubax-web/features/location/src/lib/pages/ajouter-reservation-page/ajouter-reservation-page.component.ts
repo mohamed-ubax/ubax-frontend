@@ -134,7 +134,7 @@ export class AjouterReservationPageComponent {
     {
       label: 'Wave',
       value: 'wave',
-      logoSrc: 'client-detail/icons/wave-logo.png',
+      logoSrc: 'client-detail/icons/wave-logo.webp',
     },
     {
       label: 'Orange Money',

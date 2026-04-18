@@ -6,8 +6,10 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
+  PreloadAllModules,
   provideRouter,
   withComponentInputBinding,
+  withPreloading,
   withViewTransitions,
 } from '@angular/router';
 import {
@@ -17,7 +19,8 @@ import {
 } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
-import { authInterceptor, UbaxPreset } from '@ubax-workspace/ubax-web-shell';
+import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
+import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
 import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
 
 /**
@@ -42,7 +45,7 @@ function provideMockUserInDev() {
               nom: 'Kouassi',
               prenom: 'Jean-Marc',
               email: 'jm.kouassi@ubax.io',
-              avatar: 'header/header-user-avatar.png',
+              avatar: 'header/header-user-avatar.webp',
               role: Role.HOTEL,
             });
           }
@@ -59,6 +62,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       appRoutes,
       withComponentInputBinding(),
+      withPreloading(PreloadAllModules),
       withViewTransitions(),
     ),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),

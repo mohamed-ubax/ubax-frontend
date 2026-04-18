@@ -44,7 +44,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 20:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-koffi-yao.png',
+    avatarSrc: '/shared/people/profile-02.webp',
     statusTone: 'active',
   },
   {
@@ -56,7 +56,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-youssouf-traore.png',
+    avatarSrc: '/employes/images/employe-youssouf-traore.webp',
     statusTone: 'active',
   },
   {
@@ -68,7 +68,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-aicha-kone.png',
+    avatarSrc: '/employes/images/employe-aicha-kone.webp',
     statusTone: 'active',
   },
   {
@@ -80,7 +80,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-souleymane-diabate.png',
+    avatarSrc: '/shared/people/profile-03.webp',
     statusTone: 'inactive',
   },
   {
@@ -92,7 +92,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-adama-bamba.png',
+    avatarSrc: '/shared/people/profile-01.webp',
     statusTone: 'active',
   },
 ] as const;

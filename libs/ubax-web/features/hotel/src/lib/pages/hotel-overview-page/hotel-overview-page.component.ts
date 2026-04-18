@@ -335,7 +335,7 @@ export class HotelOverviewPageComponent {
   readonly reservations: ReservationRow[] = [
     {
       id: 1,
-      image: 'hotel-dashboard/reservations/guest-01.png',
+      image: 'hotel-dashboard/reservations/guest-01.webp',
       guest: 'Koné Ibrahim',
       room: 'Résidence Plateau',
       duration: '2 jours',
@@ -344,7 +344,7 @@ export class HotelOverviewPageComponent {
     },
     {
       id: 2,
-      image: 'hotel-dashboard/reservations/guest-02.png',
+      image: 'hotel-dashboard/reservations/guest-02.webp',
       guest: 'Koné Ibrahim',
       room: 'Résidence Plateau',
       duration: '2 jours',
@@ -353,7 +353,7 @@ export class HotelOverviewPageComponent {
     },
     {
       id: 3,
-      image: 'hotel-dashboard/reservations/guest-03.png',
+      image: 'hotel-dashboard/reservations/guest-03.webp',
       guest: 'Koné Ibrahim',
       room: 'Résidence Plateau',
       duration: '2 jours',
@@ -362,7 +362,7 @@ export class HotelOverviewPageComponent {
     },
     {
       id: 4,
-      image: 'hotel-dashboard/reservations/guest-04.png',
+      image: 'hotel-dashboard/reservations/guest-04.webp',
       guest: 'Koné Ibrahim',
       room: 'Résidence Plateau',
       duration: '2 jours',
@@ -371,7 +371,7 @@ export class HotelOverviewPageComponent {
     },
     {
       id: 5,
-      image: 'hotel-dashboard/reservations/guest-05.png',
+      image: 'hotel-dashboard/reservations/guest-05.webp',
       guest: 'Koné Ibrahim',
       room: 'Résidence Plateau',
       duration: '2 jours',
@@ -383,29 +383,29 @@ export class HotelOverviewPageComponent {
   readonly availableProperties: PropertyCard[] = [
     {
       id: 1,
-      image: 'hotel-dashboard/properties/property-aicha.png',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-aicha.png',
+      image: 'shared/rooms/room-photo-01.webp',
+      tenantAvatar: 'hotel-dashboard/properties/tenant-aicha.webp',
       tenantName: 'Aïcha Kouadio',
       price: '400 000 FCFA',
     },
     {
       id: 2,
-      image: 'hotel-dashboard/properties/property-patrick.png',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-patrick.png',
+      image: 'hotel-dashboard/properties/property-patrick.webp',
+      tenantAvatar: 'hotel-dashboard/properties/tenant-patrick.webp',
       tenantName: 'Patrick Koffi',
       price: '350 000 FCFA',
     },
     {
       id: 3,
-      image: 'hotel-dashboard/properties/property-kevin.png',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-kevin.png',
+      image: 'hotel-dashboard/properties/property-kevin.webp',
+      tenantAvatar: 'hotel-dashboard/properties/tenant-kevin.webp',
       tenantName: 'Kevin Kouassi',
       price: '550 000 FCFA',
     },
     {
       id: 4,
-      image: 'hotel-dashboard/properties/property-armand.png',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-armand.png',
+      image: 'hotel-dashboard/properties/property-armand.webp',
+      tenantAvatar: 'hotel-dashboard/properties/tenant-armand.webp',
       tenantName: 'Armand Tano',
       price: '765 000 FCFA',
     },

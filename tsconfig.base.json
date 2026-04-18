@@ -22,8 +22,15 @@
         "libs/ubax-portal/features/src/index.ts"
       ],
       "@ubax-workspace/shared-ui": ["libs/shared/ui/src/index.ts"],
-      "@ubax-workspace/ubax-web-shell": [
-        "libs/ubax-web/shell/src/index.ts"
+      "@ubax-workspace/ubax-web-shell": ["libs/ubax-web/shell/src/index.ts"],
+      "@ubax-workspace/ubax-web-shell/web-routes": [
+        "libs/ubax-web/shell/src/lib/web.routes.ts"
+      ],
+      "@ubax-workspace/ubax-web-shell/interceptors": [
+        "libs/ubax-web/shell/src/lib/interceptors/auth.interceptor.ts"
+      ],
+      "@ubax-workspace/ubax-web-shell/theme": [
+        "libs/ubax-web/shell/src/lib/theme/ubax-preset.ts"
       ],
       "@ubax-workspace/ubax-web-data-access": [
         "libs/ubax-web/data-access/src/index.ts"
