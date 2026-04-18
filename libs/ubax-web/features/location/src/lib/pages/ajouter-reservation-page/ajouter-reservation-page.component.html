@@ -694,7 +694,7 @@
                     class="photos-track"
                     [style.transform]="photosTranslate()"
                   >
-                    @for (photo of roomPhotos; track photo) {
+                    @for (photo of roomPhotos; track $index) {
                       <img class="room-photo" [src]="photo" alt="" />
                     }
                   </div>

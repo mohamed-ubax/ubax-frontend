@@ -155,7 +155,7 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-09.webp',
+    image: 'shared/rooms/deluxe-room-photo-01.webp',
     avatar: 'rooms/avatars/owner-01.webp',
   },
   {

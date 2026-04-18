@@ -68,7 +68,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-aicha-kone.webp',
+    avatarSrc: '/shared/people/billing-guest-03.webp',
     statusTone: 'active',
   },
   {
@@ -123,7 +123,7 @@ function normalizeSearchText(value: string): string {
   return value
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .replaceAll(/[\u0300-\u036f]/g, '');
 }
 
 @Component({

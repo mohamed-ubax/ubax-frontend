@@ -153,16 +153,15 @@ export class AjouterReservationPageComponent {
     },
   ];
 
-  readonly roomPreviewImg =
-    'https://www.figma.com/api/mcp/asset/118a55c9-7936-41df-89b5-be684fc45dd5';
+  readonly roomPreviewImg = 'shared/rooms/room-photo-03.webp';
 
   readonly roomPhotos = [
-    'https://www.figma.com/api/mcp/asset/67d222df-23aa-4e25-8acd-c3fedd0abd68',
-    'https://www.figma.com/api/mcp/asset/b854eabc-1ef0-4e74-bf67-d13c581e6feb',
-    'https://www.figma.com/api/mcp/asset/4b37b6d8-78d3-49e2-bccf-7a8b52d29f70',
-    'https://www.figma.com/api/mcp/asset/67d222df-23aa-4e25-8acd-c3fedd0abd68',
-    'https://www.figma.com/api/mcp/asset/b854eabc-1ef0-4e74-bf67-d13c581e6feb',
-    'https://www.figma.com/api/mcp/asset/4b37b6d8-78d3-49e2-bccf-7a8b52d29f70',
+    'shared/rooms/deluxe-room-photo-01.webp',
+    'shared/rooms/room-photo-05.webp',
+    'shared/rooms/room-photo-04.webp',
+    'shared/rooms/deluxe-room-photo-01.webp',
+    'shared/rooms/room-photo-05.webp',
+    'shared/rooms/room-photo-04.webp',
   ];
 
   // Computed

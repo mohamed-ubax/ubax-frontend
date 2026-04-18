@@ -114,7 +114,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '2 jours',
         period: '14 Avril 2026 - 18 Avril 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-01.webp',
+        avatar: 'shared/people/billing-guest-04.webp',
       },
       {
         clientId: '3',
@@ -205,7 +205,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '4 jours',
         period: '24 Juin 2026 - 28 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-01.webp',
+        avatar: 'shared/people/billing-guest-04.webp',
       },
       {
         clientId: '5',
@@ -296,7 +296,7 @@ const SPACE_DETAILS: Record<string, SpaceDetailData> = {
         duration: '2 jours',
         period: '28 Juin 2026 - 30 Juin 2026',
         status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-01.webp',
+        avatar: 'shared/people/billing-guest-04.webp',
       },
       {
         clientId: '4',
