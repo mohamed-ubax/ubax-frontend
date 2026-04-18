@@ -142,6 +142,7 @@ export class EmployesListPageComponent {
   readonly currentPage = signal(3);
   readonly totalPages = 5;
   readonly searchValue = signal('');
+  readonly selectedEmployeIds = signal<Set<string>>(new Set<string>());
 
   readonly tabs = EMPLOYES_TABS;
 
@@ -167,8 +168,82 @@ export class EmployesListPageComponent {
     );
   });
 
+  readonly filteredEmployeIds = computed(() =>
+    this.filteredEmployes().map((employe) => employe.id),
+  );
+
+  readonly allFilteredEmployesSelected = computed(() => {
+    const filteredIds = this.filteredEmployeIds();
+
+    if (!filteredIds.length) {
+      return false;
+    }
+
+    const selectedIds = this.selectedEmployeIds();
+    return filteredIds.every((id) => selectedIds.has(id));
+  });
+
+  readonly someFilteredEmployesSelected = computed(() => {
+    const filteredIds = this.filteredEmployeIds();
+
+    if (!filteredIds.length) {
+      return false;
+    }
+
+    const selectedIds = this.selectedEmployeIds();
+    let selectedCount = 0;
+
+    filteredIds.forEach((id) => {
+      if (selectedIds.has(id)) {
+        selectedCount += 1;
+      }
+    });
+
+    return selectedCount > 0 && selectedCount < filteredIds.length;
+  });
+
   setTab(id: TabId): void {
     this.activeTab.set(id);
+  }
+
+  isEmployeSelected(id: string): boolean {
+    return this.selectedEmployeIds().has(id);
+  }
+
+  toggleSelectAll(event: Event): void {
+    const shouldSelect = this.readCheckboxState(event);
+    const filteredIds = this.filteredEmployeIds();
+
+    this.selectedEmployeIds.update((current) => {
+      const next = new Set(current);
+
+      filteredIds.forEach((id) => {
+        if (shouldSelect) {
+          next.add(id);
+          return;
+        }
+
+        next.delete(id);
+      });
+
+      return next;
+    });
+  }
+
+  toggleEmployeSelection(id: string, event: Event): void {
+    const shouldSelect = this.readCheckboxState(event);
+
+    this.selectedEmployeIds.update((current) => {
+      const next = new Set(current);
+
+      if (shouldSelect) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+
+      return next;
+    });
   }
 
   updateSearch(event: Event): void {
@@ -176,5 +251,10 @@ export class EmployesListPageComponent {
     if (target instanceof HTMLInputElement) {
       this.searchValue.set(target.value);
     }
+  }
+
+  private readCheckboxState(event: Event): boolean {
+    const target = event.target;
+    return target instanceof HTMLInputElement ? target.checked : false;
   }
 }

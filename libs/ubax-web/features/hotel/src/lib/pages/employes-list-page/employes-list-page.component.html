@@ -16,6 +16,7 @@
       role="tablist"
       aria-label="Filtres employés"
       ubaxMorphTabs
+      ubaxMorphTabsMode="underline"
       ubaxMorphTabsItemSelector=".employees-tabs__button"
     >
       @for (tab of tabs; track tab.id) {
@@ -71,7 +72,10 @@
               <input
                 class="employees-checkbox"
                 type="checkbox"
+                [checked]="allFilteredEmployesSelected()"
+                [indeterminate]="someFilteredEmployesSelected()"
                 aria-label="Sélectionner tous les employés"
+                (change)="toggleSelectAll($event)"
               />
             </th>
             <th scope="col">
@@ -100,12 +104,18 @@
 
         <tbody>
           @for (employe of filteredEmployes(); track employe.id) {
-            <tr>
+            <tr
+              [class.employees-table__row--selected]="
+                isEmployeSelected(employe.id)
+              "
+            >
               <td class="employees-table__check-cell">
                 <input
                   class="employees-checkbox"
                   type="checkbox"
+                  [checked]="isEmployeSelected(employe.id)"
                   [attr.aria-label]="'Sélectionner ' + employe.nom"
+                  (change)="toggleEmployeSelection(employe.id, $event)"
                 />
               </td>
 
