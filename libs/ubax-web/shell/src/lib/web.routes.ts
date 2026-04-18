@@ -47,7 +47,10 @@ export const webRoutes: Route[] = [
             (m) => m.locationRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.HOTEL] },
+        data: {
+          preload: true,
+          roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.HOTEL],
+        },
       },
 
       // ── Demandes clients ────────────────────────────────────────────────────
@@ -58,7 +61,10 @@ export const webRoutes: Route[] = [
             (m) => m.demandesRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.COMPTABLE] },
+        data: {
+          preload: true,
+          roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.COMPTABLE],
+        },
       },
 
       // ── Finance ─────────────────────────────────────────────────────────────

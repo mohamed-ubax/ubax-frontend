@@ -20,13 +20,13 @@
         </div>
       </div>
       <div class="kpi-chart-mini">
-        <p-chart
+        <ubax-lazy-chart
           type="doughnut"
           [data]="kpiRevenusChartData"
           [options]="kpiChartOptions"
           width="81px"
           height="81px"
-        />
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -40,13 +40,13 @@
         </div>
       </div>
       <div class="kpi-chart-mini">
-        <p-chart
+        <ubax-lazy-chart
           type="doughnut"
           [data]="kpiReservChartData"
           [options]="kpiChartOptions"
           width="81px"
           height="81px"
-        />
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -60,13 +60,13 @@
         </div>
       </div>
       <div class="kpi-chart-mini">
-        <p-chart
+        <ubax-lazy-chart
           type="doughnut"
           [data]="kpiDepensesChartData"
           [options]="kpiChartOptions"
           width="81px"
           height="81px"
-        />
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -125,12 +125,12 @@
         </a>
       </div>
       <div class="stats-chart-area">
-        <p-chart
+        <ubax-lazy-chart
           type="line"
           [data]="statsData"
           [options]="statsOptions"
           height="315px"
-        />
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -179,12 +179,12 @@
         <span class="date-range-pill">Du 01 avril 2026 au 07 avril 2026</span>
       </div>
       <div class="mini-card__chart">
-        <p-chart
+        <ubax-lazy-chart
           type="bar"
           [data]="miniBarData"
           [options]="miniBarOptions"
           height="200px"
-        />
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -243,13 +243,13 @@
       </div>
       <div class="donut-area">
         <div class="donut-wrap">
-          <p-chart
+          <ubax-lazy-chart
             type="doughnut"
             [data]="donutData"
             [options]="donutOptions"
             width="176px"
             height="176px"
-          />
+          ></ubax-lazy-chart>
           <div class="donut-center">
             <p class="donut-center__value">2,859</p>
             <p class="donut-center__label">Total des réservations</p>

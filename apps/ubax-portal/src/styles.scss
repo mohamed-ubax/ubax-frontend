@@ -38,6 +38,49 @@ body {
   overflow-x: clip;
 }
 
+body
+  :where(
+    div,
+    section,
+    article,
+    aside,
+    main,
+    header,
+    footer,
+    nav,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    option,
+    label,
+    li,
+    ul,
+    ol,
+    dt,
+    dd,
+    td,
+    th,
+    strong,
+    small,
+    em
+  ):not(.pi) {
+  font-family: inherit !important;
+}
+
+.p-component {
+  font-family: inherit;
+}
+
 .country-picker-overlay {
   border-radius: 12px;
   border: 1px solid #e0e0e0;

@@ -99,12 +99,12 @@
           <div class="panel__divider"></div>
 
           <div class="revenue-chart">
-            <p-chart
+            <ubax-lazy-chart
               type="bar"
               [data]="revenueChartData"
               [options]="revenueChartOptions"
               height="280px"
-            />
+            ></ubax-lazy-chart>
           </div>
         </section>
 
@@ -224,13 +224,13 @@
           </div>
 
           <div class="trend-card__chart">
-            <p-chart
+            <ubax-lazy-chart
               type="line"
               [data]="reservationTrendData"
               [options]="reservationTrendOptions"
               [plugins]="reservationTrendPlugins"
               height="140px"
-            />
+            ></ubax-lazy-chart>
           </div>
 
           <div class="trend-card__months">

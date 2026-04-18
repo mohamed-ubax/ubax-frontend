@@ -71,7 +71,7 @@
 
 .employees-title {
   color: var(--text);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 36px;
   font-weight: 600;
   line-height: 58px;
@@ -115,7 +115,7 @@
   border: 0;
   background: transparent;
   color: var(--text-muted);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: 25px;
@@ -167,7 +167,7 @@
   border-radius: 2px;
   background: #f9f9f9;
   color: var(--text-strong);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 25px;
@@ -196,7 +196,7 @@
   background: var(--navy);
   box-shadow: var(--shadow-card);
   color: var(--surface);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 1rem;
   font-weight: 600;
   line-height: 27px;
@@ -273,7 +273,7 @@
 .employees-table th {
   border-bottom: 2px solid var(--border-accent);
   color: #000000;
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 500;
   line-height: 28px;
@@ -395,7 +395,7 @@
 
 .employees-table__name {
   color: var(--text-strong);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 600;
   line-height: 26px;
@@ -403,7 +403,7 @@
 
 .employees-table__poste {
   color: var(--accent);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 23px;
@@ -411,7 +411,7 @@
 
 .employees-table__description {
   color: var(--text-strong);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
@@ -421,7 +421,7 @@
 .employees-table__planning-days,
 .employees-table__phone {
   color: var(--text-strong);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   line-height: 23px;
 }
@@ -432,7 +432,7 @@
 
 .employees-table__planning-hours {
   color: var(--text-strong);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 23px;
@@ -476,7 +476,7 @@
   border: 1px solid var(--success);
   border-radius: 73px;
   color: var(--success);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   line-height: 22px;
@@ -495,7 +495,7 @@
   width: 24px;
   height: 24px;
   color: var(--text-strong);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 22px;
   font-weight: 600;
   line-height: 1;
@@ -506,7 +506,7 @@
 .employees-table__empty {
   height: 140px;
   color: var(--text-muted);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 24px;

@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ChartModule } from 'primeng/chart';
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import {
+  LazyChartComponent,
+  UbaxPaginatorComponent,
+} from '@ubax-workspace/shared-ui';
 
 @Component({
   selector: 'ubax-historique-recettes-page',
   standalone: true,
-  imports: [ChartModule, RouterLink, UbaxPaginatorComponent],
+  imports: [LazyChartComponent, RouterLink, UbaxPaginatorComponent],
   templateUrl: './historique-recettes-page.component.html',
   styleUrl: './historique-recettes-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

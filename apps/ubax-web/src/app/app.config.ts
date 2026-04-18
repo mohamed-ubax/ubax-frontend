@@ -6,7 +6,6 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
-  PreloadAllModules,
   provideRouter,
   withComponentInputBinding,
   withPreloading,
@@ -22,6 +21,7 @@ import { appRoutes } from './app.routes';
 import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
 import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
 import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
+import { SelectivePreloadStrategy } from './selective-preload.strategy';
 
 /**
  * En dev, initialise l'utilisateur mock AVANT que le router évalue les
@@ -62,7 +62,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       appRoutes,
       withComponentInputBinding(),
-      withPreloading(PreloadAllModules),
+      withPreloading(SelectivePreloadStrategy),
       withViewTransitions(),
     ),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),

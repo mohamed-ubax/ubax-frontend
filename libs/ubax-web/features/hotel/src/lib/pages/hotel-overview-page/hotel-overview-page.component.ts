@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ChartModule } from 'primeng/chart';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ChartData, ChartOptions, Plugin, ScriptableContext } from 'chart.js';
+import { LazyChartComponent } from '@ubax-workspace/shared-ui';
 
 type TrendRangeKey = 'jan-jun' | 'apr-sep' | 'jul-dec';
 
@@ -54,7 +54,7 @@ interface PropertyCard {
 @Component({
   selector: 'ubax-hotel-overview-page',
   standalone: true,
-  imports: [FormsModule, ChartModule, DatePickerModule, SelectModule],
+  imports: [FormsModule, LazyChartComponent, DatePickerModule, SelectModule],
   templateUrl: './hotel-overview-page.component.html',
   styleUrl: './hotel-overview-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,7 +102,7 @@ export class HotelOverviewPageComponent {
         border: { display: false },
         ticks: {
           color: '#615e83',
-          font: { family: 'Inter', size: 12, weight: 400 },
+          font: { family: 'Lexend', size: 12, weight: 400 },
           maxRotation: 0,
         },
       },
@@ -112,7 +112,7 @@ export class HotelOverviewPageComponent {
         ticks: {
           stepSize: 1000,
           color: '#615e83',
-          font: { family: 'Inter', size: 14, weight: 400 },
+          font: { family: 'Lexend', size: 14, weight: 400 },
           padding: 14,
           callback: (value) => {
             if (value === 0) return '0';

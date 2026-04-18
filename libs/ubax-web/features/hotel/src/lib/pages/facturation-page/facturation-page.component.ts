@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ChartModule } from 'primeng/chart';
+import { LazyChartComponent } from '@ubax-workspace/shared-ui';
 
 @Component({
   selector: 'ubax-facturation-page',
   standalone: true,
-  imports: [ChartModule, RouterLink],
+  imports: [LazyChartComponent, RouterLink],
   templateUrl: './facturation-page.component.html',
   styleUrl: './facturation-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

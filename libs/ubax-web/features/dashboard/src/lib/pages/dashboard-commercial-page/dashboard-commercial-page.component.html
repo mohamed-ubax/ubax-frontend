@@ -1,5 +1,4 @@
 <div class="dashboard">
-
   <!-- ── Page header ──────────────────────────────────────────────── -->
   <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
@@ -8,9 +7,18 @@
         <i class="pi pi-search"></i>
         <input type="text" placeholder="Recherche ..." />
       </div>
-      <button class="search-field search-field--btn" (click)="datePickerOpen.set(true)">
+      <button
+        class="search-field search-field--btn"
+        (click)="datePickerOpen.set(true)"
+      >
         <i class="pi pi-calendar"></i>
-        <span>{{ selectedRange() ? (selectedRange()!.start | date:'dd/MM/yy') + ' – ' + (selectedRange()!.end | date:'dd/MM/yy') : 'Sélectionner une date' }}</span>
+        <span>{{
+          selectedRange()
+            ? (selectedRange()!.start | date: 'dd/MM/yy') +
+              ' – ' +
+              (selectedRange()!.end | date: 'dd/MM/yy')
+            : 'Sélectionner une date'
+        }}</span>
       </button>
       <button class="export-btn">
         <i class="pi pi-upload"></i>
@@ -21,12 +29,16 @@
 
   <!-- ── Hero + KPI wrapper card ──────────────────────────────────── -->
   <div class="hero-kpi-card">
-
     <!-- Hero banner -->
     <div class="hero-banner">
       <div class="hero-content">
-        <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
-        <p>Consultez rapidement les indicateurs clés de votre portefeuille et gérez vos biens en toute simplicité.</p>
+        <h2>
+          Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !
+        </h2>
+        <p>
+          Consultez rapidement les indicateurs clés de votre portefeuille et
+          gérez vos biens en toute simplicité.
+        </p>
       </div>
       <button class="hero-cta">
         Ajouter un bien
@@ -50,12 +62,10 @@
         </div>
       }
     </div>
-
   </div>
 
   <!-- ── Appointments calendar ────────────────────────────────────── -->
   <div class="card calendar-card">
-
     <div class="calendar-header">
       <div>
         <p class="card-pretitle">Planning</p>
@@ -63,21 +73,27 @@
       </div>
       <div class="calendar-nav">
         <div class="cal-legend">
-          <span class="cal-dot cal-dot--confirmed"></span><span class="cal-legend-label">Confirmé</span>
-          <span class="cal-dot cal-dot--upcoming"></span><span class="cal-legend-label">À venir</span>
-          <span class="cal-dot cal-dot--cancelled"></span><span class="cal-legend-label">Annulé</span>
+          <span class="cal-dot cal-dot--confirmed"></span
+          ><span class="cal-legend-label">Confirmé</span>
+          <span class="cal-dot cal-dot--upcoming"></span
+          ><span class="cal-legend-label">À venir</span>
+          <span class="cal-dot cal-dot--cancelled"></span
+          ><span class="cal-legend-label">Annulé</span>
         </div>
         <div class="cal-nav-btns">
-          <button class="cal-nav-btn"><i class="pi pi-chevron-left"></i></button>
+          <button class="cal-nav-btn">
+            <i class="pi pi-chevron-left"></i>
+          </button>
           <span class="cal-week-label">Avr. 07 – 13, 2026</span>
-          <button class="cal-nav-btn"><i class="pi pi-chevron-right"></i></button>
+          <button class="cal-nav-btn">
+            <i class="pi pi-chevron-right"></i>
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Calendar grid -->
     <div class="cal-grid-wrapper">
-
       <!-- Time column -->
       <div class="cal-times">
         <div class="cal-times__header"></div>
@@ -96,8 +112,11 @@
           @for (slot of timeSlots; track slot; let si = $index) {
             <div class="cal-slot">
               @for (ev of getEventsForSlot(di, si); track ev.label) {
-                <div class="cal-event" [class]="'cal-event--' + ev.status"
-                     [style.height.px]="ev.span * 56 - 6">
+                <div
+                  class="cal-event"
+                  [class]="'cal-event--' + ev.status"
+                  [style.height.px]="ev.span * 56 - 6"
+                >
                   {{ ev.label }}
                 </div>
               }
@@ -105,14 +124,11 @@
           }
         </div>
       }
-
     </div>
-
   </div>
 
   <!-- ── Bottom row ────────────────────────────────────────────────── -->
   <div class="bottom-row">
-
     <!-- Prospects bar chart -->
     <div class="card chart-card">
       <div class="card-header">
@@ -120,10 +136,17 @@
           <p class="card-pretitle">Statistiques</p>
           <h3 class="card-title">Prospects</h3>
         </div>
-        <button class="filter-pill">Cette semaine <i class="pi pi-chevron-down"></i></button>
+        <button class="filter-pill">
+          Cette semaine <i class="pi pi-chevron-down"></i>
+        </button>
       </div>
       <div class="bar-chart-wrapper">
-        <p-chart type="bar" [data]="prospectsData" [options]="prospectsOptions" height="240px" />
+        <ubax-lazy-chart
+          type="bar"
+          [data]="prospectsData"
+          [options]="prospectsOptions"
+          height="240px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -141,7 +164,11 @@
 
       <div class="etat-progress">
         @for (stat of bienStats; track stat.label) {
-          <div class="progress-segment" [style.flex]="stat.percent" [style.background]="stat.color"></div>
+          <div
+            class="progress-segment"
+            [style.flex]="stat.percent"
+            [style.background]="stat.color"
+          ></div>
         }
       </div>
 
@@ -155,7 +182,6 @@
         }
       </div>
     </div>
-
   </div>
 
   <!-- ── Explorer les biens ─────────────────────────────────────────── -->
@@ -168,12 +194,19 @@
     <div class="explorer-grid">
       @for (prop of properties; track prop.title) {
         <div class="prop-card">
-          <img class="prop-card__img" [src]="prop.image" [alt]="prop.title" loading="lazy" />
+          <img
+            class="prop-card__img"
+            [src]="prop.image"
+            [alt]="prop.title"
+            loading="lazy"
+          />
           <div class="prop-card__overlay">
             <span class="prop-badge">{{ prop.badge }}</span>
             <div class="prop-info">
               <p class="prop-title">{{ prop.title }}</p>
-              <p class="prop-location"><i class="pi pi-map-marker"></i> {{ prop.location }}</p>
+              <p class="prop-location">
+                <i class="pi pi-map-marker"></i> {{ prop.location }}
+              </p>
               <p class="prop-price">{{ prop.price }}</p>
             </div>
           </div>
@@ -181,7 +214,6 @@
       }
     </div>
   </div>
-
 </div>
 
 <!-- ── Date range picker (fixed overlay) ─────────────────────────── -->

@@ -9,13 +9,13 @@
           <!-- Card 1 — Taux d'occupation -->
           <div class="kpi-card kpi-card--light">
             <div class="kpi-donut">
-              <p-chart
+              <ubax-lazy-chart
                 type="doughnut"
                 [data]="occupancyDonutData"
                 [options]="occupancyDonutOptions"
                 height="54px"
                 width="54px"
-              />
+              ></ubax-lazy-chart>
               <span class="kpi-donut__pct">{{ occupancyRate }}%</span>
             </div>
             <div class="kpi-body">
@@ -80,12 +80,12 @@
             </div>
             <div class="revenue-divider"></div>
             <div class="bar-chart-wrap">
-              <p-chart
+              <ubax-lazy-chart
                 type="bar"
                 [data]="revenueData"
                 [options]="revenueOptions"
                 height="240px"
-              />
+              ></ubax-lazy-chart>
             </div>
           </div>
 
@@ -171,12 +171,12 @@
               </span>
             </div>
             <div class="line-chart-wrap">
-              <p-chart
+              <ubax-lazy-chart
                 type="line"
                 [data]="reservationsData"
                 [options]="reservationsOptions"
                 height="120px"
-              />
+              ></ubax-lazy-chart>
             </div>
             <div class="months-row">
               @for (m of months; track m.label) {
