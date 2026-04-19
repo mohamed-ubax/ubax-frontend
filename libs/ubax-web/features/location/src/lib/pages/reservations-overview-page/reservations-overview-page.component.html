@@ -1,0 +1,274 @@
+<div class="reservation-overview">
+  <header class="reservation-overview__header">
+    <h1 class="reservation-overview__title">Réservations</h1>
+
+    <div class="reservation-overview__actions">
+      <label
+        class="page-chip page-chip--search"
+        aria-label="Rechercher une réservation"
+      >
+        <img [src]="icons.searchHeader" alt="" />
+        <input
+          type="text"
+          placeholder="Recherche ..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+      </label>
+
+      <button
+        type="button"
+        class="page-chip page-chip--date"
+        (click)="datePickerOpen.set(true)"
+      >
+        <span>{{ rangeLabel() }}</span>
+        <span class="page-chip__icon-wrap">
+          <img [src]="icons.calendar" alt="" />
+        </span>
+      </button>
+
+      <button type="button" class="page-chip page-chip--export">
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
+          <img [src]="icons.download" alt="" />
+        </span>
+        <span>Exporter les données</span>
+      </button>
+    </div>
+  </header>
+
+  <ubax-reservation-kpi-strip [cards]="kpiCards" />
+
+  <div class="reservation-overview__top-grid">
+    <section class="panel panel--availability">
+      <h2 class="panel__title">Disponibilité des piéces</h2>
+
+      <div class="availability-bar">
+        @for (metric of availabilityMetrics; track metric.label) {
+          <span
+            class="availability-bar__segment"
+            [class]="
+              'availability-bar__segment availability-bar__segment--' +
+              metric.tone
+            "
+          ></span>
+        }
+      </div>
+
+      <div class="availability-stats">
+        @for (metric of availabilityMetrics; track metric.label) {
+          <article class="availability-stat">
+            <span
+              class="availability-stat__marker"
+              [class]="
+                'availability-stat__marker availability-stat__marker--' +
+                metric.tone
+              "
+            ></span>
+            <div class="availability-stat__copy">
+              <p class="availability-stat__label">{{ metric.label }}</p>
+              <p class="availability-stat__value">{{ metric.value }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="panel panel--revenue">
+      <div class="revenue-panel__header">
+        <div>
+          <h2 class="panel__title">Evolution des revenus</h2>
+          <div class="revenue-panel__legend">
+            <span class="revenue-panel__legend-dot"></span>
+            <span>Villa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="revenue-panel__chart-wrap">
+        <div class="revenue-panel__callout">3 500 000 FCFA</div>
+        <div class="revenue-panel__guide"></div>
+        <ubax-lazy-chart
+          type="line"
+          [data]="revenueChartData"
+          [options]="revenueChartOptions"
+          height="400px"
+        />
+      </div>
+    </section>
+  </div>
+
+  <div class="reservation-overview__bottom-grid">
+    @for (property of propertyCards; track property.id) {
+      <article class="property-card">
+        <img
+          class="property-card__image"
+          [src]="property.image"
+          [alt]="property.title"
+          loading="lazy"
+          decoding="async"
+        />
+
+        <span class="property-card__badge">{{ property.badge }}</span>
+
+        <div class="property-card__overlay">
+          <p class="property-card__title">{{ property.title }}</p>
+
+          <p class="property-card__location">
+            <img [src]="icons.locationFill" alt="" />
+            <span>{{ property.location }}</span>
+          </p>
+
+          <div class="property-card__footer">
+            <div class="property-card__tenant">
+              <img [src]="property.avatar" [alt]="property.tenantName" />
+              <div>
+                <p>{{ property.tenantName }}</p>
+                <span>{{ property.tenantRole }}</span>
+              </div>
+            </div>
+
+            <strong>{{ property.price }}</strong>
+          </div>
+        </div>
+      </article>
+    }
+
+    <section class="panel panel--mini-calendar">
+      <div class="mini-calendar-panel__header">
+        <h2 class="panel__title">Calendrier des réservations</h2>
+        <a
+          routerLink="/reservations/calendrier"
+          class="mini-calendar-panel__cta"
+        >
+          Tout voir
+        </a>
+      </div>
+
+      <ubax-reservation-mini-calendar [activeDate]="activeCalendarDate" />
+    </section>
+  </div>
+
+  <div class="reservation-overview__table-wrap">
+    <section class="panel panel--table">
+      <div class="panel__toolbar">
+        <h2 class="panel__title">Liste de réservations</h2>
+
+        <div class="panel__toolbar-actions">
+          <label
+            class="table-chip table-chip--search"
+            aria-label="Rechercher dans la liste des réservations"
+          >
+            <img [src]="icons.searchCard" alt="" />
+            <input
+              type="text"
+              placeholder="Rechercher"
+              [ngModel]="searchTerm()"
+              (ngModelChange)="onSearchChange($event)"
+            />
+          </label>
+
+          <button
+            type="button"
+            class="table-chip table-chip--date"
+            (click)="datePickerOpen.set(true)"
+          >
+            <span>{{ rangeLabel() }}</span>
+            <span class="table-chip__icon-wrap">
+              <img [src]="icons.calendar" alt="" />
+            </span>
+          </button>
+
+          <a
+            routerLink="/reservations/ajouter"
+            class="table-chip table-chip--primary"
+          >
+            Ajouter une réservation
+          </a>
+
+          <a
+            routerLink="/reservations/liste"
+            class="table-chip table-chip--accent"
+          >
+            Voir toutes les reservations
+          </a>
+        </div>
+      </div>
+
+      <div class="reservation-table reservation-table--head">
+        <span>Invité</span>
+        <span>Chambre</span>
+        <span>Durée</span>
+        <span>Arrivée - Départ</span>
+        <span>Statut</span>
+        <span>Action</span>
+      </div>
+
+      <div class="reservation-table__body">
+        @for (reservation of previewReservations(); track reservation.id) {
+          <div class="reservation-table reservation-table--row">
+            <div class="reservation-table__guest">
+              <img [src]="reservation.guestImage" [alt]="reservation.guest" />
+              <span>{{ reservation.guest }}</span>
+            </div>
+
+            <span class="reservation-table__cell">{{
+              reservation.property
+            }}</span>
+            <span class="reservation-table__cell">{{
+              reservation.durationLabel
+            }}</span>
+            <span
+              class="reservation-table__cell reservation-table__cell--dates"
+            >
+              {{ reservation.arrivalDate | date: 'dd / MM / yyyy' }} -
+              {{ reservation.departureDate | date: 'dd / MM / yyyy' }}
+            </span>
+
+            <span
+              class="reservation-table__status"
+              [class]="
+                'reservation-table__status reservation-table__status--' +
+                reservation.tone
+              "
+            >
+              {{ reservation.status }}
+            </span>
+
+            <div class="reservation-table__actions">
+              <a
+                [routerLink]="['/reservations', reservation.id]"
+                class="reservation-table__action reservation-table__action--view"
+                aria-label="Voir le détail de la réservation"
+              >
+                <img [src]="icons.actionEye" alt="" />
+              </a>
+
+              <button
+                type="button"
+                class="reservation-table__action reservation-table__action--confirm"
+              >
+                <img [src]="icons.actionEdit" alt="" />
+                <span>Confirmer</span>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="reservation-table__empty">
+            Aucune réservation ne correspond aux filtres appliqués.
+          </div>
+        }
+      </div>
+
+      <div class="panel__footer">
+        <a routerLink="/reservations/liste" class="panel__footer-btn"
+          >Voir plus</a
+        >
+      </div>
+    </section>
+  </div>
+</div>
+
+<ubax-date-range-picker
+  [(isOpen)]="datePickerOpen"
+  (applied)="onDateRangeApplied($event)"
+/>

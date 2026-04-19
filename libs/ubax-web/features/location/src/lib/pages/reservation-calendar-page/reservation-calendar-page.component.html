@@ -1,0 +1,171 @@
+<div class="reservation-calendar-page">
+  <header class="reservation-calendar-page__header">
+    <h1 class="reservation-calendar-page__title">Calendrier</h1>
+
+    <div class="reservation-calendar-page__actions">
+      <label
+        class="page-chip page-chip--search"
+        aria-label="Rechercher une réservation"
+      >
+        <img [src]="icons.searchHeader" alt="" />
+        <input
+          type="text"
+          placeholder="Recherche ..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+      </label>
+
+      <button
+        type="button"
+        class="page-chip page-chip--date"
+        (click)="datePickerOpen.set(true)"
+      >
+        <span>{{ rangeLabel() }}</span>
+        <span class="page-chip__icon-wrap">
+          <img [src]="icons.calendar" alt="" />
+        </span>
+      </button>
+
+      <button type="button" class="page-chip page-chip--export">
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
+          <img [src]="icons.download" alt="" />
+        </span>
+        <span>Exporter les données</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="calendar-panel">
+    <aside class="calendar-panel__sidebar">
+      <div class="calendar-panel__sidebar-header">
+        <h2>Calendrier des réservations</h2>
+      </div>
+
+      <ubax-reservation-mini-calendar
+        [initialMonth]="currentMonth()"
+        [activeDate]="activeDate()"
+      />
+
+      <div class="calendar-legend">
+        <h3 class="calendar-legend__title">Biens</h3>
+
+        <div class="calendar-legend__items">
+          @for (entry of legendEntries(); track entry.property) {
+            <div class="calendar-legend__item">
+              <span
+                class="calendar-legend__dot"
+                [class]="
+                  'calendar-legend__dot calendar-legend__dot--' + entry.tone
+                "
+              ></span>
+              <span>{{ entry.property }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </aside>
+
+    <div class="calendar-panel__main-wrap">
+      <div class="calendar-panel__main">
+        <div class="calendar-toolbar">
+          <div class="calendar-toolbar__month">
+            <h2>{{ monthLabel() }}</h2>
+            <div class="calendar-toolbar__nav">
+              <button
+                type="button"
+                (click)="previousMonth()"
+                aria-label="Mois précédent"
+              >
+                <img [src]="icons.chevronLeft" alt="" />
+              </button>
+              <button
+                type="button"
+                (click)="nextMonth()"
+                aria-label="Mois suivant"
+              >
+                <img [src]="icons.chevronRight" alt="" />
+              </button>
+            </div>
+          </div>
+
+          <a
+            routerLink="/reservations/ajouter"
+            class="calendar-toolbar__add-btn"
+          >
+            Nouvelle réservation
+          </a>
+        </div>
+
+        <div class="calendar-grid-wrap">
+          <div class="calendar-grid">
+            <div class="calendar-grid__head">
+              @for (label of weekLabels; track label; let last = $last) {
+                <div
+                  class="calendar-grid__head-cell"
+                  [class.calendar-grid__head-cell--last]="last"
+                >
+                  {{ label }}
+                </div>
+              }
+            </div>
+
+            @for (week of weeks(); track $index; let last = $last) {
+              <div [class]="weekClass(week, last)">
+                @for (day of week.days; track $index; let lastCol = $last) {
+                  <div
+                    class="calendar-day"
+                    [class.calendar-day--other]="!day.isCurrentMonth"
+                    [class.calendar-day--active]="day.isActive"
+                    [class.calendar-day--last-col]="lastCol"
+                  >
+                    <span class="calendar-day__number">{{ day.label }}</span>
+                  </div>
+                }
+
+                <div class="calendar-week__events">
+                  @for (
+                    event of week.events;
+                    track event.id + '-' + event.row
+                  ) {
+                    <a
+                      [routerLink]="['/reservations', event.id]"
+                      [class]="eventClass(event)"
+                    >
+                      <div class="calendar-event__avatar">
+                        <img [src]="event.image" [alt]="event.guest" />
+                      </div>
+
+                      <div class="calendar-event__main">
+                        <span class="calendar-event__name">{{
+                          event.guest
+                        }}</span>
+                        <span class="calendar-event__property">{{
+                          event.property
+                        }}</span>
+                      </div>
+
+                      <div class="calendar-event__meta">
+                        <span class="calendar-event__dates">{{
+                          event.dateRange
+                        }}</span>
+                        <span class="calendar-event__amount">{{
+                          event.amount
+                        }}</span>
+                      </div>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<ubax-date-range-picker
+  [(isOpen)]="datePickerOpen"
+  (applied)="onDateRangeApplied($event)"
+/>

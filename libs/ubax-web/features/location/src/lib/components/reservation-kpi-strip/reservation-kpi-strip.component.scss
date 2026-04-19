@@ -1,0 +1,145 @@
+:host {
+  display: block;
+}
+
+.reservation-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 19px;
+}
+
+.reservation-kpi-card {
+  min-height: 149px;
+  border-radius: 10px;
+  border: 1px solid #f0f8ff;
+  background: var(--ubax-surface);
+  padding: 18px 21px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.reservation-kpi-card--new {
+  border-color: transparent;
+  background: var(--ubax-accent);
+}
+
+.reservation-kpi-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reservation-kpi-card__label {
+  margin: 0;
+  font-family: 'Inter', 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--ubax-text-primary);
+}
+
+.reservation-kpi-card--new .reservation-kpi-card__label {
+  color: var(--ubax-surface);
+}
+
+.reservation-kpi-card__icon-shell {
+  width: 50px;
+  height: 50px;
+  border-radius: 20px;
+  background: var(--ubax-page-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reservation-kpi-card--new .reservation-kpi-card__icon-shell {
+  background: rgb(255 255 255 / 0.18);
+}
+
+.reservation-kpi-card__icon-shell img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.reservation-kpi-card__value {
+  margin: 14px 0 0;
+  font-family: 'Inter', 'Lexend', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ubax-text-primary);
+}
+
+.reservation-kpi-card--new .reservation-kpi-card__value {
+  color: var(--ubax-surface);
+}
+
+.reservation-kpi-card__value--compact {
+  font-size: 24px;
+}
+
+.reservation-kpi-card__meta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reservation-kpi-card__delta-pill {
+  min-height: 27px;
+  padding: 0 11px 0 9px;
+  border-radius: 15.923px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Inter', 'Lexend', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ubax-text-primary);
+  background: var(--ubax-surface);
+}
+
+.reservation-kpi-card__delta-pill img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.reservation-kpi-card__caption {
+  font-family: 'Inter', 'Lexend', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 14px;
+  color: var(--ubax-text-body);
+}
+
+.reservation-kpi-card--new .reservation-kpi-card__caption {
+  color: var(--ubax-surface);
+}
+
+.reservation-kpi-card--arrival .reservation-kpi-card__delta-pill,
+.reservation-kpi-card--revenue .reservation-kpi-card__delta-pill {
+  background: #e6ffec;
+  color: var(--ubax-success);
+}
+
+.reservation-kpi-card--departure .reservation-kpi-card__delta-pill {
+  background: #ffdfe0;
+  color: var(--ubax-danger);
+}
+
+@media (max-width: 1280px) {
+  .reservation-kpi-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .reservation-kpi-strip {
+    grid-template-columns: 1fr;
+  }
+}
