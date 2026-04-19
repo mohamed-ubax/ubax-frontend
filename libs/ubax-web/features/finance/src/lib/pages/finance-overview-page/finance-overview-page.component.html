@@ -1,0 +1,255 @@
+<section class="finance-overview-page" data-ubax-motion="page">
+  <header class="finance-overview-page__header">
+    <h1 class="finance-overview-page__title">Finances</h1>
+
+    <div class="finance-overview-page__toolbar">
+      <label class="toolbar-chip toolbar-chip--search">
+        <input type="text" placeholder="Recherche ..." />
+        <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
+      </label>
+
+      <button class="toolbar-chip toolbar-chip--action" type="button">
+        <span>Sélectionner une date</span>
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.calendarIcon" alt="" aria-hidden="true" />
+        </span>
+      </button>
+
+      <button
+        class="toolbar-chip toolbar-chip--action toolbar-chip--export"
+        type="button"
+      >
+        <span>Exporter les données</span>
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.exportIcon" alt="" aria-hidden="true" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <div class="finance-overview-page__summary-grid" data-ubax-motion="surface">
+    @for (card of summaryCards; track card.label) {
+      <article
+        class="summary-card"
+        [class.summary-card--balance]="card.tone === 'balance'"
+      >
+        @if (card.tone !== 'balance') {
+          <span
+            class="summary-card__icon-shell"
+            [class.summary-card__icon-shell--success]="card.tone === 'success'"
+            [class.summary-card__icon-shell--info]="card.tone === 'info'"
+            [class.summary-card__icon-shell--warning]="card.tone === 'warning'"
+          >
+            @if (card.icon) {
+              <img [src]="card.icon" [alt]="card.iconAlt ?? ''" />
+            }
+          </span>
+
+          <div class="summary-card__content">
+            <p>{{ card.label }}</p>
+            <strong>{{ card.amount }}</strong>
+          </div>
+        } @else {
+          <div class="summary-card__balance-copy">
+            <p>{{ card.label }}</p>
+            <strong>{{ card.amount }}</strong>
+          </div>
+
+          <button class="summary-card__balance-toggle" type="button">
+            @if (card.icon) {
+              <img [src]="card.icon" [alt]="card.iconAlt ?? ''" />
+            }
+          </button>
+        }
+      </article>
+    }
+  </div>
+
+  <div class="finance-overview-page__content-grid">
+    <article class="surface-card chart-card" data-ubax-motion="surface">
+      <h2>Evolution des encaissements</h2>
+
+      <div class="chart-card__canvas">
+        <div class="chart-card__graphic" aria-hidden="true">
+          <img class="chart-card__grid" [src]="assets.chartGrid" alt="" />
+          <img
+            class="chart-card__gradient"
+            [src]="assets.chartGradient"
+            alt=""
+          />
+          <img class="chart-card__line" [src]="assets.chartLine" alt="" />
+          <img
+            class="chart-card__indicator"
+            [src]="assets.chartIndicator"
+            alt=""
+          />
+          <img class="chart-card__tooltip" [src]="assets.chartTooltip" alt="" />
+          <span class="chart-card__tooltip-label">3 500 000 FCFA</span>
+        </div>
+
+        <div class="chart-card__y-axis" aria-hidden="true">
+          @for (label of yAxisLabels; track label) {
+            <span>{{ label }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="chart-card__months" aria-hidden="true">
+        @for (label of monthLabels; track label) {
+          <span>{{ label }}</span>
+        }
+      </div>
+    </article>
+
+    <article class="surface-card expense-card" data-ubax-motion="surface">
+      <div class="expense-card__header">
+        <div>
+          <p>Dépenses</p>
+          <h2>Répartition des dépenses</h2>
+        </div>
+
+        <button class="expense-card__range" type="button">
+          <span>Ce mois ci</span>
+          <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
+        </button>
+      </div>
+
+      <div class="expense-card__divider"></div>
+
+      <div class="expense-card__pie-wrap" aria-hidden="true">
+        <img [src]="assets.expensePie" alt="" />
+      </div>
+
+      <div class="expense-card__legend">
+        @for (item of expenseLegend; track item.label) {
+          <div class="expense-card__legend-item">
+            <span
+              class="expense-card__legend-dot"
+              [class.expense-card__legend-dot--blue]="item.tone === 'blue'"
+              [class.expense-card__legend-dot--yellow]="item.tone === 'yellow'"
+              [class.expense-card__legend-dot--green]="item.tone === 'green'"
+              [class.expense-card__legend-dot--purple]="item.tone === 'purple'"
+              [class.expense-card__legend-dot--orange]="item.tone === 'orange'"
+            ></span>
+            <strong>{{ item.ratio }}</strong>
+            <span>{{ item.label }}</span>
+          </div>
+        }
+      </div>
+    </article>
+
+    <aside class="surface-card overdue-sidebar" data-ubax-motion="surface">
+      <h2>Loyer en retard</h2>
+
+      <div class="overdue-sidebar__divider"></div>
+
+      <div class="overdue-sidebar__list">
+        @for (item of overdueItems; track item.amount + item.avatar) {
+          <article class="overdue-sidebar__row">
+            <img
+              class="overdue-sidebar__avatar"
+              [src]="item.avatar"
+              [alt]="item.name"
+            />
+
+            <div class="overdue-sidebar__copy">
+              <strong>{{ item.name }}</strong>
+              <span>{{ item.property }}</span>
+            </div>
+
+            <span class="overdue-sidebar__amount">{{ item.amount }}</span>
+          </article>
+        }
+      </div>
+
+      <a class="overdue-sidebar__more" routerLink="/finances/loyers-retard"
+        >Voir plus</a
+      >
+    </aside>
+
+    <section
+      class="surface-card transactions-preview"
+      data-ubax-motion="surface"
+    >
+      <div class="transactions-preview__header">
+        <h2>Historique des transactions</h2>
+
+        <div class="transactions-preview__actions">
+          <button class="transactions-preview__filter" type="button">
+            <span>Tout type</span>
+            <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
+          </button>
+
+          <label class="transactions-preview__search">
+            <img [src]="assets.tableSearchIcon" alt="" aria-hidden="true" />
+            <input type="text" placeholder="Rechercher" />
+          </label>
+
+          <button class="transactions-preview__add" type="button">
+            <img [src]="assets.addIcon" alt="" aria-hidden="true" />
+            <span>Nouvelle transaction</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="transactions-table transactions-table--compact">
+        <div class="transactions-table__head">
+          <span>Date</span>
+          <span>Ref</span>
+          <span>Type</span>
+          <span>Bien</span>
+          <span>Locataire</span>
+          <span>Montant</span>
+          <span>Statut</span>
+          <span>Action</span>
+        </div>
+
+        <div class="transactions-table__body">
+          @for (
+            transaction of transactions;
+            track transaction.date + transaction.reference + $index
+          ) {
+            <div class="transactions-table__row">
+              <span>{{ transaction.date }}</span>
+              <span>{{ transaction.reference }}</span>
+              <span>
+                <span
+                  class="table-pill"
+                  [class.table-pill--expense]="transaction.type === 'depense'"
+                >
+                  {{ transaction.type === 'loyer' ? 'Loyer' : 'Dépense' }}
+                </span>
+              </span>
+              <span>{{ transaction.property }}</span>
+              <span>{{ transaction.tenant }}</span>
+              <span>{{ transaction.amount }}</span>
+              <span>
+                <span
+                  class="status-pill"
+                  [class.status-pill--pending]="
+                    transaction.status === 'en-attente'
+                  "
+                >
+                  <span class="status-pill__dot"></span>
+                  {{ transaction.status === 'payee' ? 'Payé' : 'En attente' }}
+                </span>
+              </span>
+              <span class="transactions-table__actions">
+                <button type="button" aria-label="Modifier la transaction">
+                  <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
+                </button>
+                <button type="button" aria-label="Plus d’actions">
+                  <img [src]="assets.actionMore" alt="" aria-hidden="true" />
+                </button>
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <a class="transactions-preview__more" routerLink="/finances/transactions"
+        >Voir plus</a
+      >
+    </section>
+  </div>
+</section>

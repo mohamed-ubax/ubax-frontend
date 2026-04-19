@@ -46,7 +46,7 @@ function provideMockUserInDev() {
               prenom: 'Jean-Marc',
               email: 'jm.kouassi@ubax.io',
               avatar: 'header/header-user-avatar.webp',
-              role: Role.COMMERCIAL,
+              role: Role.COMPTABLE,
             });
           }
         };

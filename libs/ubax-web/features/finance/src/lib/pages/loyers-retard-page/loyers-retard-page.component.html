@@ -1,0 +1,83 @@
+<section class="loyers-retard-page" data-ubax-motion="page">
+  <header class="loyers-retard-page__header">
+    <h1>Loyer en retard</h1>
+
+    <div class="loyers-retard-page__toolbar">
+      <button
+        class="toolbar-chip toolbar-chip--action toolbar-chip--export"
+        type="button"
+      >
+        <span>Exporter les données</span>
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.exportIcon" alt="" aria-hidden="true" />
+        </span>
+      </button>
+
+      <button class="toolbar-chip toolbar-chip--action" type="button">
+        <span>Sélectionner une date</span>
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.calendarIcon" alt="" aria-hidden="true" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <section class="surface-card overdue-panel" data-ubax-motion="surface">
+    <div class="overdue-panel__controls">
+      <div class="overdue-panel__period">
+        <span>Période</span>
+        <button type="button">
+          <img [src]="assets.calendarIcon" alt="" aria-hidden="true" />
+          <strong>Avril 2025</strong>
+          <img [src]="assets.overdueDropdown" alt="" aria-hidden="true" />
+        </button>
+      </div>
+
+      <label class="overdue-panel__search">
+        <input type="text" placeholder="Recherche ..." />
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
+        </span>
+      </label>
+    </div>
+
+    <div class="overdue-panel__table">
+      <div class="overdue-panel__head">
+        <span>Locataire</span>
+        <span>Bien</span>
+        <span>Montant</span>
+        <span>Date limite</span>
+        <span>Jour de retard</span>
+        <span>Pénalité</span>
+        <span>Action</span>
+      </div>
+
+      <div class="overdue-panel__body">
+        @for (row of rows; track row.id) {
+          <div class="overdue-panel__row">
+            <span>{{ row.tenant }}</span>
+            <span>{{ row.property }}</span>
+            <span class="overdue-panel__amount">{{ row.amount }}</span>
+            <span>{{ row.dueDate }}</span>
+            <span>{{ row.delay }}</span>
+            <span class="overdue-panel__penalty">{{ row.penalty }}</span>
+            <span class="overdue-panel__actions">
+              <button type="button">Relancer</button>
+              <a
+                [routerLink]="['/finances/locataires', row.id]"
+                aria-label="Voir le profil locataire"
+              >
+                <img [src]="assets.overdueRowEye" alt="" aria-hidden="true" />
+                <img [src]="assets.overdueRowMore" alt="" aria-hidden="true" />
+              </a>
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <footer class="overdue-panel__pagination">
+      <ubax-paginator [(currentPage)]="currentPage" [totalPages]="totalPages" />
+    </footer>
+  </section>
+</section>

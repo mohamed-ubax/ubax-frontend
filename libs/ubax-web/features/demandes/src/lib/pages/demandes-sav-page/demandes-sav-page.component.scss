@@ -1,0 +1,637 @@
+:host {
+  display: block;
+}
+
+.demandes-sav {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 407px);
+    gap: 22px;
+    align-items: start;
+  }
+
+  &__main,
+  &__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 23px;
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  flex: 1 1 780px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.toolbar-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 67px;
+  min-width: 240px;
+  padding: 8px 9px 8px 26px;
+  border: none;
+  border-radius: 34px;
+  background: var(--ubax-surface);
+  box-shadow: var(--ubax-shadow-card-soft);
+  cursor: pointer;
+
+  &--search {
+    flex: 1 1 295px;
+    max-width: 295px;
+  }
+
+  &--export {
+    flex: 1 1 278px;
+    max-width: 278px;
+  }
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+    text-align: left;
+  }
+
+  &--search &__label {
+    font-weight: 300;
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--ubax-page-bg);
+    flex-shrink: 0;
+
+    img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.stat-card {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  min-height: 139px;
+  padding: 26px 28px;
+  border-bottom: 5px solid var(--card-accent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--card-accent) 16%, white 84%);
+  box-shadow: var(--ubax-shadow-card-soft);
+
+  &__orb {
+    --card-orb: var(--ubax-blue-soft);
+
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--card-orb);
+
+    img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+  }
+
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  &__label,
+  &__value {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+  }
+
+  &__label {
+    font-weight: 300;
+  }
+
+  &__value {
+    font-weight: 500;
+  }
+}
+
+.tickets-card,
+.issues-card,
+.notifications-card {
+  border-radius: 20px;
+  background: var(--ubax-surface);
+  box-shadow: var(--ubax-shadow-card-soft);
+}
+
+.tickets-card {
+  padding: 19px 19px 18px;
+
+  &__filters {
+    display: grid;
+    grid-template-columns: minmax(0, 221px) minmax(0, 204px) minmax(
+        0,
+        283px
+      ) minmax(0, 179px) 142px;
+    gap: 18px;
+    align-items: center;
+  }
+
+  &__subheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 27px 0 24px;
+    padding-top: 23px;
+    border-top: 1px solid var(--ubax-divider-soft);
+
+    h2 {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--ubax-navy);
+    }
+  }
+
+  &__search {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: 190px;
+    height: 47px;
+    padding: 0 14px 0 16px;
+    border: 1px solid var(--ubax-border-card);
+    border-radius: 5px;
+    background: var(--ubax-page-bg);
+    cursor: pointer;
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 1.2;
+      color: var(--ubax-text-primary);
+    }
+
+    img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+  }
+}
+
+.filter-chip,
+.filter-submit {
+  height: 56px;
+  border-radius: 5px;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 16px 0 24px;
+  border: 1px solid var(--ubax-border-card);
+  background: var(--ubax-page-bg);
+  cursor: pointer;
+
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+  }
+
+  &--wide {
+    padding-right: 12px;
+  }
+
+  &--date img {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+.filter-submit {
+  border: none;
+  background: var(--ubax-accent);
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ubax-surface);
+  cursor: pointer;
+}
+
+.ticket-table {
+  overflow: hidden;
+
+  &__scroll {
+    overflow-x: auto;
+  }
+
+  &__head,
+  &__body,
+  .ticket-row {
+    min-width: 1123px;
+  }
+
+  &__head {
+    display: grid;
+    grid-template-columns: 130px 165px 230px 150px 110px 120px 103px 79px;
+    align-items: center;
+    gap: 10px;
+    min-height: 50px;
+    padding: 0 16px;
+    border-radius: 5px;
+    background: var(--ubax-page-bg);
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--ubax-navy);
+    }
+  }
+}
+
+.ticket-row {
+  display: grid;
+  grid-template-columns: 130px 165px 230px 150px 110px 120px 103px 79px;
+  align-items: center;
+  gap: 10px;
+  min-height: 61px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ubax-ring-neutral);
+
+  span,
+  button {
+    min-width: 0;
+  }
+
+  &__id {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ubax-navy);
+  }
+
+  &__client {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    img {
+      width: 31px;
+      height: 31px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--ubax-navy);
+    }
+  }
+
+  > span:not(.ticket-row__id):not(.ticket-row__priority):not(
+      .ticket-row__status
+    ) {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+  }
+
+  &__priority {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--ubax-navy);
+
+    &--urgent {
+      color: var(--ubax-danger);
+    }
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 79px;
+    height: 35px;
+    border-radius: 5px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.2;
+
+    &--success {
+      color: var(--ubax-success);
+      background: var(--ubax-success-soft);
+    }
+
+    &--progress {
+      color: var(--ubax-accent);
+      background: color-mix(in srgb, var(--ubax-accent) 12%, white 88%);
+    }
+  }
+
+  &__action {
+    width: 79px;
+    height: 36px;
+    border: none;
+    border-radius: 5px;
+    background: var(--ubax-accent);
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--ubax-surface);
+    cursor: pointer;
+  }
+}
+
+.issues-card {
+  padding: 18px 10px 14px;
+
+  &__title {
+    margin: 0 12px 15px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--ubax-navy);
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+.issue-item {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 9px 8px;
+  border-radius: 5px;
+  background: var(--ubax-page-bg);
+
+  &__image {
+    width: 80px;
+    height: 75px;
+    border-radius: 5px;
+    object-fit: cover;
+  }
+
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+
+    h3,
+    p {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ubax-danger);
+    }
+
+    p {
+      font-size: 10px;
+      font-weight: 300;
+      color: var(--ubax-text-primary);
+    }
+  }
+
+  &__client {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+  }
+}
+
+.notifications-card {
+  overflow: hidden;
+
+  &__header {
+    padding: 22px 19px 18px;
+    border-bottom: 1px solid var(--ubax-divider-soft);
+
+    h2 {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--ubax-navy);
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px 15px 24px 12px;
+  }
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--ubax-peach-soft);
+    flex-shrink: 0;
+
+    img {
+      width: 12px;
+      height: 12px;
+      object-fit: contain;
+    }
+  }
+
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+
+    h3,
+    p,
+    span {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ubax-navy);
+    }
+
+    p {
+      font-size: 10px;
+      font-weight: 300;
+      color: var(--ubax-text-muted);
+    }
+
+    span {
+      font-size: 10px;
+      font-weight: 400;
+      color: #000;
+    }
+  }
+}
+
+@media (max-width: 1680px) {
+  .demandes-sav {
+    &__layout {
+      grid-template-columns: 1fr;
+    }
+
+    &__sidebar {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+@media (max-width: 1320px) {
+  .stats-grid,
+  .demandes-sav__sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .tickets-card__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .demandes-sav {
+    gap: 20px;
+
+    &__title {
+      font-size: 30px;
+    }
+  }
+
+  .toolbar-actions,
+  .stats-grid,
+  .tickets-card__filters,
+  .demandes-sav__sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-actions {
+    display: grid;
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .toolbar-pill,
+  .toolbar-pill--search,
+  .toolbar-pill--export {
+    max-width: none;
+  }
+
+  .tickets-card__subheader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .tickets-card,
+  .issues-card,
+  .notifications-card {
+    padding-inline: 14px;
+  }
+
+  .ticket-table__head,
+  .ticket-row {
+    min-width: 1040px;
+  }
+}

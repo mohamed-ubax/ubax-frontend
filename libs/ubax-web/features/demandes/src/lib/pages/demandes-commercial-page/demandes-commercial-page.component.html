@@ -1,0 +1,184 @@
+<div class="demandes-commercial" data-ubax-motion="page">
+  <section class="demandes-commercial__summary" data-ubax-motion="surface">
+    <div class="demandes-commercial__title-wrap">
+      <h1 class="demandes-commercial__title">Demande clientèle</h1>
+    </div>
+
+    <div class="demandes-commercial__stats">
+      @for (metric of metricCards; track metric.label) {
+        <article class="summary-card" [style.--summary-accent]="metric.accent">
+          <div class="summary-card__copy">
+            <p class="summary-card__label">{{ metric.label }}</p>
+            <p class="summary-card__value">{{ metric.value }}</p>
+          </div>
+
+          <span
+            class="summary-card__icon"
+            [style.--summary-icon-bg]="metric.iconBackground"
+          >
+            <img [src]="metric.icon" alt="" />
+          </span>
+        </article>
+      }
+    </div>
+
+    <aside class="calendar-shell">
+      <div class="calendar-card">
+        <div class="calendar-card__header">
+          <h2>Avril 2026</h2>
+
+          <div class="calendar-card__actions" aria-hidden="true">
+            <img [src]="calendarIcons.previous" alt="" />
+            <img [src]="calendarIcons.next" alt="" />
+          </div>
+        </div>
+
+        <div class="calendar-card__grid calendar-card__grid--weekdays">
+          @for (day of calendarWeekdays; track day) {
+            <span>{{ day }}</span>
+          }
+        </div>
+
+        @for (week of calendarWeeks; track $index) {
+          <div class="calendar-card__grid">
+            @for (day of week; track day.label) {
+              <span
+                class="calendar-card__day"
+                [class.calendar-card__day--active]="day.isActive"
+                [class.calendar-card__day--muted]="day.isMuted"
+              >
+                {{ day.label }}
+              </span>
+            }
+          </div>
+        }
+      </div>
+    </aside>
+  </section>
+
+  <section class="demandes-commercial__board" data-ubax-motion="surface">
+    <article class="board-card board-card--requests">
+      <header class="board-card__header">
+        <h2>Liste des demandes</h2>
+      </header>
+
+      <div class="requests-table">
+        <div class="requests-table__head">
+          <span>Client</span>
+          <span>Bien</span>
+          <span>Type</span>
+          <span>Message</span>
+          <span>Date</span>
+          <span></span>
+        </div>
+
+        <div class="requests-table__body">
+          @for (request of requestRows; track request.id) {
+            <div class="request-row">
+              <span>{{ request.client }}</span>
+              <span>{{ request.property }}</span>
+              <span>{{ request.requestType }}</span>
+              <span>{{ request.summary }}</span>
+              <span>{{ request.date }}</span>
+
+              <button
+                type="button"
+                class="request-row__action"
+                [attr.aria-label]="'Voir les détails de ' + request.client"
+                (click)="openRequest(request.detail)"
+              >
+                <img [src]="requestActionIcon" alt="" />
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </article>
+
+    <article class="board-card board-card--visits">
+      <header class="board-card__header">
+        <h2>Demande de visite</h2>
+      </header>
+
+      <div class="visit-grid">
+        @for (visit of visitCards; track visit.id) {
+          <article class="visit-card">
+            <div class="visit-card__header">
+              <img
+                class="visit-card__avatar"
+                [src]="visit.avatar"
+                [alt]="visit.client"
+              />
+
+              <div>
+                <p class="visit-card__name">{{ visit.client }}</p>
+                <p class="visit-card__phone">{{ visit.phone }}</p>
+              </div>
+            </div>
+
+            <div class="visit-card__meta">
+              <div class="visit-card__meta-item">
+                <img [src]="visitMetaIcons.home" alt="" />
+                <span>{{ visit.location }}</span>
+              </div>
+
+              <div class="visit-card__meta-item">
+                <img [src]="visitMetaIcons.clock" alt="" />
+                <span>{{ visit.schedule }}</span>
+              </div>
+            </div>
+
+            <div class="visit-card__actions">
+              <button
+                type="button"
+                class="visit-card__button visit-card__button--cancel"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                class="visit-card__button visit-card__button--confirm"
+              >
+                Confirmer
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    </article>
+
+    <article class="board-card board-card--notifications">
+      <header class="board-card__header board-card__header--stacked">
+        <h2>Notification</h2>
+      </header>
+
+      <div class="notification-list">
+        @for (item of notifications; track item.title + item.time) {
+          <article class="notification-item">
+            <span class="notification-item__icon" aria-hidden="true">
+              <img
+                class="notification-item__icon-bell"
+                [src]="notificationBellIcon"
+                alt=""
+              />
+            </span>
+
+            <div class="notification-item__copy">
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.message }}</p>
+              <span>{{ item.time }}</span>
+            </div>
+          </article>
+        }
+      </div>
+    </article>
+  </section>
+
+  @if (selectedRequest(); as request) {
+    <ubax-demande-detail-panel
+      [request]="request"
+      [closeIconSrc]="overlayCloseIcon"
+      (close)="closeRequest()"
+    />
+  }
+</div>

@@ -1,0 +1,217 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+}
+
+.demande-detail-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: rgb(0 0 0 / 50%);
+
+  &__dialog {
+    position: relative;
+    width: min(970px, calc(100vw - 48px));
+    min-height: 457px;
+    padding: 24px 40px 40px 20px;
+    border-radius: 20px;
+    background: var(--ubax-surface);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 16%);
+  }
+
+  &__close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: grid;
+    place-items: center;
+    width: 31px;
+    height: 31px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--ubax-page-bg);
+    cursor: pointer;
+
+    img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+  }
+
+  &__title {
+    margin: 0 0 28px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.1573;
+    color: var(--ubax-navy);
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 323px;
+    gap: 54px;
+    align-items: start;
+  }
+
+  &__meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 48px;
+    row-gap: 16px;
+    margin: 0;
+  }
+
+  &__meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+
+    dt {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--ubax-text-primary);
+      flex-shrink: 0;
+    }
+
+    dd {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.2;
+      color: var(--ubax-text-primary);
+    }
+  }
+
+  &__message-block {
+    margin-top: 22px;
+
+    h3 {
+      margin: 0 0 10px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--ubax-text-primary);
+    }
+  }
+
+  &__message-copy {
+    max-width: 352px;
+
+    p {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.35;
+      color: var(--ubax-text-primary);
+    }
+  }
+
+  &__reply {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 2px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--ubax-text-primary);
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      border-radius: 10px;
+      background: var(--ubax-page-bg);
+      font-family: 'Lexend', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--ubax-text-primary);
+      resize: none;
+    }
+
+    input {
+      height: 41px;
+      padding: 0 14px;
+    }
+
+    textarea {
+      min-height: 98px;
+      padding: 14px;
+      line-height: 1.35;
+    }
+
+    &--textarea {
+      margin-top: 2px;
+    }
+  }
+
+  &__submit {
+    width: 323px;
+    height: 48px;
+    margin-top: 4px;
+    border: none;
+    border-radius: 10px;
+    background: var(--ubax-navy);
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ubax-surface);
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 980px) {
+  .demande-detail-panel {
+    align-items: flex-start;
+    overflow-y: auto;
+
+    &__dialog {
+      width: min(970px, calc(100vw - 32px));
+      margin: 24px 0;
+      padding: 20px 20px 24px;
+    }
+
+    &__content {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    &__meta-grid {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+    }
+
+    &__message-copy {
+      max-width: none;
+    }
+
+    &__submit {
+      width: 100%;
+    }
+  }
+}

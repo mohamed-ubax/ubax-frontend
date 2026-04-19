@@ -42,6 +42,10 @@ body.ubax-date-picker-open ubax-topbar {
   z-index: 0;
 }
 
+body.ubax-demande-overlay-open ubax-topbar {
+  z-index: 0;
+}
+
 ::view-transition-old(ubax-route-stage),
 ::view-transition-new(ubax-route-stage) {
   animation-duration: 680ms;

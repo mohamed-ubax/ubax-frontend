@@ -1,0 +1,133 @@
+<div class="demandes-comptable" data-ubax-motion="page">
+  <header class="demandes-comptable__hero">
+    <h1 class="demandes-comptable__title">Demandes clientèles</h1>
+
+    <div class="toolbar-actions" data-ubax-motion="surface">
+      @for (field of toolbarFields; track field.label) {
+        <button
+          type="button"
+          class="toolbar-pill"
+          [class.toolbar-pill--search]="field.kind === 'search'"
+          [class.toolbar-pill--export]="field.kind === 'export'"
+        >
+          <span class="toolbar-pill__label">{{ field.label }}</span>
+          <span class="toolbar-pill__icon" aria-hidden="true">
+            <img [src]="field.icon" alt="" />
+          </span>
+        </button>
+      }
+    </div>
+  </header>
+
+  <section class="demandes-comptable__summary" data-ubax-motion="surface">
+    <div class="stats-grid">
+      @for (metric of metrics; track metric.label) {
+        <article class="stat-card" [style.--card-accent]="metric.accent">
+          <span class="stat-card__orb">
+            <img [src]="metric.icon" alt="" />
+          </span>
+
+          <div class="stat-card__copy">
+            <p class="stat-card__label">{{ metric.label }}</p>
+            <p class="stat-card__value">{{ metric.value }}</p>
+          </div>
+        </article>
+      }
+    </div>
+
+    <aside class="calendar-card">
+      <div class="calendar-card__header">
+        <h2>Avril 2026</h2>
+
+        <div class="calendar-card__actions" aria-hidden="true">
+          <img [src]="icons.calendarPrev" alt="" />
+          <img [src]="icons.calendarNext" alt="" />
+        </div>
+      </div>
+
+      <div class="calendar-card__grid calendar-card__grid--weekdays">
+        @for (day of calendarWeekdays; track day) {
+          <span>{{ day }}</span>
+        }
+      </div>
+
+      @for (week of calendarWeeks; track $index) {
+        <div class="calendar-card__grid">
+          @for (day of week; track day.label) {
+            <span
+              class="calendar-card__day"
+              [class.calendar-card__day--active]="day.isActive"
+              [class.calendar-card__day--muted]="day.isMuted"
+            >
+              {{ day.label }}
+            </span>
+          }
+        </div>
+      }
+    </aside>
+  </section>
+
+  <div class="demandes-comptable__layout">
+    <article class="requests-card" data-ubax-motion="surface">
+      <div class="requests-card__head">
+        <span>Ref</span>
+        <span>Client</span>
+        <span>Bien</span>
+        <span>Type de demande</span>
+        <span>Montant</span>
+        <span>Statut</span>
+        <span>Date</span>
+        <span>Action</span>
+      </div>
+
+      <div class="requests-card__body">
+        @for (row of requestRows; track row.ref + row.requestType) {
+          <div class="request-row">
+            <span class="request-row__ref">{{ row.ref }}</span>
+
+            <span class="request-row__client">{{ row.client }}</span>
+
+            <div class="request-row__property">
+              <img [src]="row.image" alt="" />
+              <span>{{ row.property }}</span>
+            </div>
+
+            <span class="request-row__type">{{ row.requestType }}</span>
+            <span class="request-row__amount">{{ row.amount }}</span>
+            <span class="request-row__status">{{ row.status }}</span>
+            <span class="request-row__date">{{ row.date }}</span>
+
+            <button type="button" class="request-row__action">
+              <span>Voir</span>
+              <img [src]="icons.eye" alt="" />
+            </button>
+          </div>
+        }
+      </div>
+    </article>
+
+    <aside class="demandes-comptable__sidebar">
+      <article class="notifications-card" data-ubax-motion="surface">
+        <header class="notifications-card__header">
+          <h2>Notification</h2>
+        </header>
+
+        <div class="notifications-card__list">
+          @for (item of notifications; track item.title + item.time) {
+            <article class="notification-item">
+              <span class="notification-item__icon" aria-hidden="true">
+                <img [src]="icons.notification" alt="" />
+              </span>
+
+              <div class="notification-item__copy">
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.message }}</p>
+                <span>{{ item.time }}</span>
+              </div>
+            </article>
+          }
+        </div>
+      </article>
+    </aside>
+  </div>
+</div>

@@ -1,0 +1,379 @@
+<div
+  class="archivage-page"
+  [class.archivage-page--biens]="activeTab() === 'biens'"
+  [class.archivage-page--locataires]="activeTab() === 'locataires'"
+  [class.archivage-page--factures]="activeTab() === 'factures'"
+  [class.archivage-page--tickets]="activeTab() === 'tickets'"
+  [class.archivage-page--documents]="activeTab() === 'documents'"
+>
+  <header class="archivage-page__header">
+    <h1 class="archivage-page__title">{{ activeDefinition().title }}</h1>
+
+    <div class="archivage-page__toolbar">
+      <label
+        class="archivage-utility archivage-utility--search"
+        aria-label="Recherche globale"
+      >
+        <input
+          type="search"
+          placeholder="Recherche ..."
+          [value]="headerSearch()"
+          (input)="updateHeaderSearch($event)"
+        />
+        <span class="archivage-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.search" alt="" />
+        </span>
+      </label>
+
+      <button type="button" class="archivage-utility archivage-utility--button">
+        <span>Sélectionner une date</span>
+        <span class="archivage-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.toolbarCalendar" alt="" />
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="archivage-utility archivage-utility--button archivage-utility--export"
+        (click)="exportCurrentView()"
+      >
+        <span>Exporter les données</span>
+        <span class="archivage-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.export" alt="" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="archivage-tabs" aria-label="Onglets d’archivage">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="archivage-tabs__button"
+        [class.is-active]="activeTab() === tab.id"
+        (click)="selectTab(tab.id)"
+      >
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  @if (activeDefinition().filterVariant === 'advanced') {
+    <section class="archivage-panel">
+      <h2 class="archivage-panel__title">Filtres avancés</h2>
+
+      <form
+        class="archivage-filters archivage-filters--advanced"
+        (submit)="applyFilters($event)"
+      >
+        @for (field of activeDefinition().filterFields; track field.id) {
+          @if (field.kind === 'select') {
+            <label class="archivage-field archivage-field--select">
+              <select
+                [value]="filters()[field.id]"
+                (change)="updateFilter(field.id, getSelectValue($event))"
+              >
+                <option value="">{{ field.label }}</option>
+                @for (option of field.options ?? []; track option) {
+                  <option [value]="option">{{ option }}</option>
+                }
+              </select>
+
+              <span
+                class="archivage-field__icon archivage-field__icon--chevron"
+                aria-hidden="true"
+              >
+                <img [src]="icons.chevronDown" alt="" />
+              </span>
+            </label>
+          } @else {
+            <label
+              class="archivage-field"
+              [class.archivage-field--date]="field.kind === 'date'"
+            >
+              <input
+                type="text"
+                [placeholder]="field.label"
+                [value]="filters()[field.id]"
+                (input)="updateFilter(field.id, getTextInputValue($event))"
+              />
+
+              @if (field.kind === 'date') {
+                <span class="archivage-field__icon" aria-hidden="true">
+                  <img [src]="icons.filterCalendar" alt="" />
+                </span>
+              }
+            </label>
+          }
+        }
+
+        <button type="submit" class="archivage-filters__submit">Filtrer</button>
+      </form>
+
+      <div class="archivage-table-wrap archivage-table-wrap--panel">
+        <div class="archivage-table-shell">
+          <table class="archivage-table archivage-table--documents">
+            <thead>
+              <tr class="archivage-table__header">
+                @for (column of activeDefinition().columns; track column) {
+                  <th class="archivage-table__header-cell" scope="col">
+                    {{ column }}
+                  </th>
+                }
+              </tr>
+            </thead>
+
+            <tbody class="archivage-table__body">
+              @for (row of filteredRows(); track row.id) {
+                <tr class="archivage-table__row">
+                  @for (cell of row.cells; track $index) {
+                    <td
+                      class="archivage-table__cell"
+                      [class.archivage-table__cell--avatar]="
+                        cell.kind === 'avatar'
+                      "
+                      [class.archivage-table__cell--actions]="
+                        cell.kind === 'actions'
+                      "
+                    >
+                      @switch (cell.kind) {
+                        @case ('avatar') {
+                          <div class="archivage-table__avatar-cell">
+                            <img
+                              class="archivage-table__avatar"
+                              [src]="cell.imageSrc"
+                              [alt]="cell.value"
+                            />
+                            <span>{{ cell.value }}</span>
+                          </div>
+                        }
+
+                        @case ('badge') {
+                          <span
+                            class="archivage-badge"
+                            [class.archivage-badge--success]="
+                              cell.tone === 'success'
+                            "
+                            [class.archivage-badge--warning]="
+                              cell.tone === 'warning'
+                            "
+                            [class.archivage-badge--danger]="
+                              cell.tone === 'danger'
+                            "
+                          >
+                            {{ cell.label }}
+                          </span>
+                        }
+
+                        @case ('actions') {
+                          <div class="archivage-table__actions">
+                            <button
+                              type="button"
+                              class="archivage-table__action archivage-table__action--primary"
+                            >
+                              {{ cell.primaryLabel }}
+                            </button>
+                            <button
+                              type="button"
+                              class="archivage-table__action archivage-table__action--secondary"
+                            >
+                              {{ cell.secondaryLabel }}
+                            </button>
+                          </div>
+                        }
+
+                        @default {
+                          <span
+                            [class.archivage-table__text--emphasis]="
+                              cell.emphasis ?? false
+                            "
+                            >{{ cell.value }}</span
+                          >
+                        }
+                      }
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr>
+                  <td
+                    class="archivage-table__empty"
+                    [attr.colspan]="activeDefinition().columns.length"
+                  >
+                    Aucune ligne ne correspond aux filtres en cours.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div
+            class="archivage-table__pagination archivage-table__pagination--panel"
+          >
+            <ubax-paginator
+              [currentPage]="currentPage()"
+              (currentPageChange)="currentPage.set($event)"
+              [totalPages]="5"
+              [previousIconSrc]="icons.paginatorPrevious"
+              [nextIconSrc]="icons.paginatorNext"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <form class="archivage-filters" (submit)="applyFilters($event)">
+      @for (field of activeDefinition().filterFields; track field.id) {
+        @if (field.kind === 'select') {
+          <label class="archivage-field archivage-field--select">
+            <select
+              [value]="filters()[field.id]"
+              (change)="updateFilter(field.id, getSelectValue($event))"
+            >
+              <option value="">{{ field.label }}</option>
+              @for (option of field.options ?? []; track option) {
+                <option [value]="option">{{ option }}</option>
+              }
+            </select>
+
+            <span
+              class="archivage-field__icon archivage-field__icon--chevron"
+              aria-hidden="true"
+            >
+              <img [src]="icons.chevronDown" alt="" />
+            </span>
+          </label>
+        } @else {
+          <label
+            class="archivage-field"
+            [class.archivage-field--date]="field.kind === 'date'"
+          >
+            <input
+              type="text"
+              [placeholder]="field.label"
+              [value]="filters()[field.id]"
+              (input)="updateFilter(field.id, getTextInputValue($event))"
+            />
+
+            @if (field.kind === 'date') {
+              <span class="archivage-field__icon" aria-hidden="true">
+                <img [src]="icons.filterCalendar" alt="" />
+              </span>
+            }
+          </label>
+        }
+      }
+
+      <button type="submit" class="archivage-filters__submit">Filtrer</button>
+    </form>
+
+    <section class="archivage-table-wrap">
+      <div class="archivage-table-shell">
+        <table class="archivage-table">
+          <thead>
+            <tr class="archivage-table__header">
+              @for (column of activeDefinition().columns; track column) {
+                <th class="archivage-table__header-cell" scope="col">
+                  {{ column }}
+                </th>
+              }
+            </tr>
+          </thead>
+
+          <tbody class="archivage-table__body">
+            @for (row of filteredRows(); track row.id) {
+              <tr class="archivage-table__row">
+                @for (cell of row.cells; track $index) {
+                  <td
+                    class="archivage-table__cell"
+                    [class.archivage-table__cell--avatar]="
+                      cell.kind === 'avatar'
+                    "
+                    [class.archivage-table__cell--actions]="
+                      cell.kind === 'actions'
+                    "
+                  >
+                    @switch (cell.kind) {
+                      @case ('avatar') {
+                        <div class="archivage-table__avatar-cell">
+                          <img
+                            class="archivage-table__avatar"
+                            [src]="cell.imageSrc"
+                            [alt]="cell.value"
+                          />
+                          <span>{{ cell.value }}</span>
+                        </div>
+                      }
+
+                      @case ('badge') {
+                        <span
+                          class="archivage-badge"
+                          [class.archivage-badge--success]="
+                            cell.tone === 'success'
+                          "
+                          [class.archivage-badge--warning]="
+                            cell.tone === 'warning'
+                          "
+                          [class.archivage-badge--danger]="
+                            cell.tone === 'danger'
+                          "
+                        >
+                          {{ cell.label }}
+                        </span>
+                      }
+
+                      @case ('actions') {
+                        <div class="archivage-table__actions">
+                          <button
+                            type="button"
+                            class="archivage-table__action archivage-table__action--primary"
+                          >
+                            {{ cell.primaryLabel }}
+                          </button>
+                          <button
+                            type="button"
+                            class="archivage-table__action archivage-table__action--secondary"
+                          >
+                            {{ cell.secondaryLabel }}
+                          </button>
+                        </div>
+                      }
+
+                      @default {
+                        <span
+                          [class.archivage-table__text--emphasis]="
+                            cell.emphasis ?? false
+                          "
+                          >{{ cell.value }}</span
+                        >
+                      }
+                    }
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td
+                  class="archivage-table__empty"
+                  [attr.colspan]="activeDefinition().columns.length"
+                >
+                  Aucune ligne ne correspond aux filtres en cours.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="archivage-table__pagination">
+          <ubax-paginator
+            [currentPage]="currentPage()"
+            (currentPageChange)="currentPage.set($event)"
+            [totalPages]="5"
+            [previousIconSrc]="icons.paginatorPrevious"
+            [nextIconSrc]="icons.paginatorNext"
+          />
+        </div>
+      </div>
+    </section>
+  }
+</div>

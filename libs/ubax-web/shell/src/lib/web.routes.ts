@@ -86,7 +86,7 @@ export const webRoutes: Route[] = [
             (m) => m.archivageRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMPTABLE] },
+        data: { roles: [Role.DG, Role.COMMERCIAL, Role.COMPTABLE] },
       },
 
       // ── Hotel ───────────────────────────────────────────────────────────────

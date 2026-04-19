@@ -1,0 +1,81 @@
+<div class="demande-detail-panel" (click)="onBackdropClick($event)">
+  <section
+    class="demande-detail-panel__dialog"
+    (click)="$event.stopPropagation()"
+  >
+    <button
+      type="button"
+      class="demande-detail-panel__close"
+      aria-label="Fermer le détail de la demande"
+      (click)="closePanel()"
+    >
+      <img [src]="closeIconSrc()" alt="" />
+    </button>
+
+    <h2 class="demande-detail-panel__title">{{ title() }}</h2>
+
+    <div class="demande-detail-panel__content">
+      <div class="demande-detail-panel__meta">
+        <dl class="demande-detail-panel__meta-grid">
+          <div class="demande-detail-panel__meta-item">
+            <dt>Prénom :</dt>
+            <dd>{{ request().firstName }}</dd>
+          </div>
+
+          <div class="demande-detail-panel__meta-item">
+            <dt>Bien :</dt>
+            <dd>{{ request().property }}</dd>
+          </div>
+
+          <div class="demande-detail-panel__meta-item">
+            <dt>Nom :</dt>
+            <dd>{{ request().lastName }}</dd>
+          </div>
+
+          <div class="demande-detail-panel__meta-item">
+            <dt>Type :</dt>
+            <dd>{{ request().requestType }}</dd>
+          </div>
+
+          <div class="demande-detail-panel__meta-item">
+            <dt>Téléphone :</dt>
+            <dd>{{ request().phone }}</dd>
+          </div>
+
+          <div class="demande-detail-panel__meta-item">
+            <dt>Date :</dt>
+            <dd>{{ request().date }}</dd>
+          </div>
+        </dl>
+
+        <div class="demande-detail-panel__message-block">
+          <h3>Message :</h3>
+
+          <div class="demande-detail-panel__message-copy">
+            @for (line of request().requestMessage; track line) {
+              <p>{{ line }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="demande-detail-panel__reply">
+        <label class="demande-detail-panel__field">
+          <span>Titre</span>
+          <input type="text" [value]="request().replyTitle" />
+        </label>
+
+        <label
+          class="demande-detail-panel__field demande-detail-panel__field--textarea"
+        >
+          <span>Message</span>
+          <textarea rows="4">{{ request().replyMessage }}</textarea>
+        </label>
+
+        <button type="button" class="demande-detail-panel__submit">
+          Envoyer le message
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
