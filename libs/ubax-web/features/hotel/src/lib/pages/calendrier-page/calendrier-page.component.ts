@@ -5,6 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 
 interface CalReservation {
   id: string;
@@ -14,6 +15,18 @@ interface CalReservation {
   dateRange: string;
   start: Date;
   end: Date;
+  image: string;
+  color: 'green' | 'blue' | 'orange';
+}
+
+interface CalReservationTemplate {
+  id: string;
+  guest: string;
+  property: string;
+  amount: string;
+  startDay: number;
+  durationDays: number;
+  image: string;
   color: 'green' | 'blue' | 'orange';
 }
 
@@ -41,7 +54,7 @@ interface WeekWithEvents {
 @Component({
   selector: 'ubax-calendrier-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, UbaxMorphTabsDirective],
   templateUrl: './calendrier-page.component.html',
   styleUrl: './calendrier-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,8 +62,14 @@ interface WeekWithEvents {
 export class CalendrierPageComponent {
   activeView = signal<'Jour' | 'Semaine' | 'Mois' | 'Année'>('Mois');
 
-  private readonly weekBaseHeight = 156;
+  private readonly weekBaseHeight = 147.196;
   private readonly weekRowOffset = 82;
+  private readonly multiDayEventInset = 44;
+  private readonly multiDayEventWidthOffset = 88;
+  private readonly singleDayEventInset = 18;
+  private readonly singleDayEventWidthOffset = 36;
+  private readonly maxMultiDayEventWidth = 381.45;
+  private readonly maxSingleDayEventWidth = 192;
 
   private readonly today = new Date();
   currentDate = signal(
@@ -72,7 +91,15 @@ export class CalendrierPageComponent {
     'Décembre',
   ];
 
-  readonly dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  readonly dayNames = [
+    'Dimanche',
+    'Lundi',
+    'Mardi',
+    'Mercredi',
+    'Jeudi',
+    'Vendredi',
+    'Samedi',
+  ];
 
   readonly views: Array<'Jour' | 'Semaine' | 'Mois' | 'Année'> = [
     'Jour',
@@ -86,25 +113,25 @@ export class CalendrierPageComponent {
     return `${this.monthNames[d.getMonth()]} ${d.getFullYear()}`;
   });
 
-  private readonly reservations: CalReservation[] = [
+  private readonly reservationTemplates: CalReservationTemplate[] = [
     {
       id: '1',
       guest: 'Konan Olivier',
-      property: 'résidence Plateau',
+      property: 'Appartement meublé',
       amount: '150 000 FCFA',
-      dateRange: '06 - 08 avr.',
-      start: new Date(2026, 3, 6),
-      end: new Date(2026, 3, 8),
-      color: 'green',
+      startDay: 2,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-04.webp',
+      color: 'orange',
     },
     {
       id: '2',
       guest: 'Konan Olivier',
       property: 'résidence Plateau',
       amount: '150 000 FCFA',
-      dateRange: '20 - 22 avr.',
-      start: new Date(2026, 3, 20),
-      end: new Date(2026, 3, 22),
+      startDay: 6,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-02.webp',
       color: 'green',
     },
     {
@@ -112,9 +139,9 @@ export class CalendrierPageComponent {
       guest: 'Konan Olivier',
       property: 'Villa Riviera',
       amount: '150 000 FCFA',
-      dateRange: '09 - 11 avr.',
-      start: new Date(2026, 3, 9),
-      end: new Date(2026, 3, 11),
+      startDay: 9,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-03.webp',
       color: 'blue',
     },
     {
@@ -122,9 +149,9 @@ export class CalendrierPageComponent {
       guest: 'Konan Olivier',
       property: 'Villa Riviera',
       amount: '150 000 FCFA',
-      dateRange: '14 - 16 avr.',
-      start: new Date(2026, 3, 14),
-      end: new Date(2026, 3, 16),
+      startDay: 12,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-01.webp',
       color: 'blue',
     },
     {
@@ -132,52 +159,78 @@ export class CalendrierPageComponent {
       guest: 'Konan Olivier',
       property: 'Villa Riviera',
       amount: '150 000 FCFA',
-      dateRange: '23 - 25 avr.',
-      start: new Date(2026, 3, 23),
-      end: new Date(2026, 3, 25),
-      color: 'blue',
+      startDay: 15,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-04.webp',
+      color: 'orange',
     },
     {
       id: '6',
       guest: 'Konan Olivier',
-      property: 'Villa Riviera',
+      property: 'résidence Plateau',
       amount: '150 000 FCFA',
-      dateRange: '28 - 30 avr.',
-      start: new Date(2026, 3, 28),
-      end: new Date(2026, 3, 30),
-      color: 'blue',
+      startDay: 20,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-05.webp',
+      color: 'green',
     },
     {
       id: '7',
       guest: 'Konan Olivier',
-      property: 'Appartement meublé',
+      property: 'Villa Riviera',
       amount: '150 000 FCFA',
-      dateRange: '02 - 04 avr.',
-      start: new Date(2026, 3, 2),
-      end: new Date(2026, 3, 4),
-      color: 'orange',
+      startDay: 23,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-02.webp',
+      color: 'blue',
     },
     {
       id: '8',
       guest: 'Konan Olivier',
-      property: 'Appartement meublé',
+      property: 'Villa Riviera',
       amount: '150 000 FCFA',
-      dateRange: '17 - 19 avr.',
-      start: new Date(2026, 3, 17),
-      end: new Date(2026, 3, 19),
+      startDay: 26,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-04.webp',
       color: 'orange',
     },
     {
       id: '9',
       guest: 'Konan Olivier',
-      property: 'Appartement meublé',
+      property: 'Villa Riviera',
       amount: '150 000 FCFA',
-      dateRange: '26 - 28 avr.',
-      start: new Date(2026, 3, 26),
-      end: new Date(2026, 3, 28),
-      color: 'orange',
+      startDay: 29,
+      durationDays: 2,
+      image: '/hotel-dashboard/reservations/guest-01.webp',
+      color: 'blue',
     },
   ];
+
+  readonly reservations = computed((): CalReservation[] => {
+    const currentMonth = this.currentDate();
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    return this.reservationTemplates.map((template) => {
+      const { startDay, durationDays, ...reservation } = template;
+      const maxStartDay = Math.max(1, daysInMonth - durationDays + 1);
+      const resolvedStartDay = Math.min(startDay, maxStartDay);
+      const resolvedEndDay = Math.min(
+        daysInMonth,
+        resolvedStartDay + durationDays - 1,
+      );
+      const start = new Date(year, month, resolvedStartDay);
+      const end = new Date(year, month, resolvedEndDay);
+
+      return {
+        ...reservation,
+        start,
+        end,
+        dateRange: this.formatDateRange(start, end),
+      };
+    });
+  });
 
   private normalize(d: Date): Date {
     const n = new Date(d);
@@ -239,7 +292,7 @@ export class CalendrierPageComponent {
       const wStart = this.normalize(week[0].date);
       const wEnd = this.normalize(week[6].date);
 
-      const events = this.reservations
+      const events = this.reservations()
         .filter(
           (r) =>
             this.normalize(r.start) <= wEnd && this.normalize(r.end) >= wStart,
@@ -328,5 +381,54 @@ export class CalendrierPageComponent {
     this.currentDate.set(
       new Date(this.today.getFullYear(), this.today.getMonth(), 1),
     );
+  }
+
+  getWeekClasses(week: WeekWithEvents, isLast: boolean): string {
+    const classes = [
+      'cal-week',
+      `cal-week--rows-${Math.min(week.rowCount, 4)}`,
+    ];
+
+    if (isLast) {
+      classes.push('cal-week--last');
+    }
+
+    return classes.join(' ');
+  }
+
+  getEventClasses(event: CalendarWeekEvent): string {
+    const classes = [
+      'cal-event',
+      `cal-event--${event.color}`,
+      `cal-event--start-${event.startCol}`,
+      `cal-event--span-${Math.min(event.spanDays, 7)}`,
+      `cal-event--row-${Math.min(event.row, 3)}`,
+    ];
+
+    if (event.spanDays === 1) {
+      classes.push('cal-event--compact', 'cal-event--mini');
+    }
+
+    return classes.join(' ');
+  }
+
+  private formatDateRange(start: Date, end: Date): string {
+    const startDay = String(start.getDate()).padStart(2, '0');
+    const endDay = String(end.getDate()).padStart(2, '0');
+    const sameMonth =
+      start.getMonth() === end.getMonth() &&
+      start.getFullYear() === end.getFullYear();
+
+    if (sameMonth) {
+      return `${startDay} - ${endDay} ${this.monthNames[start.getMonth()].toLowerCase()} ${start.getFullYear()}`;
+    }
+
+    const formatter = new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    return `${formatter.format(start)} - ${formatter.format(end)}`;
   }
 }

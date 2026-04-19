@@ -1,5 +1,4 @@
 <div class="dashboard">
-
   <!-- ── Page header ────────────────────────────────────────────── -->
   <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
@@ -8,9 +7,18 @@
         <i class="pi pi-search"></i>
         <input type="text" placeholder="Recherche ..." />
       </div>
-      <button class="search-field search-field--btn" (click)="datePickerOpen.set(true)">
+      <button
+        class="search-field search-field--btn"
+        (click)="datePickerOpen.set(true)"
+      >
         <i class="pi pi-calendar"></i>
-        <span>{{ selectedRange() ? (selectedRange()!.start | date:'dd/MM/yy') + ' – ' + (selectedRange()!.end | date:'dd/MM/yy') : 'Sélectionner une date' }}</span>
+        <span>{{
+          selectedRange()
+            ? (selectedRange()!.start | date: 'dd/MM/yy') +
+              ' – ' +
+              (selectedRange()!.end | date: 'dd/MM/yy')
+            : 'Sélectionner une date'
+        }}</span>
       </button>
       <button class="export-btn">
         <i class="pi pi-upload"></i>
@@ -20,15 +28,18 @@
   </div>
 
   @if (!showFullList()) {
-
     <!-- ── Hero + KPI wrapper card ──────────────────────────────── -->
     <div class="hero-kpi-card">
-
       <!-- Hero banner -->
       <div class="hero-banner">
         <div class="hero-content">
-          <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
-          <p>Consultez rapidement les indicateurs clés de votre agence et gérez vos biens en toute simplicité.</p>
+          <h2>
+            Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !
+          </h2>
+          <p>
+            Consultez rapidement les indicateurs clés de votre agence et gérez
+            vos biens en toute simplicité.
+          </p>
         </div>
         <button class="hero-cta" [routerLink]="['/biens']">
           Ajouter un bien
@@ -57,12 +68,10 @@
           </div>
         }
       </div>
-
     </div>
 
     <!-- ── Charts row ────────────────────────────────────────────── -->
     <div class="charts-row">
-
       <!-- Donut chart -->
       <div class="card donut-card">
         <div class="card-header">
@@ -70,11 +79,18 @@
             <p class="card-pretitle">Biens en</p>
             <h3 class="card-title">Location courte durée</h3>
           </div>
-          <button class="filter-pill">Ce mois ci <i class="pi pi-chevron-down"></i></button>
+          <button class="filter-pill">
+            Ce mois ci <i class="pi pi-chevron-down"></i>
+          </button>
         </div>
 
         <div class="donut-chart-wrapper">
-          <p-chart type="doughnut" [data]="donutData" [options]="donutOptions" height="220px" />
+          <ubax-lazy-chart
+            type="doughnut"
+            [data]="donutData"
+            [options]="donutOptions"
+            height="220px"
+          ></ubax-lazy-chart>
           <div class="donut-center">
             <span class="donut-center__count">29</span>
             <span class="donut-center__label">Biens</span>
@@ -99,18 +115,23 @@
             <p class="card-pretitle">Finance</p>
             <h3 class="card-title">Flux de revenus</h3>
           </div>
-          <button class="outline-btn" [routerLink]="['/finances']">Voir plus</button>
+          <button class="outline-btn" [routerLink]="['/finances']">
+            Voir plus
+          </button>
         </div>
         <div class="bar-chart-wrapper">
-          <p-chart type="bar" [data]="revenueData" [options]="revenueOptions" height="340px" />
+          <ubax-lazy-chart
+            type="bar"
+            [data]="revenueData"
+            [options]="revenueOptions"
+            height="340px"
+          ></ubax-lazy-chart>
         </div>
       </div>
-
     </div>
 
     <!-- ── Bottom row ────────────────────────────────────────────── -->
     <div class="bottom-row">
-
       <!-- Properties table -->
       <div class="card table-card">
         <div class="table-header">
@@ -124,7 +145,9 @@
               <i class="pi pi-calendar"></i>
               <input type="text" placeholder="Filtrer par date" />
             </div>
-            <button class="see-all-btn" (click)="toggleFullList()">Voir tout</button>
+            <button class="see-all-btn" (click)="toggleFullList()">
+              Voir tout
+            </button>
           </div>
         </div>
 
@@ -152,11 +175,15 @@
                   <td>{{ p.prix }}</td>
                   <td>{{ p.locataire }}</td>
                   <td>
-                    <span class="status-badge status-badge--actif">{{ p.statut }}</span>
+                    <span class="status-badge status-badge--actif">{{
+                      p.statut
+                    }}</span>
                   </td>
                   <td class="cell-actions">
                     <button class="action-btn action-btn--voir">Voir</button>
-                    <button class="action-btn action-btn--modifier">Modifier</button>
+                    <button class="action-btn action-btn--modifier">
+                      Modifier
+                    </button>
                   </td>
                 </tr>
               }
@@ -169,7 +196,9 @@
       <div class="card transactions-card">
         <div class="card-header">
           <h3 class="card-title">Derniers transactions</h3>
-          <button class="outline-btn" [routerLink]="['/finances']">Voir plus</button>
+          <button class="outline-btn" [routerLink]="['/finances']">
+            Voir plus
+          </button>
         </div>
 
         <div class="transactions-list">
@@ -196,17 +225,19 @@
           }
         </div>
       </div>
-
     </div>
-
   } @else {
-
     <!-- ── Hero + KPI (toujours visible) ─────────────────────────── -->
     <div class="hero-kpi-card">
       <div class="hero-banner">
         <div class="hero-content">
-          <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
-          <p>Consultez rapidement les indicateurs clés de votre agence et gérez vos biens en toute simplicité.</p>
+          <h2>
+            Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !
+          </h2>
+          <p>
+            Consultez rapidement les indicateurs clés de votre agence et gérez
+            vos biens en toute simplicité.
+          </p>
         </div>
         <button class="hero-cta" [routerLink]="['/biens']">
           Ajouter un bien
@@ -248,7 +279,10 @@
             <i class="pi pi-calendar"></i>
             <input type="text" placeholder="Filtrer par date" />
           </div>
-          <button class="see-all-btn see-all-btn--back" (click)="toggleFullList()">
+          <button
+            class="see-all-btn see-all-btn--back"
+            (click)="toggleFullList()"
+          >
             <i class="pi pi-arrow-left"></i>
             Réduire
           </button>
@@ -279,11 +313,15 @@
                 <td>{{ p.prix }}</td>
                 <td>{{ p.locataire }}</td>
                 <td>
-                  <span class="status-badge status-badge--actif">{{ p.statut }}</span>
+                  <span class="status-badge status-badge--actif">{{
+                    p.statut
+                  }}</span>
                 </td>
                 <td class="cell-actions">
                   <button class="action-btn action-btn--voir">Voir</button>
-                  <button class="action-btn action-btn--modifier">Modifier</button>
+                  <button class="action-btn action-btn--modifier">
+                    Modifier
+                  </button>
                 </td>
               </tr>
             }
@@ -299,9 +337,7 @@
         [totalPages]="totalPages()"
       />
     </div>
-
   }
-
 </div>
 
 <!-- ── Date range picker (fixed overlay) ─────────────────────────── -->

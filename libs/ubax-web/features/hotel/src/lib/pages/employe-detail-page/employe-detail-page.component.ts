@@ -60,7 +60,7 @@ export class EmployeDetailPageComponent {
   readonly employe = {
     nom: 'Youssouf Traoré',
     role: 'Responsable Sécurité',
-    avatarSrc: '/employes/images/employe-youssouf-traore.png',
+    avatarSrc: '/employes/images/employe-youssouf-traore.webp',
     telephone: '+225 07 00 00 01',
     email: 'keanurepes@mail.com',
     contrat: 'Contrat : CDD',

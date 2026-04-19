@@ -2,13 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import {
+  UbaxMorphTabsDirective,
+  UbaxPaginatorComponent,
+} from '@ubax-workspace/shared-ui';
 
 type RoomStatus = 'Disponible' | 'Réservé';
 type RoomViewMode = 'grid' | 'list';
+type FilterDropdownKey = 'type' | 'status';
 
 interface SummaryCard {
   readonly label: string;
@@ -32,6 +37,12 @@ interface RoomCard {
   readonly avatar: string;
 }
 
+interface FilterOption {
+  readonly label: string;
+  readonly value: string;
+  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';
+}
+
 const baseRooms: Omit<RoomCard, 'id'>[] = [
   {
     title: 'Chambre Queen A-2345',
@@ -43,8 +54,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-01.png',
-    avatar: 'rooms/avatars/owner-01.png',
+    image: 'shared/rooms/room-photo-01.webp',
+    avatar: 'rooms/avatars/owner-01.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -56,8 +67,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-02.png',
-    avatar: 'rooms/avatars/owner-02.png',
+    image: 'rooms/images/room-02.webp',
+    avatar: 'rooms/avatars/owner-02.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -69,8 +80,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-03.png',
-    avatar: 'rooms/avatars/owner-03.png',
+    image: 'shared/rooms/room-photo-02.webp',
+    avatar: 'rooms/avatars/owner-03.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -82,8 +93,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-04.png',
-    avatar: 'rooms/avatars/owner-04.png',
+    image: 'rooms/images/room-04.webp',
+    avatar: 'rooms/avatars/owner-04.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -95,8 +106,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-05.png',
-    avatar: 'rooms/avatars/owner-05.png',
+    image: 'shared/rooms/room-photo-03.webp',
+    avatar: 'rooms/avatars/owner-05.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -108,8 +119,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-06.png',
-    avatar: 'rooms/avatars/owner-06.png',
+    image: 'rooms/images/room-06.webp',
+    avatar: 'rooms/avatars/owner-06.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -121,8 +132,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-07.png',
-    avatar: 'rooms/avatars/owner-07.png',
+    image: 'rooms/images/room-07.webp',
+    avatar: 'rooms/avatars/owner-07.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -134,8 +145,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-08.png',
-    avatar: 'rooms/avatars/owner-08.png',
+    image: 'rooms/images/room-08.webp',
+    avatar: 'rooms/avatars/owner-08.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -147,8 +158,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-09.png',
-    avatar: 'rooms/avatars/owner-01.png',
+    image: 'shared/rooms/deluxe-room-photo-01.webp',
+    avatar: 'rooms/avatars/owner-01.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -160,8 +171,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-10.png',
-    avatar: 'rooms/avatars/owner-02.png',
+    image: 'rooms/images/room-10.webp',
+    avatar: 'rooms/avatars/owner-02.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -173,8 +184,8 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-11.png',
-    avatar: 'rooms/avatars/owner-03.png',
+    image: 'shared/rooms/room-photo-05.webp',
+    avatar: 'rooms/avatars/owner-03.webp',
   },
   {
     title: 'Chambre Queen A-2345',
@@ -186,15 +197,15 @@ const baseRooms: Omit<RoomCard, 'id'>[] = [
     rating: '4.1',
     priceValue: '65 000',
     priceUnit: 'FCFA/nuit',
-    image: 'rooms/images/room-12.png',
-    avatar: 'rooms/avatars/owner-04.png',
+    image: 'rooms/images/room-12.webp',
+    avatar: 'rooms/avatars/owner-04.webp',
   },
 ];
 
 @Component({
   selector: 'ubax-espaces-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxPaginatorComponent],
+  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent],
   templateUrl: './espaces-list-page.component.html',
   styleUrls: ['./espaces-list-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -205,19 +216,28 @@ export class EspacesListPageComponent {
   readonly activePage = signal(1);
   readonly selectedType = signal('all');
   readonly selectedStatus = signal('all');
+  readonly openDropdown = signal<FilterDropdownKey | null>(null);
   readonly viewMode = signal<RoomViewMode>('grid');
   readonly stars = Array.from({ length: 4 });
 
-  readonly typeOptions = [
-    { label: 'Type d’espace', value: 'all' },
-    { label: 'Chambre', value: 'Chambre' },
+  readonly typeOptions: FilterOption[] = [
+    { label: 'Type d’espace', value: 'all', tone: 'neutral' },
+    { label: 'Chambre', value: 'Chambre', tone: 'accent' },
   ];
 
-  readonly statusOptions = [
-    { label: 'Statut', value: 'all' },
-    { label: 'Disponible', value: 'Disponible' },
-    { label: 'Réservé', value: 'Réservé' },
+  readonly statusOptions: FilterOption[] = [
+    { label: 'Statut', value: 'all', tone: 'neutral' },
+    { label: 'Disponible', value: 'Disponible', tone: 'success' },
+    { label: 'Réservé', value: 'Réservé', tone: 'warning' },
   ];
+
+  readonly selectedTypeLabel = computed(() =>
+    this.getOptionLabel(this.typeOptions, this.selectedType()),
+  );
+
+  readonly selectedStatusLabel = computed(() =>
+    this.getOptionLabel(this.statusOptions, this.selectedStatus()),
+  );
 
   readonly summaryCards: SummaryCard[] = [
     {
@@ -295,7 +315,46 @@ export class EspacesListPageComponent {
     this.activePage.set(1);
   }
 
+  toggleDropdown(dropdown: FilterDropdownKey): void {
+    this.openDropdown.update((current) =>
+      current === dropdown ? null : dropdown,
+    );
+  }
+
+  selectTypeOption(value: string): void {
+    this.updateType(value);
+    this.openDropdown.set(null);
+  }
+
+  selectStatusOption(value: string): void {
+    this.updateStatus(value);
+    this.openDropdown.set(null);
+  }
+
   setViewMode(viewMode: RoomViewMode): void {
     this.viewMode.set(viewMode);
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent): void {
+    const target = event.target;
+
+    if (target instanceof HTMLElement && target.closest('.filter-dropdown')) {
+      return;
+    }
+
+    this.openDropdown.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscapeKey(): void {
+    this.openDropdown.set(null);
+  }
+
+  private getOptionLabel(options: FilterOption[], value: string): string {
+    return (
+      options.find((option) => option.value === value)?.label ??
+      options[0].label
+    );
   }
 }

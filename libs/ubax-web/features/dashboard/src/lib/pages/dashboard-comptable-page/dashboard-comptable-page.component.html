@@ -1,5 +1,4 @@
 <div class="dashboard">
-
   <!-- ── Page header ──────────────────────────────────────────────── -->
   <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
@@ -8,9 +7,18 @@
         <i class="pi pi-search"></i>
         <input type="text" placeholder="Recherche ..." />
       </div>
-      <button class="search-field search-field--btn" (click)="datePickerOpen.set(true)">
+      <button
+        class="search-field search-field--btn"
+        (click)="datePickerOpen.set(true)"
+      >
         <i class="pi pi-calendar"></i>
-        <span>{{ selectedRange() ? (selectedRange()!.start | date:'dd/MM/yy') + ' – ' + (selectedRange()!.end | date:'dd/MM/yy') : 'Sélectionner une date' }}</span>
+        <span>{{
+          selectedRange()
+            ? (selectedRange()!.start | date: 'dd/MM/yy') +
+              ' – ' +
+              (selectedRange()!.end | date: 'dd/MM/yy')
+            : 'Sélectionner une date'
+        }}</span>
       </button>
       <button class="export-btn">
         <i class="pi pi-upload"></i>
@@ -21,14 +29,17 @@
 
   <!-- ── Hero + KPI wrapper card ──────────────────────────────────── -->
   <div class="hero-kpi-card">
-
     <!-- Hero banner -->
     <div class="hero-banner">
-
       <!-- Left — greeting + description -->
       <div class="hero-text">
-        <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
-        <p>Consultez rapidement les indicateurs clés de votre agence et suivez l'essentiel de votre activité en temps réel.</p>
+        <h2>
+          Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !
+        </h2>
+        <p>
+          Consultez rapidement les indicateurs clés de votre agence et suivez
+          l'essentiel de votre activité en temps réel.
+        </p>
       </div>
 
       <!-- Center — CTA -->
@@ -48,12 +59,21 @@
           } @else {
             <span class="balance-dots">●●●●●●●●●</span>
           }
-          <button class="balance-eye" (click)="toggleBalance()" [attr.aria-label]="balanceVisible() ? 'Masquer le solde' : 'Afficher le solde'">
-            <i class="pi" [class.pi-eye-slash]="balanceVisible()" [class.pi-eye]="!balanceVisible()"></i>
+          <button
+            class="balance-eye"
+            (click)="toggleBalance()"
+            [attr.aria-label]="
+              balanceVisible() ? 'Masquer le solde' : 'Afficher le solde'
+            "
+          >
+            <i
+              class="pi"
+              [class.pi-eye-slash]="balanceVisible()"
+              [class.pi-eye]="!balanceVisible()"
+            ></i>
           </button>
         </div>
       </div>
-
     </div>
 
     <!-- KPI cards -->
@@ -70,12 +90,10 @@
         </div>
       }
     </div>
-
   </div>
 
   <!-- ── Charts row ────────────────────────────────────────────────── -->
   <div class="charts-row">
-
     <!-- Evolution des revenus — line chart -->
     <div class="card line-card">
       <div class="card-header">
@@ -84,14 +102,24 @@
           <h3 class="card-title">Evolution des revenus</h3>
         </div>
         <div class="period-toggle">
-          @for (p of ['Jour','Mois','Année']; track p) {
-            <button class="period-btn" [class.is-active]="revenueChartPeriod() === p"
-                    (click)="revenueChartPeriod.set($any(p))">{{ p }}</button>
+          @for (p of ['Jour', 'Mois', 'Année']; track p) {
+            <button
+              class="period-btn"
+              [class.is-active]="revenueChartPeriod() === p"
+              (click)="revenueChartPeriod.set($any(p))"
+            >
+              {{ p }}
+            </button>
           }
         </div>
       </div>
       <div class="line-chart-wrapper">
-        <p-chart type="line" [data]="revenueData" [options]="revenueOptions" height="260px" />
+        <ubax-lazy-chart
+          type="line"
+          [data]="revenueData"
+          [options]="revenueOptions"
+          height="260px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -103,9 +131,14 @@
           <h3 class="card-title">Répartition des revenus</h3>
         </div>
         <div class="period-toggle">
-          @for (p of ['Jour','Mois','Année']; track p) {
-            <button class="period-btn" [class.is-active]="distChartPeriod() === p"
-                    (click)="distChartPeriod.set($any(p))">{{ p }}</button>
+          @for (p of ['Jour', 'Mois', 'Année']; track p) {
+            <button
+              class="period-btn"
+              [class.is-active]="distChartPeriod() === p"
+              (click)="distChartPeriod.set($any(p))"
+            >
+              {{ p }}
+            </button>
           }
         </div>
       </div>
@@ -118,22 +151,26 @@
           <div class="dist-legend-item">
             <span class="legend-dot" [style.background]="item.color"></span>
             <span class="legend-label">{{ item.label }}</span>
-            <span class="legend-pct" [style.color]="item.color">{{ item.pct }}</span>
+            <span class="legend-pct" [style.color]="item.color">{{
+              item.pct
+            }}</span>
           </div>
         }
       </div>
 
       <!-- Chart fills remaining height -->
       <div class="dist-chart-wrapper">
-        <p-chart type="doughnut" [data]="distData" [options]="distOptions" />
+        <ubax-lazy-chart
+          type="doughnut"
+          [data]="distData"
+          [options]="distOptions"
+        ></ubax-lazy-chart>
       </div>
     </div>
-
   </div>
 
   <!-- ── Bottom row — 3 columns ────────────────────────────────────── -->
   <div class="bottom-row">
-
     <!-- Dernières transactions -->
     <div class="card tx-card">
       <div class="card-header">
@@ -171,17 +208,24 @@
       <div class="expenses-list">
         @for (exp of monthExpenses; track exp.label; let last = $last) {
           <div class="expense-item">
-            <i class="pi {{ exp.icon }} expense-icon" [style.color]="exp.color"></i>
+            <i
+              class="pi {{ exp.icon }} expense-icon"
+              [style.color]="exp.color"
+            ></i>
             <span class="expense-label">{{ exp.label }}</span>
             <span class="expense-amount">{{ exp.amount }}</span>
           </div>
-          @if (!last) { <div class="expense-sep"></div> }
+          @if (!last) {
+            <div class="expense-sep"></div>
+          }
         }
         <div class="expense-sep"></div>
         <div class="expense-item expense-item--total">
-          <i class="pi pi-calculator expense-icon" style="color:#1a3047"></i>
+          <i class="pi pi-calculator expense-icon" style="color: #1a3047"></i>
           <span class="expense-label expense-label--total">Total</span>
-          <span class="expense-amount expense-amount--total">1 800 000 FCFA</span>
+          <span class="expense-amount expense-amount--total"
+            >1 800 000 FCFA</span
+          >
         </div>
       </div>
     </div>
@@ -211,9 +255,7 @@
         }
       </div>
     </div>
-
   </div>
-
 </div>
 
 <!-- ── Date range picker ──────────────────────────────────────────── -->
@@ -224,11 +266,17 @@
 
 <!-- ── Add expense modal ─────────────────────────────────────────── -->
 @if (addExpenseOpen()) {
+  <div
+    class="ae-overlay"
+    [class.is-closing]="addExpenseClosing()"
+    (click)="closeAddExpense()"
+  ></div>
 
-  <div class="ae-overlay" [class.is-closing]="addExpenseClosing()" (click)="closeAddExpense()"></div>
-
-  <div class="ae-modal" [class.is-closing]="addExpenseClosing()" (click)="stopPropagation($event)">
-
+  <div
+    class="ae-modal"
+    [class.is-closing]="addExpenseClosing()"
+    (click)="stopPropagation($event)"
+  >
     <!-- Modal header -->
     <div class="ae-header">
       <h2 class="ae-title">Ajouter une dépense</h2>
@@ -239,7 +287,6 @@
 
     <!-- Modal body — 3 columns -->
     <div class="ae-body">
-
       <!-- Column 1 — Informations Générales -->
       <div class="ae-col">
         <h4 class="ae-col-title">Informations Générales</h4>
@@ -247,7 +294,10 @@
         <div class="ae-field">
           <label class="ae-label">Catégorie de dépense</label>
           <div class="ae-select">
-            <select [value]="expenseCategory()" (change)="expenseCategory.set($any($event.target).value)">
+            <select
+              [value]="expenseCategory()"
+              (change)="expenseCategory.set($any($event.target).value)"
+            >
               @for (cat of expenseCategories; track cat) {
                 <option [value]="cat">{{ cat }}</option>
               }
@@ -259,16 +309,23 @@
         <div class="ae-field">
           <label class="ae-label">Montant</label>
           <div class="ae-input-wrap">
-            <input class="ae-input" type="text" placeholder="0 FCFA"
-                   [value]="expenseAmount()"
-                   (input)="expenseAmount.set($any($event.target).value)" />
+            <input
+              class="ae-input"
+              type="text"
+              placeholder="0 FCFA"
+              [value]="expenseAmount()"
+              (input)="expenseAmount.set($any($event.target).value)"
+            />
           </div>
         </div>
 
         <div class="ae-field">
           <label class="ae-label">Méthode de paiement</label>
           <div class="ae-select">
-            <select [value]="expenseMethod()" (change)="expenseMethod.set($any($event.target).value)">
+            <select
+              [value]="expenseMethod()"
+              (change)="expenseMethod.set($any($event.target).value)"
+            >
               @for (m of paymentMethods; track m) {
                 <option [value]="m">{{ m }}</option>
               }
@@ -280,9 +337,12 @@
         <div class="ae-field">
           <label class="ae-label">Date</label>
           <div class="ae-input-wrap ae-input-wrap--icon">
-            <input class="ae-input" type="date"
-                   [value]="expenseDate()"
-                   (input)="expenseDate.set($any($event.target).value)" />
+            <input
+              class="ae-input"
+              type="date"
+              [value]="expenseDate()"
+              (input)="expenseDate.set($any($event.target).value)"
+            />
             <i class="pi pi-calendar ae-input-icon"></i>
           </div>
         </div>
@@ -297,18 +357,32 @@
         <div class="ae-field">
           <label class="ae-label">Type de liaison</label>
           <div class="ae-radio-group">
-            <label class="ae-radio" [class.is-checked]="expenseLiaison() === 'bien'">
+            <label
+              class="ae-radio"
+              [class.is-checked]="expenseLiaison() === 'bien'"
+            >
               <span class="ae-radio__dot"></span>
-              <input type="radio" name="liaison" value="bien"
-                     [checked]="expenseLiaison() === 'bien'"
-                     (change)="expenseLiaison.set('bien')" />
+              <input
+                type="radio"
+                name="liaison"
+                value="bien"
+                [checked]="expenseLiaison() === 'bien'"
+                (change)="expenseLiaison.set('bien')"
+              />
               Dépense liée à un bien
             </label>
-            <label class="ae-radio" [class.is-checked]="expenseLiaison() === 'general'">
+            <label
+              class="ae-radio"
+              [class.is-checked]="expenseLiaison() === 'general'"
+            >
               <span class="ae-radio__dot"></span>
-              <input type="radio" name="liaison" value="general"
-                     [checked]="expenseLiaison() === 'general'"
-                     (change)="expenseLiaison.set('general')" />
+              <input
+                type="radio"
+                name="liaison"
+                value="general"
+                [checked]="expenseLiaison() === 'general'"
+                (change)="expenseLiaison.set('general')"
+              />
               Dépense Générale agence
             </label>
           </div>
@@ -318,18 +392,26 @@
           <div class="ae-field">
             <label class="ae-label">Sélectionner le bien</label>
             <div class="ae-input-wrap">
-              <input class="ae-input" type="text" placeholder="UBX-XXX — Nom du bien"
-                     [value]="expenseBien()"
-                     (input)="expenseBien.set($any($event.target).value)" />
+              <input
+                class="ae-input"
+                type="text"
+                placeholder="UBX-XXX — Nom du bien"
+                [value]="expenseBien()"
+                (input)="expenseBien.set($any($event.target).value)"
+              />
             </div>
           </div>
 
           <div class="ae-field">
             <label class="ae-label">Propriétaire</label>
             <div class="ae-input-wrap">
-              <input class="ae-input" type="text" placeholder="Nom du propriétaire"
-                     [value]="expenseOwner()"
-                     (input)="expenseOwner.set($any($event.target).value)" />
+              <input
+                class="ae-input"
+                type="text"
+                placeholder="Nom du propriétaire"
+                [value]="expenseOwner()"
+                (input)="expenseOwner.set($any($event.target).value)"
+              />
             </div>
           </div>
         }
@@ -344,18 +426,26 @@
         <div class="ae-field">
           <label class="ae-label">Prestataire</label>
           <div class="ae-input-wrap">
-            <input class="ae-input" type="text" placeholder="Nom du prestataire"
-                   [value]="expenseProvider()"
-                   (input)="expenseProvider.set($any($event.target).value)" />
+            <input
+              class="ae-input"
+              type="text"
+              placeholder="Nom du prestataire"
+              [value]="expenseProvider()"
+              (input)="expenseProvider.set($any($event.target).value)"
+            />
           </div>
         </div>
 
         <div class="ae-field">
           <label class="ae-label">Référence Facture</label>
           <div class="ae-input-wrap">
-            <input class="ae-input" type="text" placeholder="UBX-FAC-XXXX"
-                   [value]="expenseRef()"
-                   (input)="expenseRef.set($any($event.target).value)" />
+            <input
+              class="ae-input"
+              type="text"
+              placeholder="UBX-FAC-XXXX"
+              [value]="expenseRef()"
+              (input)="expenseRef.set($any($event.target).value)"
+            />
           </div>
         </div>
 
@@ -369,7 +459,11 @@
                 <span class="ae-file-name">{{ expenseFile()!.name }}</span>
                 <span class="ae-file-size">{{ expenseFile()!.size }}</span>
               </div>
-              <button class="ae-file-remove" (click)="removeFile()" aria-label="Supprimer">
+              <button
+                class="ae-file-remove"
+                (click)="removeFile()"
+                aria-label="Supprimer"
+              >
                 <i class="pi pi-times"></i>
               </button>
             </div>
@@ -381,15 +475,16 @@
           }
         </div>
       </div>
-
     </div>
 
     <!-- Modal footer -->
     <div class="ae-footer">
-      <button class="ae-btn ae-btn--cancel" (click)="closeAddExpense()">Annuler</button>
-      <button class="ae-btn ae-btn--save" (click)="saveExpense()">Enregistrer la dépense</button>
+      <button class="ae-btn ae-btn--cancel" (click)="closeAddExpense()">
+        Annuler
+      </button>
+      <button class="ae-btn ae-btn--save" (click)="saveExpense()">
+        Enregistrer la dépense
+      </button>
     </div>
-
   </div>
-
 }

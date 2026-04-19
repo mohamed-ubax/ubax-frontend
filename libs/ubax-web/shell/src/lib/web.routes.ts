@@ -2,12 +2,14 @@ import { Route } from '@angular/router';
 import { Role } from '@ubax-workspace/ubax-web-data-access';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
-import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
 export const webRoutes: Route[] = [
   {
     path: '',
-    component: MainLayoutComponent,
+    loadComponent: () =>
+      import('./layout/main-layout/main-layout.component').then(
+        (m) => m.MainLayoutComponent,
+      ),
     canActivate: [authGuard],
     children: [
       // Redirection racine selon rôle (gérée dans DashboardRoutes)
@@ -21,14 +23,18 @@ export const webRoutes: Route[] = [
       {
         path: 'tableau-de-bord',
         loadChildren: () =>
-          import('@ubax-workspace/ubax-web-dashboard').then((m) => m.dashboardRoutes),
+          import('@ubax-workspace/ubax-web-dashboard').then(
+            (m) => m.dashboardRoutes,
+          ),
       },
 
       // ── Immobilier ──────────────────────────────────────────────────────────
       {
         path: 'biens',
         loadChildren: () =>
-          import('@ubax-workspace/ubax-web-immobilier').then((m) => m.immobilierRoutes),
+          import('@ubax-workspace/ubax-web-immobilier').then(
+            (m) => m.immobilierRoutes,
+          ),
         canActivate: [roleGuard],
         data: { roles: [Role.DG, Role.COMMERCIAL, Role.COMPTABLE] },
       },
@@ -37,25 +43,37 @@ export const webRoutes: Route[] = [
       {
         path: 'reservations',
         loadChildren: () =>
-          import('@ubax-workspace/ubax-web-location').then((m) => m.locationRoutes),
+          import('@ubax-workspace/ubax-web-location').then(
+            (m) => m.locationRoutes,
+          ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.HOTEL] },
+        data: {
+          preload: true,
+          roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.HOTEL],
+        },
       },
 
       // ── Demandes clients ────────────────────────────────────────────────────
       {
         path: 'demandes',
         loadChildren: () =>
-          import('@ubax-workspace/ubax-web-demandes').then((m) => m.demandesRoutes),
+          import('@ubax-workspace/ubax-web-demandes').then(
+            (m) => m.demandesRoutes,
+          ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.COMPTABLE] },
+        data: {
+          preload: true,
+          roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.COMPTABLE],
+        },
       },
 
       // ── Finance ─────────────────────────────────────────────────────────────
       {
         path: 'finances',
         loadChildren: () =>
-          import('@ubax-workspace/ubax-web-finance').then((m) => m.financeRoutes),
+          import('@ubax-workspace/ubax-web-finance').then(
+            (m) => m.financeRoutes,
+          ),
         canActivate: [roleGuard],
         data: { roles: [Role.DG, Role.COMPTABLE] },
       },
@@ -64,7 +82,9 @@ export const webRoutes: Route[] = [
       {
         path: 'archivages',
         loadChildren: () =>
-          import('@ubax-workspace/ubax-web-archivage').then((m) => m.archivageRoutes),
+          import('@ubax-workspace/ubax-web-archivage').then(
+            (m) => m.archivageRoutes,
+          ),
         canActivate: [roleGuard],
         data: { roles: [Role.DG, Role.COMPTABLE] },
       },

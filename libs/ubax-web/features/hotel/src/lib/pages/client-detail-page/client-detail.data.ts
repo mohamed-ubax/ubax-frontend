@@ -50,9 +50,9 @@ const SHARED_DOCUMENTS: readonly ClientDocument[] = [
 
 const SHARED_SUMMARY: ClientReservationSummary = {
   thumbnails: [
-    'client-detail/images/reservation-thumb-01.png',
-    'client-detail/images/reservation-thumb-02.png',
-    'client-detail/images/reservation-thumb-03.png',
+    'shared/rooms/room-photo-03.webp',
+    'shared/rooms/room-photo-02.webp',
+    'shared/rooms/room-photo-04.webp',
   ],
   charges: [
     { label: 'Nuitée chambre (2 nuitées)', amount: '90 000 FCFA' },
@@ -63,7 +63,7 @@ const SHARED_SUMMARY: ClientReservationSummary = {
   subtotal: '200 000 FCFA',
   total: '200 000 FCFA',
   paymentMethod: 'Wave',
-  paymentLogo: 'client-detail/icons/wave-logo.png',
+  paymentLogo: 'client-detail/icons/wave-logo.webp',
 };
 
 export const CLIENT_DETAILS: Record<string, ClientDetailData> = {
@@ -72,7 +72,7 @@ export const CLIENT_DETAILS: Record<string, ClientDetailData> = {
       name: 'Landry Bamba',
       phone: '+225 07 58 23 41 89',
       email: 'jm.koffi@gmail.com',
-      portrait: 'client-detail/images/client-hero.png',
+      portrait: 'shared/people/profile-01.webp',
       documents: SHARED_DOCUMENTS,
     },
     stay: {
@@ -92,7 +92,7 @@ export const CLIENT_DETAILS: Record<string, ClientDetailData> = {
       name: 'Koné Ibrahim',
       phone: '+225 05 44 11 82 33',
       email: 'kone.ibrahim@mail.com',
-      portrait: 'client-detail/images/client-hero.png',
+      portrait: 'shared/people/profile-01.webp',
       documents: SHARED_DOCUMENTS,
     },
     stay: {
@@ -122,7 +122,7 @@ export const CLIENT_DETAILS: Record<string, ClientDetailData> = {
       name: 'Soro Mireille',
       phone: '+225 01 23 44 56 78',
       email: 'mireille.soro@mail.com',
-      portrait: 'client-detail/images/client-hero.png',
+      portrait: 'shared/people/profile-01.webp',
       documents: SHARED_DOCUMENTS,
     },
     stay: {
@@ -142,7 +142,7 @@ export const CLIENT_DETAILS: Record<string, ClientDetailData> = {
       name: 'Bamba Ismael',
       phone: '+225 07 77 21 65 09',
       email: 'ismael.bamba@mail.com',
-      portrait: 'client-detail/images/client-hero.png',
+      portrait: 'shared/people/profile-01.webp',
       documents: SHARED_DOCUMENTS,
     },
     stay: {
@@ -172,7 +172,7 @@ export const CLIENT_DETAILS: Record<string, ClientDetailData> = {
       name: 'Yao Charline',
       phone: '+225 05 09 18 27 43',
       email: 'charline.yao@mail.com',
-      portrait: 'client-detail/images/client-hero.png',
+      portrait: 'shared/people/profile-01.webp',
       documents: SHARED_DOCUMENTS,
     },
     stay: {
@@ -192,7 +192,7 @@ export const CLIENT_DETAILS: Record<string, ClientDetailData> = {
       name: 'Boni Jordan',
       phone: '+225 07 11 44 92 18',
       email: 'jordan.boni@mail.com',
-      portrait: 'client-detail/images/client-hero.png',
+      portrait: 'shared/people/profile-01.webp',
       documents: SHARED_DOCUMENTS,
     },
     stay: {

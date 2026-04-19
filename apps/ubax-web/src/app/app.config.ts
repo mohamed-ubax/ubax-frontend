@@ -8,6 +8,7 @@ import {
 import {
   provideRouter,
   withComponentInputBinding,
+  withPreloading,
   withViewTransitions,
 } from '@angular/router';
 import {
@@ -17,8 +18,10 @@ import {
 } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
-import { authInterceptor, UbaxPreset } from '@ubax-workspace/ubax-web-shell';
+import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
+import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
 import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
+import { SelectivePreloadStrategy } from './selective-preload.strategy';
 
 /**
  * En dev, initialise l'utilisateur mock AVANT que le router évalue les
@@ -42,6 +45,7 @@ function provideMockUserInDev() {
               nom: 'Kouassi',
               prenom: 'Jean-Marc',
               email: 'jm.kouassi@ubax.io',
+              avatar: 'header/header-user-avatar.webp',
               role: Role.HOTEL,
             });
           }
@@ -58,6 +62,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       appRoutes,
       withComponentInputBinding(),
+      withPreloading(SelectivePreloadStrategy),
       withViewTransitions(),
     ),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),

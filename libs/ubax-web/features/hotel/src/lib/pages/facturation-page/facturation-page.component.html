@@ -1,5 +1,4 @@
 <div class="fact-page">
-
   <!-- ── Header ─────────────────────────────────────────────────────── -->
   <div class="fact-header">
     <h1 class="fact-title">Facturation</h1>
@@ -11,7 +10,6 @@
 
   <!-- ── KPI Row ────────────────────────────────────────────────── -->
   <div class="kpi-row">
-
     <div class="kpi-card">
       <div class="kpi-text">
         <p class="kpi-label">Revenus total</p>
@@ -22,7 +20,13 @@
         </div>
       </div>
       <div class="kpi-chart-mini">
-        <p-chart type="doughnut" [data]="kpiRevenusChartData" [options]="kpiChartOptions" width="81px" height="81px" />
+        <ubax-lazy-chart
+          type="doughnut"
+          [data]="kpiRevenusChartData"
+          [options]="kpiChartOptions"
+          width="81px"
+          height="81px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -36,7 +40,13 @@
         </div>
       </div>
       <div class="kpi-chart-mini">
-        <p-chart type="doughnut" [data]="kpiReservChartData" [options]="kpiChartOptions" width="81px" height="81px" />
+        <ubax-lazy-chart
+          type="doughnut"
+          [data]="kpiReservChartData"
+          [options]="kpiChartOptions"
+          width="81px"
+          height="81px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -50,7 +60,13 @@
         </div>
       </div>
       <div class="kpi-chart-mini">
-        <p-chart type="doughnut" [data]="kpiDepensesChartData" [options]="kpiChartOptions" width="81px" height="81px" />
+        <ubax-lazy-chart
+          type="doughnut"
+          [data]="kpiDepensesChartData"
+          [options]="kpiChartOptions"
+          width="81px"
+          height="81px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -61,7 +77,11 @@
           <p class="kpi-balance__value">
             {{ showBalance ? '16 850 000 FCFA' : '•••••••••••' }}
           </p>
-          <button class="kpi-balance__eye" type="button" (click)="toggleBalance()">
+          <button
+            class="kpi-balance__eye"
+            type="button"
+            (click)="toggleBalance()"
+          >
             <i [class]="showBalance ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
           </button>
         </div>
@@ -70,12 +90,10 @@
         <i class="pi pi-send"></i>
       </div>
     </div>
-
   </div>
 
   <!-- ── Content Grid : stats | nouvelles réservations ─────────── -->
   <div class="content-grid">
-
     <!-- Statistiques -->
     <div class="stats-card card">
       <div class="stats-header">
@@ -95,7 +113,9 @@
                 class="period-btn"
                 [class.period-btn--active]="activePeriod === p"
                 (click)="activePeriod = p"
-              >{{ p }}</button>
+              >
+                {{ p }}
+              </button>
             }
           </div>
         </div>
@@ -105,7 +125,12 @@
         </a>
       </div>
       <div class="stats-chart-area">
-        <p-chart type="line" [data]="statsData" [options]="statsOptions" height="315px" />
+        <ubax-lazy-chart
+          type="line"
+          [data]="statsData"
+          [options]="statsOptions"
+          height="315px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -118,7 +143,13 @@
       <div class="new-res-list">
         @for (r of newReservations; track r.id) {
           <div class="new-res-item">
-            <img class="new-res-img" [src]="r.image" [alt]="r.name" />
+            <img
+              class="new-res-img"
+              [src]="r.image"
+              [alt]="r.name"
+              loading="lazy"
+              decoding="async"
+            />
             <div class="new-res-info">
               <p class="new-res-name">{{ r.name }}</p>
               <div class="new-res-meta">
@@ -134,12 +165,10 @@
         }
       </div>
     </div>
-
   </div>
 
   <!-- ── Bottom Grid : mini chart | transactions | donut ────────── -->
   <div class="bottom-grid">
-
     <!-- Mini bar chart (Revenus) -->
     <div class="mini-card card">
       <div class="mini-card__head">
@@ -150,7 +179,12 @@
         <span class="date-range-pill">Du 01 avril 2026 au 07 avril 2026</span>
       </div>
       <div class="mini-card__chart">
-        <p-chart type="bar" [data]="miniBarData" [options]="miniBarOptions" height="200px" />
+        <ubax-lazy-chart
+          type="bar"
+          [data]="miniBarData"
+          [options]="miniBarOptions"
+          height="200px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -179,9 +213,17 @@
                 <td class="td-name">{{ t.name }}</td>
                 <td>{{ t.date }}</td>
                 <td>{{ t.method }}</td>
-                <td class="td-total" [class.td-total--neg]="t.total.startsWith('-')">{{ t.total }}</td>
+                <td
+                  class="td-total"
+                  [class.td-total--neg]="t.total.startsWith('-')"
+                >
+                  {{ t.total }}
+                </td>
                 <td>
-                  <span class="statut-badge" [class]="'statut-badge--' + t.statut">
+                  <span
+                    class="statut-badge"
+                    [class]="'statut-badge--' + t.statut"
+                  >
                     <span class="badge-dot"></span>
                     {{ t.statut === 'success' ? 'Success' : 'Failed' }}
                   </span>
@@ -201,28 +243,42 @@
       </div>
       <div class="donut-area">
         <div class="donut-wrap">
-          <p-chart type="doughnut" [data]="donutData" [options]="donutOptions" width="176px" height="176px" />
+          <ubax-lazy-chart
+            type="doughnut"
+            [data]="donutData"
+            [options]="donutOptions"
+            width="176px"
+            height="176px"
+          ></ubax-lazy-chart>
           <div class="donut-center">
             <p class="donut-center__value">2,859</p>
             <p class="donut-center__label">Total des réservations</p>
           </div>
         </div>
       </div>
-      <div class="donut-legend">
+      <div class="donut-legend" data-ubax-motion-skip>
         <div class="donut-legend__item">
           <span class="donut-bar donut-bar--orange"></span>
-          <div><p class="legend-pct">29.5%</p><p class="legend-txt">reservés</p></div>
+          <div>
+            <p class="legend-pct">29.5%</p>
+            <p class="legend-txt">reservés</p>
+          </div>
         </div>
         <div class="donut-legend__item">
           <span class="donut-bar donut-bar--red"></span>
-          <div><p class="legend-pct">8.5%</p><p class="legend-txt">Annulées</p></div>
+          <div>
+            <p class="legend-pct">8.5%</p>
+            <p class="legend-txt">Annulées</p>
+          </div>
         </div>
         <div class="donut-legend__item">
           <span class="donut-bar donut-bar--green"></span>
-          <div><p class="legend-pct">62%</p><p class="legend-txt">Terminées</p></div>
+          <div>
+            <p class="legend-pct">62%</p>
+            <p class="legend-txt">Terminées</p>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
 </div>

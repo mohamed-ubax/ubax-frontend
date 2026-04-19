@@ -1,69 +1,74 @@
 <div class="dashboard">
-
   <!-- ── Grille principale : section gauche+milieu | panneau droit ─── -->
   <div class="main-grid">
-
     <!-- ── Section principale (left + middle) ─────────────────────── -->
     <div class="main-section">
-
       <!-- KPI row ─────────────────────────────────────────────────── -->
       <div class="kpi-outer card">
-      <div class="kpi-wrapper">
-
-        <!-- Card 1 — Taux d'occupation -->
-        <div class="kpi-card kpi-card--light">
-          <div class="kpi-donut">
-            <p-chart type="doughnut" [data]="occupancyDonutData" [options]="occupancyDonutOptions" height="54px" width="54px" />
-            <span class="kpi-donut__pct">{{ occupancyRate }}%</span>
+        <div class="kpi-wrapper">
+          <!-- Card 1 — Taux d'occupation -->
+          <div class="kpi-card kpi-card--light">
+            <div class="kpi-donut">
+              <ubax-lazy-chart
+                type="doughnut"
+                [data]="occupancyDonutData"
+                [options]="occupancyDonutOptions"
+                height="54px"
+                width="54px"
+              ></ubax-lazy-chart>
+              <span class="kpi-donut__pct">{{ occupancyRate }}%</span>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Taux d'occupation</p>
+              <span class="kpi-value kpi-value--green"
+                >{{ occupancyRate }}%</span
+              >
+            </div>
           </div>
-          <div class="kpi-body">
-            <p class="kpi-label">Taux d'occupation</p>
-            <span class="kpi-value kpi-value--green">{{ occupancyRate }}%</span>
+
+          <!-- Card 2 — Arrivée -->
+          <div class="kpi-card kpi-card--purple">
+            <div class="kpi-icon-wrap kpi-icon-wrap--purple">
+              <i class="pi pi-sign-in"></i>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Arrivée aujourd'hui</p>
+              <span class="kpi-value kpi-value--purple">{{
+                arriveeCount
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Card 3 — Départ -->
+          <div class="kpi-card kpi-card--peach">
+            <div class="kpi-icon-wrap kpi-icon-wrap--orange">
+              <i class="pi pi-sign-out"></i>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Départ aujourd'hui</p>
+              <span class="kpi-value kpi-value--orange">{{ departCount }}</span>
+            </div>
+          </div>
+
+          <!-- Card 4 — Revenus -->
+          <div class="kpi-card kpi-card--blue">
+            <div class="kpi-icon-wrap kpi-icon-wrap--blue">
+              <i class="pi pi-wallet"></i>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Revenus du jour</p>
+              <span class="kpi-value kpi-value--navy kpi-value--sm">{{
+                revenusJour
+              }}</span>
+            </div>
           </div>
         </div>
-
-        <!-- Card 2 — Arrivée -->
-        <div class="kpi-card kpi-card--purple">
-          <div class="kpi-icon-wrap kpi-icon-wrap--purple">
-            <i class="pi pi-sign-in"></i>
-          </div>
-          <div class="kpi-body">
-            <p class="kpi-label">Arrivée aujourd'hui</p>
-            <span class="kpi-value kpi-value--purple">{{ arriveeCount }}</span>
-          </div>
-        </div>
-
-        <!-- Card 3 — Départ -->
-        <div class="kpi-card kpi-card--peach">
-          <div class="kpi-icon-wrap kpi-icon-wrap--orange">
-            <i class="pi pi-sign-out"></i>
-          </div>
-          <div class="kpi-body">
-            <p class="kpi-label">Départ aujourd'hui</p>
-            <span class="kpi-value kpi-value--orange">{{ departCount }}</span>
-          </div>
-        </div>
-
-        <!-- Card 4 — Revenus -->
-        <div class="kpi-card kpi-card--blue">
-          <div class="kpi-icon-wrap kpi-icon-wrap--blue">
-            <i class="pi pi-wallet"></i>
-          </div>
-          <div class="kpi-body">
-            <p class="kpi-label">Revenus du jour</p>
-            <span class="kpi-value kpi-value--navy kpi-value--sm">{{ revenusJour }}</span>
-          </div>
-        </div>
-
-      </div>
       </div>
 
       <!-- Grille contenu : left col | middle col ───────────────────── -->
       <div class="content-grid">
-
         <!-- ── Colonne gauche : graphe revenus + tableau ───────────── -->
         <div class="left-col">
-
           <!-- Bar chart — Revenus -->
           <div class="card revenue-card">
             <div class="card-header">
@@ -75,7 +80,12 @@
             </div>
             <div class="revenue-divider"></div>
             <div class="bar-chart-wrap">
-              <p-chart type="bar" [data]="revenueData" [options]="revenueOptions" height="240px" />
+              <ubax-lazy-chart
+                type="bar"
+                [data]="revenueData"
+                [options]="revenueOptions"
+                height="240px"
+              ></ubax-lazy-chart>
             </div>
           </div>
 
@@ -116,7 +126,11 @@
                       <td>{{ r.duree }}</td>
                       <td>{{ r.dates }}</td>
                       <td>
-                        <span class="badge" [class]="'badge--' + r.statut.toLowerCase()">{{ r.statut }}</span>
+                        <span
+                          class="badge"
+                          [class]="'badge--' + r.statut.toLowerCase()"
+                          >{{ r.statut }}</span
+                        >
                       </td>
                       <td>
                         <button class="voir-btn">voir</button>
@@ -131,12 +145,10 @@
               <button class="voir-plus-btn">Voir plus</button>
             </div>
           </div>
-
         </div>
 
         <!-- ── Colonne milieu : CTA + graphe résa + notifications ──── -->
         <div class="middle-col">
-
           <!-- CTA — Ajouter une réservation -->
           <div class="cta-card">
             <button class="add-res-btn">Ajouter une réservation</button>
@@ -159,11 +171,20 @@
               </span>
             </div>
             <div class="line-chart-wrap">
-              <p-chart type="line" [data]="reservationsData" [options]="reservationsOptions" height="120px" />
+              <ubax-lazy-chart
+                type="line"
+                [data]="reservationsData"
+                [options]="reservationsOptions"
+                height="120px"
+              ></ubax-lazy-chart>
             </div>
             <div class="months-row">
               @for (m of months; track m.label) {
-                <span class="month-label" [class.month-label--active]="m.active">{{ m.label }}</span>
+                <span
+                  class="month-label"
+                  [class.month-label--active]="m.active"
+                  >{{ m.label }}</span
+                >
               }
             </div>
           </div>
@@ -180,7 +201,9 @@
                     <i class="pi {{ n.icon }}"></i>
                   </div>
                   <div class="notif-body">
-                    <p class="notif-title notif-title--{{ n.type }}">{{ n.title }}</p>
+                    <p class="notif-title notif-title--{{ n.type }}">
+                      {{ n.title }}
+                    </p>
                     <span class="notif-sub">{{ n.sub }}</span>
                   </div>
                   <span class="notif-time">{{ n.time }}</span>
@@ -191,15 +214,12 @@
               }
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
 
     <!-- ── Panneau droit : calendrier + biens disponibles ───────────── -->
     <div class="right-panel">
-
       <!-- Calendrier -->
       <div class="card calendar-card">
         <p-datePicker
@@ -219,7 +239,13 @@
           @for (p of availableProperties; track p.id) {
             <div class="property-card">
               <!-- Image de fond -->
-              <img class="property-card__bg" [src]="p.image" [alt]="p.name" />
+              <img
+                class="property-card__bg"
+                [src]="p.image"
+                [alt]="p.name"
+                loading="lazy"
+                decoding="async"
+              />
               <!-- Badge type -->
               <span class="property-card__badge">{{ p.type }}</span>
               <!-- Panel glassmorphism en bas -->
@@ -238,7 +264,13 @@
                 </div>
                 <div class="glass-bottom">
                   <div class="glass-tenant">
-                    <img [src]="p.tenantAvatar" [alt]="p.tenantName" class="glass-tenant__avatar" />
+                    <img
+                      [src]="p.tenantAvatar"
+                      [alt]="p.tenantName"
+                      class="glass-tenant__avatar"
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <div class="glass-tenant__info">
                       <p class="glass-tenant__name">{{ p.tenantName }}</p>
                       <span class="glass-tenant__role">{{ p.tenantRole }}</span>
@@ -251,8 +283,6 @@
           }
         </div>
       </div>
-
     </div>
   </div>
-
 </div>
