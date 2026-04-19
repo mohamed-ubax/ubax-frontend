@@ -16,6 +16,13 @@ export const immobilierRoutes: Route[] = [
       ),
   },
   {
+    path: 'bailleurs/:id',
+    loadComponent: () =>
+      import(
+        './pages/bailleur-detail-page/bailleur-detail-page.component'
+      ).then((m) => m.BailleurDetailPageComponent),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./pages/bien-detail-page/bien-detail-page.component').then(
