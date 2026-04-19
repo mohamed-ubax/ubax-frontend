@@ -6,13 +6,19 @@ import {
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
+import { DevRoleSwitcherComponent } from '../dev-role-switcher/dev-role-switcher.component';
 import { UbaxAutoMotionDirective } from '../motion/auto-motion.directive';
 import { TopbarComponent } from '../topbar/topbar.component';
 
 @Component({
   selector: 'ubax-main-layout',
   standalone: true,
-  imports: [RouterOutlet, TopbarComponent, UbaxAutoMotionDirective],
+  imports: [
+    RouterOutlet,
+    TopbarComponent,
+    DevRoleSwitcherComponent,
+    UbaxAutoMotionDirective,
+  ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

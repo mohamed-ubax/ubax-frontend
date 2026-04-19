@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { Role } from '@ubax-workspace/ubax-web-data-access';
+import { ROUTE_ROLE_ACCESS } from '@ubax-workspace/ubax-web-data-access';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 
@@ -36,7 +36,7 @@ export const webRoutes: Route[] = [
             (m) => m.immobilierRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMMERCIAL, Role.COMPTABLE] },
+        data: { roles: ROUTE_ROLE_ACCESS.biens },
       },
 
       // ── Location / Réservations ─────────────────────────────────────────────
@@ -49,7 +49,7 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: {
           preload: true,
-          roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.HOTEL],
+          roles: ROUTE_ROLE_ACCESS.reservations,
         },
       },
 
@@ -63,7 +63,7 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: {
           preload: true,
-          roles: [Role.DG, Role.COMMERCIAL, Role.SAV, Role.COMPTABLE],
+          roles: ROUTE_ROLE_ACCESS.demandes,
         },
       },
 
@@ -75,7 +75,7 @@ export const webRoutes: Route[] = [
             (m) => m.financeRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMPTABLE] },
+        data: { roles: ROUTE_ROLE_ACCESS.finances },
       },
 
       // ── Archivage ───────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ export const webRoutes: Route[] = [
             (m) => m.archivageRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.COMMERCIAL, Role.COMPTABLE] },
+        data: { roles: ROUTE_ROLE_ACCESS.archivages },
       },
 
       // ── Hotel ───────────────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ export const webRoutes: Route[] = [
         loadChildren: () =>
           import('@ubax-workspace/ubax-web-hotel').then((m) => m.hotelRoutes),
         canActivate: [roleGuard],
-        data: { roles: [Role.DG, Role.HOTEL] },
+        data: { roles: ROUTE_ROLE_ACCESS.hotel },
       },
     ],
   },

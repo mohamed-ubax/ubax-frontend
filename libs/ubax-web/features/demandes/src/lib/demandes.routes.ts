@@ -1,6 +1,10 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Route } from '@angular/router';
-import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
+import {
+  AuthStore,
+  ROUTE_ROLE_ACCESS,
+  Role,
+} from '@ubax-workspace/ubax-web-data-access';
 
 const forRole =
   (...roles: Role[]): CanMatchFn =>
@@ -12,7 +16,7 @@ const forRole =
 export const demandesRoutes: Route[] = [
   {
     path: '',
-    canMatch: [forRole(Role.COMMERCIAL, Role.DG)],
+    canMatch: [forRole(...ROUTE_ROLE_ACCESS.demandesCommercial)],
     loadComponent: () =>
       import(
         './pages/demandes-commercial-page/demandes-commercial-page.component'
@@ -20,7 +24,7 @@ export const demandesRoutes: Route[] = [
   },
   {
     path: '',
-    canMatch: [forRole(Role.SAV)],
+    canMatch: [forRole(...ROUTE_ROLE_ACCESS.demandesSav)],
     loadComponent: () =>
       import('./pages/demandes-sav-page/demandes-sav-page.component').then(
         (m) => m.DemandesSavPageComponent,
@@ -28,7 +32,7 @@ export const demandesRoutes: Route[] = [
   },
   {
     path: '',
-    canMatch: [forRole(Role.COMPTABLE)],
+    canMatch: [forRole(...ROUTE_ROLE_ACCESS.demandesComptable)],
     loadComponent: () =>
       import(
         './pages/demandes-comptable-page/demandes-comptable-page.component'
@@ -36,7 +40,7 @@ export const demandesRoutes: Route[] = [
   },
   {
     path: 'commercial',
-    canMatch: [forRole(Role.COMMERCIAL, Role.DG)],
+    canMatch: [forRole(...ROUTE_ROLE_ACCESS.demandesCommercial)],
     loadComponent: () =>
       import(
         './pages/demandes-commercial-page/demandes-commercial-page.component'
@@ -44,7 +48,7 @@ export const demandesRoutes: Route[] = [
   },
   {
     path: 'sav',
-    canMatch: [forRole(Role.SAV, Role.DG)],
+    canMatch: [forRole(...ROUTE_ROLE_ACCESS.demandesSav)],
     loadComponent: () =>
       import('./pages/demandes-sav-page/demandes-sav-page.component').then(
         (m) => m.DemandesSavPageComponent,
@@ -52,7 +56,7 @@ export const demandesRoutes: Route[] = [
   },
   {
     path: 'comptable',
-    canMatch: [forRole(Role.COMPTABLE, Role.DG)],
+    canMatch: [forRole(...ROUTE_ROLE_ACCESS.demandesComptable)],
     loadComponent: () =>
       import(
         './pages/demandes-comptable-page/demandes-comptable-page.component'
