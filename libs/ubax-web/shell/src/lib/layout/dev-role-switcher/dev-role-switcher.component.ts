@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,7 +7,6 @@ import {
   isDevMode,
   OnInit,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import {
   AuthStore,
   DEV_ROLE_OPTIONS,
@@ -24,7 +24,7 @@ import {
 })
 export class DevRoleSwitcherComponent implements OnInit {
   readonly authStore = inject(AuthStore);
-  private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
   protected readonly enabled = isDevMode();
   protected readonly roleOptions = DEV_ROLE_OPTIONS;
   protected readonly selectedRole = computed(() => this.authStore.role());
@@ -42,7 +42,7 @@ export class DevRoleSwitcherComponent implements OnInit {
     }
 
     this.authStore.setRole(storedRole);
-    void this.router.navigateByUrl('/tableau-de-bord');
+    this.reloadDashboard();
   }
 
   protected onRoleChange(rawRole: string): void {
@@ -54,6 +54,10 @@ export class DevRoleSwitcherComponent implements OnInit {
 
     persistDevRole(nextRole);
     this.authStore.setRole(nextRole);
-    void this.router.navigateByUrl('/tableau-de-bord');
+    this.reloadDashboard();
+  }
+
+  private reloadDashboard(): void {
+    this.document.defaultView?.location.replace('/tableau-de-bord');
   }
 }

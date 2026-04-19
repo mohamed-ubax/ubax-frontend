@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,335 +11,461 @@ import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
 import {
   DateRange,
   DateRangePickerComponent,
-  LazyChartComponent,
   UbaxPaginatorComponent,
 } from '@ubax-workspace/shared-ui';
 
-const PAGE_SIZE = 5;
+interface DashboardKpiCard {
+  readonly label: string;
+  readonly value: string;
+  readonly trend?: string;
+  readonly tone: 'all' | 'active' | 'rented' | 'sold';
+  readonly iconClass: string;
+}
+
+interface DashboardPropertyRow {
+  readonly uid: string;
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly location: string;
+  readonly price: string;
+  readonly tenant: string;
+  readonly status: string;
+  readonly avatar: string;
+}
+
+interface DashboardDonutLegendItem {
+  readonly count: number;
+  readonly label: string;
+  readonly tone: 'occupied' | 'available' | 'reserved' | 'maintenance';
+}
+
+interface DashboardRevenueBar {
+  readonly label: string;
+  readonly slug:
+    | 'jan'
+    | 'fev'
+    | 'mar'
+    | 'avr'
+    | 'mai'
+    | 'jui-1'
+    | 'jui-2'
+    | 'aou'
+    | 'sep'
+    | 'oct'
+    | 'nov'
+    | 'dec';
+  readonly highlighted?: boolean;
+}
+
+interface DashboardTransaction {
+  readonly uid: string;
+  readonly title: string;
+  readonly date: string;
+  readonly customer: string;
+  readonly amount: string;
+  readonly month: string;
+  readonly logo: string;
+}
+
+const PAGE_SIZE = 8;
+
+const DASHBOARD_ICONS = {
+  search: 'archivages/commercial/icons/search.webp',
+  calendar: 'archivages/commercial/icons/calendar-toolbar.webp',
+  export: 'archivages/commercial/icons/export.webp',
+  chevronDown: 'archivages/commercial/icons/chevron-down.webp',
+  eye: 'shared/demandes/action-eye.webp',
+  paginatorPrevious: 'archivages/commercial/icons/paginator-previous.webp',
+  paginatorNext: 'archivages/commercial/icons/paginator-next.webp',
+} as const;
+
+const KPI_CARDS: readonly DashboardKpiCard[] = [
+  {
+    label: 'Tous les biens',
+    value: '45',
+    trend: '+2%',
+    tone: 'all',
+    iconClass: 'pi pi-home',
+  },
+  {
+    label: 'Annonces actives',
+    value: '10',
+    tone: 'active',
+    iconClass: 'pi pi-arrow-up-right',
+  },
+  {
+    label: 'Biens Loués',
+    value: '33',
+    tone: 'rented',
+    iconClass: 'pi pi-key',
+  },
+  {
+    label: 'Biens Vendus',
+    value: '2',
+    tone: 'sold',
+    iconClass: 'pi pi-check-square',
+  },
+];
+
+const DONUT_LEGEND: readonly DashboardDonutLegendItem[] = [
+  { count: 9, label: 'Occupés', tone: 'occupied' },
+  { count: 6, label: 'Disponibles', tone: 'available' },
+  { count: 12, label: 'Réservés', tone: 'reserved' },
+  { count: 2, label: 'En maintenance', tone: 'maintenance' },
+];
+
+const REVENUE_BARS: readonly DashboardRevenueBar[] = [
+  { label: 'JAN', slug: 'jan' },
+  { label: 'FEV', slug: 'fev' },
+  { label: 'MAR', slug: 'mar' },
+  { label: 'AVR', slug: 'avr' },
+  { label: 'MAI', slug: 'mai' },
+  { label: 'JUI', slug: 'jui-1', highlighted: true },
+  { label: 'JUI', slug: 'jui-2' },
+  { label: 'AOU', slug: 'aou' },
+  { label: 'SEP', slug: 'sep' },
+  { label: 'OCT', slug: 'oct' },
+  { label: 'NOV', slug: 'nov' },
+  { label: 'DEC', slug: 'dec' },
+];
+
+const OVERVIEW_PROPERTIES: readonly DashboardPropertyRow[] = [
+  {
+    uid: 'overview-1',
+    id: 'UBX-001',
+    name: 'Immeuble kalia',
+    type: 'Appartement',
+    location: 'Abidjan, Cocody',
+    price: '450 000 FCFA/mois',
+    tenant: 'Koné Ibrahim',
+    status: 'Actif',
+    avatar: 'biens/list/list-tenant-01.webp',
+  },
+  {
+    uid: 'overview-2',
+    id: 'UBX-002',
+    name: 'Villa Riviera',
+    type: 'Villa',
+    location: 'Abidjan, Riviera',
+    price: '600 000 FCFA/mois',
+    tenant: 'Koffi Didier',
+    status: 'Actif',
+    avatar: 'shared/people/profile-01.webp',
+  },
+  {
+    uid: 'overview-3',
+    id: 'UBX-003',
+    name: 'Villa Riviera',
+    type: 'Villa',
+    location: 'Abidjan, Riviera',
+    price: '600 000 FCFA/mois',
+    tenant: 'Kouamé Patrick',
+    status: 'Actif',
+    avatar: 'shared/people/profile-02.webp',
+  },
+  {
+    uid: 'overview-4',
+    id: 'UBX-004',
+    name: 'résidence Plateau',
+    type: 'Appartement',
+    location: 'Abidjan, Plateau',
+    price: '250 000 FCFA/mois',
+    tenant: 'Konan Olivier',
+    status: 'Actif',
+    avatar: 'shared/people/profile-03.webp',
+  },
+  {
+    uid: 'overview-5',
+    id: 'UBX-005',
+    name: 'Villa Riviera',
+    type: 'Villa',
+    location: 'Abidjan, Riviera',
+    price: '600 000 FCFA/mois',
+    tenant: 'Konan Olivier',
+    status: 'Actif',
+    avatar: 'shared/people/receipt-guest-01.webp',
+  },
+  {
+    uid: 'overview-6',
+    id: 'UBX-001',
+    name: 'Immeuble kalia',
+    type: 'Appartement',
+    location: 'Abidjan, Cocody',
+    price: '450 000 FCFA/mois',
+    tenant: 'Konan Olivier',
+    status: 'Actif',
+    avatar: 'shared/people/receipt-guest-02.webp',
+  },
+  {
+    uid: 'overview-7',
+    id: 'UBX-002',
+    name: 'Villa Riviera',
+    type: 'Villa',
+    location: 'Abidjan, Riviera',
+    price: '600 000 FCFA/mois',
+    tenant: 'Koffi Didier',
+    status: 'Actif',
+    avatar: 'shared/people/receipt-guest-03.webp',
+  },
+  {
+    uid: 'overview-8',
+    id: 'UBX-003',
+    name: 'Villa Riviera',
+    type: 'Villa',
+    location: 'Abidjan, Riviera',
+    price: '600 000 FCFA/mois',
+    tenant: 'Kouamé Patrick',
+    status: 'Actif',
+    avatar: 'shared/people/receipt-guest-04.webp',
+  },
+  {
+    uid: 'overview-9',
+    id: 'UBX-004',
+    name: 'résidence Plateau',
+    type: 'Appartement',
+    location: 'Abidjan, Plateau',
+    price: '250 000 FCFA/mois',
+    tenant: 'Konan Olivier',
+    status: 'Actif',
+    avatar: 'shared/people/receipt-guest-05.webp',
+  },
+  {
+    uid: 'overview-10',
+    id: 'UBX-005',
+    name: 'Villa Riviera',
+    type: 'Villa',
+    location: 'Abidjan, Riviera',
+    price: '600 000 FCFA/mois',
+    tenant: 'Konan Olivier',
+    status: 'Actif',
+    avatar: 'biens/bailleur/tenant-02.webp',
+  },
+];
+
+const FULL_LIST_PROPERTIES: readonly DashboardPropertyRow[] = Array.from(
+  { length: PAGE_SIZE * 5 },
+  (_, index) => ({
+    uid: `full-${index + 1}`,
+    id: 'UBX-001',
+    name: 'Immeuble kalia',
+    type: 'Appartement',
+    location: 'Abidjan, Cocody',
+    price: '450 000 FCFA/mois',
+    tenant: 'Koné Ibrahim',
+    status: 'Actif',
+    avatar: 'biens/list/list-tenant-01.webp',
+  }),
+);
+
+const TRANSACTIONS: readonly DashboardTransaction[] = [
+  {
+    uid: 'txn-1',
+    title: 'Réception paiement Location',
+    date: '5 Avril 2026 à 12 : 30',
+    customer: 'Koné Ibrahim',
+    amount: '+ 450 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-wave.webp',
+  },
+  {
+    uid: 'txn-2',
+    title: 'Réception paiement Location',
+    date: '2 Avril 2026 à 17 : 41',
+    customer: 'Koffi Didier',
+    amount: '+ 600 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-orange.webp',
+  },
+  {
+    uid: 'txn-3',
+    title: 'Réception paiement Location',
+    date: '2 Avril 2026 à 17 : 41',
+    customer: 'Konan Olivier',
+    amount: '+ 250 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-orange.webp',
+  },
+  {
+    uid: 'txn-4',
+    title: 'Réception paiement Location',
+    date: '2 Avril 2026 à 17 : 41',
+    customer: 'Koffi Didier',
+    amount: '+ 600 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-wave.webp',
+  },
+  {
+    uid: 'txn-5',
+    title: 'Réception paiement Location',
+    date: '5 Avril 2026 à 12 : 30',
+    customer: 'Koné Ibrahim',
+    amount: '+ 450 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-wave.webp',
+  },
+  {
+    uid: 'txn-6',
+    title: 'Réception paiement Location',
+    date: '5 Avril 2026 à 12 : 30',
+    customer: 'Koné Ibrahim',
+    amount: '+ 450 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-wave.webp',
+  },
+  {
+    uid: 'txn-7',
+    title: 'Réception paiement Location',
+    date: '2 Avril 2026 à 17 : 41',
+    customer: 'Koffi Didier',
+    amount: '+ 600 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-orange.webp',
+  },
+  {
+    uid: 'txn-8',
+    title: 'Réception paiement Location',
+    date: '2 Avril 2026 à 17 : 41',
+    customer: 'Konan Olivier',
+    amount: '+ 250 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-orange.webp',
+  },
+  {
+    uid: 'txn-9',
+    title: 'Réception paiement Location',
+    date: '2 Avril 2026 à 17 : 41',
+    customer: 'Koffi Didier',
+    amount: '+ 600 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-wave.webp',
+  },
+  {
+    uid: 'txn-10',
+    title: 'Réception paiement Location',
+    date: '5 Avril 2026 à 12 : 30',
+    customer: 'Koné Ibrahim',
+    amount: '+ 450 000 FCFA',
+    month: 'Mars 2026',
+    logo: 'biens/bailleur/payment-wave.webp',
+  },
+];
 
 @Component({
   selector: 'ubax-dashboard-dg-page',
   standalone: true,
-  imports: [
-    RouterLink,
-    LazyChartComponent,
-    UbaxPaginatorComponent,
-    DateRangePickerComponent,
-    DatePipe,
-  ],
+  imports: [RouterLink, UbaxPaginatorComponent, DateRangePickerComponent],
   templateUrl: './dashboard-dg-page.component.html',
   styleUrl: './dashboard-dg-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardDgPageComponent {
-  readonly authStore = inject(AuthStore);
+  private readonly document = inject(DOCUMENT);
 
-  // ── Date range picker ─────────────────────────────────────────────────
+  readonly authStore = inject(AuthStore);
+  readonly icons = DASHBOARD_ICONS;
+  readonly kpiCards = KPI_CARDS;
+  readonly donutLegend = DONUT_LEGEND;
+  readonly revenueBars = REVENUE_BARS;
+  readonly overviewProperties = OVERVIEW_PROPERTIES;
+  readonly transactions = TRANSACTIONS;
+
   readonly datePickerOpen = signal(false);
   readonly selectedRange = signal<DateRange | null>(null);
+  readonly showFullList = signal(false);
+  readonly currentPage = signal(3);
+
+  readonly displayName = computed(
+    () => this.authStore.fullName() || 'Jean-Marc Kouassi',
+  );
+
+  readonly pageTitle = computed(() =>
+    this.showFullList() ? 'Liste des biens' : 'Tableau de bord',
+  );
+
+  readonly headerDateLabel = computed(() => {
+    const range = this.selectedRange();
+    if (!range) {
+      return 'Sélectionner une date';
+    }
+
+    return `${this.formatShortDate(range.start)} - ${this.formatShortDate(range.end)}`;
+  });
+
+  readonly totalPages = computed(() =>
+    Math.ceil(FULL_LIST_PROPERTIES.length / PAGE_SIZE),
+  );
+
+  readonly pagedProperties = computed(() => {
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return FULL_LIST_PROPERTIES.slice(start, start + PAGE_SIZE);
+  });
+
+  readonly exportRows = computed(() =>
+    this.showFullList() ? this.pagedProperties() : this.overviewProperties,
+  );
+
+  openDatePicker(): void {
+    this.datePickerOpen.set(true);
+  }
 
   onDateRangeApplied(range: DateRange): void {
     this.selectedRange.set(range);
   }
 
-  // ── Full-list toggle ──────────────────────────────────────────────────
-  readonly showFullList = signal(false);
-  readonly currentPage = signal(1);
-
-  readonly propertiesFull = [
-    {
-      id: 'UBX-001',
-      nom: 'Immeuble Kalia',
-      type: 'Appartement',
-      localisation: 'Abidjan, Cocody',
-      prix: '450 000 FCFA/mois',
-      locataire: 'Koné Ibrahim',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-002',
-      nom: 'Villa Riviera',
-      type: 'Villa',
-      localisation: 'Abidjan, Riviera',
-      prix: '600 000 FCFA/mois',
-      locataire: 'Koffi Didier',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-003',
-      nom: 'Villa Riviera',
-      type: 'Villa',
-      localisation: 'Abidjan, Riviera',
-      prix: '600 000 FCFA/mois',
-      locataire: 'Kouamé Patrick',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-004',
-      nom: 'Résidence Plateau',
-      type: 'Appartement',
-      localisation: 'Abidjan, Plateau',
-      prix: '250 000 FCFA/mois',
-      locataire: 'Konan Olivier',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-005',
-      nom: 'Villa Riviera',
-      type: 'Villa',
-      localisation: 'Abidjan, Riviera',
-      prix: '600 000 FCFA/mois',
-      locataire: 'Konan Olivier',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-006',
-      nom: 'Appt. Deux Plateaux',
-      type: 'Appartement',
-      localisation: 'Abidjan, 2 Plx',
-      prix: '350 000 FCFA/mois',
-      locataire: 'Bamba Seydou',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-007',
-      nom: 'Maison Yopougon',
-      type: 'Maison',
-      localisation: 'Abidjan, Yopougon',
-      prix: '180 000 FCFA/mois',
-      locataire: 'Touré Mamadou',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-008',
-      nom: 'Studio Marcory',
-      type: 'Studio',
-      localisation: 'Abidjan, Marcory',
-      prix: '120 000 FCFA/mois',
-      locataire: 'Diomandé Fatoum',
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-009',
-      nom: 'Duplex Cocody',
-      type: 'Duplex',
-      localisation: 'Abidjan, Cocody',
-      prix: '750 000 FCFA/mois',
-      locataire: "N'Goran Eric",
-      statut: 'Actif',
-    },
-    {
-      id: 'UBX-010',
-      nom: 'Villa Angré',
-      type: 'Villa',
-      localisation: 'Abidjan, Angré',
-      prix: '800 000 FCFA/mois',
-      locataire: 'Coulibaly Inza',
-      statut: 'Actif',
-    },
-  ];
-
-  /** Preview (first 5) shown in the bottom-row dashboard view */
-  readonly properties = this.propertiesFull.slice(0, PAGE_SIZE);
-
-  readonly totalPages = computed(() =>
-    Math.ceil(this.propertiesFull.length / PAGE_SIZE),
-  );
-
-  readonly pagedProperties = computed(() => {
-    const start = (this.currentPage() - 1) * PAGE_SIZE;
-    return this.propertiesFull.slice(start, start + PAGE_SIZE);
-  });
-
   toggleFullList(): void {
-    this.showFullList.update((v) => !v);
-    this.currentPage.set(1);
+    const nextState = !this.showFullList();
+    this.showFullList.set(nextState);
+
+    if (nextState) {
+      this.currentPage.set(3);
+    }
   }
 
-  // ── Charts ────────────────────────────────────────────────────────────
-  readonly donutData = {
-    labels: ['Occupés', 'Disponibles', 'Réservés', 'En maintenance'],
-    datasets: [
-      {
-        data: [9, 6, 12, 2],
-        backgroundColor: ['#16b55b', '#2388ff', '#e87d1e', '#ff383c'],
-        borderWidth: 3,
-        borderColor: '#fff',
-        hoverBorderWidth: 3,
-      },
-    ],
-  };
+  exportVisibleRows(): void {
+    const currentWindow = this.document.defaultView;
 
-  readonly donutOptions = {
-    cutout: '68%',
-    plugins: { legend: { display: false } },
-    responsive: true,
-    maintainAspectRatio: false,
-  };
+    if (!currentWindow) {
+      return;
+    }
 
-  readonly revenueData = {
-    labels: [
-      'JAN',
-      'FÉV',
-      'MAR',
-      'AVR',
-      'MAI',
-      'JUI',
-      'JUI',
-      'AOU',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DÉC',
-    ],
-    datasets: [
-      {
-        data: [
-          3200000, 2800000, 4100000, 3500000, 3900000, 1850000, 4200000,
-          3800000, 2900000, 4500000, 3200000, 4800000,
-        ],
-        backgroundColor: [
-          '#ff8d28',
-          '#ff8d28',
-          '#ff8d28',
-          '#ff8d28',
-          '#ff8d28',
-          '#1a3047',
-          '#ff8d28',
-          '#ff8d28',
-          '#ff8d28',
-          '#ff8d28',
-          '#ff8d28',
-          '#ff8d28',
-        ],
-        borderRadius: 8,
-        borderSkipped: false,
-        barPercentage: 0.55,
-        categoryPercentage: 0.8,
-      },
-    ],
-  };
+    const lines = [
+      'ID;Nom du bien;Type;Localisation;Prix;Locataires;Statut',
+      ...this.exportRows().map((row) =>
+        [
+          row.id,
+          row.name,
+          row.type,
+          row.location,
+          row.price,
+          row.tenant,
+          row.status,
+        ].join(';'),
+      ),
+    ];
 
-  readonly revenueOptions = {
-    plugins: { legend: { display: false } },
-    scales: {
-      x: {
-        grid: { display: false },
-        border: { display: false },
-        ticks: {
-          font: { family: 'Lexend', size: 11 },
-          color: '#615e83',
-          maxRotation: 0,
-        },
-      },
-      y: {
-        grid: { color: '#f0f0f0' },
-        border: { display: false },
-        ticks: {
-          font: { family: 'Lexend', size: 11 },
-          color: '#615e83',
-          callback: (v: number) => {
-            if (v >= 1_000_000) return v / 1_000_000 + 'M';
-            if (v >= 1_000) return v / 1_000 + 'k';
-            return v;
-          },
-        },
-      },
-    },
-    responsive: true,
-    maintainAspectRatio: false,
-  };
+    const blob = new Blob([lines.join('\n')], {
+      type: 'text/csv;charset=utf-8',
+    });
+    const url = currentWindow.URL.createObjectURL(blob);
+    const link = this.document.createElement('a');
 
-  readonly kpiCards = [
-    {
-      label: 'Tous les biens',
-      value: 45,
-      change: '+2%',
-      icon: 'pi-home',
-      color: '#1a3047',
-      bg: '#ecf2f7',
-    },
-    {
-      label: 'Annonces actives',
-      value: 10,
-      change: null,
-      icon: 'pi-arrow-up-right',
-      color: '#e87d1e',
-      bg: '#ecf2f7',
-    },
-    {
-      label: 'Biens Loués',
-      value: 33,
-      change: null,
-      icon: 'pi-key',
-      color: '#2388ff',
-      bg: '#ecf2f7',
-    },
-    {
-      label: 'Biens Vendus',
-      value: 2,
-      change: null,
-      icon: 'pi-check-square',
-      color: '#16b55b',
-      bg: '#ecf2f7',
-    },
-  ];
+    link.href = url;
+    link.download = this.showFullList()
+      ? 'dashboard-dg-liste-biens.csv'
+      : 'dashboard-dg-overview.csv';
 
-  readonly donutLegend = [
-    { color: '#16b55b', label: 'Occupés', count: 9 },
-    { color: '#2388ff', label: 'Disponibles', count: 6 },
-    { color: '#e87d1e', label: 'Réservés', count: 12 },
-    { color: '#ff383c', label: 'En maintenance', count: 2 },
-  ];
+    this.document.body.append(link);
+    link.click();
+    link.remove();
+    currentWindow.URL.revokeObjectURL(url);
+  }
 
-  readonly transactions = [
-    {
-      label: 'Réception paiement Location',
-      date: '5 Avril 2026 à 12 : 30',
-      month: 'Avril 2026',
-      amount: '+ 450 000 FCFA',
-      initials: 'KI',
-      name: 'Koné Ibrahim',
-    },
-    {
-      label: 'Réception paiement Location',
-      date: '2 Avril 2026 à 17 : 41',
-      month: 'Avril 2026',
-      amount: '+ 600 000 FCFA',
-      initials: 'KD',
-      name: 'Koffi Didier',
-    },
-    {
-      label: 'Réception paiement Location',
-      date: '28 Mars 2026 à 09 : 15',
-      month: 'Mars 2026',
-      amount: '+ 250 000 FCFA',
-      initials: 'KP',
-      name: 'Kouamé Patrick',
-    },
-    {
-      label: 'Réception paiement Location',
-      date: '20 Mars 2026 à 14 : 22',
-      month: 'Mars 2026',
-      amount: '+ 600 000 FCFA',
-      initials: 'KO',
-      name: 'Konan Olivier',
-    },
-    {
-      label: 'Réception paiement Location',
-      date: '15 Mars 2026 à 10 : 05',
-      month: 'Mars 2026',
-      amount: '+ 450 000 FCFA',
-      initials: 'KI',
-      name: 'Koné Ibrahim',
-    },
-    {
-      label: 'Réception paiement Location',
-      date: '8 Mars 2026 à 16 : 30',
-      month: 'Mars 2026',
-      amount: '+ 600 000 FCFA',
-      initials: 'KD',
-      name: 'Koffi Didier',
-    },
-  ];
+  private formatShortDate(date: Date): string {
+    const day = `${date.getDate()}`.padStart(2, '0');
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const year = `${date.getFullYear()}`.slice(-2);
+
+    return `${day}/${month}/${year}`;
+  }
 }
