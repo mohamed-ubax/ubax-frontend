@@ -1,10 +1,21 @@
 <section class="transactions-history-page" data-ubax-motion="page">
-  <header class="transactions-history-page__header">
-    <h1 class="transactions-history-page__title">Historique de transaction</h1>
+  <div class="transactions-history-page__shell">
+    <div class="transactions-history-page__title-block">
+      <h1 class="transactions-history-page__title">
+        <span>Historique</span>
+        <span>de</span>
+        <span>transaction</span>
+      </h1>
+    </div>
 
-    <div class="transactions-history-page__toolbar">
+    <div class="transactions-history-page__toolbar-column">
       <label class="toolbar-chip toolbar-chip--search">
-        <input type="text" placeholder="Recherche ..." />
+        <input
+          type="search"
+          placeholder="Recherche ..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="setSearchQuery($event)"
+        />
         <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
       </label>
 
@@ -25,127 +36,127 @@
         </span>
       </button>
     </div>
-  </header>
 
-  <div
-    class="transactions-history-page__summary-grid"
-    data-ubax-motion="surface"
-  >
-    @for (card of summaryCards; track card.label) {
-      <article
-        class="summary-card"
-        [class.summary-card--balance]="card.tone === 'balance'"
-      >
-        @if (card.tone !== 'balance') {
-          <span
-            class="summary-card__icon-shell"
-            [class.summary-card__icon-shell--success]="card.tone === 'success'"
-            [class.summary-card__icon-shell--info]="card.tone === 'info'"
-            [class.summary-card__icon-shell--warning]="card.tone === 'warning'"
-          >
-            @if (card.icon) {
-              <img [src]="card.icon" [alt]="card.iconAlt ?? ''" />
-            }
-          </span>
+    <div class="balance-stack" data-ubax-motion="surface">
+      <span class="balance-stack__layer balance-stack__layer--rear"></span>
+      <span class="balance-stack__layer balance-stack__layer--middle"></span>
 
-          <div class="summary-card__content">
-            <p>{{ card.label }}</p>
-            <strong>{{ card.amount }}</strong>
-          </div>
-        } @else {
-          <div class="summary-card__balance-copy">
-            <p>{{ card.label }}</p>
-            <strong>{{ card.amount }}</strong>
-          </div>
+      <article class="summary-card summary-card--balance">
+        <div class="summary-card__balance-copy">
+          <p>{{ summaryCards[3].label }}</p>
+          <strong>{{ balanceAmount() }}</strong>
+        </div>
 
-          <button class="summary-card__balance-toggle" type="button">
-            @if (card.icon) {
-              <img [src]="card.icon" [alt]="card.iconAlt ?? ''" />
-            }
-          </button>
-        }
+        <button
+          class="summary-card__balance-toggle"
+          type="button"
+          (click)="toggleBalanceVisibility()"
+        >
+          @if (summaryCards[3].icon) {
+            <img
+              [src]="summaryCards[3].icon"
+              [alt]="summaryCards[3].iconAlt ?? ''"
+            />
+          }
+        </button>
       </article>
-    }
-  </div>
-
-  <section class="surface-card transactions-panel" data-ubax-motion="surface">
-    <div class="transactions-panel__toolbar">
-      <button class="transactions-panel__filter" type="button">
-        <span>Tout type</span>
-        <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
-      </button>
-
-      <label class="transactions-panel__search">
-        <img [src]="assets.tableSearchIcon" alt="" aria-hidden="true" />
-        <input type="text" placeholder="Rechercher" />
-      </label>
-
-      <button class="transactions-panel__add" type="button">
-        <img [src]="assets.addIcon" alt="" aria-hidden="true" />
-        <span>Nouvelle transaction</span>
-      </button>
     </div>
 
-    <div class="transactions-panel__table">
-      <div class="transactions-panel__head">
-        <span>Date</span>
-        <span>Ref</span>
-        <span>Type</span>
-        <span>Bien</span>
-        <span class="transactions-panel__head-sort">
-          Locataire
-          <img [src]="assets.sortArrow" alt="" aria-hidden="true" />
-        </span>
-        <span>Montant</span>
-        <span>Statut</span>
-        <span>Action</span>
+    <section class="surface-card transactions-panel" data-ubax-motion="surface">
+      <div class="transactions-panel__header">
+        <h2>Historique des transactions</h2>
+
+        <div class="transactions-panel__toolbar">
+          <label class="transactions-panel__filter">
+            <select
+              [ngModel]="selectedType()"
+              (ngModelChange)="setSelectedType($event)"
+              title="Type de transaction"
+            >
+              @for (option of transactionTypeOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
+          </label>
+
+          <label class="transactions-panel__search">
+            <img [src]="assets.tableSearchIcon" alt="" aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Rechercher"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="setSearchQuery($event)"
+            />
+          </label>
+        </div>
       </div>
 
-      <div class="transactions-panel__body">
-        @for (
-          transaction of transactions;
-          track transaction.date + transaction.reference + $index
-        ) {
-          <div class="transactions-panel__row">
-            <span>{{ transaction.date }}</span>
-            <span>{{ transaction.reference }}</span>
-            <span>
-              <span
-                class="table-pill"
-                [class.table-pill--expense]="transaction.type === 'depense'"
-              >
-                {{ transaction.type === 'loyer' ? 'Loyer' : 'Dépense' }}
-              </span>
+      @if (pagedTransactions().length > 0) {
+        <div class="transactions-panel__table">
+          <div class="transactions-panel__head">
+            <span>Date</span>
+            <span>Ref</span>
+            <span>Type</span>
+            <span>Bien</span>
+            <span class="transactions-panel__head-sort">
+              Locataire
+              <img [src]="assets.sortArrow" alt="" aria-hidden="true" />
             </span>
-            <span>{{ transaction.property }}</span>
-            <span>{{ transaction.tenant }}</span>
-            <span>{{ transaction.amount }}</span>
-            <span>
-              <span
-                class="status-pill"
-                [class.status-pill--pending]="
-                  transaction.status === 'en-attente'
-                "
-              >
-                <span class="status-pill__dot"></span>
-                {{ transaction.status === 'payee' ? 'Payé' : 'En attente' }}
-              </span>
-            </span>
-            <span class="transactions-panel__actions">
-              <button type="button" aria-label="Modifier la transaction">
-                <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
-              </button>
-              <button type="button" aria-label="Plus d’actions">
-                <img [src]="assets.actionMore" alt="" aria-hidden="true" />
-              </button>
-            </span>
+            <span>Montant</span>
+            <span>Statut</span>
+            <span>Action</span>
           </div>
-        }
-      </div>
-    </div>
 
-    <footer class="transactions-panel__pagination">
-      <ubax-paginator [(currentPage)]="currentPage" [totalPages]="totalPages" />
-    </footer>
-  </section>
+          <div class="transactions-panel__body">
+            @for (transaction of pagedTransactions(); track transaction.uid) {
+              <div class="transactions-panel__row">
+                <span>{{ transaction.date }}</span>
+                <span>{{ transaction.reference }}</span>
+                <span>
+                  <span
+                    class="table-pill"
+                    [class.table-pill--expense]="transaction.type === 'depense'"
+                  >
+                    {{ transaction.type === 'loyer' ? 'Loyer' : 'Dépense' }}
+                  </span>
+                </span>
+                <span>{{ transaction.property }}</span>
+                <span>{{ transaction.tenant }}</span>
+                <span>{{ transaction.amount }}</span>
+                <span>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--pending]="
+                      transaction.status === 'en-attente'
+                    "
+                  >
+                    <span class="status-pill__dot"></span>
+                    {{ transaction.status === 'payee' ? 'Payé' : 'En attente' }}
+                  </span>
+                </span>
+                <span class="transactions-panel__actions">
+                  <button type="button" aria-label="Modifier la transaction">
+                    <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
+                  </button>
+                  <button type="button" aria-label="Plus d’actions">
+                    <img [src]="assets.actionMore" alt="" aria-hidden="true" />
+                  </button>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <p class="transactions-panel__empty">Aucune transaction trouvée.</p>
+      }
+
+      <footer class="transactions-panel__pagination">
+        <ubax-paginator
+          [(currentPage)]="currentPage"
+          [totalPages]="totalPages()"
+        />
+      </footer>
+    </section>
+  </div>
 </section>

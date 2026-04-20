@@ -52,10 +52,14 @@
         } @else {
           <div class="summary-card__balance-copy">
             <p>{{ card.label }}</p>
-            <strong>{{ card.amount }}</strong>
+            <strong>{{ balanceAmount() }}</strong>
           </div>
 
-          <button class="summary-card__balance-toggle" type="button">
+          <button
+            class="summary-card__balance-toggle"
+            type="button"
+            (click)="toggleBalanceVisibility()"
+          >
             @if (card.icon) {
               <img [src]="card.icon" [alt]="card.iconAlt ?? ''" />
             }
@@ -71,20 +75,17 @@
 
       <div class="chart-card__canvas">
         <div class="chart-card__graphic" aria-hidden="true">
-          <img class="chart-card__grid" [src]="assets.chartGrid" alt="" />
-          <img
-            class="chart-card__gradient"
-            [src]="assets.chartGradient"
-            alt=""
-          />
-          <img class="chart-card__line" [src]="assets.chartLine" alt="" />
-          <img
-            class="chart-card__indicator"
-            [src]="assets.chartIndicator"
-            alt=""
-          />
-          <img class="chart-card__tooltip" [src]="assets.chartTooltip" alt="" />
-          <span class="chart-card__tooltip-label">3 500 000 FCFA</span>
+          <div class="chart-card__chart">
+            <p-chart
+              type="line"
+              [data]="revenueChartData"
+              [options]="revenueChartOptions"
+              [plugins]="revenueChartPlugins"
+            />
+          </div>
+          <span class="chart-card__tooltip-label">{{
+            activeRevenueLabel
+          }}</span>
         </div>
 
         <div class="chart-card__y-axis" aria-hidden="true">
@@ -117,7 +118,13 @@
       <div class="expense-card__divider"></div>
 
       <div class="expense-card__pie-wrap" aria-hidden="true">
-        <img [src]="assets.expensePie" alt="" />
+        <div class="expense-card__chart">
+          <p-chart
+            type="pie"
+            [data]="expenseChartData"
+            [options]="expenseChartOptions"
+          />
+        </div>
       </div>
 
       <div class="expense-card__legend">
@@ -162,9 +169,11 @@
         }
       </div>
 
-      <a class="overdue-sidebar__more" routerLink="/finances/loyers-retard"
-        >Voir plus</a
-      >
+      <div class="transactions-preview__divider-container">
+        <a class="overdue-sidebar__more" routerLink="/finances/loyers-retard"
+          >Voir plus</a
+        >
+      </div>
     </aside>
 
     <section
@@ -175,14 +184,27 @@
         <h2>Historique des transactions</h2>
 
         <div class="transactions-preview__actions">
-          <button class="transactions-preview__filter" type="button">
-            <span>Tout type</span>
+          <label class="transactions-preview__filter">
+            <select
+              [ngModel]="selectedType()"
+              (ngModelChange)="setSelectedType($event)"
+              title="Type de transaction"
+            >
+              @for (option of transactionTypeOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
             <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
-          </button>
+          </label>
 
           <label class="transactions-preview__search">
             <img [src]="assets.tableSearchIcon" alt="" aria-hidden="true" />
-            <input type="text" placeholder="Rechercher" />
+            <input
+              type="search"
+              placeholder="Rechercher"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="setSearchQuery($event)"
+            />
           </label>
 
           <button class="transactions-preview__add" type="button">
@@ -204,52 +226,60 @@
           <span>Action</span>
         </div>
 
-        <div class="transactions-table__body">
-          @for (
-            transaction of transactions;
-            track transaction.date + transaction.reference + $index
-          ) {
-            <div class="transactions-table__row">
-              <span>{{ transaction.date }}</span>
-              <span>{{ transaction.reference }}</span>
-              <span>
-                <span
-                  class="table-pill"
-                  [class.table-pill--expense]="transaction.type === 'depense'"
-                >
-                  {{ transaction.type === 'loyer' ? 'Loyer' : 'Dépense' }}
+        @if (transactions().length > 0) {
+          <div class="transactions-table__body">
+            @for (
+              transaction of transactions();
+              track transaction.date + transaction.reference + $index
+            ) {
+              <div class="transactions-table__row">
+                <span>{{ transaction.date }}</span>
+                <span>{{ transaction.reference }}</span>
+                <span>
+                  <span
+                    class="table-pill"
+                    [class.table-pill--expense]="transaction.type === 'depense'"
+                  >
+                    {{ transaction.type === 'loyer' ? 'Loyer' : 'Dépense' }}
+                  </span>
                 </span>
-              </span>
-              <span>{{ transaction.property }}</span>
-              <span>{{ transaction.tenant }}</span>
-              <span>{{ transaction.amount }}</span>
-              <span>
-                <span
-                  class="status-pill"
-                  [class.status-pill--pending]="
-                    transaction.status === 'en-attente'
-                  "
-                >
-                  <span class="status-pill__dot"></span>
-                  {{ transaction.status === 'payee' ? 'Payé' : 'En attente' }}
+                <span>{{ transaction.property }}</span>
+                <span>{{ transaction.tenant }}</span>
+                <span>{{ transaction.amount }}</span>
+                <span>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--pending]="
+                      transaction.status === 'en-attente'
+                    "
+                  >
+                    <span class="status-pill__dot"></span>
+                    {{ transaction.status === 'payee' ? 'Payé' : 'En attente' }}
+                  </span>
                 </span>
-              </span>
-              <span class="transactions-table__actions">
-                <button type="button" aria-label="Modifier la transaction">
-                  <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
-                </button>
-                <button type="button" aria-label="Plus d’actions">
-                  <img [src]="assets.actionMore" alt="" aria-hidden="true" />
-                </button>
-              </span>
-            </div>
-          }
-        </div>
+                <span class="transactions-table__actions">
+                  <button type="button" aria-label="Modifier la transaction">
+                    <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
+                  </button>
+                  <button type="button" aria-label="Plus d’actions">
+                    <img [src]="assets.actionMore" alt="" aria-hidden="true" />
+                  </button>
+                </span>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="transactions-table__empty">Aucune transaction trouvée.</p>
+        }
       </div>
 
-      <a class="transactions-preview__more" routerLink="/finances/transactions"
-        >Voir plus</a
-      >
+      <div class="transactions-preview__divider-container">
+        <a
+          class="transactions-preview__more"
+          routerLink="/finances/transactions"
+          >Voir plus</a
+        >
+      </div>
     </section>
   </div>
 </section>

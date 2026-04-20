@@ -1,5 +1,6 @@
 export type FinanceTransactionType = 'loyer' | 'depense';
 export type FinanceTransactionStatus = 'payee' | 'en-attente';
+export type FinanceTransactionFilterValue = 'all' | FinanceTransactionType;
 
 export interface FinanceSummaryCard {
   readonly label: string;
@@ -7,6 +8,11 @@ export interface FinanceSummaryCard {
   readonly tone: 'success' | 'info' | 'warning' | 'balance';
   readonly icon?: string;
   readonly iconAlt?: string;
+}
+
+export interface FinanceSelectOption<T extends string = string> {
+  readonly value: T;
+  readonly label: string;
 }
 
 export interface FinanceTransactionRow {
@@ -34,12 +40,42 @@ export interface FinanceOverdueRow {
   readonly dueDate: string;
   readonly delay: string;
   readonly penalty: string;
+  readonly period: string;
 }
 
 export interface FinanceExpenseLegendItem {
   readonly label: string;
   readonly ratio: string;
+  readonly value: number;
   readonly tone: 'blue' | 'yellow' | 'green' | 'purple' | 'orange';
+}
+
+export interface FinanceRevenuePoint {
+  readonly label: string;
+  readonly amount: number;
+  readonly amountLabel: string;
+  readonly highlighted?: boolean;
+}
+
+export interface FinanceTenantProfile {
+  readonly name: string;
+  readonly role: string;
+  readonly avatar: string;
+  readonly cardAvatar: string;
+  readonly propertyImage: string;
+  readonly propertyTitle: string;
+  readonly propertyLocation: string;
+  readonly rentAmount: string;
+  readonly propertyStatus: string;
+  readonly paymentDuration: string;
+  readonly rating: string;
+  readonly ratingCount: string;
+}
+
+export interface FinanceTenantPaymentState {
+  readonly unpaid: string;
+  readonly remaining: string;
+  readonly paid: string;
 }
 
 export interface FinanceTenantInfoCard {
@@ -113,6 +149,13 @@ export const FINANCE_SUMMARY_CARDS: readonly FinanceSummaryCard[] = [
     iconAlt: 'Masquer le solde',
   },
 ] as const;
+
+export const FINANCE_TRANSACTION_TYPE_OPTIONS: readonly FinanceSelectOption<FinanceTransactionFilterValue>[] =
+  [
+    { value: 'all', label: 'Tout type' },
+    { value: 'loyer', label: 'Loyer' },
+    { value: 'depense', label: 'Dépense' },
+  ] as const;
 
 export const FINANCE_OVERVIEW_TRANSACTIONS: readonly FinanceTransactionRow[] = [
   {
@@ -238,11 +281,32 @@ export const FINANCE_TRANSACTION_HISTORY: readonly FinanceTransactionRow[] = [
 ] as const;
 
 export const FINANCE_EXPENSE_LEGEND: readonly FinanceExpenseLegendItem[] = [
-  { label: 'Entretien', ratio: '33 %', tone: 'blue' },
-  { label: 'Marketing', ratio: '33 %', tone: 'yellow' },
-  { label: 'Salaire', ratio: '28 %', tone: 'green' },
-  { label: 'Taxes', ratio: '35 %', tone: 'purple' },
-  { label: 'Charges', ratio: '22 %', tone: 'orange' },
+  { label: 'Entretien', ratio: '33 %', value: 33, tone: 'blue' },
+  { label: 'Marketing', ratio: '33 %', value: 33, tone: 'yellow' },
+  { label: 'Salaire', ratio: '28 %', value: 28, tone: 'green' },
+  { label: 'Taxes', ratio: '33 %', value: 33, tone: 'purple' },
+  { label: 'Charges', ratio: '22 %', value: 22, tone: 'orange' },
+] as const;
+
+// Derived from the Figma curve asset so the PrimeNG line chart keeps the original shape.
+export const FINANCE_REVENUE_SERIES: readonly FinanceRevenuePoint[] = [
+  { label: 'JAN', amount: 1_900_000, amountLabel: '1 900 000 FCFA' },
+  { label: 'FEB', amount: 3_300_000, amountLabel: '3 300 000 FCFA' },
+  { label: 'MAR', amount: 600_000, amountLabel: '600 000 FCFA' },
+  { label: 'APR', amount: 2_300_000, amountLabel: '2 300 000 FCFA' },
+  { label: 'MAY', amount: 5_600_000, amountLabel: '5 600 000 FCFA' },
+  {
+    label: 'JUN',
+    amount: 3_500_000,
+    amountLabel: '3 500 000 FCFA',
+    highlighted: true,
+  },
+  { label: 'JUL', amount: 4_800_000, amountLabel: '4 800 000 FCFA' },
+  { label: 'AUG', amount: 4_100_000, amountLabel: '4 100 000 FCFA' },
+  { label: 'SEP', amount: 3_700_000, amountLabel: '3 700 000 FCFA' },
+  { label: 'OCT', amount: 1_800_000, amountLabel: '1 800 000 FCFA' },
+  { label: 'NOV', amount: 600_000, amountLabel: '600 000 FCFA' },
+  { label: 'DEC', amount: 3_600_000, amountLabel: '3 600 000 FCFA' },
 ] as const;
 
 export const FINANCE_MONTH_LABELS = [
@@ -323,6 +387,7 @@ export const FINANCE_OVERDUE_ROWS: readonly FinanceOverdueRow[] = [
     dueDate: '22/04/2026',
     delay: '14 jours',
     penalty: '14 000 FCFA',
+    period: 'Avril 2025',
   },
   {
     id: '2',
@@ -332,6 +397,7 @@ export const FINANCE_OVERDUE_ROWS: readonly FinanceOverdueRow[] = [
     dueDate: '22/04/2026',
     delay: '14 jours',
     penalty: '14 000 FCFA',
+    period: 'Avril 2025',
   },
   {
     id: '3',
@@ -341,6 +407,7 @@ export const FINANCE_OVERDUE_ROWS: readonly FinanceOverdueRow[] = [
     dueDate: '22/04/2026',
     delay: '14 jours',
     penalty: '14 000 FCFA',
+    period: 'Avril 2025',
   },
   {
     id: '4',
@@ -350,6 +417,7 @@ export const FINANCE_OVERDUE_ROWS: readonly FinanceOverdueRow[] = [
     dueDate: '22/04/2026',
     delay: '14 jours',
     penalty: '14 000 FCFA',
+    period: 'Avril 2025',
   },
   {
     id: '5',
@@ -359,6 +427,7 @@ export const FINANCE_OVERDUE_ROWS: readonly FinanceOverdueRow[] = [
     dueDate: '22/04/2026',
     delay: '14 jours',
     penalty: '14 000 FCFA',
+    period: 'Avril 2025',
   },
   {
     id: '6',
@@ -368,8 +437,30 @@ export const FINANCE_OVERDUE_ROWS: readonly FinanceOverdueRow[] = [
     dueDate: '22/04/2026',
     delay: '14 jours',
     penalty: '14 000 FCFA',
+    period: 'Avril 2025',
   },
 ] as const;
+
+export const FINANCE_TENANT_PROFILE: FinanceTenantProfile = {
+  name: 'Aïcha Kouadio',
+  role: 'Locataire',
+  avatar: 'biens/list/list-tenant-01.webp',
+  cardAvatar: 'hotel-dashboard/properties/tenant-aicha.webp',
+  propertyImage: 'shared/rooms/room-photo-01.webp',
+  propertyTitle: 'Immeuble kalia',
+  propertyLocation: 'Abidjan, Cocody',
+  rentAmount: '400 000 FCFA',
+  propertyStatus: 'Location',
+  paymentDuration: '12 mois',
+  rating: '★★★★',
+  ratingCount: '4',
+} as const;
+
+export const FINANCE_TENANT_PAYMENT_STATE: FinanceTenantPaymentState = {
+  unpaid: '0',
+  remaining: '4',
+  paid: '8',
+} as const;
 
 export const FINANCE_TENANT_INFO: readonly FinanceTenantInfoCard[] = [
   {

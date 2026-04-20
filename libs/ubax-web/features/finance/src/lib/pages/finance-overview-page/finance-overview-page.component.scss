@@ -63,6 +63,7 @@
 
   img {
     display: block;
+    width: 26px;
   }
 }
 
@@ -264,44 +265,68 @@
 .chart-card__graphic {
   position: relative;
   min-height: 286px;
-}
+  padding-top: 10px;
 
-.chart-card__grid,
-.chart-card__gradient,
-.chart-card__line,
-.chart-card__indicator {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-}
-
-.chart-card__indicator {
-  inset: 24px auto 0 71.1%;
-  width: 2.6%;
-  height: calc(100% - 24px);
-}
-
-.chart-card__tooltip {
-  position: absolute;
-  top: 58px;
-  left: 44.7%;
-  width: 126px;
-  height: 53px;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 8px 0 18px;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 142, 41, 0.08) 0%,
+        rgba(255, 142, 41, 0) 72%
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0 52px,
+        #eef1f5 52px 53px
+      );
+    pointer-events: none;
+  }
 }
 
 .chart-card__tooltip-label {
   position: absolute;
-  top: 77px;
-  left: calc(44.7% + 6px);
+  top: 58px;
+  left: 50.8%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 118px;
+  min-width: 126px;
+  height: 53px;
+  padding: 0 16px;
+  transform: translateX(-50%);
+  border-radius: 14px;
+  background: var(--ubax-navy);
   font-size: 13px;
   font-weight: 500;
   color: #fff;
+  z-index: 2;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    background: var(--ubax-navy);
+    transform: translateX(-50%) rotate(45deg);
+  }
+}
+
+.chart-card__chart {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 286px;
+
+  ::ng-deep .p-chart,
+  ::ng-deep canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
 }
 
 .chart-card__y-axis {
@@ -399,11 +424,16 @@
   display: flex;
   justify-content: center;
   margin: 28px 0 24px;
+}
 
-  img {
-    width: min(100%, 208px);
-    height: auto;
-    object-fit: contain;
+.expense-card__chart {
+  width: 208px;
+  height: 206px;
+
+  ::ng-deep .p-chart,
+  ::ng-deep canvas {
+    width: 100% !important;
+    height: 100% !important;
   }
 }
 
@@ -516,6 +546,13 @@
   white-space: nowrap;
 }
 
+.transactions-preview__divider-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .overdue-sidebar__more,
 .transactions-preview__more {
   display: inline-flex;
@@ -573,14 +610,24 @@
   width: 195px;
   padding: 0 26px 0 28px;
   background: var(--ubax-page-bg);
-  font-size: 15px;
-  font-weight: 500;
   color: var(--ubax-text-primary);
-  cursor: pointer;
 
   img {
     width: 20px;
     height: 20px;
+  }
+
+  select {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ubax-text-primary);
+    appearance: none;
+    cursor: pointer;
   }
 }
 
@@ -655,6 +702,17 @@
 
 .transactions-table__body {
   display: grid;
+}
+
+.transactions-table__empty {
+  margin: 20px 0 0;
+  padding: 22px 18px;
+  border-radius: 14px;
+  background: #f8fbff;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ubax-text-secondary);
+  text-align: center;
 }
 
 .transactions-table__row {
