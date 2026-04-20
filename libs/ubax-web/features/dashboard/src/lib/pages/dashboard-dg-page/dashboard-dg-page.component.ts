@@ -7,6 +7,8 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UIChart } from 'primeng/chart';
+import { ChartData, ChartOptions } from 'chart.js';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
 import {
   DateRange,
@@ -19,7 +21,7 @@ interface DashboardKpiCard {
   readonly value: string;
   readonly trend?: string;
   readonly tone: 'all' | 'active' | 'rented' | 'sold';
-  readonly iconClass: string;
+  readonly iconSrc: string;
 }
 
 interface DashboardPropertyRow {
@@ -55,6 +57,7 @@ interface DashboardRevenueBar {
     | 'oct'
     | 'nov'
     | 'dec';
+  readonly value: number;
   readonly highlighted?: boolean;
 }
 
@@ -69,13 +72,14 @@ interface DashboardTransaction {
 }
 
 const PAGE_SIZE = 8;
+const REVENUE_MAX = 10_000_000;
 
 const DASHBOARD_ICONS = {
   search: 'archivages/commercial/icons/search.webp',
   calendar: 'archivages/commercial/icons/calendar-toolbar.webp',
   export: 'archivages/commercial/icons/export.webp',
   chevronDown: 'archivages/commercial/icons/chevron-down.webp',
-  eye: 'shared/demandes/action-eye.webp',
+  eye: 'client-detail/icons/eye.svg',
   paginatorPrevious: 'archivages/commercial/icons/paginator-previous.webp',
   paginatorNext: 'archivages/commercial/icons/paginator-next.webp',
 } as const;
@@ -86,25 +90,25 @@ const KPI_CARDS: readonly DashboardKpiCard[] = [
     value: '45',
     trend: '+2%',
     tone: 'all',
-    iconClass: 'pi pi-home',
+    iconSrc: 'rooms/icons/stat-all.svg',
   },
   {
     label: 'Annonces actives',
     value: '10',
     tone: 'active',
-    iconClass: 'pi pi-arrow-up-right',
+    iconSrc: 'rooms/icons/stat-online.svg',
   },
   {
     label: 'Biens Loués',
     value: '33',
     tone: 'rented',
-    iconClass: 'pi pi-key',
+    iconSrc: 'rooms/icons/stat-occupied.svg',
   },
   {
     label: 'Biens Vendus',
     value: '2',
     tone: 'sold',
-    iconClass: 'pi pi-check-square',
+    iconSrc: 'rooms/icons/stat-reserved.svg',
   },
 ];
 
@@ -116,18 +120,18 @@ const DONUT_LEGEND: readonly DashboardDonutLegendItem[] = [
 ];
 
 const REVENUE_BARS: readonly DashboardRevenueBar[] = [
-  { label: 'JAN', slug: 'jan' },
-  { label: 'FEV', slug: 'fev' },
-  { label: 'MAR', slug: 'mar' },
-  { label: 'AVR', slug: 'avr' },
-  { label: 'MAI', slug: 'mai' },
-  { label: 'JUI', slug: 'jui-1', highlighted: true },
-  { label: 'JUI', slug: 'jui-2' },
-  { label: 'AOU', slug: 'aou' },
-  { label: 'SEP', slug: 'sep' },
-  { label: 'OCT', slug: 'oct' },
-  { label: 'NOV', slug: 'nov' },
-  { label: 'DEC', slug: 'dec' },
+  { label: 'JAN', slug: 'jan', value: 1_000_000 },
+  { label: 'FEV', slug: 'fev', value: 3_150_000 },
+  { label: 'MAR', slug: 'mar', value: 4_450_000 },
+  { label: 'AVR', slug: 'avr', value: 1_000_000 },
+  { label: 'MAI', slug: 'mai', value: 2_950_000 },
+  { label: 'JUI', slug: 'jui-1', value: 6_730_000, highlighted: true },
+  { label: 'JUI', slug: 'jui-2', value: 2_250_000 },
+  { label: 'AOU', slug: 'aou', value: 1_280_000 },
+  { label: 'SEP', slug: 'sep', value: 3_150_000 },
+  { label: 'OCT', slug: 'oct', value: 1_000_000 },
+  { label: 'NOV', slug: 'nov', value: 3_150_000 },
+  { label: 'DEC', slug: 'dec', value: 4_450_000 },
 ];
 
 const OVERVIEW_PROPERTIES: readonly DashboardPropertyRow[] = [
@@ -354,7 +358,12 @@ const TRANSACTIONS: readonly DashboardTransaction[] = [
 @Component({
   selector: 'ubax-dashboard-dg-page',
   standalone: true,
-  imports: [RouterLink, UbaxPaginatorComponent, DateRangePickerComponent],
+  imports: [
+    RouterLink,
+    UbaxPaginatorComponent,
+    DateRangePickerComponent,
+    UIChart,
+  ],
   templateUrl: './dashboard-dg-page.component.html',
   styleUrl: './dashboard-dg-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -369,6 +378,112 @@ export class DashboardDgPageComponent {
   readonly revenueBars = REVENUE_BARS;
   readonly overviewProperties = OVERVIEW_PROPERTIES;
   readonly transactions = TRANSACTIONS;
+  readonly donutChartData: ChartData<'doughnut'> = {
+    labels: ['Réservés', 'Occupés', 'Disponibles', 'En maintenance'],
+    datasets: [
+      {
+        data: [12, 9, 6, 2],
+        backgroundColor: ['#E87D1E', '#16B55B', '#2388FF', '#FF383C'],
+        borderColor: '#FFFFFF',
+        borderWidth: 6,
+        hoverOffset: 0,
+        spacing: 2,
+      },
+    ],
+  };
+  readonly donutChartOptions: ChartOptions<'doughnut'> = {
+    animation: {
+      duration: 650,
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '72%',
+    rotation: (-34 * Math.PI) / 180,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+  };
+  readonly revenueChartData: ChartData<'bar'> = {
+    labels: REVENUE_BARS.map((bar) => bar.label),
+    datasets: [
+      {
+        data: REVENUE_BARS.map((bar) => bar.value),
+        backgroundColor: REVENUE_BARS.map((bar) =>
+          bar.highlighted ? '#1A3047' : '#FF8D28',
+        ),
+        borderSkipped: false,
+        borderRadius: 3,
+        barThickness: 25,
+        maxBarThickness: 25,
+        categoryPercentage: 0.74,
+        barPercentage: 1,
+        stack: 'revenue',
+      },
+      {
+        data: REVENUE_BARS.map((bar) => REVENUE_MAX - bar.value),
+        backgroundColor: '#E5E5EF',
+        borderSkipped: false,
+        borderRadius: 3,
+        barThickness: 25,
+        maxBarThickness: 25,
+        categoryPercentage: 0.74,
+        barPercentage: 1,
+        stack: 'revenue',
+      },
+    ],
+  };
+  readonly revenueChartOptions: ChartOptions<'bar'> = {
+    animation: {
+      duration: 650,
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+    layout: {
+      padding: {
+        top: 10,
+        right: 4,
+        bottom: 2,
+        left: 4,
+      },
+    },
+    scales: {
+      x: {
+        stacked: true,
+        display: false,
+        grid: {
+          display: false,
+        },
+        border: {
+          display: false,
+        },
+      },
+      y: {
+        stacked: true,
+        display: false,
+        min: 0,
+        max: REVENUE_MAX,
+        grid: {
+          display: false,
+        },
+        border: {
+          display: false,
+        },
+      },
+    },
+  };
 
   readonly datePickerOpen = signal(false);
   readonly selectedRange = signal<DateRange | null>(null);
@@ -415,11 +530,20 @@ export class DashboardDgPageComponent {
 
   toggleFullList(): void {
     const nextState = !this.showFullList();
-    this.showFullList.set(nextState);
+    const applyState = () => {
+      this.showFullList.set(nextState);
 
-    if (nextState) {
-      this.currentPage.set(3);
+      if (nextState) {
+        this.currentPage.set(3);
+      }
+    };
+
+    if ('startViewTransition' in this.document) {
+      this.document.startViewTransition(() => applyState());
+      return;
     }
+
+    applyState();
   }
 
   exportVisibleRows(): void {
