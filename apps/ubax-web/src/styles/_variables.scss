@@ -1,6 +1,7 @@
 :root {
   --ubax-page-bg: #ecf2f7;
   --ubax-surface: #ffffff;
+  --ubax-surface-muted: #f2f6fa;
   --ubax-text-primary: #222222;
   --ubax-text-muted: #5f5f5f;
   --ubax-text-soft: #bababa;
@@ -10,6 +11,7 @@
   --ubax-text-body: #292929;
   --ubax-border-subtle: #ededed;
   --ubax-border-card: #f1f3f7;
+  --ubax-border-kpi: #d3d3d3;
   --ubax-border-strong: #adadad;
   --ubax-divider-soft: #f0f2f6;
   --ubax-shadow-card-soft: 0 4px 4px rgb(0 0 0 / 0.03);
@@ -20,13 +22,17 @@
   --ubax-danger-soft: #ffe3e3;
   --ubax-success: #16b55b;
   --ubax-success-soft: #cefee3;
+  --ubax-success-soft-alt: #d8ffe9;
+  --ubax-success-emphasis: #34c759;
   --ubax-warning: #be8100;
   --ubax-warning-soft: #fff1d5;
+  --ubax-warning-soft-alt: #ffe6d0;
   --ubax-info: #008bff;
   --ubax-lilac: #6059ff;
   --ubax-lilac-soft: #dad8ff;
   --ubax-peach-soft: #ffecdb;
   --ubax-blue-soft: #d2ebff;
+  --ubax-danger-soft-alt: #ffcccd;
   --ubax-chart-magenta: #c893fd;
   --ubax-ring-neutral: #e5e5ef;
   --ubax-border-pagination: #cfd6dc;

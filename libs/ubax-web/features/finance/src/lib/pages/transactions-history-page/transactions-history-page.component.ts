@@ -38,7 +38,8 @@ const ALL_TRANSACTIONS: readonly TransactionHistoryItem[] = Array.from(
 })
 export class TransactionsHistoryPageComponent {
   protected readonly assets = FINANCE_ASSETS;
-  protected readonly summaryCards = FINANCE_SUMMARY_CARDS;
+  protected readonly kpiCards = FINANCE_SUMMARY_CARDS.slice(0, 3);
+  protected readonly balanceCard = FINANCE_SUMMARY_CARDS[3];
   protected readonly transactionTypeOptions = FINANCE_TRANSACTION_TYPE_OPTIONS;
   protected readonly currentPage = signal(3);
   protected readonly selectedType =
@@ -46,7 +47,7 @@ export class TransactionsHistoryPageComponent {
   protected readonly searchQuery = signal('');
   protected readonly isBalanceHidden = signal(false);
   protected readonly balanceAmount = computed(() =>
-    this.isBalanceHidden() ? '•••••••• FCFA' : this.summaryCards[3].amount,
+    this.isBalanceHidden() ? '•••••••• FCFA' : this.balanceCard.amount,
   );
   protected readonly filteredTransactions = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
