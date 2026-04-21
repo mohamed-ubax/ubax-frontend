@@ -7,12 +7,32 @@
   flex-direction: column;
   gap: 24px;
 
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 396px);
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  &__content-column {
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+    min-width: 0;
+  }
+
+  &__side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+  }
+
   &__summary {
     display: grid;
-    grid-template-columns: minmax(280px, 1fr) minmax(520px, 738px) minmax(
-        320px,
-        396px
-      );
+    grid-template-columns: minmax(340px, 1fr) minmax(520px, 738px);
     gap: 24px;
     align-items: start;
   }
@@ -31,20 +51,20 @@
     font-weight: 600;
     line-height: 1.2;
     color: var(--ubax-text-primary);
+    max-width: 460px;
   }
 
   &__stats {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 357px));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
+    width: 100%;
+    max-width: 738px;
   }
 
   &__board {
     display: grid;
-    grid-template-columns: minmax(320px, 595px) minmax(320px, 590px) minmax(
-        320px,
-        396px
-      );
+    grid-template-columns: minmax(320px, 672px) minmax(320px, 590px);
     gap: 22px;
     align-items: start;
   }
@@ -54,7 +74,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
   min-height: 104px;
   padding: 14px 18px 16px 20px;
   border-radius: 10px;
@@ -72,7 +92,7 @@
   &__label {
     margin: 0;
     font-family: 'Lexend', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 400;
     line-height: 1.2;
     color: var(--ubax-text-primary);
@@ -81,7 +101,7 @@
   &__value {
     margin: 0;
     font-family: 'Lexend', sans-serif;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 500;
     line-height: 1.2;
     color: var(--summary-accent);
@@ -125,13 +145,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    margin-bottom: 0.5rem;
 
     h2 {
       margin: 0;
-      font-family: 'Modernica', 'Rubik', sans-serif;
+      font-family: 'Lexend', sans-serif;
       font-size: 20px;
-      font-weight: 700;
-      line-height: 1.4;
+      font-weight: 600;
+      line-height: 1.2;
       color: var(--ubax-text-dark);
     }
   }
@@ -139,7 +160,7 @@
   &__actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 24px;
 
     img {
       width: 16px;
@@ -154,10 +175,10 @@
     gap: 8px;
 
     &--weekdays span {
-      font-family: 'Rubik', sans-serif;
+      font-family: 'Lexend', sans-serif;
       font-size: 14px;
       font-weight: 500;
-      line-height: 1.4;
+      line-height: 1.2;
       color: var(--ubax-text-dark);
       text-align: center;
     }
@@ -168,10 +189,10 @@
     place-items: center;
     height: 40px;
     border-radius: 10px;
-    font-family: 'Rubik', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 14px;
-    font-weight: 400;
-    line-height: 1.4;
+    font-weight: 500;
+    line-height: 1.2;
     color: rgb(38 37 53 / 80%);
 
     &--muted {
@@ -220,13 +241,18 @@
   &--visits {
     min-height: 710px;
   }
+
+  &--notifications {
+    min-height: auto;
+    align-self: stretch;
+  }
 }
 
 .requests-table {
   display: flex;
   flex-direction: column;
   gap: 13px;
-  padding: 9px 8px 16px;
+  padding: 13px 14px 20px;
 
   &__head {
     display: grid;
@@ -240,28 +266,32 @@
 
     span {
       font-family: 'Lexend', sans-serif;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 400;
       line-height: 1.2;
       color: var(--ubax-surface);
+      white-space: nowrap;
     }
   }
 
   &__body {
     display: flex;
     flex-direction: column;
+    gap: 2px;
   }
 }
 
 .request-row {
-  display: grid;
-  grid-template-columns: 1.2fr 1.2fr 0.82fr 1.45fr 0.95fr 36px;
-  align-items: center;
   gap: 12px;
+  display: grid;
   min-height: 49px;
-  padding: 0 14px 0 12px;
-  border-bottom: 1px solid var(--ubax-page-bg);
   position: relative;
+  align-items: center;
+  padding: 0 0 0 12px;
+  margin-bottom: 0.5rem;
+  background: var(--ubax-surface);
+  border-bottom: 1px solid var(--ubax-page-bg);
+  grid-template-columns: 1.2fr 1.2fr 0.82fr 1.45fr 0.95fr 36px;
 
   &::before {
     content: '';
@@ -276,11 +306,14 @@
 
   span {
     font-family: 'Lexend', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
-    line-height: 1.2;
+    line-height: 1.25;
     color: var(--ubax-text-primary);
     min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__action {
@@ -336,19 +369,21 @@
   &__name {
     margin: 2px 0 2px;
     font-family: 'Lexend', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
     line-height: 1.2;
     color: var(--ubax-text-primary);
+    white-space: nowrap;
   }
 
   &__phone {
     margin: 0;
     font-family: 'Lexend', sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 300;
     line-height: 1.2;
     color: var(--ubax-text-primary);
+    white-space: nowrap;
   }
 
   &__meta {
@@ -371,10 +406,13 @@
 
     span {
       font-family: 'Lexend', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 300;
-      line-height: 2.8;
+      line-height: 1.5;
       color: var(--ubax-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -389,11 +427,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 23px;
+    height: 24px;
     border: none;
     border-radius: 5px;
     font-family: 'Lexend', sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 300;
     line-height: 1;
     color: var(--ubax-surface);
@@ -414,8 +452,8 @@
 .notification-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 19px 18px 24px 12px;
+  gap: 16px;
+  padding: 19px 18px 22px 14px;
 }
 
 .notification-item {
@@ -427,29 +465,29 @@
     position: relative;
     display: grid;
     place-items: center;
-    width: 35px;
-    height: 35px;
+    width: 47px;
+    height: 47px;
     border-radius: 50%;
     background: var(--ubax-peach-soft);
     flex-shrink: 0;
-  }
 
-  &__icon-bell {
-    width: 12px;
-    height: 12px;
-    object-fit: contain;
+    &-bell {
+      width: 28px;
+      height: 20px;
+      object-fit: cover;
+    }
   }
 
   &__copy {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 8px;
     min-width: 0;
 
     h3 {
       margin: 0;
       font-family: 'Lexend', sans-serif;
-      font-size: 12px;
+      font-size: 1rem;
       font-weight: 500;
       line-height: 1.2;
       color: var(--ubax-navy);
@@ -458,15 +496,15 @@
     p {
       margin: 0;
       font-family: 'Lexend', sans-serif;
-      font-size: 10px;
+      font-size: 0.5rem;
       font-weight: 300;
-      line-height: 1.2;
+      line-height: 1.25;
       color: var(--ubax-text-muted);
     }
 
     span {
       font-family: 'Lexend', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 400;
       line-height: 1.2;
       color: #000;
@@ -474,8 +512,17 @@
   }
 }
 
-@media (max-width: 1640px) {
+@media (max-width: 1360px) {
   .demandes-commercial {
+    &__layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    &__content-column {
+      gap: 24px;
+    }
+
     &__summary,
     &__board {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -490,11 +537,13 @@
     &__stats {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-  }
 
-  .calendar-shell,
-  .board-card--notifications {
-    grid-column: 1 / -1;
+    &__side-column {
+      display: grid;
+      grid-template-columns: minmax(320px, 396px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
   }
 
   .notification-list {
@@ -505,9 +554,11 @@
 
 @media (max-width: 1180px) {
   .demandes-commercial {
+    &__layout,
     &__summary,
     &__board,
-    &__stats {
+    &__stats,
+    &__side-column {
       grid-template-columns: 1fr;
     }
   }

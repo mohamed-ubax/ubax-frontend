@@ -46,6 +46,7 @@ interface CommercialVisitCard {
 }
 
 interface CommercialNotificationItem {
+  readonly id: string;
   readonly title: string;
   readonly message: string;
   readonly time: string;
@@ -242,34 +243,39 @@ export class DemandesCommercialPageComponent {
 
   readonly notifications: readonly CommercialNotificationItem[] = [
     {
+      id: 'notification-01',
       title: 'Nouvelle demande d’information',
       message:
         'Laura Koné a demandé plus d’informations sur Appartement Riviera Palmeraie',
-      time: 'il ya 2 minutes',
+      time: "il y'a 2 minutes",
     },
     {
+      id: 'notification-02',
       title: 'demande de visite',
       message:
         'Laura Koné a demandé plus d’informations sur Appartement Riviera Palmeraie',
-      time: 'il ya 12 minutes',
+      time: "il y'a 12 minutes",
     },
     {
+      id: 'notification-03',
       title: 'Nouvelle demande d’information',
       message:
         'Laura Koné a demandé plus d’informations sur Appartement Riviera Palmeraie',
-      time: 'il ya 16 minutes',
+      time: "il y'a 16 minutes",
     },
     {
+      id: 'notification-04',
       title: 'Nouvelle demande d’information',
       message:
         'Laura Koné a demandé plus d’informations sur Appartement Riviera Palmeraie',
-      time: 'il ya 2 minutes',
+      time: "il y'a 2 minutes",
     },
     {
+      id: 'notification-05',
       title: 'Nouvelle demande d’information',
       message:
         'Laura Koné a demandé plus d’informations sur Appartement Riviera Palmeraie',
-      time: 'il ya 1 heure',
+      time: "il y'a 1 heure",
     },
   ];
 
