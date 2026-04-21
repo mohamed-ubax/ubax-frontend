@@ -5,11 +5,11 @@
 .demandes-sav {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 50px;
 
   &__hero {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
     gap: 24px;
     flex-wrap: wrap;
@@ -113,11 +113,30 @@
   align-items: center;
   gap: 22px;
   min-height: 139px;
+  position: relative;
   padding: 26px 28px;
   border-bottom: 5px solid var(--card-accent);
   border-radius: 20px;
   background: color-mix(in srgb, var(--card-accent) 16%, white 84%);
   box-shadow: var(--ubax-shadow-card-soft);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ecf2f7;
+  }
+
+  &::before {
+    left: -10px;
+  }
+
+  &::after {
+    right: -10px;
+  }
 
   &__orb {
     --card-orb: var(--ubax-blue-soft);
@@ -173,10 +192,9 @@
 
   &__filters {
     display: grid;
-    grid-template-columns: minmax(0, 221px) minmax(0, 204px) minmax(
-        0,
-        283px
-      ) minmax(0, 179px) 142px;
+    grid-template-columns:
+      minmax(0, 221px) minmax(0, 204px) minmax(0, 283px)
+      minmax(0, 179px) 142px;
     gap: 18px;
     align-items: center;
   }
@@ -523,12 +541,6 @@
     border-radius: 50%;
     background: var(--ubax-peach-soft);
     flex-shrink: 0;
-
-    img {
-      width: 12px;
-      height: 12px;
-      object-fit: contain;
-    }
   }
 
   &__copy {
