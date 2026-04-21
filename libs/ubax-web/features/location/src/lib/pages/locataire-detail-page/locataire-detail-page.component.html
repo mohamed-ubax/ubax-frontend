@@ -1,181 +1,304 @@
-<section class="locataire-page">
-  <header class="locataire-page__header">
-    <div class="locataire-page__heading">
-      <a class="back-button" routerLink="/biens/1" aria-label="Retour">
-        <i class="pi pi-arrow-left" aria-hidden="true"></i>
-      </a>
-      <h1>Profil locataire</h1>
-    </div>
-
-    <div class="locataire-page__actions">
-      <button class="secondary-action" type="button">
-        <i class="pi pi-times" aria-hidden="true"></i>
-        <span>Résilier contrat</span>
+<section class="locataire-detail-page" data-ubax-motion="page">
+  <header class="locataire-detail-page__header">
+    <div class="locataire-detail-page__title-group">
+      <button
+        class="locataire-detail-page__back-button"
+        type="button"
+        aria-label="Retour à la page précédente"
+        (click)="goBack()"
+      >
+        <img
+          class="locataire-detail-page__back-shell"
+          [src]="assets.backShell"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          class="locataire-detail-page__back-icon"
+          [src]="assets.backArrow"
+          alt=""
+          aria-hidden="true"
+        />
       </button>
 
-      <button class="secondary-action" type="button">
-        <i class="pi pi-pencil" aria-hidden="true"></i>
+      <h1 class="locataire-detail-page__title">Profil locataire</h1>
+    </div>
+
+    <section class="locataire-hero" aria-label="Profil locataire">
+      <img
+        class="locataire-hero__avatar"
+        [src]="assets.profileHero"
+        alt="Aïcha Kouadio"
+        loading="eager"
+        decoding="async"
+      />
+
+      <div class="locataire-hero__content">
+        <h2>Aïcha Kouadio</h2>
+        <p>Locataire</p>
+
+        <div class="locataire-hero__rating" aria-label="Note 4 sur 5">
+          @for (star of ratingStars; track star + $index) {
+            <img [src]="star" alt="" aria-hidden="true" />
+          }
+
+          <span class="locataire-hero__rating-count">4</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="locataire-detail-page__actions">
+      <button class="action-pill action-pill--danger" type="button">
+        <span>Résilier contrat</span>
+
+        <span class="action-pill__icon-shell" aria-hidden="true">
+          <img [src]="assets.actionShell" alt="" />
+          <img [src]="assets.cancel" alt="" />
+        </span>
+      </button>
+
+      <button class="action-pill action-pill--edit" type="button">
         <span>Modifier</span>
+
+        <span class="action-pill__icon-shell" aria-hidden="true">
+          <img [src]="assets.actionShell" alt="" />
+          <img [src]="assets.edit" alt="" />
+        </span>
       </button>
     </div>
   </header>
 
-  <section class="locataire-hero">
-    <img
-      class="locataire-hero__avatar"
-      src="biens/list/list-tenant-01.webp"
-      alt="Aïcha Kouadio"
-    />
+  <div class="locataire-detail-page__content">
+    <article class="locataire-property-panel" data-ubax-motion="surface">
+      <h2 class="locataire-property-panel__title">Bien locataire</h2>
 
-    <div class="locataire-hero__content">
-      <span class="locataire-hero__badge">Locataire</span>
-      <h2>Aïcha Kouadio</h2>
-    </div>
-  </section>
+      <a class="locataire-property-card" routerLink="/biens/1">
+        <img
+          class="locataire-property-card__image"
+          [src]="assets.propertyMain"
+          alt="Immeuble kalia"
+          loading="eager"
+          decoding="async"
+        />
 
-  <div class="locataire-page__grid">
-    <div class="locataire-page__left">
-      <article class="surface-card property-card">
-        <h3>Bien locataire</h3>
+        <span class="locataire-property-card__status">Location</span>
 
-        <a class="property-card__preview" routerLink="/biens/1">
-          <span class="property-card__status">Location</span>
+        <div class="locataire-property-card__overlay">
+          <span class="locataire-property-card__action" aria-hidden="true">
+            <img
+              class="locataire-property-card__action-shell"
+              [src]="assets.propertyActionShell"
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              class="locataire-property-card__action-icon"
+              [src]="assets.propertyOpenArrow"
+              alt=""
+              aria-hidden="true"
+            />
+          </span>
 
-          <img src="shared/rooms/room-photo-01.webp" alt="Immeuble kalia" />
+          <div class="locataire-property-card__summary">
+            <p class="locataire-property-card__name">Immeuble kalia</p>
 
-          <div class="property-card__overlay">
-            <div>
-              <p class="property-card__title">Immeuble kalia</p>
-              <span class="property-card__location">
-                <i class="pi pi-map-marker" aria-hidden="true"></i>
-                Abidjan, Cocody
-              </span>
-            </div>
-
-            <div class="property-card__tenant">
-              <img
-                src="hotel-dashboard/properties/tenant-aicha.webp"
-                alt="Aïcha Kouadio"
-              />
-              <div>
-                <p>Aïcha Kouadio</p>
-                <span>Locataire</span>
-              </div>
-              <strong>400 000 FCFA</strong>
-            </div>
+            <span class="locataire-property-card__location">
+              <img [src]="assets.location" alt="" aria-hidden="true" />
+              <span>Abidjan, Cocody</span>
+            </span>
           </div>
-        </a>
-      </article>
 
-      <article class="surface-card payment-state-card">
-        <h3>Etat de paiement</h3>
+          <div class="locataire-property-card__tenant">
+            <img [src]="assets.propertyTenant" alt="Aïcha Kouadio" />
 
-        <div class="payment-state-card__bars" aria-hidden="true">
-          <div
-            class="payment-state-card__bar payment-state-card__bar--remaining"
-          ></div>
-          <div
-            class="payment-state-card__bar payment-state-card__bar--paid"
-          ></div>
+            <div>
+              <p>Aïcha Kouadio</p>
+              <span>Locataire</span>
+            </div>
+
+            <strong>400 000 FCFA</strong>
+          </div>
+        </div>
+      </a>
+
+      <section class="payment-state" aria-label="Etat de paiement">
+        <div class="payment-state__heading">
+          <h3>Etat de paiement</h3>
+          <span class="payment-state__duration">12 mois</span>
         </div>
 
-        <div class="payment-state-card__stats">
-          <div>
+        <span class="payment-state__divider" aria-hidden="true"></span>
+
+        <div class="payment-state__bars" aria-hidden="true">
+          <span class="payment-state__bar payment-state__bar--remaining"></span>
+          <span class="payment-state__bar payment-state__bar--paid"></span>
+        </div>
+
+        <div class="payment-state__stats">
+          <div class="payment-state__stat payment-state__stat--danger">
             <span>Impayé</span>
             <strong>0</strong>
           </div>
-          <div>
+
+          <div class="payment-state__stat payment-state__stat--accent">
             <span>Restant</span>
             <strong>4</strong>
           </div>
-          <div>
+
+          <div class="payment-state__stat payment-state__stat--success">
             <span>Payés</span>
             <strong>8</strong>
           </div>
         </div>
-      </article>
-    </div>
+      </section>
+    </article>
 
-    <div class="locataire-page__right">
-      <section class="info-grid">
-        @for (group of infoGroups; track group.title) {
-          <article class="surface-card info-card">
-            <h3>{{ group.title }}</h3>
-
-            <div class="info-card__items">
-              @for (item of group.items; track item.text) {
-                <div class="info-card__item">
-                  <i [class]="item.icon" aria-hidden="true"></i>
-                  <span>{{ item.text }}</span>
-                </div>
-              }
+    <div class="locataire-detail-page__right-column">
+      <section class="locataire-info-grid">
+        <article
+          class="info-card info-card--contact"
+          data-ubax-motion="surface"
+        >
+          @for (item of contactItems; track item.text) {
+            <div class="info-card__item">
+              <img
+                class="info-card__icon"
+                [class]="'info-card__icon info-card__icon--' + item.tone"
+                [src]="item.icon"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ item.text }}</span>
             </div>
-          </article>
-        }
+          }
+        </article>
+
+        <article class="info-card info-card--status" data-ubax-motion="surface">
+          @for (item of statusItems; track item.text) {
+            <div class="info-card__item">
+              <img
+                class="info-card__icon"
+                [class]="'info-card__icon info-card__icon--' + item.tone"
+                [src]="item.icon"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ item.text }}</span>
+            </div>
+          }
+        </article>
+
+        <article
+          class="info-card info-card--contract"
+          data-ubax-motion="surface"
+        >
+          @for (item of contractItems; track item.text) {
+            <div class="info-card__item">
+              <img
+                class="info-card__icon"
+                [class]="'info-card__icon info-card__icon--' + item.tone"
+                [src]="item.icon"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ item.text }}</span>
+            </div>
+          }
+        </article>
       </section>
 
-      <section class="lower-grid">
-        <article class="surface-card documents-card">
-          <div class="card-title-row">
-            <i class="pi pi-file" aria-hidden="true"></i>
+      <div class="locataire-detail-page__lower-grid">
+        <article class="documents-card" data-ubax-motion="surface">
+          <div class="documents-card__heading">
+            <img [src]="assets.documentTitle" alt="" aria-hidden="true" />
             <h3>Documents</h3>
           </div>
 
-          <div class="document-list">
-            @for (document of documents; track document.name) {
-              <div class="document-row">
-                <div class="document-row__label">
-                  <i class="pi pi-file-pdf" aria-hidden="true"></i>
+          <span class="documents-card__divider" aria-hidden="true"></span>
+
+          <div class="documents-card__list">
+            @for (
+              document of documents;
+              track document.name;
+              let last = $last
+            ) {
+              <div class="document-row" [class.document-row--last]="last">
+                <div class="document-row__pill">
+                  <img [src]="assets.document" alt="" aria-hidden="true" />
                   <span>{{ document.name }}</span>
                 </div>
 
-                <div class="document-row__actions">
-                  <button type="button" aria-label="Prévisualiser">
-                    <i class="pi pi-eye" aria-hidden="true"></i>
-                  </button>
-                  <button type="button" aria-label="Télécharger">
-                    <i class="pi pi-download" aria-hidden="true"></i>
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        </article>
+                <button type="button" aria-label="Prévisualiser le document">
+                  <img
+                    [src]="assets.docActionShell"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <img [src]="assets.eye" alt="" aria-hidden="true" />
+                </button>
 
-        <article class="surface-card history-card">
-          <div class="card-title-row">
-            <i class="pi pi-wallet" aria-hidden="true"></i>
-            <h3>Historique de paiement</h3>
-          </div>
-
-          <div class="history-list">
-            @for (payment of payments; track payment.date + payment.amount) {
-              <div class="history-row">
-                <div class="history-row__brand">
-                  <img [src]="payment.logo" [alt]="payment.title" />
-                </div>
-
-                <div class="history-row__body">
-                  <p>{{ payment.title }}</p>
-                  <span>{{ payment.date }}</span>
-                </div>
-
-                <div class="history-row__meta">
-                  <strong>{{ payment.amount }}</strong>
-                  <span class="history-row__period">
-                    <i class="pi pi-check" aria-hidden="true"></i>
-                    {{ payment.period }}
-                  </span>
-                </div>
-
-                <button type="button" aria-label="Voir la transaction">
-                  <i class="pi pi-angle-right" aria-hidden="true"></i>
+                <button type="button" aria-label="Télécharger le document">
+                  <img
+                    [src]="assets.docActionShell"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <img [src]="assets.download" alt="" aria-hidden="true" />
                 </button>
               </div>
             }
           </div>
         </article>
-      </section>
+
+        <article class="payment-history-card" data-ubax-motion="surface">
+          <div class="payment-history-card__heading">
+            <img [src]="assets.historyTitle" alt="" aria-hidden="true" />
+            <h3>Historique de paiement</h3>
+          </div>
+
+          <span class="payment-history-card__divider" aria-hidden="true"></span>
+
+          <div class="payment-history-card__list">
+            @for (
+              payment of payments;
+              track payment.date + payment.amount + payment.period + $index
+            ) {
+              <div class="payment-entry">
+                <img [src]="payment.logo" [alt]="payment.title" />
+
+                <div class="payment-entry__content">
+                  <p>{{ payment.title }}</p>
+                  <span>{{ payment.date }}</span>
+                </div>
+
+                <div class="payment-entry__meta">
+                  <strong>{{ payment.amount }}</strong>
+
+                  <span
+                    class="payment-entry__period"
+                    [class.payment-entry__period--wide]="payment.widePeriod"
+                  >
+                    <img
+                      [src]="assets.paymentCheck"
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    <span>{{ payment.period }}</span>
+                  </span>
+                </div>
+
+                <button type="button" aria-label="Voir la transaction">
+                  <img
+                    [src]="assets.paymentChevron"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+            }
+          </div>
+        </article>
+      </div>
     </div>
   </div>
 </section>

@@ -15,14 +15,18 @@
   --ubax-border-strong: #adadad;
   --ubax-divider-soft: #f0f2f6;
   --ubax-shadow-card-soft: 0 4px 4px rgb(0 0 0 / 0.03);
+  --ubax-shadow-figma-soft: 0 2px 6px rgb(13 10 44 / 0.08);
   --ubax-shadow-calendar-active: 0 0 30px rgb(123 97 255 / 0.2);
   --ubax-navy: #1a3047;
   --ubax-accent: #e87d1e;
+  --ubax-accent-soft-strong: #fff4ea;
+  --ubax-accent-badge-soft: #facba0;
   --ubax-danger: #fa191d;
   --ubax-danger-soft: #ffe3e3;
   --ubax-success: #16b55b;
   --ubax-success-soft: #cefee3;
   --ubax-success-soft-alt: #d8ffe9;
+  --ubax-success-pill: #ddfff4;
   --ubax-success-emphasis: #34c759;
   --ubax-warning: #be8100;
   --ubax-warning-soft: #fff1d5;
@@ -36,6 +40,9 @@
   --ubax-chart-magenta: #c893fd;
   --ubax-ring-neutral: #e5e5ef;
   --ubax-border-pagination: #cfd6dc;
+  --ubax-text-label-muted: #898989;
+  --ubax-black: #000000;
+  --ubax-black-soft: #020202;
   --ubax-radius-xl: 20px;
   --ubax-radius-lg: 14px;
   --ubax-radius-md: 10px;

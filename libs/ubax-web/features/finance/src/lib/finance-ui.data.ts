@@ -117,6 +117,14 @@ export const FINANCE_ASSETS = {
   overdueRowEye: 'finances/overdue/row-eye.webp',
   overdueRowMore: 'finances/overdue/row-more.webp',
   overdueDropdown: 'finances/overdue/dropdown-icon.webp',
+  overdueBackIcon: 'finances/overdue/back-icon.webp',
+  overdueHeaderCalendarIcon: 'finances/overdue/header-calendar-icon.webp',
+  overdueHeaderExportIcon: 'finances/overdue/header-export-icon.webp',
+  overduePeriodCalendarIcon: 'finances/overdue/period-calendar-icon.webp',
+  overduePeriodDropdownIcon: 'finances/overdue/period-dropdown-icon.webp',
+  overdueSearchIcon: 'finances/overdue/search-icon.webp',
+  overduePaginatorPreviousIcon: 'finances/overdue/paginator-prev-icon.webp',
+  overduePaginatorNextIcon: 'finances/overdue/paginator-next-icon.webp',
 } as const;
 
 export const FINANCE_SUMMARY_CARDS: readonly FinanceSummaryCard[] = [

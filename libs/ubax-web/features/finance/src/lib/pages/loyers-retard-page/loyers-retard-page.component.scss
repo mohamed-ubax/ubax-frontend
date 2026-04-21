@@ -2,9 +2,17 @@
   display: block;
 }
 
-.loyers-retard-page,
-.loyers-retard-page__shell,
-.loyers-retard-page__toolbar-column,
+.loyers-retard-page {
+  color: var(--ubax-text-primary);
+}
+
+.loyers-retard-page__shell {
+  display: grid;
+  gap: 55px;
+}
+
+.loyers-retard-page__header,
+.loyers-retard-page__toolbar,
 .toolbar-chip,
 .toolbar-chip__icon-shell,
 .back-button,
@@ -13,81 +21,81 @@
 .overdue-panel__period,
 .overdue-panel__period-select,
 .overdue-panel__search,
-.overdue-panel__head,
-.overdue-panel__row,
+.overdue-panel__search-icon-shell,
+.overdue-panel__head > span,
+.overdue-panel__row > span,
 .overdue-panel__actions,
 .overdue-panel__icon-button {
   display: flex;
   align-items: center;
 }
 
-.loyers-retard-page {
-  color: var(--ubax-text-primary);
-}
-
-.loyers-retard-page__shell {
+.loyers-retard-page__header {
   display: grid;
-  grid-template-columns: 44px 120px 192px minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
-}
-
-.loyers-retard-page__title-block {
-  padding-top: 198px;
-}
-
-.loyers-retard-page__title {
-  margin: 0;
-  display: grid;
-  gap: 10px;
-  font-size: 32px;
-  line-height: 1.15;
-  font-weight: 600;
+  grid-template-columns: 67px minmax(0, 1fr) 601px;
+  gap: 40px;
+  align-items: center;
 }
 
 .back-button {
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  margin-top: 246px;
+  width: 67px;
+  height: 67px;
+  border: 0;
   border-radius: 50%;
   background: var(--ubax-surface);
-  box-shadow: 0 2px 6px rgb(13 10 44 / 0.08);
-  color: var(--ubax-navy);
   text-decoration: none;
 
-  i {
-    font-size: 18px;
+  img {
+    width: 29px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
   }
 }
 
-.loyers-retard-page__toolbar-column {
-  display: grid;
-  gap: 14px;
-  padding-top: 194px;
-}
-
-.toolbar-chip {
-  gap: 20px;
-  height: 60px;
-  padding: 0 20px 0 26px;
-  border: 0;
-  border-radius: 33.5px;
-  background: var(--ubax-surface);
-  box-shadow: 0 2px 6px rgb(13 10 44 / 0.08);
-  font: inherit;
+.loyers-retard-page__title {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: normal;
   color: var(--ubax-text-primary);
 }
 
-.toolbar-chip--action {
-  width: 192px;
+.loyers-retard-page__toolbar {
+  display: grid;
+  grid-template-columns: 295px 278px;
+  gap: 28px;
+  justify-content: end;
+}
+
+.toolbar-chip {
   justify-content: space-between;
-  font-size: 15px;
-  font-weight: 400;
+  height: 67px;
+  padding: 0 11px 0 25px;
+  border: 0;
+  border-radius: 33.5px;
+  background: var(--ubax-surface);
+  color: var(--ubax-text-primary);
+  font-family: 'Lexend', sans-serif;
+  cursor: pointer;
+
+  > span:first-child {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: normal;
+  }
+}
+
+.toolbar-chip--date {
+  width: 295px;
+  padding-left: 32px;
+  border-radius: 50px;
 }
 
 .toolbar-chip--export {
-  width: 192px;
+  width: 278px;
 }
 
 .toolbar-chip__icon-shell {
@@ -95,231 +103,314 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #f2f6fa;
+  background: var(--ubax-page-bg);
   flex-shrink: 0;
+
+  img {
+    display: block;
+    object-fit: contain;
+  }
 }
 
-.surface-card {
-  background: var(--ubax-surface);
-  border-radius: var(--ubax-radius-xl);
-  box-shadow: 0 2px 6px rgb(13 10 44 / 0.08);
+.toolbar-chip__icon-shell--date img {
+  width: 26px;
+  height: 26px;
+}
+
+.toolbar-chip__icon-shell--export img {
+  width: 30px;
+  height: 30px;
 }
 
 .overdue-panel {
-  min-height: 478px;
-  padding: 20px 14px 20px;
+  min-height: 880px;
+  background: var(--ubax-surface);
+  border-radius: var(--ubax-radius-xl);
+  overflow: hidden;
 }
 
 .overdue-panel__controls {
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.overdue-panel__meta {
-  gap: 18px;
+  gap: 24px;
+  padding: 28px 61px 33px 51px;
 }
 
 .overdue-panel__period {
-  gap: 18px;
-  min-height: 40px;
-  padding: 0 14px;
+  gap: 20px;
+  width: 338px;
+  height: 57px;
+  padding: 0 20px;
   border: 1px solid #dadada;
-  border-radius: 10px;
+  border-radius: var(--ubax-radius-md);
   background: var(--ubax-page-bg);
+  box-sizing: border-box;
+}
 
-  span {
-    font-size: 15px;
-    font-weight: 400;
-  }
+.overdue-panel__period-label {
+  flex-shrink: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--ubax-text-primary);
 }
 
 .overdue-panel__period-select {
-  gap: 10px;
-  min-width: 145px;
-  min-height: 39px;
-  padding: 0 12px;
+  gap: 14px;
+  width: 195px;
+  height: 39px;
+  padding: 0 9px 0 9px;
   border: 1px solid #fff;
   border-radius: 5px;
   background: #fff;
+  box-sizing: border-box;
 
-  img:first-child {
+  > img:first-child {
     width: 24px;
     height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
-  img:last-child {
+  > img:last-child {
     width: 22px;
     height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   select {
     width: 100%;
+    min-width: 0;
     border: 0;
     outline: 0;
     background: transparent;
     font-family: 'Lexend', sans-serif;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 400;
+    line-height: normal;
     color: var(--ubax-text-primary);
     appearance: none;
     cursor: pointer;
   }
 }
 
+.overdue-panel__meta {
+  gap: 39px;
+}
+
 .overdue-panel__balance {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  min-width: 150px;
-  min-height: 38px;
-  padding: 4px 14px 8px;
-  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 264px;
+  height: 62px;
+  padding-top: 8px;
+  border-radius: 50px;
   background: var(--ubax-danger);
   color: #fff;
   text-align: center;
+  box-sizing: border-box;
+
+  span,
+  strong {
+    margin: 0;
+  }
 
   span {
-    font-size: 10px;
-    font-weight: 400;
-    line-height: 1.2;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 16.36px;
   }
 
   strong {
+    font-family: 'Lexend', sans-serif;
     font-size: 16px;
-    font-weight: 700;
-    line-height: 1.15;
+    font-weight: 600;
+    line-height: 30px;
   }
 }
 
 .overdue-panel__search {
-  width: 160px;
   justify-content: space-between;
-  gap: 16px;
-  min-height: 40px;
-  padding: 0 12px 0 18px;
+  gap: 18px;
+  width: 295px;
+  height: 60.896px;
+  padding: 0 9px 0 26px;
   border-radius: 33.5px;
   background: var(--ubax-page-bg);
+  box-sizing: border-box;
 
   input {
     width: 100%;
+    min-width: 0;
     border: 0;
     outline: 0;
     background: transparent;
     font-family: 'Lexend', sans-serif;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 300;
+    line-height: normal;
     color: var(--ubax-text-primary);
 
     &::placeholder {
       color: var(--ubax-text-primary);
       opacity: 1;
     }
+
+    &::-webkit-search-cancel-button {
+      display: none;
+    }
+  }
+}
+
+.overdue-panel__search-icon-shell {
+  justify-content: center;
+  width: 52px;
+  height: 47.262px;
+  border-radius: 50%;
+  background: transparent;
+  flex-shrink: 0;
+
+  img {
+    width: 24.787px;
+    height: 24.787px;
+    object-fit: contain;
+    display: block;
   }
 }
 
 .overdue-panel__table {
   overflow-x: auto;
-}
-
-.overdue-panel__head,
-.overdue-panel__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(
-      0,
-      1.15fr
-    ) 104px 100px 102px 108px 92px;
-  gap: 10px;
-  min-width: 0;
+  padding-inline: 51px 61px;
+  box-sizing: border-box;
 }
 
 .overdue-panel__head {
-  min-height: 44px;
-  padding: 0 12px;
-  border-radius: 10px;
+  --overdue-head-columns: 15.25fr 15.52fr 12.91fr 14.02fr 13.95fr 12.45fr 15.9fr;
+
+  display: grid;
+  grid-template-columns: var(--overdue-head-columns);
+  align-items: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 0 8px 0 8px;
+  border-radius: var(--ubax-radius-md);
   background: var(--ubax-navy);
-  font-size: 15px;
-  font-weight: 600;
-  color: #fff;
+  box-sizing: border-box;
+
+  > span {
+    min-width: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: normal;
+    color: #fff;
+    white-space: nowrap;
+  }
 }
 
 .overdue-panel__body {
   display: grid;
-  padding-inline: 10px;
+  gap: 0;
+  padding: 20px 0 0;
 }
 
 .overdue-panel__row {
-  min-height: 48px;
-  padding: 0 0 0 0;
-  border-bottom: 1px solid #eef1f5;
-  font-size: 14px;
-  font-weight: 400;
-  color: #000;
+  --overdue-row-columns: 15.25fr 15.52fr 12.91fr 14.02fr 13.95fr 12.45fr 15.9fr;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--overdue-row-columns);
+  align-items: start;
+  width: 100%;
+  min-height: 58px;
+  padding-top: 11px;
+  box-sizing: border-box;
+
+  > span {
+    min-width: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    bottom: 0;
+    left: 3px;
+    height: 1px;
+    background: var(--ubax-border-subtle);
+  }
 }
 
-.overdue-panel__head > span,
-.overdue-panel__row > span {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.overdue-panel__amount,
-.overdue-panel__penalty {
-  color: var(--ubax-danger);
+.overdue-panel__row > .overdue-panel__amount,
+.overdue-panel__row > .overdue-panel__penalty {
   font-weight: 600;
+  color: var(--ubax-danger);
 }
 
 .overdue-panel__actions {
-  gap: 8px;
-  justify-content: flex-end;
+  gap: 15px;
+}
+
+.overdue-panel__relaunch,
+.overdue-panel__icon-button {
+  border: 0;
+  cursor: pointer;
 }
 
 .overdue-panel__relaunch {
-  min-width: 74px;
-  height: 28px;
-  padding: 0 10px;
-  border: 0;
+  width: 77px;
+  height: 37px;
+  padding: 0;
   border-radius: 5px;
-  background: #d8ffe9;
+  background: var(--ubax-success-soft-alt);
   font-family: 'Lexend', sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
+  line-height: normal;
   color: var(--ubax-success);
-  cursor: pointer;
 }
 
 .overdue-panel__icon-button {
   justify-content: center;
-  width: 30px;
-  height: 28px;
+  width: 62px;
+  height: 37px;
   padding: 0;
-  border: 0;
   border-radius: 5px;
   background: var(--ubax-page-bg);
   text-decoration: none;
-  cursor: pointer;
 
   img {
     width: 22px;
     height: 22px;
     object-fit: contain;
+    display: block;
   }
 }
 
 .overdue-panel__icon-button--more {
-  width: 18px;
+  width: 22px;
   background: transparent;
 }
 
 .overdue-panel__empty {
-  margin: 0;
-  padding: 22px 18px;
+  margin: 0 36px;
+  padding: 28px 18px;
   border-radius: 14px;
   background: #f8fbff;
+  font-family: 'Lexend', sans-serif;
   font-size: 15px;
   font-weight: 500;
   color: var(--ubax-text-secondary);
@@ -329,120 +420,148 @@
 .overdue-panel__pagination {
   display: flex;
   justify-content: center;
-  margin-top: 22px;
+  margin-top: 45px;
+  padding-bottom: 50px;
 
-  ::ng-deep .paginator {
-    min-height: 90px;
-    padding: 16px 25px;
-    background: var(--ubax-page-bg);
-    border-radius: 50px;
+  ::ng-deep .paginator-page {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  ::ng-deep .paginator-arrow__icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 1480px) {
+  .loyers-retard-page__header {
+    grid-template-columns: 67px minmax(0, 1fr);
+  }
+
+  .loyers-retard-page__toolbar {
+    grid-column: 1 / -1;
+    justify-content: start;
+  }
+
+  .overdue-panel__controls {
+    padding-right: 36px;
+  }
+
+  .overdue-panel__table {
+    padding-right: 36px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .loyers-retard-page__header {
+    gap: 24px;
+  }
+
+  .loyers-retard-page__toolbar {
+    grid-template-columns: repeat(2, minmax(0, 295px));
+  }
+
+  .overdue-panel__controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 28px 24px 33px;
+  }
+
+  .overdue-panel__meta {
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .overdue-panel__table {
+    padding-inline: 24px;
+  }
+
+  .overdue-panel__empty {
+    margin-inline: 24px;
+  }
+}
+
+@media (max-width: 860px) {
+  .loyers-retard-page__header {
+    grid-template-columns: 1fr;
+  }
+
+  .loyers-retard-page__toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-chip,
+  .toolbar-chip--date,
+  .toolbar-chip--export,
+  .overdue-panel__period,
+  .overdue-panel__search,
+  .overdue-panel__balance {
+    width: 100%;
+  }
+
+  .overdue-panel__period {
+    justify-content: space-between;
+  }
+
+  .overdue-panel__meta {
+    flex-direction: column;
+  }
+
+  .overdue-panel__pagination {
+    margin-top: 32px;
+    padding-inline: 16px 0;
+
+    ::ng-deep .paginator {
+      width: 100%;
+      --paginator-edge-gap: 16px;
+      --paginator-page-size: 46px;
+      --paginator-arrow-width: 44px;
+      --paginator-arrow-height: 44px;
+      --paginator-padding-inline: 14px;
+    }
+  }
+}
+
+@media (max-width: 620px) {
+  .loyers-retard-page__shell {
     gap: 32px;
   }
 
-  ::ng-deep .paginator-pages {
-    gap: 11px;
+  .back-button {
+    width: 54px;
+    height: 54px;
+
+    img {
+      width: 24px;
+      height: 20px;
+    }
   }
 
-  ::ng-deep .paginator-page {
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    border-color: #cfd6dc;
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-    font-weight: 400;
-  }
-
-  ::ng-deep .paginator-page.is-active {
-    font-size: 20px;
-    font-weight: 600;
-  }
-
-  ::ng-deep .paginator-arrow {
-    width: 52px;
-    height: 50px;
-    border-radius: 10px;
-    border-color: #cfd6dc;
-  }
-}
-
-@media (max-width: 1240px) {
-  .loyers-retard-page__shell {
-    grid-template-columns: 1fr;
-  }
-
-  .back-button,
-  .loyers-retard-page__title-block,
-  .loyers-retard-page__toolbar-column {
-    margin-top: 0;
-    padding-top: 0;
-  }
-
-  .loyers-retard-page__toolbar-column {
-    width: 100%;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .overdue-panel__controls,
-  .overdue-panel__meta {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .toolbar-chip--action,
-  .toolbar-chip--export,
-  .overdue-panel__search {
-    width: 100%;
-  }
-
-  .overdue-panel__period {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-@media (max-width: 720px) {
   .loyers-retard-page__title {
-    font-size: 28px;
-    line-height: 1.2;
+    font-size: 30px;
   }
 
-  .loyers-retard-page__toolbar-column {
-    grid-template-columns: 1fr;
-  }
-
-  .overdue-panel {
-    padding-inline: 16px;
+  .overdue-panel__controls {
+    padding: 20px 16px 24px;
   }
 
   .overdue-panel__period {
-    flex-direction: column;
+    height: auto;
+    padding: 12px 14px;
     align-items: stretch;
-    padding-block: 12px;
+    flex-direction: column;
   }
 
   .overdue-panel__period-select {
     width: 100%;
   }
 
-  .overdue-panel__pagination {
-    justify-content: stretch;
+  .overdue-panel__table {
+    padding-inline: 16px;
+  }
 
-    ::ng-deep .paginator {
-      width: 100%;
-      min-height: 76px;
-      gap: 16px;
-      padding-inline: 14px;
-    }
-
-    ::ng-deep .paginator-page {
-      width: 46px;
-      height: 46px;
-    }
-
-    ::ng-deep .paginator-arrow {
-      width: 44px;
-      height: 44px;
-    }
+  .overdue-panel__empty {
+    margin-inline: 16px;
   }
 }

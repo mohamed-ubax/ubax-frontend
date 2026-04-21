@@ -1,43 +1,50 @@
 <section class="loyers-retard-page" data-ubax-motion="page">
   <div class="loyers-retard-page__shell">
-    <a class="back-button" routerLink="/finances" aria-label="Retour">
-      <i class="pi pi-arrow-left" aria-hidden="true"></i>
-    </a>
+    <header class="loyers-retard-page__header">
+      <a class="back-button" routerLink="/finances" aria-label="Retour">
+        <img [src]="assets.overdueBackIcon" alt="" aria-hidden="true" />
+      </a>
 
-    <div class="loyers-retard-page__title-block">
-      <h1 class="loyers-retard-page__title">
-        <span>Loyer</span>
-        <span>en</span>
-        <span>retard</span>
-      </h1>
-    </div>
+      <h1 class="loyers-retard-page__title">Loyer en retard</h1>
 
-    <div class="loyers-retard-page__toolbar-column">
-      <button class="toolbar-chip toolbar-chip--action" type="button">
-        <span>Sélectionner une date</span>
-        <span class="toolbar-chip__icon-shell">
-          <img [src]="assets.calendarIcon" alt="" aria-hidden="true" />
-        </span>
-      </button>
+      <div class="loyers-retard-page__toolbar">
+        <button class="toolbar-chip toolbar-chip--date" type="button">
+          <span>Sélectionner une date</span>
+          <span class="toolbar-chip__icon-shell toolbar-chip__icon-shell--date">
+            <img
+              [src]="assets.overdueHeaderCalendarIcon"
+              alt=""
+              aria-hidden="true"
+            />
+          </span>
+        </button>
 
-      <button
-        class="toolbar-chip toolbar-chip--action toolbar-chip--export"
-        type="button"
-      >
-        <span>Exporter les données</span>
-        <span class="toolbar-chip__icon-shell">
-          <img [src]="assets.exportIcon" alt="" aria-hidden="true" />
-        </span>
-      </button>
-    </div>
+        <button class="toolbar-chip toolbar-chip--export" type="button">
+          <span>Exporter les données</span>
+          <span
+            class="toolbar-chip__icon-shell toolbar-chip__icon-shell--export"
+          >
+            <img
+              [src]="assets.overdueHeaderExportIcon"
+              alt=""
+              aria-hidden="true"
+            />
+          </span>
+        </button>
+      </div>
+    </header>
 
-    <section class="surface-card overdue-panel" data-ubax-motion="surface">
+    <section class="overdue-panel" data-ubax-motion="surface">
       <div class="overdue-panel__controls">
         <div class="overdue-panel__period">
-          <span>Période</span>
+          <span class="overdue-panel__period-label">Période</span>
 
           <label class="overdue-panel__period-select">
-            <img [src]="assets.calendarIcon" alt="" aria-hidden="true" />
+            <img
+              [src]="assets.overduePeriodCalendarIcon"
+              alt=""
+              aria-hidden="true"
+            />
             <select
               [ngModel]="selectedPeriod()"
               (ngModelChange)="setSelectedPeriod($event)"
@@ -47,13 +54,17 @@
                 <option [value]="period">{{ period }}</option>
               }
             </select>
-            <img [src]="assets.overdueDropdown" alt="" aria-hidden="true" />
+            <img
+              [src]="assets.overduePeriodDropdownIcon"
+              alt=""
+              aria-hidden="true"
+            />
           </label>
         </div>
 
         <div class="overdue-panel__meta">
           <div class="overdue-panel__balance">
-            <span>Solde impayés</span>
+            <span>Solde impayé</span>
             <strong>{{ unpaidBalance }}</strong>
           </div>
 
@@ -64,8 +75,8 @@
               [ngModel]="searchQuery()"
               (ngModelChange)="setSearchQuery($event)"
             />
-            <span class="toolbar-chip__icon-shell">
-              <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
+            <span class="overdue-panel__search-icon-shell">
+              <img [src]="assets.overdueSearchIcon" alt="" aria-hidden="true" />
             </span>
           </label>
         </div>
@@ -131,6 +142,8 @@
         <ubax-paginator
           [(currentPage)]="currentPage"
           [totalPages]="totalPages()"
+          [previousIconSrc]="assets.overduePaginatorPreviousIcon"
+          [nextIconSrc]="assets.overduePaginatorNextIcon"
         />
       </footer>
     </section>

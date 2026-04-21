@@ -123,6 +123,38 @@ const ASSETS = [
     file: 'apps/ubax-web/public/finances/overdue/dropdown-icon.webp',
     url: 'https://www.figma.com/api/mcp/asset/8e145595-94d2-4691-8461-8f301518784f',
   },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/back-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/00459335-9089-4206-a437-7f8624e81e24',
+  },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/header-calendar-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/627aadda-ad88-4ded-8f20-31fb9b2f3e6f',
+  },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/header-export-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/24fb7772-12f2-40c4-a25e-592ca3f91151',
+  },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/period-calendar-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/a745803f-e7c7-4115-825f-2a352e7bfaf4',
+  },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/period-dropdown-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/3c9448dd-ae73-4b3e-83ee-28849ff5ca30',
+  },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/search-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/03b0e39d-0531-4fe9-8b80-3a552ba5b4a7',
+  },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/paginator-prev-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/c567a072-20d4-42dc-9711-f2788ec162ac',
+  },
+  {
+    file: 'apps/ubax-web/public/finances/overdue/paginator-next-icon.webp',
+    url: 'https://www.figma.com/api/mcp/asset/00244439-6365-457e-9b61-57a989ebb7e5',
+  },
 ];
 
 function getTargetPath(relativeFile) {
@@ -165,26 +197,22 @@ async function downloadAsset(asset, force) {
   console.log(`Downloaded ${asset.file}`);
 }
 
-async function main() {
-  const force = process.argv.includes('--force');
-  const failures = [];
+const force = process.argv.includes('--force');
+const failures = [];
 
-  for (const asset of ASSETS) {
-    try {
-      await downloadAsset(asset, force);
-    } catch (error) {
-      failures.push({ asset, error });
-      console.error(`Failed ${asset.file}: ${error.message}`);
-    }
-  }
-
-  console.log(
-    `\nFinished: ${ASSETS.length - failures.length}/${ASSETS.length} assets downloaded.`,
-  );
-
-  if (failures.length > 0) {
-    process.exitCode = 1;
+for (const asset of ASSETS) {
+  try {
+    await downloadAsset(asset, force);
+  } catch (error) {
+    failures.push({ asset, error });
+    console.error(`Failed ${asset.file}: ${error.message}`);
   }
 }
 
-main();
+console.log(
+  `\nFinished: ${ASSETS.length - failures.length}/${ASSETS.length} assets downloaded.`,
+);
+
+if (failures.length > 0) {
+  process.exitCode = 1;
+}
