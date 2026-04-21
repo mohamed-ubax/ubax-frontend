@@ -13,6 +13,19 @@ import {
   getReservationById,
 } from '../../reservation-commercial.data';
 
+interface ReservationContactItem {
+  readonly label: string;
+  readonly value: string;
+  readonly icon: string;
+  readonly href?: string;
+  readonly external?: boolean;
+}
+
+interface ReservationPricingRow {
+  readonly label: string;
+  readonly value: string;
+}
+
 @Component({
   selector: 'ubax-reservation-detail-page',
   standalone: true,
@@ -32,4 +45,60 @@ export class ReservationDetailPageComponent {
   readonly reservation = computed(() =>
     getReservationById(this.reservationId()),
   );
+  readonly contactItems = computed<readonly ReservationContactItem[]>(() => {
+    const reservation = this.reservation();
+    const phoneNumber = reservation.phone.replace(/\s+/g, '');
+    const mapQuery = encodeURIComponent(
+      `${reservation.property}, ${reservation.address}`,
+    );
+
+    return [
+      {
+        label: 'Téléphone',
+        value: reservation.phone,
+        icon: this.icons.phone,
+        href: `tel:${phoneNumber}`,
+      },
+      {
+        label: 'Email',
+        value: reservation.email,
+        icon: this.icons.mail,
+        href: `mailto:${reservation.email}`,
+      },
+      {
+        label: 'Adresse',
+        value: reservation.address,
+        icon: this.icons.locationFill,
+        href: `https://www.google.com/maps/search/?api=1&query=${mapQuery}`,
+        external: true,
+      },
+      {
+        label: 'Référence',
+        value: reservation.reference,
+        icon: this.icons.idCard,
+      },
+    ];
+  });
+  readonly pricingRows = computed<readonly ReservationPricingRow[]>(() => {
+    const pricing = this.reservation().pricing;
+
+    return [
+      {
+        label: 'Nuitée',
+        value: pricing.nightlyAmount,
+      },
+      {
+        label: 'Nuits',
+        value: pricing.nights.toString(),
+      },
+      {
+        label: 'Sous total',
+        value: pricing.subtotal,
+      },
+      {
+        label: 'Taxe de séjour',
+        value: pricing.cityTax,
+      },
+    ];
+  });
 }

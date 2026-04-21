@@ -1,4 +1,4 @@
-<div class="reservation-detail-page">
+<section class="reservation-detail-page" data-ubax-motion="page">
   <header class="reservation-detail-page__header">
     <a
       routerLink="/reservations/liste"
@@ -11,12 +11,14 @@
   </header>
 
   <div class="reservation-detail-page__layout">
-    <section class="profile-card">
+    <section class="profile-card" data-ubax-motion="surface">
       <div class="profile-card__cover-wrap">
         <img
           class="profile-card__cover"
           [src]="reservation().profileCover"
           [alt]="reservation().guest"
+          loading="eager"
+          decoding="async"
         />
       </div>
 
@@ -25,67 +27,69 @@
           class="profile-card__avatar"
           [src]="reservation().profileAvatar"
           [alt]="reservation().guest"
+          loading="eager"
+          decoding="async"
         />
 
-        <div class="profile-card__heading">
-          <h2>{{ reservation().guest }}</h2>
-          <span
-            class="profile-card__status"
-            [class]="
-              'profile-card__status profile-card__status--' + reservation().tone
-            "
-          >
-            {{ reservation().status }}
-          </span>
+        <div class="profile-card__identity">
+          <div class="profile-card__identity-row">
+            <div class="profile-card__name-block">
+              <h2>{{ reservation().guest }}</h2>
+              <p class="profile-card__code">{{ reservation().code }}</p>
+            </div>
+
+            <span
+              [class]="
+                'profile-card__status profile-card__status--' +
+                reservation().tone
+              "
+            >
+              {{ reservation().status }}
+            </span>
+          </div>
         </div>
 
-        <p class="profile-card__code">{{ reservation().code }}</p>
-
         <div class="profile-card__contact-list">
-          <div class="profile-card__contact-item">
-            <span class="profile-card__contact-icon">
-              <img [src]="icons.phone" alt="" />
-            </span>
-            <div>
-              <span class="profile-card__contact-label">Téléphone</span>
-              <strong>{{ reservation().phone }}</strong>
-            </div>
-          </div>
+          @for (item of contactItems(); track item.label) {
+            @if (item.href) {
+              <a
+                class="profile-card__contact-item profile-card__contact-item--link"
+                [href]="item.href"
+                [attr.target]="item.external ? '_blank' : null"
+                [attr.rel]="item.external ? 'noopener noreferrer' : null"
+                [attr.aria-label]="item.label + ' : ' + item.value"
+              >
+                <span class="profile-card__contact-icon">
+                  <img [src]="item.icon" alt="" aria-hidden="true" />
+                </span>
 
-          <div class="profile-card__contact-item">
-            <span class="profile-card__contact-icon">
-              <img [src]="icons.mail" alt="" />
-            </span>
-            <div>
-              <span class="profile-card__contact-label">Email</span>
-              <strong>{{ reservation().email }}</strong>
-            </div>
-          </div>
+                <div>
+                  <span class="profile-card__contact-label">{{
+                    item.label
+                  }}</span>
+                  <strong>{{ item.value }}</strong>
+                </div>
+              </a>
+            } @else {
+              <div class="profile-card__contact-item">
+                <span class="profile-card__contact-icon">
+                  <img [src]="item.icon" alt="" aria-hidden="true" />
+                </span>
 
-          <div class="profile-card__contact-item">
-            <span class="profile-card__contact-icon">
-              <img [src]="icons.locationFill" alt="" />
-            </span>
-            <div>
-              <span class="profile-card__contact-label">Adresse</span>
-              <strong>{{ reservation().address }}</strong>
-            </div>
-          </div>
-
-          <div class="profile-card__contact-item">
-            <span class="profile-card__contact-icon">
-              <img [src]="icons.idCard" alt="" />
-            </span>
-            <div>
-              <span class="profile-card__contact-label">Référence</span>
-              <strong>{{ reservation().reference }}</strong>
-            </div>
-          </div>
+                <div>
+                  <span class="profile-card__contact-label">{{
+                    item.label
+                  }}</span>
+                  <strong>{{ item.value }}</strong>
+                </div>
+              </div>
+            }
+          }
         </div>
       </div>
     </section>
 
-    <section class="detail-card">
+    <section class="detail-card" data-ubax-motion="surface">
       <div class="detail-card__section">
         <div class="detail-card__section-header">
           <h2>Informations générales</h2>
@@ -148,7 +152,7 @@
         <div class="detail-card__amenities">
           @for (amenity of reservation().amenities; track amenity + $index) {
             <span class="detail-card__amenity">
-              <img [src]="icons.check" alt="" />
+              <img [src]="icons.check" alt="" aria-hidden="true" />
               <span>{{ amenity }}</span>
             </span>
           }
@@ -156,12 +160,14 @@
       </div>
     </section>
 
-    <aside class="summary-card">
+    <aside class="summary-card" data-ubax-motion="surface">
       <div class="summary-card__property">
         <img
           class="summary-card__image"
           [src]="reservation().propertyImage"
           [alt]="reservation().property"
+          loading="eager"
+          decoding="async"
         />
 
         <div class="summary-card__property-body">
@@ -171,21 +177,25 @@
           <h2>{{ reservation().property }}</h2>
 
           <p class="summary-card__location">
-            <img [src]="icons.locationFill" alt="" />
+            <img [src]="icons.locationFill" alt="" aria-hidden="true" />
             <span>{{ reservation().propertyLocation }}</span>
           </p>
+        </div>
 
-          <div class="summary-card__tenant">
-            <img
-              [src]="reservation().guestImage"
-              [alt]="reservation().tenantName"
-            />
-            <div>
-              <strong>{{ reservation().tenantName }}</strong>
-              <span>{{ reservation().tenantRole }}</span>
-            </div>
-            <b>{{ reservation().price }}</b>
+        <div class="summary-card__tenant">
+          <img
+            [src]="reservation().guestImage"
+            [alt]="reservation().tenantName"
+            loading="lazy"
+            decoding="async"
+          />
+
+          <div>
+            <strong>{{ reservation().tenantName }}</strong>
+            <span>{{ reservation().tenantRole }}</span>
           </div>
+
+          <b>{{ reservation().price }}</b>
         </div>
       </div>
 
@@ -196,22 +206,12 @@
         </div>
 
         <div class="summary-card__pricing-list">
-          <div class="summary-card__pricing-row">
-            <span>Nuitée</span>
-            <strong>{{ reservation().pricing.nightlyAmount }}</strong>
-          </div>
-          <div class="summary-card__pricing-row">
-            <span>Nuits</span>
-            <strong>{{ reservation().pricing.nights }}</strong>
-          </div>
-          <div class="summary-card__pricing-row">
-            <span>Sous total</span>
-            <strong>{{ reservation().pricing.subtotal }}</strong>
-          </div>
-          <div class="summary-card__pricing-row">
-            <span>Taxe de séjour</span>
-            <strong>{{ reservation().pricing.cityTax }}</strong>
-          </div>
+          @for (row of pricingRows(); track row.label) {
+            <div class="summary-card__pricing-row">
+              <span>{{ row.label }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+          }
         </div>
 
         <div class="summary-card__pricing-total">
@@ -226,6 +226,7 @@
               [alt]="reservation().paymentMethod"
             />
           </span>
+
           <div>
             <span class="summary-card__payment-label">Méthode de paiement</span>
             <strong>{{ reservation().paymentMethod }}</strong>
@@ -234,4 +235,4 @@
       </div>
     </aside>
   </div>
-</div>
+</section>
