@@ -4,6 +4,7 @@ import {
   computed,
   effect,
   input,
+  output,
   signal,
 } from '@angular/core';
 import {
@@ -31,6 +32,7 @@ type MiniCalendarWeek = readonly MiniCalendarCell[];
 export class ReservationMiniCalendarComponent {
   readonly initialMonth = input<Date>(COMMERCIAL_DISPLAY_MONTH);
   readonly activeDate = input<Date | null>(COMMERCIAL_ACTIVE_DATE);
+  readonly monthChange = output<Date>();
 
   protected readonly icons = COMMERCIAL_ICON_ASSETS;
   protected readonly weekLabels = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
@@ -51,16 +53,18 @@ export class ReservationMiniCalendarComponent {
 
   protected previousMonth(): void {
     const month = this.displayMonth();
-    this.displayMonth.set(
-      new Date(month.getFullYear(), month.getMonth() - 1, 1),
-    );
+    const nextMonth = new Date(month.getFullYear(), month.getMonth() - 1, 1);
+
+    this.displayMonth.set(nextMonth);
+    this.monthChange.emit(nextMonth);
   }
 
   protected nextMonth(): void {
     const month = this.displayMonth();
-    this.displayMonth.set(
-      new Date(month.getFullYear(), month.getMonth() + 1, 1),
-    );
+    const nextMonth = new Date(month.getFullYear(), month.getMonth() + 1, 1);
+
+    this.displayMonth.set(nextMonth);
+    this.monthChange.emit(nextMonth);
   }
 
   private buildWeeks(

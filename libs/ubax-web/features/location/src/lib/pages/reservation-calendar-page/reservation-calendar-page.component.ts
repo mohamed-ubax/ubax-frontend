@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  HostListener,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -54,6 +55,19 @@ interface LegendEntry {
   readonly tone: 'green' | 'orange' | 'blue';
 }
 
+interface PropertyFilterOption {
+  readonly value: string;
+  readonly label: string;
+  readonly tone: 'neutral' | 'green' | 'orange' | 'blue';
+}
+
+const PROPERTY_FILTER_ORDER = ['Résidence', 'Villa', 'Appartement'] as const;
+const PROPERTY_FILTER_TONES: Record<string, PropertyFilterOption['tone']> = {
+  Résidence: 'green',
+  Appartement: 'orange',
+  Villa: 'blue',
+};
+
 @Component({
   selector: 'ubax-reservation-calendar-page',
   standalone: true,
@@ -70,29 +84,90 @@ interface LegendEntry {
 export class ReservationCalendarPageComponent {
   readonly icons = COMMERCIAL_ICON_ASSETS;
   readonly weekLabels = [
+    'Dimanche',
     'Lundi',
     'Mardi',
     'Mercredi',
     'Jeudi',
     'Vendredi',
     'Samedi',
-    'Dimanche',
   ];
   readonly datePickerOpen = signal(false);
+  readonly propertyFilterOpen = signal(false);
   readonly selectedRange = signal<DateRange | null>(null);
+  readonly selectedPropertyCategory = signal('');
   readonly searchTerm = signal('');
   readonly currentMonth = signal(COMMERCIAL_DISPLAY_MONTH);
   readonly activeDate = signal(COMMERCIAL_ACTIVE_DATE);
+
+  readonly propertyFilterOptions = computed<PropertyFilterOption[]>(() => {
+    const categories = [
+      ...new Set(
+        COMMERCIAL_RESERVATIONS.map(
+          (reservation) => reservation.propertyCategory,
+        ),
+      ),
+    ].sort((left, right) => {
+      const leftIndex = PROPERTY_FILTER_ORDER.indexOf(
+        left as (typeof PROPERTY_FILTER_ORDER)[number],
+      );
+      const rightIndex = PROPERTY_FILTER_ORDER.indexOf(
+        right as (typeof PROPERTY_FILTER_ORDER)[number],
+      );
+
+      if (leftIndex === -1 && rightIndex === -1) {
+        return left.localeCompare(right, 'fr');
+      }
+
+      if (leftIndex === -1) {
+        return 1;
+      }
+
+      if (rightIndex === -1) {
+        return -1;
+      }
+
+      return leftIndex - rightIndex;
+    });
+
+    return [
+      {
+        value: '',
+        label: 'Tous les biens',
+        tone: 'neutral',
+      },
+      ...categories.map((category) => ({
+        value: category,
+        label: category,
+        tone: PROPERTY_FILTER_TONES[category] ?? 'neutral',
+      })),
+    ];
+  });
+
+  readonly selectedPropertyOption = computed<PropertyFilterOption>(() => {
+    return (
+      this.propertyFilterOptions().find(
+        (option) => option.value === this.selectedPropertyCategory(),
+      ) ?? this.propertyFilterOptions()[0]
+    );
+  });
 
   readonly filteredReservations = computed(() =>
     filterReservations(
       COMMERCIAL_RESERVATIONS,
       this.searchTerm(),
       this.selectedRange(),
+      this.selectedPropertyCategory(),
     ),
   );
 
   readonly monthLabel = computed(() => formatMonthLabel(this.currentMonth()));
+  readonly hasActiveFilters = computed(
+    () =>
+      this.searchTerm().trim().length > 0 ||
+      this.selectedRange() !== null ||
+      this.selectedPropertyCategory().length > 0,
+  );
 
   readonly legendEntries = computed<LegendEntry[]>(() => {
     const entries = new Map<string, LegendEntry>();
@@ -116,7 +191,7 @@ export class ReservationCalendarPageComponent {
     const firstDay = new Date(year, monthIndex, 1);
     const lastDay = new Date(year, monthIndex + 1, 0);
     const monthDays: CalendarDay[] = [];
-    const firstDayOffset = (firstDay.getDay() + 6) % 7;
+    const firstDayOffset = firstDay.getDay();
 
     for (let day = firstDayOffset; day > 0; day -= 1) {
       const date = new Date(year, monthIndex, 1 - day);
@@ -248,6 +323,59 @@ export class ReservationCalendarPageComponent {
     this.selectedRange.set(range);
   }
 
+  onMonthChange(month: Date): void {
+    this.currentMonth.set(new Date(month.getFullYear(), month.getMonth(), 1));
+  }
+
+  onPropertyFilterChange(value: string): void {
+    this.selectedPropertyCategory.set(value);
+  }
+
+  protected clearFilters(): void {
+    this.searchTerm.set('');
+    this.selectedRange.set(null);
+    this.selectedPropertyCategory.set('');
+    this.propertyFilterOpen.set(false);
+    this.datePickerOpen.set(false);
+  }
+
+  protected togglePropertyFilter(): void {
+    this.propertyFilterOpen.update((isOpen) => !isOpen);
+  }
+
+  protected selectPropertyOption(value: string): void {
+    this.onPropertyFilterChange(value);
+    this.propertyFilterOpen.set(false);
+  }
+
+  protected propertyFilterOptionClass(option: PropertyFilterOption): string {
+    const classes = ['calendar-property-filter__option'];
+
+    if (option.value === this.selectedPropertyCategory()) {
+      classes.push('is-active');
+    }
+
+    classes.push(`calendar-property-filter__option--${option.tone}`);
+
+    return classes.join(' ');
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected handleDocumentClick(event: MouseEvent): void {
+    const target = event.target;
+
+    if (target instanceof HTMLElement && target.closest('.filter-dropdown')) {
+      return;
+    }
+
+    this.propertyFilterOpen.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected handleEscapeKey(): void {
+    this.propertyFilterOpen.set(false);
+  }
+
   protected previousMonth(): void {
     const month = this.currentMonth();
     this.currentMonth.set(
@@ -297,6 +425,20 @@ export class ReservationCalendarPageComponent {
     }
 
     return classes.join(' ');
+  }
+
+  protected eventPopoverClass(event: CalendarReservationEvent): string {
+    const classes = ['calendar-event__popover'];
+
+    if (event.endCol >= 5) {
+      classes.push('calendar-event__popover--align-right');
+    }
+
+    return classes.join(' ');
+  }
+
+  protected eventTooltipDetails(event: CalendarReservationEvent): string {
+    return `${event.guest} · ${event.property} · ${event.dateRange} · ${event.amount}`;
   }
 
   private createCalendarDay(date: Date, isCurrentMonth: boolean): CalendarDay {

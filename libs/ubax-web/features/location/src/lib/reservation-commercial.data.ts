@@ -163,11 +163,13 @@ export const COMMERCIAL_ICON_ASSETS = {
   check: `${ICON_ROOT}/check.webp`,
   calendar: `${CLIENT_ICON_ROOT}/calendar.svg`,
   export: `${ICON_ROOT}/export.webp`,
+  toolbarCalendar: '/archivages/commercial/icons/calendar-toolbar.webp',
+  selectChevron: '/archivages/commercial/icons/chevron-down.webp',
   phone: `${CLIENT_ICON_ROOT}/phone.svg`,
   mail: `${CLIENT_ICON_ROOT}/mail.svg`,
   wave: `${CLIENT_ICON_ROOT}/wave-logo.webp`,
-  chevronLeft: '/calendar/icons/raphael_arrow_left.svg',
-  chevronRight: '/calendar/icons/raphael_arrow_right.svg',
+  chevronLeft: '/calendar/icons/raphael_arrow_left.webp',
+  chevronRight: '/calendar/icons/raphael_arrow_right.webp',
 } as const;
 
 function createDate(year: number, month: number, day: number): Date {
@@ -764,6 +766,7 @@ export function filterReservations(
   reservations: readonly CommercialReservation[],
   query: string,
   range: { readonly start: Date; readonly end: Date } | null,
+  propertyCategory: string | null = null,
 ): CommercialReservation[] {
   const normalizedQuery = normalizeText(query);
   const rangeStart = range ? startOfDay(range.start) : null;
@@ -778,8 +781,12 @@ export function filterReservations(
       rangeEnd === null ||
       (startOfDay(reservation.arrivalDate) <= rangeEnd &&
         startOfDay(reservation.departureDate) >= rangeStart);
+    const matchesPropertyCategory =
+      propertyCategory === null ||
+      propertyCategory.length === 0 ||
+      reservation.propertyCategory === propertyCategory;
 
-    return matchesQuery && matchesRange;
+    return matchesQuery && matchesRange && matchesPropertyCategory;
   });
 }
 
