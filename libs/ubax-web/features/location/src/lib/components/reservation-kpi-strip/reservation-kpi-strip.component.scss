@@ -5,7 +5,7 @@
 .reservation-kpi-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 19px;
+  gap: 20px;
 }
 
 .reservation-kpi-card {
@@ -13,7 +13,7 @@
   border-radius: 10px;
   border: 1px solid #f0f8ff;
   background: var(--ubax-surface);
-  padding: 18px 21px 16px;
+  padding: 18px 21px 14px;
   display: flex;
   flex-direction: column;
 }
@@ -27,12 +27,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
 }
 
 .reservation-kpi-card__label {
   margin: 0;
-  font-family: 'Inter', 'Lexend', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 13px;
   font-weight: 500;
   line-height: 18px;
@@ -44,10 +44,9 @@
 }
 
 .reservation-kpi-card__icon-shell {
-  width: 50px;
-  height: 50px;
+  width: 34.994px;
+  height: 34.805px;
   border-radius: 20px;
-  background: var(--ubax-page-bg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -55,18 +54,35 @@
 }
 
 .reservation-kpi-card--new .reservation-kpi-card__icon-shell {
-  background: rgb(255 255 255 / 0.18);
+  width: 50.289px;
+  height: 49.313px;
+  background: rgb(255 255 255);
+}
+
+.reservation-kpi-card--arrival .reservation-kpi-card__icon-shell,
+.reservation-kpi-card--departure .reservation-kpi-card__icon-shell,
+.reservation-kpi-card--revenue .reservation-kpi-card__icon-shell {
+  background: var(--ubax-page-bg);
 }
 
 .reservation-kpi-card__icon-shell img {
-  width: 22px;
-  height: 22px;
+  width: 17.419px;
+  height: 17.419px;
   object-fit: contain;
 }
 
+.reservation-kpi-card--new .reservation-kpi-card__icon-shell img {
+  width: 21px;
+  height: 20px;
+}
+
+.reservation-kpi-card--revenue .reservation-kpi-card__icon-shell img {
+  width: 13.064px;
+  height: 20px;
+}
+
 .reservation-kpi-card__value {
-  margin: 14px 0 0;
-  font-family: 'Inter', 'Lexend', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 24px;
   font-weight: 600;
   line-height: 1.1;
@@ -85,18 +101,18 @@
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   flex-wrap: wrap;
 }
 
 .reservation-kpi-card__delta-pill {
   min-height: 27px;
-  padding: 0 11px 0 9px;
+  padding: 0 10px 0 9px;
   border-radius: 15.923px;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-family: 'Inter', 'Lexend', sans-serif;
+  gap: 6px;
+  font-family: 'Lexend', sans-serif;
   font-size: 10px;
   font-weight: 500;
   color: var(--ubax-text-primary);
@@ -104,13 +120,13 @@
 }
 
 .reservation-kpi-card__delta-pill img {
-  width: 16px;
-  height: 16px;
+  width: 16.875px;
+  height: 16.875px;
   object-fit: contain;
 }
 
 .reservation-kpi-card__caption {
-  font-family: 'Inter', 'Lexend', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 10px;
   font-weight: 500;
   line-height: 14px;

@@ -46,10 +46,11 @@ export class ReservationPageComponent {
   readonly selectedRange = signal<DateRange | null>(null);
   readonly searchTerm = signal('');
   readonly currentPage = signal(1);
+  readonly reservations = signal([...COMMERCIAL_RESERVATIONS]);
 
   readonly filteredReservations = computed(() => {
     return filterReservations(
-      COMMERCIAL_RESERVATIONS,
+      this.reservations(),
       this.searchTerm(),
       this.selectedRange(),
     );
@@ -86,6 +87,33 @@ export class ReservationPageComponent {
   onDateRangeApplied(range: DateRange): void {
     this.selectedRange.set(range);
     this.currentPage.set(1);
+  }
+
+  protected confirmReservation(reservationId: string): void {
+    this.reservations.update((reservations) =>
+      reservations.map((reservation) => {
+        if (
+          reservation.id !== reservationId ||
+          reservation.status === 'Confirmé'
+        ) {
+          return reservation;
+        }
+
+        return {
+          ...reservation,
+          status: 'Confirmé',
+          tone: 'success',
+        };
+      }),
+    );
+  }
+
+  protected confirmLabel(status: string): string {
+    return status === 'Confirmé' ? 'Confirmé' : 'Confirmer';
+  }
+
+  protected isConfirmed(status: string): boolean {
+    return status === 'Confirmé';
   }
 
   protected rangeLabel(): string {

@@ -7,13 +7,16 @@
         class="page-chip page-chip--search"
         aria-label="Rechercher une réservation"
       >
-        <img [src]="icons.searchHeader" alt="" />
         <input
           type="text"
           placeholder="Recherche ..."
           [ngModel]="searchTerm()"
           (ngModelChange)="onSearchChange($event)"
         />
+
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--search">
+          <img [src]="icons.searchHeader" alt="" />
+        </span>
       </label>
 
       <button
@@ -22,16 +25,16 @@
         (click)="datePickerOpen.set(true)"
       >
         <span>{{ rangeLabel() }}</span>
-        <span class="page-chip__icon-wrap">
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--date">
           <img [src]="icons.calendar" alt="" />
         </span>
       </button>
 
       <button type="button" class="page-chip page-chip--export">
-        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
-          <img [src]="icons.download" alt="" />
-        </span>
         <span>Exporter les données</span>
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
+          <img [src]="icons.export" alt="" />
+        </span>
       </button>
     </div>
   </header>
@@ -118,20 +121,38 @@
             </span>
 
             <div class="reservation-table__actions">
-              <a
-                [routerLink]="['/reservations', reservation.id]"
-                class="reservation-table__action reservation-table__action--view"
-                aria-label="Voir le détail de la réservation"
-              >
-                <img [src]="icons.actionEye" alt="" />
-              </a>
+              <span class="reservation-table__icon-group">
+                <a
+                  [routerLink]="['/reservations', reservation.id]"
+                  class="reservation-table__icon-action reservation-table__icon-action--view"
+                  aria-label="Voir le détail de la réservation"
+                >
+                  <img [src]="icons.actionEye" alt="" />
+                </a>
+
+                <a
+                  routerLink="/reservations/ajouter"
+                  [queryParams]="{
+                    reservationId: reservation.id,
+                    mode: 'edit',
+                  }"
+                  class="reservation-table__icon-action reservation-table__icon-action--edit"
+                  aria-label="Modifier la réservation"
+                >
+                  <img [src]="icons.actionEdit" alt="" />
+                </a>
+              </span>
 
               <button
                 type="button"
                 class="reservation-table__action reservation-table__action--confirm"
+                [class.reservation-table__action--confirmed]="
+                  isConfirmed(reservation.status)
+                "
+                [disabled]="isConfirmed(reservation.status)"
+                (click)="confirmReservation(reservation.id)"
               >
-                <img [src]="icons.actionEdit" alt="" />
-                <span>Confirmer</span>
+                <span>{{ confirmLabel(reservation.status) }}</span>
               </button>
             </div>
           </div>

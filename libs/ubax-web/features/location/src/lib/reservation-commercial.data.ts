@@ -33,6 +33,25 @@ export interface ReservationPropertyCard {
   readonly avatar: string;
 }
 
+export interface CommercialOverviewSnapshot {
+  readonly month: Date;
+  readonly newReservations: number;
+  readonly arrivals: number;
+  readonly departures: number;
+  readonly totalRevenue: number;
+  readonly newReservationsDelta: string;
+  readonly arrivalsDelta: string;
+  readonly departuresDelta: string;
+  readonly totalRevenueDelta: string;
+  readonly availability: readonly ReservationAvailabilityMetric[];
+}
+
+export interface CommercialRevenuePoint {
+  readonly label: string;
+  readonly month: Date;
+  readonly value: number;
+}
+
 export interface ReservationPricing {
   readonly nightlyAmount: string;
   readonly nights: number;
@@ -143,7 +162,7 @@ export const COMMERCIAL_ICON_ASSETS = {
   idCard: `${ICON_ROOT}/id-card.webp`,
   check: `${ICON_ROOT}/check.webp`,
   calendar: `${CLIENT_ICON_ROOT}/calendar.svg`,
-  download: `${CLIENT_ICON_ROOT}/download.svg`,
+  export: `${ICON_ROOT}/export.webp`,
   phone: `${CLIENT_ICON_ROOT}/phone.svg`,
   mail: `${CLIENT_ICON_ROOT}/mail.svg`,
   wave: `${CLIENT_ICON_ROOT}/wave-logo.webp`,
@@ -185,6 +204,12 @@ export function formatDateRange(
   separator = ' - ',
 ): string {
   return `${formatShortDate(start)}${separator}${formatShortDate(end)}`;
+}
+
+export function formatFcfa(value: number): string {
+  return `${new Intl.NumberFormat('fr-FR')
+    .format(value)
+    .replaceAll(/\u202f/g, ' ')} FCFA`;
 }
 
 function createDurationLabel(start: Date, end: Date): string {
@@ -242,54 +267,6 @@ export const COMMERCIAL_DISPLAY_MONTH = createDate(2026, 4, 1);
 export const COMMERCIAL_ACTIVE_DATE = createDate(2026, 4, 18);
 export const COMMERCIAL_DETAIL_RESERVATION_ID = '0245';
 
-export const COMMERCIAL_RESERVATION_KPIS: readonly ReservationKpiCard[] = [
-  {
-    tone: 'new',
-    label: 'Nouvelles réservations',
-    value: '150',
-    delta: '20 %',
-    caption: 'la semaine dernière',
-    icon: COMMERCIAL_ICON_ASSETS.kpiCalendar,
-    trendIcon: COMMERCIAL_ICON_ASSETS.trendUpDark,
-  },
-  {
-    tone: 'arrival',
-    label: 'Arrivée',
-    value: '102',
-    delta: '3.40 %',
-    caption: 'la semaine dernière',
-    icon: COMMERCIAL_ICON_ASSETS.kpiArrival,
-    trendIcon: COMMERCIAL_ICON_ASSETS.trendUpGreen,
-  },
-  {
-    tone: 'departure',
-    label: 'Départ',
-    value: '48',
-    delta: '3.40 %',
-    caption: 'la semaine dernière',
-    icon: COMMERCIAL_ICON_ASSETS.kpiArrival,
-    trendIcon: COMMERCIAL_ICON_ASSETS.trendDownRed,
-  },
-  {
-    tone: 'revenue',
-    label: 'Revenus totaux',
-    value: '2 250 000 FCFA',
-    delta: '3.40 %',
-    caption: 'la semaine dernière',
-    icon: COMMERCIAL_ICON_ASSETS.kpiRevenue,
-    trendIcon: COMMERCIAL_ICON_ASSETS.trendUpGreen,
-    compactValue: true,
-  },
-] as const;
-
-export const COMMERCIAL_AVAILABILITY_METRICS: readonly ReservationAvailabilityMetric[] =
-  [
-    { label: 'Occupés', value: 102, tone: 'green', share: 72 },
-    { label: 'Réservés', value: 20, tone: 'orange', share: 15 },
-    { label: 'Disponible', value: 75, tone: 'blue', share: 9 },
-    { label: 'Pas prêts', value: 22, tone: 'red', share: 4 },
-  ] as const;
-
 export const COMMERCIAL_PROPERTY_CARDS: readonly ReservationPropertyCard[] = [
   {
     id: 'kalia-01',
@@ -315,25 +292,172 @@ export const COMMERCIAL_PROPERTY_CARDS: readonly ReservationPropertyCard[] = [
   },
 ] as const;
 
-export const COMMERCIAL_REVENUE_LABELS = [
-  'JAN',
-  'FEB',
-  'MAR',
-  'AVR',
-  'MAI',
-  'JUI',
-  'JUI',
-  'AOU',
-  'SEP',
-  'OCT',
-  'NOV',
-  'DEC',
+const COMMERCIAL_OVERVIEW_SNAPSHOTS: readonly CommercialOverviewSnapshot[] = [
+  {
+    month: createDate(2026, 1, 1),
+    newReservations: 118,
+    arrivals: 86,
+    departures: 39,
+    totalRevenue: 1650000,
+    newReservationsDelta: '12.50 %',
+    arrivalsDelta: '2.85 %',
+    departuresDelta: '2.10 %',
+    totalRevenueDelta: '2.70 %',
+    availability: [
+      { label: 'Occupés', value: 92, tone: 'green', share: 68 },
+      { label: 'Réservés', value: 17, tone: 'orange', share: 16 },
+      { label: 'Disponible', value: 82, tone: 'blue', share: 11 },
+      { label: 'Pas prêts', value: 19, tone: 'red', share: 5 },
+    ],
+  },
+  {
+    month: createDate(2026, 2, 1),
+    newReservations: 129,
+    arrivals: 91,
+    departures: 42,
+    totalRevenue: 1890000,
+    newReservationsDelta: '9.30 %',
+    arrivalsDelta: '3.10 %',
+    departuresDelta: '2.75 %',
+    totalRevenueDelta: '3.15 %',
+    availability: [
+      { label: 'Occupés', value: 95, tone: 'green', share: 70 },
+      { label: 'Réservés', value: 18, tone: 'orange', share: 14 },
+      { label: 'Disponible', value: 79, tone: 'blue', share: 11 },
+      { label: 'Pas prêts', value: 20, tone: 'red', share: 5 },
+    ],
+  },
+  {
+    month: createDate(2026, 3, 1),
+    newReservations: 141,
+    arrivals: 97,
+    departures: 45,
+    totalRevenue: 2100000,
+    newReservationsDelta: '10.20 %',
+    arrivalsDelta: '3.20 %',
+    departuresDelta: '3.05 %',
+    totalRevenueDelta: '3.25 %',
+    availability: [
+      { label: 'Occupés', value: 99, tone: 'green', share: 71 },
+      { label: 'Réservés', value: 19, tone: 'orange', share: 15 },
+      { label: 'Disponible', value: 76, tone: 'blue', share: 10 },
+      { label: 'Pas prêts', value: 21, tone: 'red', share: 4 },
+    ],
+  },
+  {
+    month: createDate(2026, 4, 1),
+    newReservations: 150,
+    arrivals: 102,
+    departures: 48,
+    totalRevenue: 2250000,
+    newReservationsDelta: '20 %',
+    arrivalsDelta: '3.40 %',
+    departuresDelta: '3.40 %',
+    totalRevenueDelta: '3.40 %',
+    availability: [
+      { label: 'Occupés', value: 102, tone: 'green', share: 72 },
+      { label: 'Réservés', value: 20, tone: 'orange', share: 15 },
+      { label: 'Disponible', value: 75, tone: 'blue', share: 9 },
+      { label: 'Pas prêts', value: 22, tone: 'red', share: 4 },
+    ],
+  },
 ] as const;
 
-export const COMMERCIAL_REVENUE_VALUES = [
-  400000, 860000, 1540000, 3500000, 2400000, 4200000, 5100000, 5800000, 6600000,
-  7100000, 7900000, 9200000,
+const COMMERCIAL_DEFAULT_OVERVIEW_SNAPSHOT =
+  COMMERCIAL_OVERVIEW_SNAPSHOTS[COMMERCIAL_OVERVIEW_SNAPSHOTS.length - 1];
+
+export function buildCommercialReservationKpis(
+  snapshot: CommercialOverviewSnapshot,
+): readonly ReservationKpiCard[] {
+  return [
+    {
+      tone: 'new',
+      label: 'Nouvelles réservations',
+      value: snapshot.newReservations.toString(),
+      delta: snapshot.newReservationsDelta,
+      caption: 'la semaine dernière',
+      icon: COMMERCIAL_ICON_ASSETS.kpiCalendar,
+      trendIcon: COMMERCIAL_ICON_ASSETS.trendUpDark,
+    },
+    {
+      tone: 'arrival',
+      label: 'Arrivée',
+      value: snapshot.arrivals.toString(),
+      delta: snapshot.arrivalsDelta,
+      caption: 'la semaine dernière',
+      icon: COMMERCIAL_ICON_ASSETS.kpiArrival,
+      trendIcon: COMMERCIAL_ICON_ASSETS.trendUpGreen,
+    },
+    {
+      tone: 'departure',
+      label: 'Départ',
+      value: snapshot.departures.toString(),
+      delta: snapshot.departuresDelta,
+      caption: 'la semaine dernière',
+      icon: COMMERCIAL_ICON_ASSETS.kpiArrival,
+      trendIcon: COMMERCIAL_ICON_ASSETS.trendDownRed,
+    },
+    {
+      tone: 'revenue',
+      label: 'Revenus totaux',
+      value: formatFcfa(snapshot.totalRevenue),
+      delta: snapshot.totalRevenueDelta,
+      caption: 'la semaine dernière',
+      icon: COMMERCIAL_ICON_ASSETS.kpiRevenue,
+      trendIcon: COMMERCIAL_ICON_ASSETS.trendUpGreen,
+      compactValue: true,
+    },
+  ] as const;
+}
+
+export function resolveCommercialOverviewSnapshot(
+  range: { readonly start: Date; readonly end: Date } | null,
+): CommercialOverviewSnapshot {
+  if (range === null) {
+    return COMMERCIAL_DEFAULT_OVERVIEW_SNAPSHOT;
+  }
+
+  const targetYear = range.end.getFullYear();
+  const targetMonth = range.end.getMonth();
+
+  return (
+    COMMERCIAL_OVERVIEW_SNAPSHOTS.find(
+      (snapshot) =>
+        snapshot.month.getFullYear() === targetYear &&
+        snapshot.month.getMonth() === targetMonth,
+    ) ?? COMMERCIAL_DEFAULT_OVERVIEW_SNAPSHOT
+  );
+}
+
+export const COMMERCIAL_RESERVATION_KPIS = buildCommercialReservationKpis(
+  COMMERCIAL_DEFAULT_OVERVIEW_SNAPSHOT,
+);
+
+export const COMMERCIAL_AVAILABILITY_METRICS =
+  COMMERCIAL_DEFAULT_OVERVIEW_SNAPSHOT.availability;
+
+export const COMMERCIAL_REVENUE_SERIES: readonly CommercialRevenuePoint[] = [
+  { label: 'JAN', month: createDate(2026, 1, 1), value: 400000 },
+  { label: 'FEB', month: createDate(2026, 2, 1), value: 860000 },
+  { label: 'MAR', month: createDate(2026, 3, 1), value: 1540000 },
+  { label: 'AVR', month: createDate(2026, 4, 1), value: 3500000 },
+  { label: 'MAI', month: createDate(2026, 5, 1), value: 2400000 },
+  { label: 'JUI', month: createDate(2026, 6, 1), value: 4200000 },
+  { label: 'JUI', month: createDate(2026, 7, 1), value: 5100000 },
+  { label: 'AOU', month: createDate(2026, 8, 1), value: 5800000 },
+  { label: 'SEP', month: createDate(2026, 9, 1), value: 6600000 },
+  { label: 'OCT', month: createDate(2026, 10, 1), value: 7100000 },
+  { label: 'NOV', month: createDate(2026, 11, 1), value: 7900000 },
+  { label: 'DEC', month: createDate(2026, 12, 1), value: 9200000 },
 ] as const;
+
+export const COMMERCIAL_REVENUE_LABELS = COMMERCIAL_REVENUE_SERIES.map(
+  (point) => point.label,
+);
+
+export const COMMERCIAL_REVENUE_VALUES = COMMERCIAL_REVENUE_SERIES.map(
+  (point) => point.value,
+);
 
 export const COMMERCIAL_RESERVATIONS: readonly CommercialReservation[] = [
   createReservation({

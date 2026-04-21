@@ -7,13 +7,16 @@
         class="page-chip page-chip--search"
         aria-label="Rechercher une réservation"
       >
-        <img [src]="icons.searchHeader" alt="" />
         <input
           type="text"
           placeholder="Recherche ..."
           [ngModel]="searchTerm()"
           (ngModelChange)="onSearchChange($event)"
         />
+
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--search">
+          <img [src]="icons.searchHeader" alt="" />
+        </span>
       </label>
 
       <button
@@ -22,40 +25,38 @@
         (click)="datePickerOpen.set(true)"
       >
         <span>{{ rangeLabel() }}</span>
-        <span class="page-chip__icon-wrap">
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--date">
           <img [src]="icons.calendar" alt="" />
         </span>
       </button>
 
       <button type="button" class="page-chip page-chip--export">
-        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
-          <img [src]="icons.download" alt="" />
-        </span>
         <span>Exporter les données</span>
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
+          <img [src]="icons.export" alt="" />
+        </span>
       </button>
     </div>
   </header>
 
-  <ubax-reservation-kpi-strip [cards]="kpiCards" />
+  <ubax-reservation-kpi-strip [cards]="kpiCards()" />
 
   <div class="reservation-overview__top-grid">
     <section class="panel panel--availability">
       <h2 class="panel__title">Disponibilité des piéces</h2>
 
-      <div class="availability-bar">
-        @for (metric of availabilityMetrics; track metric.label) {
-          <span
-            class="availability-bar__segment"
-            [class]="
-              'availability-bar__segment availability-bar__segment--' +
-              metric.tone
-            "
-          ></span>
-        }
+      <div class="availability-bar" aria-hidden="true">
+        <div class="availability-bar__chart">
+          <p-chart
+            type="bar"
+            [data]="availabilityChartData()"
+            [options]="availabilityChartOptions"
+          />
+        </div>
       </div>
 
       <div class="availability-stats">
-        @for (metric of availabilityMetrics; track metric.label) {
+        @for (metric of availabilityMetrics(); track metric.label) {
           <article class="availability-stat">
             <span
               class="availability-stat__marker"
@@ -85,20 +86,33 @@
       </div>
 
       <div class="revenue-panel__chart-wrap">
-        <div class="revenue-panel__callout">3 500 000 FCFA</div>
-        <div class="revenue-panel__guide"></div>
-        <ubax-lazy-chart
-          type="line"
-          [data]="revenueChartData"
-          [options]="revenueChartOptions"
-          height="400px"
-        />
+        <div
+          class="revenue-panel__callout"
+          [style.left]="activeRevenueOffset()"
+        >
+          {{ activeRevenueLabel() }}
+        </div>
+
+        <div
+          class="revenue-panel__guide"
+          [style.left]="activeRevenueOffset()"
+          aria-hidden="true"
+        ></div>
+
+        <div class="revenue-panel__chart">
+          <p-chart
+            type="line"
+            [data]="revenueChartData()"
+            [options]="revenueChartOptions"
+            [plugins]="revenueChartPlugins()"
+          />
+        </div>
       </div>
     </section>
   </div>
 
   <div class="reservation-overview__bottom-grid">
-    @for (property of propertyCards; track property.id) {
+    @for (property of propertyCards(); track property.id) {
       <article class="property-card">
         <img
           class="property-card__image"
@@ -111,12 +125,27 @@
         <span class="property-card__badge">{{ property.badge }}</span>
 
         <div class="property-card__overlay">
-          <p class="property-card__title">{{ property.title }}</p>
+          <div class="property-card__overlay-header">
+            <div>
+              <p class="property-card__title">{{ property.title }}</p>
 
-          <p class="property-card__location">
-            <img [src]="icons.locationFill" alt="" />
-            <span>{{ property.location }}</span>
-          </p>
+              <p class="property-card__location">
+                <img [src]="icons.locationFill" alt="" />
+                <span>{{ property.location }}</span>
+              </p>
+            </div>
+
+            <a
+              [routerLink]="[
+                '/reservations/locataires',
+                property.reservationId,
+              ]"
+              class="property-card__open"
+              aria-label="Ouvrir la fiche locataire"
+            >
+              <i class="pi pi-arrow-up-right"></i>
+            </a>
+          </div>
 
           <div class="property-card__footer">
             <div class="property-card__tenant">
@@ -235,20 +264,38 @@
             </span>
 
             <div class="reservation-table__actions">
-              <a
-                [routerLink]="['/reservations', reservation.id]"
-                class="reservation-table__action reservation-table__action--view"
-                aria-label="Voir le détail de la réservation"
-              >
-                <img [src]="icons.actionEye" alt="" />
-              </a>
+              <span class="reservation-table__icon-group">
+                <a
+                  [routerLink]="['/reservations', reservation.id]"
+                  class="reservation-table__icon-action reservation-table__icon-action--view"
+                  aria-label="Voir le détail de la réservation"
+                >
+                  <img [src]="icons.actionEye" alt="" />
+                </a>
+
+                <a
+                  routerLink="/reservations/ajouter"
+                  [queryParams]="{
+                    reservationId: reservation.id,
+                    mode: 'edit',
+                  }"
+                  class="reservation-table__icon-action reservation-table__icon-action--edit"
+                  aria-label="Modifier la réservation"
+                >
+                  <img [src]="icons.actionEdit" alt="" />
+                </a>
+              </span>
 
               <button
                 type="button"
                 class="reservation-table__action reservation-table__action--confirm"
+                [class.reservation-table__action--confirmed]="
+                  isConfirmed(reservation)
+                "
+                [disabled]="isConfirmed(reservation)"
+                (click)="confirmReservation(reservation.id)"
               >
-                <img [src]="icons.actionEdit" alt="" />
-                <span>Confirmer</span>
+                <span>{{ confirmLabel(reservation) }}</span>
               </button>
             </div>
           </div>
