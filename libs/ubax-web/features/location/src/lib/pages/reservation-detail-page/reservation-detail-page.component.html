@@ -1,0 +1,238 @@
+<section class="reservation-detail-page" data-ubax-motion="page">
+  <header class="reservation-detail-page__header">
+    <a
+      routerLink="/reservations/liste"
+      class="reservation-detail-page__back-btn"
+      aria-label="Retour à la liste des réservations"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </a>
+    <h1 class="reservation-detail-page__title">Détail de réservation</h1>
+  </header>
+
+  <div class="reservation-detail-page__layout">
+    <section class="profile-card" data-ubax-motion="surface">
+      <div class="profile-card__cover-wrap">
+        <img
+          class="profile-card__cover"
+          [src]="reservation().profileCover"
+          [alt]="reservation().guest"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+
+      <div class="profile-card__body">
+        <img
+          class="profile-card__avatar"
+          [src]="reservation().profileAvatar"
+          [alt]="reservation().guest"
+          loading="eager"
+          decoding="async"
+        />
+
+        <div class="profile-card__identity">
+          <div class="profile-card__identity-row">
+            <div class="profile-card__name-block">
+              <h2>{{ reservation().guest }}</h2>
+              <p class="profile-card__code">{{ reservation().code }}</p>
+            </div>
+
+            <span
+              [class]="
+                'profile-card__status profile-card__status--' +
+                reservation().tone
+              "
+            >
+              {{ reservation().status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="profile-card__contact-list">
+          @for (item of contactItems(); track item.label) {
+            @if (item.href) {
+              <a
+                class="profile-card__contact-item profile-card__contact-item--link"
+                [href]="item.href"
+                [attr.target]="item.external ? '_blank' : null"
+                [attr.rel]="item.external ? 'noopener noreferrer' : null"
+                [attr.aria-label]="item.label + ' : ' + item.value"
+              >
+                <span class="profile-card__contact-icon">
+                  <img [src]="item.icon" alt="" aria-hidden="true" />
+                </span>
+
+                <div>
+                  <span class="profile-card__contact-label">{{
+                    item.label
+                  }}</span>
+                  <strong>{{ item.value }}</strong>
+                </div>
+              </a>
+            } @else {
+              <div class="profile-card__contact-item">
+                <span class="profile-card__contact-icon">
+                  <img [src]="item.icon" alt="" aria-hidden="true" />
+                </span>
+
+                <div>
+                  <span class="profile-card__contact-label">{{
+                    item.label
+                  }}</span>
+                  <strong>{{ item.value }}</strong>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-card" data-ubax-motion="surface">
+      <div class="detail-card__section">
+        <div class="detail-card__section-header">
+          <h2>Informations générales</h2>
+          <span class="detail-card__badge">{{
+            reservation().propertyCategory
+          }}</span>
+        </div>
+
+        <div class="detail-card__grid">
+          <article class="detail-card__field">
+            <span>Arrivée</span>
+            <strong>{{
+              reservation().arrivalDate | date: 'dd MMMM yyyy'
+            }}</strong>
+          </article>
+
+          <article class="detail-card__field">
+            <span>Départ</span>
+            <strong>{{
+              reservation().departureDate | date: 'dd MMMM yyyy'
+            }}</strong>
+          </article>
+
+          <article class="detail-card__field">
+            <span>Durée</span>
+            <strong>{{ reservation().durationLabel }}</strong>
+          </article>
+
+          <article class="detail-card__field">
+            <span>Montant</span>
+            <strong>{{ reservation().amount }}</strong>
+          </article>
+        </div>
+      </div>
+
+      <div class="detail-card__section">
+        <h2>Informations de logement</h2>
+
+        <div class="detail-card__summary-list">
+          <div class="detail-card__summary-row">
+            <span>Bien</span>
+            <strong>{{ reservation().property }}</strong>
+          </div>
+
+          <div class="detail-card__summary-row">
+            <span>Localisation</span>
+            <strong>{{ reservation().propertyLocation }}</strong>
+          </div>
+
+          <div class="detail-card__summary-row">
+            <span>Locataire</span>
+            <strong>{{ reservation().tenantName }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card__section">
+        <h2>Equipements</h2>
+
+        <div class="detail-card__amenities">
+          @for (amenity of reservation().amenities; track amenity + $index) {
+            <span class="detail-card__amenity">
+              <img [src]="icons.check" alt="" aria-hidden="true" />
+              <span>{{ amenity }}</span>
+            </span>
+          }
+        </div>
+      </div>
+    </section>
+
+    <aside class="summary-card" data-ubax-motion="surface">
+      <div class="summary-card__property">
+        <img
+          class="summary-card__image"
+          [src]="reservation().propertyImage"
+          [alt]="reservation().property"
+          loading="eager"
+          decoding="async"
+        />
+
+        <div class="summary-card__property-body">
+          <span class="summary-card__property-tag">{{
+            reservation().propertyCategory
+          }}</span>
+          <h2>{{ reservation().property }}</h2>
+
+          <p class="summary-card__location">
+            <img [src]="icons.locationFill" alt="" aria-hidden="true" />
+            <span>{{ reservation().propertyLocation }}</span>
+          </p>
+        </div>
+
+        <div class="summary-card__tenant">
+          <img
+            [src]="reservation().guestImage"
+            [alt]="reservation().tenantName"
+            loading="lazy"
+            decoding="async"
+          />
+
+          <div>
+            <strong>{{ reservation().tenantName }}</strong>
+            <span>{{ reservation().tenantRole }}</span>
+          </div>
+
+          <b>{{ reservation().price }}</b>
+        </div>
+      </div>
+
+      <div class="summary-card__pricing">
+        <div class="summary-card__pricing-header">
+          <h2>Paiement</h2>
+          <span>{{ reservation().paymentMethod }}</span>
+        </div>
+
+        <div class="summary-card__pricing-list">
+          @for (row of pricingRows(); track row.label) {
+            <div class="summary-card__pricing-row">
+              <span>{{ row.label }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+          }
+        </div>
+
+        <div class="summary-card__pricing-total">
+          <span>Total</span>
+          <strong>{{ reservation().pricing.total }}</strong>
+        </div>
+
+        <div class="summary-card__payment-method">
+          <span class="summary-card__payment-logo">
+            <img
+              [src]="reservation().paymentLogo"
+              [alt]="reservation().paymentMethod"
+            />
+          </span>
+
+          <div>
+            <span class="summary-card__payment-label">Méthode de paiement</span>
+            <strong>{{ reservation().paymentMethod }}</strong>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>

@@ -1,0 +1,289 @@
+<div class="reservation-calendar-page">
+  <header class="reservation-calendar-page__header">
+    <h1 class="reservation-calendar-page__title">Calendrier</h1>
+
+    <div class="reservation-calendar-page__actions">
+      <label
+        class="page-chip page-chip--search"
+        aria-label="Rechercher une réservation"
+      >
+        <input
+          type="search"
+          placeholder="Recherche ..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--search">
+          <img
+            class="page-chip__icon page-chip__icon--search"
+            [src]="icons.searchHeader"
+            alt=""
+          />
+        </span>
+      </label>
+
+      <button
+        type="button"
+        class="page-chip page-chip--date"
+        (click)="datePickerOpen.set(true)"
+      >
+        <span>{{ rangeLabel() }}</span>
+        <span class="page-chip__icon-wrap">
+          <img
+            class="page-chip__icon page-chip__icon--calendar"
+            [src]="icons.toolbarCalendar"
+            alt=""
+          />
+        </span>
+      </button>
+
+      <button type="button" class="page-chip page-chip--export">
+        <span>Exporter les données</span>
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
+          <img
+            class="page-chip__icon page-chip__icon--export"
+            [src]="icons.export"
+            alt=""
+          />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <section class="calendar-layout">
+    <aside class="calendar-sidebar-card">
+      <ubax-reservation-mini-calendar
+        [initialMonth]="currentMonth()"
+        [activeDate]="activeDate()"
+        (monthChange)="onMonthChange($event)"
+      />
+
+      <div class="calendar-property-filter filter-dropdown">
+        <div class="calendar-property-filter__header">
+          <label
+            class="calendar-property-filter__label"
+            for="reservation-property-filter"
+          >
+            Biens immobiliers
+          </label>
+
+          <button
+            type="button"
+            class="calendar-property-filter__reset"
+            [disabled]="!hasActiveFilters()"
+            (click)="clearFilters()"
+          >
+            Annuler les filtres
+          </button>
+        </div>
+
+        <button
+          id="reservation-property-filter"
+          type="button"
+          class="calendar-property-filter__control"
+          [class.is-open]="propertyFilterOpen()"
+          [attr.aria-expanded]="propertyFilterOpen()"
+          aria-haspopup="listbox"
+          (click)="togglePropertyFilter()"
+        >
+          <span class="calendar-property-filter__selection">
+            <span
+              class="calendar-property-filter__selection-dot"
+              [class]="
+                'calendar-property-filter__selection-dot calendar-property-filter__selection-dot--' +
+                selectedPropertyOption().tone
+              "
+            ></span>
+            <span class="calendar-property-filter__selection-label">
+              {{ selectedPropertyOption().label }}
+            </span>
+          </span>
+
+          <span class="calendar-property-filter__icon" aria-hidden="true">
+            <img [src]="icons.selectChevron" alt="" />
+          </span>
+        </button>
+
+        @if (propertyFilterOpen()) {
+          <div class="calendar-property-filter__menu">
+            @for (option of propertyFilterOptions(); track option.value) {
+              <button
+                type="button"
+                [attr.aria-pressed]="
+                  option.value === selectedPropertyCategory()
+                "
+                [class]="propertyFilterOptionClass(option)"
+                (click)="selectPropertyOption(option.value)"
+              >
+                <span class="calendar-property-filter__option-main">
+                  <span
+                    class="calendar-property-filter__option-dot"
+                    [class]="
+                      'calendar-property-filter__option-dot calendar-property-filter__option-dot--' +
+                      option.tone
+                    "
+                  ></span>
+                  <span class="calendar-property-filter__option-label">
+                    {{ option.label }}
+                  </span>
+                </span>
+
+                @if (option.value === selectedPropertyCategory()) {
+                  <span class="calendar-property-filter__option-check">
+                    <img [src]="icons.check" alt="" />
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="calendar-legend">
+        @if (legendEntries().length) {
+          <div class="calendar-legend__items">
+            @for (entry of legendEntries(); track entry.property) {
+              <div class="calendar-legend__item">
+                <span
+                  class="calendar-legend__dot"
+                  [class]="
+                    'calendar-legend__dot calendar-legend__dot--' + entry.tone
+                  "
+                ></span>
+                <span>{{ entry.property }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="calendar-legend__empty">Aucun bien trouvé</p>
+        }
+      </div>
+    </aside>
+
+    <div class="calendar-main-card">
+      <div class="calendar-toolbar">
+        <div class="calendar-toolbar__month">
+          <h2>{{ monthLabel() }}</h2>
+          <div class="calendar-toolbar__nav">
+            <button
+              type="button"
+              (click)="previousMonth()"
+              aria-label="Mois précédent"
+            >
+              <img [src]="icons.chevronLeft" alt="" />
+            </button>
+            <button
+              type="button"
+              (click)="nextMonth()"
+              aria-label="Mois suivant"
+            >
+              <img [src]="icons.chevronRight" alt="" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-grid-wrap">
+        <div class="calendar-grid">
+          <div class="calendar-grid__head">
+            @for (label of weekLabels; track label; let last = $last) {
+              <div
+                class="calendar-grid__head-cell"
+                [class.calendar-grid__head-cell--last]="last"
+              >
+                {{ label }}
+              </div>
+            }
+          </div>
+
+          @for (week of weeks(); track $index; let last = $last) {
+            <div [class]="weekClass(week, last)">
+              @for (day of week.days; track $index; let lastCol = $last) {
+                <div
+                  class="calendar-day"
+                  [class.calendar-day--other]="!day.isCurrentMonth"
+                  [class.calendar-day--active]="day.isActive"
+                  [class.calendar-day--last-col]="lastCol"
+                >
+                  <span class="calendar-day__number">{{ day.label }}</span>
+                </div>
+              }
+
+              <div class="calendar-week__events">
+                @for (event of week.events; track event.id + '-' + event.row) {
+                  <a
+                    [routerLink]="['/reservations', event.id]"
+                    [class]="eventClass(event)"
+                    [attr.aria-label]="eventTooltipDetails(event)"
+                  >
+                    <div class="calendar-event__avatar">
+                      <img [src]="event.image" [alt]="event.guest" />
+                    </div>
+
+                    <div class="calendar-event__main">
+                      <span class="calendar-event__name">{{
+                        event.guest
+                      }}</span>
+                      <span class="calendar-event__property">{{
+                        event.property
+                      }}</span>
+                    </div>
+
+                    <div class="calendar-event__meta">
+                      <span class="calendar-event__dates">{{
+                        event.dateRange
+                      }}</span>
+                      <span class="calendar-event__amount">{{
+                        event.amount
+                      }}</span>
+                    </div>
+
+                    <span [class]="eventPopoverClass(event)" aria-hidden="true">
+                      <span class="calendar-event__popover-header">
+                        <span class="calendar-event__popover-avatar">
+                          <img [src]="event.image" [alt]="" />
+                        </span>
+
+                        <span class="calendar-event__popover-identity">
+                          <span class="calendar-event__popover-title">{{
+                            event.guest
+                          }}</span>
+                          <span class="calendar-event__popover-subtitle">{{
+                            event.property
+                          }}</span>
+                        </span>
+                      </span>
+
+                      <span class="calendar-event__popover-row">
+                        <span class="calendar-event__popover-label"
+                          >Séjour</span
+                        >
+                        <span class="calendar-event__popover-value">{{
+                          event.dateRange
+                        }}</span>
+                      </span>
+
+                      <span class="calendar-event__popover-row">
+                        <span class="calendar-event__popover-label"
+                          >Montant</span
+                        >
+                        <span class="calendar-event__popover-value">{{
+                          event.amount
+                        }}</span>
+                      </span>
+                    </span>
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<ubax-date-range-picker
+  [(isOpen)]="datePickerOpen"
+  (applied)="onDateRangeApplied($event)"
+/>

@@ -1,0 +1,342 @@
+<section class="bien-detail-page">
+  <header class="bien-detail-page__header">
+    <div class="bien-detail-page__heading">
+      <a class="bien-back-button" routerLink="/biens" aria-label="Retour">
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      </a>
+
+      <h1 class="bien-detail-page__title">Détails d’un bien</h1>
+    </div>
+
+    <div class="bien-detail-page__actions">
+      <button class="secondary-action" type="button">
+        <i class="pi pi-box" aria-hidden="true"></i>
+        <span>Archiver ce bien</span>
+      </button>
+
+      <button class="secondary-action" type="button">
+        <i class="pi pi-pencil" aria-hidden="true"></i>
+        <span>Modifier</span>
+      </button>
+
+      <a class="primary-action" routerLink="/biens/ajouter">
+        <span>Ajouter un bien</span>
+        <span class="primary-action__icon">
+          <i class="pi pi-plus" aria-hidden="true"></i>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <div class="bien-detail-page__layout">
+    <aside class="bien-detail-sidebar">
+      <article class="info-card">
+        <div class="info-card__header">
+          <i class="pi pi-user" aria-hidden="true"></i>
+          <h2>Bailleur</h2>
+        </div>
+
+        <div class="owner-card">
+          <img
+            class="owner-card__avatar"
+            src="biens/detail/owner-avatar.webp"
+            alt="Koffi Jean-Marc"
+          />
+
+          <div class="owner-card__meta">
+            <p class="owner-card__name">Koffi Jean-Marc</p>
+            <p class="owner-card__phone">+225 07 58 23 41 89</p>
+          </div>
+        </div>
+
+        <a class="card-link" routerLink="/biens/bailleurs/1">
+          Voir le profil
+        </a>
+      </article>
+
+      <article class="info-card info-card--tenant">
+        <div class="info-card__header">
+          <i class="pi pi-users" aria-hidden="true"></i>
+          <h2>Informations locataire</h2>
+        </div>
+
+        <div class="tenant-card">
+          <img
+            class="tenant-card__avatar"
+            src="biens/list/list-tenant-01.webp"
+            alt="Aïcha Kouadio"
+          />
+
+          <div class="tenant-card__meta">
+            <p class="tenant-card__name">Aïcha Kouadio</p>
+
+            <div class="tenant-card__badges">
+              <span class="tenant-card__badge tenant-card__badge--accent"
+                >Bail 1 an</span
+              >
+              <span class="tenant-card__badge tenant-card__badge--soft"
+                >Expiration : 01/01/2027</span
+              >
+            </div>
+
+            <div class="tenant-card__contact-grid">
+              <span>
+                <i class="pi pi-phone" aria-hidden="true"></i>
+                +225 07 58 23 41 89
+              </span>
+              <span>
+                <i class="pi pi-envelope" aria-hidden="true"></i>
+                jm.koffi@gmail.com
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <a class="card-link" routerLink="/reservations/locataires/1">
+          Voir le profil
+        </a>
+      </article>
+
+      <article class="info-card">
+        <div class="info-card__header">
+          <i class="pi pi-file" aria-hidden="true"></i>
+          <h2>Documents</h2>
+        </div>
+
+        <div class="document-list">
+          @for (document of documents; track document.name) {
+            <div class="document-row">
+              <div class="document-row__label">
+                <i class="pi pi-file-pdf" aria-hidden="true"></i>
+                <span>{{ document.name }}</span>
+              </div>
+
+              <div class="document-row__actions">
+                <button type="button" aria-label="Prévisualiser le document">
+                  <i class="pi pi-eye" aria-hidden="true"></i>
+                </button>
+                <button type="button" aria-label="Télécharger le document">
+                  <i class="pi pi-download" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+    </aside>
+
+    <div class="bien-detail-content">
+      <article class="bien-detail-shell">
+        <section class="gallery-section">
+          <div class="gallery-section__main">
+            <span class="gallery-section__status">Location</span>
+
+            <img
+              class="gallery-section__image"
+              [src]="activeImage()"
+              alt="Appartement Haut Standing"
+            />
+
+            <button
+              class="gallery-nav gallery-nav--previous"
+              type="button"
+              (click)="previousImage()"
+              aria-label="Image précédente"
+            >
+              <i class="pi pi-angle-left" aria-hidden="true"></i>
+            </button>
+
+            <button
+              class="gallery-nav gallery-nav--next"
+              type="button"
+              (click)="nextImage()"
+              aria-label="Image suivante"
+            >
+              <i class="pi pi-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="gallery-section__thumbs">
+            @for (image of galleryImages; track image; let index = $index) {
+              <button
+                class="gallery-thumb"
+                [class.is-active]="activeImageIndex() === index"
+                type="button"
+                (click)="selectImage(index)"
+              >
+                <img [src]="image" alt="Aperçu du bien" />
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="overview-section">
+          <div class="overview-section__intro">
+            <div>
+              <span class="lease-badge">12 mois</span>
+              <h2>Appartement Haut Standing</h2>
+              <p class="overview-section__location">
+                <i class="pi pi-map-marker" aria-hidden="true"></i>
+                Abidjan, Cocody
+              </p>
+            </div>
+
+            <div class="overview-section__stats">
+              <p class="overview-section__price">450 000 FCFA</p>
+
+              <div class="overview-section__meta">
+                <span>
+                  <strong>4.8</strong>
+                  <em>note</em>
+                </span>
+                <span>
+                  <strong>148</strong>
+                  <em>vues</em>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-grid">
+            @for (metric of metrics; track metric.label) {
+              <div class="metric-pill">
+                <span class="metric-pill__value">{{ metric.value }}</span>
+                <span class="metric-pill__label">{{ metric.label }}</span>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="content-section">
+          <h3>Description</h3>
+          <p>
+            Découvrez ce magnifique appartement de 3 pièces situé dans le
+            quartier résidentiel prisé de Cocody Riviera. Conçu pour offrir un
+            confort optimal et un cadre de vie paisible, ce bien combine
+            modernité, fonctionnalité et sécurité.
+          </p>
+          <p>
+            Dès l’entrée, vous êtes accueilli par un vaste séjour lumineux
+            bénéficiant de grandes baies vitrées qui laissent entrer une lumière
+            naturelle abondante tout au long de la journée. Le salon s’ouvre sur
+            un balcon spacieux, idéal pour vos moments de détente ou pour
+            recevoir des invités.
+          </p>
+        </section>
+
+        <section class="content-section">
+          <h3>Commodités</h3>
+
+          <div class="amenities-grid">
+            @for (column of amenityColumns; track $index) {
+              <div class="amenity-column">
+                @for (item of column; track item) {
+                  <div class="amenity-item">
+                    <span class="amenity-item__icon">
+                      <i class="pi pi-check" aria-hidden="true"></i>
+                    </span>
+                    <span>{{ item }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="content-section content-section--location">
+          <h3>Localisation</h3>
+
+          <div class="location-panel">
+            <img
+              class="location-panel__map"
+              src="biens/detail/location-map.webp"
+              alt="Carte du bien"
+            />
+
+            <div class="location-panel__card">
+              <img
+                src="shared/rooms/room-photo-01.webp"
+                alt="Appartement Haut Standing"
+              />
+
+              <div>
+                <p>Appartement Haut Standing</p>
+                <span>
+                  <i class="pi pi-map-marker" aria-hidden="true"></i>
+                  Abidjan, Cocody
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-section content-section--video">
+          <div class="content-section__header-row">
+            <h3>Video 360</h3>
+            <span class="video-tag">video</span>
+          </div>
+
+          <div class="video-panel">
+            <img
+              class="video-panel__cover"
+              src="biens/detail/property-side-01.webp"
+              alt="Vidéo de l’appartement Haut Standing"
+            />
+
+            <div class="video-panel__overlay">
+              <button type="button" aria-label="Lire la vidéo">
+                <i class="pi pi-play" aria-hidden="true"></i>
+              </button>
+
+              <div>
+                <p>Vidéo de l’appartement Haut Standing</p>
+                <span>10 : 15</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-section content-section--comments">
+          <div class="content-section__header-row">
+            <h3>Avis &amp; Commentaires</h3>
+
+            <div class="comment-nav">
+              <button type="button" aria-label="Avis précédent">
+                <i class="pi pi-angle-left" aria-hidden="true"></i>
+              </button>
+              <button type="button" aria-label="Avis suivant">
+                <i class="pi pi-angle-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="comment-grid">
+            @for (comment of comments; track comment.author) {
+              <article class="comment-card">
+                <div class="comment-card__head">
+                  <img [src]="comment.avatar" [alt]="comment.author" />
+
+                  <div>
+                    <p class="comment-card__author">{{ comment.author }}</p>
+
+                    <div class="comment-card__rating">
+                      <span class="comment-card__score">{{ comment.rating }}</span>
+
+                      <div class="comment-card__stars" aria-hidden="true">
+                        @for (star of ratingStars; track star) {
+                          <span [class.is-muted]="star > comment.rating">★</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="comment-card__review">{{ comment.review }}</p>
+              </article>
+            }
+          </div>
+        </section>
+      </article>
+    </div>
+  </div>
+</section>

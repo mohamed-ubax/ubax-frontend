@@ -10,7 +10,7 @@ import {
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
-import { User } from '../../models/user.model';
+import { Role, User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 
 const AUTH_TOKEN_STORAGE_KEY = 'ubax_token';
@@ -70,6 +70,16 @@ export const AuthStore = signalStore(
       /** Hydrate le store après login ou depuis le mock dev */
       setUser(user: User): void {
         patchState(store, { user });
+      },
+
+      setRole(role: Role): void {
+        const currentUser = store.user();
+
+        if (!currentUser) {
+          return;
+        }
+
+        patchState(store, { user: { ...currentUser, role } });
       },
 
       loadMe: rxMethod<void>(

@@ -1,0 +1,30 @@
+<div class="reservation-kpi-strip">
+  @for (card of cards(); track card.label) {
+    <article
+      class="reservation-kpi-card"
+      [class]="'reservation-kpi-card reservation-kpi-card--' + card.tone"
+    >
+      <div class="reservation-kpi-card__header">
+        <p class="reservation-kpi-card__label">{{ card.label }}</p>
+        <span class="reservation-kpi-card__icon-shell">
+          <img [src]="card.icon" alt="" />
+        </span>
+      </div>
+
+      <p
+        class="reservation-kpi-card__value"
+        [class.reservation-kpi-card__value--compact]="card.compactValue"
+      >
+        {{ card.value }}
+      </p>
+
+      <div class="reservation-kpi-card__meta">
+        <span class="reservation-kpi-card__delta-pill">
+          <img [src]="card.trendIcon" alt="" />
+          <span>{{ card.delta }}</span>
+        </span>
+        <span class="reservation-kpi-card__caption">{{ card.caption }}</span>
+      </div>
+    </article>
+  }
+</div>

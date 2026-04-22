@@ -1,0 +1,353 @@
+<section class="bien-add-page">
+  <header class="bien-add-page__header">
+    <h1>Ajouter un bien</h1>
+  </header>
+
+  <ol class="journey-stepper" aria-label="Progression de l’ajout du bien">
+    @for (step of steps; track step.label; let index = $index) {
+      <li class="journey-stepper__segment">
+        <div
+          class="journey-stepper__item"
+          [class.is-reached]="isReachedStep(index)"
+          [class.is-pending]="!isReachedStep(index)"
+        >
+          <span class="journey-stepper__circle">{{ index + 1 }}</span>
+          <span class="journey-stepper__label">{{ step.label }}</span>
+        </div>
+
+        @if (index < steps.length - 1) {
+          <span
+            class="journey-stepper__line"
+            [class.is-complete]="isCompletedStep(index)"
+            [class.is-active]="activeStep() === index"
+          ></span>
+        }
+      </li>
+    }
+  </ol>
+
+  @switch (activeStep()) {
+    @case (0) {
+      <section class="intro-layout">
+        <div class="intro-layout__media">
+          <section class="photo-stage" aria-labelledby="photo-stage-title">
+            <h2 id="photo-stage-title">Importer les photos</h2>
+
+            <div class="photo-stage__frame">
+              <img
+                class="photo-stage__hero"
+                src="biens/add/step1-main.webp"
+                alt="Vue principale du bien"
+                width="438"
+                height="505"
+              />
+
+              <div class="photo-stage__thumbs">
+                @for (
+                  media of stepOneMedia;
+                  track media.src;
+                  let index = $index
+                ) {
+                  <div
+                    class="photo-stage__thumb"
+                    [class.is-vertical]="index === 1"
+                  >
+                    <img
+                      [src]="media.src"
+                      [alt]="media.alt"
+                      width="187"
+                      height="117"
+                    />
+                  </div>
+                }
+
+                <button class="upload-tile" type="button">
+                  <span class="upload-tile__icon">
+                    <i class="pi pi-plus" aria-hidden="true"></i>
+                  </span>
+                  <span>Cliquez pour importer</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <article class="surface-card video-stage">
+            <h2>Importer Vidéos 360</h2>
+
+            <button class="video-stage__action" type="button">
+              <i class="pi pi-video" aria-hidden="true"></i>
+              <span>Importer vidéo</span>
+            </button>
+          </article>
+        </div>
+
+        <article class="surface-card editor-sheet editor-sheet--intro">
+          <h2>Informations du bien</h2>
+
+          <div class="field-block">
+            <p class="field-block__label">Titre du bien</p>
+            <div class="field-shell field-shell--wide">
+              <span>{{ title }}</span>
+            </div>
+          </div>
+
+          <div class="field-grid field-grid--duo">
+            <div class="field-block">
+              <p class="field-block__label">Catégories</p>
+              <div class="field-shell">
+                <span>{{ category }}</span>
+                <i class="pi pi-angle-down" aria-hidden="true"></i>
+              </div>
+            </div>
+
+            <div class="field-block">
+              <p class="field-block__label">Type d’annonce</p>
+              <div class="field-shell">
+                <span>{{ listingType }}</span>
+                <i class="pi pi-angle-down" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="counter-grid">
+            @for (counter of counters; track counter.label) {
+              <div class="field-block">
+                <p class="field-block__label">{{ counter.label }}</p>
+                <div class="counter-shell">
+                  <button type="button" aria-label="Diminuer">
+                    <i class="pi pi-minus" aria-hidden="true"></i>
+                  </button>
+                  <span>{{ counter.value }}</span>
+                  <button type="button" aria-label="Augmenter">
+                    <i class="pi pi-plus" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="field-grid field-grid--owner">
+            <div class="field-block">
+              <p class="field-block__label">Sélectionner le propriétaire</p>
+              <div class="field-shell">
+                <span>{{ owner }}</span>
+                <i class="pi pi-angle-down" aria-hidden="true"></i>
+              </div>
+            </div>
+
+            <div class="field-block">
+              <p class="field-block__label">Téléphone du du propriétaire</p>
+              <div class="field-shell field-shell--phone">
+                <i class="pi pi-phone" aria-hidden="true"></i>
+                <span>{{ ownerPhone }}</span>
+              </div>
+            </div>
+
+            <div class="field-block">
+              <p class="field-block__label">ID Ubax</p>
+              <div class="field-shell">
+                <span>{{ ubaxId }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-sheet__footer editor-sheet__footer--end">
+            <button class="primary-action" type="button" (click)="nextStep()">
+              Suivant
+            </button>
+          </div>
+        </article>
+      </section>
+    }
+
+    @case (1) {
+      <section class="pricing-layout">
+        <aside class="pricing-layout__aside">
+          <section
+            class="surface-card pricing-block"
+            aria-labelledby="pricing-title"
+          >
+            <h2 id="pricing-title">Prix</h2>
+
+            <div class="price-shell">{{ price }}</div>
+
+            <div class="selection-list selection-list--inline">
+              @for (mode of pricingModes; track mode) {
+                <button
+                  type="button"
+                  class="selection-list__item"
+                  [class.is-selected]="selectedPricingMode() === mode"
+                  [attr.aria-pressed]="selectedPricingMode() === mode"
+                  (click)="selectPricingMode(mode)"
+                >
+                  <span class="selection-list__dot"></span>
+                  <span>{{ mode }}</span>
+                </button>
+              }
+            </div>
+          </section>
+        </aside>
+
+        <article class="surface-card editor-sheet editor-sheet--pricing">
+          <section class="editor-section">
+            <h2>Description</h2>
+            <div class="description-shell">
+              {{ description }}
+            </div>
+          </section>
+
+          <section class="editor-section">
+            <h2>Commodités</h2>
+
+            <div class="selection-grid">
+              @for (commodity of commodities; track commodity.label) {
+                <div
+                  class="selection-grid__item"
+                  [class.is-selected]="commodity.selected"
+                >
+                  <span class="selection-grid__dot"></span>
+                  <span>{{ commodity.label }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <section class="editor-section">
+            <h2>Adresse</h2>
+
+            <div class="address-grid">
+              <div class="field-shell field-shell--compact">
+                <span>Pays</span>
+                <i class="pi pi-angle-down" aria-hidden="true"></i>
+              </div>
+              <div class="field-shell field-shell--compact">
+                <span>Région</span>
+                <i class="pi pi-angle-down" aria-hidden="true"></i>
+              </div>
+              <div class="field-shell field-shell--compact">
+                <span>Ville</span>
+                <i class="pi pi-angle-down" aria-hidden="true"></i>
+              </div>
+              <div class="field-shell field-shell--compact">
+                <span>Quartier</span>
+              </div>
+              <div class="field-shell field-shell--compact address-grid__wide">
+                <span>Saisir l’emplacement exact</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="editor-section">
+            <h2>Map</h2>
+
+            <div class="coordinates-row">
+              <div
+                class="field-shell field-shell--compact field-shell--coordinate"
+              >
+                <span>Latitude</span>
+              </div>
+              <div
+                class="field-shell field-shell--compact field-shell--coordinate"
+              >
+                <span>Longitude</span>
+              </div>
+            </div>
+
+            <div class="map-stage">
+              <img
+                src="biens/detail/location-map.webp"
+                alt="Carte de localisation"
+                width="1051"
+                height="329"
+              />
+            </div>
+          </section>
+        </article>
+      </section>
+
+      <div class="page-actions page-actions--split">
+        <button
+          class="circle-action"
+          type="button"
+          (click)="previousStep()"
+          aria-label="Étape précédente"
+        >
+          <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        </button>
+        <button class="primary-action" type="button" (click)="nextStep()">
+          Suivant
+        </button>
+      </div>
+    }
+
+    @case (2) {
+      <section class="summary-layout">
+        <div class="summary-stage">
+          <img
+            class="summary-stage__background"
+            src="biens/add/step3-background.webp"
+            alt=""
+            aria-hidden="true"
+            width="1111"
+            height="532"
+          />
+
+          <div class="summary-stage__content">
+            <div class="summary-stage__media">
+              <div class="summary-stage__visual">
+                <img
+                  src="biens/add/step3-main.webp"
+                  alt="Aperçu final du bien"
+                  width="491"
+                  height="366"
+                />
+              </div>
+
+              <div class="summary-gallery">
+                @for (media of stepThreeMedia; track media.src) {
+                  <div class="summary-gallery__item">
+                    <img
+                      [src]="media.src"
+                      [alt]="media.alt"
+                      width="159"
+                      height="114"
+                    />
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="summary-stage__copy">
+              <h2>Récapitulatif du bien</h2>
+              <h3>{{ title }}</h3>
+
+              <ul class="summary-list">
+                @for (item of summaryItems; track item.text) {
+                  <li>
+                    <i class="pi pi-angle-right" aria-hidden="true"></i>
+                    <span>{{ item.text }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <div
+            class="page-actions page-actions--publish summary-stage__actions"
+          >
+            <button
+              class="circle-action"
+              type="button"
+              (click)="previousStep()"
+              aria-label="Étape précédente"
+            >
+              <i class="pi pi-arrow-left" aria-hidden="true"></i>
+            </button>
+            <button class="draft-action" type="button">Brouillon</button>
+            <button class="primary-action" type="button">Publier</button>
+          </div>
+        </div>
+      </section>
+    }
+  }
+</section>

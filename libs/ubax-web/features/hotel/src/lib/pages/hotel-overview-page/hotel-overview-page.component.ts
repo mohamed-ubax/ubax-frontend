@@ -390,7 +390,7 @@ export class HotelOverviewPageComponent {
     },
     {
       id: 2,
-      image: 'hotel-dashboard/properties/property-patrick.webp',
+      image: 'biens/detail/property-side-03.webp',
       tenantAvatar: 'hotel-dashboard/properties/tenant-patrick.webp',
       tenantName: 'Patrick Koffi',
       price: '350 000 FCFA',

@@ -1,139 +1,177 @@
-<div class="res-page">
-  <div class="res-card">
-    <!-- ── Toolbar ─────────────────────────────────────────────── -->
-    <div class="res-toolbar">
-      <h1 class="res-title">Liste de réservations</h1>
-      <div class="toolbar-filters">
-        <div class="search-pill">
-          <i class="pi pi-search"></i>
-          <input
-            type="text"
-            placeholder="Rechercher"
-            class="search-input"
-            [ngModel]="searchTerm()"
-            (ngModelChange)="onSearchChange($event)"
-          />
-        </div>
-        <button
-          type="button"
-          class="date-pill"
-          (click)="datePickerOpen.set(true)"
-          aria-label="Sélectionner un intervalle de dates"
-        >
-          <span class="date-label">
-            {{
-              selectedRange()
-                ? (selectedRange()!.start | date: 'dd/MM/yy') +
-                  ' – ' +
-                  (selectedRange()!.end | date: 'dd/MM/yy')
-                : 'Sélectionner une date'
-            }}
-          </span>
-          <div class="date-icon-wrap">
-            <i class="pi pi-calendar"></i>
-          </div>
-        </button>
-        @if (hasActiveFilters()) {
-          <button
-            type="button"
-            class="reset-filters-btn"
-            (click)="resetFilters()"
-            aria-label="Réinitialiser les filtres"
-          >
-            Réinitialiser
-          </button>
-        }
-      </div>
-      <button class="add-btn" routerLink="ajouter">
-        Ajouter une réservation
+<div class="reservation-list-page">
+  <header class="reservation-list-page__header">
+    <h1 class="reservation-list-page__title">Réservations</h1>
+
+    <div class="reservation-list-page__actions">
+      <label
+        class="page-chip page-chip--search"
+        aria-label="Rechercher une réservation"
+      >
+        <input
+          type="text"
+          placeholder="Recherche ..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--search">
+          <img [src]="icons.searchHeader" alt="" />
+        </span>
+      </label>
+
+      <button
+        type="button"
+        class="page-chip page-chip--date"
+        (click)="datePickerOpen.set(true)"
+      >
+        <span>{{ rangeLabel() }}</span>
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--date">
+          <img [src]="icons.calendar" alt="" />
+        </span>
+      </button>
+
+      <button type="button" class="page-chip page-chip--export">
+        <span>Exporter les données</span>
+        <span class="page-chip__icon-wrap page-chip__icon-wrap--export">
+          <img [src]="icons.export" alt="" />
+        </span>
       </button>
     </div>
+  </header>
 
-    <!-- ── Table ───────────────────────────────────────────────── -->
-    <div class="table-scroll">
-      <table class="res-table">
-        <colgroup>
-          <col class="res-table__col res-table__col--guest" />
-          <col class="res-table__col res-table__col--property" />
-          <col class="res-table__col res-table__col--duration" />
-          <col class="res-table__col res-table__col--dates" />
-          <col class="res-table__col res-table__col--status" />
-          <col class="res-table__col res-table__col--actions" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Invité</th>
-            <th>Biens</th>
-            <th>Durée</th>
-            <th>Arrivée &nbsp;–&nbsp; Départ</th>
-            <th>Statut</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (r of pagedReservations(); track r.id) {
-            <tr>
-              <td class="td-guest">
-                <div class="td-guest__content">
-                  <img
-                    [src]="r.image"
-                    [alt]="r.guest"
-                    class="guest-avatar"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <span class="guest-name">{{ r.guest }}</span>
-                </div>
-              </td>
-              <td>{{ r.property }}</td>
-              <td>{{ r.duration }}</td>
-              <td>
-                {{ formatTableDate(r.arrivalDate) }} &nbsp;–
-                {{ formatTableDate(r.departureDate) }}
-              </td>
-              <td>
-                <span
-                  class="status-badge"
-                  [class.status--confirmed]="r.status === 'Confirmé'"
-                  [class.status--pending]="r.status === 'En attente'"
-                  [class.status--cancelled]="r.status === 'Annulé'"
-                >
-                  {{ r.status }}
-                </span>
-              </td>
-              <td class="td-actions">
-                <div class="td-actions__content">
-                  <button class="action-btn action-btn--view" type="button">
-                    <i class="pi pi-eye"></i>
-                    <span>Voir</span>
-                  </button>
-                  <button class="action-btn action-btn--edit" type="button">
-                    <i class="pi pi-pencil"></i>
-                    <span>Modifier</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td class="td-empty" colspan="6">
-                Aucune réservation ne correspond aux filtres appliqués.
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+  <ubax-reservation-kpi-strip [cards]="kpiCards" />
 
-    <!-- ── Pagination ──────────────────────────────────────────── -->
-    @if (filteredReservations().length > 0) {
-      <div class="table-footer">
-        <ubax-paginator
-          [(currentPage)]="currentPage"
-          [totalPages]="totalPages()"
-        />
+  <div class="reservation-list-page__table-wrap">
+    <section class="table-panel">
+      <div class="table-panel__toolbar">
+        <h2 class="table-panel__title">Liste de réservations</h2>
+
+        <div class="table-panel__toolbar-actions">
+          <label
+            class="table-chip table-chip--search"
+            aria-label="Rechercher dans la liste des réservations"
+          >
+            <img [src]="icons.searchCard" alt="" />
+            <input
+              type="text"
+              placeholder="Rechercher"
+              [ngModel]="searchTerm()"
+              (ngModelChange)="onSearchChange($event)"
+            />
+          </label>
+
+          <button
+            type="button"
+            class="table-chip table-chip--date"
+            (click)="datePickerOpen.set(true)"
+          >
+            <span>{{ rangeLabel() }}</span>
+            <span class="table-chip__icon-wrap">
+              <img [src]="icons.calendar" alt="" />
+            </span>
+          </button>
+
+          <a
+            routerLink="/reservations/ajouter"
+            class="table-chip table-chip--primary"
+          >
+            Ajouter une réservation
+          </a>
+        </div>
       </div>
-    }
+
+      <div class="reservation-table reservation-table--head">
+        <span>Invité</span>
+        <span>Biens</span>
+        <span>Durée</span>
+        <span>Arrivée - Départ</span>
+        <span>Statut</span>
+        <span>Action</span>
+      </div>
+
+      <div class="reservation-table__body">
+        @for (reservation of pagedReservations(); track reservation.id) {
+          <div class="reservation-table reservation-table--row">
+            <div class="reservation-table__guest">
+              <img [src]="reservation.guestImage" [alt]="reservation.guest" />
+              <span>{{ reservation.guest }}</span>
+            </div>
+
+            <span class="reservation-table__cell">{{
+              reservation.property
+            }}</span>
+            <span class="reservation-table__cell">{{
+              reservation.durationLabel
+            }}</span>
+            <span
+              class="reservation-table__cell reservation-table__cell--dates"
+            >
+              {{ reservation.arrivalDate | date: 'dd / MM / yyyy' }} -
+              {{ reservation.departureDate | date: 'dd / MM / yyyy' }}
+            </span>
+
+            <span
+              class="reservation-table__status"
+              [class]="
+                'reservation-table__status reservation-table__status--' +
+                reservation.tone
+              "
+            >
+              {{ reservation.status }}
+            </span>
+
+            <div class="reservation-table__actions">
+              <span class="reservation-table__icon-group">
+                <a
+                  [routerLink]="['/reservations', reservation.id]"
+                  class="reservation-table__icon-action reservation-table__icon-action--view"
+                  aria-label="Voir le détail de la réservation"
+                >
+                  <img [src]="icons.actionEye" alt="" />
+                </a>
+
+                <a
+                  routerLink="/reservations/ajouter"
+                  [queryParams]="{
+                    reservationId: reservation.id,
+                    mode: 'edit',
+                  }"
+                  class="reservation-table__icon-action reservation-table__icon-action--edit"
+                  aria-label="Modifier la réservation"
+                >
+                  <img [src]="icons.actionEdit" alt="" />
+                </a>
+              </span>
+
+              <button
+                type="button"
+                class="reservation-table__action reservation-table__action--confirm"
+                [class.reservation-table__action--confirmed]="
+                  isConfirmed(reservation.status)
+                "
+                [disabled]="isConfirmed(reservation.status)"
+                (click)="confirmReservation(reservation.id)"
+              >
+                <span>{{ confirmLabel(reservation.status) }}</span>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="reservation-table__empty">
+            Aucune réservation ne correspond aux filtres appliqués.
+          </div>
+        }
+      </div>
+
+      @if (filteredReservations().length > 0) {
+        <div class="table-panel__footer">
+          <ubax-paginator
+            [(currentPage)]="currentPage"
+            [totalPages]="totalPages()"
+          />
+        </div>
+      }
+    </section>
   </div>
 </div>
 

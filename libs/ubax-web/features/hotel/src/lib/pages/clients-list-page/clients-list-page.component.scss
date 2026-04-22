@@ -328,11 +328,11 @@
   align-items: center;
   justify-content: center;
   min-width: 78px;
-  min-height: 36px;
-  padding: 0 10px;
+  min-height: 50px;
+  padding: 0 22px;
   border-radius: 999px;
   font-family: 'Lexend', system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 20px;
   white-space: nowrap;
@@ -357,19 +357,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
   min-width: 78px;
-  min-height: 38px;
-  padding: 0 8px;
+  min-height: 50px;
+  padding: 0 22px;
   border-radius: 999px;
   background: var(--navy);
   color: var(--surface);
   font-family: 'Lexend', system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 20px;
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  &:hover {
+    background: var(--warning-text);
+  }
 }
 
 .clients-table__action i {

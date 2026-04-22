@@ -1,0 +1,233 @@
+<section class="biens-page">
+  <header class="biens-page__header">
+    <h1 class="biens-page__title">Mes biens</h1>
+
+    <div class="biens-page__actions">
+      @if (showOwnerAction()) {
+        <button class="action-button action-button--owner" type="button">
+          <span class="action-button__label">Ajouter un propriétaire</span>
+          <span class="action-button__icon-shell" aria-hidden="true">
+            <img [src]="ownerIcon" alt="" />
+          </span>
+        </button>
+      }
+
+      <a class="action-button action-button--primary" routerLink="ajouter">
+        <span class="action-button__label">Ajouter un bien</span>
+        <span class="action-button__icon-shell" aria-hidden="true">
+          <img [src]="addIcon" alt="" />
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <section class="summary-strip" aria-label="Résumé des biens">
+    @for (summary of summaryCards(); track summary.label) {
+      <article class="summary-card">
+        <div class="summary-card__media" aria-hidden="true">
+          <img class="summary-card__orb" [src]="summary.orb" alt="" />
+          <img
+            class="summary-card__icon"
+            [src]="summary.icon"
+            [alt]="summary.iconAlt"
+          />
+        </div>
+
+        <div class="summary-card__content">
+          <p class="summary-card__label">{{ summary.label }}</p>
+
+          <div class="summary-card__metrics">
+            <p class="summary-card__value">{{ summary.value }}</p>
+
+            @if (summary.trend; as trend) {
+              <p class="summary-card__trend">
+                <img [src]="trendIcon" alt="" aria-hidden="true" />
+                <span>{{ trend }}</span>
+              </p>
+            }
+          </div>
+        </div>
+      </article>
+    }
+  </section>
+
+  <section class="biens-panel">
+    <div class="biens-toolbar">
+      <div class="biens-toolbar__filters">
+        @for (filter of filters; track filter.label) {
+          <button class="filter-pill {{ filter.className }}" type="button">
+            <span>{{ filter.label }}</span>
+            <img [src]="chevronIcon" alt="" aria-hidden="true" />
+          </button>
+        }
+
+        <button class="filter-action" type="button">Filtrer</button>
+      </div>
+
+      <div
+        class="biens-toolbar__toggle"
+        role="tablist"
+        aria-label="Mode d'affichage des biens"
+      >
+        <button
+          class="view-toggle"
+          [class.is-active]="viewMode() === 'grid'"
+          type="button"
+          role="tab"
+          aria-label="Vue grille"
+          [attr.aria-selected]="viewMode() === 'grid'"
+          [attr.aria-pressed]="viewMode() === 'grid'"
+          (click)="setViewMode('grid')"
+        >
+          <img
+            class="view-toggle__icon view-toggle__icon--grid"
+            [src]="gridViewIcon"
+            alt=""
+          />
+        </button>
+
+        <button
+          class="view-toggle"
+          [class.is-active]="viewMode() === 'list'"
+          type="button"
+          role="tab"
+          aria-label="Vue liste"
+          [attr.aria-selected]="viewMode() === 'list'"
+          [attr.aria-pressed]="viewMode() === 'list'"
+          (click)="setViewMode('list')"
+        >
+          <img
+            class="view-toggle__icon view-toggle__icon--list"
+            [src]="listViewIcon"
+            alt=""
+          />
+        </button>
+      </div>
+    </div>
+
+    @if (viewMode() === 'grid') {
+      <div class="biens-grid">
+        @for (bien of visibleGridCards(); track bien.id) {
+          <a class="bien-card" [routerLink]="[bien.id]">
+            <img
+              class="bien-card__image"
+              [src]="bien.image"
+              [alt]="bien.title"
+              loading="lazy"
+              decoding="async"
+            />
+
+            <span class="bien-card__badge">Location</span>
+
+            <div class="bien-card__panel">
+              <div class="bien-card__heading">
+                <h2 class="bien-card__title">{{ bien.title }}</h2>
+
+                <span class="bien-card__arrow" aria-hidden="true">
+                  <img [src]="gridArrowIcon" alt="" />
+                </span>
+              </div>
+
+              <p class="bien-card__location">
+                <span class="bien-card__location-icon" aria-hidden="true">
+                  <img [src]="gridLocationIcon" alt="" />
+                </span>
+                <span>{{ bien.location }}</span>
+              </p>
+
+              <div class="bien-card__bottom">
+                <div class="bien-card__tenant">
+                  <img
+                    class="bien-card__avatar"
+                    [src]="bien.avatar"
+                    [alt]="bien.tenant"
+                    loading="lazy"
+                    decoding="async"
+                  />
+
+                  <div class="bien-card__tenant-copy">
+                    <p class="bien-card__tenant-name">{{ bien.tenant }}</p>
+                    <p class="bien-card__tenant-role">{{ bien.tenantRole }}</p>
+                  </div>
+                </div>
+
+                <p class="bien-card__price">{{ bien.price }}</p>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="biens-list">
+        @for (bien of visibleListCards(); track bien.id) {
+          <a class="bien-list-card" [routerLink]="[bien.id]">
+            <div class="bien-list-card__media">
+              <img
+                class="bien-list-card__image"
+                [src]="bien.image"
+                [alt]="bien.title"
+                loading="lazy"
+                decoding="async"
+              />
+
+              <span class="bien-list-card__badge">Location</span>
+            </div>
+
+            <div class="bien-list-card__content">
+              <div class="bien-list-card__top">
+                <h2 class="bien-list-card__title">{{ bien.title }}</h2>
+                <p class="bien-list-card__price">{{ bien.price }}</p>
+              </div>
+
+              <p class="bien-list-card__location">
+                <span class="bien-list-card__location-icon" aria-hidden="true">
+                  <img
+                    class="bien-list-card__location-icon-outer"
+                    [src]="listLocationOuterIcon"
+                    alt=""
+                  />
+                  <img
+                    class="bien-list-card__location-icon-inner"
+                    [src]="listLocationInnerIcon"
+                    alt=""
+                  />
+                </span>
+                <span>{{ bien.location }}</span>
+              </p>
+
+              <div class="bien-list-card__bottom">
+                <div class="bien-list-card__tenant">
+                  <img
+                    class="bien-list-card__avatar"
+                    [src]="bien.avatar"
+                    [alt]="bien.tenant"
+                    loading="lazy"
+                    decoding="async"
+                  />
+
+                  <div class="bien-list-card__tenant-copy">
+                    <p class="bien-list-card__tenant-name">{{ bien.tenant }}</p>
+                    <p class="bien-list-card__tenant-role">
+                      {{ bien.tenantRole }}
+                    </p>
+                  </div>
+                </div>
+
+                <span class="bien-list-card__arrow" aria-hidden="true">
+                  <img [src]="listArrowIcon" alt="" />
+                </span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
+
+    <div class="biens-pagination">
+      <ubax-paginator
+        [(currentPage)]="currentPage"
+        [totalPages]="totalPages()"
+      />
+    </div>
+  </section>
+</section>

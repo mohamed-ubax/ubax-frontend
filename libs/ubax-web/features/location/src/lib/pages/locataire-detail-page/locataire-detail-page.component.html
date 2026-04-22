@@ -1,0 +1,304 @@
+<section class="locataire-detail-page" data-ubax-motion="page">
+  <header class="locataire-detail-page__header">
+    <div class="locataire-detail-page__title-group">
+      <button
+        class="locataire-detail-page__back-button"
+        type="button"
+        aria-label="Retour à la page précédente"
+        (click)="goBack()"
+      >
+        <img
+          class="locataire-detail-page__back-shell"
+          [src]="assets.backShell"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          class="locataire-detail-page__back-icon"
+          [src]="assets.backArrow"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+
+      <h1 class="locataire-detail-page__title">Profil locataire</h1>
+    </div>
+
+    <section class="locataire-hero" aria-label="Profil locataire">
+      <img
+        class="locataire-hero__avatar"
+        [src]="assets.profileHero"
+        alt="Aïcha Kouadio"
+        loading="eager"
+        decoding="async"
+      />
+
+      <div class="locataire-hero__content">
+        <h2>Aïcha Kouadio</h2>
+        <p>Locataire</p>
+
+        <div class="locataire-hero__rating" aria-label="Note 4 sur 5">
+          @for (star of ratingStars; track star + $index) {
+            <img [src]="star" alt="" aria-hidden="true" />
+          }
+
+          <span class="locataire-hero__rating-count">4</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="locataire-detail-page__actions">
+      <button class="action-pill action-pill--danger" type="button">
+        <span>Résilier contrat</span>
+
+        <span class="action-pill__icon-shell" aria-hidden="true">
+          <img [src]="assets.actionShell" alt="" />
+          <img [src]="assets.cancel" alt="" />
+        </span>
+      </button>
+
+      <button class="action-pill action-pill--edit" type="button">
+        <span>Modifier</span>
+
+        <span class="action-pill__icon-shell" aria-hidden="true">
+          <img [src]="assets.actionShell" alt="" />
+          <img [src]="assets.edit" alt="" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <div class="locataire-detail-page__content">
+    <article class="locataire-property-panel" data-ubax-motion="surface">
+      <h2 class="locataire-property-panel__title">Bien locataire</h2>
+
+      <a class="locataire-property-card" routerLink="/biens/1">
+        <img
+          class="locataire-property-card__image"
+          [src]="assets.propertyMain"
+          alt="Immeuble kalia"
+          loading="eager"
+          decoding="async"
+        />
+
+        <span class="locataire-property-card__status">Location</span>
+
+        <div class="locataire-property-card__overlay">
+          <span class="locataire-property-card__action" aria-hidden="true">
+            <img
+              class="locataire-property-card__action-shell"
+              [src]="assets.propertyActionShell"
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              class="locataire-property-card__action-icon"
+              [src]="assets.propertyOpenArrow"
+              alt=""
+              aria-hidden="true"
+            />
+          </span>
+
+          <div class="locataire-property-card__summary">
+            <p class="locataire-property-card__name">Immeuble kalia</p>
+
+            <span class="locataire-property-card__location">
+              <img [src]="assets.location" alt="" aria-hidden="true" />
+              <span>Abidjan, Cocody</span>
+            </span>
+          </div>
+
+          <div class="locataire-property-card__tenant">
+            <img [src]="assets.propertyTenant" alt="Aïcha Kouadio" />
+
+            <div>
+              <p>Aïcha Kouadio</p>
+              <span>Locataire</span>
+            </div>
+
+            <strong>400 000 FCFA</strong>
+          </div>
+        </div>
+      </a>
+
+      <section class="payment-state" aria-label="Etat de paiement">
+        <div class="payment-state__heading">
+          <h3>Etat de paiement</h3>
+          <span class="payment-state__duration">12 mois</span>
+        </div>
+
+        <span class="payment-state__divider" aria-hidden="true"></span>
+
+        <div class="payment-state__bars" aria-hidden="true">
+          <span class="payment-state__bar payment-state__bar--remaining"></span>
+          <span class="payment-state__bar payment-state__bar--paid"></span>
+        </div>
+
+        <div class="payment-state__stats">
+          <div class="payment-state__stat payment-state__stat--danger">
+            <span>Impayé</span>
+            <strong>0</strong>
+          </div>
+
+          <div class="payment-state__stat payment-state__stat--accent">
+            <span>Restant</span>
+            <strong>4</strong>
+          </div>
+
+          <div class="payment-state__stat payment-state__stat--success">
+            <span>Payés</span>
+            <strong>8</strong>
+          </div>
+        </div>
+      </section>
+    </article>
+
+    <div class="locataire-detail-page__right-column">
+      <section class="locataire-info-grid">
+        <article
+          class="info-card info-card--contact"
+          data-ubax-motion="surface"
+        >
+          @for (item of contactItems; track item.text) {
+            <div class="info-card__item">
+              <img
+                class="info-card__icon"
+                [class]="'info-card__icon info-card__icon--' + item.tone"
+                [src]="item.icon"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ item.text }}</span>
+            </div>
+          }
+        </article>
+
+        <article class="info-card info-card--status" data-ubax-motion="surface">
+          @for (item of statusItems; track item.text) {
+            <div class="info-card__item">
+              <img
+                class="info-card__icon"
+                [class]="'info-card__icon info-card__icon--' + item.tone"
+                [src]="item.icon"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ item.text }}</span>
+            </div>
+          }
+        </article>
+
+        <article
+          class="info-card info-card--contract"
+          data-ubax-motion="surface"
+        >
+          @for (item of contractItems; track item.text) {
+            <div class="info-card__item">
+              <img
+                class="info-card__icon"
+                [class]="'info-card__icon info-card__icon--' + item.tone"
+                [src]="item.icon"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ item.text }}</span>
+            </div>
+          }
+        </article>
+      </section>
+
+      <div class="locataire-detail-page__lower-grid">
+        <article class="documents-card" data-ubax-motion="surface">
+          <div class="documents-card__heading">
+            <img [src]="assets.documentTitle" alt="" aria-hidden="true" />
+            <h3>Documents</h3>
+          </div>
+
+          <span class="documents-card__divider" aria-hidden="true"></span>
+
+          <div class="documents-card__list">
+            @for (
+              document of documents;
+              track document.name;
+              let last = $last
+            ) {
+              <div class="document-row" [class.document-row--last]="last">
+                <div class="document-row__pill">
+                  <img [src]="assets.document" alt="" aria-hidden="true" />
+                  <span>{{ document.name }}</span>
+                </div>
+
+                <button type="button" aria-label="Prévisualiser le document">
+                  <img
+                    [src]="assets.docActionShell"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <img [src]="assets.eye" alt="" aria-hidden="true" />
+                </button>
+
+                <button type="button" aria-label="Télécharger le document">
+                  <img
+                    [src]="assets.docActionShell"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <img [src]="assets.download" alt="" aria-hidden="true" />
+                </button>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="payment-history-card" data-ubax-motion="surface">
+          <div class="payment-history-card__heading">
+            <img [src]="assets.historyTitle" alt="" aria-hidden="true" />
+            <h3>Historique de paiement</h3>
+          </div>
+
+          <span class="payment-history-card__divider" aria-hidden="true"></span>
+
+          <div class="payment-history-card__list">
+            @for (
+              payment of payments;
+              track payment.date + payment.amount + payment.period + $index
+            ) {
+              <div class="payment-entry">
+                <img [src]="payment.logo" [alt]="payment.title" />
+
+                <div class="payment-entry__content">
+                  <p>{{ payment.title }}</p>
+                  <span>{{ payment.date }}</span>
+                </div>
+
+                <div class="payment-entry__meta">
+                  <strong>{{ payment.amount }}</strong>
+
+                  <span
+                    class="payment-entry__period"
+                    [class.payment-entry__period--wide]="payment.widePeriod"
+                  >
+                    <img
+                      [src]="assets.paymentCheck"
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    <span>{{ payment.period }}</span>
+                  </span>
+                </div>
+
+                <button type="button" aria-label="Voir la transaction">
+                  <img
+                    [src]="assets.paymentChevron"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+            }
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

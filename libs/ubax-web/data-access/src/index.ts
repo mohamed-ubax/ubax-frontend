@@ -1,5 +1,6 @@
 // ubax-web-data-access public API
 export * from './lib/models/user.model';
+export * from './lib/models/role-access.model';
 export * from './lib/models/bien.model';
 export * from './lib/models/locataire.model';
 export * from './lib/models/reservation.model';

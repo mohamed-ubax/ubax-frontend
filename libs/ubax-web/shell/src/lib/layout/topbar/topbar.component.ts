@@ -14,22 +14,14 @@ import { isPlatformBrowser } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
-import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
+import {
+  AuthStore,
+  NavItemConfig,
+  ROLE_LABELS,
+  Role,
+  topbarNavItemsForRole,
+} from '@ubax-workspace/ubax-web-data-access';
 import { filter, map } from 'rxjs';
-
-interface NavItem {
-  label: string;
-  path: string;
-  activePaths?: string[];
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  DG: "Directeur d'agence",
-  COMMERCIAL: 'Commercial',
-  COMPTABLE: 'Comptable',
-  SAV: 'Service client',
-  HOTEL: 'Responsable hôtel',
-};
 
 const COMPACT_EXIT_BUFFER = 8;
 
@@ -98,32 +90,8 @@ export class TopbarComponent implements AfterViewInit {
     return initials || '?';
   }
 
-  private readonly agencyNavItems: NavItem[] = [
-    { label: 'Tableau de bord', path: '/tableau-de-bord' },
-    { label: 'Biens', path: '/biens' },
-    { label: 'Réservations', path: '/reservations' },
-    { label: 'Demandes clientèles', path: '/demandes' },
-    { label: 'Finances', path: '/finances' },
-    { label: 'Archivages', path: '/archivages' },
-  ];
-
-  private readonly hotelNavItems: NavItem[] = [
-    { label: 'Tableau de bord', path: '/tableau-de-bord' },
-    {
-      label: 'Réservations',
-      path: '/hotel/reservations',
-      activePaths: ['/hotel/reservations', '/reservations'],
-    },
-    { label: 'Espaces', path: '/hotel/espaces' },
-    { label: 'Clients', path: '/hotel/clients' },
-    { label: 'Employés', path: '/hotel/employes' },
-    { label: 'Facturation', path: '/hotel/facturation' },
-  ];
-
-  protected visibleItems(): NavItem[] {
-    return this.authStore.role() === Role.HOTEL
-      ? this.hotelNavItems
-      : this.agencyNavItems;
+  protected visibleItems(): readonly NavItemConfig[] {
+    return topbarNavItemsForRole(this.authStore.role());
   }
 
   protected logoSrc(): string {
@@ -137,7 +105,7 @@ export class TopbarComponent implements AfterViewInit {
     this.observeScrollState();
   }
 
-  protected isItemActive(item: NavItem): boolean {
+  protected isItemActive(item: NavItemConfig): boolean {
     const currentUrl = this.currentUrl();
     const activePaths = item.activePaths ?? [item.path];
 

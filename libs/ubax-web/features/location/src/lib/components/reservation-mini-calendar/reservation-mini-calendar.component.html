@@ -1,0 +1,42 @@
+<div class="reservation-mini-calendar">
+  <div class="reservation-mini-calendar__header">
+    <p class="reservation-mini-calendar__title">{{ monthLabel() }}</p>
+
+    <div class="reservation-mini-calendar__controls">
+      <button
+        type="button"
+        class="reservation-mini-calendar__nav"
+        (click)="previousMonth()"
+        aria-label="Mois précédent"
+      >
+        <img [src]="icons.chevronLeft" alt="" />
+      </button>
+      <button
+        type="button"
+        class="reservation-mini-calendar__nav"
+        (click)="nextMonth()"
+        aria-label="Mois suivant"
+      >
+        <img [src]="icons.chevronRight" alt="" />
+      </button>
+    </div>
+  </div>
+
+  <div class="reservation-mini-calendar__grid">
+    @for (label of weekLabels; track label) {
+      <span class="reservation-mini-calendar__weekday">{{ label }}</span>
+    }
+
+    @for (week of weeks(); track $index) {
+      @for (day of week; track $index) {
+        <span
+          class="reservation-mini-calendar__day"
+          [class.reservation-mini-calendar__day--muted]="day.muted"
+          [class.reservation-mini-calendar__day--active]="day.active"
+        >
+          {{ day.label }}
+        </span>
+      }
+    }
+  </div>
+</div>
