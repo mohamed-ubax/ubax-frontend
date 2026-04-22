@@ -148,7 +148,7 @@
 .archivage-filters {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   gap: 19px;
   box-sizing: border-box;
   padding: 12px;
@@ -165,90 +165,133 @@
 
   &__submit {
     width: 186px;
-    height: 51px;
-    border: 0;
+    min-height: 56px;
+    border: none;
     border-radius: 50px;
     background: var(--ubax-accent);
     color: var(--ubax-surface);
     font-family: 'Lexend', system-ui, sans-serif;
     font-size: 15px;
-    font-weight: 500;
-    line-height: 28px;
+    font-weight: 400;
+    line-height: 1.2;
     cursor: pointer;
+  }
+
+  &__submit--reset {
+    border: 1px solid var(--ubax-border-card);
+    background: var(--ubax-page-bg);
+    color: var(--ubax-text-primary);
+    font-weight: 300;
   }
 }
 
 .archivage-field {
-  position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   width: 217px;
-  height: 51px;
-  padding: 0 21px;
+  min-height: 56px;
+  padding: 0 24px;
+  border: 1px solid var(--ubax-border-card);
   border-radius: 50px;
   background: var(--ubax-page-bg);
+  box-shadow: none;
 
-  input,
-  select {
+  input {
     width: 100%;
-    border: 0;
+    min-width: 0;
+    min-height: 54px;
+    padding: 0;
+    border: none;
     background: transparent;
     color: var(--ubax-text-primary);
     font-family: 'Lexend', system-ui, sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 300;
-    line-height: 28px;
+    line-height: 1.2;
     outline: 0;
+    box-shadow: none;
   }
 
   input::placeholder {
     color: var(--ubax-text-primary);
-    opacity: 0.58;
+    opacity: 0.8;
+  }
+}
+
+:host ::ng-deep .archivage-filter-control {
+  width: 217px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 50px;
+  background: var(--ubax-page-bg);
+  box-shadow: none;
+  overflow: hidden;
+
+  .p-select-label,
+  .p-inputtext {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 54px;
+    padding: 0 16px 0 24px;
+    border: none;
+    background: transparent;
+    font-family: 'Lexend', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+    box-shadow: none;
   }
 
-  select {
-    appearance: none;
-    cursor: pointer;
-    padding-right: 34px;
+  .p-select-label {
+    display: inline-flex;
+    align-items: center;
   }
 
-  &--date {
-    padding-right: 52px;
-  }
-
-  &__icon {
-    position: absolute;
-    right: 19px;
-    top: 50%;
-    transform: translateY(-50%);
+  .p-select-dropdown,
+  .p-datepicker-dropdown {
+    width: 48px;
+    min-height: 54px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 23px;
-    height: 23px;
-    pointer-events: none;
-
-    img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+    padding: 0 12px 0 0;
+    border: none;
+    background: transparent;
+    color: transparent;
+    flex-shrink: 0;
   }
 
-  &__icon--chevron {
-    width: 24px;
-    height: 24px;
-    right: 22px;
+  .p-select-dropdown-icon,
+  .p-datepicker-trigger-icon,
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
   }
 
-  select.is-placeholder {
-    color: rgba(34, 34, 34, 0.48);
+  .p-select-label.p-placeholder,
+  .p-inputtext::placeholder {
+    color: var(--ubax-text-primary);
+    opacity: 0.8;
   }
 
-  input[type='date']::-webkit-calendar-picker-indicator {
-    opacity: 0;
-    pointer-events: none;
+  &.p-focus,
+  .p-inputtext:focus {
+    box-shadow: none;
+  }
+}
+
+:host ::ng-deep .archivage-filter-control--date {
+  .p-datepicker-dropdown {
+    padding-right: 10px;
+  }
+
+  img {
+    width: 35px;
+    height: 35px;
   }
 }
 
@@ -274,11 +317,90 @@
   padding-left: 27px;
 
   .archivage-field {
-    height: 56.577px;
+    min-height: 56.577px;
   }
 
   .archivage-filters__submit {
-    height: 56.577px;
+    min-height: 56.577px;
+  }
+}
+
+:host ::ng-deep .archivage-filters--advanced .archivage-filter-control {
+  min-height: 56.577px;
+
+  .p-select-label,
+  .p-inputtext,
+  .p-select-dropdown,
+  .p-datepicker-dropdown {
+    min-height: 54.577px;
+  }
+}
+
+:host ::ng-deep .archivage-filter-panel,
+:host ::ng-deep .archivage-datepicker-panel {
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgb(26 48 71 / 0.1);
+  overflow: hidden;
+}
+
+:host ::ng-deep .archivage-filter-panel {
+  .p-select-list {
+    padding: 8px;
+  }
+
+  .p-select-option {
+    border-radius: 12px;
+    font-family: 'Lexend', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+  }
+
+  .p-select-option.p-select-option-selected {
+    background: rgb(232 125 30 / 0.12);
+    color: var(--ubax-accent);
+  }
+}
+
+:host ::ng-deep .archivage-datepicker-panel {
+  .p-datepicker {
+    border: none;
+    background: var(--ubax-surface);
+  }
+
+  .p-datepicker-header {
+    border: none;
+    background: transparent;
+    padding: 16px 18px 10px;
+  }
+
+  .p-datepicker-title {
+    font-family: 'Lexend', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  .p-datepicker-prev-button,
+  .p-datepicker-next-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    color: var(--ubax-text-primary);
+  }
+
+  th,
+  td {
+    padding: 2px;
+    text-align: center;
+  }
+
+  .p-datepicker-weekday {
+    font-family: 'Lexend', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ubax-navy);
   }
 }
 
@@ -462,7 +584,17 @@
     padding-bottom: 0;
   }
 
+  &__empty-row {
+    display: block;
+    width: 100%;
+  }
+
   &__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
     padding: 72px 24px;
     min-height: 200px;
     color: var(--ubax-text-muted);
@@ -653,6 +785,10 @@
   .archivage-field,
   .archivage-filters__submit,
   .archivage-tabs__button {
+    width: 100%;
+  }
+
+  :host ::ng-deep .archivage-filter-control {
     width: 100%;
   }
 

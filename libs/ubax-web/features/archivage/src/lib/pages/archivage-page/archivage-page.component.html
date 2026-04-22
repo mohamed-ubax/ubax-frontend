@@ -68,47 +68,72 @@
       >
         @for (field of activeDefinition().filterFields; track field.id) {
           @if (field.kind === 'select') {
-            <label class="archivage-field archivage-field--select">
-              <select
-                [class.is-placeholder]="!filters()[field.id]"
-                [value]="filters()[field.id]"
-                (change)="updateFilter(field.id, getSelectValue($event))"
-              >
-                <option value="">{{ field.label }}</option>
-                @for (option of field.options ?? []; track option) {
-                  <option [value]="option">{{ option }}</option>
-                }
-              </select>
-
-              <span
-                class="archivage-field__icon archivage-field__icon--chevron"
-                aria-hidden="true"
-              >
-                <img [src]="icons.chevronDown" alt="" />
-              </span>
-            </label>
-          } @else {
-            <label
-              class="archivage-field"
-              [class.archivage-field--date]="field.kind === 'date'"
+            <p-select
+              [options]="getSelectOptions(field)"
+              [ngModel]="getDraftFilterValue(field.id)"
+              (ngModelChange)="updateDraftFilter(field.id, $event)"
+              [ngModelOptions]="standaloneModelOptions"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="archivage-filter-control archivage-filter-control--select"
+              panelStyleClass="archivage-filter-panel"
+              [inputId]="'archivage-filter-' + field.id"
+              [ariaLabel]="field.label"
             >
+              <ng-template #dropdownicon>
+                <img [src]="icons.chevronDown" alt="" />
+              </ng-template>
+            </p-select>
+          } @else if (field.kind === 'date') {
+            <p-datepicker
+              [ngModel]="getDraftDateValue(field.id)"
+              (ngModelChange)="updateDraftDateFilter(field.id, $event)"
+              [ngModelOptions]="standaloneModelOptions"
+              [showIcon]="true"
+              [showButtonBar]="true"
+              [readonlyInput]="true"
+              iconDisplay="button"
+              dateFormat="dd/mm/yy"
+              appendTo="body"
+              styleClass="archivage-filter-control archivage-filter-control--date"
+              panelStyleClass="archivage-datepicker-panel"
+              todayButtonStyleClass="archivage-datepicker-panel__today"
+              clearButtonStyleClass="archivage-datepicker-panel__clear"
+              [inputId]="'archivage-filter-' + field.id"
+              [placeholder]="field.label"
+              [ariaLabel]="field.label"
+            >
+              <ng-template #triggericon>
+                <img [src]="icons.filterCalendar" alt="" />
+              </ng-template>
+            </p-datepicker>
+          } @else {
+            <label class="archivage-field archivage-field--text">
               <input
                 type="text"
                 [placeholder]="field.label"
-                [value]="filters()[field.id]"
-                (input)="updateFilter(field.id, getTextInputValue($event))"
+                [ngModel]="getDraftFilterValue(field.id)"
+                (ngModelChange)="updateDraftFilter(field.id, $event)"
+                [ngModelOptions]="standaloneModelOptions"
               />
-
-              @if (field.kind === 'date') {
-                <span class="archivage-field__icon" aria-hidden="true">
-                  <img [src]="icons.filterCalendar" alt="" />
-                </span>
-              }
             </label>
           }
         }
 
-        <button type="submit" class="archivage-filters__submit">Filtrer</button>
+        @if (showResetFiltersButton()) {
+          <button
+            type="button"
+            class="archivage-filters__submit archivage-filters__submit--reset"
+            (click)="clearFilters()"
+          >
+            Annuler
+          </button>
+        } @else {
+          <button type="submit" class="archivage-filters__submit">
+            Filtrer
+          </button>
+        }
       </form>
 
       <div class="archivage-table-wrap archivage-table-wrap--panel">
@@ -196,7 +221,7 @@
                   }
                 </tr>
               } @empty {
-                <tr>
+                <tr class="archivage-table__empty-row">
                   <td
                     class="archivage-table__empty"
                     [attr.colspan]="activeDefinition().columns.length"
@@ -226,46 +251,70 @@
     <form class="archivage-filters" (submit)="applyFilters($event)">
       @for (field of activeDefinition().filterFields; track field.id) {
         @if (field.kind === 'select') {
-          <label class="archivage-field archivage-field--select">
-            <select
-              [value]="filters()[field.id]"
-              (change)="updateFilter(field.id, getSelectValue($event))"
-            >
-              <option value="">{{ field.label }}</option>
-              @for (option of field.options ?? []; track option) {
-                <option [value]="option">{{ option }}</option>
-              }
-            </select>
-
-            <span
-              class="archivage-field__icon archivage-field__icon--chevron"
-              aria-hidden="true"
-            >
-              <img [src]="icons.chevronDown" alt="" />
-            </span>
-          </label>
-        } @else {
-          <label
-            class="archivage-field"
-            [class.archivage-field--date]="field.kind === 'date'"
+          <p-select
+            [options]="getSelectOptions(field)"
+            [ngModel]="getDraftFilterValue(field.id)"
+            (ngModelChange)="updateDraftFilter(field.id, $event)"
+            [ngModelOptions]="standaloneModelOptions"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="archivage-filter-control archivage-filter-control--select"
+            panelStyleClass="archivage-filter-panel"
+            [inputId]="'archivage-filter-' + field.id"
+            [ariaLabel]="field.label"
           >
+            <ng-template #dropdownicon>
+              <img [src]="icons.chevronDown" alt="" />
+            </ng-template>
+          </p-select>
+        } @else if (field.kind === 'date') {
+          <p-datepicker
+            [ngModel]="getDraftDateValue(field.id)"
+            (ngModelChange)="updateDraftDateFilter(field.id, $event)"
+            [ngModelOptions]="standaloneModelOptions"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [readonlyInput]="true"
+            iconDisplay="button"
+            dateFormat="dd/mm/yy"
+            appendTo="body"
+            styleClass="archivage-filter-control archivage-filter-control--date"
+            panelStyleClass="archivage-datepicker-panel"
+            todayButtonStyleClass="archivage-datepicker-panel__today"
+            clearButtonStyleClass="archivage-datepicker-panel__clear"
+            [inputId]="'archivage-filter-' + field.id"
+            [placeholder]="field.label"
+            [ariaLabel]="field.label"
+          >
+            <ng-template #triggericon>
+              <img [src]="icons.filterCalendar" alt="" />
+            </ng-template>
+          </p-datepicker>
+        } @else {
+          <label class="archivage-field archivage-field--text">
             <input
               type="text"
               [placeholder]="field.label"
-              [value]="filters()[field.id]"
-              (input)="updateFilter(field.id, getTextInputValue($event))"
+              [ngModel]="getDraftFilterValue(field.id)"
+              (ngModelChange)="updateDraftFilter(field.id, $event)"
+              [ngModelOptions]="standaloneModelOptions"
             />
-
-            @if (field.kind === 'date') {
-              <span class="archivage-field__icon" aria-hidden="true">
-                <img [src]="icons.filterCalendar" alt="" />
-              </span>
-            }
           </label>
         }
       }
 
-      <button type="submit" class="archivage-filters__submit">Filtrer</button>
+      @if (showResetFiltersButton()) {
+        <button
+          type="button"
+          class="archivage-filters__submit archivage-filters__submit--reset"
+          (click)="clearFilters()"
+        >
+          Annuler
+        </button>
+      } @else {
+        <button type="submit" class="archivage-filters__submit">Filtrer</button>
+      }
     </form>
 
     <section class="archivage-table-wrap">
