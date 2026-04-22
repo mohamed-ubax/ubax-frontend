@@ -630,15 +630,24 @@
 .archivage-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 31px;
+  max-width: 100%;
+  min-width: 0;
   padding: 0 18px;
   border-radius: 5px;
   font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 1;
-  white-space: nowrap;
+
+  &__label {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   &--success {
     background: var(--ubax-success-soft);
@@ -653,6 +662,18 @@
   &--danger {
     background: var(--ubax-danger-soft);
     color: var(--ubax-danger);
+  }
+}
+
+:host ::ng-deep .archivage-badge-tooltip {
+  max-width: 240px;
+
+  .p-tooltip-text {
+    white-space: normal;
+    word-break: break-word;
+    font-family: 'Lexend', system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
   }
 }
 

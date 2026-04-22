@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
 
 import {
   ARCHIVAGE_ICONS,
@@ -212,6 +213,7 @@ function stringifyRowCells(row: ArchivageRow): string[] {
     FormsModule,
     DatePickerModule,
     SelectModule,
+    TooltipModule,
     UbaxPaginatorComponent,
   ],
   templateUrl: './archivage-page.component.html',

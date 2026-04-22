@@ -190,7 +190,16 @@
                               cell.tone === 'danger'
                             "
                           >
-                            {{ cell.label }}
+                            <span
+                              class="archivage-badge__label"
+                              [pTooltip]="cell.label"
+                              tooltipPosition="top"
+                              [showOnEllipsis]="true"
+                              [appendTo]="'body'"
+                              tooltipStyleClass="archivage-badge-tooltip"
+                            >
+                              {{ cell.label }}
+                            </span>
                           </span>
                         }
 
@@ -383,7 +392,16 @@
                             cell.tone === 'danger'
                           "
                         >
-                          {{ cell.label }}
+                          <span
+                            class="archivage-badge__label"
+                            [pTooltip]="cell.label"
+                            tooltipPosition="top"
+                            [showOnEllipsis]="true"
+                            [appendTo]="'body'"
+                            tooltipStyleClass="archivage-badge-tooltip"
+                          >
+                            {{ cell.label }}
+                          </span>
                         </span>
                       }
 
