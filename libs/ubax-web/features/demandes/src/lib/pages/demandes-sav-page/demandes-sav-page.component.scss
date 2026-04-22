@@ -903,7 +903,7 @@ label.toolbar-pill {
   &__copy {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
     min-width: 0;
     flex: 1 1 auto;
 
@@ -932,7 +932,7 @@ label.toolbar-pill {
       font-size: 0.75rem;
       font-weight: 400;
       color: #000;
-      margin-top: 0.5rem;
+      margin-top: 0.15rem;
       text-align: right;
     }
   }
