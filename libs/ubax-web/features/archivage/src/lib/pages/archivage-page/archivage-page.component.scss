@@ -6,7 +6,6 @@
   display: flex;
   flex-direction: column;
   gap: 34px;
-  max-width: 1652px;
   margin: 0 auto;
   padding: 4px 0 28px;
 
@@ -107,6 +106,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  margin: 0 auto;
 
   &__button {
     width: 293px;
@@ -151,7 +151,7 @@
   align-items: center;
   gap: 19px;
   box-sizing: border-box;
-  padding: 19px 12px 20px;
+  padding: 12px;
   background: var(--ubax-surface);
   border-radius: 50px;
   box-shadow: var(--ubax-shadow-card-soft);
@@ -487,7 +487,7 @@
 .archivage-page--biens {
   .archivage-filters {
     width: 100%;
-    max-width: 1416px;
+    max-width: 1392px;
     margin: 0 auto;
   }
 
@@ -500,7 +500,7 @@
 .archivage-page--locataires {
   .archivage-filters {
     width: 100%;
-    max-width: 950px;
+    max-width: 920px;
     margin: 0 auto;
   }
 
@@ -513,7 +513,7 @@
 .archivage-page--factures {
   .archivage-filters {
     width: 100%;
-    max-width: 963px;
+    max-width: 920px;
     margin: 0 auto;
   }
 
@@ -526,7 +526,7 @@
 .archivage-page--tickets {
   .archivage-filters {
     width: 100%;
-    max-width: 951px;
+    max-width: 920px;
     margin: 0 auto;
   }
 
