@@ -1,222 +1,329 @@
 <div class="dashboard">
-  <!-- ── Page header ──────────────────────────────────────────────── -->
   <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
     <div class="page-actions">
       <div class="search-field">
-        <i class="pi pi-search"></i>
         <input type="text" placeholder="Recherche ..." />
+        <span class="search-field__icon" aria-hidden="true">
+          <img [src]="searchIconSrc" alt="" />
+        </span>
       </div>
       <button
         class="search-field search-field--btn"
+        type="button"
         (click)="datePickerOpen.set(true)"
       >
-        <i class="pi pi-calendar"></i>
-        <span>{{
+        <span class="search-field__text">{{
           selectedRange()
             ? (selectedRange()!.start | date: 'dd/MM/yy') +
               ' – ' +
               (selectedRange()!.end | date: 'dd/MM/yy')
             : 'Sélectionner une date'
         }}</span>
+        <span class="search-field__icon" aria-hidden="true">
+          <img [src]="calendarIconSrc" alt="" />
+        </span>
       </button>
-      <button class="export-btn">
-        <i class="pi pi-upload"></i>
-        Exporter les données
+      <button class="export-btn" type="button">
+        <span class="export-btn__label">Exporter les données</span>
+        <span class="export-btn__icon" aria-hidden="true">
+          <img [src]="exportIconSrc" alt="" />
+        </span>
       </button>
     </div>
   </div>
 
-  <!-- ── Hero + KPI wrapper card ──────────────────────────────────── -->
-  <div class="hero-kpi-card">
-    <!-- Hero banner -->
+  <section class="hero-kpi-card">
     <div class="hero-banner">
       <div class="hero-content">
         <h2>
           Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !
         </h2>
         <p>
-          Consultez rapidement les indicateurs clés de votre portefeuille et
-          gérez vos biens en toute simplicité.
+          Consultez rapidement les indicateurs clés de votre agence et suivez
+          l’essentiel de votre activité en temps réel.
         </p>
       </div>
-      <button class="hero-cta">
-        Ajouter un bien
-        <span class="hero-cta__icon">
-          <i class="pi pi-plus"></i>
+      <button class="hero-cta" type="button">
+        <span class="hero-cta__label">Ajouter un bien</span>
+        <span class="hero-cta__icon" aria-hidden="true">
+          <img [src]="addIconSrc" alt="" />
         </span>
       </button>
     </div>
 
-    <!-- KPI cards -->
     <div class="kpi-row">
       @for (card of kpiCards; track card.label) {
-        <div class="kpi-card" [style.background]="card.bg">
-          <div class="kpi-card__icon" [style.color]="card.color">
-            <i class="pi {{ card.icon }}"></i>
+        <article class="kpi-card" [ngClass]="'kpi-card--' + card.variant">
+          <div class="kpi-card__icon-shell" aria-hidden="true">
+            <img
+              class="kpi-card__icon"
+              [src]="card.iconSrc"
+              [alt]="card.iconAlt"
+            />
           </div>
           <div class="kpi-card__body">
             <p class="kpi-card__label">{{ card.label }}</p>
             <span class="kpi-card__value">{{ card.value }}</span>
           </div>
-        </div>
+        </article>
       }
     </div>
-  </div>
+  </section>
 
-  <!-- ── Appointments calendar ────────────────────────────────────── -->
-  <div class="card calendar-card">
-    <div class="calendar-header">
-      <div>
-        <p class="card-pretitle">Planning</p>
-        <h3 class="card-title">Demandes de Rendez-vous</h3>
+  <section class="dashboard-card planning-card">
+    <div class="planning-card__header">
+      <div class="planning-card__copy">
+        <p class="planning-card__eyebrow">Planning</p>
+        <h3 class="planning-card__title">Demandes de Rendez vous</h3>
       </div>
-      <div class="calendar-nav">
-        <div class="cal-legend">
-          <span class="cal-dot cal-dot--confirmed"></span
-          ><span class="cal-legend-label">Confirmé</span>
-          <span class="cal-dot cal-dot--upcoming"></span
-          ><span class="cal-legend-label">À venir</span>
-          <span class="cal-dot cal-dot--cancelled"></span
-          ><span class="cal-legend-label">Annulé</span>
-        </div>
-        <div class="cal-nav-btns">
-          <button class="cal-nav-btn">
-            <i class="pi pi-chevron-left"></i>
-          </button>
-          <span class="cal-week-label">Avr. 07 – 13, 2026</span>
-          <button class="cal-nav-btn">
-            <i class="pi pi-chevron-right"></i>
-          </button>
+      <div class="planning-card__actions">
+        <button
+          class="planning-card__date-filter"
+          type="button"
+          (click)="datePickerOpen.set(true)"
+        >
+          <span>Sélectionner une date</span>
+          <span class="planning-card__date-filter-icon" aria-hidden="true">
+            <img [src]="planningFilterIconSrc" alt="" />
+          </span>
+        </button>
+        <div class="planning-card__legend">
+          <span class="planning-card__legend-item">
+            <span
+              class="planning-card__legend-dot planning-card__legend-dot--confirmed"
+            ></span>
+            <span>Validé</span>
+          </span>
+          <span class="planning-card__legend-item">
+            <span
+              class="planning-card__legend-dot planning-card__legend-dot--upcoming"
+            ></span>
+            <span>A venir</span>
+          </span>
+          <span class="planning-card__legend-item">
+            <span
+              class="planning-card__legend-dot planning-card__legend-dot--cancelled"
+            ></span>
+            <span>Annulées</span>
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- Calendar grid -->
-    <div class="cal-grid-wrapper">
-      <!-- Time column -->
-      <div class="cal-times">
-        <div class="cal-times__header"></div>
-        @for (slot of timeSlots; track slot) {
-          <div class="cal-time-cell">{{ slot }}</div>
+    <div class="planning-card__surface">
+      <div class="planning-card__canvas">
+        <span class="planning-card__day-panel" aria-hidden="true"></span>
+        <span class="planning-card__time-header" aria-hidden="true"></span>
+
+        @for (slot of planningTimeLabels; track slot.label) {
+          <span
+            class="planning-card__time-label"
+            [ngClass]="slot.positionClass"
+          >
+            {{ slot.label }}
+          </span>
+        }
+
+        @for (day of planningDays; track day.label) {
+          <div class="planning-card__day-group" [ngClass]="day.positionClass">
+            <span class="planning-card__day-label">{{ day.label }}</span>
+            <span class="planning-card__day-date">{{ day.date }}</span>
+          </div>
+        }
+
+        @for (event of planningEvents; track event.positionClass) {
+          <article
+            class="planning-event"
+            [ngClass]="[event.positionClass, 'planning-event--' + event.status]"
+          >
+            <img
+              class="planning-event__avatar"
+              [src]="event.avatarSrc"
+              [alt]="event.customer"
+            />
+            <div class="planning-event__content">
+              <p class="planning-event__customer">{{ event.customer }}</p>
+              <p class="planning-event__property">{{ event.property }}</p>
+            </div>
+            <img
+              class="planning-event__arrow"
+              [src]="event.arrowSrc"
+              alt=""
+              aria-hidden="true"
+            />
+          </article>
         }
       </div>
+    </div>
+  </section>
 
-      <!-- Day columns -->
-      @for (day of weekDays; track day.label; let di = $index) {
-        <div class="cal-day-col">
-          <div class="cal-day-header">
-            <span class="cal-day-name">{{ day.label }}</span>
-            <span class="cal-day-date">{{ day.date }}</span>
-          </div>
-          @for (slot of timeSlots; track slot; let si = $index) {
-            <div class="cal-slot">
-              @for (ev of getEventsForSlot(di, si); track ev.label) {
-                <div
-                  class="cal-event"
-                  [class]="'cal-event--' + ev.status"
-                  [style.height.px]="ev.span * 56 - 6"
-                >
-                  {{ ev.label }}
-                </div>
-              }
+  <div class="dashboard-summary-row">
+    <section class="dashboard-card prospects-card">
+      <div class="prospects-card__header">
+        <div class="prospects-card__copy">
+          <p class="prospects-card__eyebrow">Activités</p>
+          <h3 class="prospects-card__title">Prospects</h3>
+        </div>
+        <button class="prospects-card__filter" type="button">
+          <span>Semaine</span>
+          <img [src]="chevronDownIconSrc" alt="" aria-hidden="true" />
+        </button>
+      </div>
+
+      <div class="prospects-card__divider"></div>
+
+      <div class="prospects-card__chart">
+        <div class="prospects-card__axis">
+          <span
+            class="prospects-card__axis-label prospects-card__axis-label--100"
+            >100</span
+          >
+          <span
+            class="prospects-card__axis-label prospects-card__axis-label--50"
+            >50</span
+          >
+          <span
+            class="prospects-card__axis-label prospects-card__axis-label--30"
+            >30</span
+          >
+          <span
+            class="prospects-card__axis-label prospects-card__axis-label--20"
+            >20</span
+          >
+          <span
+            class="prospects-card__axis-label prospects-card__axis-label--10"
+            >10</span
+          >
+          <span class="prospects-card__axis-label prospects-card__axis-label--0"
+            >0</span
+          >
+        </div>
+
+        <div class="prospects-card__plot">
+          @for (bar of prospectBars; track bar.code) {
+            <div class="prospects-card__bar-group">
+              <div class="prospects-card__bar-track">
+                <span
+                  class="prospects-card__bar-fill"
+                  [ngClass]="'prospects-card__bar-fill--' + bar.code"
+                ></span>
+              </div>
+              <span
+                class="prospects-card__bar-label"
+                [class.prospects-card__bar-label--active]="bar.code === 'ven'"
+              >
+                {{ bar.label }}
+              </span>
             </div>
           }
         </div>
-      }
-    </div>
-  </div>
+      </div>
+    </section>
 
-  <!-- ── Bottom row ────────────────────────────────────────────────── -->
-  <div class="bottom-row">
-    <!-- Prospects bar chart -->
-    <div class="card chart-card">
-      <div class="card-header">
-        <div>
-          <p class="card-pretitle">Statistiques</p>
-          <h3 class="card-title">Prospects</h3>
+    <section class="dashboard-card state-card">
+      <div class="state-card__header">
+        <div class="state-card__copy">
+          <p class="state-card__eyebrow">Activités</p>
+          <h3 class="state-card__title">Etat des biens</h3>
         </div>
-        <button class="filter-pill">
-          Cette semaine <i class="pi pi-chevron-down"></i>
+        <button class="state-card__add-button" type="button">
+          Ajouter un bien
         </button>
       </div>
-      <div class="bar-chart-wrapper">
-        <ubax-lazy-chart
-          type="bar"
-          [data]="prospectsData"
-          [options]="prospectsOptions"
-          height="240px"
-        ></ubax-lazy-chart>
-      </div>
-    </div>
 
-    <!-- Etat des biens -->
-    <div class="card etat-card">
-      <div class="card-header">
-        <h3 class="card-title">État des biens</h3>
-        <button class="outline-btn">Voir plus</button>
+      <div class="state-card__divider"></div>
+
+      <div class="state-card__total-row">
+        <span class="state-card__total-label">Tous les biens</span>
+        <span class="state-card__total-value">45</span>
       </div>
 
-      <div class="etat-total">
-        <span class="etat-total__count">Tous les biens</span>
-        <span class="etat-total__value">120</span>
-      </div>
+      <img
+        class="state-card__progress"
+        [src]="stateProgressSrc"
+        alt="Répartition des biens"
+      />
 
-      <div class="etat-progress">
-        @for (stat of bienStats; track stat.label) {
-          <div
-            class="progress-segment"
-            [style.flex]="stat.percent"
-            [style.background]="stat.color"
-          ></div>
-        }
-      </div>
-
-      <div class="etat-list">
-        @for (stat of bienStats; track stat.label) {
-          <div class="etat-item">
-            <span class="etat-dot" [style.background]="stat.color"></span>
-            <span class="etat-label">{{ stat.label }}</span>
-            <span class="etat-count">{{ stat.count }}</span>
+      <div class="state-card__legend-list">
+        @for (item of stateItems; track item.label) {
+          <div class="state-card__legend-item">
+            <span
+              class="state-card__legend-swatch"
+              [ngClass]="'state-card__legend-swatch--' + item.tone"
+            ></span>
+            <span class="state-card__legend-label">{{ item.label }}</span>
+            <span class="state-card__legend-value">{{ item.value }}</span>
           </div>
         }
       </div>
-    </div>
+    </section>
   </div>
 
-  <!-- ── Explorer les biens ─────────────────────────────────────────── -->
-  <div class="explorer-section">
-    <div class="explorer-header">
-      <h3 class="card-title">Explorer les biens</h3>
-      <button class="outline-btn">Voir tout</button>
+  <section class="dashboard-card explorer-card">
+    <div class="explorer-card__header">
+      <h3 class="explorer-card__title">Explorer les biens</h3>
+      <button class="explorer-card__button" type="button">Voir plus</button>
     </div>
 
-    <div class="explorer-grid">
-      @for (prop of properties; track prop.title) {
-        <div class="prop-card">
+    <div class="explorer-card__grid">
+      @for (property of properties; track property.imageSrc) {
+        <article class="property-card">
           <img
-            class="prop-card__img"
-            [src]="prop.image"
-            [alt]="prop.title"
+            class="property-card__image"
+            [src]="property.imageSrc"
+            [alt]="property.title"
             loading="lazy"
           />
-          <div class="prop-card__overlay">
-            <span class="prop-badge">{{ prop.badge }}</span>
-            <div class="prop-info">
-              <p class="prop-title">{{ prop.title }}</p>
-              <p class="prop-location">
-                <i class="pi pi-map-marker"></i> {{ prop.location }}
-              </p>
-              <p class="prop-price">{{ prop.price }}</p>
+          <span class="property-card__badge">Location</span>
+          <div class="property-card__overlay">
+            <div class="property-card__summary-row">
+              <div class="property-card__summary">
+                <h4 class="property-card__title">{{ property.title }}</h4>
+                <div class="property-card__location-row">
+                  <img
+                    class="property-card__location-icon"
+                    [src]="locationIconSrc"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <span>{{ property.location }}</span>
+                </div>
+              </div>
+              <button
+                class="property-card__action"
+                type="button"
+                aria-label="Ouvrir le bien"
+              >
+                <img [src]="propertyArrowSrc" alt="" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div class="property-card__meta-row">
+              <div class="property-card__tenant">
+                <img
+                  class="property-card__tenant-avatar"
+                  [src]="property.ownerAvatarSrc"
+                  [alt]="property.owner"
+                />
+                <div class="property-card__tenant-copy">
+                  <span class="property-card__tenant-name">{{
+                    property.owner
+                  }}</span>
+                  <span class="property-card__tenant-role">{{
+                    property.role
+                  }}</span>
+                </div>
+              </div>
+              <span class="property-card__price">{{ property.price }}</span>
             </div>
           </div>
-        </div>
+        </article>
       }
     </div>
-  </div>
+  </section>
 </div>
 
-<!-- ── Date range picker (fixed overlay) ─────────────────────────── -->
 <ubax-date-range-picker
   [(isOpen)]="datePickerOpen"
   (applied)="onDateRangeApplied($event)"
