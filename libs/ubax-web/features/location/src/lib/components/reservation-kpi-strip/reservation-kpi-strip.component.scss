@@ -33,7 +33,7 @@
 .reservation-kpi-card__label {
   margin: 0;
   font-family: 'Lexend', sans-serif;
-  font-size: 13px;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 18px;
   color: var(--ubax-text-primary);
@@ -85,12 +85,13 @@
   font-family: 'Lexend', sans-serif;
   font-size: 24px;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 0.5;
   color: var(--ubax-text-primary);
 }
 
 .reservation-kpi-card--new .reservation-kpi-card__value {
   color: var(--ubax-surface);
+  margin-top: -0.9rem;
 }
 
 .reservation-kpi-card__value--compact {
@@ -127,7 +128,7 @@
 
 .reservation-kpi-card__caption {
   font-family: 'Lexend', sans-serif;
-  font-size: 10px;
+  font-size: 0.8rem;
   font-weight: 500;
   line-height: 14px;
   color: var(--ubax-text-body);
