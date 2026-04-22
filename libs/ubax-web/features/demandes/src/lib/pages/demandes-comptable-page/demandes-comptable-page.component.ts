@@ -225,23 +225,23 @@ export class DemandesComptablePageComponent {
     {
       title: 'Technicien assigné',
       message: 'Une nouvelle demande a été enregistrée pour le bien UBX-0845.',
-      time: 'il ya 2 minutes',
+      time: 'il y a 2 minutes',
     },
     {
       title: 'Intervention planifiée',
       message:
         'Laura Koné a demandé plus d’informations sur Appartement Riviera Palmeraie',
-      time: 'il ya 12 minutes',
+      time: 'il y a 12 minutes',
     },
     {
       title: 'Nouveau ticket SAV créé',
       message: 'Une nouvelle demande a été enregistrée pour le bien UBX-0845.',
-      time: 'il ya 16 minutes',
+      time: 'il y a 16 minutes',
     },
     {
       title: 'Nouveau ticket SAV créé',
       message: 'Une nouvelle demande a été enregistrée pour le bien UBX-0845.',
-      time: 'il ya 16 minutes',
+      time: 'il y a 16 minutes',
     },
   ];
 }

@@ -480,6 +480,7 @@
 
   &__copy {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: 8px;
     min-width: 0;
@@ -496,18 +497,19 @@
     p {
       margin: 0;
       font-family: 'Lexend', sans-serif;
-      font-size: 0.5rem;
+      font-size: 0.9rem;
       font-weight: 300;
       line-height: 1.25;
-      color: var(--ubax-text-muted);
+      color: var(--ubax-text);
     }
 
     span {
-      font-family: 'Lexend', sans-serif;
-      font-size: 11px;
+      align-self: flex-end;
+      font-size: 0.75rem;
       font-weight: 400;
-      line-height: 1.2;
       color: #000;
+      margin-top: 0.5rem;
+      text-align: right;
     }
   }
 }

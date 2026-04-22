@@ -3,27 +3,64 @@
     <h1 class="demandes-sav__title">Demandes clientèles</h1>
 
     <div class="toolbar-actions" data-ubax-motion="surface">
-      @for (field of toolbarFields; track field.label) {
-        <button
-          type="button"
-          class="toolbar-pill"
-          [class.toolbar-pill--search]="field.kind === 'search'"
-          [class.toolbar-pill--export]="field.kind === 'export'"
-        >
-          <span class="toolbar-pill__label">{{ field.label }}</span>
+      <label
+        class="toolbar-pill toolbar-pill--search"
+        aria-label="Recherche globale"
+      >
+        <input
+          class="toolbar-pill__input"
+          type="search"
+          placeholder="Recherche ..."
+          [ngModel]="toolbarSearchTerm()"
+          (ngModelChange)="updateToolbarSearchTerm($event)"
+        />
 
-          <span class="toolbar-pill__icon" aria-hidden="true">
-            <img [src]="field.icon" alt="" />
-          </span>
-        </button>
-      }
+        <span class="toolbar-pill__icon" aria-hidden="true">
+          <img [src]="sharedIcons.search" alt="" />
+        </span>
+      </label>
+
+      <p-datepicker
+        [ngModel]="toolbarSelectedDate()"
+        (ngModelChange)="updateToolbarSelectedDate($event)"
+        [showIcon]="true"
+        [showButtonBar]="true"
+        [readonlyInput]="true"
+        iconDisplay="button"
+        dateFormat="dd/mm/yy"
+        appendTo="body"
+        styleClass="toolbar-pill toolbar-pill--date"
+        inputStyleClass="toolbar-pill__input"
+        panelStyleClass="toolbar-datepicker-panel"
+        todayButtonStyleClass="toolbar-datepicker-panel__today"
+        clearButtonStyleClass="toolbar-datepicker-panel__clear"
+        inputId="demandes-sav-toolbar-date"
+        placeholder="Sélectionner une date"
+        ariaLabel="Sélectionner une date"
+      >
+        <ng-template #triggericon>
+          <img [src]="sharedIcons.date" alt="" />
+        </ng-template>
+      </p-datepicker>
+
+      <button
+        type="button"
+        class="toolbar-pill toolbar-pill--export"
+        (click)="exportVisibleTickets()"
+      >
+        <span class="toolbar-pill__label">Exporter les données</span>
+
+        <span class="toolbar-pill__icon" aria-hidden="true">
+          <img [src]="sharedIcons.export" alt="" />
+        </span>
+      </button>
     </div>
   </header>
 
   <div class="demandes-sav__layout">
     <div class="demandes-sav__main">
       <section class="stats-grid" data-ubax-motion="surface">
-        @for (metric of statCards; track metric.label) {
+        @for (metric of statCards(); track metric.label) {
           <article class="stat-card" [style.--card-accent]="metric.accent">
             <span class="stat-card__orb" [style.--card-orb]="metric.background">
               <img [src]="metric.icon" alt="" />
@@ -39,93 +76,186 @@
 
       <article class="tickets-card" data-ubax-motion="surface">
         <div class="tickets-card__filters">
-          @for (filter of tableFilters; track filter.label) {
+          <p-select
+            [options]="statusOptions"
+            [ngModel]="draftStatus()"
+            (ngModelChange)="draftStatus.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="tickets-filter"
+            panelStyleClass="tickets-filter-panel"
+            inputId="demandes-sav-filter-status"
+            ariaLabel="Filtrer par statut"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="sharedIcons.chevron" alt="" />
+            </ng-template>
+          </p-select>
+
+          <p-select
+            [options]="priorityOptions"
+            [ngModel]="draftPriority()"
+            (ngModelChange)="draftPriority.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="tickets-filter"
+            panelStyleClass="tickets-filter-panel"
+            inputId="demandes-sav-filter-priority"
+            ariaLabel="Filtrer par priorité"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="sharedIcons.chevron" alt="" />
+            </ng-template>
+          </p-select>
+
+          <p-select
+            [options]="issueOptions"
+            [ngModel]="draftIssue()"
+            (ngModelChange)="draftIssue.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="tickets-filter tickets-filter--wide"
+            panelStyleClass="tickets-filter-panel"
+            inputId="demandes-sav-filter-issue"
+            ariaLabel="Filtrer par type de problème"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="sharedIcons.chevron" alt="" />
+            </ng-template>
+          </p-select>
+
+          <p-datepicker
+            [ngModel]="draftCreatedAt()"
+            (ngModelChange)="draftCreatedAt.set($event)"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [readonlyInput]="true"
+            iconDisplay="button"
+            dateFormat="dd/mm/yy"
+            appendTo="body"
+            styleClass="tickets-filter tickets-filter--date"
+            panelStyleClass="tickets-datepicker-panel"
+            todayButtonStyleClass="tickets-datepicker-panel__today"
+            clearButtonStyleClass="tickets-datepicker-panel__clear"
+            inputId="demandes-sav-filter-date"
+            placeholder="Date"
+            ariaLabel="Filtrer par date"
+          >
+            <ng-template #triggericon>
+              <img [src]="sharedIcons.date" alt="" />
+            </ng-template>
+          </p-datepicker>
+
+          @if (showResetTicketFiltersButton()) {
             <button
               type="button"
-              class="filter-chip"
-              [class.filter-chip--wide]="filter.size === 'lg'"
-              [class.filter-chip--date]="filter.size === 'date'"
+              class="filter-reset"
+              (click)="clearTicketFilters()"
             >
-              <span>{{ filter.label }}</span>
-              <img
-                [src]="
-                  filter.size === 'date'
-                    ? sharedIcons.date
-                    : sharedIcons.chevron
-                "
-                alt=""
-              />
+              Annuler
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="filter-submit"
+              (click)="applyTicketFilters()"
+            >
+              Filtrer
             </button>
           }
-
-          <button type="button" class="filter-submit">Filtrer</button>
         </div>
 
         <div class="tickets-card__subheader">
           <h2>Liste des tickets</h2>
 
-          <button type="button" class="tickets-card__search">
-            <span>Rechercher</span>
+          <label class="tickets-card__search" aria-label="Rechercher un ticket">
+            <input
+              type="search"
+              placeholder="Rechercher"
+              [ngModel]="tableSearchTerm()"
+              (ngModelChange)="updateTableSearchTerm($event)"
+            />
             <img [src]="sharedIcons.search" alt="" />
-          </button>
+          </label>
         </div>
 
         <div class="ticket-table">
-          <div class="ticket-table__scroll">
-            <div class="ticket-table__head">
-              <span>ID Ticket</span>
-              <span>Client</span>
-              <span>Biens concernés</span>
-              <span>Problème</span>
-              <span>Priorité</span>
-              <span>Crée le</span>
-              <span>Statut</span>
-              <span>Détails</span>
-            </div>
+          @if (visibleTickets().length) {
+            <div class="ticket-table__scroll">
+              <div class="ticket-table__head">
+                <span>ID Ticket</span>
+                <span>Client</span>
+                <span>Biens concernés</span>
+                <span>Problème</span>
+                <span>Priorité</span>
+                <span>Crée le</span>
+                <span>Statut</span>
+                <span>Détails</span>
+              </div>
 
-            <div class="ticket-table__body">
-              @for (ticket of tickets; track ticket.id) {
-                <div class="ticket-row">
-                  <span class="ticket-row__id">{{ ticket.id }}</span>
+              <div class="ticket-table__body">
+                @for (ticket of paginatedTickets(); track ticket.id) {
+                  <div class="ticket-row">
+                    <span class="ticket-row__id">{{ ticket.id }}</span>
 
-                  <div class="ticket-row__client">
-                    <img [src]="ticket.avatar" [alt]="ticket.client" />
-                    <span>{{ ticket.client }}</span>
+                    <div class="ticket-row__client">
+                      <img [src]="ticket.avatar" [alt]="ticket.client" />
+                      <span>{{ ticket.client }}</span>
+                    </div>
+
+                    <span>{{ ticket.property }}</span>
+                    <span>{{ ticket.issue }}</span>
+
+                    <span
+                      class="ticket-row__priority"
+                      [class.ticket-row__priority--urgent]="
+                        ticket.priorityTone === 'urgent'
+                      "
+                    >
+                      {{ ticket.priority }}
+                    </span>
+
+                    <span>{{ ticket.createdAt | date: 'longDate' }}</span>
+
+                    <span
+                      class="ticket-row__status"
+                      [class.ticket-row__status--open]="
+                        ticket.statusTone === 'open'
+                      "
+                      [class.ticket-row__status--success]="
+                        ticket.statusTone === 'success'
+                      "
+                      [class.ticket-row__status--progress]="
+                        ticket.statusTone === 'progress'
+                      "
+                    >
+                      {{ ticket.status }}
+                    </span>
+
+                    <button type="button" class="ticket-row__action">
+                      Détails
+                    </button>
                   </div>
-
-                  <span>{{ ticket.property }}</span>
-                  <span>{{ ticket.issue }}</span>
-
-                  <span
-                    class="ticket-row__priority"
-                    [class.ticket-row__priority--urgent]="
-                      ticket.priorityTone === 'urgent'
-                    "
-                  >
-                    {{ ticket.priority }}
-                  </span>
-
-                  <span>{{ ticket.createdAt }}</span>
-
-                  <span
-                    class="ticket-row__status"
-                    [class.ticket-row__status--success]="
-                      ticket.statusTone === 'success'
-                    "
-                    [class.ticket-row__status--progress]="
-                      ticket.statusTone === 'progress'
-                    "
-                  >
-                    {{ ticket.status }}
-                  </span>
-
-                  <button type="button" class="ticket-row__action">
-                    Détails
-                  </button>
-                </div>
-              }
+                }
+              </div>
             </div>
-          </div>
+
+            <footer class="tickets-card__footer">
+              <p class="tickets-card__results">{{ ticketResultsLabel() }}</p>
+
+              <ubax-paginator
+                [(currentPage)]="ticketsCurrentPage"
+                [totalPages]="ticketTotalPages()"
+              />
+            </footer>
+          } @else {
+            <div class="ticket-table__empty">
+              Aucun ticket ne correspond aux filtres en cours.
+            </div>
+          }
         </div>
       </article>
     </div>
@@ -135,17 +265,23 @@
         <h2 class="issues-card__title">Problèmes administratifs</h2>
 
         <div class="issues-card__list">
-          @for (issue of issueCards; track issue.title) {
-            <article class="issue-item">
-              <img class="issue-item__image" [src]="issue.image" alt="" />
+          @if (visibleIssueCards().length) {
+            @for (issue of visibleIssueCards(); track issue.id) {
+              <article class="issue-item">
+                <img class="issue-item__image" [src]="issue.image" alt="" />
 
-              <div class="issue-item__copy">
-                <h3>{{ issue.title }}</h3>
-                <p class="issue-item__client">{{ issue.client }}</p>
-                <p>{{ issue.location }}</p>
-                <p>{{ issue.phone }}</p>
-              </div>
-            </article>
+                <div class="issue-item__copy">
+                  <h3>{{ issue.title }}</h3>
+                  <p class="issue-item__client">{{ issue.client }}</p>
+                  <p>{{ issue.location }}</p>
+                  <p>{{ issue.phone }}</p>
+                </div>
+              </article>
+            }
+          } @else {
+            <p class="aside-empty">
+              Aucun problème administratif pour cette sélection.
+            </p>
           }
         </div>
       </article>
@@ -156,18 +292,24 @@
         </header>
 
         <div class="notifications-card__list">
-          @for (item of notifications; track item.title + item.time) {
-            <article class="notification-item">
-              <span class="notification-item__icon" aria-hidden="true">
-                <img [src]="sharedIcons.notification" alt="" />
-              </span>
+          @if (visibleNotifications().length) {
+            @for (item of visibleNotifications(); track item.id) {
+              <article class="notification-item">
+                <span class="notification-item__icon" aria-hidden="true">
+                  <img [src]="sharedIcons.notification" alt="" />
+                </span>
 
-              <div class="notification-item__copy">
-                <h3>{{ item.title }}</h3>
-                <p>{{ item.message }}</p>
-                <span>{{ item.time }}</span>
-              </div>
-            </article>
+                <div class="notification-item__copy">
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.message }}</p>
+                  <span>{{ item.time }}</span>
+                </div>
+              </article>
+            }
+          } @else {
+            <p class="aside-empty aside-empty--notifications">
+              Aucune notification pour cette sélection.
+            </p>
           }
         </div>
       </article>

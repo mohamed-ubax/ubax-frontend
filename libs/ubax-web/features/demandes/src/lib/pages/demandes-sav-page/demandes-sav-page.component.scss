@@ -52,8 +52,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex: 1 1 240px;
   min-height: 67px;
-  min-width: 240px;
+  min-width: 0;
   padding: 8px 9px 8px 26px;
   border: none;
   border-radius: 34px;
@@ -69,6 +70,27 @@
   &--export {
     flex: 1 1 278px;
     max-width: 278px;
+  }
+
+  &__input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+    box-shadow: none;
+    outline: none;
+
+    &::placeholder {
+      font-weight: 300;
+      color: var(--ubax-text-primary);
+      opacity: 0.8;
+    }
   }
 
   &__label {
@@ -98,6 +120,72 @@
       height: 26px;
       object-fit: contain;
     }
+  }
+}
+
+label.toolbar-pill {
+  cursor: text;
+}
+
+:host ::ng-deep .toolbar-pill--date {
+  flex: 1 1 278px;
+  max-width: 278px;
+  min-height: 67px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 9px 8px 26px;
+  border: none;
+  border-radius: 34px;
+  background: var(--ubax-surface);
+  box-shadow: var(--ubax-shadow-card-soft);
+  overflow: hidden;
+
+  .p-inputtext {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+    box-shadow: none;
+
+    &::placeholder {
+      font-weight: 300;
+      color: var(--ubax-text-primary);
+      opacity: 0.8;
+    }
+  }
+
+  .p-datepicker-dropdown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--ubax-page-bg);
+    color: transparent;
+    flex-shrink: 0;
+  }
+
+  .p-datepicker-trigger-icon,
+  img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+
+  &.p-focus,
+  .p-inputtext:focus {
+    box-shadow: none;
   }
 }
 
@@ -188,15 +276,19 @@
 }
 
 .tickets-card {
+  --tickets-search-width: 190px;
+
   padding: 19px 19px 18px;
 
   &__filters {
     display: grid;
     grid-template-columns:
-      minmax(0, 221px) minmax(0, 204px) minmax(0, 283px)
-      minmax(0, 179px) 142px;
+      minmax(0, 1.02fr) minmax(0, 0.95fr) minmax(0, 1.31fr)
+      minmax(0, 0.82fr) 142px;
     gap: 18px;
-    align-items: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
   }
 
   &__subheader {
@@ -223,20 +315,31 @@
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    width: 190px;
+    width: var(--tickets-search-width);
     height: 47px;
     padding: 0 14px 0 16px;
     border: 1px solid var(--ubax-border-card);
     border-radius: 5px;
     background: var(--ubax-page-bg);
-    cursor: pointer;
+    cursor: text;
 
-    span {
+    input {
+      width: 100%;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      padding: 0;
       font-family: 'Lexend', sans-serif;
       font-size: 16px;
       font-weight: 300;
       line-height: 1.2;
       color: var(--ubax-text-primary);
+      box-shadow: none;
+      outline: none;
+
+      &::placeholder {
+        color: var(--ubax-text-primary);
+      }
     }
 
     img {
@@ -247,48 +350,10 @@
   }
 }
 
-.filter-chip,
 .filter-submit {
   height: 56px;
   border-radius: 5px;
-}
-
-.filter-chip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 0 16px 0 24px;
-  border: 1px solid var(--ubax-border-card);
-  background: var(--ubax-page-bg);
-  cursor: pointer;
-
-  img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
-
-  span {
-    font-family: 'Lexend', sans-serif;
-    font-size: 16px;
-    font-weight: 300;
-    line-height: 1.2;
-    color: var(--ubax-text-primary);
-  }
-
-  &--wide {
-    padding-right: 12px;
-  }
-
-  &--date img {
-    width: 35px;
-    height: 35px;
-  }
-}
-
-.filter-submit {
+  min-width: 0;
   border: none;
   background: var(--ubax-accent);
   font-family: 'Lexend', sans-serif;
@@ -299,11 +364,239 @@
   cursor: pointer;
 }
 
+.filter-reset {
+  height: 56px;
+  border-radius: 5px;
+  min-width: 0;
+  border: 1px solid var(--ubax-border-card);
+  background: var(--ubax-page-bg);
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--ubax-text-primary);
+  cursor: pointer;
+}
+
+:host ::ng-deep .tickets-filter {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 5px;
+  background: var(--ubax-page-bg);
+  box-shadow: none;
+  overflow: hidden;
+
+  .p-select-label,
+  .p-inputtext {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 54px;
+    padding: 0 16px 0 24px;
+    border: none;
+    background: transparent;
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ubax-text-primary);
+    box-shadow: none;
+  }
+
+  .p-select-label {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .p-select-dropdown,
+  .p-datepicker-dropdown {
+    width: 48px;
+    min-height: 54px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px 0 0;
+    border: none;
+    background: transparent;
+    color: transparent;
+    flex-shrink: 0;
+  }
+
+  .p-select-dropdown-icon,
+  .p-datepicker-trigger-icon,
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+
+  &.p-focus,
+  .p-inputtext:focus {
+    box-shadow: none;
+  }
+}
+
+:host ::ng-deep .tickets-filter--date {
+  .p-datepicker-dropdown {
+    padding-right: 10px;
+  }
+
+  img {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+:host ::ng-deep .tickets-filter-panel,
+:host ::ng-deep .tickets-datepicker-panel,
+:host ::ng-deep .toolbar-datepicker-panel {
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgb(26 48 71 / 0.1);
+  overflow: hidden;
+}
+
+:host ::ng-deep .tickets-filter-panel {
+  .p-select-list {
+    padding: 8px;
+  }
+
+  .p-select-option {
+    border-radius: 12px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+  }
+
+  .p-select-option.p-select-option-selected {
+    background: rgb(232 125 30 / 0.12);
+    color: var(--ubax-accent);
+  }
+}
+
+:host ::ng-deep .tickets-datepicker-panel,
+:host ::ng-deep .toolbar-datepicker-panel {
+  .p-datepicker {
+    border: none;
+    background: var(--ubax-surface);
+  }
+
+  .p-datepicker-header {
+    border: none;
+    background: transparent;
+    padding: 16px 18px 10px;
+  }
+
+  .p-datepicker-title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  .p-datepicker-prev-button,
+  .p-datepicker-next-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    color: var(--ubax-text-primary);
+  }
+
+  th,
+  td {
+    padding: 2px;
+    text-align: center;
+  }
+
+  .p-datepicker-weekday {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ubax-navy);
+  }
+
+  .p-datepicker-day,
+  .p-datepicker-day-selected,
+  .p-datepicker-day-today {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgb(38 37 53 / 0.85);
+  }
+
+  .p-datepicker-day-selected,
+  .p-datepicker-day-today.p-datepicker-day-selected {
+    background: var(--ubax-accent);
+    color: var(--ubax-surface);
+  }
+
+  .p-datepicker-day-today {
+    background: rgb(232 125 30 / 0.12);
+    color: var(--ubax-accent);
+  }
+
+  .p-datepicker-buttonbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px 14px 14px;
+    border-top: 1px solid var(--ubax-divider-soft);
+  }
+}
+
+:host ::ng-deep .tickets-datepicker-panel__today,
+:host ::ng-deep .toolbar-datepicker-panel__today,
+:host ::ng-deep .tickets-datepicker-panel__clear,
+:host ::ng-deep .toolbar-datepicker-panel__clear {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+:host ::ng-deep .tickets-datepicker-panel__today,
+:host ::ng-deep .toolbar-datepicker-panel__today {
+  background: rgb(232 125 30 / 0.12);
+  color: var(--ubax-accent);
+}
+
+:host ::ng-deep .tickets-datepicker-panel__clear,
+:host ::ng-deep .toolbar-datepicker-panel__clear {
+  background: var(--ubax-page-bg);
+  color: var(--ubax-text-primary);
+}
+
 .ticket-table {
   overflow: hidden;
 
   &__scroll {
     overflow-x: auto;
+  }
+
+  &__empty {
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    padding: 24px;
+    border: 1px dashed var(--ubax-border-card);
+    border-radius: 12px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ubax-text-primary);
+    text-align: center;
   }
 
   &__head,
@@ -316,7 +609,7 @@
     display: grid;
     grid-template-columns: 130px 165px 230px 150px 110px 120px 103px 79px;
     align-items: center;
-    gap: 10px;
+    gap: 18px;
     min-height: 50px;
     padding: 0 16px;
     border-radius: 5px;
@@ -332,11 +625,47 @@
   }
 }
 
+.tickets-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+
+  ubax-paginator {
+    --paginator-edge-gap: 18px;
+    --paginator-page-gap: 10px;
+    --paginator-padding-block: 12px;
+    --paginator-padding-inline: 18px;
+    --paginator-background: var(--ubax-page-bg);
+    --paginator-surface: var(--ubax-surface);
+    --paginator-border-color: var(--ubax-border-card);
+    --paginator-page-size: 44px;
+    --paginator-page-font-size: 14px;
+    --paginator-page-font-weight: 400;
+    --paginator-page-active-font-size: 16px;
+    --paginator-page-active-font-weight: 600;
+    --paginator-arrow-width: 42px;
+    --paginator-arrow-height: 42px;
+    --paginator-arrow-radius: 10px;
+  }
+}
+
+.tickets-card__results {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ubax-text-primary);
+}
+
 .ticket-row {
   display: grid;
   grid-template-columns: 130px 165px 230px 150px 110px 120px 103px 79px;
   align-items: center;
-  gap: 10px;
+  gap: 18px;
   min-height: 61px;
   padding: 0 16px;
   border-bottom: 1px solid var(--ubax-ring-neutral);
@@ -419,6 +748,11 @@
       color: var(--ubax-accent);
       background: color-mix(in srgb, var(--ubax-accent) 12%, white 88%);
     }
+
+    &--open {
+      color: var(--ubax-info);
+      background: color-mix(in srgb, var(--ubax-info) 14%, white 86%);
+    }
   }
 
   &__action {
@@ -429,10 +763,26 @@
     background: var(--ubax-accent);
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
-    font-weight: 400;
+    font-weight: 300;
     line-height: 1.2;
     color: var(--ubax-surface);
     cursor: pointer;
+  }
+}
+
+.aside-empty {
+  margin: 0;
+  padding: 18px 14px;
+  border-radius: 12px;
+  background: var(--ubax-page-bg);
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ubax-text-primary);
+
+  &--notifications {
+    margin: 0 3px;
   }
 }
 
@@ -442,7 +792,7 @@
   &__title {
     margin: 0 12px 15px;
     font-family: 'Lexend', sans-serif;
-    font-size: 15px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.4;
     color: var(--ubax-navy);
@@ -485,20 +835,27 @@
     }
 
     h3 {
-      font-size: 12px;
+      font-size: 1rem;
       font-weight: 500;
       color: var(--ubax-danger);
     }
 
     p {
-      font-size: 10px;
+      font-size: 0.8rem;
       font-weight: 300;
       color: var(--ubax-text-primary);
+    }
+
+    p:last-child {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--ubax-text-muted);
+      margin-top: 0.5rem;
     }
   }
 
   &__client {
-    font-size: 11px !important;
+    font-size: 0.875rem !important;
     font-weight: 500 !important;
   }
 }
@@ -548,6 +905,7 @@
     flex-direction: column;
     gap: 3px;
     min-width: 0;
+    flex: 1 1 auto;
 
     h3,
     p,
@@ -558,21 +916,24 @@
     }
 
     h3 {
-      font-size: 12px;
+      font-size: 1rem;
       font-weight: 500;
       color: var(--ubax-navy);
     }
 
     p {
-      font-size: 10px;
+      font-size: 0.9rem;
       font-weight: 300;
-      color: var(--ubax-text-muted);
+      color: var(--ubax-text);
     }
 
     span {
-      font-size: 10px;
+      align-self: flex-end;
+      font-size: 0.75rem;
       font-weight: 400;
       color: #000;
+      margin-top: 0.5rem;
+      text-align: right;
     }
   }
 }
@@ -625,13 +986,23 @@
 
   .toolbar-pill,
   .toolbar-pill--search,
-  .toolbar-pill--export {
+  .toolbar-pill--export,
+  :host ::ng-deep .toolbar-pill--date {
     max-width: none;
   }
 
   .tickets-card__subheader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .tickets-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+
+    ubax-paginator {
+      align-self: center;
+    }
   }
 }
 

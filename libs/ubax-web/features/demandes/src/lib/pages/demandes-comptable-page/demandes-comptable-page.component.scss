@@ -391,6 +391,7 @@
     flex-direction: column;
     gap: 3px;
     min-width: 0;
+    flex: 1 1 auto;
 
     h3,
     p,
@@ -401,21 +402,24 @@
     }
 
     h3 {
-      font-size: 12px;
+      font-size: 1rem;
       font-weight: 500;
       color: var(--ubax-navy);
     }
 
     p {
-      font-size: 10px;
+      font-size: 0.9rem;
       font-weight: 300;
-      color: var(--ubax-text-muted);
+      color: var(--ubax-text);
     }
 
     span {
-      font-size: 10px;
+      align-self: flex-end;
+      font-size: 0.75rem;
       font-weight: 400;
       color: #000;
+      margin-top: 0.5rem;
+      text-align: right;
     }
   }
 }
