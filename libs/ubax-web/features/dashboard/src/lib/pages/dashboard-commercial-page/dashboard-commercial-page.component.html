@@ -1,32 +1,41 @@
 <div class="dashboard">
   <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
+
     <div class="page-actions">
-      <div class="search-field">
-        <input type="text" placeholder="Recherche ..." />
-        <span class="search-field__icon" aria-hidden="true">
+      <label
+        class="dashboard-utility dashboard-utility--search"
+        aria-label="Recherche globale"
+      >
+        <input
+          type="search"
+          placeholder="Recherche ..."
+          [value]="searchTerm()"
+          (input)="updateSearchTerm($any($event.target).value)"
+        />
+        <span class="dashboard-utility__icon-shell" aria-hidden="true">
           <img [src]="searchIconSrc" alt="" />
         </span>
-      </div>
+      </label>
+
       <button
-        class="search-field search-field--btn"
+        class="dashboard-utility dashboard-utility--button dashboard-utility--calendar"
         type="button"
-        (click)="datePickerOpen.set(true)"
+        (click)="openDatePicker()"
       >
-        <span class="search-field__text">{{
-          selectedRange()
-            ? (selectedRange()!.start | date: 'dd/MM/yy') +
-              ' – ' +
-              (selectedRange()!.end | date: 'dd/MM/yy')
-            : 'Sélectionner une date'
-        }}</span>
-        <span class="search-field__icon" aria-hidden="true">
+        <span>{{ headerDateLabel() }}</span>
+        <span class="dashboard-utility__icon-shell" aria-hidden="true">
           <img [src]="calendarIconSrc" alt="" />
         </span>
       </button>
-      <button class="export-btn" type="button">
-        <span class="export-btn__label">Exporter les données</span>
-        <span class="export-btn__icon" aria-hidden="true">
+
+      <button
+        class="dashboard-utility dashboard-utility--button dashboard-utility--export"
+        type="button"
+        (click)="exportVisibleRows()"
+      >
+        <span>Exporter les données</span>
+        <span class="dashboard-utility__icon-shell" aria-hidden="true">
           <img [src]="exportIconSrc" alt="" />
         </span>
       </button>
@@ -36,24 +45,23 @@
   <section class="hero-kpi-card">
     <div class="hero-banner">
       <div class="hero-content">
-        <h2>
-          Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !
-        </h2>
+        <h2>Bonjour {{ displayName() }} !</h2>
         <p>
           Consultez rapidement les indicateurs clés de votre agence et suivez
           l’essentiel de votre activité en temps réel.
         </p>
       </div>
-      <button class="hero-cta" type="button">
+
+      <a class="hero-cta" [routerLink]="['/biens/ajouter']">
         <span class="hero-cta__label">Ajouter un bien</span>
         <span class="hero-cta__icon" aria-hidden="true">
           <img [src]="addIconSrc" alt="" />
         </span>
-      </button>
+      </a>
     </div>
 
     <div class="kpi-row">
-      @for (card of kpiCards; track card.label) {
+      @for (card of kpiCards(); track card.label) {
         <article class="kpi-card" [ngClass]="'kpi-card--' + card.variant">
           <div class="kpi-card__icon-shell" aria-hidden="true">
             <img
@@ -62,6 +70,7 @@
               [alt]="card.iconAlt"
             />
           </div>
+
           <div class="kpi-card__body">
             <p class="kpi-card__label">{{ card.label }}</p>
             <span class="kpi-card__value">{{ card.value }}</span>
@@ -75,19 +84,21 @@
     <div class="planning-card__header">
       <div class="planning-card__copy">
         <p class="planning-card__eyebrow">Planning</p>
-        <h3 class="planning-card__title">Demandes de Rendez vous</h3>
+        <h3 class="planning-card__title">Demandes de rendez-vous</h3>
       </div>
+
       <div class="planning-card__actions">
         <button
           class="planning-card__date-filter"
           type="button"
-          (click)="datePickerOpen.set(true)"
+          (click)="openDatePicker()"
         >
-          <span>Sélectionner une date</span>
+          <span>{{ planningDateLabel() }}</span>
           <span class="planning-card__date-filter-icon" aria-hidden="true">
             <img [src]="planningFilterIconSrc" alt="" />
           </span>
         </button>
+
         <div class="planning-card__legend">
           <span class="planning-card__legend-item">
             <span
@@ -95,12 +106,14 @@
             ></span>
             <span>Validé</span>
           </span>
+
           <span class="planning-card__legend-item">
             <span
               class="planning-card__legend-dot planning-card__legend-dot--upcoming"
             ></span>
             <span>A venir</span>
           </span>
+
           <span class="planning-card__legend-item">
             <span
               class="planning-card__legend-dot planning-card__legend-dot--cancelled"
@@ -113,47 +126,66 @@
 
     <div class="planning-card__surface">
       <div class="planning-card__canvas">
-        <span class="planning-card__day-panel" aria-hidden="true"></span>
-        <span class="planning-card__time-header" aria-hidden="true"></span>
+        <div class="planning-card__time-header">
+          <span class="planning-card__time-spacer" aria-hidden="true"></span>
 
-        @for (slot of planningTimeLabels; track slot.label) {
-          <span
-            class="planning-card__time-label"
-            [ngClass]="slot.positionClass"
-          >
-            {{ slot.label }}
-          </span>
-        }
+          @for (slot of planningTimeLabels; track slot.hour) {
+            <span class="planning-card__time-label">{{ slot.label }}</span>
+          }
+        </div>
 
-        @for (day of planningDays; track day.label) {
-          <div class="planning-card__day-group" [ngClass]="day.positionClass">
-            <span class="planning-card__day-label">{{ day.label }}</span>
-            <span class="planning-card__day-date">{{ day.date }}</span>
-          </div>
-        }
+        <div class="planning-card__rows">
+          @for (day of planningDays(); track day.key) {
+            <div class="planning-card__day-row">
+              <div class="planning-card__day-panel">
+                <span class="planning-card__day-label">{{ day.label }}</span>
+                <span class="planning-card__day-date">{{ day.date }}</span>
+              </div>
 
-        @for (event of planningEvents; track event.positionClass) {
-          <article
-            class="planning-event"
-            [ngClass]="[event.positionClass, 'planning-event--' + event.status]"
-          >
-            <img
-              class="planning-event__avatar"
-              [src]="event.avatarSrc"
-              [alt]="event.customer"
-            />
-            <div class="planning-event__content">
-              <p class="planning-event__customer">{{ event.customer }}</p>
-              <p class="planning-event__property">{{ event.property }}</p>
+              <div class="planning-card__timeline">
+                @if (day.events.length) {
+                  @for (event of day.events; track event.id) {
+                    <a
+                      class="planning-event"
+                      [routerLink]="event.route"
+                      [ngClass]="[
+                        'planning-event--' + event.status,
+                        event.startClass,
+                        event.spanClass,
+                      ]"
+                    >
+                      <img
+                        class="planning-event__avatar"
+                        [src]="event.avatarSrc"
+                        [alt]="event.customer"
+                      />
+
+                      <div class="planning-event__content">
+                        <p class="planning-event__customer">
+                          {{ event.customer }}
+                        </p>
+                        <p class="planning-event__property">
+                          {{ event.property }}
+                        </p>
+                      </div>
+
+                      <img
+                        class="planning-event__arrow"
+                        [src]="event.arrowSrc"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </a>
+                  }
+                } @else {
+                  <span class="planning-card__empty"
+                    >Aucun rendez-vous sur cette période</span
+                  >
+                }
+              </div>
             </div>
-            <img
-              class="planning-event__arrow"
-              [src]="event.arrowSrc"
-              alt=""
-              aria-hidden="true"
-            />
-          </article>
-        }
+          }
+        </div>
       </div>
     </div>
   </section>
@@ -165,57 +197,44 @@
           <p class="prospects-card__eyebrow">Activités</p>
           <h3 class="prospects-card__title">Prospects</h3>
         </div>
-        <button class="prospects-card__filter" type="button">
-          <span>Semaine</span>
-          <img [src]="chevronDownIconSrc" alt="" aria-hidden="true" />
-        </button>
+
+        <p-select
+          [options]="activityOptions"
+          [ngModel]="selectedActivityPeriod()"
+          (ngModelChange)="onActivityPeriodChange($event)"
+          [ngModelOptions]="standaloneModelOptions"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          styleClass="prospects-card__select-control"
+          panelStyleClass="prospects-card__select-panel"
+          ariaLabel="Période des activités"
+        >
+          <ng-template #dropdownicon>
+            <img [src]="chevronDownIconSrc" alt="" />
+          </ng-template>
+        </p-select>
       </div>
 
       <div class="prospects-card__divider"></div>
 
-      <div class="prospects-card__chart">
-        <div class="prospects-card__axis">
-          <span
-            class="prospects-card__axis-label prospects-card__axis-label--100"
-            >100</span
-          >
-          <span
-            class="prospects-card__axis-label prospects-card__axis-label--50"
-            >50</span
-          >
-          <span
-            class="prospects-card__axis-label prospects-card__axis-label--30"
-            >30</span
-          >
-          <span
-            class="prospects-card__axis-label prospects-card__axis-label--20"
-            >20</span
-          >
-          <span
-            class="prospects-card__axis-label prospects-card__axis-label--10"
-            >10</span
-          >
-          <span class="prospects-card__axis-label prospects-card__axis-label--0"
-            >0</span
-          >
+      <div class="prospects-card__chart-shell">
+        <div class="prospects-card__chart-wrap">
+          <p-chart
+            type="bar"
+            [data]="prospectChartData()"
+            [options]="prospectChartOptions"
+          />
         </div>
 
-        <div class="prospects-card__plot">
-          @for (bar of prospectBars; track bar.code) {
-            <div class="prospects-card__bar-group">
-              <div class="prospects-card__bar-track">
-                <span
-                  class="prospects-card__bar-fill"
-                  [ngClass]="'prospects-card__bar-fill--' + bar.code"
-                ></span>
-              </div>
-              <span
-                class="prospects-card__bar-label"
-                [class.prospects-card__bar-label--active]="bar.code === 'ven'"
-              >
-                {{ bar.label }}
-              </span>
-            </div>
+        <div class="prospects-card__labels">
+          @for (point of prospectPoints(); track point.code) {
+            <span
+              class="prospects-card__bar-label"
+              [class.prospects-card__bar-label--active]="point.highlighted"
+            >
+              {{ point.label }}
+            </span>
           }
         </div>
       </div>
@@ -227,33 +246,38 @@
           <p class="state-card__eyebrow">Activités</p>
           <h3 class="state-card__title">Etat des biens</h3>
         </div>
-        <button class="state-card__add-button" type="button">
+
+        <a class="state-card__add-button" [routerLink]="['/biens/ajouter']">
           Ajouter un bien
-        </button>
+        </a>
       </div>
 
       <div class="state-card__divider"></div>
 
       <div class="state-card__total-row">
         <span class="state-card__total-label">Tous les biens</span>
-        <span class="state-card__total-value">45</span>
+        <span class="state-card__total-value">{{ stateTotal() }}</span>
       </div>
 
-      <img
-        class="state-card__progress"
-        [src]="stateProgressSrc"
-        alt="Répartition des biens"
-      />
+      <div class="state-card__chart-wrap">
+        <p-chart
+          type="bar"
+          [data]="stateChartData()"
+          [options]="stateChartOptions()"
+        />
+      </div>
 
       <div class="state-card__legend-list">
-        @for (item of stateItems; track item.label) {
+        @for (item of stateItems(); track item.label) {
           <div class="state-card__legend-item">
             <span
               class="state-card__legend-swatch"
               [ngClass]="'state-card__legend-swatch--' + item.tone"
             ></span>
             <span class="state-card__legend-label">{{ item.label }}</span>
-            <span class="state-card__legend-value">{{ item.value }}</span>
+            <span class="state-card__legend-value">{{
+              formatCount(item.value)
+            }}</span>
           </div>
         }
       </div>
@@ -263,62 +287,79 @@
   <section class="dashboard-card explorer-card">
     <div class="explorer-card__header">
       <h3 class="explorer-card__title">Explorer les biens</h3>
-      <button class="explorer-card__button" type="button">Voir plus</button>
+      <a class="explorer-card__button" [routerLink]="['/biens']">Voir plus</a>
     </div>
 
     <div class="explorer-card__grid">
-      @for (property of properties; track property.imageSrc) {
-        <article class="property-card">
-          <img
-            class="property-card__image"
-            [src]="property.imageSrc"
-            [alt]="property.title"
-            loading="lazy"
-          />
-          <span class="property-card__badge">Location</span>
-          <div class="property-card__overlay">
-            <div class="property-card__summary-row">
-              <div class="property-card__summary">
-                <h4 class="property-card__title">{{ property.title }}</h4>
-                <div class="property-card__location-row">
-                  <img
-                    class="property-card__location-icon"
-                    [src]="locationIconSrc"
-                    alt=""
-                    aria-hidden="true"
-                  />
-                  <span>{{ property.location }}</span>
-                </div>
-              </div>
-              <button
-                class="property-card__action"
-                type="button"
-                aria-label="Ouvrir le bien"
-              >
-                <img [src]="propertyArrowSrc" alt="" aria-hidden="true" />
-              </button>
-            </div>
+      @if (visibleProperties().length) {
+        @for (property of visibleProperties(); track property.id) {
+          <article class="property-card">
+            <img
+              class="property-card__image"
+              [src]="property.imageSrc"
+              [alt]="property.title"
+              loading="lazy"
+            />
 
-            <div class="property-card__meta-row">
-              <div class="property-card__tenant">
-                <img
-                  class="property-card__tenant-avatar"
-                  [src]="property.ownerAvatarSrc"
-                  [alt]="property.owner"
-                />
-                <div class="property-card__tenant-copy">
-                  <span class="property-card__tenant-name">{{
-                    property.owner
-                  }}</span>
-                  <span class="property-card__tenant-role">{{
-                    property.role
-                  }}</span>
+            <span class="property-card__badge">{{ property.badge }}</span>
+
+            <div class="property-card__overlay">
+              <div class="property-card__summary-row">
+                <div class="property-card__summary">
+                  <a
+                    class="property-card__title-link"
+                    [routerLink]="property.route"
+                  >
+                    <h4 class="property-card__title">{{ property.title }}</h4>
+                  </a>
+
+                  <div class="property-card__location-row">
+                    <img
+                      class="property-card__location-icon"
+                      [src]="locationIconSrc"
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    <span>{{ property.location }}</span>
+                  </div>
                 </div>
+
+                <a
+                  class="property-card__action"
+                  [routerLink]="property.route"
+                  aria-label="Ouvrir le bien"
+                >
+                  <img [src]="propertyArrowSrc" alt="" aria-hidden="true" />
+                </a>
               </div>
-              <span class="property-card__price">{{ property.price }}</span>
+
+              <div class="property-card__meta-row">
+                <div class="property-card__tenant">
+                  <img
+                    class="property-card__tenant-avatar"
+                    [src]="property.ownerAvatarSrc"
+                    [alt]="property.owner"
+                  />
+
+                  <div class="property-card__tenant-copy">
+                    <span class="property-card__tenant-name">{{
+                      property.owner
+                    }}</span>
+                    <span class="property-card__tenant-role">{{
+                      property.role
+                    }}</span>
+                  </div>
+                </div>
+
+                <span class="property-card__price">{{ property.price }}</span>
+              </div>
             </div>
-          </div>
-        </article>
+          </article>
+        }
+      } @else {
+        <p class="explorer-card__empty">
+          Aucun bien ne correspond à la recherche en cours.
+        </p>
       }
     </div>
   </section>

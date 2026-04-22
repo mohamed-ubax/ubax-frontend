@@ -2,7 +2,11 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  z-index: 140;
+  z-index: 20;
+}
+
+:host-context(body:has(.dp-overlay)) {
+  pointer-events: none;
 }
 
 .dev-role-switcher {

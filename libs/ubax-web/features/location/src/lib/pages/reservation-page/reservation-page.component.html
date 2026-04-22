@@ -106,8 +106,8 @@
             <span
               class="reservation-table__cell reservation-table__cell--dates"
             >
-              {{ reservation.arrivalDate | date: 'dd / MM / yyyy' }} -
-              {{ reservation.departureDate | date: 'dd / MM / yyyy' }}
+              {{ reservation.arrivalDate | date: 'longDate' : 'fr-FR' }} -
+              {{ reservation.departureDate | date: 'longDate' : 'fr-FR' }}
             </span>
 
             <span
