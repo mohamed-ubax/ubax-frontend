@@ -87,7 +87,7 @@
               [showButtonBar]="true"
               [readonlyInput]="true"
               iconDisplay="button"
-              dateFormat="dd/mm/yy"
+              dateFormat="dd/mm/yyyy"
               appendTo="body"
               styleClass="archivage-filter-control archivage-filter-control--date"
               panelStyleClass="archivage-datepicker-panel"
@@ -123,11 +123,21 @@
             Annuler
           </button>
         } @else {
-          <button type="submit" class="archivage-filters__submit">
+          <button
+            type="submit"
+            class="archivage-filters__submit"
+            [disabled]="hasDateRangeValidationIssue()"
+          >
             Filtrer
           </button>
         }
       </form>
+
+      @if (dateRangeValidationMessage(); as message) {
+        <p class="archivage-filters__validation" role="alert">
+          {{ message }}
+        </p>
+      }
 
       <div class="archivage-table-wrap archivage-table-wrap--panel">
         <div class="archivage-table-shell">
@@ -206,7 +216,7 @@
                             [class.archivage-table__text--emphasis]="
                               cell.emphasis ?? false
                             "
-                            >{{ cell.value }}</span
+                            >{{ formatTableCellValue(cell.value) }}</span
                           >
                         }
                       }
@@ -306,9 +316,21 @@
           Annuler
         </button>
       } @else {
-        <button type="submit" class="archivage-filters__submit">Filtrer</button>
+        <button
+          type="submit"
+          class="archivage-filters__submit"
+          [disabled]="hasDateRangeValidationIssue()"
+        >
+          Filtrer
+        </button>
       }
     </form>
+
+    @if (dateRangeValidationMessage(); as message) {
+      <p class="archivage-filters__validation" role="alert">
+        {{ message }}
+      </p>
+    }
 
     <section class="archivage-table-wrap">
       <div class="archivage-table-shell">
@@ -387,7 +409,7 @@
                           [class.archivage-table__text--emphasis]="
                             cell.emphasis ?? false
                           "
-                          >{{ cell.value }}</span
+                          >{{ formatTableCellValue(cell.value) }}</span
                         >
                       }
                     }
@@ -395,7 +417,7 @@
                 }
               </tr>
             } @empty {
-              <tr>
+              <tr class="archivage-table__empty-row">
                 <td
                   class="archivage-table__empty"
                   [attr.colspan]="activeDefinition().columns.length"

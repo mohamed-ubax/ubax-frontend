@@ -35,11 +35,22 @@ interface ArchivageSelectOption {
   readonly value: string;
 }
 
-const DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
+const FRENCH_MONTH_NAMES = [
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre',
+] as const;
+
+const ARCHIVAGE_DATE_PATTERN = /^\d{2}\/\d{2}\/\d{4}$/;
 
 const DEFAULT_FILTERS: ArchivageFiltersState = {
   keyword: '',
@@ -68,10 +79,27 @@ function parseRowDate(value: string): Date | null {
   return new Date(year, month - 1, day);
 }
 
-function getEffectiveDateRange(filters: ArchivageFiltersState): {
-  readonly start: Date;
-  readonly end: Date;
-} | null {
+function formatLongFrenchDate(value: Date): string {
+  const day = String(value.getDate()).padStart(2, '0');
+  const month = FRENCH_MONTH_NAMES[value.getMonth()];
+
+  if (!month) {
+    return `${day}/${String(value.getMonth() + 1).padStart(2, '0')}/${value.getFullYear()}`;
+  }
+
+  return `${day} ${month} ${value.getFullYear()}`;
+}
+
+function getDateRangeValidationMessage(
+  filters: ArchivageFiltersState,
+): string | null {
+  const hasStartDate = !!filters.startDate;
+  const hasEndDate = !!filters.endDate;
+
+  if (hasStartDate !== hasEndDate) {
+    return 'Renseignez la date de début et la date de fin pour appliquer un intervalle.';
+  }
+
   if (!filters.startDate || !filters.endDate) {
     return null;
   }
@@ -79,21 +107,29 @@ function getEffectiveDateRange(filters: ArchivageFiltersState): {
   const startDate = normalizeCalendarDate(filters.startDate);
   const endDate = normalizeCalendarDate(filters.endDate);
 
-  return startDate <= endDate
-    ? { start: startDate, end: endDate }
-    : { start: endDate, end: startDate };
+  return startDate > endDate
+    ? 'La date de début ne peut pas être supérieure à la date de fin.'
+    : null;
 }
 
-function getComparableFilters(
-  filters: ArchivageFiltersState,
-): ArchivageFiltersState {
-  const effectiveDateRange = getEffectiveDateRange(filters);
+function getEffectiveDateRange(filters: ArchivageFiltersState): {
+  readonly start: Date;
+  readonly end: Date;
+} | null {
+  if (getDateRangeValidationMessage(filters)) {
+    return null;
+  }
 
-  return {
-    ...filters,
-    startDate: effectiveDateRange ? effectiveDateRange.start : null,
-    endDate: effectiveDateRange ? effectiveDateRange.end : null,
-  };
+  const { startDate, endDate } = filters;
+
+  if (!startDate || !endDate) {
+    return null;
+  }
+
+  const normalizedStartDate = normalizeCalendarDate(startDate);
+  const normalizedEndDate = normalizeCalendarDate(endDate);
+
+  return { start: normalizedStartDate, end: normalizedEndDate };
 }
 
 function isRowWithinDateRange(
@@ -136,21 +172,14 @@ function areFiltersEqual(
   left: ArchivageFiltersState,
   right: ArchivageFiltersState,
 ): boolean {
-  const comparableLeft = getComparableFilters(left);
-  const comparableRight = getComparableFilters(right);
-
   return (
-    comparableLeft.keyword === comparableRight.keyword &&
-    areFilterDatesEqual(comparableLeft.startDate, comparableRight.startDate) &&
-    areFilterDatesEqual(comparableLeft.endDate, comparableRight.endDate) &&
-    comparableLeft.owner === comparableRight.owner &&
-    comparableLeft.archivedBy === comparableRight.archivedBy &&
-    comparableLeft.type === comparableRight.type
+    left.keyword === right.keyword &&
+    areFilterDatesEqual(left.startDate, right.startDate) &&
+    areFilterDatesEqual(left.endDate, right.endDate) &&
+    left.owner === right.owner &&
+    left.archivedBy === right.archivedBy &&
+    left.type === right.type
   );
-}
-
-function formatFilterDate(value: Date): string {
-  return DATE_FORMATTER.format(value);
 }
 
 function normalizeText(value: string): string {
@@ -213,6 +242,14 @@ export class ArchivagePageComponent {
     );
   });
 
+  protected readonly dateRangeValidationMessage = computed(() =>
+    getDateRangeValidationMessage(this.draftFilters()),
+  );
+
+  protected readonly hasDateRangeValidationIssue = computed(
+    () => !!this.dateRangeValidationMessage(),
+  );
+
   protected readonly showResetFiltersButton = computed(() => {
     const hasAppliedFilters = !areFiltersEqual(
       this.appliedFilters(),
@@ -223,7 +260,10 @@ export class ArchivagePageComponent {
       this.appliedFilters(),
     );
 
-    return hasAppliedFilters && !hasPendingDraftChanges;
+    return (
+      hasAppliedFilters &&
+      (!hasPendingDraftChanges || this.hasDateRangeValidationIssue())
+    );
   });
 
   protected readonly filteredRows = computed<readonly ArchivageRow[]>(() => {
@@ -319,9 +359,12 @@ export class ArchivagePageComponent {
 
   protected applyFilters(event: Event): void {
     event.preventDefault();
-    this.appliedFilters.set(
-      cloneFiltersState(getComparableFilters(this.draftFilters())),
-    );
+
+    if (this.hasDateRangeValidationIssue()) {
+      return;
+    }
+
+    this.appliedFilters.set(cloneFiltersState(this.draftFilters()));
     this.currentPage.set(1);
   }
 
@@ -357,6 +400,16 @@ export class ArchivagePageComponent {
         value: option,
       })),
     ];
+  }
+
+  protected formatTableCellValue(value: string): string {
+    if (!ARCHIVAGE_DATE_PATTERN.test(value)) {
+      return value;
+    }
+
+    const parsedDate = parseRowDate(value);
+
+    return parsedDate ? formatLongFrenchDate(parsedDate) : value;
   }
 
   protected exportCurrentView(): void {
