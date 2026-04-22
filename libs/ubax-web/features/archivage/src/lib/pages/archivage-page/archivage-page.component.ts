@@ -54,6 +54,62 @@ function cloneDate(value: Date | null): Date | null {
   return value ? new Date(value) : null;
 }
 
+function normalizeCalendarDate(value: Date): Date {
+  return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+}
+
+function parseRowDate(value: string): Date | null {
+  const [day, month, year] = value.split('/').map(Number);
+
+  if (!day || !month || !year) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day);
+}
+
+function getEffectiveDateRange(filters: ArchivageFiltersState): {
+  readonly start: Date;
+  readonly end: Date;
+} | null {
+  if (!filters.startDate || !filters.endDate) {
+    return null;
+  }
+
+  const startDate = normalizeCalendarDate(filters.startDate);
+  const endDate = normalizeCalendarDate(filters.endDate);
+
+  return startDate <= endDate
+    ? { start: startDate, end: endDate }
+    : { start: endDate, end: startDate };
+}
+
+function getComparableFilters(
+  filters: ArchivageFiltersState,
+): ArchivageFiltersState {
+  const effectiveDateRange = getEffectiveDateRange(filters);
+
+  return {
+    ...filters,
+    startDate: effectiveDateRange ? effectiveDateRange.start : null,
+    endDate: effectiveDateRange ? effectiveDateRange.end : null,
+  };
+}
+
+function isRowWithinDateRange(
+  row: ArchivageRow,
+  dateRange: { readonly start: Date; readonly end: Date },
+): boolean {
+  const rowStart = parseRowDate(row.startDate);
+  const rowEnd = parseRowDate(row.endDate);
+
+  if (!rowStart || !rowEnd) {
+    return false;
+  }
+
+  return rowStart >= dateRange.start && rowEnd <= dateRange.end;
+}
+
 function cloneFiltersState(
   filters: ArchivageFiltersState,
 ): ArchivageFiltersState {
@@ -80,13 +136,16 @@ function areFiltersEqual(
   left: ArchivageFiltersState,
   right: ArchivageFiltersState,
 ): boolean {
+  const comparableLeft = getComparableFilters(left);
+  const comparableRight = getComparableFilters(right);
+
   return (
-    left.keyword === right.keyword &&
-    areFilterDatesEqual(left.startDate, right.startDate) &&
-    areFilterDatesEqual(left.endDate, right.endDate) &&
-    left.owner === right.owner &&
-    left.archivedBy === right.archivedBy &&
-    left.type === right.type
+    comparableLeft.keyword === comparableRight.keyword &&
+    areFilterDatesEqual(comparableLeft.startDate, comparableRight.startDate) &&
+    areFilterDatesEqual(comparableLeft.endDate, comparableRight.endDate) &&
+    comparableLeft.owner === comparableRight.owner &&
+    comparableLeft.archivedBy === comparableRight.archivedBy &&
+    comparableLeft.type === comparableRight.type
   );
 }
 
@@ -170,6 +229,7 @@ export class ArchivagePageComponent {
   protected readonly filteredRows = computed<readonly ArchivageRow[]>(() => {
     const globalQuery = normalizeText(this.headerSearch());
     const filters = this.appliedFilters();
+    const effectiveDateRange = getEffectiveDateRange(filters);
 
     return this.activeDefinition().rows.filter((row) => {
       if (
@@ -187,15 +247,8 @@ export class ArchivagePageComponent {
       }
 
       if (
-        filters.startDate &&
-        row.startDate !== formatFilterDate(filters.startDate)
-      ) {
-        return false;
-      }
-
-      if (
-        filters.endDate &&
-        row.endDate !== formatFilterDate(filters.endDate)
+        effectiveDateRange &&
+        !isRowWithinDateRange(row, effectiveDateRange)
       ) {
         return false;
       }
@@ -266,7 +319,9 @@ export class ArchivagePageComponent {
 
   protected applyFilters(event: Event): void {
     event.preventDefault();
-    this.appliedFilters.set(cloneFiltersState(this.draftFilters()));
+    this.appliedFilters.set(
+      cloneFiltersState(getComparableFilters(this.draftFilters())),
+    );
     this.currentPage.set(1);
   }
 
