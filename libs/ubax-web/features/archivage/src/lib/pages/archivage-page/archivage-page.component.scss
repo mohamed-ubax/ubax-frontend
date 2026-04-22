@@ -219,6 +219,8 @@
   &__icon {
     position: absolute;
     right: 19px;
+    top: 50%;
+    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -238,6 +240,15 @@
     width: 24px;
     height: 24px;
     right: 22px;
+  }
+
+  select.is-placeholder {
+    color: rgba(34, 34, 34, 0.48);
+  }
+
+  input[type='date']::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 
@@ -281,12 +292,11 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    overflow: visible;
   }
 }
 
 .archivage-table-shell {
-  min-width: 1580px;
+  min-width: 1060px;
 }
 
 .archivage-table {
@@ -321,11 +331,13 @@
     padding: 0;
     border: 0;
     color: var(--ubax-surface);
-    font-size: 20px;
+    font-size: 15px;
     font-weight: 600;
-    line-height: 36px;
+    line-height: 1.4;
     text-align: left;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__body {
@@ -343,12 +355,19 @@
     padding: 0;
     border: 0;
     min-width: 0;
+    overflow: hidden;
     color: var(--ubax-text-primary);
-    font-size: 20px;
+    font-size: 15px;
     font-weight: 400;
-    line-height: 36px;
+    line-height: 1.4;
     text-align: left;
     background: transparent;
+
+    > span:not(.archivage-badge) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   &__cell--avatar {
@@ -493,7 +512,7 @@
 
   .archivage-table__header,
   .archivage-table__row {
-    grid-template-columns: 1.08fr 1.32fr 1.68fr 1.56fr 1.35fr 1.04fr 1.72fr;
+    grid-template-columns: 1.08fr 1.32fr 1.68fr 1.56fr 1.35fr 1.04fr 270px;
   }
 }
 
@@ -506,7 +525,7 @@
 
   .archivage-table__header,
   .archivage-table__row {
-    grid-template-columns: 1.28fr 1.2fr 0.96fr 1fr 1.12fr 0.82fr 1.18fr;
+    grid-template-columns: 1.14fr 1.09fr 0.9fr 1.08fr 1.13fr 0.85fr 270px;
   }
 }
 
@@ -519,7 +538,7 @@
 
   .archivage-table__header,
   .archivage-table__row {
-    grid-template-columns: 0.9fr 1.18fr 1.68fr 1.16fr 1.1fr 1.16fr 1.04fr;
+    grid-template-columns: 0.9fr 1.18fr 1.68fr 1.16fr 1.1fr 1.16fr 270px;
   }
 }
 
@@ -532,18 +551,14 @@
 
   .archivage-table__header,
   .archivage-table__row {
-    grid-template-columns: 1.06fr 1.24fr 1.52fr 1.88fr 1fr 1.12fr 1.08fr;
+    grid-template-columns: 1.06fr 1.24fr 1.52fr 1.88fr 1fr 1.12fr 270px;
   }
 }
 
 .archivage-page--documents {
-  .archivage-table-shell {
-    min-width: 1634px;
-  }
-
   .archivage-table__header,
   .archivage-table__row {
-    grid-template-columns: 0.82fr 1.15fr 1.55fr 1.2fr 1.08fr 0.98fr 1.12fr;
+    grid-template-columns: 0.82fr 1.15fr 1.55fr 1.2fr 1.08fr 0.98fr 270px;
   }
 
   .archivage-table__row:last-child {
@@ -572,6 +587,46 @@
   .archivage-tabs__button:nth-child(3),
   .archivage-tabs__button:nth-child(5) {
     width: calc(50% - 8px);
+  }
+}
+
+@media (max-width: 1200px) {
+  .archivage-table__header,
+  .archivage-table__row {
+    gap: 12px;
+    padding: 0 14px;
+  }
+
+  .archivage-table__header-cell {
+    font-size: 13px;
+  }
+
+  .archivage-table__cell {
+    font-size: 13px;
+  }
+
+  .archivage-table__action {
+    font-size: 13px;
+    height: 36px;
+
+    &--primary {
+      width: 80px;
+    }
+
+    &--secondary {
+      width: 108px;
+    }
+  }
+
+  .archivage-page--biens,
+  .archivage-page--locataires,
+  .archivage-page--factures,
+  .archivage-page--tickets,
+  .archivage-page--documents {
+    .archivage-table__header,
+    .archivage-table__row {
+      grid-template-columns: 1fr 1fr 0.9fr 1fr 1fr 0.85fr 200px;
+    }
   }
 }
 

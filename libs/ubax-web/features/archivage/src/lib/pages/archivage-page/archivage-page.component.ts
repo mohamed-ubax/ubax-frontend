@@ -71,8 +71,9 @@ export class ArchivagePageComponent {
 
   protected readonly tabs = ARCHIVAGE_TAB_DEFINITIONS;
   protected readonly icons = ARCHIVAGE_ICONS;
+  protected readonly PAGE_SIZE = 6;
   protected readonly activeTab = signal<ArchivageTabId>('biens');
-  protected readonly currentPage = signal(3);
+  protected readonly currentPage = signal(1);
   protected readonly headerSearch = signal('');
   protected readonly filters = signal<ArchivageFiltersState>(DEFAULT_FILTERS);
 
@@ -126,19 +127,29 @@ export class ArchivagePageComponent {
     });
   });
 
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredRows().length / this.PAGE_SIZE)),
+  );
+
+  protected readonly pagedRows = computed<readonly ArchivageRow[]>(() => {
+    const start = (this.currentPage() - 1) * this.PAGE_SIZE;
+    return this.filteredRows().slice(start, start + this.PAGE_SIZE);
+  });
+
   protected selectTab(tabId: ArchivageTabId): void {
     if (tabId === this.activeTab()) {
       return;
     }
 
     this.activeTab.set(tabId);
-    this.currentPage.set(3);
+    this.currentPage.set(1);
     this.headerSearch.set('');
     this.filters.set(DEFAULT_FILTERS);
   }
 
   protected updateHeaderSearch(event: Event): void {
     this.headerSearch.set(this.getTextInputValue(event));
+    this.currentPage.set(1);
   }
 
   protected updateFilter(field: ArchivageFieldId, value: string): void {
@@ -146,10 +157,12 @@ export class ArchivagePageComponent {
       ...state,
       [field]: value,
     }));
+    this.currentPage.set(1);
   }
 
   protected applyFilters(event: Event): void {
     event.preventDefault();
+    this.currentPage.set(1);
   }
 
   protected getTextInputValue(event: Event): string {

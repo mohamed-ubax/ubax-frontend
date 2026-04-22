@@ -70,6 +70,7 @@
           @if (field.kind === 'select') {
             <label class="archivage-field archivage-field--select">
               <select
+                [class.is-placeholder]="!filters()[field.id]"
                 [value]="filters()[field.id]"
                 (change)="updateFilter(field.id, getSelectValue($event))"
               >
@@ -124,7 +125,7 @@
             </thead>
 
             <tbody class="archivage-table__body">
-              @for (row of filteredRows(); track row.id) {
+              @for (row of pagedRows(); track row.id) {
                 <tr class="archivage-table__row">
                   @for (cell of row.cells; track $index) {
                     <td
@@ -213,7 +214,7 @@
             <ubax-paginator
               [currentPage]="currentPage()"
               (currentPageChange)="currentPage.set($event)"
-              [totalPages]="5"
+              [totalPages]="totalPages()"
               [previousIconSrc]="icons.paginatorPrevious"
               [nextIconSrc]="icons.paginatorNext"
             />
@@ -281,7 +282,7 @@
           </thead>
 
           <tbody class="archivage-table__body">
-            @for (row of filteredRows(); track row.id) {
+            @for (row of pagedRows(); track row.id) {
               <tr class="archivage-table__row">
                 @for (cell of row.cells; track $index) {
                   <td
@@ -368,7 +369,7 @@
           <ubax-paginator
             [currentPage]="currentPage()"
             (currentPageChange)="currentPage.set($event)"
-            [totalPages]="5"
+            [totalPages]="totalPages()"
             [previousIconSrc]="icons.paginatorPrevious"
             [nextIconSrc]="icons.paginatorNext"
           />
