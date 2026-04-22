@@ -106,7 +106,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin: 0 auto;
+  margin: 2rem auto 0;
 
   &__button {
     width: 293px;
@@ -117,7 +117,7 @@
     color: var(--ubax-text-primary);
     font-family: 'Lexend', system-ui, sans-serif;
     font-size: 20px;
-    font-weight: 400;
+    font-weight: 300;
     line-height: 36px;
     cursor: pointer;
     transition:

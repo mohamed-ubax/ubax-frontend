@@ -135,7 +135,7 @@ export class ArchivagePageComponent {
 
   protected readonly tabs = ARCHIVAGE_TAB_DEFINITIONS;
   protected readonly icons = ARCHIVAGE_ICONS;
-  protected readonly PAGE_SIZE = 6;
+  protected readonly PAGE_SIZE = 10;
   protected readonly standaloneModelOptions = { standalone: true };
   protected readonly activeTab = signal<ArchivageTabId>('biens');
   protected readonly currentPage = signal(1);
