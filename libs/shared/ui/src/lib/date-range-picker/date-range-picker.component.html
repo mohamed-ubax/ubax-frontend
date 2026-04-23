@@ -1,11 +1,19 @@
 @if (isOpen()) {
-
   <!-- ── Overlay ────────────────────────────────────────────────────── -->
-  <div class="dp-overlay" [class.is-closing]="isClosing()" (click)="cancel()"></div>
+  <div
+    class="dp-overlay"
+    [class.is-closing]="isClosing()"
+    (click)="cancel()"
+  ></div>
 
   <!-- ── Modal ──────────────────────────────────────────────────────── -->
-  <div class="dp-modal" [class.is-closing]="isClosing()" (click)="stopPropagation($event)">
-
+  <div
+    class="dp-modal"
+    [class.is-closing]="isClosing()"
+    (click)="stopPropagation($event)"
+    role="dialog"
+    aria-modal="true"
+  >
     <!-- Left sidebar — quick presets -->
     <aside class="dp-sidebar">
       @for (preset of presets; track preset.label) {
@@ -13,13 +21,14 @@
           class="dp-preset"
           [class.is-active]="activePreset() === preset.label"
           (click)="applyPreset(preset.label, preset.getValue())"
-        >{{ preset.label }}</button>
+        >
+          {{ preset.label }}
+        </button>
       }
     </aside>
 
     <!-- Right — calendar content -->
     <div class="dp-content">
-
       <!-- Header -->
       <div class="dp-header">
         <h3 class="dp-title">Sélectionner une date</h3>
@@ -30,10 +39,8 @@
 
       <!-- Dual calendars -->
       <div class="dp-calendars">
-
         @for (side of ['left', 'right']; track side) {
           <div class="dp-calendar">
-
             <!-- Calendar header -->
             <div class="dp-cal-header">
               <span class="dp-month-label">
@@ -41,19 +48,35 @@
               </span>
               @if (side === 'left') {
                 <div class="dp-nav">
-                  <button class="dp-nav-btn" (click)="prevMonth()" aria-label="Mois précédent">
+                  <button
+                    class="dp-nav-btn"
+                    (click)="prevMonth()"
+                    aria-label="Mois précédent"
+                  >
                     <i class="pi pi-chevron-left"></i>
                   </button>
-                  <button class="dp-nav-btn" (click)="nextMonth()" aria-label="Mois suivant">
+                  <button
+                    class="dp-nav-btn"
+                    (click)="nextMonth()"
+                    aria-label="Mois suivant"
+                  >
                     <i class="pi pi-chevron-right"></i>
                   </button>
                 </div>
               } @else {
                 <div class="dp-nav">
-                  <button class="dp-nav-btn" (click)="prevMonth()" aria-label="Mois précédent">
+                  <button
+                    class="dp-nav-btn"
+                    (click)="prevMonth()"
+                    aria-label="Mois précédent"
+                  >
                     <i class="pi pi-chevron-left"></i>
                   </button>
-                  <button class="dp-nav-btn" (click)="nextMonth()" aria-label="Mois suivant">
+                  <button
+                    class="dp-nav-btn"
+                    (click)="nextMonth()"
+                    aria-label="Mois suivant"
+                  >
                     <i class="pi pi-chevron-right"></i>
                   </button>
                 </div>
@@ -69,7 +92,10 @@
 
             <!-- Weeks -->
             <div class="dp-weeks">
-              @for (week of (side === 'left' ? leftWeeks() : rightWeeks()); track $index) {
+              @for (
+                week of side === 'left' ? leftWeeks() : rightWeeks();
+                track $index
+              ) {
                 <div class="dp-week">
                   @for (day of week; track day.date.toISOString()) {
                     <button
@@ -77,19 +103,23 @@
                       [class.is-other-month]="!day.isCurrentMonth"
                       [class.is-selected]="isStart(day.date) || isEnd(day.date)"
                       [class.is-in-range]="isInRange(day.date)"
-                      [class.is-today]="isToday(day.date) && !isStart(day.date) && !isEnd(day.date)"
+                      [class.is-today]="
+                        isToday(day.date) &&
+                        !isStart(day.date) &&
+                        !isEnd(day.date)
+                      "
                       (click)="selectDay(day.date)"
                       (mouseenter)="hoverDay(day.date)"
                       (mouseleave)="leaveDay()"
-                    >{{ day.dayNum }}</button>
+                    >
+                      {{ day.dayNum }}
+                    </button>
                   }
                 </div>
               }
             </div>
-
           </div>
         }
-
       </div>
 
       <!-- Date inputs -->
@@ -101,12 +131,13 @@
 
       <!-- Footer -->
       <div class="dp-footer">
-        <button class="dp-btn dp-btn--cancel" (click)="cancel()">Annuler</button>
-        <button class="dp-btn dp-btn--apply"  (click)="apply()">Appliquer</button>
+        <button class="dp-btn dp-btn--cancel" (click)="cancel()">
+          Annuler
+        </button>
+        <button class="dp-btn dp-btn--apply" (click)="apply()">
+          Appliquer
+        </button>
       </div>
-
     </div>
-
   </div>
-
 }

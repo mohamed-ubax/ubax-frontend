@@ -5,6 +5,7 @@ import {
   model,
   output,
 } from '@angular/core';
+import { UbaxMorphTabsDirective } from '../morph-tabs/morph-tabs.directive';
 
 export interface PageTab {
   label: string;
@@ -14,7 +15,7 @@ export interface PageTab {
 @Component({
   selector: 'ubax-page-tabs',
   standalone: true,
-  imports: [],
+  imports: [UbaxMorphTabsDirective],
   templateUrl: './page-tabs.component.html',
   styleUrl: './page-tabs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

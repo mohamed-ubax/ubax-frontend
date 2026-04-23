@@ -339,7 +339,7 @@ $c-error: #dc2626; // error state (WCAG accessible red)
 // Node 670:1562 / 670:1563 — Poppins Medium 16px, color #000
 // Figma : texte brut, SANS background, SANS badge, SANS border
 .adhesion-hero__badge-text {
-  font-family: 'Poppins', 'Lexend', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: clamp(0.75rem, 1.16vw, 1rem); // Figma: 16px, Poppins:Medium
   font-weight: 500;
   color: #000;

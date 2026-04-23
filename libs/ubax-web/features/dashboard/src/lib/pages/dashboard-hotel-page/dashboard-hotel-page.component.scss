@@ -316,15 +316,15 @@
     font-size: 12px;
     font-weight: 500;
     color: #fff;
-    padding: 10px 16px;
+    padding: 14px 16px;
     text-align: left;
     white-space: nowrap;
   }
 
   td {
     font-family: 'Lexend', sans-serif;
-    font-size: 12px;
-    font-weight: 300;
+    font-size: 1rem;
+    font-weight: 400;
     color: #444;
     padding: 11px 16px;
     border-bottom: 1px solid #f5f7fa;
@@ -364,9 +364,9 @@
   display: inline-flex;
   align-items: center;
   border-radius: 20px;
-  padding: 3px 10px;
+  padding: 6px 12px;
   font-family: 'Lexend', sans-serif;
-  font-size: 11px;
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
 
@@ -544,8 +544,8 @@
 .month-label {
   font-family: 'Lexend', sans-serif;
   font-size: 11px;
-  font-weight: 300;
-  color: #aaa;
+  font-weight: 400;
+  color: #444;
 
   &--active {
     background: #e87d1e;
@@ -639,7 +639,7 @@
   font-family: 'Lexend', sans-serif;
   font-size: 11px;
   font-weight: 300;
-  color: #888;
+  color: #1c1c1c;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -649,7 +649,7 @@
   font-family: 'Lexend', sans-serif;
   font-size: 10px;
   font-weight: 300;
-  color: #bbb;
+  color: #1c1c1c;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -748,8 +748,8 @@
 .properties-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 0 14px 14px;
+  gap: 14px;
+  padding: 1.5rem 14px 14px;
   max-height: 540px;
   overflow-y: auto;
   scroll-behavior: smooth;
@@ -870,7 +870,12 @@
   transition: background 0.12s;
 
   &:hover {
-    background: #fff;
+    background: #e87d1e;
+    border: none;
+
+    i {
+      color: #fff;
+    }
   }
 
   i {

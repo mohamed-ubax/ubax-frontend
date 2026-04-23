@@ -6,7 +6,10 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import {
+  UbaxMorphTabsDirective,
+  UbaxPaginatorComponent,
+} from '@ubax-workspace/shared-ui';
 
 type TabId = 'all' | 'active' | 'inactive';
 type EmployeStatusTone = 'active' | 'inactive';
@@ -44,7 +47,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 20:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-koffi-yao.png',
+    avatarSrc: '/shared/people/profile-02.webp',
     statusTone: 'active',
   },
   {
@@ -56,7 +59,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-youssouf-traore.png',
+    avatarSrc: '/employes/images/employe-youssouf-traore.webp',
     statusTone: 'active',
   },
   {
@@ -68,7 +71,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-aicha-kone.png',
+    avatarSrc: '/shared/people/billing-guest-03.webp',
     statusTone: 'active',
   },
   {
@@ -80,7 +83,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-souleymane-diabate.png',
+    avatarSrc: '/shared/people/profile-03.webp',
     statusTone: 'inactive',
   },
   {
@@ -92,7 +95,7 @@ const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-adama-bamba.png',
+    avatarSrc: '/shared/people/profile-01.webp',
     statusTone: 'active',
   },
 ] as const;
@@ -123,13 +126,13 @@ function normalizeSearchText(value: string): string {
   return value
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .replaceAll(/[\u0300-\u036f]/g, '');
 }
 
 @Component({
   selector: 'ubax-employes-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxPaginatorComponent],
+  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent],
   templateUrl: './employes-list-page.component.html',
   styleUrl: './employes-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -139,6 +142,7 @@ export class EmployesListPageComponent {
   readonly currentPage = signal(3);
   readonly totalPages = 5;
   readonly searchValue = signal('');
+  readonly selectedEmployeIds = signal<Set<string>>(new Set<string>());
 
   readonly tabs = EMPLOYES_TABS;
 
@@ -164,8 +168,82 @@ export class EmployesListPageComponent {
     );
   });
 
+  readonly filteredEmployeIds = computed(() =>
+    this.filteredEmployes().map((employe) => employe.id),
+  );
+
+  readonly allFilteredEmployesSelected = computed(() => {
+    const filteredIds = this.filteredEmployeIds();
+
+    if (!filteredIds.length) {
+      return false;
+    }
+
+    const selectedIds = this.selectedEmployeIds();
+    return filteredIds.every((id) => selectedIds.has(id));
+  });
+
+  readonly someFilteredEmployesSelected = computed(() => {
+    const filteredIds = this.filteredEmployeIds();
+
+    if (!filteredIds.length) {
+      return false;
+    }
+
+    const selectedIds = this.selectedEmployeIds();
+    let selectedCount = 0;
+
+    filteredIds.forEach((id) => {
+      if (selectedIds.has(id)) {
+        selectedCount += 1;
+      }
+    });
+
+    return selectedCount > 0 && selectedCount < filteredIds.length;
+  });
+
   setTab(id: TabId): void {
     this.activeTab.set(id);
+  }
+
+  isEmployeSelected(id: string): boolean {
+    return this.selectedEmployeIds().has(id);
+  }
+
+  toggleSelectAll(event: Event): void {
+    const shouldSelect = this.readCheckboxState(event);
+    const filteredIds = this.filteredEmployeIds();
+
+    this.selectedEmployeIds.update((current) => {
+      const next = new Set(current);
+
+      filteredIds.forEach((id) => {
+        if (shouldSelect) {
+          next.add(id);
+          return;
+        }
+
+        next.delete(id);
+      });
+
+      return next;
+    });
+  }
+
+  toggleEmployeSelection(id: string, event: Event): void {
+    const shouldSelect = this.readCheckboxState(event);
+
+    this.selectedEmployeIds.update((current) => {
+      const next = new Set(current);
+
+      if (shouldSelect) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+
+      return next;
+    });
   }
 
   updateSearch(event: Event): void {
@@ -173,5 +251,10 @@ export class EmployesListPageComponent {
     if (target instanceof HTMLInputElement) {
       this.searchValue.set(target.value);
     }
+  }
+
+  private readCheckboxState(event: Event): boolean {
+    const target = event.target;
+    return target instanceof HTMLInputElement ? target.checked : false;
   }
 }

@@ -21,6 +21,8 @@ export class UbaxPaginatorComponent {
   readonly currentPage = model<number>(1);
   readonly totalPages = input.required<number>();
   readonly variant = input<UbaxPaginatorVariant>('default');
+  readonly previousIconSrc = input<string | null>(null);
+  readonly nextIconSrc = input<string | null>(null);
 
   readonly pages = computed(() =>
     Array.from({ length: this.totalPages() }, (_, i) => i + 1),

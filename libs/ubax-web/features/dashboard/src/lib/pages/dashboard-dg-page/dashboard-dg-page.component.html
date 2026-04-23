@@ -1,135 +1,227 @@
-<div class="dashboard">
+<div class="dashboard-dg" [class.dashboard-dg--full-list]="showFullList()">
+  <header class="dashboard-dg__header">
+    <h1 class="dashboard-dg__title">{{ pageTitle() }}</h1>
 
-  <!-- ── Page header ────────────────────────────────────────────── -->
-  <div class="page-header">
-    <h1 class="page-title">Tableau de bord</h1>
-    <div class="page-actions">
-      <div class="search-field">
-        <i class="pi pi-search"></i>
-        <input type="text" placeholder="Recherche ..." />
-      </div>
-      <button class="search-field search-field--btn" (click)="datePickerOpen.set(true)">
-        <i class="pi pi-calendar"></i>
-        <span>{{ selectedRange() ? (selectedRange()!.start | date:'dd/MM/yy') + ' – ' + (selectedRange()!.end | date:'dd/MM/yy') : 'Sélectionner une date' }}</span>
+    <div class="dashboard-dg__toolbar">
+      <label
+        class="dashboard-utility dashboard-utility--search"
+        aria-label="Recherche globale"
+      >
+        <input type="search" placeholder="Recherche ..." />
+        <span class="dashboard-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.search" alt="" />
+        </span>
+      </label>
+
+      <button
+        type="button"
+        class="dashboard-utility dashboard-utility--button dashboard-utility--calendar"
+        (click)="openDatePicker()"
+      >
+        <span>{{ headerDateLabel() }}</span>
+        <span class="dashboard-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.calendar" alt="" />
+        </span>
       </button>
-      <button class="export-btn">
-        <i class="pi pi-upload"></i>
-        Exporter les données
+
+      <button
+        type="button"
+        class="dashboard-utility dashboard-utility--button dashboard-utility--export"
+        (click)="exportVisibleRows()"
+      >
+        <span>Exporter les données</span>
+        <span class="dashboard-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.export" alt="" />
+        </span>
       </button>
     </div>
-  </div>
+  </header>
+
+  <section class="hero-shell">
+    <div class="hero-banner">
+      <div class="hero-banner__copy">
+        <h2 class="hero-banner__title">Bonjour {{ displayName() }} !</h2>
+        <p class="hero-banner__description">
+          Consultez rapidement les indicateurs clés de votre agence et suivez
+          l'essentiel de votre activité en temps réel.
+        </p>
+      </div>
+
+      <a class="hero-banner__action" [routerLink]="['/biens']">
+        <span>Ajouter un bien</span>
+        <span class="hero-banner__action-icon" aria-hidden="true">+</span>
+      </a>
+    </div>
+
+    <div class="kpi-grid">
+      @for (card of kpiCards; track card.label) {
+        <article class="kpi-card" [attr.data-tone]="card.tone">
+          <span class="kpi-card__icon-shell" aria-hidden="true">
+            <img [src]="card.iconSrc" alt="" />
+          </span>
+
+          <div class="kpi-card__body">
+            <p class="kpi-card__label">{{ card.label }}</p>
+
+            <div class="kpi-card__meta">
+              <span class="kpi-card__value">{{ card.value }}</span>
+
+              @if (card.trend) {
+                <span class="kpi-card__trend">{{ card.trend }}</span>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
 
   @if (!showFullList()) {
-
-    <!-- ── Hero + KPI wrapper card ──────────────────────────────── -->
-    <div class="hero-kpi-card">
-
-      <!-- Hero banner -->
-      <div class="hero-banner">
-        <div class="hero-content">
-          <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
-          <p>Consultez rapidement les indicateurs clés de votre agence et gérez vos biens en toute simplicité.</p>
-        </div>
-        <button class="hero-cta" [routerLink]="['/biens']">
-          Ajouter un bien
-          <span class="hero-cta__icon">
-            <i class="pi pi-plus"></i>
-          </span>
-        </button>
-      </div>
-
-      <!-- KPI cards -->
-      <div class="kpi-row">
-        @for (card of kpiCards; track card.label) {
-          <div class="kpi-card" [style.background]="card.bg">
-            <div class="kpi-card__icon" [style.color]="card.color">
-              <i class="pi {{ card.icon }}"></i>
-            </div>
-            <div class="kpi-card__body">
-              <p class="kpi-card__label">{{ card.label }}</p>
-              <div class="kpi-card__value-row">
-                <span class="kpi-card__value">{{ card.value }}</span>
-                @if (card.change) {
-                  <span class="kpi-card__change">{{ card.change }}</span>
-                }
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-
-    </div>
-
-    <!-- ── Charts row ────────────────────────────────────────────── -->
-    <div class="charts-row">
-
-      <!-- Donut chart -->
-      <div class="card donut-card">
-        <div class="card-header">
+    <section
+      class="dashboard-dg__analytics"
+      [class.is-visible]="!showFullList()"
+    >
+      <article class="surface-card donut-card">
+        <div class="donut-card__header">
           <div>
-            <p class="card-pretitle">Biens en</p>
-            <h3 class="card-title">Location courte durée</h3>
+            <p class="donut-card__eyebrow">Biens en</p>
+            <h2 class="donut-card__title">Location courte durée</h2>
           </div>
-          <button class="filter-pill">Ce mois ci <i class="pi pi-chevron-down"></i></button>
+
+          <button type="button" class="donut-card__filter">
+            <span>Ce mois ci</span>
+            <img [src]="icons.chevronDown" alt="" />
+          </button>
         </div>
 
-        <div class="donut-chart-wrapper">
-          <p-chart type="doughnut" [data]="donutData" [options]="donutOptions" height="220px" />
-          <div class="donut-center">
-            <span class="donut-center__count">29</span>
-            <span class="donut-center__label">Biens</span>
+        <div class="donut-card__visual">
+          <div class="donut-card__chart-wrap">
+            <div class="donut-card__chart">
+              <p-chart
+                type="doughnut"
+                [data]="donutChartData"
+                [options]="donutChartOptions"
+              />
+            </div>
+
+            <div class="donut-card__center">
+              <span class="donut-card__count">27</span>
+              <span class="donut-card__caption">Biens</span>
+            </div>
           </div>
         </div>
 
-        <div class="donut-legend">
+        <div class="donut-card__legend">
           @for (item of donutLegend; track item.label) {
-            <div class="legend-item">
-              <span class="legend-dot" [style.background]="item.color"></span>
-              <span class="legend-count">{{ item.count }}</span>
-              <span class="legend-label">{{ item.label }}</span>
+            <div class="donut-card__legend-item">
+              <span
+                class="donut-card__legend-dot"
+                [attr.data-tone]="item.tone"
+              ></span>
+              <span class="donut-card__legend-count">{{ item.count }}</span>
+              <span class="donut-card__legend-label">{{ item.label }}</span>
             </div>
           }
         </div>
-      </div>
+      </article>
 
-      <!-- Revenue bar chart -->
-      <div class="card revenue-card">
-        <div class="card-header">
+      <article class="surface-card revenue-card">
+        <div class="revenue-card__header">
           <div>
-            <p class="card-pretitle">Finance</p>
-            <h3 class="card-title">Flux de revenus</h3>
+            <p class="revenue-card__eyebrow">Finance</p>
+            <h2 class="revenue-card__title">Flux de revenus</h2>
           </div>
-          <button class="outline-btn" [routerLink]="['/finances']">Voir plus</button>
+
+          <a class="revenue-card__more" [routerLink]="['/finances']">
+            Voir plus
+          </a>
         </div>
-        <div class="bar-chart-wrapper">
-          <p-chart type="bar" [data]="revenueData" [options]="revenueOptions" height="340px" />
+
+        <div class="revenue-card__plot">
+          <div class="revenue-card__scale" aria-hidden="true">
+            <span>10M</span>
+            <span>5M</span>
+            <span>1M</span>
+            <span>500 k</span>
+            <span>250 k</span>
+            <span>100 k</span>
+            <span>0</span>
+          </div>
+
+          <div class="revenue-card__canvas">
+            <div class="revenue-card__grid" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <div class="revenue-card__chart">
+              <p-chart
+                type="bar"
+                [data]="revenueChartData"
+                [options]="revenueChartOptions"
+              />
+            </div>
+
+            <div class="revenue-card__months" aria-hidden="true">
+              @for (bar of revenueBars; track bar.slug) {
+                <span>{{ bar.label }}</span>
+              }
+            </div>
+
+            <div class="revenue-card__tooltip">1 850 000 F CFA</div>
+          </div>
         </div>
-      </div>
+      </article>
+    </section>
 
-    </div>
+    <section class="dashboard-dg__bottom" [class.is-visible]="!showFullList()">
+      <article class="properties-card properties-card--overview">
+        <div class="properties-card__header properties-card__header--overview">
+          <h2 class="properties-card__title">Liste des biens</h2>
 
-    <!-- ── Bottom row ────────────────────────────────────────────── -->
-    <div class="bottom-row">
+          <div
+            class="properties-card__filters properties-card__filters--overview"
+          >
+            <label class="properties-filter properties-filter--search">
+              <input type="search" placeholder="Recherche ..." />
+              <span class="properties-filter__icon-shell" aria-hidden="true">
+                <img [src]="icons.search" alt="" />
+              </span>
+            </label>
 
-      <!-- Properties table -->
-      <div class="card table-card">
-        <div class="table-header">
-          <h3 class="card-title">Liste des biens</h3>
-          <div class="table-filters">
-            <div class="search-field search-field--sm">
-              <i class="pi pi-search"></i>
-              <input type="text" placeholder="Recherche ..." />
-            </div>
-            <div class="search-field search-field--sm">
-              <i class="pi pi-calendar"></i>
-              <input type="text" placeholder="Filtrer par date" />
-            </div>
-            <button class="see-all-btn" (click)="toggleFullList()">Voir tout</button>
+            <button
+              type="button"
+              class="properties-filter properties-filter--date"
+              (click)="openDatePicker()"
+            >
+              <span>{{ headerDateLabel() }}</span>
+              <span class="properties-filter__icon-shell" aria-hidden="true">
+                <img [src]="icons.calendar" alt="" />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              class="properties-filter properties-filter--eye"
+              (click)="toggleFullList()"
+            >
+              <span>Tout voir</span>
+              <span class="properties-filter__icon-shell" aria-hidden="true">
+                <img [src]="icons.eye" alt="" />
+              </span>
+            </button>
           </div>
         </div>
 
-        <div class="table-scroll">
-          <table class="data-table">
+        <div class="properties-card__table-wrap">
+          <table
+            class="properties-table properties-table--overview"
+            [class.is-visible]="!showFullList()"
+          >
             <thead>
               <tr>
                 <th>ID</th>
@@ -142,121 +234,137 @@
                 <th>Actions</th>
               </tr>
             </thead>
+
             <tbody>
-              @for (p of properties; track p.id) {
+              @for (row of overviewProperties; track row.uid) {
                 <tr>
-                  <td class="cell-id">{{ p.id }}</td>
-                  <td>{{ p.nom }}</td>
-                  <td>{{ p.type }}</td>
-                  <td>{{ p.localisation }}</td>
-                  <td>{{ p.prix }}</td>
-                  <td>{{ p.locataire }}</td>
+                  <td class="properties-table__cell-id">{{ row.id }}</td>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.type }}</td>
+                  <td>{{ row.location }}</td>
+                  <td>{{ row.price }}</td>
                   <td>
-                    <span class="status-badge status-badge--actif">{{ p.statut }}</span>
+                    <div class="properties-table__tenant">
+                      <img [src]="row.avatar" [alt]="row.tenant" />
+                      <span>{{ row.tenant }}</span>
+                    </div>
                   </td>
-                  <td class="cell-actions">
-                    <button class="action-btn action-btn--voir">Voir</button>
-                    <button class="action-btn action-btn--modifier">Modifier</button>
+                  <td>
+                    <span class="properties-table__status">{{
+                      row.status
+                    }}</span>
+                  </td>
+                  <td>
+                    <div class="properties-table__actions">
+                      <button
+                        type="button"
+                        class="properties-action properties-action--view"
+                      >
+                        Voir
+                      </button>
+                      <button
+                        type="button"
+                        class="properties-action properties-action--edit"
+                      >
+                        Modifier
+                      </button>
+                    </div>
                   </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-      </div>
+      </article>
 
-      <!-- Transactions panel -->
-      <div class="card transactions-card">
-        <div class="card-header">
-          <h3 class="card-title">Derniers transactions</h3>
-          <button class="outline-btn" [routerLink]="['/finances']">Voir plus</button>
+      <aside class="properties-card transactions-card">
+        <div class="transactions-card__header">
+          <h2 class="transactions-card__title">Derniers transactions</h2>
+          <a class="transactions-card__more" [routerLink]="['/finances']">
+            Voir plus
+          </a>
         </div>
 
-        <div class="transactions-list">
-          @for (tx of transactions; track tx.date) {
-            <div class="tx-item">
-              <div class="tx-avatar">{{ tx.initials }}</div>
+        <div class="transactions-card__list">
+          @for (transaction of transactions; track transaction.uid) {
+            <article class="transaction-item">
+              <span class="transaction-item__logo-shell">
+                <img [src]="transaction.logo" alt="" />
+              </span>
 
-              <div class="tx-body">
-                <p class="tx-label">{{ tx.label }}</p>
-                <span class="tx-date">{{ tx.date }}</span>
-                <span class="tx-name">{{ tx.name }}</span>
+              <div class="transaction-item__body">
+                <p class="transaction-item__title">{{ transaction.title }}</p>
+                <span class="transaction-item__date">{{
+                  transaction.date
+                }}</span>
+                <span class="transaction-item__customer">{{
+                  transaction.customer
+                }}</span>
               </div>
 
-              <div class="tx-right">
-                <span class="tx-amount">{{ tx.amount }}</span>
-                <div class="tx-badge">
+              <div class="transaction-item__meta">
+                <span class="transaction-item__amount">{{
+                  transaction.amount
+                }}</span>
+                <span class="transaction-item__month">
                   <i class="pi pi-check"></i>
-                  <span>{{ tx.month }}</span>
-                </div>
+                  <span>{{ transaction.month }}</span>
+                </span>
               </div>
 
-              <i class="pi pi-chevron-right tx-arrow"></i>
-            </div>
+              <i
+                class="pi pi-chevron-right transaction-item__arrow"
+                aria-hidden="true"
+              ></i>
+            </article>
           }
         </div>
-      </div>
-
-    </div>
-
+      </aside>
+    </section>
   } @else {
+    <section
+      class="properties-card properties-card--full"
+      [class.is-visible]="showFullList()"
+    >
+      <div class="properties-card__header properties-card__header--full">
+        <h2 class="properties-card__title">Liste des biens</h2>
 
-    <!-- ── Hero + KPI (toujours visible) ─────────────────────────── -->
-    <div class="hero-kpi-card">
-      <div class="hero-banner">
-        <div class="hero-content">
-          <h2>Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !</h2>
-          <p>Consultez rapidement les indicateurs clés de votre agence et gérez vos biens en toute simplicité.</p>
-        </div>
-        <button class="hero-cta" [routerLink]="['/biens']">
-          Ajouter un bien
-          <span class="hero-cta__icon">
-            <i class="pi pi-plus"></i>
-          </span>
-        </button>
-      </div>
-      <div class="kpi-row">
-        @for (card of kpiCards; track card.label) {
-          <div class="kpi-card" [style.background]="card.bg">
-            <div class="kpi-card__icon" [style.color]="card.color">
-              <i class="pi {{ card.icon }}"></i>
-            </div>
-            <div class="kpi-card__body">
-              <p class="kpi-card__label">{{ card.label }}</p>
-              <div class="kpi-card__value-row">
-                <span class="kpi-card__value">{{ card.value }}</span>
-                @if (card.change) {
-                  <span class="kpi-card__change">{{ card.change }}</span>
-                }
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
+        <div class="properties-card__filters properties-card__filters--full">
+          <label class="properties-filter properties-filter--search">
+            <input type="search" placeholder="Recherche ..." />
+            <span class="properties-filter__icon-shell" aria-hidden="true">
+              <img [src]="icons.search" alt="" />
+            </span>
+          </label>
 
-    <!-- ── Full list view ─────────────────────────────────────────── -->
-    <div class="card full-table-card">
-      <div class="table-header">
-        <h3 class="card-title">Liste des biens</h3>
-        <div class="table-filters">
-          <div class="search-field search-field--sm">
-            <i class="pi pi-search"></i>
-            <input type="text" placeholder="Recherche ..." />
-          </div>
-          <div class="search-field search-field--sm">
-            <i class="pi pi-calendar"></i>
-            <input type="text" placeholder="Filtrer par date" />
-          </div>
-          <button class="see-all-btn see-all-btn--back" (click)="toggleFullList()">
-            <i class="pi pi-arrow-left"></i>
-            Réduire
+          <button
+            type="button"
+            class="properties-filter properties-filter--date"
+            (click)="openDatePicker()"
+          >
+            <span>{{ headerDateLabel() }}</span>
+            <span class="properties-filter__icon-shell" aria-hidden="true">
+              <img [src]="icons.calendar" alt="" />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="properties-filter properties-filter--eye"
+            (click)="toggleFullList()"
+          >
+            <span>OVerview</span>
+            <span class="properties-filter__icon-shell" aria-hidden="true">
+              <img [src]="icons.eye" alt="" />
+            </span>
           </button>
         </div>
       </div>
 
-      <div class="table-scroll">
-        <table class="data-table">
+      <div
+        class="properties-card__table-wrap properties-card__table-wrap--full"
+      >
+        <table class="properties-table properties-table--full">
           <thead>
             <tr>
               <th>ID</th>
@@ -269,42 +377,58 @@
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            @for (p of pagedProperties(); track p.id) {
+            @for (row of pagedProperties(); track row.uid) {
               <tr>
-                <td class="cell-id">{{ p.id }}</td>
-                <td>{{ p.nom }}</td>
-                <td>{{ p.type }}</td>
-                <td>{{ p.localisation }}</td>
-                <td>{{ p.prix }}</td>
-                <td>{{ p.locataire }}</td>
+                <td class="properties-table__cell-id">{{ row.id }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.type }}</td>
+                <td>{{ row.location }}</td>
+                <td>{{ row.price }}</td>
                 <td>
-                  <span class="status-badge status-badge--actif">{{ p.statut }}</span>
+                  <div class="properties-table__tenant">
+                    <img [src]="row.avatar" [alt]="row.tenant" />
+                    <span>{{ row.tenant }}</span>
+                  </div>
                 </td>
-                <td class="cell-actions">
-                  <button class="action-btn action-btn--voir">Voir</button>
-                  <button class="action-btn action-btn--modifier">Modifier</button>
+                <td>
+                  <span class="properties-table__status">{{ row.status }}</span>
+                </td>
+                <td>
+                  <div class="properties-table__actions">
+                    <button
+                      type="button"
+                      class="properties-action properties-action--view"
+                    >
+                      Voir
+                    </button>
+                    <button
+                      type="button"
+                      class="properties-action properties-action--edit"
+                    >
+                      Modifier
+                    </button>
+                  </div>
                 </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-    <!-- ── Paginator (outside the card) ──────────────────────────── -->
-    <div class="paginator-wrapper">
+    <div class="dashboard-dg__pagination">
       <ubax-paginator
         [(currentPage)]="currentPage"
         [totalPages]="totalPages()"
+        [previousIconSrc]="icons.paginatorPrevious"
+        [nextIconSrc]="icons.paginatorNext"
       />
     </div>
-
   }
-
 </div>
 
-<!-- ── Date range picker (fixed overlay) ─────────────────────────── -->
 <ubax-date-range-picker
   [(isOpen)]="datePickerOpen"
   (applied)="onDateRangeApplied($event)"

@@ -14,8 +14,12 @@
   }
 
   ::ng-deep {
-    .filter-bar__date .p-datepicker-input { min-width: 148px; }
-    .filter-bar__select .p-select { min-width: 160px; }
+    .filter-bar__date .p-datepicker-input {
+      min-width: 148px;
+    }
+    .filter-bar__select .p-select {
+      min-width: 160px;
+    }
   }
 
   &__btn {

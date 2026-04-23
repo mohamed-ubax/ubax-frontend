@@ -66,7 +66,7 @@ const SHARED_HISTORY_ROWS: readonly ReservationHistoryEntry[] = [
   {
     id: 'history-01',
     spaceId: '2',
-    thumbnail: 'client-detail/images/reservation-thumb-02.png',
+    thumbnail: 'shared/rooms/room-photo-02.webp',
     title: 'Suite panoramic',
     subtitle: 'Hôtel Riviera Golf',
     bookingDate: 'Mardi 12 mai 2026',
@@ -80,7 +80,7 @@ const SHARED_HISTORY_ROWS: readonly ReservationHistoryEntry[] = [
   {
     id: 'history-02',
     spaceId: '3',
-    thumbnail: 'client-detail/images/reservation-thumb-03.png',
+    thumbnail: 'shared/rooms/room-photo-04.webp',
     title: 'Chambre business',
     subtitle: 'Résidence Marcory',
     bookingDate: 'Jeudi 08 avril 2026',
@@ -94,7 +94,7 @@ const SHARED_HISTORY_ROWS: readonly ReservationHistoryEntry[] = [
   {
     id: 'history-03',
     spaceId: '1',
-    thumbnail: 'client-detail/images/reservation-thumb-01.png',
+    thumbnail: 'shared/rooms/room-photo-03.webp',
     title: 'Studio executive',
     subtitle: 'Abidjan Cocody',
     bookingDate: 'Lundi 15 mars 2026',
@@ -159,8 +159,7 @@ function buildCurrentHistoryEntry(
     id: clientId + '-current',
     spaceId,
     thumbnail:
-      client.summary.thumbnails[0] ??
-      'client-detail/images/reservation-thumb-01.png',
+      client.summary.thumbnails[0] ?? 'shared/rooms/room-photo-03.webp',
     title: client.stay.roomType,
     subtitle: client.stay.category + ' · ' + client.stay.roomNumber,
     bookingDate: client.stay.arrival,

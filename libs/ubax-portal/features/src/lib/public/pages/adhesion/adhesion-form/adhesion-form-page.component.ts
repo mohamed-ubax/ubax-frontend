@@ -25,6 +25,8 @@ import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+type LegalDocumentType = 'rccm' | 'dfe' | 'contratBail';
+
 @Component({
   selector: 'ubax-adhesion-form-page',
   standalone: true,
@@ -57,7 +59,9 @@ export class AdhesionFormPageComponent {
 
   // ── File state ────────────────────────────────────────────────────────────
   protected readonly logoFile = signal<File | null>(null);
-  protected readonly documentFile = signal<File | null>(null);
+  protected readonly rccmFile = signal<File | null>(null);
+  protected readonly dfeFile = signal<File | null>(null);
+  protected readonly contratBailFile = signal<File | null>(null);
 
   // ── Country picker (standalone from reactive form) ────────────────────────
   protected readonly countries = COUNTRY_CODES;
@@ -105,6 +109,10 @@ export class AdhesionFormPageComponent {
     {
       label: 'SARL',
       value: 'sarl',
+    },
+    {
+      label: 'Entreprise individuelle',
+      value: 'entreprise_individuelle',
     },
     {
       label: 'SCI',
@@ -305,14 +313,45 @@ export class AdhesionFormPageComponent {
   }
 
   // ── Document upload ───────────────────────────────────────────────────────
-  protected onDocumentSelected(event: Event): void {
+  protected onLegalDocumentSelected(
+    type: LegalDocumentType,
+    event: Event,
+  ): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
-    this.documentFile.set(file);
+    this._setLegalDocumentFile(type, file);
     (event.target as HTMLInputElement).value = '';
   }
 
-  protected removeDocument(): void {
-    this.documentFile.set(null);
+  protected removeLegalDocument(type: LegalDocumentType): void {
+    this._setLegalDocumentFile(type, null);
+  }
+
+  protected legalDocumentFile(type: LegalDocumentType): File | null {
+    switch (type) {
+      case 'rccm':
+        return this.rccmFile();
+      case 'dfe':
+        return this.dfeFile();
+      case 'contratBail':
+        return this.contratBailFile();
+    }
+  }
+
+  private _setLegalDocumentFile(
+    type: LegalDocumentType,
+    file: File | null,
+  ): void {
+    switch (type) {
+      case 'rccm':
+        this.rccmFile.set(file);
+        break;
+      case 'dfe':
+        this.dfeFile.set(file);
+        break;
+      case 'contratBail':
+        this.contratBailFile.set(file);
+        break;
+    }
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────

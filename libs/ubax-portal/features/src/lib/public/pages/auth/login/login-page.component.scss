@@ -1,4 +1,4 @@
-﻿// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Login page — SCSS
 // Figma canvas: 1728px wide. Stage: 131px→1095px (height=964px).
 // PrimeNG components are overridden with ::ng-deep within :host context.
@@ -139,7 +139,7 @@
   background: #fff !important;
   padding: 0 1.25rem !important;
   color: #343434;
-  font-family: 'Modernica', 'Segoe UI', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 1.25rem;
   font-weight: 400;
   min-width: 0;
@@ -222,16 +222,18 @@
   &__icon {
     position: relative;
     z-index: 1;
-    width: 50px;
-    height: 30px;
+    width: 50%;
+    height: 50%;
+    max-width: 3rem;
+    max-height: 3rem;
     object-fit: contain;
   }
 }
 
 // Each badge: larger, and clearly visible
 .orbit--top-left {
-  width: 4rem;
-  height: 4rem;
+  width: 4.75rem;
+  height: 4.75rem;
   top: 6%;
   left: 23.15%;
   --orbit-delay: 0.2s;
@@ -244,8 +246,8 @@
 }
 
 .orbit--top-right {
-  width: 4rem;
-  height: 4rem;
+  width: 4.75rem;
+  height: 4.75rem;
   top: 6%;
   left: 72.28%;
   --orbit-delay: 0.38s;
@@ -258,8 +260,8 @@
 }
 
 .orbit--mid-left {
-  width: 4rem;
-  height: 4rem;
+  width: 4.75rem;
+  height: 4.75rem;
   top: 38%;
   left: 11.46%;
   --orbit-delay: 0.56s;
@@ -272,8 +274,8 @@
 }
 
 .orbit--mid-right {
-  width: 4rem;
-  height: 4rem;
+  width: 4.75rem;
+  height: 4.75rem;
   top: 36%;
   left: 83.33%;
   --orbit-delay: 0.72s;
@@ -286,8 +288,8 @@
 }
 
 .orbit--bot-left {
-  width: 4rem;
-  height: 4rem;
+  width: 4.75rem;
+  height: 4.75rem;
   bottom: 2rem;
   left: 22.63%;
   --orbit-delay: 0.88s;
@@ -300,8 +302,8 @@
 }
 
 .orbit--bot-right {
-  width: 4rem;
-  height: 4rem;
+  width: 4.75rem;
+  height: 4.75rem;
   bottom: 2rem;
   left: 74.54%;
   --orbit-delay: 1.04s;
@@ -427,7 +429,7 @@
 
   .cp-dial {
     color: #343434;
-    font-family: 'Modernica', 'Segoe UI', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 1.25rem;
     line-height: 1;
     font-weight: 400;
@@ -511,7 +513,7 @@
 
   .cp-item-dial {
     color: #888;
-    font-family: 'Modernica', 'Segoe UI', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 0.8125rem;
     flex-shrink: 0;
   }
@@ -541,7 +543,7 @@
     border-radius: 0 !important;
     padding: 0 3rem 0 0 !important;
     color: #343434;
-    font-family: 'Modernica', 'Segoe UI', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 1.25rem;
     font-weight: 400;
     min-width: 0;

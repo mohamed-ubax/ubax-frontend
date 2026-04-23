@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ChartModule } from 'primeng/chart';
+import { LazyChartComponent } from '@ubax-workspace/shared-ui';
 
 @Component({
   selector: 'ubax-facturation-page',
   standalone: true,
-  imports: [ChartModule, RouterLink],
+  imports: [LazyChartComponent, RouterLink],
   templateUrl: './facturation-page.component.html',
   styleUrl: './facturation-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -203,32 +203,28 @@ export class FacturationPageComponent {
       name: 'Aïcha Kouadio',
       dates: '16 - 19 Avril 2026',
       guests: 2,
-      image:
-        'https://www.figma.com/api/mcp/asset/2dd68695-985e-4e91-afa3-9fcdce876bc8',
+      image: 'shared/people/profile-02.webp',
     },
     {
       id: 2,
       name: 'Aïcha Kouadio',
       dates: '18 - 21 Avril 2026',
       guests: 2,
-      image:
-        'https://www.figma.com/api/mcp/asset/8dd5c306-542d-4262-9e3c-eb68f2df0227',
+      image: 'shared/people/profile-01.webp',
     },
     {
       id: 3,
       name: 'Aïcha Kouadio',
       dates: '21 - 27 Avril 2026',
       guests: 2,
-      image:
-        'https://www.figma.com/api/mcp/asset/20d06aa3-cb55-4f07-b0f4-b162a2bc2e35',
+      image: 'shared/people/billing-guest-03.webp',
     },
     {
       id: 4,
       name: 'Aïcha Kouadio',
       dates: '22 - 25 Avril 2026',
       guests: 2,
-      image:
-        'https://www.figma.com/api/mcp/asset/17ab835d-968c-4268-b475-3be396f3bca8',
+      image: 'shared/people/billing-guest-04.webp',
     },
   ];
 

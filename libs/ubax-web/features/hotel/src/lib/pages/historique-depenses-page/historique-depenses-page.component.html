@@ -1,17 +1,30 @@
-<div class="hist-page">
-
+<div class="hist-page hist-page--depenses">
   <!-- ── Header ─────────────────────────────────────────────────── -->
   <div class="hist-header">
     <h1 class="hist-title">Historique des dépenses</h1>
     <div class="hist-actions">
-      <a routerLink="/hotel/facturation/recettes" class="tab-btn tab-btn--outline">
-        <i class="pi pi-arrow-down-left"></i>
-        Recettes
-      </a>
-      <a routerLink="/hotel/facturation/depenses" class="tab-btn tab-btn--red">
-        <i class="pi pi-send"></i>
-        Dépenses
-      </a>
+      <div class="hist-tabs" ubaxMorphTabs ubaxMorphTabsItemSelector=".tab-btn">
+        <a
+          routerLink="/hotel/facturation/recettes"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          class="tab-btn"
+        >
+          <i class="pi pi-arrow-down-left"></i>
+          Recettes
+        </a>
+        <a
+          routerLink="/hotel/facturation/depenses"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          class="tab-btn"
+        >
+          <i class="pi pi-send"></i>
+          Dépenses
+        </a>
+      </div>
       <a routerLink="/hotel/facturation/ajouter-depense" class="add-btn">
         <i class="pi pi-plus"></i>
         Ajouter une dépense
@@ -55,7 +68,11 @@
           <p class="kpi-balance__value">
             {{ showBalance ? '16 850 000 FCFA' : '•••••••••••' }}
           </p>
-          <button class="kpi-balance__eye" type="button" (click)="toggleBalance()">
+          <button
+            class="kpi-balance__eye"
+            type="button"
+            (click)="toggleBalance()"
+          >
             <i [class]="showBalance ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
           </button>
         </div>
@@ -74,12 +91,23 @@
         <h3 class="line-card__title">Dépenses</h3>
         <div class="period-filter">
           @for (p of ['Semaine', 'Moi', 'Année']; track p) {
-            <button class="period-btn" [class.period-btn--active]="activePeriod === p" (click)="activePeriod = p">{{ p }}</button>
+            <button
+              class="period-btn"
+              [class.period-btn--active]="activePeriod === p"
+              (click)="activePeriod = p"
+            >
+              {{ p }}
+            </button>
           }
         </div>
       </div>
       <div class="line-card__chart">
-        <p-chart type="line" [data]="lineData" [options]="lineOptions" height="315px" />
+        <ubax-lazy-chart
+          type="line"
+          [data]="lineData"
+          [options]="lineOptions"
+          height="315px"
+        ></ubax-lazy-chart>
       </div>
     </div>
 
@@ -93,14 +121,17 @@
         <span class="date-range-pill">Du 01 avril 2026 au 07 avril 2026</span>
       </div>
       <div class="mini-card__chart">
-        <p-chart type="bar" [data]="miniBarData" [options]="miniBarOptions" />
+        <ubax-lazy-chart
+          type="bar"
+          [data]="miniBarData"
+          [options]="miniBarOptions"
+        ></ubax-lazy-chart>
       </div>
     </div>
   </div>
 
   <!-- ── Table section ─────────────────────────────────────────── -->
   <div class="table-section card">
-
     <div class="table-section__top">
       <div>
         <h3 class="table-section__title">Historique des Dépenses</h3>
@@ -137,7 +168,9 @@
               <td class="td-id">{{ d.id }}</td>
               <td>{{ d.name }}</td>
               <td>
-                <span class="type-badge" [style.background]="d.typeBg">{{ d.type }}</span>
+                <span class="type-badge" [style.background]="d.typeBg">{{
+                  d.type
+                }}</span>
               </td>
               <td>{{ d.date }}</td>
               <td>{{ d.method }}</td>
@@ -157,6 +190,5 @@
       <p class="table-footer__info">Affichage de 8 sur 8 résultats</p>
       <ubax-paginator [(currentPage)]="currentPage" [totalPages]="totalPages" />
     </div>
-
   </div>
 </div>

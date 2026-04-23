@@ -3,9 +3,13 @@
     class="paginator-arrow"
     (click)="prev()"
     [disabled]="currentPage() === 1"
-    aria-label="Page précédente"
   >
-    <i class="pi pi-chevron-left"></i>
+    @if (previousIconSrc(); as previousIconSrc) {
+      <img class="paginator-arrow__icon" [src]="previousIconSrc" alt="" />
+    } @else {
+      <i class="pi pi-chevron-left"></i>
+    }
+    <span class="paginator-arrow__label">Page précédente</span>
   </button>
 
   <div class="paginator-pages">
@@ -24,8 +28,12 @@
     class="paginator-arrow"
     (click)="next()"
     [disabled]="currentPage() === totalPages()"
-    aria-label="Page suivante"
   >
-    <i class="pi pi-chevron-right"></i>
+    @if (nextIconSrc(); as nextIconSrc) {
+      <img class="paginator-arrow__icon" [src]="nextIconSrc" alt="" />
+    } @else {
+      <i class="pi pi-chevron-right"></i>
+    }
+    <span class="paginator-arrow__label">Page suivante</span>
   </button>
 </div>

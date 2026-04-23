@@ -1,0 +1,210 @@
+<section class="bailleur-page">
+  <header class="bailleur-page__header">
+    <div class="bailleur-page__heading">
+      <a class="back-button" routerLink="/biens/1" aria-label="Retour">
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      </a>
+      <h1>Détails bailleur</h1>
+    </div>
+
+    <div class="bailleur-page__actions">
+      <div class="date-filter">
+        <span>01 Mars 2026 - 01 Avril 2026</span>
+        <i class="pi pi-calendar" aria-hidden="true"></i>
+      </div>
+
+      <button class="secondary-action" type="button">
+        <i class="pi pi-pencil" aria-hidden="true"></i>
+        <span>Modifier</span>
+      </button>
+
+      <button class="secondary-action" type="button">
+        <i class="pi pi-times" aria-hidden="true"></i>
+        <span>Désactiver</span>
+      </button>
+
+      <a class="primary-action" routerLink="/biens/ajouter">
+        <span>Ajouter un bien</span>
+        <span class="primary-action__icon">
+          <i class="pi pi-plus" aria-hidden="true"></i>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <div class="bailleur-page__main-grid">
+    <article class="surface-card profile-card">
+      <div class="profile-card__cover">
+        <img src="biens/bailleur/profile-cover.webp" alt="Profil bailleur" />
+      </div>
+
+      <div class="profile-card__portrait">
+        <img src="biens/bailleur/profile-avatar.webp" alt="Koffi Jean-Marc" />
+      </div>
+
+      <div class="profile-card__body">
+        <h2>Koffi Jean-Marc</h2>
+        <p class="profile-card__role">Bailleur</p>
+
+        <div class="profile-card__grid">
+          <span>
+            <i class="pi pi-phone" aria-hidden="true"></i>
+            +225 07 58 23 41 89
+          </span>
+          <span>
+            <i class="pi pi-envelope" aria-hidden="true"></i>
+            jm.koffi@gmail.com
+          </span>
+          <span>
+            <i class="pi pi-map-marker" aria-hidden="true"></i>
+            Abidjan, Cocody
+          </span>
+          <span>
+            <i class="pi pi-id-card" aria-hidden="true"></i>
+            UBX-LOC-0245
+          </span>
+        </div>
+
+        <div class="profile-card__summary">
+          <div>
+            <i class="pi pi-calendar" aria-hidden="true"></i>
+            <span>Inscription : 12 Janvier 2025</span>
+          </div>
+          <div>
+            <i class="pi pi-check-circle" aria-hidden="true"></i>
+            <span>Contrat : Actif</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <div class="bailleur-page__right-column">
+      <article class="surface-card analytics-card">
+        <div class="analytics-card__header-row">
+          <h2>Statistique Revenu</h2>
+
+          <div class="analytics-card__legend">
+            <span class="legend-item legend-item--info">En ligne 1</span>
+            <span class="legend-item legend-item--success">location active 1</span>
+            <span class="legend-item legend-item--accent">Vendus 1</span>
+          </div>
+        </div>
+
+        <div class="analytics-card__content">
+          <div class="analytics-donut">
+            <strong>3</strong>
+            <span>Total biens</span>
+          </div>
+
+          <div class="analytics-stats">
+            @for (card of revenueCards; track card.label) {
+              <div class="analytics-stat analytics-stat--{{ card.tone }}">
+                <span>{{ card.label }}</span>
+                <strong>{{ card.value }}</strong>
+              </div>
+            }
+          </div>
+        </div>
+      </article>
+
+      <div class="bailleur-page__lower-grid">
+        <article class="surface-card documents-card">
+          <div class="card-title-row">
+            <i class="pi pi-file" aria-hidden="true"></i>
+            <h3>Documents du bailleur</h3>
+          </div>
+
+          <div class="document-list">
+            @for (document of documents; track document.name) {
+              <div class="document-row">
+                <div class="document-row__label">
+                  <i class="pi pi-file-pdf" aria-hidden="true"></i>
+                  <span>{{ document.name }}</span>
+                </div>
+
+                <div class="document-row__actions">
+                  <button type="button" aria-label="Prévisualiser">
+                    <i class="pi pi-eye" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Télécharger">
+                    <i class="pi pi-download" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="surface-card history-card">
+          <div class="card-title-row">
+            <i class="pi pi-wallet" aria-hidden="true"></i>
+            <h3>Historique de paiement</h3>
+          </div>
+
+          <div class="history-list">
+            @for (payment of payments; track payment.date + payment.amount) {
+              <div class="history-row">
+                <div class="history-row__brand">
+                  <img [src]="payment.logo" [alt]="payment.title" />
+                </div>
+
+                <div class="history-row__body">
+                  <p>{{ payment.title }}</p>
+                  <span>{{ payment.date }}</span>
+                  <strong>{{ payment.property }}</strong>
+                </div>
+
+                <div class="history-row__meta">
+                  <strong>{{ payment.amount }}</strong>
+                  <span class="history-row__period">
+                    <i class="pi pi-check" aria-hidden="true"></i>
+                    {{ payment.period }}
+                  </span>
+                </div>
+
+                <button type="button" aria-label="Voir la transaction">
+                  <i class="pi pi-angle-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            }
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <section class="surface-card properties-section">
+    <h2>Biens du bailleur</h2>
+
+    <div class="properties-grid">
+      @for (property of properties; track property.image) {
+        <a class="property-card" routerLink="/biens/1">
+          <span class="property-card__status property-card__status--{{ property.statusTone }}">
+            {{ property.status }}
+          </span>
+
+          <img [src]="property.image" [alt]="property.title" />
+
+          <div class="property-card__overlay">
+            <p class="property-card__title">{{ property.title }}</p>
+            <span class="property-card__location">
+              <i class="pi pi-map-marker" aria-hidden="true"></i>
+              {{ property.location }}
+            </span>
+
+            <div class="property-card__tenant">
+              <img [src]="property.tenantAvatar" [alt]="property.tenant" />
+
+              <div>
+                <p>{{ property.tenant }}</p>
+                <span>{{ property.tenantRole }}</span>
+              </div>
+
+              <strong>{{ property.price }}</strong>
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+  </section>
+</section>

@@ -276,9 +276,24 @@
       box-shadow 160ms ease;
   }
 
+  .recovery-card--email .recovery-email-input.p-inputtext {
+    height: 3.2rem;
+    border-radius: 2.5rem;
+    border: 1px solid #515151;
+    padding: 0 1.25rem;
+    color: #343434;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+
   .recovery-email-input.p-inputtext::placeholder {
     color: #6c6c6c;
     opacity: 1;
+  }
+
+  .recovery-card--email .recovery-email-input.p-inputtext::placeholder {
+    color: #b0b0b0;
   }
 
   .recovery-email-input.p-inputtext:enabled:hover {
@@ -401,9 +416,15 @@
   }
 
   .recovery-card--email .recovery-btn.p-button {
-    height: 4.6875rem;
-    font-size: 1.25rem;
-    font-weight: 600;
+    height: 3.6946rem;
+    border-radius: 2.5rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .recovery-card--email .recovery-btn.p-button .p-button-label {
+    font-weight: 400;
   }
 
   .recovery-btn--accent.p-button {
@@ -456,13 +477,13 @@
 
   :host ::ng-deep {
     .recovery-email-input.p-inputtext {
-      height: 3.5rem;
-      padding: 0 1.1rem;
+      height: 3.2rem;
+      padding: 0 1.25rem;
     }
 
     .recovery-card--email .recovery-btn.p-button {
-      height: 4rem;
-      font-size: 1.05rem;
+      height: 3.6946rem;
+      font-size: 1rem;
     }
 
     .recovery-otp-wrapper.p-inputotp {

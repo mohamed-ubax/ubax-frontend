@@ -1,18 +1,31 @@
 .paginator {
   --paginator-edge-gap: 32px;
   --paginator-page-gap: 11px;
+  --paginator-padding-block: 16px;
+  --paginator-padding-inline: 25px;
+  --paginator-background: #ecf2f7;
+  --paginator-surface: #fff;
+  --paginator-border-color: #cfd6dc;
+  --paginator-page-size: 42px;
+  --paginator-page-font-size: 13px;
+  --paginator-page-font-weight: 400;
+  --paginator-page-active-font-size: 15px;
+  --paginator-page-active-font-weight: 600;
+  --paginator-arrow-width: 40px;
+  --paginator-arrow-height: 40px;
+  --paginator-arrow-radius: 8px;
 
   display: inline-flex;
   align-items: center;
   gap: var(--paginator-edge-gap);
-  padding: 16px 25px;
-  background: #ecf2f7;
+  padding: var(--paginator-padding-block) var(--paginator-padding-inline);
+  background: var(--paginator-background);
   border-radius: 50px;
   box-sizing: border-box;
 }
 
 .paginator--white {
-  background: #fff;
+  background: var(--paginator-surface);
 }
 
 .paginator-pages {
@@ -22,15 +35,15 @@
 }
 
 .paginator-page {
-  width: 42px;
-  height: 42px;
+  width: var(--paginator-page-size);
+  height: var(--paginator-page-size);
   border-radius: 50%;
-  border: 1px solid #cfd6dc;
-  background: #fff;
+  border: 1px solid var(--paginator-border-color);
+  background: var(--paginator-surface);
   color: #1a3047;
-  font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
+  font-family: 'Lexend', sans-serif;
+  font-size: var(--paginator-page-font-size);
+  font-weight: var(--paginator-page-font-weight);
   cursor: pointer;
   transition:
     background 0.15s,
@@ -51,17 +64,17 @@
     background: #1a3047;
     color: #fff;
     border-color: #1a3047;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: var(--paginator-page-active-font-size);
+    font-weight: var(--paginator-page-active-font-weight);
   }
 }
 
 .paginator-arrow {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid #cfd6dc;
-  background: #fff;
+  width: var(--paginator-arrow-width);
+  height: var(--paginator-arrow-height);
+  border-radius: var(--paginator-arrow-radius);
+  border: 1px solid var(--paginator-border-color);
+  background: var(--paginator-surface);
   color: #1a3047;
   cursor: pointer;
   display: flex;
@@ -84,6 +97,24 @@
   }
 }
 
+.paginator-arrow__icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.paginator-arrow__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (max-width: 768px) {
   .paginator {
     --paginator-edge-gap: 12px;
@@ -93,12 +124,12 @@
   }
 
   .paginator-page {
-    width: 42px;
-    height: 42px;
+    width: var(--paginator-page-size);
+    height: var(--paginator-page-size);
   }
 
   .paginator-arrow {
-    width: 40px;
-    height: 40px;
+    width: var(--paginator-arrow-width);
+    height: var(--paginator-arrow-height);
   }
 }

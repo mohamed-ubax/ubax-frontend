@@ -226,7 +226,7 @@
         <div class="form-row form-row--two-phone">
           <div class="form-field">
             <label class="form-field__label" for="telephone">
-              Téléphone
+              Numéro de téléphone
               <img
                 class="form-field__required"
                 src="assets/portal-assets/adhesion/icons/mdi_required.svg"
@@ -296,7 +296,7 @@
                 id="telephone"
                 type="tel"
                 class="form-field__input form-field__phone-input"
-                placeholder="123456123554145"
+                placeholder="070000000"
                 formControlName="telephone"
                 autocomplete="tel"
               />
@@ -444,7 +444,7 @@
               type="text"
               class="form-field__input"
               [class.is-invalid]="isInvalid('adressePostale')"
-              placeholder="Ex : Kouadio N'Guessan"
+              placeholder="Ex : 22 BP 12345 Abidjan 22"
               formControlName="adressePostale"
             />
             @if (isInvalid('adressePostale')) {
@@ -524,15 +524,7 @@
               <label class="form-field__label" for="logoInput"
                 >Ajouter votre Logo</label
               >
-              <div
-                class="upload-zone"
-                (click)="logoInput.click()"
-                role="button"
-                tabindex="0"
-                (keydown.enter)="logoInput.click()"
-                (keydown.space)="$event.preventDefault(); logoInput.click()"
-                aria-label="Cliquez pour importer votre logo"
-              >
+              <label class="upload-zone" for="logoInput">
                 @if (!logoFile()) {
                   <img
                     class="upload-zone__icon"
@@ -555,7 +547,11 @@
                     <button
                       type="button"
                       class="upload-zone__remove"
-                      (click)="$event.stopPropagation(); removeLogo()"
+                      (click)="
+                        $event.preventDefault();
+                        $event.stopPropagation();
+                        removeLogo()
+                      "
                       aria-label="Supprimer le logo"
                     >
                       <i class="pi pi-times"></i>
@@ -571,7 +567,7 @@
                   (change)="onLogoSelected($event)"
                   aria-label="Importer votre logo"
                 />
-              </div>
+              </label>
             </div>
           </div>
           <!-- /left col -->
@@ -648,122 +644,118 @@
 
             <div class="documents-field">
               <div class="form-field">
-                <label class="form-field__label" for="documentInput">
-                  RCCM
-                </label>
+                <label class="form-field__label" for="rccmInput"> RCCM </label>
                 <div class="upload-file-row">
                   <button
                     type="button"
                     class="upload-file-row__btn"
-                    (click)="documentInput.click()"
+                    (click)="rccmInput.click()"
                   >
                     Choisir un fichier
                   </button>
                   <span class="upload-file-row__name">
                     {{
-                      documentFile()
-                        ? documentFile()!.name
+                      legalDocumentFile('rccm')
+                        ? legalDocumentFile('rccm')!.name
                         : 'Aucun fichier choisi'
                     }}
                   </span>
-                  @if (documentFile()) {
+                  @if (legalDocumentFile('rccm')) {
                     <button
                       type="button"
                       class="upload-file-row__remove"
-                      (click)="removeDocument()"
-                      aria-label="Supprimer le document"
+                      (click)="removeLegalDocument('rccm')"
+                      aria-label="Supprimer le fichier RCCM"
                     >
                       <i class="pi pi-times"></i>
                     </button>
                   }
                   <input
-                    #documentInput
-                    id="documentInput"
+                    #rccmInput
+                    id="rccmInput"
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
                     class="upload-file-row__input"
-                    (change)="onDocumentSelected($event)"
-                    aria-label="Choisir un document officiel"
+                    (change)="onLegalDocumentSelected('rccm', $event)"
+                    aria-label="Choisir le fichier RCCM"
                   />
                 </div>
               </div>
               <div class="form-field">
-                <label class="form-field__label" for="documentInput">
-                  DFE
-                </label>
+                <label class="form-field__label" for="dfeInput"> DFE </label>
                 <div class="upload-file-row">
                   <button
                     type="button"
                     class="upload-file-row__btn"
-                    (click)="documentInput.click()"
+                    (click)="dfeInput.click()"
                   >
                     Choisir un fichier
                   </button>
                   <span class="upload-file-row__name">
                     {{
-                      documentFile()
-                        ? documentFile()!.name
+                      legalDocumentFile('dfe')
+                        ? legalDocumentFile('dfe')!.name
                         : 'Aucun fichier choisi'
                     }}
                   </span>
-                  @if (documentFile()) {
+                  @if (legalDocumentFile('dfe')) {
                     <button
                       type="button"
                       class="upload-file-row__remove"
-                      (click)="removeDocument()"
-                      aria-label="Supprimer le document"
+                      (click)="removeLegalDocument('dfe')"
+                      aria-label="Supprimer le fichier DFE"
                     >
                       <i class="pi pi-times"></i>
                     </button>
                   }
                   <input
-                    #documentInput
-                    id="documentInput"
+                    #dfeInput
+                    id="dfeInput"
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
                     class="upload-file-row__input"
-                    (change)="onDocumentSelected($event)"
-                    aria-label="Choisir un document officiel"
+                    (change)="onLegalDocumentSelected('dfe', $event)"
+                    aria-label="Choisir le fichier DFE"
                   />
                 </div>
               </div>
               <div class="form-field">
-                <label class="form-field__label" for="documentInput">
+                <label class="form-field__label" for="contratBailInput">
                   Contrat de bail
                 </label>
                 <div class="upload-file-row">
                   <button
                     type="button"
                     class="upload-file-row__btn"
-                    (click)="documentInput.click()"
+                    (click)="contratBailInput.click()"
                   >
                     Choisir un fichier
                   </button>
                   <span class="upload-file-row__name">
                     {{
-                      documentFile()
-                        ? documentFile()!.name
+                      legalDocumentFile('contratBail')
+                        ? legalDocumentFile('contratBail')!.name
                         : 'Aucun fichier choisi'
                     }}
                   </span>
-                  @if (documentFile()) {
+                  @if (legalDocumentFile('contratBail')) {
                     <button
                       type="button"
                       class="upload-file-row__remove"
-                      (click)="removeDocument()"
-                      aria-label="Supprimer le document"
+                      (click)="removeLegalDocument('contratBail')"
+                      aria-label="Supprimer le contrat de bail"
                     >
                       <i class="pi pi-times"></i>
                     </button>
                   }
                   <input
-                    #documentInput
-                    id="documentInput"
+                    #contratBailInput
+                    id="contratBailInput"
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
                     class="upload-file-row__input"
-                    (change)="onDocumentSelected($event)"
-                    aria-label="Choisir un document officiel"
+                    (change)="onLegalDocumentSelected('contratBail', $event)"
+                    aria-label="Choisir le contrat de bail"
                   />
                 </div>
               </div>

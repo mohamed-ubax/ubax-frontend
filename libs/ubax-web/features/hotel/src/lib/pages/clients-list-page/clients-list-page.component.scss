@@ -65,7 +65,7 @@
 
 .clients-title {
   color: var(--text);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 36px;
   font-weight: 600;
   line-height: 58px;
@@ -73,7 +73,7 @@
 
 .clients-subtitle {
   color: var(--text-muted);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 400;
   line-height: 28px;
@@ -101,7 +101,7 @@
   border: 0;
   background: transparent;
   color: var(--text);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 24px;
@@ -113,6 +113,8 @@
 }
 
 .clients-tabs {
+  --ubax-tabs-indicator-bg: linear-gradient(135deg, #16293c 0%, #29445f 100%);
+  --ubax-tabs-indicator-shadow: 0 16px 28px rgb(26 48 71 / 0.18);
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -129,16 +131,26 @@
   background: var(--surface);
   box-shadow: var(--shadow-base);
   color: var(--text-muted);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 500;
   line-height: 24px;
   cursor: pointer;
+  transition:
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  &:hover:not(.clients-tabs__button--active):not(.is-active) {
+    transform: translateY(-1px);
+  }
 }
 
+.clients-tabs__button.is-active,
 .clients-tabs__button--active {
-  background: var(--navy);
+  background: transparent;
   color: var(--surface);
+  box-shadow: none;
 }
 
 .clients-tabs__count {
@@ -153,8 +165,12 @@
   color: var(--accent);
   font-size: 13px;
   font-weight: 600;
+  transition:
+    background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.clients-tabs__button.is-active .clients-tabs__count,
 .clients-tabs__button--active .clients-tabs__count {
   background: rgb(255 255 255 / 0.18);
   color: var(--surface);
@@ -191,7 +207,7 @@
 
 .clients-table th {
   color: var(--navy);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 600;
   line-height: 24px;
@@ -261,7 +277,7 @@
   border-radius: 50%;
   background: var(--info-bg);
   color: var(--navy);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 600;
   flex: 0 0 58px;
@@ -278,7 +294,7 @@
 .clients-table__client-name,
 .clients-table__primary {
   color: var(--text);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 600;
   line-height: 22px;
@@ -287,7 +303,7 @@
 .clients-table__client-code,
 .clients-table__secondary {
   color: var(--text-muted);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 22px;
@@ -300,7 +316,7 @@
 
 .clients-table__amount {
   color: var(--navy);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 700;
   line-height: 24px;
@@ -312,11 +328,11 @@
   align-items: center;
   justify-content: center;
   min-width: 78px;
-  min-height: 36px;
-  padding: 0 10px;
+  min-height: 50px;
+  padding: 0 22px;
   border-radius: 999px;
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
-  font-size: 11px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 20px;
   white-space: nowrap;
@@ -341,19 +357,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
   min-width: 78px;
-  min-height: 38px;
-  padding: 0 8px;
+  min-height: 50px;
+  padding: 0 22px;
   border-radius: 999px;
   background: var(--navy);
   color: var(--surface);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
-  font-size: 11px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 20px;
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  &:hover {
+    background: var(--warning-text);
+  }
 }
 
 .clients-table__action i {
@@ -363,7 +386,7 @@
 .clients-table__empty {
   height: 140px;
   color: var(--text-muted);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 24px;

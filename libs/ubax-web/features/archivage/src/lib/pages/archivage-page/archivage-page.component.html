@@ -1,0 +1,462 @@
+<div
+  class="archivage-page"
+  [class.archivage-page--biens]="activeTab() === 'biens'"
+  [class.archivage-page--locataires]="activeTab() === 'locataires'"
+  [class.archivage-page--factures]="activeTab() === 'factures'"
+  [class.archivage-page--tickets]="activeTab() === 'tickets'"
+  [class.archivage-page--documents]="activeTab() === 'documents'"
+>
+  <header class="archivage-page__header">
+    <h1 class="archivage-page__title">{{ activeDefinition().title }}</h1>
+
+    <div class="archivage-page__toolbar">
+      <label
+        class="archivage-utility archivage-utility--search"
+        aria-label="Recherche globale"
+      >
+        <input
+          type="search"
+          placeholder="Recherche ..."
+          [value]="headerSearch()"
+          (input)="updateHeaderSearch($event)"
+        />
+        <span class="archivage-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.search" alt="" />
+        </span>
+      </label>
+
+      <button
+        type="button"
+        class="archivage-utility archivage-utility--button archivage-utility--export"
+        (click)="exportCurrentView()"
+      >
+        <span>Exporter les données</span>
+        <span class="archivage-utility__icon-shell" aria-hidden="true">
+          <img [src]="icons.export" alt="" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="archivage-tabs" aria-label="Onglets d’archivage">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="archivage-tabs__button"
+        [class.is-active]="activeTab() === tab.id"
+        (click)="selectTab(tab.id)"
+      >
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  @if (activeDefinition().filterVariant === 'advanced') {
+    <section class="archivage-panel">
+      <h2 class="archivage-panel__title">Filtres avancés</h2>
+
+      <form
+        class="archivage-filters archivage-filters--advanced"
+        (submit)="applyFilters($event)"
+      >
+        @for (field of activeDefinition().filterFields; track field.id) {
+          @if (field.kind === 'select') {
+            <p-select
+              [options]="getSelectOptions(field)"
+              [ngModel]="getDraftFilterValue(field.id)"
+              (ngModelChange)="updateDraftFilter(field.id, $event)"
+              [ngModelOptions]="standaloneModelOptions"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="archivage-filter-control archivage-filter-control--select"
+              panelStyleClass="archivage-filter-panel"
+              [inputId]="'archivage-filter-' + field.id"
+              [ariaLabel]="field.label"
+            >
+              <ng-template #dropdownicon>
+                <img [src]="icons.chevronDown" alt="" />
+              </ng-template>
+            </p-select>
+          } @else if (field.kind === 'date') {
+            <p-datepicker
+              [ngModel]="getDraftDateValue(field.id)"
+              (ngModelChange)="updateDraftDateFilter(field.id, $event)"
+              [ngModelOptions]="standaloneModelOptions"
+              [showIcon]="true"
+              [showButtonBar]="true"
+              [readonlyInput]="true"
+              iconDisplay="button"
+              dateFormat="dd/mm/yyyy"
+              appendTo="body"
+              styleClass="archivage-filter-control archivage-filter-control--date"
+              panelStyleClass="archivage-datepicker-panel"
+              todayButtonStyleClass="archivage-datepicker-panel__today"
+              clearButtonStyleClass="archivage-datepicker-panel__clear"
+              [inputId]="'archivage-filter-' + field.id"
+              [placeholder]="field.label"
+              [ariaLabel]="field.label"
+            >
+              <ng-template #triggericon>
+                <img [src]="icons.filterCalendar" alt="" />
+              </ng-template>
+            </p-datepicker>
+          } @else {
+            <label class="archivage-field archivage-field--text">
+              <input
+                type="text"
+                [placeholder]="field.label"
+                [ngModel]="getDraftFilterValue(field.id)"
+                (ngModelChange)="updateDraftFilter(field.id, $event)"
+                [ngModelOptions]="standaloneModelOptions"
+              />
+            </label>
+          }
+        }
+
+        @if (showResetFiltersButton()) {
+          <button
+            type="button"
+            class="archivage-filters__submit archivage-filters__submit--reset"
+            (click)="clearFilters()"
+          >
+            Annuler
+          </button>
+        } @else {
+          <button
+            type="submit"
+            class="archivage-filters__submit"
+            [disabled]="hasDateRangeValidationIssue()"
+          >
+            Filtrer
+          </button>
+        }
+      </form>
+
+      @if (dateRangeValidationMessage(); as message) {
+        <p class="archivage-filters__validation" role="alert">
+          {{ message }}
+        </p>
+      }
+
+      <div class="archivage-table-wrap archivage-table-wrap--panel">
+        <div class="archivage-table-shell">
+          <table class="archivage-table archivage-table--documents">
+            <thead>
+              <tr class="archivage-table__header">
+                @for (column of activeDefinition().columns; track column) {
+                  <th class="archivage-table__header-cell" scope="col">
+                    {{ column }}
+                  </th>
+                }
+              </tr>
+            </thead>
+
+            <tbody class="archivage-table__body">
+              @for (row of pagedRows(); track row.id) {
+                <tr class="archivage-table__row">
+                  @for (cell of row.cells; track $index) {
+                    <td
+                      class="archivage-table__cell"
+                      [class.archivage-table__cell--avatar]="
+                        cell.kind === 'avatar'
+                      "
+                      [class.archivage-table__cell--actions]="
+                        cell.kind === 'actions'
+                      "
+                    >
+                      @switch (cell.kind) {
+                        @case ('avatar') {
+                          <div class="archivage-table__avatar-cell">
+                            <img
+                              class="archivage-table__avatar"
+                              [src]="cell.imageSrc"
+                              [alt]="cell.value"
+                            />
+                            <span>{{ cell.value }}</span>
+                          </div>
+                        }
+
+                        @case ('badge') {
+                          <span
+                            class="archivage-badge"
+                            [class.archivage-badge--success]="
+                              cell.tone === 'success'
+                            "
+                            [class.archivage-badge--warning]="
+                              cell.tone === 'warning'
+                            "
+                            [class.archivage-badge--danger]="
+                              cell.tone === 'danger'
+                            "
+                          >
+                            <span
+                              class="archivage-badge__label"
+                              [pTooltip]="cell.label"
+                              tooltipPosition="top"
+                              [showOnEllipsis]="true"
+                              [appendTo]="'body'"
+                              tooltipStyleClass="archivage-badge-tooltip"
+                            >
+                              {{ cell.label }}
+                            </span>
+                          </span>
+                        }
+
+                        @case ('actions') {
+                          <div class="archivage-table__actions">
+                            <button
+                              type="button"
+                              class="archivage-table__action archivage-table__action--primary"
+                            >
+                              {{ cell.primaryLabel }}
+                            </button>
+                            <button
+                              type="button"
+                              class="archivage-table__action archivage-table__action--secondary"
+                            >
+                              {{ cell.secondaryLabel }}
+                            </button>
+                          </div>
+                        }
+
+                        @default {
+                          <span
+                            [class.archivage-table__text--emphasis]="
+                              cell.emphasis ?? false
+                            "
+                            >{{ formatTableCellValue(cell.value) }}</span
+                          >
+                        }
+                      }
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr class="archivage-table__empty-row">
+                  <td
+                    class="archivage-table__empty"
+                    [attr.colspan]="activeDefinition().columns.length"
+                  >
+                    Aucune ligne ne correspond aux filtres en cours.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div
+            class="archivage-table__pagination archivage-table__pagination--panel"
+          >
+            <ubax-paginator
+              [currentPage]="currentPage()"
+              (currentPageChange)="currentPage.set($event)"
+              [totalPages]="totalPages()"
+              [previousIconSrc]="icons.paginatorPrevious"
+              [nextIconSrc]="icons.paginatorNext"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <form class="archivage-filters" (submit)="applyFilters($event)">
+      @for (field of activeDefinition().filterFields; track field.id) {
+        @if (field.kind === 'select') {
+          <p-select
+            [options]="getSelectOptions(field)"
+            [ngModel]="getDraftFilterValue(field.id)"
+            (ngModelChange)="updateDraftFilter(field.id, $event)"
+            [ngModelOptions]="standaloneModelOptions"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="archivage-filter-control archivage-filter-control--select"
+            panelStyleClass="archivage-filter-panel"
+            [inputId]="'archivage-filter-' + field.id"
+            [ariaLabel]="field.label"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="icons.chevronDown" alt="" />
+            </ng-template>
+          </p-select>
+        } @else if (field.kind === 'date') {
+          <p-datepicker
+            [ngModel]="getDraftDateValue(field.id)"
+            (ngModelChange)="updateDraftDateFilter(field.id, $event)"
+            [ngModelOptions]="standaloneModelOptions"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [readonlyInput]="true"
+            iconDisplay="button"
+            dateFormat="dd/mm/yy"
+            appendTo="body"
+            styleClass="archivage-filter-control archivage-filter-control--date"
+            panelStyleClass="archivage-datepicker-panel"
+            todayButtonStyleClass="archivage-datepicker-panel__today"
+            clearButtonStyleClass="archivage-datepicker-panel__clear"
+            [inputId]="'archivage-filter-' + field.id"
+            [placeholder]="field.label"
+            [ariaLabel]="field.label"
+          >
+            <ng-template #triggericon>
+              <img [src]="icons.filterCalendar" alt="" />
+            </ng-template>
+          </p-datepicker>
+        } @else {
+          <label class="archivage-field archivage-field--text">
+            <input
+              type="text"
+              [placeholder]="field.label"
+              [ngModel]="getDraftFilterValue(field.id)"
+              (ngModelChange)="updateDraftFilter(field.id, $event)"
+              [ngModelOptions]="standaloneModelOptions"
+            />
+          </label>
+        }
+      }
+
+      @if (showResetFiltersButton()) {
+        <button
+          type="button"
+          class="archivage-filters__submit archivage-filters__submit--reset"
+          (click)="clearFilters()"
+        >
+          Annuler
+        </button>
+      } @else {
+        <button
+          type="submit"
+          class="archivage-filters__submit"
+          [disabled]="hasDateRangeValidationIssue()"
+        >
+          Filtrer
+        </button>
+      }
+    </form>
+
+    @if (dateRangeValidationMessage(); as message) {
+      <p class="archivage-filters__validation" role="alert">
+        {{ message }}
+      </p>
+    }
+
+    <section class="archivage-table-wrap">
+      <div class="archivage-table-shell">
+        <table class="archivage-table">
+          <thead>
+            <tr class="archivage-table__header">
+              @for (column of activeDefinition().columns; track column) {
+                <th class="archivage-table__header-cell" scope="col">
+                  {{ column }}
+                </th>
+              }
+            </tr>
+          </thead>
+
+          <tbody class="archivage-table__body">
+            @for (row of pagedRows(); track row.id) {
+              <tr class="archivage-table__row">
+                @for (cell of row.cells; track $index) {
+                  <td
+                    class="archivage-table__cell"
+                    [class.archivage-table__cell--avatar]="
+                      cell.kind === 'avatar'
+                    "
+                    [class.archivage-table__cell--actions]="
+                      cell.kind === 'actions'
+                    "
+                  >
+                    @switch (cell.kind) {
+                      @case ('avatar') {
+                        <div class="archivage-table__avatar-cell">
+                          <img
+                            class="archivage-table__avatar"
+                            [src]="cell.imageSrc"
+                            [alt]="cell.value"
+                          />
+                          <span>{{ cell.value }}</span>
+                        </div>
+                      }
+
+                      @case ('badge') {
+                        <span
+                          class="archivage-badge"
+                          [class.archivage-badge--success]="
+                            cell.tone === 'success'
+                          "
+                          [class.archivage-badge--warning]="
+                            cell.tone === 'warning'
+                          "
+                          [class.archivage-badge--danger]="
+                            cell.tone === 'danger'
+                          "
+                        >
+                          <span
+                            class="archivage-badge__label"
+                            [pTooltip]="cell.label"
+                            tooltipPosition="top"
+                            [showOnEllipsis]="true"
+                            [appendTo]="'body'"
+                            tooltipStyleClass="archivage-badge-tooltip"
+                          >
+                            {{ cell.label }}
+                          </span>
+                        </span>
+                      }
+
+                      @case ('actions') {
+                        <div class="archivage-table__actions">
+                          <button
+                            type="button"
+                            class="archivage-table__action archivage-table__action--primary"
+                          >
+                            {{ cell.primaryLabel }}
+                          </button>
+                          <button
+                            type="button"
+                            class="archivage-table__action archivage-table__action--secondary"
+                          >
+                            {{ cell.secondaryLabel }}
+                          </button>
+                        </div>
+                      }
+
+                      @default {
+                        <span
+                          [class.archivage-table__text--emphasis]="
+                            cell.emphasis ?? false
+                          "
+                          >{{ formatTableCellValue(cell.value) }}</span
+                        >
+                      }
+                    }
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr class="archivage-table__empty-row">
+                <td
+                  class="archivage-table__empty"
+                  [attr.colspan]="activeDefinition().columns.length"
+                >
+                  Aucune ligne ne correspond aux filtres en cours.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="archivage-table__pagination">
+          <ubax-paginator
+            [currentPage]="currentPage()"
+            (currentPageChange)="currentPage.set($event)"
+            [totalPages]="totalPages()"
+            [previousIconSrc]="icons.paginatorPrevious"
+            [nextIconSrc]="icons.paginatorNext"
+          />
+        </div>
+      </div>
+    </section>
+  }
+</div>

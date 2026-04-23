@@ -61,7 +61,7 @@
 .reservation-detail-page__title {
   margin: 0;
   color: var(--text);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 36px;
   font-weight: 600;
   line-height: 58px;
@@ -154,7 +154,7 @@
 
 .guest-card__name {
   color: var(--ink);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 21px;
   font-weight: 500;
   line-height: 1.65;
@@ -277,7 +277,7 @@
 }
 
 .booking-card__metric--capacity .booking-card__metric-value {
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
 }
 
 .booking-card__booking-copy {
@@ -461,7 +461,7 @@
 .history-card__title {
   margin-left: 27px;
   color: var(--navy);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 24px;
   font-weight: 500;
   line-height: 1.4;
@@ -489,7 +489,7 @@
   border-radius: 10px;
   background: var(--navy);
   color: #fff;
-  font-family: 'Inter', 'Lexend', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 20px;
   font-weight: 500;
 }
@@ -522,7 +522,7 @@
 .history-table__guest-name,
 .history-table__text {
   color: #292929;
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 400;
   line-height: normal;
@@ -547,8 +547,8 @@
   border-radius: 22.625px;
   background: var(--success-soft);
   color: var(--success);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
-  font-size: 14px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 15px;
   font-weight: 400;
   line-height: normal;
 }
@@ -570,8 +570,8 @@
   border-radius: 12px;
   background: var(--action-surface);
   color: var(--text);
-  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
-  font-size: 14px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 15px;
   font-weight: 400;
   cursor: pointer;
   text-decoration: none;

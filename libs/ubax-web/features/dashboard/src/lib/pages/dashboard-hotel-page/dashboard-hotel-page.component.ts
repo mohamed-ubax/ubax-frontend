@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChartModule } from 'primeng/chart';
 import { DatePickerModule } from 'primeng/datepicker';
+import { LazyChartComponent } from '@ubax-workspace/shared-ui';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'ubax-dashboard-hotel-page',
   standalone: true,
-  imports: [ChartModule, DatePickerModule, FormsModule],
+  imports: [LazyChartComponent, DatePickerModule, FormsModule, DatePipe],
   templateUrl: './dashboard-hotel-page.component.html',
   styleUrl: './dashboard-hotel-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,7 +44,7 @@ export class DashboardHotelPageComponent {
 
   // ── Revenue bar chart ─────────────────────────────────────────────────
   readonly revenueData = {
-    labels: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
+    labels: ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'],
     datasets: [
       {
         data: [1100, 1430, 620, 1600, 2030, 900, 810],
@@ -63,8 +64,8 @@ export class DashboardHotelPageComponent {
         grid: { display: false },
         border: { display: false },
         ticks: {
-          font: { family: 'Lexend', size: 11 },
-          color: '#aaa',
+          font: { family: 'Lexend', size: 15, weight: '400' },
+          color: '#444',
           maxRotation: 0,
         },
       },
@@ -75,8 +76,8 @@ export class DashboardHotelPageComponent {
         max: 3000,
         ticks: {
           stepSize: 1000,
-          font: { family: 'Lexend', size: 11 },
-          color: '#aaa',
+          font: { family: 'Lexend', size: 15, weight: '400' },
+          color: '#444',
           callback: (v: number) => {
             if (v === 0) return '0';
             return v / 1000 + 'k';
@@ -107,7 +108,7 @@ export class DashboardHotelPageComponent {
       {
         data: [28, 44, 58, 38, 32, 48],
         borderColor: '#e87d1e',
-        backgroundColor: 'rgba(232, 125, 30, 0.12)',
+        backgroundColor: '#F2F2F2',
         fill: true,
         tension: 0.45,
         pointRadius: 0,
@@ -119,12 +120,18 @@ export class DashboardHotelPageComponent {
 
   readonly reservationsOptions = {
     plugins: {
-      legend: { display: false },
+      legend: {
+        display: false,
+      },
       tooltip: { mode: 'index', intersect: false },
     },
     scales: {
-      x: { display: false },
-      y: { display: false },
+      x: {
+        display: false,
+      },
+      y: {
+        display: false,
+      },
     },
     responsive: true,
     maintainAspectRatio: false,
@@ -182,7 +189,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -191,7 +198,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -200,7 +207,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -209,7 +216,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
     {
@@ -218,7 +225,7 @@ export class DashboardHotelPageComponent {
       guest: 'Koné Ibrahim',
       chambre: 'Résidence Plateau',
       duree: '2 jours',
-      dates: '14 /04 / 2026 - 18 / 04 2026',
+      dates: '14 Avril 2026 - 18 Avril 2026',
       statut: 'Confirmé',
     },
   ];

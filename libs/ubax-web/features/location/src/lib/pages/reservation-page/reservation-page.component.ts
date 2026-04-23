@@ -1,101 +1,126 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  signal,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import {
+  DateRange,
+  DateRangePickerComponent,
+  UbaxPaginatorComponent,
+} from '@ubax-workspace/shared-ui';
+import {
+  COMMERCIAL_ICON_ASSETS,
+  COMMERCIAL_RESERVATION_KPIS,
+  COMMERCIAL_RESERVATIONS,
+  filterReservations,
+  formatDateRange,
+} from '../../reservation-commercial.data';
+import { ReservationKpiStripComponent } from '../../components/reservation-kpi-strip/reservation-kpi-strip.component';
 
-interface Reservation {
-  id: string;
-  guest: string;
-  property: string;
-  duration: string;
-  arrival: string;
-  departure: string;
-  status: 'Confirmé' | 'En attente' | 'Annulé';
-}
+const PAGE_SIZE = 10;
 
 @Component({
   selector: 'ubax-reservation-page',
   standalone: true,
-  imports: [RouterLink, UbaxPaginatorComponent],
+  imports: [
+    FormsModule,
+    RouterLink,
+    UbaxPaginatorComponent,
+    DateRangePickerComponent,
+    DatePipe,
+    ReservationKpiStripComponent,
+  ],
   templateUrl: './reservation-page.component.html',
   styleUrl: './reservation-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReservationPageComponent {
-  readonly reservations: Reservation[] = [
-    {
-      id: '1',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: '2',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: '3',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: '4',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: '5',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: '6',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: '7',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: '8',
-      guest: 'Koné Ibrahim',
-      property: 'Résidence Plateau',
-      duration: '2 jours',
-      arrival: '14 / 04 / 2026',
-      departure: '18 / 04 / 2026',
-      status: 'Confirmé',
-    },
-  ];
-
-  readonly totalPages = 5;
+  readonly icons = COMMERCIAL_ICON_ASSETS;
+  readonly kpiCards = COMMERCIAL_RESERVATION_KPIS;
+  readonly datePickerOpen = signal(false);
+  readonly selectedRange = signal<DateRange | null>(null);
+  readonly searchTerm = signal('');
   readonly currentPage = signal(1);
+  readonly reservations = signal([...COMMERCIAL_RESERVATIONS]);
+
+  readonly filteredReservations = computed(() => {
+    return filterReservations(
+      this.reservations(),
+      this.searchTerm(),
+      this.selectedRange(),
+    );
+  });
+
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredReservations().length / PAGE_SIZE)),
+  );
+
+  readonly pagedReservations = computed(() => {
+    const startIndex = (this.currentPage() - 1) * PAGE_SIZE;
+
+    return this.filteredReservations().slice(
+      startIndex,
+      startIndex + PAGE_SIZE,
+    );
+  });
+
+  constructor() {
+    effect(() => {
+      const totalPages = this.totalPages();
+
+      if (this.currentPage() > totalPages) {
+        this.currentPage.set(totalPages);
+      }
+    });
+  }
+
+  onSearchChange(value: string): void {
+    this.searchTerm.set(value);
+    this.currentPage.set(1);
+  }
+
+  onDateRangeApplied(range: DateRange): void {
+    this.selectedRange.set(range);
+    this.currentPage.set(1);
+  }
+
+  protected confirmReservation(reservationId: string): void {
+    this.reservations.update((reservations) =>
+      reservations.map((reservation) => {
+        if (
+          reservation.id !== reservationId ||
+          reservation.status === 'Confirmé'
+        ) {
+          return reservation;
+        }
+
+        return {
+          ...reservation,
+          status: 'Confirmé',
+          tone: 'success',
+        };
+      }),
+    );
+  }
+
+  protected confirmLabel(status: string): string {
+    return status === 'Confirmé' ? 'Confirmé' : 'Confirmer';
+  }
+
+  protected isConfirmed(status: string): boolean {
+    return status === 'Confirmé';
+  }
+
+  protected rangeLabel(): string {
+    const range = this.selectedRange();
+
+    return range
+      ? formatDateRange(range.start, range.end, ' - ')
+      : 'Sélectionner une date';
+  }
 }

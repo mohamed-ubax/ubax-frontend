@@ -32,92 +32,194 @@
   <section class="rooms-panel">
     <div class="rooms-toolbar">
       <div class="rooms-toolbar__filters">
-        <label class="filter-pill">
-          <select
-            class="filter-pill__field"
-            [value]="selectedType()"
-            (change)="updateType($any($event.target).value)"
+        <div
+          class="filter-dropdown"
+          [class.filter-dropdown--open]="openDropdown() === 'type'"
+        >
+          <button
+            class="filter-pill"
+            [class.filter-pill--open]="openDropdown() === 'type'"
+            type="button"
+            aria-label="Filtrer par type d’espace"
+            [attr.aria-expanded]="openDropdown() === 'type'"
+            (click)="$event.stopPropagation(); toggleDropdown('type')"
           >
-            @for (option of typeOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+            <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
 
-          <img
-            class="filter-pill__chevron"
-            src="rooms/icons/chevron-down.svg"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </label>
+            <img
+              class="filter-pill__chevron"
+              src="rooms/icons/chevron-down.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
 
-        <label class="filter-pill filter-pill--status">
-          <select
-            class="filter-pill__field"
-            [value]="selectedStatus()"
-            (change)="updateStatus($any($event.target).value)"
+          @if (openDropdown() === 'type') {
+            <div class="filter-menu" aria-label="Options type d’espace">
+              @for (option of typeOptions; track option.value) {
+                <button
+                  class="filter-menu__option"
+                  [class.filter-menu__option--active]="
+                    selectedType() === option.value
+                  "
+                  type="button"
+                  (click)="
+                    $event.stopPropagation(); selectTypeOption(option.value)
+                  "
+                >
+                  <span class="filter-menu__option-main">
+                    <span
+                      class="filter-menu__tone"
+                      [class.filter-menu__tone--neutral]="
+                        option.tone === 'neutral'
+                      "
+                      [class.filter-menu__tone--accent]="
+                        option.tone === 'accent'
+                      "
+                    ></span>
+                    <span>{{ option.label }}</span>
+                  </span>
+
+                  @if (selectedType() === option.value) {
+                    <span class="filter-menu__check" aria-hidden="true"></span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div
+          class="filter-dropdown filter-dropdown--status"
+          [class.filter-dropdown--open]="openDropdown() === 'status'"
+        >
+          <button
+            class="filter-pill filter-pill--status"
+            [class.filter-pill--open]="openDropdown() === 'status'"
+            type="button"
+            aria-label="Filtrer par statut"
+            [attr.aria-expanded]="openDropdown() === 'status'"
+            (click)="$event.stopPropagation(); toggleDropdown('status')"
           >
-            @for (option of statusOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+            <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
 
-          <img
-            class="filter-pill__chevron"
-            src="rooms/icons/chevron-down.svg"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </label>
+            <img
+              class="filter-pill__chevron"
+              src="rooms/icons/chevron-down.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
+
+          @if (openDropdown() === 'status') {
+            <div class="filter-menu" aria-label="Options statut">
+              @for (option of statusOptions; track option.value) {
+                <button
+                  class="filter-menu__option"
+                  [class.filter-menu__option--active]="
+                    selectedStatus() === option.value
+                  "
+                  type="button"
+                  (click)="
+                    $event.stopPropagation(); selectStatusOption(option.value)
+                  "
+                >
+                  <span class="filter-menu__option-main">
+                    <span
+                      class="filter-menu__tone"
+                      [class.filter-menu__tone--neutral]="
+                        option.tone === 'neutral'
+                      "
+                      [class.filter-menu__tone--success]="
+                        option.tone === 'success'
+                      "
+                      [class.filter-menu__tone--warning]="
+                        option.tone === 'warning'
+                      "
+                    ></span>
+                    <span>{{ option.label }}</span>
+                  </span>
+
+                  @if (selectedStatus() === option.value) {
+                    <span class="filter-menu__check" aria-hidden="true"></span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
 
         <button class="filter-action" type="button">Filtrer</button>
       </div>
 
       <div class="rooms-toolbar__actions">
-        <button
-          class="view-toggle"
-          [class.view-toggle--active]="viewMode() === 'grid'"
-          type="button"
-          aria-label="Vue grille"
-          [attr.aria-pressed]="viewMode() === 'grid'"
-          (click)="setViewMode('grid')"
+        <div
+          class="view-toggle-group"
+          role="tablist"
+          aria-label="Mode d'affichage des espaces"
+          ubaxMorphTabs
+          ubaxMorphTabsItemSelector=".view-toggle"
         >
-          <img
-            class="view-toggle__icon view-toggle__icon--grid"
-            src="rooms/icons/view-grid.svg"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </button>
+          <button
+            class="view-toggle"
+            [class.is-active]="viewMode() === 'grid'"
+            [class.view-toggle--active]="viewMode() === 'grid'"
+            type="button"
+            role="tab"
+            aria-label="Vue grille"
+            [attr.aria-selected]="viewMode() === 'grid'"
+            [attr.aria-pressed]="viewMode() === 'grid'"
+            (click)="setViewMode('grid')"
+          >
+            <img
+              class="view-toggle__icon view-toggle__icon--grid"
+              src="rooms/icons/view-grid.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
 
-        <button
-          class="view-toggle"
-          type="button"
-          aria-label="Vue liste"
-          [class.view-toggle--active]="viewMode() === 'list'"
-          [attr.aria-pressed]="viewMode() === 'list'"
-          (click)="setViewMode('list')"
-        >
-          <img
-            class="view-toggle__icon view-toggle__icon--list"
-            src="rooms/icons/view-list.svg"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </button>
+          <button
+            class="view-toggle"
+            type="button"
+            role="tab"
+            aria-label="Vue liste"
+            [class.is-active]="viewMode() === 'list'"
+            [class.view-toggle--active]="viewMode() === 'list'"
+            [attr.aria-selected]="viewMode() === 'list'"
+            [attr.aria-pressed]="viewMode() === 'list'"
+            (click)="setViewMode('list')"
+          >
+            <img
+              class="view-toggle__icon view-toggle__icon--list"
+              src="rooms/icons/view-list.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
+        </div>
 
         <a class="add-space-button" routerLink="ajouter">Ajouter une espace</a>
       </div>
     </div>
 
-    <div class="rooms-grid" [class.rooms-grid--list]="viewMode() === 'list'">
+    <div
+      class="rooms-grid"
+      [class.rooms-grid--list]="viewMode() === 'list'"
+      [attr.data-view-mode]="viewMode()"
+    >
       @for (space of visibleSpaces(); track space.id; let index = $index) {
         @if (viewMode() === 'grid') {
-          <a class="room-card" [routerLink]="[space.id]">
+          <a
+            class="room-card"
+            data-ubax-motion-skip
+            [routerLink]="[space.id]"
+            [style.--room-enter-order]="index"
+          >
             <img
               class="room-card__image"
               [src]="space.image"
@@ -152,7 +254,7 @@
 
               <p class="room-card__location">
                 <img
-                  src="rooms/icons/location.svg"
+                  src="hotel-dashboard/icons/location-icon.svg"
                   alt=""
                   loading="lazy"
                   decoding="async"
@@ -198,7 +300,12 @@
             </div>
           </a>
         } @else {
-          <a class="room-list-card" [routerLink]="[space.id]">
+          <a
+            class="room-list-card"
+            data-ubax-motion-skip
+            [routerLink]="[space.id]"
+            [style.--room-enter-order]="index"
+          >
             <div class="room-list-card__media">
               <img
                 class="room-list-card__image"
@@ -232,7 +339,7 @@
 
               <p class="room-list-card__location">
                 <img
-                  src="rooms/icons/location.svg"
+                  src="hotel-dashboard/icons/location-icon.svg"
                   alt=""
                   loading="lazy"
                   decoding="async"

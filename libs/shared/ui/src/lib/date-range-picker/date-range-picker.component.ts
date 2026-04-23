@@ -1,16 +1,43 @@
-import { ChangeDetectionStrategy, Component, computed, model, output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  model,
+  OnDestroy,
+  output,
+  signal,
+} from '@angular/core';
 
-export interface DateRange { start: Date; end: Date; }
+export interface DateRange {
+  start: Date;
+  end: Date;
+}
 
-interface CalendarDay { date: Date; dayNum: number; isCurrentMonth: boolean; }
+interface CalendarDay {
+  date: Date;
+  dayNum: number;
+  isCurrentMonth: boolean;
+}
 
 const MONTH_NAMES = [
-  'Janvier','Février','Mars','Avril','Mai','Juin',
-  'Juillet','Août','Septembre','Octobre','Novembre','Décembre',
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre',
 ];
 
-export const DAY_NAMES = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+export const DAY_NAMES = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
 function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -24,40 +51,76 @@ function startOfDay(d: Date): Date {
   styleUrl: './date-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DateRangePickerComponent {
-  readonly isOpen    = model<boolean>(false);
-  readonly isClosing = signal(false);
-  readonly applied   = output<DateRange>();
+export class DateRangePickerComponent implements OnDestroy {
+  private readonly document = inject(DOCUMENT);
+  private scrollLockState: {
+    readonly htmlOverflow: string;
+    readonly bodyOverflow: string;
+    readonly bodyTouchAction: string;
+    readonly bodyPosition: string;
+    readonly bodyTop: string;
+    readonly bodyWidth: string;
+    readonly bodyHadDatePickerOpenClass: boolean;
+    readonly scrollY: number;
+  } | null = null;
+  private closeTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  readonly dayNames  = DAY_NAMES;
+  readonly isOpen = model<boolean>(false);
+  readonly isClosing = signal(false);
+  readonly applied = output<DateRange>();
+
+  readonly dayNames = DAY_NAMES;
 
   // ── Calendar navigation ────────────────────────────────────────────
-  readonly leftYear  = signal(new Date().getFullYear());
+  readonly leftYear = signal(new Date().getFullYear());
   readonly leftMonth = signal(new Date().getMonth());
 
-  readonly rightYear  = computed(() => this.leftMonth() === 11 ? this.leftYear() + 1 : this.leftYear());
+  readonly rightYear = computed(() =>
+    this.leftMonth() === 11 ? this.leftYear() + 1 : this.leftYear(),
+  );
   readonly rightMonth = computed(() => (this.leftMonth() + 1) % 12);
 
-  readonly leftMonthLabel  = computed(() => `${MONTH_NAMES[this.leftMonth()]} ${this.leftYear()}`);
-  readonly rightMonthLabel = computed(() => `${MONTH_NAMES[this.rightMonth()]} ${this.rightYear()}`);
+  readonly leftMonthLabel = computed(
+    () => `${MONTH_NAMES[this.leftMonth()]} ${this.leftYear()}`,
+  );
+  readonly rightMonthLabel = computed(
+    () => `${MONTH_NAMES[this.rightMonth()]} ${this.rightYear()}`,
+  );
 
-  readonly leftWeeks  = computed(() => this.buildMonth(this.leftYear(),  this.leftMonth()));
-  readonly rightWeeks = computed(() => this.buildMonth(this.rightYear(), this.rightMonth()));
+  readonly leftWeeks = computed(() =>
+    this.buildMonth(this.leftYear(), this.leftMonth()),
+  );
+  readonly rightWeeks = computed(() =>
+    this.buildMonth(this.rightYear(), this.rightMonth()),
+  );
 
   // ── Selection state ────────────────────────────────────────────────
-  readonly startDate   = signal<Date | null>(null);
-  readonly endDate     = signal<Date | null>(null);
+  readonly startDate = signal<Date | null>(null);
+  readonly endDate = signal<Date | null>(null);
   readonly hoveredDate = signal<Date | null>(null);
   readonly activePreset = signal<string | null>(null);
 
   readonly startLabel = computed(() => this.formatDate(this.startDate()));
-  readonly endLabel   = computed(() => this.formatDate(this.endDate()));
+  readonly endLabel = computed(() => this.formatDate(this.endDate()));
+
+  constructor() {
+    effect(() => {
+      if (this.isOpen()) {
+        this.lockPageScroll();
+      } else {
+        this.unlockPageScroll();
+      }
+    });
+  }
 
   // ── Quick presets ──────────────────────────────────────────────────
   readonly presets: Array<{ label: string; getValue: () => DateRange }> = [
     {
       label: "Aujourd'hui",
-      getValue: () => { const d = startOfDay(new Date()); return { start: d, end: d }; },
+      getValue: () => {
+        const d = startOfDay(new Date());
+        return { start: d, end: d };
+      },
     },
     {
       label: 'Hier',
@@ -94,7 +157,7 @@ export class DateRangePickerComponent {
       getValue: () => {
         const today = new Date();
         const start = new Date(today.getFullYear(), today.getMonth(), 1);
-        const end   = startOfDay(today);
+        const end = startOfDay(today);
         return { start, end };
       },
     },
@@ -103,7 +166,7 @@ export class DateRangePickerComponent {
       getValue: () => {
         const today = new Date();
         const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const end   = new Date(today.getFullYear(), today.getMonth(), 0);
+        const end = new Date(today.getFullYear(), today.getMonth(), 0);
         return { start, end };
       },
     },
@@ -129,7 +192,10 @@ export class DateRangePickerComponent {
       label: 'Cette Année',
       getValue: () => {
         const today = new Date();
-        return { start: new Date(today.getFullYear(), 0, 1), end: startOfDay(today) };
+        return {
+          start: new Date(today.getFullYear(), 0, 1),
+          end: startOfDay(today),
+        };
       },
     },
     {
@@ -141,14 +207,17 @@ export class DateRangePickerComponent {
     },
     {
       label: 'Depuis le début',
-      getValue: () => ({ start: new Date(2020, 0, 1), end: startOfDay(new Date()) }),
+      getValue: () => ({
+        start: new Date(2020, 0, 1),
+        end: startOfDay(new Date()),
+      }),
     },
   ];
 
   // ── Calendar grid builder ──────────────────────────────────────────
   private buildMonth(year: number, month: number): CalendarDay[][] {
     const firstDay = new Date(year, month, 1);
-    const lastDay  = new Date(year, month + 1, 0);
+    const lastDay = new Date(year, month + 1, 0);
 
     // Monday-first offset
     let offset = firstDay.getDay() - 1;
@@ -161,12 +230,20 @@ export class DateRangePickerComponent {
       days.push({ date: d, dayNum: d.getDate(), isCurrentMonth: false });
     }
     for (let d = 1; d <= lastDay.getDate(); d++) {
-      days.push({ date: new Date(year, month, d), dayNum: d, isCurrentMonth: true });
+      days.push({
+        date: new Date(year, month, d),
+        dayNum: d,
+        isCurrentMonth: true,
+      });
     }
     const target = days.length <= 35 ? 35 : 42;
     let n = 1;
     while (days.length < target) {
-      days.push({ date: new Date(year, month + 1, n++), dayNum: n - 1, isCurrentMonth: false });
+      days.push({
+        date: new Date(year, month + 1, n++),
+        dayNum: n - 1,
+        isCurrentMonth: false,
+      });
     }
 
     const weeks: CalendarDay[][] = [];
@@ -176,13 +253,17 @@ export class DateRangePickerComponent {
 
   // ── Navigation ─────────────────────────────────────────────────────
   prevMonth(): void {
-    if (this.leftMonth() === 0) { this.leftYear.update(y => y - 1); this.leftMonth.set(11); }
-    else this.leftMonth.update(m => m - 1);
+    if (this.leftMonth() === 0) {
+      this.leftYear.update((y) => y - 1);
+      this.leftMonth.set(11);
+    } else this.leftMonth.update((m) => m - 1);
   }
 
   nextMonth(): void {
-    if (this.leftMonth() === 11) { this.leftYear.update(y => y + 1); this.leftMonth.set(0); }
-    else this.leftMonth.update(m => m + 1);
+    if (this.leftMonth() === 11) {
+      this.leftYear.update((y) => y + 1);
+      this.leftMonth.set(0);
+    } else this.leftMonth.update((m) => m + 1);
   }
 
   // ── Day selection ──────────────────────────────────────────────────
@@ -199,8 +280,12 @@ export class DateRangePickerComponent {
     this.activePreset.set(null);
   }
 
-  hoverDay(date: Date): void { this.hoveredDate.set(startOfDay(date)); }
-  leaveDay(): void           { this.hoveredDate.set(null); }
+  hoverDay(date: Date): void {
+    this.hoveredDate.set(startOfDay(date));
+  }
+  leaveDay(): void {
+    this.hoveredDate.set(null);
+  }
 
   isStart(date: Date): boolean {
     const s = this.startDate();
@@ -214,18 +299,25 @@ export class DateRangePickerComponent {
 
   isInRange(date: Date): boolean {
     const start = this.startDate();
-    const end   = this.endDate() ?? (this.startDate() ? this.hoveredDate() : null);
+    const end =
+      this.endDate() ?? (this.startDate() ? this.hoveredDate() : null);
     if (!start || !end) return false;
-    const t = date.getTime(), s = start.getTime(), e = end.getTime();
+    const t = date.getTime(),
+      s = start.getTime(),
+      e = end.getTime();
     return s <= e ? t > s && t < e : t < s && t > e;
   }
 
-  isToday(date: Date): boolean { return this.sameDay(date, new Date()); }
+  isToday(date: Date): boolean {
+    return this.sameDay(date, new Date());
+  }
 
   private sameDay(a: Date, b: Date): boolean {
-    return a.getFullYear() === b.getFullYear() &&
-           a.getMonth()    === b.getMonth()    &&
-           a.getDate()     === b.getDate();
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
   }
 
   // ── Presets ────────────────────────────────────────────────────────
@@ -238,22 +330,101 @@ export class DateRangePickerComponent {
   // ── Actions ────────────────────────────────────────────────────────
   apply(): void {
     const start = this.startDate();
-    const end   = this.endDate() ?? start;
+    const end = this.endDate() ?? start;
     if (start) this.applied.emit({ start, end: end! });
     this.close();
   }
 
-  cancel(): void { this.close(); }
+  cancel(): void {
+    this.close();
+  }
 
   private close(): void {
+    this.clearCloseTimeout();
     this.isClosing.set(true);
-    setTimeout(() => {
+    this.closeTimeout = setTimeout(() => {
       this.isOpen.set(false);
       this.isClosing.set(false);
+      this.closeTimeout = null;
     }, 220);
   }
 
-  stopPropagation(event: MouseEvent): void { event.stopPropagation(); }
+  stopPropagation(event: MouseEvent): void {
+    event.stopPropagation();
+  }
+
+  ngOnDestroy(): void {
+    this.clearCloseTimeout();
+    this.unlockPageScroll();
+  }
+
+  private lockPageScroll(): void {
+    if (this.scrollLockState) {
+      return;
+    }
+
+    const { body, documentElement, defaultView } = this.document;
+    if (!body || !documentElement) {
+      return;
+    }
+
+    this.scrollLockState = {
+      htmlOverflow: documentElement.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyTouchAction: body.style.touchAction,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyWidth: body.style.width,
+      bodyHadDatePickerOpenClass: body.classList.contains(
+        'ubax-date-picker-open',
+      ),
+      scrollY: defaultView?.scrollY ?? documentElement.scrollTop ?? 0,
+    };
+
+    body.classList.add('ubax-date-picker-open');
+    documentElement.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.touchAction = 'none';
+    body.style.position = 'fixed';
+    body.style.top = `-${this.scrollLockState.scrollY}px`;
+    body.style.width = '100%';
+  }
+
+  private unlockPageScroll(): void {
+    if (!this.scrollLockState) {
+      return;
+    }
+
+    const { body, documentElement, defaultView } = this.document;
+
+    documentElement.style.overflow = this.scrollLockState.htmlOverflow;
+    body.style.overflow = this.scrollLockState.bodyOverflow;
+    body.style.touchAction = this.scrollLockState.bodyTouchAction;
+    body.style.position = this.scrollLockState.bodyPosition;
+    body.style.top = this.scrollLockState.bodyTop;
+    body.style.width = this.scrollLockState.bodyWidth;
+
+    if (!this.scrollLockState.bodyHadDatePickerOpenClass) {
+      body.classList.remove('ubax-date-picker-open');
+    }
+
+    defaultView?.scrollTo({
+      top: this.scrollLockState.scrollY,
+      left: 0,
+      behavior: 'auto',
+    });
+
+    this.scrollLockState = null;
+  }
+
+  private clearCloseTimeout(): void {
+    if (this.closeTimeout === null) {
+      return;
+    }
+
+    clearTimeout(this.closeTimeout);
+    this.closeTimeout = null;
+  }
 
   // ── Formatting ─────────────────────────────────────────────────────
   private formatDate(d: Date | null): string {

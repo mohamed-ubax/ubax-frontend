@@ -4,9 +4,9 @@ export const financeRoutes: Route[] = [
   {
     path: '',
     loadComponent: () =>
-      import('./pages/finance-overview-page/finance-overview-page.component').then(
-        (m) => m.FinanceOverviewPageComponent,
-      ),
+      import(
+        './pages/finance-overview-page/finance-overview-page.component'
+      ).then((m) => m.FinanceOverviewPageComponent),
   },
   {
     path: 'facturation',
@@ -18,9 +18,9 @@ export const financeRoutes: Route[] = [
   {
     path: 'recettes',
     loadComponent: () =>
-      import('./pages/recettes-history-page/recettes-history-page.component').then(
-        (m) => m.RecettesHistoryPageComponent,
-      ),
+      import(
+        './pages/recettes-history-page/recettes-history-page.component'
+      ).then((m) => m.RecettesHistoryPageComponent),
   },
   {
     path: 'depenses',
@@ -39,9 +39,9 @@ export const financeRoutes: Route[] = [
   {
     path: 'transactions',
     loadComponent: () =>
-      import('./pages/transactions-history-page/transactions-history-page.component').then(
-        (m) => m.TransactionsHistoryPageComponent,
-      ),
+      import(
+        './pages/transactions-history-page/transactions-history-page.component'
+      ).then((m) => m.TransactionsHistoryPageComponent),
   },
   {
     path: 'loyers-retard',
@@ -49,5 +49,12 @@ export const financeRoutes: Route[] = [
       import('./pages/loyers-retard-page/loyers-retard-page.component').then(
         (m) => m.LoyersRetardPageComponent,
       ),
+  },
+  {
+    path: 'locataires/:id',
+    loadComponent: () =>
+      import(
+        './pages/locataire-detail-page/locataire-detail-page.component'
+      ).then((m) => m.FinanceLocataireDetailPageComponent),
   },
 ];

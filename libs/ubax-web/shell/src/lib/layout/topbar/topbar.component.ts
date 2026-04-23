@@ -5,31 +5,23 @@ import {
   DestroyRef,
   ElementRef,
   NgZone,
+  PLATFORM_ID,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { AuthStore, Role } from '@ubax-workspace/ubax-web-data-access';
-import { AvatarModule } from 'primeng/avatar';
-import { BadgeModule } from 'primeng/badge';
-import { ButtonModule } from 'primeng/button';
+import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
+import {
+  AuthStore,
+  NavItemConfig,
+  ROLE_LABELS,
+  Role,
+  topbarNavItemsForRole,
+} from '@ubax-workspace/ubax-web-data-access';
 import { filter, map } from 'rxjs';
-
-interface NavItem {
-  label: string;
-  path: string;
-  activePaths?: string[];
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  DG: "Directeur d'agence",
-  COMMERCIAL: 'Commercial',
-  COMPTABLE: 'Comptable',
-  SAV: 'Service client',
-  HOTEL: 'Responsable hôtel',
-};
 
 const COMPACT_EXIT_BUFFER = 8;
 
@@ -48,7 +40,7 @@ function readFlexGap(element: HTMLElement): number {
 @Component({
   selector: 'ubax-topbar',
   standalone: true,
-  imports: [RouterLink, ButtonModule, AvatarModule, BadgeModule],
+  imports: [RouterLink, UbaxMorphTabsDirective],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,8 +50,11 @@ export class TopbarComponent implements AfterViewInit {
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly platformId = inject(PLATFORM_ID);
+  protected readonly notificationCount = 3;
   protected readonly isMobileNavOpen = signal(false);
   protected readonly isCompactNav = signal(false);
+  protected readonly isScrolled = signal(false);
   private inlineNavRequiredWidth = 0;
   private readonly topbarInner =
     viewChild<ElementRef<HTMLElement>>('topbarInner');
@@ -84,45 +79,33 @@ export class TopbarComponent implements AfterViewInit {
     return role ? (ROLE_LABELS[role] ?? role) : '';
   }
 
-  private readonly agencyNavItems: NavItem[] = [
-    { label: 'Tableau de bord', path: '/tableau-de-bord' },
-    { label: 'Biens', path: '/biens' },
-    { label: 'Réservations', path: '/reservations' },
-    { label: 'Demandes clientèles', path: '/demandes' },
-    { label: 'Finances', path: '/finances' },
-    { label: 'Archivages', path: '/archivages' },
-  ];
+  protected avatarSrc(): string | null {
+    return this.authStore.user()?.avatar ?? null;
+  }
 
-  private readonly hotelNavItems: NavItem[] = [
-    { label: 'Tableau de bord', path: '/tableau-de-bord' },
-    {
-      label: 'Réservations',
-      path: '/hotel/reservations',
-      activePaths: ['/hotel/reservations', '/reservations'],
-    },
-    { label: 'Espaces', path: '/hotel/espaces' },
-    { label: 'Clients', path: '/hotel/clients' },
-    { label: 'Employés', path: '/hotel/employes' },
-    { label: 'Facturation', path: '/hotel/facturation' },
-  ];
+  protected avatarLabel(): string {
+    const user = this.authStore.user();
+    const initials = `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`;
 
-  protected visibleItems(): NavItem[] {
-    return this.authStore.role() === Role.HOTEL
-      ? this.hotelNavItems
-      : this.agencyNavItems;
+    return initials || '?';
+  }
+
+  protected visibleItems(): readonly NavItemConfig[] {
+    return topbarNavItemsForRole(this.authStore.role());
   }
 
   protected logoSrc(): string {
     return this.authStore.role() === Role.HOTEL
-      ? 'header/header-hotel-logo.png'
-      : 'header/header-logo.png';
+      ? 'header/header-hotel-logo.webp'
+      : 'header/header-logo.webp';
   }
 
   ngAfterViewInit(): void {
     this.observeCompactNavState();
+    this.observeScrollState();
   }
 
-  protected isItemActive(item: NavItem): boolean {
+  protected isItemActive(item: NavItemConfig): boolean {
     const currentUrl = this.currentUrl();
     const activePaths = item.activePaths ?? [item.path];
 
@@ -165,6 +148,35 @@ export class TopbarComponent implements AfterViewInit {
       this.destroyRef.onDestroy(() => {
         cancelAnimationFrame(animationFrameState.id);
         resizeObserver.disconnect();
+      });
+    });
+  }
+
+  private observeScrollState(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.zone.runOutsideAngular(() => {
+      const updateScrollState = () => {
+        const nextValue = globalThis.scrollY > 18;
+
+        if (nextValue === this.isScrolled()) {
+          return;
+        }
+
+        this.zone.run(() => {
+          this.isScrolled.set(nextValue);
+        });
+      };
+
+      updateScrollState();
+      globalThis.addEventListener('scroll', updateScrollState, {
+        passive: true,
+      });
+
+      this.destroyRef.onDestroy(() => {
+        globalThis.removeEventListener('scroll', updateScrollState);
       });
     });
   }

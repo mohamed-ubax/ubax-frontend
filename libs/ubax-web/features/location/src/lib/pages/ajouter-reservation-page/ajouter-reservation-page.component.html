@@ -1,5 +1,4 @@
 <div class="ajout-page">
-
   <!-- ── Page header ────────────────────────────────────── -->
   <div class="ajout-header">
     <a class="back-btn" routerLink="/reservations">
@@ -10,18 +9,26 @@
 
   <!-- ── Body ──────────────────────────────────────────── -->
   <div class="ajout-body">
-
     <!-- Sidebar stepper -->
     <aside class="ajout-sidebar">
       <h2 class="sidebar-title">{{ sidebarTitle() }}</h2>
 
       <div class="steps-list">
-        @for (label of STEP_LABELS; track $index; let i = $index, last = $last) {
-          <div class="step-row"
+        @for (
+          label of STEP_LABELS;
+          track $index;
+          let i = $index, last = $last
+        ) {
+          <div
+            class="step-row"
             [class.step-row--clickable]="i + 1 < currentStep()"
-            (click)="goToStep(i + 1)">
+            (click)="goToStep(i + 1)"
+          >
             <div class="step-col">
-              <div class="step-circle" [class.step-circle--done]="i + 1 <= currentStep()">
+              <div
+                class="step-circle"
+                [class.step-circle--done]="i + 1 <= currentStep()"
+              >
                 @if (i + 1 <= currentStep()) {
                   <i class="pi pi-check"></i>
                 } @else {
@@ -29,10 +36,16 @@
                 }
               </div>
               @if (!last) {
-                <div class="step-connector" [class.step-connector--done]="i + 2 <= currentStep()"></div>
+                <div
+                  class="step-connector"
+                  [class.step-connector--done]="i + 2 <= currentStep()"
+                ></div>
               }
             </div>
-            <span class="step-label" [class.step-label--active]="i + 1 === currentStep()">
+            <span
+              class="step-label"
+              [class.step-label--active]="i + 1 === currentStep()"
+            >
               {{ label }}
             </span>
           </div>
@@ -42,58 +55,117 @@
 
     <!-- Right column: type-tabs (step 1 only) + form card -->
     <div class="ajout-right-col">
-
       <!-- ── Type tabs (step 1 only) ────────────────────────── -->
       @if (currentStep() === 1) {
-        <div class="type-tabs">
-          <button class="type-tab" [class.type-tab--active]="roomType() === 'chambre'"
-            (click)="roomType.set('chambre')">Chambre</button>
-          <button class="type-tab" [class.type-tab--active]="roomType() === 'conference'"
-            (click)="roomType.set('conference')">Salle de conférence</button>
-          <button class="type-tab" [class.type-tab--active]="roomType() === 'evenement'"
-            (click)="roomType.set('evenement')">Salle d'évènement</button>
+        <div
+          class="type-tabs"
+          role="tablist"
+          ubaxMorphTabs
+          ubaxMorphTabsItemSelector=".type-tab"
+        >
+          <button
+            class="type-tab"
+            role="tab"
+            [attr.aria-selected]="roomType() === 'chambre'"
+            [class.type-tab--active]="roomType() === 'chambre'"
+            [class.is-active]="roomType() === 'chambre'"
+            (click)="roomType.set('chambre')"
+          >
+            Chambre
+          </button>
+          <button
+            class="type-tab"
+            role="tab"
+            [attr.aria-selected]="roomType() === 'conference'"
+            [class.type-tab--active]="roomType() === 'conference'"
+            [class.is-active]="roomType() === 'conference'"
+            (click)="roomType.set('conference')"
+          >
+            Salle de conférence
+          </button>
+          <button
+            class="type-tab"
+            role="tab"
+            [attr.aria-selected]="roomType() === 'evenement'"
+            [class.type-tab--active]="roomType() === 'evenement'"
+            [class.is-active]="roomType() === 'evenement'"
+            (click)="roomType.set('evenement')"
+          >
+            Salle d'évènement
+          </button>
         </div>
       }
 
       <!-- Form card -->
       <div class="ajout-card">
-
         <!-- ── STEP 1: Informations client ─────────────────── -->
         @if (currentStep() === 1) {
           <div class="step-content">
-            <p class="step-section-title step-section-title--sm">Informations client</p>
+            <p class="step-section-title step-section-title--sm">
+              Informations client
+            </p>
 
             <div class="s1-layout">
               <div class="s1-form">
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">Nom <span class="req">*</span></label>
-                    <input class="form-input" type="text" placeholder="Saisir votre nom"
-                      [value]="nom()" (input)="nom.set($any($event.target).value)" />
+                    <label class="form-label"
+                      >Nom <span class="req">*</span></label
+                    >
+                    <input
+                      class="form-input"
+                      type="text"
+                      placeholder="Saisir votre nom"
+                      [value]="nom()"
+                      (input)="nom.set($any($event.target).value)"
+                    />
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Prénom <span class="req">*</span></label>
-                    <input class="form-input" type="text" placeholder="Saisir votre prénom"
-                      [value]="prenom()" (input)="prenom.set($any($event.target).value)" />
+                    <label class="form-label"
+                      >Prénom <span class="req">*</span></label
+                    >
+                    <input
+                      class="form-input"
+                      type="text"
+                      placeholder="Saisir votre prénom"
+                      [value]="prenom()"
+                      (input)="prenom.set($any($event.target).value)"
+                    />
                   </div>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">Téléphone <span class="req">*</span></label>
-                    <input class="form-input" type="text" placeholder="+225 00 00 00 00"
-                      [value]="telephone()" (input)="telephone.set($any($event.target).value)" />
+                    <label class="form-label"
+                      >Téléphone <span class="req">*</span></label
+                    >
+                    <input
+                      class="form-input"
+                      type="text"
+                      placeholder="+225 00 00 00 00"
+                      [value]="telephone()"
+                      (input)="telephone.set($any($event.target).value)"
+                    />
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Email <span class="req">*</span></label>
-                    <input class="form-input" type="email" placeholder="exemple@email.com"
-                      [value]="email()" (input)="email.set($any($event.target).value)" />
+                    <label class="form-label"
+                      >Email <span class="req">*</span></label
+                    >
+                    <input
+                      class="form-input"
+                      type="email"
+                      placeholder="exemple@email.com"
+                      [value]="email()"
+                      (input)="email.set($any($event.target).value)"
+                    />
                   </div>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">Documents <span class="req">*</span></label>
+                    <label class="form-label"
+                      >Documents <span class="req">*</span></label
+                    >
                     <div class="upload-zone">
                       <i class="pi pi-cloud-upload upload-icon"></i>
                       <span class="upload-label">Ajouter des documents</span>
@@ -101,7 +173,11 @@
                   </div>
                   <div class="form-group docs-list-group">
                     <div class="docs-list">
-                      @for (doc of uploadedDocs(); track $index; let di = $index) {
+                      @for (
+                        doc of uploadedDocs();
+                        track $index;
+                        let di = $index
+                      ) {
                         <div class="doc-item">
                           <i class="pi pi-file doc-icon"></i>
                           <span class="doc-name">{{ doc }}</span>
@@ -119,7 +195,11 @@
               <div class="room-panel-wrapper">
                 <p class="room-panel-title-outside">Choisir une chambre</p>
                 <div class="room-panel">
-                  <img class="room-panel-img" [src]="roomPreviewImg" alt="Chambre" />
+                  <img
+                    class="room-panel-img"
+                    [src]="roomPreviewImg"
+                    alt="Chambre"
+                  />
                   <p class="room-panel-label">Type de chambre</p>
                   <div class="room-select">
                     <span>Chambre deluxe</span>
@@ -141,22 +221,32 @@
 
             <div class="s2-layout">
               <div class="s2-form">
-
                 <!-- Dates row -->
                 <div class="dates-row">
                   <div class="date-group">
                     <label class="form-label">Date d'arrivée</label>
-                    <div class="date-input">
-                      <span>{{ arrivalDate() }}</span>
-                      <i class="pi pi-calendar"></i>
-                    </div>
+                    <p-datepicker
+                      [ngModel]="arrivalDate()"
+                      (ngModelChange)="onArrivalDateChange($event)"
+                      [showIcon]="true"
+                      appendTo="body"
+                      styleClass="date-input"
+                      inputId="arrival-date"
+                      placeholder="Sélectionner une date"
+                    />
                   </div>
                   <div class="date-group">
                     <label class="form-label">Date de départ</label>
-                    <div class="date-input">
-                      <span>{{ departureDate() }}</span>
-                      <i class="pi pi-calendar"></i>
-                    </div>
+                    <p-datepicker
+                      [ngModel]="departureDate()"
+                      (ngModelChange)="onDepartureDateChange($event)"
+                      [minDate]="minDepartureDate()"
+                      [showIcon]="true"
+                      appendTo="body"
+                      styleClass="date-input"
+                      inputId="departure-date"
+                      placeholder="Sélectionner une date"
+                    />
                   </div>
                 </div>
 
@@ -165,11 +255,17 @@
                   <div class="counter-card">
                     <label class="counter-label">Nombre de nuits</label>
                     <div class="counter-ctrl">
-                      <button class="counter-btn counter-btn--minus" (click)="adjustNights(-1)">
+                      <button
+                        class="counter-btn counter-btn--minus"
+                        (click)="adjustNights(-1)"
+                      >
                         <i class="pi pi-minus"></i>
                       </button>
                       <span class="counter-val">{{ nights() }}</span>
-                      <button class="counter-btn counter-btn--plus" (click)="adjustNights(1)">
+                      <button
+                        class="counter-btn counter-btn--plus"
+                        (click)="adjustNights(1)"
+                      >
                         <i class="pi pi-plus"></i>
                       </button>
                     </div>
@@ -177,11 +273,17 @@
                   <div class="counter-card">
                     <label class="counter-label">Nombre d'adultes</label>
                     <div class="counter-ctrl">
-                      <button class="counter-btn counter-btn--minus" (click)="adjustAdults(-1)">
+                      <button
+                        class="counter-btn counter-btn--minus"
+                        (click)="adjustAdults(-1)"
+                      >
                         <i class="pi pi-minus"></i>
                       </button>
                       <span class="counter-val">{{ adults() }}</span>
-                      <button class="counter-btn counter-btn--plus" (click)="adjustAdults(1)">
+                      <button
+                        class="counter-btn counter-btn--plus"
+                        (click)="adjustAdults(1)"
+                      >
                         <i class="pi pi-plus"></i>
                       </button>
                     </div>
@@ -189,11 +291,17 @@
                   <div class="counter-card">
                     <label class="counter-label">Nombre d'enfants</label>
                     <div class="counter-ctrl">
-                      <button class="counter-btn counter-btn--minus" (click)="adjustChildren(-1)">
+                      <button
+                        class="counter-btn counter-btn--minus"
+                        (click)="adjustChildren(-1)"
+                      >
                         <i class="pi pi-minus"></i>
                       </button>
                       <span class="counter-val">{{ children() }}</span>
-                      <button class="counter-btn counter-btn--plus" (click)="adjustChildren(1)">
+                      <button
+                        class="counter-btn counter-btn--plus"
+                        (click)="adjustChildren(1)"
+                      >
                         <i class="pi pi-plus"></i>
                       </button>
                     </div>
@@ -206,22 +314,28 @@
                     <span class="rate-label">Taux tarifaire adulte</span>
                     <span class="rate-value">{{ adultRate() }}%</span>
                   </div>
-                  <p class="rate-subtitle">Entre 20% et 60% du tarif adulte ({{ fmt(BASE_NIGHT_PRICE) }} FCFA)</p>
+                  <p class="rate-subtitle">
+                    Entre 20% et 60% du tarif adulte ({{
+                      fmt(BASE_NIGHT_PRICE)
+                    }}
+                    FCFA)
+                  </p>
                   <div class="slider-wrap">
                     <input
                       type="range"
                       class="rate-slider"
-                      min="20" max="60"
+                      min="20"
+                      max="60"
                       [value]="adultRate()"
                       [style.background]="sliderBg()"
-                      (input)="adultRate.set(+$any($event.target).value)" />
+                      (input)="adultRate.set(+$any($event.target).value)"
+                    />
                   </div>
                   <div class="rate-minmax">
                     <span>20 % Minimum</span>
                     <span>60% Maximum</span>
                   </div>
                 </div>
-
               </div>
 
               <!-- Cost estimation panel -->
@@ -238,14 +352,22 @@
                   <span class="cost-lbl">Adultes</span>
                   <span class="cost-amt">{{ fmt(adultsTotal()) }} FCFA</span>
                 </div>
-                <p class="cost-detail">{{ fmt(BASE_NIGHT_PRICE) }} FCFA x {{ adults() }} adultes&nbsp; x {{ nights() }} nuits</p>
+                <p class="cost-detail">
+                  {{ fmt(BASE_NIGHT_PRICE) }} FCFA x
+                  {{ adults() }} adultes&nbsp; x {{ nights() }} nuits
+                </p>
                 <div class="cost-divider"></div>
 
                 <div class="cost-row">
                   <span class="cost-lbl">Enfants ({{ adultRate() }}%)</span>
-                  <span class="cost-amt cost-amt--orange">{{ fmt(childrenTotal()) }} FCFA</span>
+                  <span class="cost-amt cost-amt--orange"
+                    >{{ fmt(childrenTotal()) }} FCFA</span
+                  >
                 </div>
-                <p class="cost-detail">{{ fmt(childrenNightPrice()) }} FCFA x {{ children() }} enfant&nbsp; x {{ nights() }} nuits</p>
+                <p class="cost-detail">
+                  {{ fmt(childrenNightPrice()) }} FCFA x
+                  {{ children() }} enfant&nbsp; x {{ nights() }} nuits
+                </p>
                 <div class="cost-divider"></div>
 
                 <div class="cost-divider cost-divider--heavy"></div>
@@ -258,31 +380,44 @@
 
                 <div class="cost-per-night">
                   <span>Soit par nuit</span>
-                  <span class="cost-amt--orange">{{ fmt(perNight()) }} FCFA</span>
+                  <span class="cost-amt--orange"
+                    >{{ fmt(perNight()) }} FCFA</span
+                  >
                 </div>
 
                 <!-- Répartition du coût -->
                 <div class="cost-repartition">
                   <p class="cost-repartition-lbl">Répartition du coût</p>
                   <div class="cost-repartition-bar">
-                    <span class="repartition-fill repartition-fill--adults"></span>
-                    <span class="repartition-fill repartition-fill--children"></span>
+                    <span
+                      class="repartition-fill repartition-fill--adults"
+                    ></span>
+                    <span
+                      class="repartition-fill repartition-fill--children"
+                    ></span>
                   </div>
                   <div class="cost-legend">
                     <div class="legend-item">
                       <span class="legend-swatch legend-swatch--orange"></span>
-                      <span class="legend-text">réduction {{ adultRate() }} %</span>
+                      <span class="legend-text"
+                        >réduction {{ adultRate() }} %</span
+                      >
                     </div>
                     <div class="legend-item">
                       <span class="legend-swatch legend-swatch--dark"></span>
-                      <span class="legend-text">réduction {{ adultRate() }} %</span>
+                      <span class="legend-text"
+                        >réduction {{ adultRate() }} %</span
+                      >
                     </div>
                   </div>
                 </div>
 
                 <div class="cost-warning">
                   <i class="pi pi-exclamation-triangle"></i>
-                  <span>Estimation indicative. Tarif confirmé à l'étape suivante.</span>
+                  <span
+                    >Estimation indicative. Tarif confirmé à l'étape
+                    suivante.</span
+                  >
                 </div>
               </div>
             </div>
@@ -293,11 +428,48 @@
         @if (currentStep() === 3) {
           <div class="step-content">
             <p class="step-section-title">Options supplémentaires</p>
+
+            <div class="options-toolbar">
+              <div class="options-inline-add">
+                <input
+                  class="option-input"
+                  type="text"
+                  placeholder="Ajouter une option personnalisée"
+                  [value]="newOptionLabel()"
+                  (input)="newOptionLabel.set($any($event.target).value)"
+                  (keydown.enter)="addCustomOption()"
+                />
+                <button
+                  type="button"
+                  class="option-add-btn"
+                  [disabled]="!canAddOption()"
+                  (click)="addCustomOption()"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </div>
+
             <div class="options-grid">
-              @for (opt of EXTRA_OPTIONS; track $index; let i = $index) {
-                <div class="option-item" (click)="toggleOption(i)">
-                  <div class="option-circle" [class.option-circle--checked]="selectedOptions()[i]"></div>
-                  <span class="option-label">{{ opt }}</span>
+              @for (opt of extraOptions(); track opt.id) {
+                <div class="option-item" (click)="toggleOption(opt.id)">
+                  <div
+                    class="option-circle"
+                    [class.option-circle--checked]="opt.selected"
+                  ></div>
+                  <span class="option-label">{{ opt.label }}</span>
+                  @if (opt.custom) {
+                    <button
+                      type="button"
+                      class="option-remove"
+                      aria-label="Supprimer l'option"
+                      (click)="
+                        $event.stopPropagation(); removeCustomOption(opt.id)
+                      "
+                    >
+                      <i class="pi pi-times"></i>
+                    </button>
+                  }
                 </div>
               }
             </div>
@@ -324,9 +496,13 @@
 
               <div class="pricing-row">
                 <span>Taxes et frais</span>
-                <input class="taxes-input" type="number" placeholder="Saisie le montant"
+                <input
+                  class="taxes-input"
+                  type="number"
                   [value]="taxes() || ''"
-                  (input)="taxes.set(+$any($event.target).value || 0)" />
+                  placeholder="Saisir le montant"
+                  (input)="taxes.set(+$any($event.target).value || 0)"
+                />
               </div>
               <div class="pricing-divider"></div>
 
@@ -337,25 +513,59 @@
 
               <!-- Discount pills -->
               <div class="discount-pills">
-                <button class="disc-pill" [class.disc-pill--active]="discount() === 'none'"
-                  (click)="discount.set('none')">Aucune remise</button>
-                <button class="disc-pill" [class.disc-pill--active]="discount() === '5'"
-                  (click)="discount.set('5')">5%</button>
-                <button class="disc-pill" [class.disc-pill--active]="discount() === '10'"
-                  (click)="discount.set('10')">10%</button>
-                <button class="disc-pill" [class.disc-pill--active]="discount() === '15'"
-                  (click)="discount.set('15')">15%</button>
-                <button class="disc-pill" [class.disc-pill--active]="discount() === '30'"
-                  (click)="discount.set('30')">30%</button>
-                <button class="disc-pill disc-pill--promo" [class.disc-pill--active]="discount() === 'promo'"
-                  (click)="discount.set('promo')">Code promotionnel</button>
+                <button
+                  class="disc-pill"
+                  [class.disc-pill--active]="discount() === 'none'"
+                  (click)="discount.set('none')"
+                >
+                  Aucune remise
+                </button>
+                <button
+                  class="disc-pill"
+                  [class.disc-pill--active]="discount() === '5'"
+                  (click)="discount.set('5')"
+                >
+                  5%
+                </button>
+                <button
+                  class="disc-pill"
+                  [class.disc-pill--active]="discount() === '10'"
+                  (click)="discount.set('10')"
+                >
+                  10%
+                </button>
+                <button
+                  class="disc-pill"
+                  [class.disc-pill--active]="discount() === '15'"
+                  (click)="discount.set('15')"
+                >
+                  15%
+                </button>
+                <button
+                  class="disc-pill"
+                  [class.disc-pill--active]="discount() === '30'"
+                  (click)="discount.set('30')"
+                >
+                  30%
+                </button>
+                <button
+                  class="disc-pill disc-pill--promo"
+                  [class.disc-pill--active]="discount() === 'promo'"
+                  (click)="discount.set('promo')"
+                >
+                  Code promotionnel
+                </button>
               </div>
 
               <!-- Promo code row -->
               <div class="promo-row">
-                <input class="promo-input" type="text" placeholder="Entrer votre code promo"
+                <input
+                  class="promo-input"
+                  type="text"
+                  placeholder="Entrer votre code promo"
                   [value]="promoCode()"
-                  (input)="promoCode.set($any($event.target).value)" />
+                  (input)="promoCode.set($any($event.target).value)"
+                />
                 <button class="promo-apply-btn">Appliquer</button>
               </div>
 
@@ -369,11 +579,61 @@
               <!-- Payment method — side by side -->
               <div class="pricing-row pricing-row--payment">
                 <span>Mode de paiement</span>
-                <div class="payment-select">
-                  <span class="wave-logo">W</span>
-                  <span>Wave</span>
-                  <i class="pi pi-chevron-down"></i>
-                </div>
+                <p-select
+                  [options]="paymentMethods"
+                  [ngModel]="selectedPaymentMethod()"
+                  (ngModelChange)="selectedPaymentMethod.set($event)"
+                  optionLabel="label"
+                  optionValue="value"
+                  appendTo="body"
+                  styleClass="payment-select"
+                  panelStyleClass="payment-select-overlay"
+                  aria-label="Mode de paiement"
+                >
+                  <ng-template #selectedItem let-method>
+                    <div class="payment-option payment-option--selected">
+                      <span class="payment-option__media">
+                        @if (method?.logoSrc) {
+                          <img
+                            class="payment-option__logo"
+                            [src]="method.logoSrc"
+                            alt=""
+                          />
+                        } @else {
+                          <span class="payment-option__badge">{{
+                            method?.badge
+                          }}</span>
+                        }
+                      </span>
+                      <span class="payment-option__label">{{
+                        method?.label
+                      }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template #item let-method>
+                    <div class="payment-option">
+                      <span class="payment-option__media">
+                        @if (method.logoSrc) {
+                          <img
+                            class="payment-option__logo"
+                            [src]="method.logoSrc"
+                            alt=""
+                          />
+                        } @else {
+                          <span class="payment-option__badge">{{
+                            method.badge
+                          }}</span>
+                        }
+                      </span>
+                      <span class="payment-option__label">{{
+                        method.label
+                      }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </ng-template>
+                </p-select>
               </div>
             </div>
           </div>
@@ -394,7 +654,9 @@
                     <p class="recap-booking-id">Booking ID #0052466623</p>
                     <p class="recap-room-name">Queen Room Deluxe A09244</p>
                     <p class="recap-guest">Valentin Kouadio</p>
-                    <p class="recap-phone"><i class="pi pi-phone"></i>&nbsp; +225 07 58 23 41 89</p>
+                    <p class="recap-phone">
+                      <i class="pi pi-phone"></i>&nbsp; +225 07 58 23 41 89
+                    </p>
                   </div>
                 </div>
 
@@ -418,7 +680,7 @@
                       <i class="pi pi-calendar meta-icon"></i>
                       <small class="meta-lbl">Date de reservation</small>
                     </div>
-                    <p class="meta-value">{{ arrivalDate() }} – {{ departureDate() }}</p>
+                    <p class="meta-value">{{ stayPeriodLabel() }}</p>
                   </div>
                 </div>
               </div>
@@ -434,12 +696,19 @@
               </div>
 
               <div class="room-photos">
-                <button class="gallery-btn" (click)="prevPhoto()" [disabled]="photoOffset() === 0">
+                <button
+                  class="gallery-btn"
+                  (click)="prevPhoto()"
+                  [disabled]="photoOffset() === 0"
+                >
                   <i class="pi pi-arrow-left"></i>
                 </button>
                 <div class="photos-wrapper">
-                  <div class="photos-track" [style.transform]="photosTranslate()">
-                    @for (photo of roomPhotos; track photo) {
+                  <div
+                    class="photos-track"
+                    [style.transform]="photosTranslate()"
+                  >
+                    @for (photo of roomPhotos; track $index) {
                       <img class="room-photo" [src]="photo" alt="" />
                     }
                   </div>
@@ -466,7 +735,9 @@
             } @else {
               <div class="step4-actions">
                 <button class="btn-draft">Enregistrer comme brouillon</button>
-                <button class="btn-validate" (click)="nextStep()">Valider</button>
+                <button class="btn-validate" (click)="nextStep()">
+                  Valider
+                </button>
               </div>
             }
           </div>
@@ -478,8 +749,10 @@
             <button class="btn-next">Enregistrer</button>
           </div>
         }
-
-      </div><!-- /ajout-card -->
-    </div><!-- /ajout-right-col -->
-  </div><!-- /ajout-body -->
+      </div>
+      <!-- /ajout-card -->
+    </div>
+    <!-- /ajout-right-col -->
+  </div>
+  <!-- /ajout-body -->
 </div>
