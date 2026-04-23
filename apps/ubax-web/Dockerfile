@@ -16,7 +16,7 @@ RUN npm ci --no-audit --no-fund --legacy-peer-deps
 COPY . .
 
 # base-href=/admin/ → l'app sera servie sous /admin/ via le reverse proxy
-RUN npx nx build ubax-web --configuration=production --base-href=/admin/
+RUN npx nx build ubax-web --configuration=production --base-href=/tableau-de-bord/
 
 # ─── Stage 2 : Runtime ───────────────────────────────────────────
 FROM nginx:1.27-alpine AS runtime
