@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
 import { LazyChartComponent } from '@ubax-workspace/shared-ui';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'ubax-dashboard-hotel-page',
   standalone: true,
-  imports: [LazyChartComponent, DatePickerModule, FormsModule],
+  imports: [LazyChartComponent, DatePickerModule, FormsModule, DatePipe],
   templateUrl: './dashboard-hotel-page.component.html',
   styleUrl: './dashboard-hotel-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

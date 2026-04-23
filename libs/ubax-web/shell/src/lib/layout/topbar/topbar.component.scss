@@ -30,7 +30,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   min-height: 72px;
-  padding: 0 28px;
+  padding: 1rem 28px;
   gap: 20px;
   transition: min-height 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -48,7 +48,7 @@
   text-decoration: none;
 
   img {
-    height: 38px;
+    height: 55px;
     width: auto;
   }
 }
@@ -81,9 +81,9 @@
   padding: 8px 18px;
   border-radius: 50px;
   font-family: 'Lexend', sans-serif;
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 400;
-  color: rgb(26 48 71 / 0.74);
+  color: #1c1c1c;
   text-decoration: none;
   white-space: nowrap;
   transition:
@@ -228,7 +228,7 @@
 
   .topbar-user__name {
     font-family: 'Lexend', sans-serif;
-    font-size: 13px;
+    font-size: 1rem;
     font-weight: 500;
     color: #222;
     line-height: 1.3;
@@ -236,7 +236,7 @@
 
   .topbar-user__role {
     font-family: 'Lexend', sans-serif;
-    font-size: 11px;
+    font-size: 0.9rem;
     font-weight: 400;
     color: #d06a0e;
     line-height: 1.5;
