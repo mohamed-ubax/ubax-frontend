@@ -46,7 +46,7 @@ export const ROUTE_ROLE_ACCESS = {
 const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
   {
     label: 'Tableau de bord',
-    path: '/tableau-de-bord',
+    path: '/dashboard',
     roles: ROUTE_ROLE_ACCESS.dashboard,
   },
   {
