@@ -194,15 +194,15 @@ jobs:
             sleep 10
           done
 
-      - name: Health check – ubax-admin (/admin/)
+      - name: Health check – ubax-admin (/tableau-de-bord/)
         run: |
           echo "Vérification de l'admin (max 2 min)..."
           for i in $(seq 1 12); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
-              http://${{ secrets.VPS_HOST }}/admin/)
+              http://${{ secrets.VPS_HOST }}/tableau-de-bord/)
             echo "Attempt $i/12 – HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Admin healthy"
+              echo "✅ Admin web healthy"
               exit 0
             fi
             sleep 10

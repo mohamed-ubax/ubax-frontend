@@ -14,7 +14,7 @@ services:
       retries: 3
       start_period: 10s
 
-  # ubax-web-admin – Frontend Admin (route /admin/)
+  # ubax-web-admin – Frontend Admin (route /tableau-de-bord/)
   web-admin:
     image: ubaxproject/ubax-admin:${ADMIN_TAG:-latest}
     container_name: ubax-web-prod
