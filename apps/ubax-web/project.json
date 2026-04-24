@@ -42,6 +42,12 @@
           ],
           "outputHashing": "all"
         },
+        "staging": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": false,
+          "outputHashing": "all"
+        },
         "development": {
           "optimization": false,
           "extractLicenses": false,
