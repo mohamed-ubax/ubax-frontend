@@ -15,13 +15,13 @@ export const webRoutes: Route[] = [
       // Redirection racine selon rôle (gérée dans DashboardRoutes)
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'tableau-de-bord',
         pathMatch: 'full',
       },
 
       // ── Dashboards ──────────────────────────────────────────────────────────
       {
-        path: 'dashboard',
+        path: 'tableau-de-bord',
         loadChildren: () =>
           import('@ubax-workspace/ubax-web-dashboard').then(
             (m) => m.dashboardRoutes,
@@ -101,5 +101,5 @@ export const webRoutes: Route[] = [
   },
 
   // Fallback
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'tableau-de-bord' },
 ];
