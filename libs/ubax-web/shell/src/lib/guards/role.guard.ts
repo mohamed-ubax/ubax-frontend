@@ -16,5 +16,5 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const userRole = authStore.role();
   if (roleCanAccess(userRole, allowedRoles)) return true;
 
-  return router.createUrlTree(['/dashboard']);
+  return router.createUrlTree(['/tableau-de-bord']);
 };
