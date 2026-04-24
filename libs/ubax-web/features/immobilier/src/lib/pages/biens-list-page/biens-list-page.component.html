@@ -3,15 +3,6 @@
     <h1 class="biens-page__title">Mes biens</h1>
 
     <div class="biens-page__actions">
-      @if (showOwnerAction()) {
-        <button class="action-button action-button--owner" type="button">
-          <span class="action-button__label">Ajouter un propriétaire</span>
-          <span class="action-button__icon-shell" aria-hidden="true">
-            <img [src]="ownerIcon" alt="" />
-          </span>
-        </button>
-      }
-
       <a class="action-button action-button--primary" routerLink="ajouter">
         <span class="action-button__label">Ajouter un bien</span>
         <span class="action-button__icon-shell" aria-hidden="true">
@@ -22,7 +13,7 @@
   </header>
 
   <section class="summary-strip" aria-label="Résumé des biens">
-    @for (summary of summaryCards(); track summary.label) {
+    @for (summary of summaryCards; track summary.label) {
       <article class="summary-card">
         <div class="summary-card__media" aria-hidden="true">
           <img class="summary-card__orb" [src]="summary.orb" alt="" />
@@ -54,12 +45,155 @@
   <section class="biens-panel">
     <div class="biens-toolbar">
       <div class="biens-toolbar__filters">
-        @for (filter of filters; track filter.label) {
-          <button class="filter-pill {{ filter.className }}" type="button">
-            <span>{{ filter.label }}</span>
-            <img [src]="chevronIcon" alt="" aria-hidden="true" />
+        <div
+          class="filter-dropdown"
+          [class.filter-dropdown--open]="openDropdown() === 'type'"
+        >
+          <button
+            class="filter-pill"
+            [class.filter-pill--open]="openDropdown() === 'type'"
+            type="button"
+            aria-label="Filtrer par type de bien"
+            [attr.aria-expanded]="openDropdown() === 'type'"
+            (click)="$event.stopPropagation(); toggleDropdown('type')"
+          >
+            <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
+            <img
+              class="filter-pill__chevron"
+              [src]="chevronIcon"
+              alt=""
+              aria-hidden="true"
+            />
           </button>
-        }
+
+          @if (openDropdown() === 'type') {
+            <div class="filter-menu" aria-label="Options type de bien">
+              @for (option of typeOptions; track option.value) {
+                <button
+                  class="filter-menu__option"
+                  [class.filter-menu__option--active]="
+                    selectedType() === option.value
+                  "
+                  type="button"
+                  (click)="$event.stopPropagation(); selectTypeOption(option.value)"
+                >
+                  <span class="filter-menu__option-main">
+                    <span
+                      class="filter-menu__tone"
+                      [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
+                      [class.filter-menu__tone--accent]="option.tone === 'accent'"
+                    ></span>
+                    <span>{{ option.label }}</span>
+                  </span>
+                  @if (selectedType() === option.value) {
+                    <span class="filter-menu__check" aria-hidden="true"></span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div
+          class="filter-dropdown filter-dropdown--category"
+          [class.filter-dropdown--open]="openDropdown() === 'category'"
+        >
+          <button
+            class="filter-pill"
+            [class.filter-pill--open]="openDropdown() === 'category'"
+            type="button"
+            aria-label="Filtrer par catégorie"
+            [attr.aria-expanded]="openDropdown() === 'category'"
+            (click)="$event.stopPropagation(); toggleDropdown('category')"
+          >
+            <span class="filter-pill__field">{{ selectedCategoryLabel() }}</span>
+            <img
+              class="filter-pill__chevron"
+              [src]="chevronIcon"
+              alt=""
+              aria-hidden="true"
+            />
+          </button>
+
+          @if (openDropdown() === 'category') {
+            <div class="filter-menu" aria-label="Options catégorie">
+              @for (option of categoryOptions; track option.value) {
+                <button
+                  class="filter-menu__option"
+                  [class.filter-menu__option--active]="
+                    selectedCategory() === option.value
+                  "
+                  type="button"
+                  (click)="$event.stopPropagation(); selectCategoryOption(option.value)"
+                >
+                  <span class="filter-menu__option-main">
+                    <span
+                      class="filter-menu__tone"
+                      [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
+                      [class.filter-menu__tone--success]="option.tone === 'success'"
+                      [class.filter-menu__tone--warning]="option.tone === 'warning'"
+                    ></span>
+                    <span>{{ option.label }}</span>
+                  </span>
+                  @if (selectedCategory() === option.value) {
+                    <span class="filter-menu__check" aria-hidden="true"></span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div
+          class="filter-dropdown filter-dropdown--status"
+          [class.filter-dropdown--open]="openDropdown() === 'status'"
+        >
+          <button
+            class="filter-pill"
+            [class.filter-pill--open]="openDropdown() === 'status'"
+            type="button"
+            aria-label="Filtrer par statut"
+            [attr.aria-expanded]="openDropdown() === 'status'"
+            (click)="$event.stopPropagation(); toggleDropdown('status')"
+          >
+            <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
+            <img
+              class="filter-pill__chevron"
+              [src]="chevronIcon"
+              alt=""
+              aria-hidden="true"
+            />
+          </button>
+
+          @if (openDropdown() === 'status') {
+            <div class="filter-menu" aria-label="Options statut">
+              @for (option of statusOptions; track option.value) {
+                <button
+                  class="filter-menu__option"
+                  [class.filter-menu__option--active]="
+                    selectedStatus() === option.value
+                  "
+                  type="button"
+                  (click)="$event.stopPropagation(); selectStatusOption(option.value)"
+                >
+                  <span class="filter-menu__option-main">
+                    <span
+                      class="filter-menu__tone"
+                      [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
+                      [class.filter-menu__tone--success]="option.tone === 'success'"
+                      [class.filter-menu__tone--accent]="option.tone === 'accent'"
+                      [class.filter-menu__tone--warning]="option.tone === 'warning'"
+                    ></span>
+                    <span>{{ option.label }}</span>
+                  </span>
+                  @if (selectedStatus() === option.value) {
+                    <span class="filter-menu__check" aria-hidden="true"></span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
 
         <button class="filter-action" type="button">Filtrer</button>
       </div>
@@ -68,10 +202,13 @@
         class="biens-toolbar__toggle"
         role="tablist"
         aria-label="Mode d'affichage des biens"
+        ubaxMorphTabs
+        ubaxMorphTabsItemSelector=".view-toggle"
       >
         <button
           class="view-toggle"
           [class.is-active]="viewMode() === 'grid'"
+          [class.view-toggle--active]="viewMode() === 'grid'"
           type="button"
           role="tab"
           aria-label="Vue grille"
@@ -89,6 +226,7 @@
         <button
           class="view-toggle"
           [class.is-active]="viewMode() === 'list'"
+          [class.view-toggle--active]="viewMode() === 'list'"
           type="button"
           role="tab"
           aria-label="Vue liste"
@@ -107,17 +245,21 @@
 
     @if (viewMode() === 'grid') {
       <div class="biens-grid">
-        @for (bien of visibleGridCards(); track bien.id) {
-          <a class="bien-card" [routerLink]="[bien.id]">
+        @for (bien of visibleGridCards(); track bien.id; let index = $index) {
+          <a
+            class="bien-card"
+            [routerLink]="[bien.id]"
+            [style.--bien-enter-order]="index"
+          >
             <img
               class="bien-card__image"
               [src]="bien.image"
               [alt]="bien.title"
-              loading="lazy"
+              [attr.loading]="index === 0 ? 'eager' : 'lazy'"
               decoding="async"
             />
 
-            <span class="bien-card__badge">Location</span>
+            <span class="bien-card__badge">{{ bien.category }}</span>
 
             <div class="bien-card__panel">
               <div class="bien-card__heading">
@@ -159,18 +301,22 @@
       </div>
     } @else {
       <div class="biens-list">
-        @for (bien of visibleListCards(); track bien.id) {
-          <a class="bien-list-card" [routerLink]="[bien.id]">
+        @for (bien of visibleListCards(); track bien.id; let index = $index) {
+          <a
+            class="bien-list-card"
+            [routerLink]="[bien.id]"
+            [style.--bien-enter-order]="index"
+          >
             <div class="bien-list-card__media">
               <img
                 class="bien-list-card__image"
                 [src]="bien.image"
                 [alt]="bien.title"
-                loading="lazy"
+                [attr.loading]="index === 0 ? 'eager' : 'lazy'"
                 decoding="async"
               />
 
-              <span class="bien-list-card__badge">Location</span>
+              <span class="bien-list-card__badge">{{ bien.category }}</span>
             </div>
 
             <div class="bien-list-card__content">
