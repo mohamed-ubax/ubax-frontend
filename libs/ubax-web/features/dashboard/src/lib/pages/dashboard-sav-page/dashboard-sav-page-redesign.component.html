@@ -1,0 +1,691 @@
+<div
+  class="dashboard-sav"
+  data-ubax-motion="page"
+  [class.is-transitioning-to-directory]="transitionPhase() === 'to-directory'"
+  [class.is-transitioning-to-dashboard]="transitionPhase() === 'to-dashboard'"
+>
+  <header class="dashboard-sav__hero">
+    <h1
+      class="dashboard-sav__title"
+      [class.is-phase-transitioning]="transitionPhase() !== 'idle'"
+    >{{ pageTitle() }}</h1>
+
+    <div class="toolbar-actions" data-ubax-motion="surface">
+      <label
+        class="toolbar-pill toolbar-pill--search"
+        aria-label="Recherche globale"
+      >
+        <input
+          class="toolbar-pill__input"
+          type="search"
+          placeholder="Recherche ..."
+          [ngModel]="toolbarSearchTerm()"
+          (ngModelChange)="updateToolbarSearchTerm($event)"
+        />
+
+        <span class="toolbar-pill__icon" aria-hidden="true">
+          <img [src]="sharedIcons.search" alt="" />
+        </span>
+      </label>
+
+      <p-datepicker
+        [ngModel]="toolbarSelectedDate()"
+        (ngModelChange)="updateToolbarSelectedDate($event)"
+        [showIcon]="true"
+        [showButtonBar]="true"
+        [readonlyInput]="true"
+        iconDisplay="button"
+        dateFormat="dd/mm/yy"
+        appendTo="body"
+        styleClass="toolbar-pill toolbar-pill--date"
+        inputStyleClass="toolbar-pill__input"
+        panelStyleClass="dashboard-sav-datepicker-panel"
+        todayButtonStyleClass="dashboard-sav-datepicker-panel__today"
+        clearButtonStyleClass="dashboard-sav-datepicker-panel__clear"
+        inputId="dashboard-sav-toolbar-date"
+        placeholder="Sélectionner une date"
+        ariaLabel="Sélectionner une date"
+      >
+        <ng-template #triggericon>
+          <img [src]="sharedIcons.date" alt="" />
+        </ng-template>
+      </p-datepicker>
+
+      <button
+        type="button"
+        class="toolbar-pill toolbar-pill--export"
+        (click)="exportDashboardData()"
+      >
+        <span class="toolbar-pill__label">Exporter les données</span>
+
+        <span class="toolbar-pill__icon" aria-hidden="true">
+          <img [src]="sharedIcons.export" alt="" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <section class="dashboard-sav__summary" data-ubax-motion="surface">
+    <div class="dashboard-sav__welcome">
+      <div class="dashboard-sav__welcome-copy">
+        <h2>Bonjour {{ userFullName() }} !</h2>
+        <p>
+          Consultez rapidement les indicateurs clés de votre agence et suivez
+          l’essentiel de votre activité en temps réel.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="dashboard-sav__add-technician"
+        (click)="openAddTech()"
+      >
+        <span>Ajouter un technicien</span>
+
+        <span class="dashboard-sav__add-technician-icon" aria-hidden="true">
+          <img [src]="heroAddTechnicianIcon" alt="" />
+        </span>
+      </button>
+    </div>
+
+    <section class="stats-grid" data-ubax-motion="surface">
+      @for (metric of statCards(); track metric.label) {
+        <article
+          class="stat-card"
+          [style.--stat-card-accent]="metric.accent"
+          [style.--stat-card-background]="metric.background"
+        >
+          <span class="stat-card__orb" aria-hidden="true">
+            <img class="stat-card__orb-bg" [src]="metric.orbSrc" alt="" />
+            <img class="stat-card__orb-icon" [src]="metric.iconSrc" alt="" />
+          </span>
+
+          <div class="stat-card__copy">
+            <p class="stat-card__label">{{ metric.label }}</p>
+            <p class="stat-card__value">{{ metric.value }}</p>
+          </div>
+        </article>
+      }
+    </section>
+  </section>
+
+  @if (showAllTechnicians()) {
+    <section
+      id="dashboard-sav-technician-directory"
+      class="technician-directory"
+      data-ubax-motion-skip
+    >
+      <header class="technician-directory__header">
+        <h2>Liste des techniciens</h2>
+
+        <div class="technician-directory__actions">
+          <label
+            class="technician-directory__search"
+            aria-label="Rechercher un technicien"
+          >
+            <img [src]="sharedIcons.search" alt="" />
+            <input
+              type="search"
+              placeholder="Rechercher"
+              [ngModel]="directorySearchTerm()"
+              (ngModelChange)="updateDirectorySearchTerm($event)"
+            />
+          </label>
+
+          <button
+            type="button"
+            class="technician-directory__collapse"
+            (click)="toggleTechnicians()"
+          >
+            Réduire
+          </button>
+        </div>
+      </header>
+
+      <div class="technician-directory__grid">
+        @if (filteredTechnicians().length) {
+          @for (
+            technician of filteredTechnicians();
+            track trackByTechnicianId($index, technician)
+          ) {
+            <article class="dashboard-tech-card dashboard-tech-card--directory">
+              <div class="dashboard-tech-card__top">
+                <img
+                  class="dashboard-tech-card__avatar"
+                  [src]="technician.image"
+                  [alt]="technician.name"
+                />
+
+                <div class="dashboard-tech-card__identity">
+                  <h3>{{ technician.name }}</h3>
+                  <p>{{ technician.specialty }}</p>
+                </div>
+              </div>
+
+              <div class="dashboard-tech-card__rating">
+                <div class="dashboard-tech-card__stars" aria-hidden="true">
+                  @for (star of ratingStars(technician.rating); track $index) {
+                    <img [src]="starIcons()[star]" alt="" />
+                  }
+                </div>
+                <span>{{ technician.rating }}</span>
+              </div>
+
+              <div class="dashboard-tech-card__meta">
+                <img [src]="technicianTicketIcon" alt="" />
+                <span>Ticket en cour : {{ technician.tickets }}</span>
+              </div>
+
+              <div class="dashboard-tech-card__footer">
+                <div class="dashboard-tech-card__phone">
+                  <img [src]="technicianPhoneIcon" alt="" />
+                  <span>{{ technician.phone }}</span>
+                </div>
+
+                <button type="button" class="dashboard-tech-card__button">
+                  Voir fiche
+                </button>
+              </div>
+            </article>
+          }
+        } @else {
+          <p class="technician-directory__empty">
+            Aucun technicien ne correspond à la recherche en cours.
+          </p>
+        }
+      </div>
+    </section>
+  } @else {
+    <div class="dashboard-sav__content-grid">
+      <article class="tickets-card" data-ubax-motion-skip>
+        <div class="tickets-card__filters">
+          <p-select
+            [options]="statusOptions"
+            [ngModel]="draftStatus()"
+            (ngModelChange)="draftStatus.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="tickets-filter"
+            panelStyleClass="tickets-filter-panel"
+            inputId="dashboard-sav-filter-status"
+            ariaLabel="Filtrer par statut"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="sharedIcons.chevron" alt="" />
+            </ng-template>
+          </p-select>
+
+          <p-select
+            [options]="priorityOptions"
+            [ngModel]="draftPriority()"
+            (ngModelChange)="draftPriority.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="tickets-filter"
+            panelStyleClass="tickets-filter-panel"
+            inputId="dashboard-sav-filter-priority"
+            ariaLabel="Filtrer par priorité"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="sharedIcons.chevron" alt="" />
+            </ng-template>
+          </p-select>
+
+          <p-select
+            [options]="issueOptions"
+            [ngModel]="draftIssue()"
+            (ngModelChange)="draftIssue.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="tickets-filter tickets-filter--wide"
+            panelStyleClass="tickets-filter-panel"
+            inputId="dashboard-sav-filter-issue"
+            ariaLabel="Filtrer par type de problème"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="sharedIcons.chevron" alt="" />
+            </ng-template>
+          </p-select>
+
+          <p-datepicker
+            [ngModel]="draftCreatedAt()"
+            (ngModelChange)="draftCreatedAt.set($event)"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [readonlyInput]="true"
+            iconDisplay="button"
+            dateFormat="dd/mm/yy"
+            appendTo="body"
+            styleClass="tickets-filter tickets-filter--date"
+            panelStyleClass="dashboard-sav-datepicker-panel"
+            todayButtonStyleClass="dashboard-sav-datepicker-panel__today"
+            clearButtonStyleClass="dashboard-sav-datepicker-panel__clear"
+            inputId="dashboard-sav-filter-date"
+            placeholder="Date"
+            ariaLabel="Filtrer par date"
+          >
+            <ng-template #triggericon>
+              <img [src]="sharedIcons.date" alt="" />
+            </ng-template>
+          </p-datepicker>
+
+          <button
+            type="button"
+            class="filter-submit"
+            (click)="applyTicketFilters()"
+          >
+            Filtrer
+          </button>
+        </div>
+
+        <div class="tickets-card__subheader">
+          <h2>Liste des tickets</h2>
+
+          <div class="tickets-card__subheader-actions">
+            <label
+              class="tickets-card__search"
+              aria-label="Rechercher un ticket"
+            >
+              <input
+                type="search"
+                placeholder="Rechercher"
+                [ngModel]="tableSearchTerm()"
+                (ngModelChange)="updateTableSearchTerm($event)"
+              />
+              <img [src]="sharedIcons.search" alt="" />
+            </label>
+
+            <button
+              type="button"
+              class="tickets-card__all"
+              (click)="clearTicketFilters()"
+            >
+              Tout voir
+            </button>
+          </div>
+        </div>
+
+        <div class="ticket-table">
+          @if (visibleTickets().length) {
+            <div class="ticket-table__scroll">
+              <div class="ticket-table__head">
+                <span>ID Ticket</span>
+                <span>Client</span>
+                <span>Biens concernés</span>
+                <span>Problème</span>
+                <span>Priorité</span>
+                <span>Crée le</span>
+                <span>Statut</span>
+                <span>Détails</span>
+              </div>
+
+              <div class="ticket-table__body">
+                @for (
+                  ticket of paginatedTickets();
+                  track trackByTicketId($index, ticket)
+                ) {
+                  <div class="ticket-row">
+                    <span class="ticket-row__id">{{ ticket.id }}</span>
+
+                    <div class="ticket-row__client">
+                      <img [src]="ticket.avatar" [alt]="ticket.client" />
+                      <span>{{ ticket.client }}</span>
+                    </div>
+
+                    <span>{{ ticket.property }}</span>
+                    <span>{{ ticket.issue }}</span>
+
+                    <span
+                      class="ticket-row__priority"
+                      [class.ticket-row__priority--urgent]="
+                        ticket.priorityTone === 'urgent'
+                      "
+                    >
+                      {{ ticket.priority }}
+                    </span>
+
+                    <span>{{ ticket.createdAtLabel }}</span>
+
+                    <span
+                      class="ticket-row__status"
+                      [class.ticket-row__status--open]="
+                        ticket.statusTone === 'open'
+                      "
+                      [class.ticket-row__status--progress]="
+                        ticket.statusTone === 'progress'
+                      "
+                      [class.ticket-row__status--success]="
+                        ticket.statusTone === 'success'
+                      "
+                    >
+                      {{ ticket.status }}
+                    </span>
+
+                    <button type="button" class="ticket-row__action">
+                      Détails
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <footer class="tickets-card__footer">
+              <p class="tickets-card__results">{{ ticketResultsLabel() }}</p>
+
+              <ubax-paginator
+                [(currentPage)]="ticketsCurrentPage"
+                [totalPages]="ticketTotalPages()"
+              />
+            </footer>
+          } @else {
+            <div class="ticket-table__empty">
+              Aucun ticket ne correspond aux filtres en cours.
+            </div>
+          }
+        </div>
+      </article>
+
+      <aside
+        class="notifications-card"
+        data-ubax-motion-skip
+        aria-labelledby="dashboard-sav-notifications-title"
+      >
+        <header class="notifications-card__header">
+          <h2 id="dashboard-sav-notifications-title">Derniers notifications</h2>
+
+          @if (canToggleNotifications()) {
+            <button
+              type="button"
+              class="notifications-card__toggle"
+              (click)="toggleNotifications()"
+            >
+              {{ notificationToggleLabel() }}
+            </button>
+          }
+        </header>
+
+        <div class="notifications-card__list">
+          @if (displayedNotifications().length) {
+            @for (
+              item of displayedNotifications();
+              track trackByNotificationId($index, item)
+            ) {
+              <article class="notification-item">
+                <span class="notification-item__media" aria-hidden="true">
+                  <img
+                    class="notification-item__media-bg"
+                    [src]="item.iconBackground"
+                    alt=""
+                  />
+                  <img
+                    class="notification-item__media-icon"
+                    [src]="item.iconSrc"
+                    alt=""
+                  />
+                </span>
+
+                <div class="notification-item__copy">
+                  <div class="notification-item__headline">
+                    <h3 [style.color]="item.accent">{{ item.title }}</h3>
+                    <span>{{ item.ticketId }}</span>
+                  </div>
+
+                  <p>{{ item.property }}</p>
+                  <small>{{ item.time }}</small>
+                </div>
+              </article>
+            }
+          } @else {
+            <p class="notifications-card__empty">
+              Aucune notification pour cette sélection.
+            </p>
+          }
+        </div>
+      </aside>
+    </div>
+
+    <div class="dashboard-sav__bottom-grid">
+      <article class="interventions-card" data-ubax-motion-skip>
+        <header class="interventions-card__header">
+          <h2>Les interventions</h2>
+
+          <p-select
+            [options]="interventionPeriodOptions"
+            [ngModel]="selectedInterventionPeriod()"
+            (ngModelChange)="selectInterventionPeriod($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="interventions-period-select"
+            panelStyleClass="tickets-filter-panel"
+            inputId="dashboard-sav-interventions-period"
+            ariaLabel="Choisir la période des interventions"
+          >
+            <ng-template #dropdownicon>
+              <img [src]="sharedIcons.chevron" alt="" />
+            </ng-template>
+          </p-select>
+        </header>
+
+        <div class="interventions-card__chart">
+          <ubax-lazy-chart
+            type="doughnut"
+            [data]="interventionsChartData()"
+            [options]="interventionsChartOptions"
+            ariaLabel="Répartition des interventions"
+          />
+
+          <div class="interventions-card__chart-center">
+            <span>Total</span>
+            <strong>{{ interventionsTotal() }}</strong>
+          </div>
+        </div>
+
+        <div class="interventions-card__legend">
+          @for (item of interventionLegend(); track item.label) {
+            <div class="interventions-card__legend-item">
+              <span
+                class="interventions-card__legend-dot"
+                [style.background]="item.color"
+              ></span>
+              <span class="interventions-card__legend-label">{{
+                item.label
+              }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="technicians-card" data-ubax-motion-skip>
+        <header class="technicians-card__header">
+          <h2>Technicien en activité</h2>
+
+          @if (canToggleTechnicians()) {
+            <button
+              type="button"
+              class="technicians-card__toggle"
+              (click)="toggleTechnicians()"
+            >
+              {{ technicianToggleLabel() }}
+            </button>
+          }
+        </header>
+
+        <div class="technicians-card__grid">
+          @if (displayedTechnicians().length) {
+            @for (
+              technician of displayedTechnicians();
+              track trackByTechnicianId($index, technician)
+            ) {
+              <article class="dashboard-tech-card">
+                <div class="dashboard-tech-card__top">
+                  <img
+                    class="dashboard-tech-card__avatar"
+                    [src]="technician.image"
+                    [alt]="technician.name"
+                  />
+
+                  <div class="dashboard-tech-card__identity">
+                    <h3>{{ technician.name }}</h3>
+                    <p>{{ technician.specialty }}</p>
+                  </div>
+                </div>
+
+                <div class="dashboard-tech-card__rating">
+                  <div class="dashboard-tech-card__stars" aria-hidden="true">
+                    @for (
+                      star of ratingStars(technician.rating);
+                      track $index
+                    ) {
+                      <img [src]="starIcons()[star]" alt="" />
+                    }
+                  </div>
+                  <span>{{ technician.rating }}</span>
+                </div>
+
+                <div class="dashboard-tech-card__meta">
+                  <img [src]="technicianTicketIcon" alt="" />
+                  <span>Ticket en cour : {{ technician.tickets }}</span>
+                </div>
+
+                <div class="dashboard-tech-card__footer">
+                  <div class="dashboard-tech-card__phone">
+                    <img [src]="technicianPhoneIcon" alt="" />
+                    <span>{{ technician.phone }}</span>
+                  </div>
+
+                  <button type="button" class="dashboard-tech-card__button">
+                    Voir fiche
+                  </button>
+                </div>
+              </article>
+            }
+          } @else {
+            <p class="technicians-card__empty">
+              Aucun technicien ne correspond à la recherche en cours.
+            </p>
+          }
+        </div>
+      </article>
+    </div>
+  }
+</div>
+
+@if (addTechOpen()) {
+  <div
+    class="at-overlay"
+    [class.is-closing]="addTechClosing()"
+    (click)="closeAddTech()"
+  ></div>
+
+  <div
+    class="at-modal"
+    [class.is-closing]="addTechClosing()"
+    (click)="stopPropagation($event)"
+  >
+    <div class="at-header">
+      <h2 class="at-title">Ajouter un technicien</h2>
+      <button class="at-close" (click)="closeAddTech()">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+
+    <div class="at-body">
+      <div class="at-photo">
+        <div class="at-photo__circle">
+          {{ (newPrenom() || 'T').slice(0, 1) }}
+        </div>
+        <button class="at-photo__link" type="button">Modifier la photo</button>
+      </div>
+
+      <div class="at-form">
+        <div class="at-field">
+          <label class="at-label" for="dashboard-sav-new-prenom">Prénom</label>
+          <input
+            id="dashboard-sav-new-prenom"
+            class="at-input"
+            type="text"
+            placeholder="Prénom"
+            [value]="newPrenom()"
+            (input)="newPrenom.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="at-field">
+          <label class="at-label" for="dashboard-sav-new-nom">Nom</label>
+          <input
+            id="dashboard-sav-new-nom"
+            class="at-input"
+            type="text"
+            placeholder="Nom"
+            [value]="newNom()"
+            (input)="newNom.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="at-field">
+          <label class="at-label" for="dashboard-sav-new-phone"
+            >Numéro de téléphone</label
+          >
+          <input
+            id="dashboard-sav-new-phone"
+            class="at-input"
+            type="tel"
+            placeholder="+225 07 XX XX XX XX"
+            [value]="newPhone()"
+            (input)="newPhone.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="at-field">
+          <label class="at-label" for="dashboard-sav-new-specialty"
+            >Domaine de compétence</label
+          >
+          <div class="at-select">
+            <select
+              id="dashboard-sav-new-specialty"
+              [value]="newSpecialty()"
+              (change)="newSpecialty.set($any($event.target).value)"
+            >
+              @for (specialty of specialties; track specialty) {
+                <option [value]="specialty">{{ specialty }}</option>
+              }
+            </select>
+            <span aria-hidden="true">⌄</span>
+          </div>
+        </div>
+
+        <div class="at-field at-field--full">
+          <label class="at-label" for="dashboard-sav-new-payment"
+            >Moyen de paiement souhaité</label
+          >
+          <div class="at-select">
+            <select
+              id="dashboard-sav-new-payment"
+              [value]="newPayment()"
+              (change)="newPayment.set($any($event.target).value)"
+            >
+              @for (paymentMethod of paymentMethods; track paymentMethod) {
+                <option [value]="paymentMethod">{{ paymentMethod }}</option>
+              }
+            </select>
+            <span aria-hidden="true">⌄</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="at-footer">
+      <button class="at-btn at-btn--cancel" (click)="closeAddTech()">
+        Annuler
+      </button>
+      <button class="at-btn at-btn--save" (click)="saveTech()">
+        Enregistrer
+      </button>
+    </div>
+  </div>
+}

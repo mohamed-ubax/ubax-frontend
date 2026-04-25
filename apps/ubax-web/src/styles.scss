@@ -254,3 +254,206 @@ body
     transform: none !important;
   }
 }
+
+.dashboard-sav .technician-directory {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 37px 36px 24px;
+  border-radius: 20px;
+  background: var(--ubax-surface);
+  box-shadow: var(--ubax-shadow-figma-soft);
+}
+
+.dashboard-sav .technician-directory__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.dashboard-sav .technician-directory__header h2 {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--ubax-navy);
+}
+
+.dashboard-sav .technician-directory__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dashboard-sav .technician-directory__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 213px;
+  height: 56px;
+  padding: 0 18px 0 16px;
+  border-radius: 30px;
+  background: var(--ubax-page-bg);
+}
+
+.dashboard-sav .technician-directory__search input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--ubax-text-primary);
+  outline: none;
+}
+
+.dashboard-sav .technician-directory__search img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.dashboard-sav .technician-directory__collapse {
+  height: 56px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 28px;
+  background: var(--ubax-navy);
+  color: var(--ubax-surface);
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.dashboard-sav .technician-directory__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 23px;
+}
+
+.dashboard-sav .technician-directory__empty {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ubax-text-muted);
+}
+
+.dashboard-sav .dashboard-tech-card--directory {
+  position: relative;
+  min-height: 456px;
+  padding: 111px 22px 18px;
+  border-radius: 25px;
+  overflow: visible;
+}
+
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__top {
+  display: block;
+}
+
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__avatar {
+  position: absolute;
+  top: -33px;
+  left: 50%;
+  width: 147px;
+  height: 147px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 8px var(--ubax-surface);
+}
+
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__identity {
+  align-items: center;
+  gap: 0;
+}
+
+.dashboard-sav
+  .dashboard-tech-card--directory
+  .dashboard-tech-card__identity
+  h3,
+.dashboard-sav
+  .dashboard-tech-card--directory
+  .dashboard-tech-card__identity
+  p {
+  text-align: center;
+}
+
+.dashboard-sav
+  .dashboard-tech-card--directory
+  .dashboard-tech-card__identity
+  p {
+  font-size: 12px;
+}
+
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__rating,
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__meta {
+  justify-content: center;
+}
+
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__meta {
+  font-size: 10px;
+}
+
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__footer {
+  padding-top: 12px;
+}
+
+.dashboard-sav .dashboard-tech-card--directory .dashboard-tech-card__button {
+  width: 96px;
+  min-width: 96px;
+}
+
+@media (max-width: 1440px) {
+  .dashboard-sav .technician-directory__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .dashboard-sav .technician-directory__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-sav .technician-directory__actions {
+    justify-content: space-between;
+  }
+
+  .dashboard-sav .technician-directory__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-sav .technician-directory {
+    padding-inline: 20px;
+  }
+
+  .dashboard-sav .technician-directory__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-sav .technician-directory__search,
+  .dashboard-sav .technician-directory__collapse {
+    width: 100%;
+  }
+
+  .dashboard-sav .technician-directory__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-sav .dashboard-tech-card--directory {
+    padding-inline: 18px;
+  }
+}

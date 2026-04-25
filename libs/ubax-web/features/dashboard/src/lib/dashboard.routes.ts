@@ -39,9 +39,9 @@ export const dashboardRoutes: Route[] = [
     path: '',
     canMatch: [forRole(Role.SAV)],
     loadComponent: () =>
-      import('./pages/dashboard-sav-page/dashboard-sav-page.component').then(
-        (m) => m.DashboardSavPageComponent,
-      ),
+      import(
+        './pages/dashboard-sav-page/dashboard-sav-page-redesign.component'
+      ).then((m) => m.DashboardSavPageComponent),
   },
   {
     path: '',
