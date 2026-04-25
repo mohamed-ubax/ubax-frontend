@@ -661,6 +661,9 @@ export class DashboardSavPageComponent {
   readonly ticketsCurrentPage = signal(1);
   readonly showAllNotifications = signal(false);
   readonly showAllTechnicians = signal(false);
+  readonly transitionPhase = signal<'idle' | 'to-directory' | 'to-dashboard'>(
+    'idle',
+  );
   readonly selectedInterventionPeriod =
     signal<DashboardSavInterventionPeriod>('current-month');
 
@@ -1131,15 +1134,27 @@ export class DashboardSavPageComponent {
   }
 
   toggleTechnicians(): void {
-    const nextValue = !this.showAllTechnicians();
-    this.showAllTechnicians.set(nextValue);
-
-    if (nextValue) {
-      this.scrollToTechnicianDirectory();
+    if (this.transitionPhase() !== 'idle') {
       return;
     }
 
-    this.directorySearchTerm.set('');
+    const nextValue = !this.showAllTechnicians();
+
+    if (nextValue) {
+      this.transitionPhase.set('to-directory');
+      setTimeout(() => {
+        this.showAllTechnicians.set(true);
+        this.transitionPhase.set('idle');
+        this.scrollToTechnicianDirectory();
+      }, 260);
+    } else {
+      this.transitionPhase.set('to-dashboard');
+      setTimeout(() => {
+        this.showAllTechnicians.set(false);
+        this.directorySearchTerm.set('');
+        this.transitionPhase.set('idle');
+      }, 260);
+    }
   }
 
   selectInterventionPeriod(period: DashboardSavInterventionPeriod): void {

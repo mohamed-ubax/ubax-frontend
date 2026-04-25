@@ -1,6 +1,14 @@
-<div class="dashboard-sav" data-ubax-motion="page">
+<div
+  class="dashboard-sav"
+  data-ubax-motion="page"
+  [class.is-transitioning-to-directory]="transitionPhase() === 'to-directory'"
+  [class.is-transitioning-to-dashboard]="transitionPhase() === 'to-dashboard'"
+>
   <header class="dashboard-sav__hero">
-    <h1 class="dashboard-sav__title">{{ pageTitle() }}</h1>
+    <h1
+      class="dashboard-sav__title"
+      [class.is-phase-transitioning]="transitionPhase() !== 'idle'"
+    >{{ pageTitle() }}</h1>
 
     <div class="toolbar-actions" data-ubax-motion="surface">
       <label

@@ -22,6 +22,11 @@
     font-weight: 600;
     line-height: 1.2;
     color: var(--ubax-text-primary);
+    transition: opacity 130ms ease;
+
+    &.is-phase-transitioning {
+      opacity: 0.12;
+    }
   }
 
   &__summary {
@@ -117,6 +122,7 @@
     grid-template-columns: minmax(0, 1fr) 423px;
     gap: 19px;
     align-items: stretch;
+    animation: phaseEnter 400ms var(--ubax-motion-ease-soft) both;
   }
 
   &__bottom-grid {
@@ -124,6 +130,7 @@
     grid-template-columns: 535px minmax(0, 1fr);
     gap: 19px;
     align-items: stretch;
+    animation: phaseEnter 400ms var(--ubax-motion-ease-soft) 55ms both;
   }
 }
 
@@ -982,6 +989,7 @@ label.toolbar-pill {
   background: var(--ubax-surface);
   box-shadow: var(--ubax-shadow-figma-soft);
   padding: 23px 34px 24px;
+  animation: phaseEnter 480ms var(--ubax-motion-ease-soft) both;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -1301,12 +1309,43 @@ label.toolbar-pill {
   font-family: 'Lexend', sans-serif;
 }
 
-.at-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(8, 18, 31, 0.48);
+// ── Phase transition keyframes ─────────────────────────────────────────────
+
+@keyframes phaseEnter {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.965);
+  }
 }
+
+@keyframes phaseExitUp {
+  to {
+    opacity: 0;
+    transform: translateY(-22px) scale(0.978);
+  }
+}
+
+@keyframes phaseExitDown {
+  to {
+    opacity: 0;
+    transform: translateY(30px) scale(0.978);
+  }
+}
+
+// Exit: going to directory — dashboard content slides up and fades
+.dashboard-sav.is-transitioning-to-directory .dashboard-sav__content-grid,
+.dashboard-sav.is-transitioning-to-directory .dashboard-sav__bottom-grid {
+  animation: phaseExitUp 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+// Exit: going back to dashboard — directory slides down and fades
+.dashboard-sav.is-transitioning-to-dashboard .technician-directory {
+  animation: phaseExitDown 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+// ── Modal overlay & animations ─────────────────────────────────────────────
 
 @keyframes overlayIn {
   from {
@@ -1353,6 +1392,10 @@ label.toolbar-pill {
 }
 
 .at-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(8, 18, 31, 0.48);
   animation: overlayIn 0.2s ease forwards;
 
   &.is-closing {
