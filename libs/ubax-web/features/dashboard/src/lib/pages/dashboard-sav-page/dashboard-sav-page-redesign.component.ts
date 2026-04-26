@@ -687,6 +687,8 @@ export class DashboardSavPageComponent {
   readonly newPhone = signal('');
   readonly newSpecialty = signal('Plomberie & sanitaires');
   readonly newPayment = signal('Espèces');
+  readonly newPhotoUrl = signal<string | null>(null);
+  private photoObjectUrl: string | null = null;
 
   readonly specialties = [
     'Plomberie & sanitaires',
@@ -736,9 +738,9 @@ export class DashboardSavPageComponent {
 
   readonly interventionPeriodOptions: DashboardSavSelectOption<DashboardSavInterventionPeriod>[] =
     [
-      { label: 'mois en cour', value: 'current-month' },
-      { label: 'trimestre', value: 'quarter' },
-      { label: 'année', value: 'year' },
+      { label: 'Mois en cours', value: 'current-month' },
+      { label: 'Trimestre', value: 'quarter' },
+      { label: 'Année', value: 'year' },
     ];
 
   readonly scopedTickets = computed(() => {
@@ -949,7 +951,7 @@ export class DashboardSavPageComponent {
     const snapshot = this.selectedInterventionSnapshot();
 
     return {
-      labels: ['en attente', 'en cour', 'Terminés'],
+      labels: ['En attente', 'En cours', 'Terminés'],
       datasets: [
         {
           data: [snapshot.pending, snapshot.progress, snapshot.completed],
@@ -969,7 +971,7 @@ export class DashboardSavPageComponent {
     animation: false,
     rotation: -90,
     circumference: 180,
-    cutout: '76%',
+    cutout: '75%',
     plugins: {
       legend: {
         display: false,
@@ -985,12 +987,12 @@ export class DashboardSavPageComponent {
 
     return [
       {
-        label: 'en attente',
+        label: 'En attente',
         count: snapshot.pending,
         color: '#008bff',
       },
       {
-        label: 'en cour',
+        label: 'En cours',
         count: snapshot.progress,
         color: '#e87d1e',
       },
@@ -1027,14 +1029,39 @@ export class DashboardSavPageComponent {
 
   openAddTech(): void {
     this.addTechOpen.set(true);
+    this.document.body.style.setProperty('overflow', 'hidden');
   }
 
   closeAddTech(): void {
     this.addTechClosing.set(true);
+    this.document.body.style.removeProperty('overflow');
     setTimeout(() => {
       this.addTechOpen.set(false);
       this.addTechClosing.set(false);
+      this.resetPhotoState();
     }, 220);
+  }
+
+  handlePhotoChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const defaultView = this.document.defaultView;
+
+    if (!defaultView) {
+      return;
+    }
+
+    if (this.photoObjectUrl) {
+      defaultView.URL.revokeObjectURL(this.photoObjectUrl);
+    }
+
+    this.photoObjectUrl = defaultView.URL.createObjectURL(file);
+    this.newPhotoUrl.set(this.photoObjectUrl);
   }
 
   saveTech(): void {
@@ -1051,6 +1078,11 @@ export class DashboardSavPageComponent {
     const id = `UBX-TECH-${String(nextIndex).padStart(3, '0')}`;
     const name = `${prenom} ${nom}`;
     const initials = `${prenom[0] ?? ''}${nom[0] ?? ''}`.toUpperCase();
+    const image =
+      this.newPhotoUrl() ??
+      dashboardSavAsset(
+        `technicians/avatar-${String(avatarIndex).padStart(2, '0')}.webp`,
+      );
 
     this.technicians.update((technicians) => [
       {
@@ -1062,9 +1094,7 @@ export class DashboardSavPageComponent {
         tickets: 0,
         phone,
         color: 'var(--ubax-navy)',
-        image: dashboardSavAsset(
-          `technicians/avatar-${String(avatarIndex).padStart(2, '0')}.webp`,
-        ),
+        image,
       },
       ...technicians,
     ]);
@@ -1074,7 +1104,20 @@ export class DashboardSavPageComponent {
     this.newPhone.set('');
     this.newSpecialty.set('Plomberie & sanitaires');
     this.newPayment.set('Espèces');
+    this.photoObjectUrl = null;
+    this.newPhotoUrl.set(null);
     this.closeAddTech();
+  }
+
+  private resetPhotoState(): void {
+    const defaultView = this.document.defaultView;
+
+    if (this.photoObjectUrl && defaultView) {
+      defaultView.URL.revokeObjectURL(this.photoObjectUrl);
+    }
+
+    this.photoObjectUrl = null;
+    this.newPhotoUrl.set(null);
   }
 
   stopPropagation(event: MouseEvent): void {

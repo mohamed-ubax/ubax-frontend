@@ -8,7 +8,9 @@
     <h1
       class="dashboard-sav__title"
       [class.is-phase-transitioning]="transitionPhase() !== 'idle'"
-    >{{ pageTitle() }}</h1>
+    >
+      {{ pageTitle() }}
+    </h1>
 
     <div class="toolbar-actions" data-ubax-motion="surface">
       <label
@@ -433,8 +435,10 @@
                     <span>{{ item.ticketId }}</span>
                   </div>
 
-                  <p>{{ item.property }}</p>
-                  <small>{{ item.time }}</small>
+                  <div class="notification-item__subline">
+                    <p>{{ item.property }}</p>
+                    <small>{{ item.time }}</small>
+                  </div>
                 </div>
               </article>
             }
@@ -588,6 +592,7 @@
     (click)="stopPropagation($event)"
   >
     <div class="at-header">
+      <span aria-hidden="true"></span>
       <h2 class="at-title">Ajouter un technicien</h2>
       <button class="at-close" (click)="closeAddTech()">
         <span aria-hidden="true">×</span>
@@ -596,10 +601,21 @@
 
     <div class="at-body">
       <div class="at-photo">
-        <div class="at-photo__circle">
-          {{ (newPrenom() || 'T').slice(0, 1) }}
-        </div>
-        <button class="at-photo__link" type="button">Modifier la photo</button>
+        <label class="at-photo__circle" for="at-photo-input">
+          @if (newPhotoUrl()) {
+            <img [src]="newPhotoUrl()!" class="at-photo__preview" alt="" />
+          } @else {
+            {{ (newPrenom() || 'T').slice(0, 1) }}
+          }
+        </label>
+        <input
+          id="at-photo-input"
+          class="at-photo__input"
+          type="file"
+          accept="image/*"
+          (change)="handlePhotoChange($event)"
+        />
+        <label class="at-photo__link" for="at-photo-input">Modifier la photo</label>
       </div>
 
       <div class="at-form">
@@ -631,14 +647,17 @@
           <label class="at-label" for="dashboard-sav-new-phone"
             >Numéro de téléphone</label
           >
-          <input
-            id="dashboard-sav-new-phone"
-            class="at-input"
-            type="tel"
-            placeholder="+225 07 XX XX XX XX"
-            [value]="newPhone()"
-            (input)="newPhone.set($any($event.target).value)"
-          />
+          <div class="at-phone">
+            <span class="at-phone__flag" aria-hidden="true">🇨🇮</span>
+            <input
+              id="dashboard-sav-new-phone"
+              class="at-phone__input"
+              type="tel"
+              placeholder="+225 07 XX XX XX XX"
+              [value]="newPhone()"
+              (input)="newPhone.set($any($event.target).value)"
+            />
+          </div>
         </div>
 
         <div class="at-field">
