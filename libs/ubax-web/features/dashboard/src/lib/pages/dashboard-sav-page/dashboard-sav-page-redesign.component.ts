@@ -736,9 +736,9 @@ export class DashboardSavPageComponent {
 
   readonly interventionPeriodOptions: DashboardSavSelectOption<DashboardSavInterventionPeriod>[] =
     [
-      { label: 'mois en cour', value: 'current-month' },
-      { label: 'trimestre', value: 'quarter' },
-      { label: 'année', value: 'year' },
+      { label: 'Mois en cours', value: 'current-month' },
+      { label: 'Trimestre', value: 'quarter' },
+      { label: 'Année', value: 'year' },
     ];
 
   readonly scopedTickets = computed(() => {
@@ -949,7 +949,7 @@ export class DashboardSavPageComponent {
     const snapshot = this.selectedInterventionSnapshot();
 
     return {
-      labels: ['en attente', 'en cour', 'Terminés'],
+      labels: ['En attente', 'En cours', 'Terminés'],
       datasets: [
         {
           data: [snapshot.pending, snapshot.progress, snapshot.completed],
@@ -969,7 +969,7 @@ export class DashboardSavPageComponent {
     animation: false,
     rotation: -90,
     circumference: 180,
-    cutout: '76%',
+    cutout: '75%',
     plugins: {
       legend: {
         display: false,
@@ -985,12 +985,12 @@ export class DashboardSavPageComponent {
 
     return [
       {
-        label: 'en attente',
+        label: 'En attente',
         count: snapshot.pending,
         color: '#008bff',
       },
       {
-        label: 'en cour',
+        label: 'En cours',
         count: snapshot.progress,
         color: '#e87d1e',
       },
