@@ -1006,7 +1006,7 @@ label.toolbar-pill {
   border-radius: 20px;
   background: var(--ubax-surface);
   box-shadow: var(--ubax-shadow-figma-soft);
-  padding: 30px 36px 34px;
+  padding: 41px 36px 34px;
   animation: phaseEnter 480ms var(--ubax-motion-ease-soft) both;
   display: flex;
   flex-direction: column;
@@ -1018,6 +1018,7 @@ label.toolbar-pill {
     justify-content: space-between;
     gap: 18px;
     padding-bottom: 0;
+    border-bottom: none;
 
     h2 {
       margin: 0;
@@ -1040,17 +1041,17 @@ label.toolbar-pill {
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    width: 220px;
-    height: 47px;
-    padding: 0 14px 0 16px;
-    border: 1px solid #f1f1f1;
-    border-radius: 5px;
+    width: 213px;
+    height: 56px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 28px;
     background: var(--ubax-page-bg);
     cursor: text;
 
     img {
-      width: 26px;
-      height: 26px;
+      width: 18px;
+      height: 18px;
       object-fit: contain;
       flex-shrink: 0;
     }
@@ -1062,7 +1063,7 @@ label.toolbar-pill {
       background: transparent;
       padding: 0;
       font-family: 'Lexend', sans-serif;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 300;
       line-height: 1.2;
       color: var(--ubax-text-primary);
@@ -1077,10 +1078,10 @@ label.toolbar-pill {
   }
 
   &__collapse {
-    width: 143px;
-    height: 47px;
+    height: 56px;
+    padding: 0 28px;
     border: none;
-    border-radius: 5px;
+    border-radius: 28px;
     background: var(--ubax-accent);
     color: var(--ubax-surface);
     font-family: 'Lexend', sans-serif;
@@ -1088,18 +1089,20 @@ label.toolbar-pill {
     font-weight: 400;
     line-height: 1.2;
     cursor: pointer;
+    white-space: nowrap;
   }
 
   &__grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 362px));
     justify-content: space-between;
-    gap: 84px 23px;
-    padding: 24px 8px 0 9px;
+    gap: 108px 23px;
+    padding: 130px 0 0;
     align-content: start;
   }
 
   &__empty {
+    grid-column: 1 / -1;
     margin: 0;
     padding: 40px 0;
     font-family: 'Lexend', sans-serif;
@@ -1332,8 +1335,8 @@ label.toolbar-pill {
     row-gap: 0;
     width: 100%;
     max-width: 362px;
-    min-height: 322px;
-    padding: 0 22px 20px;
+    min-height: 321px;
+    padding: 0 24px 20px;
     border-radius: 25px;
     background: var(--ubax-page-bg);
     overflow: visible;
@@ -1355,10 +1358,11 @@ label.toolbar-pill {
     .dashboard-tech-card__avatar {
       width: 147px;
       height: 147px;
-      border: 6px solid var(--ubax-surface);
+      border: 4px solid var(--ubax-surface);
       margin: 0 0 22px;
       grid-column: auto;
       grid-row: auto;
+      align-self: center;
       justify-self: center;
       box-shadow: none;
       position: static;
@@ -1368,14 +1372,15 @@ label.toolbar-pill {
     .dashboard-tech-card__identity {
       grid-column: auto;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0;
+      gap: 4px;
       width: 100%;
-      max-width: 256px;
 
       h3,
       p {
+        margin: 0;
         line-height: 28px;
         text-align: center;
       }
@@ -1383,11 +1388,13 @@ label.toolbar-pill {
       h3 {
         font-size: 15px;
         font-weight: 500;
+        color: var(--ubax-navy);
       }
 
       p {
         font-size: 12px;
         font-weight: 300;
+        color: var(--ubax-accent);
       }
     }
 
@@ -1438,21 +1445,30 @@ label.toolbar-pill {
     .dashboard-tech-card__footer {
       grid-area: footer;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       margin-top: 22px;
       padding-top: 16px;
       border-top: 1px solid var(--ubax-ring-neutral);
     }
 
     .dashboard-tech-card__phone {
-      gap: 8px;
+      gap: 6px;
       font-size: 14px;
       font-weight: 400;
       line-height: 28px;
+      color: #222;
+      flex: 1 1 auto;
+      min-width: 0;
 
       img {
-        width: 18px;
-        height: 18px;
+        width: 12px;
+        height: 12px;
+      }
+
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
 
@@ -1466,6 +1482,7 @@ label.toolbar-pill {
       font-size: 11px;
       font-weight: 400;
       line-height: 28px;
+      flex-shrink: 0;
     }
   }
 }
