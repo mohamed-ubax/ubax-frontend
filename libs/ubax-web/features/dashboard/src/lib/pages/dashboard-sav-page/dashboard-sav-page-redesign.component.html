@@ -8,7 +8,9 @@
     <h1
       class="dashboard-sav__title"
       [class.is-phase-transitioning]="transitionPhase() !== 'idle'"
-    >{{ pageTitle() }}</h1>
+    >
+      {{ pageTitle() }}
+    </h1>
 
     <div class="toolbar-actions" data-ubax-motion="surface">
       <label
@@ -433,8 +435,10 @@
                     <span>{{ item.ticketId }}</span>
                   </div>
 
-                  <p>{{ item.property }}</p>
-                  <small>{{ item.time }}</small>
+                  <div class="notification-item__subline">
+                    <p>{{ item.property }}</p>
+                    <small>{{ item.time }}</small>
+                  </div>
                 </div>
               </article>
             }

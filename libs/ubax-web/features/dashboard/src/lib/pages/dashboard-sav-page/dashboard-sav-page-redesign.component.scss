@@ -281,7 +281,7 @@ label.toolbar-pill {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
+  gap: 26px;
 }
 
 .stat-card {
@@ -608,7 +608,7 @@ label.toolbar-pill {
 }
 
 .ticket-row {
-  min-height: 49px;
+  min-height: 60px;
   padding: 0 16px;
   border-bottom: 1px solid var(--ubax-ring-neutral);
 
@@ -746,10 +746,10 @@ label.toolbar-pill {
 
 .notification-item {
   display: flex;
-  align-items: center;
-  gap: 19px;
+  align-items: flex-start;
+  gap: 16px;
   min-height: 73px;
-  padding: 12px 18px 12px 18px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--ubax-ring-neutral);
 
   &:first-child {
@@ -784,14 +784,14 @@ label.toolbar-pill {
   &__copy {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 6px;
     min-width: 0;
     width: 100%;
   }
 
   &__headline {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
 
@@ -799,38 +799,52 @@ label.toolbar-pill {
     span {
       margin: 0;
       font-family: 'Lexend', sans-serif;
-      font-size: 13px;
-      line-height: 1.2;
+      line-height: 1.25;
     }
 
     h3 {
+      font-size: 1rem;
       font-weight: 500;
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
     span {
+      font-size: 0.875rem;
       font-weight: 500;
       color: var(--ubax-accent);
       white-space: nowrap;
     }
   }
 
+  &__subline {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
   p,
   small {
     margin: 0;
     font-family: 'Lexend', sans-serif;
-    line-height: 1.2;
+    line-height: 1.25;
     color: var(--ubax-text-primary);
   }
 
   p {
-    font-size: 13px;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 1rem;
     font-weight: 300;
   }
 
   small {
-    font-size: 10px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
     font-weight: 300;
     color: var(--ubax-text-muted);
+    white-space: nowrap;
   }
 }
 
@@ -845,7 +859,8 @@ label.toolbar-pill {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 20px 20px 19px 35px;
+    padding: 23px 34px 22px;
+    border-bottom: 1px solid var(--ubax-ring-neutral);
 
     h2 {
       margin: 0;
@@ -860,7 +875,7 @@ label.toolbar-pill {
   &__chart {
     position: relative;
     height: 300px;
-    padding: 0 30px;
+    padding: 0 30px 0;
 
     ::ng-deep .p-chart {
       width: 100%;
@@ -871,7 +886,7 @@ label.toolbar-pill {
   &__chart-center {
     position: absolute;
     left: 50%;
-    top: 100%;
+    top: 90%;
     transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
@@ -1151,16 +1166,16 @@ label.toolbar-pill {
 .dashboard-tech-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   min-height: 173px;
-  padding: 13px 14px 10px 16px;
+  padding: 14px 16px 12px;
   border-radius: 10px;
   background: var(--ubax-page-bg);
 
   &__top {
     display: flex;
     align-items: flex-start;
-    gap: 14px;
+    gap: 16px;
   }
 
   &__avatar {
@@ -1174,24 +1189,24 @@ label.toolbar-pill {
   &__identity {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 4px;
     min-width: 0;
 
     h3,
     p {
       margin: 0;
       font-family: 'Lexend', sans-serif;
-      line-height: 28px;
+      line-height: 1.25;
     }
 
     h3 {
-      font-size: 15px;
+      font-size: 1rem;
       font-weight: 500;
       color: var(--ubax-navy);
     }
 
     p {
-      font-size: 11px;
+      font-size: 1rem;
       font-weight: 300;
       color: var(--ubax-accent);
     }
@@ -1208,13 +1223,14 @@ label.toolbar-pill {
   &__rating {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 8px;
+    padding-left: 83px;
 
     span {
       font-size: 12px;
       font-weight: 300;
-      line-height: 28px;
+      line-height: 1.25;
     }
   }
 
@@ -1233,11 +1249,12 @@ label.toolbar-pill {
   &__meta {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 8px;
+    padding-left: 83px;
     font-size: 11px;
     font-weight: 300;
-    line-height: 28px;
+    line-height: 1.25;
 
     img {
       width: 20px;
@@ -1253,7 +1270,7 @@ label.toolbar-pill {
     justify-content: space-between;
     gap: 12px;
     margin-top: auto;
-    padding-top: 9px;
+    padding-top: 12px;
     border-top: 1px solid var(--ubax-ring-neutral);
   }
 
