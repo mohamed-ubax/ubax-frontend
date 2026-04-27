@@ -1682,7 +1682,9 @@ label.toolbar-pill {
     color: var(--ubax-navy);
     cursor: pointer;
     overflow: hidden;
-    transition: border-color 160ms ease, opacity 160ms ease;
+    transition:
+      border-color 160ms ease,
+      opacity 160ms ease;
 
     &:hover {
       border-color: var(--ubax-accent);

@@ -1,490 +1,980 @@
-<div class="dashboard">
-  <!-- ── Page header ──────────────────────────────────────────────── -->
-  <div class="page-header">
-    <h1 class="page-title">Tableau de bord</h1>
-    <div class="page-actions">
-      <div class="search-field">
-        <i class="pi pi-search"></i>
-        <input type="text" placeholder="Recherche ..." />
-      </div>
+<section class="dashboard-comptable" data-ubax-motion="page">
+  <header class="dashboard-comptable__header">
+    <h1 class="dashboard-comptable__title">Tableau de bord</h1>
+
+    <div class="dashboard-comptable__toolbar">
+      <label class="dashboard-comptable__search" aria-label="Recherche globale">
+        <input
+          type="search"
+          name="dashboardSearch"
+          placeholder="Recherche ..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+
+        <span
+          class="dashboard-comptable__toolbar-icon-shell"
+          aria-hidden="true"
+        >
+          <img [src]="assets.search" alt="" />
+        </span>
+      </label>
+
       <button
-        class="search-field search-field--btn"
+        class="dashboard-comptable__toolbar-chip"
+        type="button"
         (click)="datePickerOpen.set(true)"
       >
-        <i class="pi pi-calendar"></i>
-        <span>{{
-          selectedRange()
-            ? (selectedRange()!.start | date: 'dd/MM/yy') +
-              ' – ' +
-              (selectedRange()!.end | date: 'dd/MM/yy')
-            : 'Sélectionner une date'
-        }}</span>
-      </button>
-      <button class="export-btn">
-        <i class="pi pi-upload"></i>
-        Exporter les données
-      </button>
-    </div>
-  </div>
+        <span>{{ selectedRangeLabel() }}</span>
 
-  <!-- ── Hero + KPI wrapper card ──────────────────────────────────── -->
-  <div class="hero-kpi-card">
-    <!-- Hero banner -->
-    <div class="hero-banner">
-      <!-- Left — greeting + description -->
-      <div class="hero-text">
-        <h2>
-          Bonjour {{ authStore.user()?.prenom }} {{ authStore.user()?.nom }} !
-        </h2>
-        <p>
-          Consultez rapidement les indicateurs clés de votre agence et suivez
-          l'essentiel de votre activité en temps réel.
-        </p>
-      </div>
-
-      <!-- Center — CTA -->
-      <button class="hero-cta" (click)="openAddExpense()">
-        Ajouter une dépense
-        <span class="hero-cta__icon">
-          <i class="pi pi-plus"></i>
+        <span
+          class="dashboard-comptable__toolbar-icon-shell"
+          aria-hidden="true"
+        >
+          <img [src]="assets.calendar" alt="" />
         </span>
       </button>
 
-      <!-- Right — Solde disponible (green card) -->
-      <div class="balance-card">
-        <p class="balance-label">Solde disponible</p>
-        <div class="balance-row">
-          @if (balanceVisible()) {
-            <span class="balance-amount">15 750 000 FCFA</span>
-          } @else {
-            <span class="balance-dots">●●●●●●●●●</span>
-          }
+      <button
+        class="dashboard-comptable__toolbar-chip dashboard-comptable__toolbar-chip--export"
+        type="button"
+      >
+        <span>Exporter les données</span>
+
+        <span
+          class="dashboard-comptable__toolbar-icon-shell"
+          aria-hidden="true"
+        >
+          <img [src]="assets.export" alt="" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <section class="dashboard-comptable__hero-surface" data-ubax-motion="surface">
+    <div class="dashboard-comptable__hero-banner">
+      <div class="dashboard-comptable__welcome">
+        <h2>Bonjour {{ displayName() }} !</h2>
+        <p>
+          Consultez rapidement les indicateurs clés de votre agence et suivez
+          l’essentiel de votre activité en temps réel.
+        </p>
+      </div>
+
+      <button
+        class="dashboard-comptable__expense-cta"
+        type="button"
+        (click)="openAddExpense()"
+      >
+        <span>Ajouter une dépense</span>
+
+        <span class="dashboard-comptable__expense-cta-icon" aria-hidden="true">
+          <img [src]="assets.addExpense" alt="" />
+        </span>
+      </button>
+
+      <article class="dashboard-comptable__balance-card">
+        <p>Solde disponible</p>
+
+        <div class="dashboard-comptable__balance-row">
+          <strong>{{ balanceAmount() }}</strong>
+
           <button
-            class="balance-eye"
-            (click)="toggleBalance()"
+            class="dashboard-comptable__balance-toggle"
+            type="button"
             [attr.aria-label]="
-              balanceVisible() ? 'Masquer le solde' : 'Afficher le solde'
+              balanceVisible()
+                ? 'Masquer le solde disponible'
+                : 'Afficher le solde disponible'
             "
+            (click)="toggleBalanceVisibility()"
           >
-            <i
-              class="pi"
-              [class.pi-eye-slash]="balanceVisible()"
-              [class.pi-eye]="!balanceVisible()"
-            ></i>
+            <img [src]="assets.balanceEyeOff" alt="" />
           </button>
         </div>
-      </div>
+      </article>
     </div>
 
-    <!-- KPI cards -->
-    <div class="kpi-row">
+    <div class="dashboard-comptable__kpi-grid">
       @for (card of kpiCards; track card.label) {
-        <div class="kpi-card" [style.background]="card.bg">
-          <div class="kpi-card__icon" [style.color]="card.color">
-            <i class="pi {{ card.icon }}"></i>
+        <article
+          class="dashboard-comptable__kpi-card"
+          [class.dashboard-comptable__kpi-card--revenue]="
+            card.tone === 'revenue'
+          "
+          [class.dashboard-comptable__kpi-card--rent]="card.tone === 'rent'"
+          [class.dashboard-comptable__kpi-card--pending]="
+            card.tone === 'pending'
+          "
+          [class.dashboard-comptable__kpi-card--commission]="
+            card.tone === 'commission'
+          "
+        >
+          <span class="dashboard-comptable__kpi-icon-shell" aria-hidden="true">
+            <img [src]="card.icon" [alt]="card.iconAlt" />
+          </span>
+
+          <div class="dashboard-comptable__kpi-copy">
+            <p>{{ card.label }}</p>
+            <strong>{{ formatAmount(card.amount) }}</strong>
           </div>
-          <div class="kpi-card__body">
-            <p class="kpi-card__label">{{ card.label }}</p>
-            <span class="kpi-card__value">{{ card.value }}</span>
-          </div>
-        </div>
+        </article>
       }
     </div>
-  </div>
+  </section>
 
-  <!-- ── Charts row ────────────────────────────────────────────────── -->
-  <div class="charts-row">
-    <!-- Evolution des revenus — line chart -->
-    <div class="card line-card">
-      <div class="card-header">
-        <div>
-          <p class="card-pretitle">Finance</p>
-          <h3 class="card-title">Evolution des revenus</h3>
-        </div>
-        <div class="period-toggle">
-          @for (p of ['Jour', 'Mois', 'Année']; track p) {
-            <button
-              class="period-btn"
-              [class.is-active]="revenueChartPeriod() === p"
-              (click)="revenueChartPeriod.set($any(p))"
-            >
-              {{ p }}
-            </button>
-          }
-        </div>
-      </div>
-      <div class="line-chart-wrapper">
-        <ubax-lazy-chart
-          type="line"
-          [data]="revenueData"
-          [options]="revenueOptions"
-          height="260px"
-        ></ubax-lazy-chart>
-      </div>
-    </div>
+  <div class="dashboard-comptable__analytics-grid">
+    <article
+      class="dashboard-comptable__panel dashboard-comptable__panel--revenue"
+      data-ubax-motion="surface"
+    >
+      <div class="dashboard-comptable__panel-header">
+        <h2>Evolution des revenus</h2>
 
-    <!-- Répartition des revenus — half-donut -->
-    <div class="card dist-card">
-      <div class="card-header">
-        <div>
-          <p class="card-pretitle">Finance</p>
-          <h3 class="card-title">Répartition des revenus</h3>
-        </div>
-        <div class="period-toggle">
-          @for (p of ['Jour', 'Mois', 'Année']; track p) {
+        <div
+          class="dashboard-comptable__period-toggle"
+          aria-label="Période des revenus"
+        >
+          @for (period of ['Jour', 'Mois', 'Année']; track period) {
             <button
-              class="period-btn"
-              [class.is-active]="distChartPeriod() === p"
-              (click)="distChartPeriod.set($any(p))"
+              class="dashboard-comptable__period-button"
+              type="button"
+              [class.is-active]="revenuePeriod() === period"
+              (click)="revenuePeriod.set($any(period))"
             >
-              {{ p }}
+              {{ period }}
             </button>
           }
         </div>
       </div>
 
-      <div class="dist-header-sep"></div>
+      <div class="dashboard-comptable__revenue-layout">
+        <div class="dashboard-comptable__revenue-chart-shell">
+          <div
+            class="dashboard-comptable__revenue-grid"
+            aria-hidden="true"
+          ></div>
 
-      <!-- Legend ABOVE the chart -->
-      <div class="dist-legend">
-        @for (item of distLegend; track item.label) {
-          <div class="dist-legend-item">
-            <span class="legend-dot" [style.background]="item.color"></span>
-            <span class="legend-label">{{ item.label }}</span>
-            <span class="legend-pct" [style.color]="item.color">{{
-              item.pct
+          <p-chart
+            type="line"
+            [data]="revenueChartData()"
+            [options]="revenueChartOptions"
+            [plugins]="revenueChartPlugins()"
+          />
+        </div>
+
+        <div class="dashboard-comptable__y-axis" aria-hidden="true">
+          @for (label of yAxisLabels(); track label) {
+            <span>{{ label }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="dashboard-comptable__month-axis" aria-hidden="true">
+        @for (label of monthLabels(); track label) {
+          <span>{{ label }}</span>
+        }
+      </div>
+    </article>
+
+    <article
+      class="dashboard-comptable__panel dashboard-comptable__panel--split"
+      data-ubax-motion="surface"
+    >
+      <div
+        class="dashboard-comptable__panel-header dashboard-comptable__panel-header--split"
+      >
+        <h2>Répartition des revenus</h2>
+
+        <div
+          class="dashboard-comptable__period-toggle"
+          aria-label="Période de répartition des revenus"
+        >
+          @for (period of ['Jour', 'Mois', 'Année']; track period) {
+            <button
+              class="dashboard-comptable__period-button"
+              type="button"
+              [class.is-active]="splitPeriod() === period"
+              (click)="splitPeriod.set($any(period))"
+            >
+              {{ period }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="dashboard-comptable__panel-divider"></div>
+
+      <div class="dashboard-comptable__split-legend">
+        @for (item of revenueSplit(); track item.label) {
+          <div class="dashboard-comptable__split-legend-item">
+            <span
+              class="dashboard-comptable__split-dot"
+              [class.dashboard-comptable__split-dot--short]="
+                item.tone === 'short'
+              "
+              [class.dashboard-comptable__split-dot--location]="
+                item.tone === 'location'
+              "
+              [class.dashboard-comptable__split-dot--sale]="
+                item.tone === 'sale'
+              "
+            ></span>
+            <span class="dashboard-comptable__split-label">{{
+              item.label
             }}</span>
+            <strong>{{ item.percentage }}</strong>
           </div>
         }
       </div>
 
-      <!-- Chart fills remaining height -->
-      <div class="dist-chart-wrapper">
-        <ubax-lazy-chart
+      <div class="dashboard-comptable__split-chart-shell">
+        <p-chart
           type="doughnut"
-          [data]="distData"
-          [options]="distOptions"
-        ></ubax-lazy-chart>
+          [data]="distributionChartData()"
+          [options]="distributionChartOptions"
+        />
       </div>
-    </div>
+    </article>
   </div>
 
-  <!-- ── Bottom row — 3 columns ────────────────────────────────────── -->
-  <div class="bottom-row">
-    <!-- Dernières transactions -->
-    <div class="card tx-card">
-      <div class="card-header">
-        <h3 class="card-title">Dernières transactions</h3>
-        <button class="outline-btn">Voir plus</button>
-      </div>
-      <div class="tx-list">
-        @for (tx of transactions; track tx.date) {
-          <div class="tx-item">
-            <div class="tx-avatar">{{ tx.initials }}</div>
-            <div class="tx-body">
-              <p class="tx-label">{{ tx.label }}</p>
-              <span class="tx-date">{{ tx.date }}</span>
-              <span class="tx-name">{{ tx.name }}</span>
-            </div>
-            <div class="tx-right">
-              <span class="tx-amount">{{ tx.amount }}</span>
-              <div class="tx-badge">
-                <i class="pi pi-check"></i>
-                <span>{{ tx.month }}</span>
-              </div>
-            </div>
-            <i class="pi pi-chevron-right tx-arrow"></i>
-          </div>
-        }
-      </div>
-    </div>
+  <div class="dashboard-comptable__bottom-grid">
+    <article
+      class="dashboard-comptable__panel dashboard-comptable__panel--transactions"
+      data-ubax-motion="surface"
+    >
+      <div
+        class="dashboard-comptable__panel-header dashboard-comptable__panel-header--transactions"
+      >
+        <h2>Derniers transactions</h2>
 
-    <!-- Dépenses du Mois -->
-    <div class="card expenses-card">
-      <div class="card-header">
-        <h3 class="card-title">Dépenses du Mois</h3>
-        <button class="outline-btn">Voir plus</button>
+        <button class="dashboard-comptable__more-button" type="button">
+          Voir plus
+        </button>
       </div>
-      <div class="expenses-list">
-        @for (exp of monthExpenses; track exp.label; let last = $last) {
-          <div class="expense-item">
-            <i
-              class="pi {{ exp.icon }} expense-icon"
-              [style.color]="exp.color"
-            ></i>
-            <span class="expense-label">{{ exp.label }}</span>
-            <span class="expense-amount">{{ exp.amount }}</span>
-          </div>
-          @if (!last) {
-            <div class="expense-sep"></div>
-          }
+
+      <div class="dashboard-comptable__panel-divider"></div>
+
+      <div class="dashboard-comptable__transaction-list">
+        @for (transaction of filteredTransactions(); track transaction.id) {
+          <article class="dashboard-comptable__transaction-row">
+            <span
+              class="dashboard-comptable__transaction-logo-shell"
+              aria-hidden="true"
+            >
+              <img [src]="transaction.logo" [alt]="transaction.logoAlt" />
+            </span>
+
+            <div class="dashboard-comptable__transaction-copy">
+              <p>{{ transaction.title }}</p>
+              <span>{{ transaction.date }}</span>
+              <strong>{{ transaction.customer }}</strong>
+            </div>
+
+            <div class="dashboard-comptable__transaction-meta">
+              <em>{{ formatAmount(transaction.amount) }}</em>
+
+              <span class="dashboard-comptable__transaction-badge">
+                <img [src]="assets.transactionCheck" alt="" />
+                <span>{{ transaction.month }}</span>
+              </span>
+            </div>
+
+            <img
+              class="dashboard-comptable__transaction-arrow"
+              [src]="assets.transactionArrow"
+              alt=""
+            />
+          </article>
         }
-        <div class="expense-sep"></div>
-        <div class="expense-item expense-item--total">
-          <i class="pi pi-calculator expense-icon" style="color: #1a3047"></i>
-          <span class="expense-label expense-label--total">Total</span>
-          <span class="expense-amount expense-amount--total"
-            >1 800 000 FCFA</span
+      </div>
+    </article>
+
+    <article
+      class="dashboard-comptable__panel dashboard-comptable__panel--expenses"
+      data-ubax-motion="surface"
+    >
+      <div
+        class="dashboard-comptable__panel-header dashboard-comptable__panel-header--expenses"
+      >
+        <h2>Dépenses du Mois</h2>
+      </div>
+
+      <div class="dashboard-comptable__panel-divider"></div>
+
+      <div class="dashboard-comptable__expense-list">
+        @for (expense of expenses(); track expense.id) {
+          <div class="dashboard-comptable__expense-row">
+            <span
+              class="dashboard-comptable__expense-icon-shell"
+              aria-hidden="true"
+            >
+              <img [src]="expense.icon" [alt]="expense.iconAlt" />
+            </span>
+
+            <span class="dashboard-comptable__expense-label">{{
+              expense.label
+            }}</span>
+            <strong>{{ formatAmount(expense.amount) }}</strong>
+          </div>
+
+          <div class="dashboard-comptable__expense-divider"></div>
+        }
+
+        <div
+          class="dashboard-comptable__expense-row dashboard-comptable__expense-row--total"
+        >
+          <span
+            class="dashboard-comptable__expense-icon-shell dashboard-comptable__expense-icon-shell--total"
+            aria-hidden="true"
           >
-        </div>
-      </div>
-    </div>
+            <img [src]="assets.expenseTotal" alt="" />
+          </span>
 
-    <!-- Paiements en retard -->
-    <div class="card overdue-card">
-      <div class="card-header">
-        <div class="overdue-title-row">
-          <i class="pi pi-exclamation-triangle overdue-icon"></i>
-          <h3 class="card-title">Paiements en retard</h3>
+          <span
+            class="dashboard-comptable__expense-label dashboard-comptable__expense-label--total"
+          >
+            Total
+          </span>
+          <strong>{{ formatAmount(totalExpenses()) }}</strong>
         </div>
-        <button class="outline-btn">Voir plus</button>
       </div>
-      <div class="overdue-list">
-        @for (od of overduePayments; track od.name) {
-          <div class="overdue-item">
-            <div class="overdue-info">
-              <p class="overdue-name">{{ od.name }}</p>
-              <span class="overdue-property">{{ od.property }}</span>
+    </article>
+
+    <article
+      class="dashboard-comptable__panel dashboard-comptable__panel--overdue"
+      data-ubax-motion="surface"
+    >
+      <div
+        class="dashboard-comptable__panel-header dashboard-comptable__panel-header--overdue"
+      >
+        <h2>Paiements en retard</h2>
+
+        <img
+          class="dashboard-comptable__warning-icon"
+          [src]="assets.warning"
+          alt=""
+        />
+      </div>
+
+      <div class="dashboard-comptable__panel-divider"></div>
+
+      <div class="dashboard-comptable__overdue-list">
+        @for (item of filteredOverdueItems(); track item.id) {
+          <article
+            class="dashboard-comptable__overdue-row"
+            [class.dashboard-comptable__overdue-row--reminded]="
+              isRelanceSent(item.id)
+            "
+          >
+            <div class="dashboard-comptable__overdue-copy">
+              <strong>{{ item.name }}</strong>
+              <span>{{ item.property }} - {{ item.type }}</span>
             </div>
-            <span class="overdue-days">{{ od.daysLate }}j</span>
-            <div class="overdue-actions">
-              <button class="oa-btn oa-btn--details">Détails</button>
-              <button class="oa-btn oa-btn--relancer">Relancer</button>
+
+            <div class="dashboard-comptable__overdue-actions">
+              <button
+                class="dashboard-comptable__overdue-button dashboard-comptable__overdue-button--details"
+                type="button"
+              >
+                Détails
+              </button>
+
+              <button
+                class="dashboard-comptable__overdue-button dashboard-comptable__overdue-button--remind"
+                type="button"
+                (click)="sendReminder(item.id)"
+              >
+                {{ isRelanceSent(item.id) ? 'Relancé' : 'Relancer' }}
+              </button>
             </div>
-          </div>
+          </article>
         }
       </div>
-    </div>
+    </article>
   </div>
-</div>
+</section>
 
-<!-- ── Date range picker ──────────────────────────────────────────── -->
 <ubax-date-range-picker
   [(isOpen)]="datePickerOpen"
   (applied)="onDateRangeApplied($event)"
 />
 
-<!-- ── Add expense modal ─────────────────────────────────────────── -->
-@if (addExpenseOpen()) {
+@if (modalVisible()) {
   <div
-    class="ae-overlay"
+    class="dashboard-comptable__modal-layer"
     [class.is-closing]="addExpenseClosing()"
-    (click)="closeAddExpense()"
-  ></div>
-
-  <div
-    class="ae-modal"
-    [class.is-closing]="addExpenseClosing()"
-    (click)="stopPropagation($event)"
   >
-    <!-- Modal header -->
-    <div class="ae-header">
-      <h2 class="ae-title">Ajouter une dépense</h2>
-      <button class="ae-close" (click)="closeAddExpense()" aria-label="Fermer">
-        <i class="pi pi-times"></i>
-      </button>
-    </div>
+    <button
+      class="dashboard-comptable__modal-backdrop"
+      type="button"
+      aria-label="Fermer l'overlay d'ajout de dépense"
+      (click)="closeAddExpense()"
+    ></button>
 
-    <!-- Modal body — 3 columns -->
-    <div class="ae-body">
-      <!-- Column 1 — Informations Générales -->
-      <div class="ae-col">
-        <h4 class="ae-col-title">Informations Générales</h4>
+    <dialog
+      class="dashboard-comptable__modal"
+      [class.is-closing]="addExpenseClosing()"
+      open
+      aria-labelledby="dashboard-comptable-expense-title"
+      aria-modal="true"
+    >
+      <div class="dashboard-comptable__modal-header">
+        <h2 id="dashboard-comptable-expense-title">Ajouter une dépense</h2>
 
-        <div class="ae-field">
-          <label class="ae-label">Catégorie de dépense</label>
-          <div class="ae-select">
-            <select
-              [value]="expenseCategory()"
-              (change)="expenseCategory.set($any($event.target).value)"
-            >
-              @for (cat of expenseCategories; track cat) {
-                <option [value]="cat">{{ cat }}</option>
-              }
-            </select>
-            <i class="pi pi-chevron-down"></i>
-          </div>
-        </div>
-
-        <div class="ae-field">
-          <label class="ae-label">Montant</label>
-          <div class="ae-input-wrap">
-            <input
-              class="ae-input"
-              type="text"
-              placeholder="0 FCFA"
-              [value]="expenseAmount()"
-              (input)="expenseAmount.set($any($event.target).value)"
-            />
-          </div>
-        </div>
-
-        <div class="ae-field">
-          <label class="ae-label">Méthode de paiement</label>
-          <div class="ae-select">
-            <select
-              [value]="expenseMethod()"
-              (change)="expenseMethod.set($any($event.target).value)"
-            >
-              @for (m of paymentMethods; track m) {
-                <option [value]="m">{{ m }}</option>
-              }
-            </select>
-            <i class="pi pi-chevron-down"></i>
-          </div>
-        </div>
-
-        <div class="ae-field">
-          <label class="ae-label">Date</label>
-          <div class="ae-input-wrap ae-input-wrap--icon">
-            <input
-              class="ae-input"
-              type="date"
-              [value]="expenseDate()"
-              (input)="expenseDate.set($any($event.target).value)"
-            />
-            <i class="pi pi-calendar ae-input-icon"></i>
-          </div>
-        </div>
+        <button
+          class="dashboard-comptable__modal-close"
+          type="button"
+          aria-label="Fermer le formulaire d'ajout de dépense"
+          (click)="closeAddExpense()"
+        >
+          <img [src]="assets.modalClose" alt="" aria-hidden="true" />
+        </button>
       </div>
 
-      <div class="ae-divider"></div>
+      <form class="dashboard-comptable__modal-form" (ngSubmit)="saveExpense()">
+        <div class="dashboard-comptable__modal-sections">
+          <section class="dashboard-comptable__modal-section">
+            <h3>Informations Générales</h3>
 
-      <!-- Column 2 — Liaison dépense -->
-      <div class="ae-col">
-        <h4 class="ae-col-title">Liaison dépense</h4>
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-category"
+                >Catégories de dépense</label
+              >
 
-        <div class="ae-field">
-          <label class="ae-label">Type de liaison</label>
-          <div class="ae-radio-group">
-            <label
-              class="ae-radio"
-              [class.is-checked]="expenseLiaison() === 'bien'"
-            >
-              <span class="ae-radio__dot"></span>
-              <input
-                type="radio"
-                name="liaison"
-                value="bien"
-                [checked]="expenseLiaison() === 'bien'"
-                (change)="expenseLiaison.set('bien')"
-              />
-              Dépense liée à un bien
-            </label>
-            <label
-              class="ae-radio"
-              [class.is-checked]="expenseLiaison() === 'general'"
-            >
-              <span class="ae-radio__dot"></span>
-              <input
-                type="radio"
-                name="liaison"
-                value="general"
-                [checked]="expenseLiaison() === 'general'"
-                (change)="expenseLiaison.set('general')"
-              />
-              Dépense Générale agence
-            </label>
-          </div>
-        </div>
+              <div
+                class="dashboard-comptable__modal-dropdown dashboard-comptable__modal-interactive"
+              >
+                <button
+                  id="dashboard-comptable-expense-category"
+                  class="dashboard-comptable__field-shell dashboard-comptable__field-shell--select dashboard-comptable__field-shell--category"
+                  type="button"
+                  [class.is-open]="activeExpenseDropdown() === 'category'"
+                  [attr.aria-expanded]="activeExpenseDropdown() === 'category'"
+                  aria-haspopup="listbox"
+                  (click)="toggleExpenseDropdown('category')"
+                >
+                  <span
+                    class="dashboard-comptable__field-leading-icon"
+                    aria-hidden="true"
+                  >
+                    <img [src]="assets.modalCategoryIcon" alt="" />
+                  </span>
 
-        @if (expenseLiaison() === 'bien') {
-          <div class="ae-field">
-            <label class="ae-label">Sélectionner le bien</label>
-            <div class="ae-input-wrap">
+                  <span class="dashboard-comptable__field-display">{{
+                    draftCategory()
+                  }}</span>
+
+                  <span
+                    class="dashboard-comptable__field-trailing-icon"
+                    aria-hidden="true"
+                  >
+                    <img [src]="assets.modalChevron" alt="" />
+                  </span>
+                </button>
+
+                @if (activeExpenseDropdown() === 'category') {
+                  <div
+                    class="dashboard-comptable__field-menu"
+                    aria-label="Options de catégories de dépense"
+                  >
+                    @for (category of expenseCategories; track category) {
+                      <button
+                        class="dashboard-comptable__field-option"
+                        type="button"
+                        [class.is-active]="draftCategory() === category"
+                        (click)="selectExpenseCategory(category)"
+                      >
+                        <span class="dashboard-comptable__field-option-label">{{
+                          category
+                        }}</span>
+
+                        @if (draftCategory() === category) {
+                          <span
+                            class="dashboard-comptable__field-option-check"
+                            aria-hidden="true"
+                          >
+                            <i class="pi pi-check"></i>
+                          </span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-amount">Montant</label>
+
               <input
-                class="ae-input"
+                id="dashboard-comptable-expense-amount"
+                class="dashboard-comptable__field-input"
+                name="expenseAmount"
                 type="text"
-                placeholder="UBX-XXX — Nom du bien"
-                [value]="expenseBien()"
-                (input)="expenseBien.set($any($event.target).value)"
+                inputmode="numeric"
+                [ngModel]="draftAmount()"
+                (ngModelChange)="draftAmount.set($event)"
               />
             </div>
-          </div>
 
-          <div class="ae-field">
-            <label class="ae-label">Propriétaire</label>
-            <div class="ae-input-wrap">
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-payment"
+                >Méthode de paiement</label
+              >
+
+              <div
+                class="dashboard-comptable__modal-dropdown dashboard-comptable__modal-interactive"
+              >
+                <button
+                  id="dashboard-comptable-expense-payment"
+                  class="dashboard-comptable__field-shell dashboard-comptable__field-shell--select"
+                  type="button"
+                  [class.is-open]="activeExpenseDropdown() === 'payment'"
+                  [attr.aria-expanded]="activeExpenseDropdown() === 'payment'"
+                  aria-haspopup="listbox"
+                  (click)="toggleExpenseDropdown('payment')"
+                >
+                  <span class="dashboard-comptable__field-display">{{
+                    draftPaymentMethod()
+                  }}</span>
+
+                  <span
+                    class="dashboard-comptable__field-trailing-icon"
+                    aria-hidden="true"
+                  >
+                    <img [src]="assets.modalChevron" alt="" />
+                  </span>
+                </button>
+
+                @if (activeExpenseDropdown() === 'payment') {
+                  <div
+                    class="dashboard-comptable__field-menu"
+                    aria-label="Options de méthode de paiement"
+                  >
+                    @for (
+                      paymentMethod of expensePaymentMethods;
+                      track paymentMethod
+                    ) {
+                      <button
+                        class="dashboard-comptable__field-option"
+                        type="button"
+                        [class.is-active]="
+                          draftPaymentMethod() === paymentMethod
+                        "
+                        (click)="selectExpensePaymentMethod(paymentMethod)"
+                      >
+                        <span class="dashboard-comptable__field-option-label">{{
+                          paymentMethod
+                        }}</span>
+
+                        @if (draftPaymentMethod() === paymentMethod) {
+                          <span
+                            class="dashboard-comptable__field-option-check"
+                            aria-hidden="true"
+                          >
+                            <i class="pi pi-check"></i>
+                          </span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-date">Date</label>
+
+              <div
+                class="dashboard-comptable__modal-date-picker dashboard-comptable__modal-interactive"
+              >
+                <button
+                  id="dashboard-comptable-expense-date"
+                  class="dashboard-comptable__field-shell dashboard-comptable__field-shell--date"
+                  type="button"
+                  [class.is-open]="expenseDatePickerOpen()"
+                  [attr.aria-expanded]="expenseDatePickerOpen()"
+                  aria-haspopup="dialog"
+                  (click)="toggleExpenseDatePicker()"
+                >
+                  <span
+                    class="dashboard-comptable__field-leading-icon"
+                    aria-hidden="true"
+                  >
+                    <img [src]="assets.modalCalendar" alt="" />
+                  </span>
+
+                  <span class="dashboard-comptable__field-display">{{
+                    draftDateLabel()
+                  }}</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dashboard-comptable__modal-section">
+            <h3>Liaison dépense</h3>
+
+            <div
+              class="dashboard-comptable__modal-field-group dashboard-comptable__modal-field-group--scope"
+            >
+              <span class="dashboard-comptable__modal-field-label"
+                >Liaison dépense</span
+              >
+
+              <div class="dashboard-comptable__expense-scope-list">
+                <button
+                  class="dashboard-comptable__expense-scope"
+                  type="button"
+                  [class.is-active]="isPropertyLinkedExpense()"
+                  [attr.aria-pressed]="isPropertyLinkedExpense()"
+                  (click)="setExpenseLinkMode('property')"
+                >
+                  <span class="dashboard-comptable__expense-scope-dot"></span>
+                  <span>Dépense lié à un bien</span>
+                </button>
+
+                <button
+                  class="dashboard-comptable__expense-scope"
+                  type="button"
+                  [class.is-active]="!isPropertyLinkedExpense()"
+                  [attr.aria-pressed]="!isPropertyLinkedExpense()"
+                  (click)="setExpenseLinkMode('agency')"
+                >
+                  <span class="dashboard-comptable__expense-scope-dot"></span>
+                  <span>Dépense Général agence</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-property"
+                >Sélectionner le bien</label
+              >
+
+              <div
+                class="dashboard-comptable__modal-dropdown dashboard-comptable__modal-interactive"
+              >
+                <button
+                  id="dashboard-comptable-expense-property"
+                  class="dashboard-comptable__field-shell dashboard-comptable__field-shell--select"
+                  type="button"
+                  [class.is-disabled]="!isPropertyLinkedExpense()"
+                  [class.is-open]="activeExpenseDropdown() === 'property'"
+                  [disabled]="!isPropertyLinkedExpense()"
+                  [attr.aria-expanded]="activeExpenseDropdown() === 'property'"
+                  aria-haspopup="listbox"
+                  (click)="toggleExpenseDropdown('property')"
+                >
+                  <span class="dashboard-comptable__field-display">{{
+                    isPropertyLinkedExpense()
+                      ? draftProperty()
+                      : 'Agence générale'
+                  }}</span>
+
+                  <span
+                    class="dashboard-comptable__field-trailing-icon"
+                    aria-hidden="true"
+                  >
+                    <img [src]="assets.modalChevron" alt="" />
+                  </span>
+                </button>
+
+                @if (
+                  isPropertyLinkedExpense() &&
+                  activeExpenseDropdown() === 'property'
+                ) {
+                  <div
+                    class="dashboard-comptable__field-menu"
+                    aria-label="Options de biens immobiliers"
+                  >
+                    @for (property of expenseProperties; track property.id) {
+                      <button
+                        class="dashboard-comptable__field-option"
+                        type="button"
+                        [class.is-active]="draftProperty() === property.label"
+                        (click)="selectExpenseProperty(property.label)"
+                      >
+                        <span class="dashboard-comptable__field-option-label">{{
+                          property.label
+                        }}</span>
+
+                        @if (draftProperty() === property.label) {
+                          <span
+                            class="dashboard-comptable__field-option-check"
+                            aria-hidden="true"
+                          >
+                            <i class="pi pi-check"></i>
+                          </span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <span class="dashboard-comptable__modal-field-label"
+                >Propriétaire</span
+              >
+
+              <div
+                class="dashboard-comptable__field-shell dashboard-comptable__field-shell--readonly"
+                [class.is-disabled]="!isPropertyLinkedExpense()"
+              >
+                <span class="dashboard-comptable__field-display">{{
+                  draftOwner()
+                }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section
+            class="dashboard-comptable__modal-section dashboard-comptable__modal-section--details"
+          >
+            <h3>Détails supplémentaires</h3>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-provider"
+                >Prestataire</label
+              >
+
+              <div
+                class="dashboard-comptable__modal-dropdown dashboard-comptable__modal-interactive"
+              >
+                <button
+                  id="dashboard-comptable-expense-provider"
+                  class="dashboard-comptable__field-shell dashboard-comptable__field-shell--select"
+                  type="button"
+                  [class.is-open]="activeExpenseDropdown() === 'provider'"
+                  [attr.aria-expanded]="activeExpenseDropdown() === 'provider'"
+                  aria-haspopup="listbox"
+                  (click)="toggleExpenseDropdown('provider')"
+                >
+                  <span class="dashboard-comptable__field-display">{{
+                    draftProvider()
+                  }}</span>
+
+                  <span
+                    class="dashboard-comptable__field-trailing-icon"
+                    aria-hidden="true"
+                  >
+                    <img [src]="assets.modalChevron" alt="" />
+                  </span>
+                </button>
+
+                @if (activeExpenseDropdown() === 'provider') {
+                  <div
+                    class="dashboard-comptable__field-menu"
+                    aria-label="Options de prestataires"
+                  >
+                    @for (provider of expenseProviders; track provider) {
+                      <button
+                        class="dashboard-comptable__field-option"
+                        type="button"
+                        [class.is-active]="draftProvider() === provider"
+                        (click)="selectExpenseProvider(provider)"
+                      >
+                        <span class="dashboard-comptable__field-option-label">{{
+                          provider
+                        }}</span>
+
+                        @if (draftProvider() === provider) {
+                          <span
+                            class="dashboard-comptable__field-option-check"
+                            aria-hidden="true"
+                          >
+                            <i class="pi pi-check"></i>
+                          </span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-reference"
+                >Référence Facture</label
+              >
+
               <input
-                class="ae-input"
+                id="dashboard-comptable-expense-reference"
+                class="dashboard-comptable__field-input"
+                name="expenseReference"
                 type="text"
-                placeholder="Nom du propriétaire"
-                [value]="expenseOwner()"
-                (input)="expenseOwner.set($any($event.target).value)"
+                [ngModel]="draftReference()"
+                (ngModelChange)="draftReference.set($event)"
               />
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <span class="dashboard-comptable__modal-field-label"
+                >Ajouter un fichier justificatif</span
+              >
+
+              <input
+                #expenseUploadInput
+                class="dashboard-comptable__upload-native-input"
+                type="file"
+                multiple
+                accept=".pdf,.png,.jpg,.jpeg,.webp"
+                (change)="
+                  updateExpenseUploads(
+                    expenseUploadInput.files,
+                    expenseUploadInput
+                  )
+                "
+              />
+
+              <div
+                class="dashboard-comptable__upload-box"
+                [class.is-empty]="draftUploads().length === 0"
+              >
+                @if (draftUploads().length === 0) {
+                  <button
+                    class="dashboard-comptable__upload-empty"
+                    type="button"
+                    (click)="expenseUploadInput.click()"
+                  >
+                    <span
+                      class="dashboard-comptable__upload-file-icon dashboard-comptable__upload-file-icon--empty"
+                      aria-hidden="true"
+                    >
+                      <img [src]="assets.modalFile" alt="" />
+                    </span>
+
+                    <span class="dashboard-comptable__upload-empty-copy">
+                      <strong>Aucun fichier sélectionné</strong>
+                      <span>Ajoutez un ou plusieurs justificatifs.</span>
+                    </span>
+                  </button>
+                } @else {
+                  <div class="dashboard-comptable__upload-list">
+                    @for (upload of draftUploads(); track upload.id) {
+                      <div class="dashboard-comptable__upload-item">
+                        <span
+                          class="dashboard-comptable__upload-file-icon"
+                          aria-hidden="true"
+                        >
+                          <img [src]="assets.modalFile" alt="" />
+                        </span>
+
+                        <span class="dashboard-comptable__upload-copy">
+                          <strong>{{ upload.name }}</strong>
+                          <span>{{ upload.sizeLabel }}</span>
+                        </span>
+
+                        <span
+                          class="dashboard-comptable__upload-check"
+                          aria-hidden="true"
+                        >
+                          <img [src]="assets.modalFileCheck" alt="" />
+                        </span>
+
+                        <button
+                          class="dashboard-comptable__upload-remove"
+                          type="button"
+                          aria-label="Retirer le fichier {{ upload.name }}"
+                          (click)="removeExpenseUpload(upload.id)"
+                        >
+                          <i class="pi pi-times"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <button
+                  class="dashboard-comptable__upload-action"
+                  type="button"
+                  (click)="expenseUploadInput.click()"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="dashboard-comptable__modal-actions">
+          <button
+            class="dashboard-comptable__modal-button dashboard-comptable__modal-button--ghost"
+            type="button"
+            (click)="closeAddExpense()"
+          >
+            Annuler
+          </button>
+
+          <button
+            class="dashboard-comptable__modal-button dashboard-comptable__modal-button--primary"
+            type="submit"
+            [disabled]="!canSaveExpense()"
+          >
+            Enregistrer la dépense
+          </button>
+        </div>
+
+        @if (expenseDatePickerOpen()) {
+          <button
+            class="dashboard-comptable__date-overlay"
+            type="button"
+            aria-label="Fermer le calendrier"
+            (click)="toggleExpenseDatePicker()"
+          ></button>
+
+          <div
+            class="dashboard-comptable__date-menu dashboard-comptable__date-menu--overlay dashboard-comptable__modal-interactive"
+            aria-label="Calendrier de sélection de date"
+          >
+            <div class="dashboard-comptable__date-menu-header">
+              <p>{{ expenseCalendarLabel() }}</p>
+
+              <div class="dashboard-comptable__date-menu-nav">
+                <button
+                  type="button"
+                  aria-label="Mois précédent"
+                  (click)="previousExpenseCalendarMonth()"
+                >
+                  <i class="pi pi-angle-left"></i>
+                </button>
+                <button
+                  type="button"
+                  aria-label="Mois suivant"
+                  (click)="nextExpenseCalendarMonth()"
+                >
+                  <i class="pi pi-angle-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__date-grid">
+              @for (weekday of expenseCalendarWeekdays; track weekday) {
+                <span class="dashboard-comptable__date-weekday">{{
+                  weekday
+                }}</span>
+              }
+
+              @for (week of expenseCalendarWeeks(); track $index) {
+                @for (day of week; track day.date.getTime()) {
+                  <button
+                    class="dashboard-comptable__date-day"
+                    type="button"
+                    [class.is-active]="day.active"
+                    [class.is-muted]="day.muted"
+                    (click)="selectExpenseDate(day.date)"
+                  >
+                    {{ day.label }}
+                  </button>
+                }
+              }
             </div>
           </div>
         }
-      </div>
-
-      <div class="ae-divider"></div>
-
-      <!-- Column 3 — Détails supplémentaires -->
-      <div class="ae-col">
-        <h4 class="ae-col-title">Détails supplémentaires</h4>
-
-        <div class="ae-field">
-          <label class="ae-label">Prestataire</label>
-          <div class="ae-input-wrap">
-            <input
-              class="ae-input"
-              type="text"
-              placeholder="Nom du prestataire"
-              [value]="expenseProvider()"
-              (input)="expenseProvider.set($any($event.target).value)"
-            />
-          </div>
-        </div>
-
-        <div class="ae-field">
-          <label class="ae-label">Référence Facture</label>
-          <div class="ae-input-wrap">
-            <input
-              class="ae-input"
-              type="text"
-              placeholder="UBX-FAC-XXXX"
-              [value]="expenseRef()"
-              (input)="expenseRef.set($any($event.target).value)"
-            />
-          </div>
-        </div>
-
-        <div class="ae-field">
-          <label class="ae-label">Ajouter un fichier justificatif</label>
-
-          @if (expenseFile()) {
-            <div class="ae-file-preview">
-              <i class="pi pi-file-pdf ae-file-icon"></i>
-              <div class="ae-file-info">
-                <span class="ae-file-name">{{ expenseFile()!.name }}</span>
-                <span class="ae-file-size">{{ expenseFile()!.size }}</span>
-              </div>
-              <button
-                class="ae-file-remove"
-                (click)="removeFile()"
-                aria-label="Supprimer"
-              >
-                <i class="pi pi-times"></i>
-              </button>
-            </div>
-          } @else {
-            <button class="ae-upload-btn" (click)="simulateFileUpload()">
-              <i class="pi pi-upload"></i>
-              Ajouter
-            </button>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal footer -->
-    <div class="ae-footer">
-      <button class="ae-btn ae-btn--cancel" (click)="closeAddExpense()">
-        Annuler
-      </button>
-      <button class="ae-btn ae-btn--save" (click)="saveExpense()">
-        Enregistrer la dépense
-      </button>
-    </div>
+      </form>
+    </dialog>
   </div>
 }

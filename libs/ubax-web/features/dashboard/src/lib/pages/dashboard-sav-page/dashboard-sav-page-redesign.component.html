@@ -3,539 +3,379 @@
   data-ubax-motion="page"
   [class.is-transitioning-to-directory]="transitionPhase() === 'to-directory'"
   [class.is-transitioning-to-dashboard]="transitionPhase() === 'to-dashboard'"
+  [class.is-transitioning-to-detail]="transitionPhase() === 'to-detail'"
+  [class.is-transitioning-from-detail]="transitionPhase() === 'from-detail'"
 >
   <header class="dashboard-sav__hero">
-    <h1
-      class="dashboard-sav__title"
-      [class.is-phase-transitioning]="transitionPhase() !== 'idle'"
-    >
-      {{ pageTitle() }}
-    </h1>
+    @if (selectedTechnicianDetail()) {
+      <div class="dashboard-sav__detail-heading">
+        <button
+          type="button"
+          class="dashboard-sav__back-button"
+          (click)="closeTechnicianDetail()"
+          aria-label="Retour"
+        >
+          <img [src]="detailIcons.back" alt="" />
+        </button>
 
-    <div class="toolbar-actions" data-ubax-motion="surface">
-      <label
-        class="toolbar-pill toolbar-pill--search"
-        aria-label="Recherche globale"
+        <h1 class="dashboard-sav__title dashboard-sav__title--detail">
+          {{ pageTitle() }}
+        </h1>
+      </div>
+    } @else {
+      <h1
+        class="dashboard-sav__title"
+        [class.is-phase-transitioning]="transitionPhase() !== 'idle'"
       >
-        <input
-          class="toolbar-pill__input"
-          type="search"
-          placeholder="Recherche ..."
-          [ngModel]="toolbarSearchTerm()"
-          (ngModelChange)="updateToolbarSearchTerm($event)"
-        />
+        {{ pageTitle() }}
+      </h1>
 
-        <span class="toolbar-pill__icon" aria-hidden="true">
-          <img [src]="sharedIcons.search" alt="" />
-        </span>
-      </label>
+      <div class="toolbar-actions" data-ubax-motion="surface">
+        <label
+          class="toolbar-pill toolbar-pill--search"
+          aria-label="Recherche globale"
+        >
+          <input
+            class="toolbar-pill__input"
+            type="search"
+            placeholder="Recherche ..."
+            [ngModel]="toolbarSearchTerm()"
+            (ngModelChange)="updateToolbarSearchTerm($event)"
+          />
 
-      <p-datepicker
-        [ngModel]="toolbarSelectedDate()"
-        (ngModelChange)="updateToolbarSelectedDate($event)"
-        [showIcon]="true"
-        [showButtonBar]="true"
-        [readonlyInput]="true"
-        iconDisplay="button"
-        dateFormat="dd/mm/yy"
-        appendTo="body"
-        styleClass="toolbar-pill toolbar-pill--date"
-        inputStyleClass="toolbar-pill__input"
-        panelStyleClass="dashboard-sav-datepicker-panel"
-        todayButtonStyleClass="dashboard-sav-datepicker-panel__today"
-        clearButtonStyleClass="dashboard-sav-datepicker-panel__clear"
-        inputId="dashboard-sav-toolbar-date"
-        placeholder="Sélectionner une date"
-        ariaLabel="Sélectionner une date"
-      >
-        <ng-template #triggericon>
-          <img [src]="sharedIcons.date" alt="" />
-        </ng-template>
-      </p-datepicker>
+          <span class="toolbar-pill__icon" aria-hidden="true">
+            <img [src]="sharedIcons.search" alt="" />
+          </span>
+        </label>
 
-      <button
-        type="button"
-        class="toolbar-pill toolbar-pill--export"
-        (click)="exportDashboardData()"
-      >
-        <span class="toolbar-pill__label">Exporter les données</span>
+        <p-datepicker
+          [ngModel]="toolbarSelectedDate()"
+          (ngModelChange)="updateToolbarSelectedDate($event)"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          [readonlyInput]="true"
+          iconDisplay="button"
+          dateFormat="dd/mm/yy"
+          appendTo="body"
+          styleClass="toolbar-pill toolbar-pill--date"
+          inputStyleClass="toolbar-pill__input"
+          panelStyleClass="dashboard-sav-datepicker-panel"
+          todayButtonStyleClass="dashboard-sav-datepicker-panel__today"
+          clearButtonStyleClass="dashboard-sav-datepicker-panel__clear"
+          inputId="dashboard-sav-toolbar-date"
+          placeholder="Sélectionner une date"
+          ariaLabel="Sélectionner une date"
+        >
+          <ng-template #triggericon>
+            <img [src]="sharedIcons.date" alt="" />
+          </ng-template>
+        </p-datepicker>
 
-        <span class="toolbar-pill__icon" aria-hidden="true">
-          <img [src]="sharedIcons.export" alt="" />
-        </span>
-      </button>
-    </div>
+        <button
+          type="button"
+          class="toolbar-pill toolbar-pill--export"
+          (click)="exportDashboardData()"
+        >
+          <span class="toolbar-pill__label">Exporter les données</span>
+
+          <span class="toolbar-pill__icon" aria-hidden="true">
+            <img [src]="sharedIcons.export" alt="" />
+          </span>
+        </button>
+      </div>
+    }
   </header>
 
-  <section class="dashboard-sav__summary" data-ubax-motion="surface">
-    <div class="dashboard-sav__welcome">
-      <div class="dashboard-sav__welcome-copy">
-        <h2>Bonjour {{ userFullName() }} !</h2>
-        <p>
-          Consultez rapidement les indicateurs clés de votre agence et suivez
-          l’essentiel de votre activité en temps réel.
-        </p>
-      </div>
-
-      <button
-        type="button"
-        class="dashboard-sav__add-technician"
-        (click)="openAddTech()"
+  @if (selectedTechnicianDetail(); as technicianDetail) {
+    <section class="tech-detail">
+      <article
+        class="tech-detail__sidebar"
+        [style.view-transition-name]="
+          technicianShellTransitionName(technicianDetail.id)
+        "
       >
-        <span>Ajouter un technicien</span>
+        <div class="tech-detail__profile-shell">
+          <img
+            class="tech-detail__profile-avatar"
+            [src]="technicianDetail.profileImage"
+            [alt]="technicianDetail.name"
+            [style.view-transition-name]="
+              technicianAvatarTransitionName(technicianDetail.id)
+            "
+          />
 
-        <span class="dashboard-sav__add-technician-icon" aria-hidden="true">
-          <img [src]="heroAddTechnicianIcon" alt="" />
-        </span>
-      </button>
-    </div>
-
-    <section class="stats-grid" data-ubax-motion="surface">
-      @for (metric of statCards(); track metric.label) {
-        <article
-          class="stat-card"
-          [style.--stat-card-accent]="metric.accent"
-          [style.--stat-card-background]="metric.background"
-        >
-          <span class="stat-card__orb" aria-hidden="true">
-            <img class="stat-card__orb-bg" [src]="metric.orbSrc" alt="" />
-            <img class="stat-card__orb-icon" [src]="metric.iconSrc" alt="" />
-          </span>
-
-          <div class="stat-card__copy">
-            <p class="stat-card__label">{{ metric.label }}</p>
-            <p class="stat-card__value">{{ metric.value }}</p>
-          </div>
-        </article>
-      }
-    </section>
-  </section>
-
-  @if (showAllTechnicians()) {
-    <section
-      id="dashboard-sav-technician-directory"
-      class="technician-directory"
-      data-ubax-motion-skip
-    >
-      <header class="technician-directory__header">
-        <h2>Liste des techniciens</h2>
-
-        <div class="technician-directory__actions">
-          <label
-            class="technician-directory__search"
-            aria-label="Rechercher un technicien"
+          <h2
+            class="tech-detail__profile-name"
+            [style.view-transition-name]="
+              technicianNameTransitionName(technicianDetail.id)
+            "
           >
-            <img [src]="sharedIcons.search" alt="" />
-            <input
-              type="search"
-              placeholder="Rechercher"
-              [ngModel]="directorySearchTerm()"
-              (ngModelChange)="updateDirectorySearchTerm($event)"
-            />
-          </label>
-
-          <button
-            type="button"
-            class="technician-directory__collapse"
-            (click)="toggleTechnicians()"
+            {{ technicianDetail.name }}
+          </h2>
+          <p
+            class="tech-detail__profile-specialty"
+            [style.view-transition-name]="
+              technicianSpecialtyTransitionName(technicianDetail.id)
+            "
           >
-            Réduire
-          </button>
-        </div>
-      </header>
-
-      <div class="technician-directory__grid">
-        @if (filteredTechnicians().length) {
-          @for (
-            technician of filteredTechnicians();
-            track trackByTechnicianId($index, technician)
-          ) {
-            <article class="dashboard-tech-card dashboard-tech-card--directory">
-              <div class="dashboard-tech-card__top">
-                <img
-                  class="dashboard-tech-card__avatar"
-                  [src]="technician.image"
-                  [alt]="technician.name"
-                />
-
-                <div class="dashboard-tech-card__identity">
-                  <h3>{{ technician.name }}</h3>
-                  <p>{{ technician.specialty }}</p>
-                </div>
-              </div>
-
-              <div class="dashboard-tech-card__rating">
-                <div class="dashboard-tech-card__stars" aria-hidden="true">
-                  @for (star of ratingStars(technician.rating); track $index) {
-                    <img [src]="starIcons()[star]" alt="" />
-                  }
-                </div>
-                <span>{{ technician.rating }}</span>
-              </div>
-
-              <div class="dashboard-tech-card__meta">
-                <img [src]="technicianTicketIcon" alt="" />
-                <span>Ticket en cour : {{ technician.tickets }}</span>
-              </div>
-
-              <div class="dashboard-tech-card__footer">
-                <div class="dashboard-tech-card__phone">
-                  <img [src]="technicianPhoneIcon" alt="" />
-                  <span>{{ technician.phone }}</span>
-                </div>
-
-                <button type="button" class="dashboard-tech-card__button">
-                  Voir fiche
-                </button>
-              </div>
-            </article>
-          }
-        } @else {
-          <p class="technician-directory__empty">
-            Aucun technicien ne correspond à la recherche en cours.
+            {{ technicianDetail.specialty }}
           </p>
-        }
-      </div>
-    </section>
-  } @else {
-    <div class="dashboard-sav__content-grid">
-      <article class="tickets-card" data-ubax-motion-skip>
-        <div class="tickets-card__filters">
-          <p-select
-            [options]="statusOptions"
-            [ngModel]="draftStatus()"
-            (ngModelChange)="draftStatus.set($event)"
-            optionLabel="label"
-            optionValue="value"
-            appendTo="body"
-            styleClass="tickets-filter"
-            panelStyleClass="tickets-filter-panel"
-            inputId="dashboard-sav-filter-status"
-            ariaLabel="Filtrer par statut"
-          >
-            <ng-template #dropdownicon>
-              <img [src]="sharedIcons.chevron" alt="" />
-            </ng-template>
-          </p-select>
-
-          <p-select
-            [options]="priorityOptions"
-            [ngModel]="draftPriority()"
-            (ngModelChange)="draftPriority.set($event)"
-            optionLabel="label"
-            optionValue="value"
-            appendTo="body"
-            styleClass="tickets-filter"
-            panelStyleClass="tickets-filter-panel"
-            inputId="dashboard-sav-filter-priority"
-            ariaLabel="Filtrer par priorité"
-          >
-            <ng-template #dropdownicon>
-              <img [src]="sharedIcons.chevron" alt="" />
-            </ng-template>
-          </p-select>
-
-          <p-select
-            [options]="issueOptions"
-            [ngModel]="draftIssue()"
-            (ngModelChange)="draftIssue.set($event)"
-            optionLabel="label"
-            optionValue="value"
-            appendTo="body"
-            styleClass="tickets-filter tickets-filter--wide"
-            panelStyleClass="tickets-filter-panel"
-            inputId="dashboard-sav-filter-issue"
-            ariaLabel="Filtrer par type de problème"
-          >
-            <ng-template #dropdownicon>
-              <img [src]="sharedIcons.chevron" alt="" />
-            </ng-template>
-          </p-select>
-
-          <p-datepicker
-            [ngModel]="draftCreatedAt()"
-            (ngModelChange)="draftCreatedAt.set($event)"
-            [showIcon]="true"
-            [showButtonBar]="true"
-            [readonlyInput]="true"
-            iconDisplay="button"
-            dateFormat="dd/mm/yy"
-            appendTo="body"
-            styleClass="tickets-filter tickets-filter--date"
-            panelStyleClass="dashboard-sav-datepicker-panel"
-            todayButtonStyleClass="dashboard-sav-datepicker-panel__today"
-            clearButtonStyleClass="dashboard-sav-datepicker-panel__clear"
-            inputId="dashboard-sav-filter-date"
-            placeholder="Date"
-            ariaLabel="Filtrer par date"
-          >
-            <ng-template #triggericon>
-              <img [src]="sharedIcons.date" alt="" />
-            </ng-template>
-          </p-datepicker>
-
-          <button
-            type="button"
-            class="filter-submit"
-            (click)="applyTicketFilters()"
-          >
-            Filtrer
-          </button>
         </div>
 
-        <div class="tickets-card__subheader">
-          <h2>Liste des tickets</h2>
+        <div class="tech-detail__contact-grid">
+          <div class="tech-detail__contact-item">
+            <img [src]="detailIcons.phone" alt="" />
+            <span>{{ technicianDetail.phone }}</span>
+          </div>
 
-          <div class="tickets-card__subheader-actions">
+          <div
+            class="tech-detail__contact-item tech-detail__contact-item--identifier"
+          >
+            <img [src]="detailIcons.identifier" alt="" />
+            <span>{{ technicianDetail.employeeCode }}</span>
+          </div>
+        </div>
+
+        <div class="tech-detail__info-box">
+          <div class="tech-detail__info-row">
+            <img [src]="detailIcons.date" alt="" />
+            <span>Inscription : {{ technicianDetail.joinedOn }}</span>
+          </div>
+
+          <div class="tech-detail__info-row">
+            <span class="tech-detail__status-dot" aria-hidden="true"></span>
+            <span>Contrat : {{ technicianDetail.contractStatus }}</span>
+          </div>
+        </div>
+
+        <button type="button" class="tech-detail__edit-button">
+          <span>Modifier</span>
+
+          <span class="tech-detail__edit-button-icon" aria-hidden="true">
+            <img [src]="detailIcons.edit" alt="" />
+          </span>
+        </button>
+      </article>
+
+      <div class="tech-detail__main">
+        <div class="tech-detail__stats">
+          <article class="detail-stat detail-stat--resolved">
+            <span class="detail-stat__orb" aria-hidden="true">
+              <img [src]="detailIcons.resolved" alt="" />
+            </span>
+
+            <div class="detail-stat__copy">
+              <p>Tickets résolus</p>
+              <strong>{{ technicianDetail.resolvedTickets }}</strong>
+            </div>
+          </article>
+
+          <article class="detail-stat detail-stat--paid">
+            <span class="detail-stat__orb" aria-hidden="true">
+              <img [src]="detailIcons.paid" alt="" />
+            </span>
+
+            <div class="detail-stat__copy">
+              <p>total versés</p>
+              <strong>{{ technicianDetail.totalPaid }}</strong>
+            </div>
+          </article>
+        </div>
+
+        <section class="detail-history">
+          <header class="detail-history__header">
+            <h2>Historique d’interventions</h2>
+
             <label
-              class="tickets-card__search"
-              aria-label="Rechercher un ticket"
+              class="detail-history__search"
+              aria-label="Rechercher dans l’historique"
             >
+              <img [src]="detailIcons.historySearch" alt="" />
               <input
                 type="search"
                 placeholder="Rechercher"
-                [ngModel]="tableSearchTerm()"
-                (ngModelChange)="updateTableSearchTerm($event)"
+                [ngModel]="detailHistorySearchTerm()"
+                (ngModelChange)="updateDetailHistorySearchTerm($event)"
               />
+            </label>
+          </header>
+
+          <div class="detail-history__grid">
+            @if (filteredSelectedTechnicianHistory().length) {
+              @for (
+                intervention of filteredSelectedTechnicianHistory();
+                track intervention.id + '-' + $index
+              ) {
+                <article class="detail-history-card">
+                  <div class="detail-history-card__top">
+                    <div class="detail-history-card__heading">
+                      <p class="detail-history-card__id">
+                        {{ intervention.id }}
+                      </p>
+                      <p class="detail-history-card__issue">
+                        {{ intervention.issue }}
+                      </p>
+                    </div>
+
+                    <span class="detail-history-card__status">
+                      <img [src]="detailIcons.historyStatus" alt="" />
+                      <span>{{ intervention.status }}</span>
+                    </span>
+                  </div>
+
+                  <div class="detail-history-card__body">
+                    <img
+                      class="detail-history-card__avatar"
+                      [src]="intervention.avatar"
+                      [alt]="intervention.client"
+                    />
+
+                    <p class="detail-history-card__client">
+                      {{ intervention.client }}
+                    </p>
+                    <p class="detail-history-card__property">
+                      {{ intervention.property }}
+                    </p>
+                    <p class="detail-history-card__city">
+                      {{ intervention.city }}
+                    </p>
+                  </div>
+
+                  <div class="detail-history-card__footer">
+                    <span class="detail-history-card__date">
+                      {{ intervention.date }}
+                    </span>
+
+                    <button type="button" class="detail-history-card__button">
+                      Voir le ticket
+                    </button>
+                  </div>
+                </article>
+              }
+            } @else {
+              <p class="detail-history__empty">
+                Aucun ticket ne correspond à la recherche en cours.
+              </p>
+            }
+          </div>
+        </section>
+      </div>
+    </section>
+  } @else {
+    <section class="dashboard-sav__summary" data-ubax-motion="surface">
+      <div class="dashboard-sav__welcome">
+        <div class="dashboard-sav__welcome-copy">
+          <h2>Bonjour {{ userFullName() }} !</h2>
+          <p>
+            Consultez rapidement les indicateurs clés de votre agence et suivez
+            l’essentiel de votre activité en temps réel.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="dashboard-sav__add-technician"
+          (click)="openAddTech()"
+        >
+          <span>Ajouter un technicien</span>
+
+          <span class="dashboard-sav__add-technician-icon" aria-hidden="true">
+            <img [src]="heroAddTechnicianIcon" alt="" />
+          </span>
+        </button>
+      </div>
+
+      <section class="stats-grid" data-ubax-motion="surface">
+        @for (metric of statCards(); track metric.label) {
+          <article
+            class="stat-card"
+            [style.--stat-card-accent]="metric.accent"
+            [style.--stat-card-background]="metric.background"
+          >
+            <span class="stat-card__orb" aria-hidden="true">
+              <img class="stat-card__orb-bg" [src]="metric.orbSrc" alt="" />
+              <img class="stat-card__orb-icon" [src]="metric.iconSrc" alt="" />
+            </span>
+
+            <div class="stat-card__copy">
+              <p class="stat-card__label">{{ metric.label }}</p>
+              <p class="stat-card__value">{{ metric.value }}</p>
+            </div>
+          </article>
+        }
+      </section>
+    </section>
+
+    @if (showAllTechnicians()) {
+      <section
+        id="dashboard-sav-technician-directory"
+        class="technician-directory"
+        data-ubax-motion-skip
+      >
+        <header class="technician-directory__header">
+          <h2>Liste des techniciens</h2>
+
+          <div class="technician-directory__actions">
+            <label
+              class="technician-directory__search"
+              aria-label="Rechercher un technicien"
+            >
               <img [src]="sharedIcons.search" alt="" />
+              <input
+                type="search"
+                placeholder="Rechercher"
+                [ngModel]="directorySearchTerm()"
+                (ngModelChange)="updateDirectorySearchTerm($event)"
+              />
             </label>
 
             <button
               type="button"
-              class="tickets-card__all"
-              (click)="clearTicketFilters()"
-            >
-              Tout voir
-            </button>
-          </div>
-        </div>
-
-        <div class="ticket-table">
-          @if (visibleTickets().length) {
-            <div class="ticket-table__scroll">
-              <div class="ticket-table__head">
-                <span>ID Ticket</span>
-                <span>Client</span>
-                <span>Biens concernés</span>
-                <span>Problème</span>
-                <span>Priorité</span>
-                <span>Crée le</span>
-                <span>Statut</span>
-                <span>Détails</span>
-              </div>
-
-              <div class="ticket-table__body">
-                @for (
-                  ticket of paginatedTickets();
-                  track trackByTicketId($index, ticket)
-                ) {
-                  <div class="ticket-row">
-                    <span class="ticket-row__id">{{ ticket.id }}</span>
-
-                    <div class="ticket-row__client">
-                      <img [src]="ticket.avatar" [alt]="ticket.client" />
-                      <span>{{ ticket.client }}</span>
-                    </div>
-
-                    <span>{{ ticket.property }}</span>
-                    <span>{{ ticket.issue }}</span>
-
-                    <span
-                      class="ticket-row__priority"
-                      [class.ticket-row__priority--urgent]="
-                        ticket.priorityTone === 'urgent'
-                      "
-                    >
-                      {{ ticket.priority }}
-                    </span>
-
-                    <span>{{ ticket.createdAtLabel }}</span>
-
-                    <span
-                      class="ticket-row__status"
-                      [class.ticket-row__status--open]="
-                        ticket.statusTone === 'open'
-                      "
-                      [class.ticket-row__status--progress]="
-                        ticket.statusTone === 'progress'
-                      "
-                      [class.ticket-row__status--success]="
-                        ticket.statusTone === 'success'
-                      "
-                    >
-                      {{ ticket.status }}
-                    </span>
-
-                    <button type="button" class="ticket-row__action">
-                      Détails
-                    </button>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <footer class="tickets-card__footer">
-              <p class="tickets-card__results">{{ ticketResultsLabel() }}</p>
-
-              <ubax-paginator
-                [(currentPage)]="ticketsCurrentPage"
-                [totalPages]="ticketTotalPages()"
-              />
-            </footer>
-          } @else {
-            <div class="ticket-table__empty">
-              Aucun ticket ne correspond aux filtres en cours.
-            </div>
-          }
-        </div>
-      </article>
-
-      <aside
-        class="notifications-card"
-        data-ubax-motion-skip
-        aria-labelledby="dashboard-sav-notifications-title"
-      >
-        <header class="notifications-card__header">
-          <h2 id="dashboard-sav-notifications-title">Derniers notifications</h2>
-
-          @if (canToggleNotifications()) {
-            <button
-              type="button"
-              class="notifications-card__toggle"
-              (click)="toggleNotifications()"
-            >
-              {{ notificationToggleLabel() }}
-            </button>
-          }
-        </header>
-
-        <div class="notifications-card__list">
-          @if (displayedNotifications().length) {
-            @for (
-              item of displayedNotifications();
-              track trackByNotificationId($index, item)
-            ) {
-              <article class="notification-item">
-                <span class="notification-item__media" aria-hidden="true">
-                  <img
-                    class="notification-item__media-bg"
-                    [src]="item.iconBackground"
-                    alt=""
-                  />
-                  <img
-                    class="notification-item__media-icon"
-                    [src]="item.iconSrc"
-                    alt=""
-                  />
-                </span>
-
-                <div class="notification-item__copy">
-                  <div class="notification-item__headline">
-                    <h3 [style.color]="item.accent">{{ item.title }}</h3>
-                    <span>{{ item.ticketId }}</span>
-                  </div>
-
-                  <div class="notification-item__subline">
-                    <p>{{ item.property }}</p>
-                    <small>{{ item.time }}</small>
-                  </div>
-                </div>
-              </article>
-            }
-          } @else {
-            <p class="notifications-card__empty">
-              Aucune notification pour cette sélection.
-            </p>
-          }
-        </div>
-      </aside>
-    </div>
-
-    <div class="dashboard-sav__bottom-grid">
-      <article class="interventions-card" data-ubax-motion-skip>
-        <header class="interventions-card__header">
-          <h2>Les interventions</h2>
-
-          <p-select
-            [options]="interventionPeriodOptions"
-            [ngModel]="selectedInterventionPeriod()"
-            (ngModelChange)="selectInterventionPeriod($event)"
-            optionLabel="label"
-            optionValue="value"
-            appendTo="body"
-            styleClass="interventions-period-select"
-            panelStyleClass="tickets-filter-panel"
-            inputId="dashboard-sav-interventions-period"
-            ariaLabel="Choisir la période des interventions"
-          >
-            <ng-template #dropdownicon>
-              <img [src]="sharedIcons.chevron" alt="" />
-            </ng-template>
-          </p-select>
-        </header>
-
-        <div class="interventions-card__chart">
-          <ubax-lazy-chart
-            type="doughnut"
-            [data]="interventionsChartData()"
-            [options]="interventionsChartOptions"
-            ariaLabel="Répartition des interventions"
-          />
-
-          <div class="interventions-card__chart-center">
-            <span>Total</span>
-            <strong>{{ interventionsTotal() }}</strong>
-          </div>
-        </div>
-
-        <div class="interventions-card__legend">
-          @for (item of interventionLegend(); track item.label) {
-            <div class="interventions-card__legend-item">
-              <span
-                class="interventions-card__legend-dot"
-                [style.background]="item.color"
-              ></span>
-              <span class="interventions-card__legend-label">{{
-                item.label
-              }}</span>
-              <strong>{{ item.count }}</strong>
-            </div>
-          }
-        </div>
-      </article>
-
-      <article class="technicians-card" data-ubax-motion-skip>
-        <header class="technicians-card__header">
-          <h2>Technicien en activité</h2>
-
-          @if (canToggleTechnicians()) {
-            <button
-              type="button"
-              class="technicians-card__toggle"
+              class="technician-directory__collapse"
               (click)="toggleTechnicians()"
             >
-              {{ technicianToggleLabel() }}
+              Réduire
             </button>
-          }
+          </div>
         </header>
 
-        <div class="technicians-card__grid">
-          @if (displayedTechnicians().length) {
+        <div class="technician-directory__grid">
+          @if (filteredTechnicians().length) {
             @for (
-              technician of displayedTechnicians();
+              technician of filteredTechnicians();
               track trackByTechnicianId($index, technician)
             ) {
-              <article class="dashboard-tech-card">
+              <article
+                class="dashboard-tech-card dashboard-tech-card--directory"
+                [style.view-transition-name]="
+                  technicianShellTransitionName(technician.id)
+                "
+              >
                 <div class="dashboard-tech-card__top">
                   <img
                     class="dashboard-tech-card__avatar"
                     [src]="technician.image"
                     [alt]="technician.name"
+                    [style.view-transition-name]="
+                      technicianAvatarTransitionName(technician.id)
+                    "
                   />
 
                   <div class="dashboard-tech-card__identity">
-                    <h3>{{ technician.name }}</h3>
-                    <p>{{ technician.specialty }}</p>
+                    <h3
+                      [style.view-transition-name]="
+                        technicianNameTransitionName(technician.id)
+                      "
+                    >
+                      {{ technician.name }}
+                    </h3>
+                    <p
+                      [style.view-transition-name]="
+                        technicianSpecialtyTransitionName(technician.id)
+                      "
+                    >
+                      {{ technician.specialty }}
+                    </p>
                   </div>
                 </div>
 
@@ -562,20 +402,429 @@
                     <span>{{ technician.phone }}</span>
                   </div>
 
-                  <button type="button" class="dashboard-tech-card__button">
+                  <button
+                    type="button"
+                    class="dashboard-tech-card__button"
+                    (click)="openTechnicianDetail(technician)"
+                  >
                     Voir fiche
                   </button>
                 </div>
               </article>
             }
           } @else {
-            <p class="technicians-card__empty">
+            <p class="technician-directory__empty">
               Aucun technicien ne correspond à la recherche en cours.
             </p>
           }
         </div>
-      </article>
-    </div>
+      </section>
+    } @else {
+      <div class="dashboard-sav__content-grid">
+        <article class="tickets-card" data-ubax-motion-skip>
+          <div class="tickets-card__filters">
+            <p-select
+              [options]="statusOptions"
+              [ngModel]="draftStatus()"
+              (ngModelChange)="draftStatus.set($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="tickets-filter"
+              panelStyleClass="tickets-filter-panel"
+              inputId="dashboard-sav-filter-status"
+              ariaLabel="Filtrer par statut"
+            >
+              <ng-template #dropdownicon>
+                <img [src]="sharedIcons.chevron" alt="" />
+              </ng-template>
+            </p-select>
+
+            <p-select
+              [options]="priorityOptions"
+              [ngModel]="draftPriority()"
+              (ngModelChange)="draftPriority.set($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="tickets-filter"
+              panelStyleClass="tickets-filter-panel"
+              inputId="dashboard-sav-filter-priority"
+              ariaLabel="Filtrer par priorité"
+            >
+              <ng-template #dropdownicon>
+                <img [src]="sharedIcons.chevron" alt="" />
+              </ng-template>
+            </p-select>
+
+            <p-select
+              [options]="issueOptions"
+              [ngModel]="draftIssue()"
+              (ngModelChange)="draftIssue.set($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="tickets-filter tickets-filter--wide"
+              panelStyleClass="tickets-filter-panel"
+              inputId="dashboard-sav-filter-issue"
+              ariaLabel="Filtrer par type de problème"
+            >
+              <ng-template #dropdownicon>
+                <img [src]="sharedIcons.chevron" alt="" />
+              </ng-template>
+            </p-select>
+
+            <p-datepicker
+              [ngModel]="draftCreatedAt()"
+              (ngModelChange)="draftCreatedAt.set($event)"
+              [showIcon]="true"
+              [showButtonBar]="true"
+              [readonlyInput]="true"
+              iconDisplay="button"
+              dateFormat="dd/mm/yy"
+              appendTo="body"
+              styleClass="tickets-filter tickets-filter--date"
+              panelStyleClass="dashboard-sav-datepicker-panel"
+              todayButtonStyleClass="dashboard-sav-datepicker-panel__today"
+              clearButtonStyleClass="dashboard-sav-datepicker-panel__clear"
+              inputId="dashboard-sav-filter-date"
+              placeholder="Date"
+              ariaLabel="Filtrer par date"
+            >
+              <ng-template #triggericon>
+                <img [src]="sharedIcons.date" alt="" />
+              </ng-template>
+            </p-datepicker>
+
+            <button
+              type="button"
+              class="filter-submit"
+              (click)="applyTicketFilters()"
+            >
+              Filtrer
+            </button>
+          </div>
+
+          <div class="tickets-card__subheader">
+            <h2>Liste des tickets</h2>
+
+            <div class="tickets-card__subheader-actions">
+              <label
+                class="tickets-card__search"
+                aria-label="Rechercher un ticket"
+              >
+                <input
+                  type="search"
+                  placeholder="Rechercher"
+                  [ngModel]="tableSearchTerm()"
+                  (ngModelChange)="updateTableSearchTerm($event)"
+                />
+                <img [src]="sharedIcons.search" alt="" />
+              </label>
+
+              <button
+                type="button"
+                class="tickets-card__all"
+                (click)="clearTicketFilters()"
+              >
+                Tout voir
+              </button>
+            </div>
+          </div>
+
+          <div class="ticket-table">
+            @if (visibleTickets().length) {
+              <div class="ticket-table__scroll">
+                <div class="ticket-table__head">
+                  <span>ID Ticket</span>
+                  <span>Client</span>
+                  <span>Biens concernés</span>
+                  <span>Problème</span>
+                  <span>Priorité</span>
+                  <span>Crée le</span>
+                  <span>Statut</span>
+                  <span>Détails</span>
+                </div>
+
+                <div class="ticket-table__body">
+                  @for (
+                    ticket of paginatedTickets();
+                    track trackByTicketId($index, ticket)
+                  ) {
+                    <div class="ticket-row">
+                      <span class="ticket-row__id">{{ ticket.id }}</span>
+
+                      <div class="ticket-row__client">
+                        <img [src]="ticket.avatar" [alt]="ticket.client" />
+                        <span>{{ ticket.client }}</span>
+                      </div>
+
+                      <span>{{ ticket.property }}</span>
+                      <span>{{ ticket.issue }}</span>
+
+                      <span
+                        class="ticket-row__priority"
+                        [class.ticket-row__priority--urgent]="
+                          ticket.priorityTone === 'urgent'
+                        "
+                      >
+                        {{ ticket.priority }}
+                      </span>
+
+                      <span>{{ ticket.createdAtLabel }}</span>
+
+                      <span
+                        class="ticket-row__status"
+                        [class.ticket-row__status--open]="
+                          ticket.statusTone === 'open'
+                        "
+                        [class.ticket-row__status--progress]="
+                          ticket.statusTone === 'progress'
+                        "
+                        [class.ticket-row__status--success]="
+                          ticket.statusTone === 'success'
+                        "
+                      >
+                        {{ ticket.status }}
+                      </span>
+
+                      <button type="button" class="ticket-row__action">
+                        Détails
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <footer class="tickets-card__footer">
+                <p class="tickets-card__results">{{ ticketResultsLabel() }}</p>
+
+                <ubax-paginator
+                  [(currentPage)]="ticketsCurrentPage"
+                  [totalPages]="ticketTotalPages()"
+                />
+              </footer>
+            } @else {
+              <div class="ticket-table__empty">
+                Aucun ticket ne correspond aux filtres en cours.
+              </div>
+            }
+          </div>
+        </article>
+
+        <aside
+          class="notifications-card"
+          data-ubax-motion-skip
+          aria-labelledby="dashboard-sav-notifications-title"
+        >
+          <header class="notifications-card__header">
+            <h2 id="dashboard-sav-notifications-title">
+              Derniers notifications
+            </h2>
+
+            @if (canToggleNotifications()) {
+              <button
+                type="button"
+                class="notifications-card__toggle"
+                (click)="toggleNotifications()"
+              >
+                {{ notificationToggleLabel() }}
+              </button>
+            }
+          </header>
+
+          <div class="notifications-card__list">
+            @if (displayedNotifications().length) {
+              @for (
+                item of displayedNotifications();
+                track trackByNotificationId($index, item)
+              ) {
+                <article class="notification-item">
+                  <span class="notification-item__media" aria-hidden="true">
+                    <img
+                      class="notification-item__media-bg"
+                      [src]="item.iconBackground"
+                      alt=""
+                    />
+                    <img
+                      class="notification-item__media-icon"
+                      [src]="item.iconSrc"
+                      alt=""
+                    />
+                  </span>
+
+                  <div class="notification-item__copy">
+                    <div class="notification-item__headline">
+                      <h3 [style.color]="item.accent">{{ item.title }}</h3>
+                      <span>{{ item.ticketId }}</span>
+                    </div>
+
+                    <div class="notification-item__subline">
+                      <p>{{ item.property }}</p>
+                      <small>{{ item.time }}</small>
+                    </div>
+                  </div>
+                </article>
+              }
+            } @else {
+              <p class="notifications-card__empty">
+                Aucune notification pour cette sélection.
+              </p>
+            }
+          </div>
+        </aside>
+      </div>
+
+      <div class="dashboard-sav__bottom-grid">
+        <article class="interventions-card" data-ubax-motion-skip>
+          <header class="interventions-card__header">
+            <h2>Les interventions</h2>
+
+            <p-select
+              [options]="interventionPeriodOptions"
+              [ngModel]="selectedInterventionPeriod()"
+              (ngModelChange)="selectInterventionPeriod($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="interventions-period-select"
+              panelStyleClass="tickets-filter-panel"
+              inputId="dashboard-sav-interventions-period"
+              ariaLabel="Choisir la période des interventions"
+            >
+              <ng-template #dropdownicon>
+                <img [src]="sharedIcons.chevron" alt="" />
+              </ng-template>
+            </p-select>
+          </header>
+
+          <div class="interventions-card__chart">
+            <ubax-lazy-chart
+              type="doughnut"
+              [data]="interventionsChartData()"
+              [options]="interventionsChartOptions"
+              ariaLabel="Répartition des interventions"
+            />
+
+            <div class="interventions-card__chart-center">
+              <span>Total</span>
+              <strong>{{ interventionsTotal() }}</strong>
+            </div>
+          </div>
+
+          <div class="interventions-card__legend">
+            @for (item of interventionLegend(); track item.label) {
+              <div class="interventions-card__legend-item">
+                <span
+                  class="interventions-card__legend-dot"
+                  [style.background]="item.color"
+                ></span>
+                <span class="interventions-card__legend-label">{{
+                  item.label
+                }}</span>
+                <strong>{{ item.count }}</strong>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="technicians-card" data-ubax-motion-skip>
+          <header class="technicians-card__header">
+            <h2>Technicien en activité</h2>
+
+            @if (canToggleTechnicians()) {
+              <button
+                type="button"
+                class="technicians-card__toggle"
+                (click)="toggleTechnicians()"
+              >
+                {{ technicianToggleLabel() }}
+              </button>
+            }
+          </header>
+
+          <div class="technicians-card__grid">
+            @if (displayedTechnicians().length) {
+              @for (
+                technician of displayedTechnicians();
+                track trackByTechnicianId($index, technician)
+              ) {
+                <article
+                  class="dashboard-tech-card"
+                  [style.view-transition-name]="
+                    technicianShellTransitionName(technician.id)
+                  "
+                >
+                  <div class="dashboard-tech-card__top">
+                    <img
+                      class="dashboard-tech-card__avatar"
+                      [src]="technician.image"
+                      [alt]="technician.name"
+                      [style.view-transition-name]="
+                        technicianAvatarTransitionName(technician.id)
+                      "
+                    />
+
+                    <div class="dashboard-tech-card__identity">
+                      <h3
+                        [style.view-transition-name]="
+                          technicianNameTransitionName(technician.id)
+                        "
+                      >
+                        {{ technician.name }}
+                      </h3>
+                      <p
+                        [style.view-transition-name]="
+                          technicianSpecialtyTransitionName(technician.id)
+                        "
+                      >
+                        {{ technician.specialty }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="dashboard-tech-card__rating">
+                    <div class="dashboard-tech-card__stars" aria-hidden="true">
+                      @for (
+                        star of ratingStars(technician.rating);
+                        track $index
+                      ) {
+                        <img [src]="starIcons()[star]" alt="" />
+                      }
+                    </div>
+                    <span>{{ technician.rating }}</span>
+                  </div>
+
+                  <div class="dashboard-tech-card__meta">
+                    <img [src]="technicianTicketIcon" alt="" />
+                    <span>Ticket en cour : {{ technician.tickets }}</span>
+                  </div>
+
+                  <div class="dashboard-tech-card__footer">
+                    <div class="dashboard-tech-card__phone">
+                      <img [src]="technicianPhoneIcon" alt="" />
+                      <span>{{ technician.phone }}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="dashboard-tech-card__button"
+                      (click)="openTechnicianDetail(technician)"
+                    >
+                      Voir fiche
+                    </button>
+                  </div>
+                </article>
+              }
+            } @else {
+              <p class="technicians-card__empty">
+                Aucun technicien ne correspond à la recherche en cours.
+              </p>
+            }
+          </div>
+        </article>
+      </div>
+    }
   }
 </div>
 
@@ -615,7 +864,9 @@
           accept="image/*"
           (change)="handlePhotoChange($event)"
         />
-        <label class="at-photo__link" for="at-photo-input">Modifier la photo</label>
+        <label class="at-photo__link" for="at-photo-input"
+          >Modifier la photo</label
+        >
       </div>
 
       <div class="at-form">
