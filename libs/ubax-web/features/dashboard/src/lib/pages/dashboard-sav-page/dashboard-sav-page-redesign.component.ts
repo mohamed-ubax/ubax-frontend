@@ -123,6 +123,7 @@ const TECHNICIAN_AVATAR_COUNT = 8;
 const DEFAULT_VISIBLE_TECHNICIANS = 5;
 const DEFAULT_VISIBLE_NOTIFICATIONS = 5;
 const TICKETS_PER_PAGE = 4;
+const PHASE_TRANSITION_DURATION_MS = 260;
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
   day: '2-digit',
@@ -753,9 +754,10 @@ export class DashboardSavPageComponent {
   readonly showAllNotifications = signal(false);
   readonly showAllTechnicians = signal(false);
   readonly selectedTechnicianId = signal<string | null>(null);
-  readonly transitionPhase = signal<'idle' | 'to-directory' | 'to-dashboard'>(
-    'idle',
-  );
+  readonly transitioningTechnicianId = signal<string | null>(null);
+  readonly transitionPhase = signal<
+    'idle' | 'to-directory' | 'to-dashboard' | 'to-detail' | 'from-detail'
+  >('idle');
   readonly selectedInterventionPeriod =
     signal<DashboardSavInterventionPeriod>('current-month');
 
@@ -1331,19 +1333,108 @@ export class DashboardSavPageComponent {
     this.detailHistorySearchTerm.set(term);
   }
 
+  technicianShellTransitionName(technicianId: string): string | null {
+    return this.transitioningTechnicianId() === technicianId
+      ? this.toViewTransitionToken(`technician-shell-${technicianId}`)
+      : null;
+  }
+
+  technicianAvatarTransitionName(technicianId: string): string | null {
+    return this.transitioningTechnicianId() === technicianId
+      ? this.toViewTransitionToken(`technician-avatar-${technicianId}`)
+      : null;
+  }
+
+  technicianNameTransitionName(technicianId: string): string | null {
+    return this.transitioningTechnicianId() === technicianId
+      ? this.toViewTransitionToken(`technician-name-${technicianId}`)
+      : null;
+  }
+
+  technicianSpecialtyTransitionName(technicianId: string): string | null {
+    return this.transitioningTechnicianId() === technicianId
+      ? this.toViewTransitionToken(`technician-specialty-${technicianId}`)
+      : null;
+  }
+
   toggleNotifications(): void {
     this.showAllNotifications.update((value) => !value);
   }
 
   openTechnicianDetail(technician: DashboardSavTechnician): void {
-    this.selectedTechnicianId.set(technician.id);
-    this.detailHistorySearchTerm.set('');
-    this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
+    if (this.transitionPhase() !== 'idle') {
+      return;
+    }
+
+    this.transitioningTechnicianId.set(technician.id);
+
+    const startViewTransition = this.document.startViewTransition?.bind(
+      this.document,
+    );
+
+    if (startViewTransition) {
+      const transition = startViewTransition(() => {
+        this.selectedTechnicianId.set(technician.id);
+        this.detailHistorySearchTerm.set('');
+      });
+
+      this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
+      void transition.finished.finally(() => {
+        this.transitioningTechnicianId.set(null);
+      });
+      return;
+    }
+
+    this.transitionPhase.set('to-detail');
+
+    setTimeout(() => {
+      this.selectedTechnicianId.set(technician.id);
+      this.detailHistorySearchTerm.set('');
+      this.transitionPhase.set('idle');
+      this.transitioningTechnicianId.set(null);
+      this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
+    }, PHASE_TRANSITION_DURATION_MS);
   }
 
   closeTechnicianDetail(): void {
-    this.selectedTechnicianId.set(null);
-    this.detailHistorySearchTerm.set('');
+    if (this.transitionPhase() !== 'idle') {
+      return;
+    }
+
+    const technicianId = this.selectedTechnicianId();
+
+    if (!technicianId) {
+      return;
+    }
+
+    this.transitioningTechnicianId.set(technicianId);
+
+    const startViewTransition = this.document.startViewTransition?.bind(
+      this.document,
+    );
+
+    if (startViewTransition) {
+      const transition = startViewTransition(() => {
+        this.selectedTechnicianId.set(null);
+        this.detailHistorySearchTerm.set('');
+      });
+
+      this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
+      void transition.finished.finally(() => {
+        this.transitioningTechnicianId.set(null);
+      });
+      return;
+    }
+
+    this.transitionPhase.set('from-detail');
+
+    setTimeout(() => {
+      this.selectedTechnicianId.set(null);
+      this.detailHistorySearchTerm.set('');
+      this.transitionPhase.set('idle');
+      this.transitioningTechnicianId.set(null);
+      this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
+    }, PHASE_TRANSITION_DURATION_MS);
   }
 
   toggleTechnicians(): void {
@@ -1359,14 +1450,14 @@ export class DashboardSavPageComponent {
         this.showAllTechnicians.set(true);
         this.transitionPhase.set('idle');
         this.scrollToTechnicianDirectory();
-      }, 260);
+      }, PHASE_TRANSITION_DURATION_MS);
     } else {
       this.transitionPhase.set('to-dashboard');
       setTimeout(() => {
         this.showAllTechnicians.set(false);
         this.directorySearchTerm.set('');
         this.transitionPhase.set('idle');
-      }, 260);
+      }, PHASE_TRANSITION_DURATION_MS);
     }
   }
 
@@ -1483,6 +1574,10 @@ export class DashboardSavPageComponent {
         .getElementById('dashboard-sav-technician-directory')
         ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+  }
+
+  private toViewTransitionToken(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
   }
 
   private downloadCsv(

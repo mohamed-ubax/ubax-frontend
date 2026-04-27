@@ -29,6 +29,24 @@
       object-fit: contain;
     }
   }
+
+  &.is-transitioning-to-detail {
+    .dashboard-sav__summary,
+    .dashboard-sav__content-grid,
+    .dashboard-sav__bottom-grid,
+    .technician-directory {
+      animation: phaseExitUp 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+      pointer-events: none;
+    }
+  }
+
+  &.is-transitioning-from-detail {
+    .dashboard-sav__detail-heading,
+    .tech-detail {
+      animation: phaseExitDown 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+      pointer-events: none;
+    }
+  }
 }
 
 .tech-detail {

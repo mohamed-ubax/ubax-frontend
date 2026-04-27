@@ -118,6 +118,7 @@ export class UbaxAutoMotionDirective implements AfterViewInit {
       .forEach((element) => {
         element.classList.remove('is-visible');
         delete element.dataset['ubaxMotion'];
+        delete element.dataset['ubaxMotionRegistered'];
         element.style.removeProperty('--ubax-motion-delay');
       });
   }
@@ -126,10 +127,41 @@ export class UbaxAutoMotionDirective implements AfterViewInit {
     const pageRoots = Array.from(this.host.children).filter(
       (element): element is HTMLElement => element instanceof HTMLElement,
     );
+    let declaredSurfaceCount = 0;
+    let declaredItemCount = 0;
 
     pageRoots.forEach((pageRoot, pageIndex) => {
       this.registerTarget(pageRoot, 'page', pageIndex);
       this.scanPageRoot(pageRoot);
+
+      pageRoot
+        .querySelectorAll<HTMLElement>('[data-ubax-motion]')
+        .forEach((element) => {
+          const declaredMotionKind = this.readDeclaredMotionKind(element);
+
+          if (
+            !declaredMotionKind ||
+            element.dataset['ubaxMotionSkip'] !== undefined
+          ) {
+            return;
+          }
+
+          if (declaredMotionKind === 'page') {
+            this.registerTarget(element, declaredMotionKind, pageIndex + 1);
+            return;
+          }
+
+          if (declaredMotionKind === 'surface') {
+            this.registerTarget(
+              element,
+              declaredMotionKind,
+              declaredSurfaceCount++,
+            );
+            return;
+          }
+
+          this.registerTarget(element, declaredMotionKind, declaredItemCount++);
+        });
     });
   }
 
@@ -235,7 +267,9 @@ export class UbaxAutoMotionDirective implements AfterViewInit {
     motionKind: MotionKind,
     index: number,
   ): void {
-    if (element.dataset['ubaxMotion']) {
+    element.dataset['ubaxMotion'] = motionKind;
+
+    if (element.dataset['ubaxMotionRegistered'] === 'true') {
       return;
     }
 
@@ -248,10 +282,24 @@ export class UbaxAutoMotionDirective implements AfterViewInit {
       delay = cappedIndex * 46;
     }
 
-    element.dataset['ubaxMotion'] = motionKind;
+    element.dataset['ubaxMotionRegistered'] = 'true';
     element.style.setProperty('--ubax-motion-delay', `${delay}ms`);
 
     this.observer?.observe(element);
+  }
+
+  private readDeclaredMotionKind(element: HTMLElement): MotionKind | null {
+    const declaredMotion = element.dataset['ubaxMotion'];
+
+    if (
+      declaredMotion === 'page' ||
+      declaredMotion === 'surface' ||
+      declaredMotion === 'item'
+    ) {
+      return declaredMotion;
+    }
+
+    return null;
   }
 
   private matchesAnyToken(tokens: string[], pattern: RegExp): boolean {

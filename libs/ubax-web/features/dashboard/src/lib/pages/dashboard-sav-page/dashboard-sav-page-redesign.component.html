@@ -3,6 +3,8 @@
   data-ubax-motion="page"
   [class.is-transitioning-to-directory]="transitionPhase() === 'to-directory'"
   [class.is-transitioning-to-dashboard]="transitionPhase() === 'to-dashboard'"
+  [class.is-transitioning-to-detail]="transitionPhase() === 'to-detail'"
+  [class.is-transitioning-from-detail]="transitionPhase() === 'from-detail'"
 >
   <header class="dashboard-sav__hero">
     @if (selectedTechnicianDetail()) {
@@ -86,16 +88,36 @@
 
   @if (selectedTechnicianDetail(); as technicianDetail) {
     <section class="tech-detail">
-      <article class="tech-detail__sidebar">
+      <article
+        class="tech-detail__sidebar"
+        [style.view-transition-name]="
+          technicianShellTransitionName(technicianDetail.id)
+        "
+      >
         <div class="tech-detail__profile-shell">
           <img
             class="tech-detail__profile-avatar"
             [src]="technicianDetail.profileImage"
             [alt]="technicianDetail.name"
+            [style.view-transition-name]="
+              technicianAvatarTransitionName(technicianDetail.id)
+            "
           />
 
-          <h2 class="tech-detail__profile-name">{{ technicianDetail.name }}</h2>
-          <p class="tech-detail__profile-specialty">
+          <h2
+            class="tech-detail__profile-name"
+            [style.view-transition-name]="
+              technicianNameTransitionName(technicianDetail.id)
+            "
+          >
+            {{ technicianDetail.name }}
+          </h2>
+          <p
+            class="tech-detail__profile-specialty"
+            [style.view-transition-name]="
+              technicianSpecialtyTransitionName(technicianDetail.id)
+            "
+          >
             {{ technicianDetail.specialty }}
           </p>
         </div>
@@ -325,17 +347,35 @@
             ) {
               <article
                 class="dashboard-tech-card dashboard-tech-card--directory"
+                [style.view-transition-name]="
+                  technicianShellTransitionName(technician.id)
+                "
               >
                 <div class="dashboard-tech-card__top">
                   <img
                     class="dashboard-tech-card__avatar"
                     [src]="technician.image"
                     [alt]="technician.name"
+                    [style.view-transition-name]="
+                      technicianAvatarTransitionName(technician.id)
+                    "
                   />
 
                   <div class="dashboard-tech-card__identity">
-                    <h3>{{ technician.name }}</h3>
-                    <p>{{ technician.specialty }}</p>
+                    <h3
+                      [style.view-transition-name]="
+                        technicianNameTransitionName(technician.id)
+                      "
+                    >
+                      {{ technician.name }}
+                    </h3>
+                    <p
+                      [style.view-transition-name]="
+                        technicianSpecialtyTransitionName(technician.id)
+                      "
+                    >
+                      {{ technician.specialty }}
+                    </p>
                   </div>
                 </div>
 
@@ -709,17 +749,37 @@
                 technician of displayedTechnicians();
                 track trackByTechnicianId($index, technician)
               ) {
-                <article class="dashboard-tech-card">
+                <article
+                  class="dashboard-tech-card"
+                  [style.view-transition-name]="
+                    technicianShellTransitionName(technician.id)
+                  "
+                >
                   <div class="dashboard-tech-card__top">
                     <img
                       class="dashboard-tech-card__avatar"
                       [src]="technician.image"
                       [alt]="technician.name"
+                      [style.view-transition-name]="
+                        technicianAvatarTransitionName(technician.id)
+                      "
                     />
 
                     <div class="dashboard-tech-card__identity">
-                      <h3>{{ technician.name }}</h3>
-                      <p>{{ technician.specialty }}</p>
+                      <h3
+                        [style.view-transition-name]="
+                          technicianNameTransitionName(technician.id)
+                        "
+                      >
+                        {{ technician.name }}
+                      </h3>
+                      <p
+                        [style.view-transition-name]="
+                          technicianSpecialtyTransitionName(technician.id)
+                        "
+                      >
+                        {{ technician.specialty }}
+                      </p>
                     </div>
                   </div>
 
