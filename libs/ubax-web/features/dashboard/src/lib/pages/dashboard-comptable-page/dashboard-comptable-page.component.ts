@@ -17,6 +17,12 @@ import { DateRange, DateRangePickerComponent } from '@ubax-workspace/shared-ui';
 
 type DashboardPeriod = 'Jour' | 'Mois' | 'Année';
 type DashboardExpenseLinkMode = 'property' | 'agency';
+type DashboardExpenseDropdown =
+  | 'category'
+  | 'payment'
+  | 'property'
+  | 'provider'
+  | null;
 
 interface DashboardKpiCard {
   readonly label: string;
@@ -66,8 +72,16 @@ interface DashboardExpensePropertyOption {
 }
 
 interface DashboardExpenseUpload {
+  readonly id: string;
   readonly name: string;
   readonly sizeLabel: string;
+}
+
+interface DashboardExpenseCalendarDay {
+  readonly date: Date;
+  readonly label: string;
+  readonly muted: boolean;
+  readonly active: boolean;
 }
 
 interface DashboardOverdueItem {
@@ -393,12 +407,85 @@ const EXPENSE_PROVIDER_OPTIONS = [
   'Kouamé Patrick',
 ] as const;
 
-const DEFAULT_EXPENSE_UPLOAD: DashboardExpenseUpload = {
-  name: 'Facture .pdf',
-  sizeLabel: '169 KB',
-};
-
 const MODAL_CLOSE_DURATION_MS = 220;
+const DEFAULT_EXPENSE_DATE = new Date(2026, 10, 14);
+const EXPENSE_CALENDAR_WEEKDAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
+
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function formatExpenseFormDate(date: Date): string {
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
+}
+
+function formatExpenseMonthLabel(date: Date): string {
+  const formatted = new Intl.DateTimeFormat('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
+function buildExpenseCalendarWeeks(
+  displayMonth: Date,
+  activeDate: Date,
+): DashboardExpenseCalendarDay[][] {
+  const firstDay = new Date(
+    displayMonth.getFullYear(),
+    displayMonth.getMonth(),
+    1,
+  );
+  const lastDay = new Date(
+    displayMonth.getFullYear(),
+    displayMonth.getMonth() + 1,
+    0,
+  );
+  const startOffset = (firstDay.getDay() + 6) % 7;
+  const weekCount = Math.ceil((startOffset + lastDay.getDate()) / 7);
+  const gridStart = new Date(
+    displayMonth.getFullYear(),
+    displayMonth.getMonth(),
+    1 - startOffset,
+  );
+  const weeks: DashboardExpenseCalendarDay[][] = [];
+
+  for (let weekIndex = 0; weekIndex < weekCount; weekIndex += 1) {
+    const week: DashboardExpenseCalendarDay[] = [];
+
+    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
+      const cellDate = new Date(gridStart);
+      cellDate.setDate(gridStart.getDate() + weekIndex * 7 + dayIndex);
+
+      week.push({
+        date: cellDate,
+        label: cellDate.getDate().toString(),
+        muted: cellDate.getMonth() !== displayMonth.getMonth(),
+        active:
+          cellDate.getFullYear() === activeDate.getFullYear() &&
+          cellDate.getMonth() === activeDate.getMonth() &&
+          cellDate.getDate() === activeDate.getDate(),
+      });
+    }
+
+    weeks.push(week);
+  }
+
+  return weeks;
+}
+
+function formatFileSize(size: number): string {
+  if (size >= 1024 * 1024) {
+    return `${(size / (1024 * 1024)).toFixed(1).replace(/\.0$/, '')} MB`;
+  }
+
+  return `${Math.max(1, Math.round(size / 1024))} KB`;
+}
 
 function formatFcfa(amount: number): string {
   return `${new Intl.NumberFormat('fr-FR').format(amount).replace(/\u202f/g, ' ')} FCFA`;
@@ -571,6 +658,16 @@ export class DashboardComptablePageComponent {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private closeExpenseTimeout: ReturnType<typeof setTimeout> | null = null;
+  private scrollLockState: {
+    readonly htmlOverflow: string;
+    readonly bodyOverflow: string;
+    readonly bodyTouchAction: string;
+    readonly bodyPosition: string;
+    readonly bodyTop: string;
+    readonly bodyWidth: string;
+    readonly bodyHadOverlayClass: boolean;
+    readonly scrollY: number;
+  } | null = null;
 
   protected readonly datePickerOpen = signal(false);
   protected readonly selectedRange = signal<DateRange | null>(null);
@@ -593,19 +690,36 @@ export class DashboardComptablePageComponent {
   protected readonly draftProvider = signal<string>(
     EXPENSE_PROVIDER_OPTIONS[0] ?? '',
   );
-  protected readonly draftDate = signal('14/11/2026');
+  protected readonly draftDate = signal<Date>(startOfDay(DEFAULT_EXPENSE_DATE));
   protected readonly draftExpenseLinkMode =
     signal<DashboardExpenseLinkMode>('property');
-  protected readonly draftUpload = signal<DashboardExpenseUpload | null>(
-    DEFAULT_EXPENSE_UPLOAD,
+  protected readonly draftUploads = signal<DashboardExpenseUpload[]>([]);
+  protected readonly activeExpenseDropdown =
+    signal<DashboardExpenseDropdown>(null);
+  protected readonly expenseDatePickerOpen = signal(false);
+  protected readonly expenseCalendarMonth = signal(
+    new Date(
+      DEFAULT_EXPENSE_DATE.getFullYear(),
+      DEFAULT_EXPENSE_DATE.getMonth(),
+      1,
+    ),
   );
 
   constructor() {
     effect(() => {
+      const isOverlayVisible =
+        this.addExpenseOpen() || this.addExpenseClosing();
+
       this.document.body.classList.toggle(
         'ubax-dashboard-overlay-open',
-        this.addExpenseOpen() || this.addExpenseClosing(),
+        isOverlayVisible,
       );
+
+      if (isOverlayVisible) {
+        this.lockPageScroll();
+      } else {
+        this.unlockPageScroll();
+      }
     });
 
     this.destroyRef.onDestroy(() => {
@@ -613,6 +727,7 @@ export class DashboardComptablePageComponent {
         clearTimeout(this.closeExpenseTimeout);
       }
 
+      this.unlockPageScroll();
       this.document.body.classList.remove('ubax-dashboard-overlay-open');
     });
   }
@@ -805,6 +920,16 @@ export class DashboardComptablePageComponent {
 
     return this.selectedExpenseProperty()?.owner ?? 'Propriétaire non assigné';
   });
+  protected readonly draftDateLabel = computed(() =>
+    formatExpenseFormDate(this.draftDate()),
+  );
+  protected readonly expenseCalendarLabel = computed(() =>
+    formatExpenseMonthLabel(this.expenseCalendarMonth()),
+  );
+  protected readonly expenseCalendarWeekdays = EXPENSE_CALENDAR_WEEKDAYS;
+  protected readonly expenseCalendarWeeks = computed(() =>
+    buildExpenseCalendarWeeks(this.expenseCalendarMonth(), this.draftDate()),
+  );
   protected readonly canSaveExpense = computed(
     () => parseAmountInput(this.draftAmount()) > 0,
   );
@@ -815,9 +940,28 @@ export class DashboardComptablePageComponent {
 
   @HostListener('document:keydown.escape')
   protected handleEscape(): void {
+    if (this.activeExpenseDropdown() !== null || this.expenseDatePickerOpen()) {
+      this.closeExpenseControls();
+      return;
+    }
+
     if (this.modalVisible()) {
       this.closeAddExpense();
     }
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected handleDocumentClick(event: MouseEvent): void {
+    const target = event.target;
+
+    if (
+      target instanceof HTMLElement &&
+      target.closest('.dashboard-comptable__modal-interactive')
+    ) {
+      return;
+    }
+
+    this.closeExpenseControls();
   }
 
   protected toggleBalanceVisibility(): void {
@@ -830,6 +974,10 @@ export class DashboardComptablePageComponent {
       this.closeExpenseTimeout = null;
     }
 
+    this.closeExpenseControls();
+    this.expenseCalendarMonth.set(
+      new Date(this.draftDate().getFullYear(), this.draftDate().getMonth(), 1),
+    );
     this.addExpenseClosing.set(false);
     this.addExpenseOpen.set(true);
   }
@@ -839,6 +987,7 @@ export class DashboardComptablePageComponent {
       return;
     }
 
+    this.closeExpenseControls();
     this.addExpenseClosing.set(true);
 
     if (this.closeExpenseTimeout) {
@@ -865,24 +1014,98 @@ export class DashboardComptablePageComponent {
     this.remindedIds.update((ids) => (ids.includes(id) ? ids : [...ids, id]));
   }
 
+  protected toggleExpenseDropdown(
+    dropdown: Exclude<DashboardExpenseDropdown, null>,
+  ): void {
+    this.expenseDatePickerOpen.set(false);
+    this.activeExpenseDropdown.update((currentDropdown) =>
+      currentDropdown === dropdown ? null : dropdown,
+    );
+  }
+
+  protected toggleExpenseDatePicker(): void {
+    this.activeExpenseDropdown.set(null);
+    this.expenseDatePickerOpen.update((isOpen) => !isOpen);
+  }
+
+  protected selectExpenseCategory(category: string): void {
+    this.draftCategory.set(category);
+    this.activeExpenseDropdown.set(null);
+  }
+
+  protected selectExpensePaymentMethod(paymentMethod: string): void {
+    this.draftPaymentMethod.set(paymentMethod);
+    this.activeExpenseDropdown.set(null);
+  }
+
   protected setExpenseLinkMode(mode: DashboardExpenseLinkMode): void {
     this.draftExpenseLinkMode.set(mode);
   }
 
   protected selectExpenseProperty(propertyLabel: string): void {
     this.draftProperty.set(propertyLabel);
+    this.activeExpenseDropdown.set(null);
   }
 
-  protected updateExpenseUpload(file: File | null): void {
-    if (!file) {
+  protected selectExpenseProvider(provider: string): void {
+    this.draftProvider.set(provider);
+    this.activeExpenseDropdown.set(null);
+  }
+
+  protected previousExpenseCalendarMonth(): void {
+    const month = this.expenseCalendarMonth();
+    this.expenseCalendarMonth.set(
+      new Date(month.getFullYear(), month.getMonth() - 1, 1),
+    );
+  }
+
+  protected nextExpenseCalendarMonth(): void {
+    const month = this.expenseCalendarMonth();
+    this.expenseCalendarMonth.set(
+      new Date(month.getFullYear(), month.getMonth() + 1, 1),
+    );
+  }
+
+  protected selectExpenseDate(date: Date): void {
+    const normalizedDate = startOfDay(date);
+
+    this.draftDate.set(normalizedDate);
+    this.expenseCalendarMonth.set(
+      new Date(normalizedDate.getFullYear(), normalizedDate.getMonth(), 1),
+    );
+    this.expenseDatePickerOpen.set(false);
+  }
+
+  protected updateExpenseUploads(
+    fileList: FileList | null,
+    input: HTMLInputElement,
+  ): void {
+    if (!fileList || fileList.length === 0) {
       return;
     }
 
-    const sizeInKb = Math.max(1, Math.round(file.size / 1024));
-    this.draftUpload.set({
+    const nextUploads = Array.from(fileList).map((file) => ({
+      id: `${file.name}-${file.lastModified}-${file.size}`,
       name: file.name,
-      sizeLabel: `${sizeInKb} KB`,
+      sizeLabel: formatFileSize(file.size),
+    }));
+
+    this.draftUploads.update((uploads) => {
+      const existingIds = new Set(uploads.map((upload) => upload.id));
+      const deduplicated = nextUploads.filter(
+        (upload) => !existingIds.has(upload.id),
+      );
+
+      return [...uploads, ...deduplicated];
     });
+
+    input.value = '';
+  }
+
+  protected removeExpenseUpload(uploadId: string): void {
+    this.draftUploads.update((uploads) =>
+      uploads.filter((upload) => upload.id !== uploadId),
+    );
   }
 
   protected saveExpense(): void {
@@ -916,8 +1139,81 @@ export class DashboardComptablePageComponent {
     this.draftReference.set('UBX-FAC-0012');
     this.draftPaymentMethod.set('Espèces');
     this.draftProvider.set(EXPENSE_PROVIDER_OPTIONS[0] ?? '');
-    this.draftDate.set('14/11/2026');
+    this.draftDate.set(startOfDay(DEFAULT_EXPENSE_DATE));
     this.draftExpenseLinkMode.set('property');
-    this.draftUpload.set(DEFAULT_EXPENSE_UPLOAD);
+    this.draftUploads.set([]);
+    this.closeExpenseControls();
+    this.expenseCalendarMonth.set(
+      new Date(
+        DEFAULT_EXPENSE_DATE.getFullYear(),
+        DEFAULT_EXPENSE_DATE.getMonth(),
+        1,
+      ),
+    );
+  }
+
+  private closeExpenseControls(): void {
+    this.activeExpenseDropdown.set(null);
+    this.expenseDatePickerOpen.set(false);
+  }
+
+  private lockPageScroll(): void {
+    if (this.scrollLockState) {
+      return;
+    }
+
+    const { body, documentElement, defaultView } = this.document;
+
+    if (!body || !documentElement) {
+      return;
+    }
+
+    this.scrollLockState = {
+      htmlOverflow: documentElement.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyTouchAction: body.style.touchAction,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyWidth: body.style.width,
+      bodyHadOverlayClass: body.classList.contains(
+        'ubax-dashboard-overlay-open',
+      ),
+      scrollY: defaultView?.scrollY ?? documentElement.scrollTop ?? 0,
+    };
+
+    body.classList.add('ubax-dashboard-overlay-open');
+    documentElement.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.touchAction = 'none';
+    body.style.position = 'fixed';
+    body.style.top = `-${this.scrollLockState.scrollY}px`;
+    body.style.width = '100%';
+  }
+
+  private unlockPageScroll(): void {
+    if (!this.scrollLockState) {
+      return;
+    }
+
+    const { body, documentElement, defaultView } = this.document;
+
+    documentElement.style.overflow = this.scrollLockState.htmlOverflow;
+    body.style.overflow = this.scrollLockState.bodyOverflow;
+    body.style.touchAction = this.scrollLockState.bodyTouchAction;
+    body.style.position = this.scrollLockState.bodyPosition;
+    body.style.top = this.scrollLockState.bodyTop;
+    body.style.width = this.scrollLockState.bodyWidth;
+
+    if (!this.scrollLockState.bodyHadOverlayClass) {
+      body.classList.remove('ubax-dashboard-overlay-open');
+    }
+
+    defaultView?.scrollTo({
+      top: this.scrollLockState.scrollY,
+      left: 0,
+      behavior: 'auto',
+    });
+
+    this.scrollLockState = null;
   }
 }

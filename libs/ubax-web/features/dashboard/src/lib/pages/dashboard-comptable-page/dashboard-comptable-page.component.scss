@@ -932,7 +932,7 @@
   z-index: 1;
   width: min(1472.938px, calc(100vw - 48px));
   max-width: none;
-  max-height: min(752.563px, calc(100vh - 48px));
+  max-height: min(716px, calc(100vh - 40px));
   margin: 0;
   padding: 0;
   border: 0;
@@ -964,8 +964,8 @@
 .dashboard-comptable__modal-header {
   position: relative;
   justify-content: center;
-  min-height: 92.181px;
-  padding: 24px 88px 26px;
+  min-height: 84px;
+  padding: 20px 88px;
   background: var(--ubax-navy);
 
   h2 {
@@ -1009,17 +1009,20 @@
 }
 
 .dashboard-comptable__modal-form {
+  position: relative;
   display: flex;
   flex-direction: column;
-  max-height: calc(min(752.563px, calc(100vh - 48px)) - 92.181px);
+  justify-content: space-between;
+  max-height: calc(min(716px, calc(100vh - 40px)) - 84px);
 }
 
 .dashboard-comptable__modal-sections {
   display: grid;
   grid-template-columns: minmax(0, 1.01fr) minmax(0, 1.01fr) minmax(0, 0.88fr);
   align-items: start;
-  padding: 30px 36px 0;
-  overflow: auto;
+  flex: 1;
+  padding: 20px 32px 0;
+  overflow: visible;
 }
 
 .dashboard-comptable__modal-section {
@@ -1036,7 +1039,7 @@
   }
 
   h3 {
-    margin: 0 0 27px;
+    margin: 0 0 20px;
     font-family: 'Lexend', sans-serif;
     font-size: 20px;
     font-weight: 500;
@@ -1049,8 +1052,8 @@
 .dashboard-comptable__modal-field-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 26px;
+  gap: 6px;
+  margin-bottom: 18px;
 
   label,
   .dashboard-comptable__modal-field-label {
@@ -1060,6 +1063,10 @@
     line-height: 30.11px;
     color: var(--ubax-black);
   }
+}
+
+.dashboard-comptable__modal-field-group--scope {
+  margin-bottom: 30px;
 }
 
 .dashboard-comptable__field-shell,
@@ -1094,11 +1101,17 @@
   display: flex;
   align-items: center;
   padding: 16px 18px;
+  border: 0;
   overflow: hidden;
+  text-align: left;
+  cursor: pointer;
 
   &:hover {
-    transform: translateY(-1px);
     box-shadow: 0 14px 26px rgb(13 10 44 / 0.08);
+  }
+
+  &.is-open {
+    box-shadow: inset 0 0 0 1px rgb(26 48 71 / 0.12);
   }
 
   &.is-disabled {
@@ -1125,14 +1138,6 @@
   }
 }
 
-.dashboard-comptable__field-input--shell {
-  width: 100%;
-  min-height: auto;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
 .dashboard-comptable__field-display {
   display: block;
   width: 100%;
@@ -1153,6 +1158,7 @@
   img {
     display: block;
     object-fit: contain;
+    transition: transform 160ms ease;
   }
 }
 
@@ -1184,22 +1190,17 @@
   }
 }
 
-.dashboard-comptable__field-native-select {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  outline: 0;
-  opacity: 0;
-  cursor: pointer;
+.dashboard-comptable__field-shell.is-open
+  .dashboard-comptable__field-trailing-icon
+  img {
+  transform: rotate(180deg);
 }
 
 .dashboard-comptable__expense-scope-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
-  padding: 6px 0 3px;
+  gap: 18px;
+  padding: 2px 0 0;
 }
 
 .dashboard-comptable__expense-scope {
@@ -1254,12 +1255,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
   width: 100%;
-  min-height: 168.693px;
-  padding: 10px 23px 14px;
+  min-height: 144px;
+  padding: 10px 20px 12px;
   border-radius: 10px;
   background: var(--ubax-page-bg);
+}
+
+.dashboard-comptable__upload-box.is-empty {
+  justify-content: space-between;
 }
 
 .dashboard-comptable__upload-item {
@@ -1273,16 +1278,6 @@
   border: 1px solid var(--ubax-accent);
   border-radius: 12px;
   background: #fff;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    transform 180ms var(--ubax-motion-ease-soft),
-    box-shadow 180ms var(--ubax-motion-ease-soft);
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 24px rgb(13 10 44 / 0.08);
-  }
 }
 
 .dashboard-comptable__upload-file-icon {
@@ -1333,7 +1328,7 @@
 .dashboard-comptable__upload-check {
   position: absolute;
   top: 15px;
-  right: 15px;
+  right: 48px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1352,7 +1347,7 @@
 .dashboard-comptable__upload-action {
   justify-content: center;
   width: 185.43px;
-  min-height: 47.145px;
+  min-height: 44px;
   padding: 0 16px;
   border: 0;
   border-radius: 23.572px;
@@ -1377,12 +1372,12 @@
 .dashboard-comptable__modal-actions {
   justify-content: center;
   gap: 18.598px;
-  padding: 14px 36px 32px;
+  padding: 10px 32px 22px;
 }
 
 .dashboard-comptable__modal-button {
   justify-content: center;
-  min-height: 56px;
+  min-height: 52px;
   padding: 0 24px;
   border: 0;
   border-radius: 50px;
@@ -1426,6 +1421,24 @@
     background: #f1841c;
     box-shadow: 0 18px 24px rgb(232 125 30 / 0.22);
   }
+}
+
+.dashboard-comptable__date-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  padding: 0;
+  border: 0;
+  background: rgb(13 10 44 / 0.08);
+}
+
+.dashboard-comptable__date-menu--overlay {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  width: min(320px, calc(100% - 40px));
+  transform: translate(-50%, -50%);
+  z-index: 6;
 }
 
 @media (max-width: 1540px) {
@@ -1473,10 +1486,14 @@
     max-height: calc(100vh - 36px);
   }
 
+  .dashboard-comptable__modal-form {
+    max-height: calc(100vh - 36px - 84px);
+  }
+
   .dashboard-comptable__modal-sections {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 28px;
-    padding: 28px 28px 0;
+    padding: 18px 24px 0;
   }
 
   .dashboard-comptable__modal-section {
@@ -1493,7 +1510,7 @@
   }
 
   .dashboard-comptable__modal-actions {
-    padding-inline: 28px;
+    padding-inline: 24px;
   }
 }
 
@@ -1598,6 +1615,7 @@
     grid-template-columns: 1fr;
     gap: 0;
     padding: 24px 18px 0;
+    overflow: auto;
   }
 
   .dashboard-comptable__modal-section {
@@ -1610,6 +1628,14 @@
 
   .dashboard-comptable__expense-scope-list {
     gap: 12px;
+  }
+
+  .dashboard-comptable__modal-field-group--scope {
+    margin-bottom: 26px;
+  }
+
+  .dashboard-comptable__date-menu--overlay {
+    width: min(320px, calc(100% - 24px));
   }
 
   .dashboard-comptable__modal-actions {
