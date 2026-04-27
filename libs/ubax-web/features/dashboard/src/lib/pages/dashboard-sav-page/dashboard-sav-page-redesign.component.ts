@@ -94,11 +94,27 @@ interface DashboardSavTechnician {
 interface DashboardSavTechIntervention {
   readonly id: string;
   readonly client: string;
+  readonly avatar: string;
   readonly property: string;
+  readonly city: string;
   readonly issue: string;
-  readonly priority: string;
   readonly status: string;
   readonly date: string;
+}
+
+interface DashboardSavTechnicianDetail {
+  readonly joinedOn: string;
+  readonly contractStatus: string;
+  readonly employeeCode: string;
+  readonly resolvedTickets: string;
+  readonly totalPaid: string;
+  readonly history: readonly DashboardSavTechIntervention[];
+}
+
+interface DashboardSavSelectedTechnicianDetail
+  extends DashboardSavTechnician,
+    DashboardSavTechnicianDetail {
+  readonly profileImage: string;
 }
 
 const SHARED_ASSET_ROOT = '/shared/demandes';
@@ -318,40 +334,103 @@ const TECH_HISTORY: readonly DashboardSavTechIntervention[] = [
   {
     id: 'UBX-TK-0012',
     client: 'Koffi Didier',
-    property: 'Résidence Plateau - App 12 / Abidjan, Riviera',
+    avatar: dashboardSavAsset('detail/history-avatar-01.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
     issue: 'Problème électrique',
-    priority: 'Urgent',
     status: 'Résolu',
     date: '05/03/2026',
   },
   {
-    id: 'UBX-TK-0030',
+    id: 'UBX-TK-30',
     client: 'Kouamé Patrick',
-    property: 'Résidence Plateau - App 13 / Abidjan, Riviera',
+    avatar: dashboardSavAsset('detail/history-avatar-02.webp'),
+    property: 'résidence Plateau - App 13',
+    city: 'Abidjan, Riviera',
     issue: 'Problème électrique',
-    priority: 'Urgent',
     status: 'Résolu',
-    date: '08/03/2026',
+    date: '05/03/2026',
   },
   {
     id: 'UBX-TK-0014',
-    client: 'Konan Olivier',
-    property: 'Villa Riviera / Abidjan, Riviera',
-    issue: 'Fuite d’eau',
-    priority: 'Normal',
+    client: 'Koffi Didier',
+    avatar: dashboardSavAsset('detail/history-avatar-03.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
+    issue: 'Problème électrique',
     status: 'Résolu',
-    date: '10/03/2026',
+    date: '05/03/2026',
+  },
+  {
+    id: 'UBX-TK-0028',
+    client: 'Koffi Didier',
+    avatar: dashboardSavAsset('detail/history-avatar-04.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
+    issue: 'Problème électrique',
+    status: 'Résolu',
+    date: '05/03/2026',
   },
   {
     id: 'UBX-TK-0056',
-    client: 'Mariam Coulibaly',
-    property: 'Résidence Plateau - App 22 / Abidjan, Plateau',
-    issue: 'Porte cassée',
-    priority: 'Normal',
+    client: 'Koffi Didier',
+    avatar: dashboardSavAsset('detail/history-avatar-05.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
+    issue: 'Problème électrique',
     status: 'Résolu',
-    date: '15/03/2026',
+    date: '05/03/2026',
+  },
+  {
+    id: 'UBX-TK-0072',
+    client: 'Koffi Didier',
+    avatar: dashboardSavAsset('detail/history-avatar-06.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
+    issue: 'Problème électrique',
+    status: 'Résolu',
+    date: '05/03/2026',
+  },
+  {
+    id: 'UBX-TK-0072',
+    client: 'Koffi Didier',
+    avatar: dashboardSavAsset('detail/history-avatar-07.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
+    issue: 'Problème électrique',
+    status: 'Résolu',
+    date: '05/03/2026',
+  },
+  {
+    id: 'UBX-TK-0082',
+    client: 'Koffi Didier',
+    avatar: dashboardSavAsset('detail/history-avatar-08.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
+    issue: 'Problème électrique',
+    status: 'Résolu',
+    date: '05/03/2026',
+  },
+  {
+    id: 'UBX-TK-0012',
+    client: 'Koffi Didier',
+    avatar: dashboardSavAsset('detail/history-avatar-09.webp'),
+    property: 'résidence Plateau - App 12',
+    city: 'Abidjan, Riviera',
+    issue: 'Problème électrique',
+    status: 'Résolu',
+    date: '05/03/2026',
   },
 ];
+
+const DEFAULT_TECHNICIAN_DETAIL: DashboardSavTechnicianDetail = {
+  joinedOn: '12 Janvier 2025',
+  contractStatus: 'Actif',
+  employeeCode: 'UBX-LOC-0245',
+  resolvedTickets: '09',
+  totalPaid: '178 000 FCFA',
+  history: TECH_HISTORY,
+};
 
 const BASE_NOTIFICATIONS: readonly DashboardSavNotificationItem[] = [
   {
@@ -653,14 +732,27 @@ export class DashboardSavPageComponent {
   );
   readonly technicianTicketIcon = dashboardSavAsset('technicians/ticket.webp');
   readonly technicianPhoneIcon = dashboardSavAsset('technicians/phone.webp');
+  readonly detailIcons = {
+    back: dashboardSavAsset('detail/back-arrow.webp'),
+    phone: dashboardSavAsset('detail/phone.webp'),
+    identifier: dashboardSavAsset('detail/id-card.webp'),
+    date: dashboardSavAsset('detail/date.webp'),
+    edit: dashboardSavAsset('detail/edit.webp'),
+    historySearch: dashboardSavAsset('detail/history-search.webp'),
+    historyStatus: dashboardSavAsset('detail/history-status.webp'),
+    resolved: dashboardSavAsset('detail/stat-resolved.webp'),
+    paid: dashboardSavAsset('detail/stat-paid.webp'),
+  } as const;
 
   readonly toolbarSearchTerm = signal('');
   readonly toolbarSelectedDate = signal<Date | null>(null);
   readonly tableSearchTerm = signal('');
   readonly directorySearchTerm = signal('');
+  readonly detailHistorySearchTerm = signal('');
   readonly ticketsCurrentPage = signal(1);
   readonly showAllNotifications = signal(false);
   readonly showAllTechnicians = signal(false);
+  readonly selectedTechnicianId = signal<string | null>(null);
   readonly transitionPhase = signal<'idle' | 'to-directory' | 'to-dashboard'>(
     'idle',
   );
@@ -679,6 +771,61 @@ export class DashboardSavPageComponent {
   readonly technicians = signal<DashboardSavTechnician[]>([
     ...BASE_TECHNICIANS,
   ]);
+
+  readonly selectedTechnician = computed(() => {
+    const technicianId = this.selectedTechnicianId();
+
+    if (!technicianId) {
+      return null;
+    }
+
+    return (
+      this.technicians().find((technician) => technician.id === technicianId) ??
+      null
+    );
+  });
+
+  readonly selectedTechnicianDetail =
+    computed<DashboardSavSelectedTechnicianDetail | null>(() => {
+      const technician = this.selectedTechnician();
+
+      if (!technician) {
+        return null;
+      }
+
+      return {
+        ...technician,
+        ...DEFAULT_TECHNICIAN_DETAIL,
+        profileImage: dashboardSavAsset('detail/profile-avatar.webp'),
+      };
+    });
+
+  readonly filteredSelectedTechnicianHistory = computed(() => {
+    const technicianDetail = this.selectedTechnicianDetail();
+
+    if (!technicianDetail) {
+      return [] as readonly DashboardSavTechIntervention[];
+    }
+
+    const query = normalizeText(this.detailHistorySearchTerm());
+
+    if (!query) {
+      return technicianDetail.history;
+    }
+
+    return technicianDetail.history.filter((intervention) =>
+      normalizeText(
+        [
+          intervention.id,
+          intervention.issue,
+          intervention.client,
+          intervention.property,
+          intervention.city,
+          intervention.date,
+        ].join(' '),
+      ).includes(query),
+    );
+  });
 
   readonly addTechOpen = signal(false);
   readonly addTechClosing = signal(false);
@@ -707,9 +854,17 @@ export class DashboardSavPageComponent {
     return fullName || 'Ibrahim Konaté';
   });
 
-  readonly pageTitle = computed(() =>
-    this.showAllTechnicians() ? 'liste des techniciens' : 'Tableau de bord',
-  );
+  readonly pageTitle = computed(() => {
+    if (this.selectedTechnicianDetail()) {
+      return 'Détails Technicien';
+    }
+
+    if (this.showAllTechnicians()) {
+      return 'liste des techniciens';
+    }
+
+    return 'Tableau de bord';
+  });
 
   readonly statusOptions: DashboardSavSelectOption<DashboardSavTicketStatusFilter>[] =
     [
@@ -1172,8 +1327,23 @@ export class DashboardSavPageComponent {
     this.directorySearchTerm.set(term);
   }
 
+  updateDetailHistorySearchTerm(term: string): void {
+    this.detailHistorySearchTerm.set(term);
+  }
+
   toggleNotifications(): void {
     this.showAllNotifications.update((value) => !value);
+  }
+
+  openTechnicianDetail(technician: DashboardSavTechnician): void {
+    this.selectedTechnicianId.set(technician.id);
+    this.detailHistorySearchTerm.set('');
+    this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  closeTechnicianDetail(): void {
+    this.selectedTechnicianId.set(null);
+    this.detailHistorySearchTerm.set('');
   }
 
   toggleTechnicians(): void {
