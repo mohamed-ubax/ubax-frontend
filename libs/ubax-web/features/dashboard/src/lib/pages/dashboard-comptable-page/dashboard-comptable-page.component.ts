@@ -1,7 +1,11 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
+  HostListener,
   inject,
   signal,
 } from '@angular/core';
@@ -12,6 +16,7 @@ import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
 import { DateRange, DateRangePickerComponent } from '@ubax-workspace/shared-ui';
 
 type DashboardPeriod = 'Jour' | 'Mois' | 'Année';
+type DashboardExpenseLinkMode = 'property' | 'agency';
 
 interface DashboardKpiCard {
   readonly label: string;
@@ -54,6 +59,17 @@ interface DashboardExpense {
   readonly iconAlt: string;
 }
 
+interface DashboardExpensePropertyOption {
+  readonly id: string;
+  readonly label: string;
+  readonly owner: string;
+}
+
+interface DashboardExpenseUpload {
+  readonly name: string;
+  readonly sizeLabel: string;
+}
+
 interface DashboardOverdueItem {
   readonly id: string;
   readonly name: string;
@@ -82,6 +98,12 @@ const DASHBOARD_COMPTABLE_ASSETS = {
   transactionWave: 'biens/bailleur/payment-wave.webp',
   transactionMomo: 'dashboard-comptable/payment-momo.webp',
   warning: 'dashboard-comptable/warning.webp',
+  modalClose: 'dashboard-comptable/modal-close.webp',
+  modalChevron: 'dashboard-comptable/modal-chevron.webp',
+  modalCategoryIcon: 'dashboard-comptable/modal-category-icon.webp',
+  modalCalendar: 'dashboard-comptable/modal-calendar.webp',
+  modalFile: 'dashboard-comptable/modal-file.webp',
+  modalFileCheck: 'dashboard-comptable/modal-file-check.webp',
 } as const;
 
 const KPI_CARDS: readonly DashboardKpiCard[] = [
@@ -333,12 +355,50 @@ const INITIAL_OVERDUE_ITEMS: readonly DashboardOverdueItem[] = [
 ] as const;
 
 const DRAWER_CATEGORIES = [
+  'Réparation',
   'Entretien',
   'Marketing',
   'Salaires',
   'Locale',
   'Autre',
 ] as const;
+
+const EXPENSE_PAYMENT_METHODS = [
+  'Espèces',
+  'Mobile Money',
+  'Virement',
+] as const;
+
+const EXPENSE_PROPERTIES: readonly DashboardExpensePropertyOption[] = [
+  {
+    id: 'property-ubx-102',
+    label: 'UBX-102 - Appartement 0015 immeuble kalia',
+    owner: 'Kouamé Patrick',
+  },
+  {
+    id: 'property-plateau',
+    label: 'UBX-208 - Résidence Plateau B12',
+    owner: 'Affoué Sandrine',
+  },
+  {
+    id: 'property-riviera',
+    label: 'UBX-315 - Villa Riviera 03',
+    owner: 'Konan Olivier',
+  },
+] as const;
+
+const EXPENSE_PROVIDER_OPTIONS = [
+  'Serge Kouamé',
+  'Affoué Sandrine',
+  'Kouamé Patrick',
+] as const;
+
+const DEFAULT_EXPENSE_UPLOAD: DashboardExpenseUpload = {
+  name: 'Facture .pdf',
+  sizeLabel: '169 KB',
+};
+
+const MODAL_CLOSE_DURATION_MS = 220;
 
 function formatFcfa(amount: number): string {
   return `${new Intl.NumberFormat('fr-FR').format(amount).replace(/\u202f/g, ' ')} FCFA`;
@@ -462,6 +522,7 @@ function resolveExpenseIcon(category: string): {
   iconAlt: string;
 } {
   switch (normalizeForSearch(category)) {
+    case 'reparation':
     case 'entretien':
       return {
         icon: DASHBOARD_COMPTABLE_ASSETS.expenseMaintenance,
@@ -503,7 +564,13 @@ export class DashboardComptablePageComponent {
   protected readonly assets = DASHBOARD_COMPTABLE_ASSETS;
   protected readonly kpiCards = KPI_CARDS;
   protected readonly expenseCategories = DRAWER_CATEGORIES;
+  protected readonly expensePaymentMethods = EXPENSE_PAYMENT_METHODS;
+  protected readonly expenseProperties = EXPENSE_PROPERTIES;
+  protected readonly expenseProviders = EXPENSE_PROVIDER_OPTIONS;
   protected readonly authStore = inject(AuthStore);
+  private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
+  private closeExpenseTimeout: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly datePickerOpen = signal(false);
   protected readonly selectedRange = signal<DateRange | null>(null);
@@ -512,15 +579,43 @@ export class DashboardComptablePageComponent {
   protected readonly revenuePeriod = signal<DashboardPeriod>('Année');
   protected readonly splitPeriod = signal<DashboardPeriod>('Année');
   protected readonly addExpenseOpen = signal(false);
+  protected readonly addExpenseClosing = signal(false);
   protected readonly remindedIds = signal<string[]>([]);
   protected readonly transactions = signal([...INITIAL_TRANSACTIONS]);
   protected readonly expenses = signal([...INITIAL_EXPENSES]);
   protected readonly overdueItems = signal([...INITIAL_OVERDUE_ITEMS]);
 
-  protected readonly draftCategory = signal<string>('Entretien');
-  protected readonly draftAmount = signal('');
-  protected readonly draftProperty = signal('');
-  protected readonly draftReference = signal('');
+  protected readonly draftCategory = signal<string>('Réparation');
+  protected readonly draftAmount = signal('75 000 FCFA');
+  protected readonly draftProperty = signal(EXPENSE_PROPERTIES[0]?.label ?? '');
+  protected readonly draftReference = signal('UBX-FAC-0012');
+  protected readonly draftPaymentMethod = signal<string>('Espèces');
+  protected readonly draftProvider = signal<string>(
+    EXPENSE_PROVIDER_OPTIONS[0] ?? '',
+  );
+  protected readonly draftDate = signal('14/11/2026');
+  protected readonly draftExpenseLinkMode =
+    signal<DashboardExpenseLinkMode>('property');
+  protected readonly draftUpload = signal<DashboardExpenseUpload | null>(
+    DEFAULT_EXPENSE_UPLOAD,
+  );
+
+  constructor() {
+    effect(() => {
+      this.document.body.classList.toggle(
+        'ubax-dashboard-overlay-open',
+        this.addExpenseOpen() || this.addExpenseClosing(),
+      );
+    });
+
+    this.destroyRef.onDestroy(() => {
+      if (this.closeExpenseTimeout) {
+        clearTimeout(this.closeExpenseTimeout);
+      }
+
+      this.document.body.classList.remove('ubax-dashboard-overlay-open');
+    });
+  }
 
   protected readonly displayName = computed(() => {
     const user = this.authStore.user();
@@ -691,9 +786,38 @@ export class DashboardComptablePageComponent {
   protected readonly totalExpenses = computed(() =>
     this.expenses().reduce((total, item) => total + item.amount, 0),
   );
+  protected readonly modalVisible = computed(
+    () => this.addExpenseOpen() || this.addExpenseClosing(),
+  );
+  protected readonly isPropertyLinkedExpense = computed(
+    () => this.draftExpenseLinkMode() === 'property',
+  );
+  protected readonly selectedExpenseProperty = computed(
+    () =>
+      this.expenseProperties.find(
+        (option) => option.label === this.draftProperty(),
+      ) ?? this.expenseProperties[0],
+  );
+  protected readonly draftOwner = computed(() => {
+    if (!this.isPropertyLinkedExpense()) {
+      return 'Agence générale';
+    }
+
+    return this.selectedExpenseProperty()?.owner ?? 'Propriétaire non assigné';
+  });
+  protected readonly canSaveExpense = computed(
+    () => parseAmountInput(this.draftAmount()) > 0,
+  );
 
   protected onDateRangeApplied(range: DateRange): void {
     this.selectedRange.set(range);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected handleEscape(): void {
+    if (this.modalVisible()) {
+      this.closeAddExpense();
+    }
   }
 
   protected toggleBalanceVisibility(): void {
@@ -701,12 +825,32 @@ export class DashboardComptablePageComponent {
   }
 
   protected openAddExpense(): void {
+    if (this.closeExpenseTimeout) {
+      clearTimeout(this.closeExpenseTimeout);
+      this.closeExpenseTimeout = null;
+    }
+
+    this.addExpenseClosing.set(false);
     this.addExpenseOpen.set(true);
   }
 
   protected closeAddExpense(): void {
-    this.addExpenseOpen.set(false);
-    this.resetExpenseDraft();
+    if (!this.addExpenseOpen()) {
+      return;
+    }
+
+    this.addExpenseClosing.set(true);
+
+    if (this.closeExpenseTimeout) {
+      clearTimeout(this.closeExpenseTimeout);
+    }
+
+    this.closeExpenseTimeout = setTimeout(() => {
+      this.addExpenseOpen.set(false);
+      this.addExpenseClosing.set(false);
+      this.closeExpenseTimeout = null;
+      this.resetExpenseDraft();
+    }, MODAL_CLOSE_DURATION_MS);
   }
 
   protected formatAmount(amount: number): string {
@@ -719,6 +863,26 @@ export class DashboardComptablePageComponent {
 
   protected sendReminder(id: string): void {
     this.remindedIds.update((ids) => (ids.includes(id) ? ids : [...ids, id]));
+  }
+
+  protected setExpenseLinkMode(mode: DashboardExpenseLinkMode): void {
+    this.draftExpenseLinkMode.set(mode);
+  }
+
+  protected selectExpenseProperty(propertyLabel: string): void {
+    this.draftProperty.set(propertyLabel);
+  }
+
+  protected updateExpenseUpload(file: File | null): void {
+    if (!file) {
+      return;
+    }
+
+    const sizeInKb = Math.max(1, Math.round(file.size / 1024));
+    this.draftUpload.set({
+      name: file.name,
+      sizeLabel: `${sizeInKb} KB`,
+    });
   }
 
   protected saveExpense(): void {
@@ -746,9 +910,14 @@ export class DashboardComptablePageComponent {
   }
 
   private resetExpenseDraft(): void {
-    this.draftCategory.set('Entretien');
-    this.draftAmount.set('');
-    this.draftProperty.set('');
-    this.draftReference.set('');
+    this.draftCategory.set('Réparation');
+    this.draftAmount.set('75 000 FCFA');
+    this.draftProperty.set(EXPENSE_PROPERTIES[0]?.label ?? '');
+    this.draftReference.set('UBX-FAC-0012');
+    this.draftPaymentMethod.set('Espèces');
+    this.draftProvider.set(EXPENSE_PROVIDER_OPTIONS[0] ?? '');
+    this.draftDate.set('14/11/2026');
+    this.draftExpenseLinkMode.set('property');
+    this.draftUpload.set(DEFAULT_EXPENSE_UPLOAD);
   }
 }

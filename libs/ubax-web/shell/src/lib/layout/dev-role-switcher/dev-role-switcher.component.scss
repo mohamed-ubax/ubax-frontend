@@ -3,9 +3,18 @@
   right: 24px;
   bottom: 24px;
   z-index: 20;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
 }
 
 :host-context(body:has(.dp-overlay)) {
+  pointer-events: none;
+}
+
+:host-context(body.ubax-dashboard-overlay-open) {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
   pointer-events: none;
 }
 

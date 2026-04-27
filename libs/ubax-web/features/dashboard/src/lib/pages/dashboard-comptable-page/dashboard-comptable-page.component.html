@@ -253,6 +253,8 @@
         </button>
       </div>
 
+      <div class="dashboard-comptable__panel-divider"></div>
+
       <div class="dashboard-comptable__transaction-list">
         @for (transaction of filteredTransactions(); track transaction.id) {
           <article class="dashboard-comptable__transaction-row">
@@ -398,99 +400,365 @@
   (applied)="onDateRangeApplied($event)"
 />
 
-@if (addExpenseOpen()) {
+@if (modalVisible()) {
   <div
-    class="dashboard-comptable__modal-backdrop"
-    (click)="closeAddExpense()"
-  ></div>
-
-  <dialog
-    class="dashboard-comptable__modal"
-    open
-    aria-labelledby="dashboard-comptable-expense-title"
-    (click)="$event.stopPropagation()"
+    class="dashboard-comptable__modal-layer"
+    [class.is-closing]="addExpenseClosing()"
   >
-    <div class="dashboard-comptable__modal-header">
-      <h2 id="dashboard-comptable-expense-title">Ajouter une dépense</h2>
+    <button
+      class="dashboard-comptable__modal-backdrop"
+      type="button"
+      aria-label="Fermer l'overlay d'ajout de dépense"
+      (click)="closeAddExpense()"
+    ></button>
 
-      <button
-        class="dashboard-comptable__modal-close"
-        type="button"
-        aria-label="Fermer le formulaire d'ajout de dépense"
-        (click)="closeAddExpense()"
-      >
-        X
-      </button>
-    </div>
+    <dialog
+      class="dashboard-comptable__modal"
+      [class.is-closing]="addExpenseClosing()"
+      open
+      aria-labelledby="dashboard-comptable-expense-title"
+      aria-modal="true"
+    >
+      <div class="dashboard-comptable__modal-header">
+        <h2 id="dashboard-comptable-expense-title">Ajouter une dépense</h2>
 
-    <form class="dashboard-comptable__modal-form" (ngSubmit)="saveExpense()">
-      <div class="dashboard-comptable__modal-field">
-        <label for="dashboard-comptable-expense-category">Catégorie</label>
-        <select
-          id="dashboard-comptable-expense-category"
-          name="expenseCategory"
-          [ngModel]="draftCategory()"
-          (ngModelChange)="draftCategory.set($event)"
-        >
-          @for (category of expenseCategories; track category) {
-            <option [value]="category">{{ category }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="dashboard-comptable__modal-field">
-        <label for="dashboard-comptable-expense-amount">Montant</label>
-        <input
-          id="dashboard-comptable-expense-amount"
-          name="expenseAmount"
-          type="text"
-          inputmode="numeric"
-          placeholder="250 000"
-          [ngModel]="draftAmount()"
-          (ngModelChange)="draftAmount.set($event)"
-        />
-      </div>
-
-      <div class="dashboard-comptable__modal-field">
-        <label for="dashboard-comptable-expense-property">Bien concerné</label>
-        <input
-          id="dashboard-comptable-expense-property"
-          name="expenseProperty"
-          type="text"
-          placeholder="résidence Plateau"
-          [ngModel]="draftProperty()"
-          (ngModelChange)="draftProperty.set($event)"
-        />
-      </div>
-
-      <div class="dashboard-comptable__modal-field">
-        <label for="dashboard-comptable-expense-reference">Référence</label>
-        <input
-          id="dashboard-comptable-expense-reference"
-          name="expenseReference"
-          type="text"
-          placeholder="FAC-2026-001"
-          [ngModel]="draftReference()"
-          (ngModelChange)="draftReference.set($event)"
-        />
-      </div>
-
-      <div class="dashboard-comptable__modal-actions">
         <button
-          class="dashboard-comptable__modal-button dashboard-comptable__modal-button--ghost"
+          class="dashboard-comptable__modal-close"
           type="button"
+          aria-label="Fermer le formulaire d'ajout de dépense"
           (click)="closeAddExpense()"
         >
-          Annuler
-        </button>
-
-        <button
-          class="dashboard-comptable__modal-button dashboard-comptable__modal-button--primary"
-          type="submit"
-        >
-          Enregistrer
+          <img [src]="assets.modalClose" alt="" aria-hidden="true" />
         </button>
       </div>
-    </form>
-  </dialog>
+
+      <form class="dashboard-comptable__modal-form" (ngSubmit)="saveExpense()">
+        <div class="dashboard-comptable__modal-sections">
+          <section class="dashboard-comptable__modal-section">
+            <h3>Informations Générales</h3>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-category"
+                >Catégories de dépense</label
+              >
+
+              <div
+                class="dashboard-comptable__field-shell dashboard-comptable__field-shell--select dashboard-comptable__field-shell--category"
+              >
+                <span
+                  class="dashboard-comptable__field-leading-icon"
+                  aria-hidden="true"
+                >
+                  <img [src]="assets.modalCategoryIcon" alt="" />
+                </span>
+
+                <span class="dashboard-comptable__field-display">{{
+                  draftCategory()
+                }}</span>
+
+                <span
+                  class="dashboard-comptable__field-trailing-icon"
+                  aria-hidden="true"
+                >
+                  <img [src]="assets.modalChevron" alt="" />
+                </span>
+
+                <select
+                  id="dashboard-comptable-expense-category"
+                  class="dashboard-comptable__field-native-select"
+                  name="expenseCategory"
+                  [ngModel]="draftCategory()"
+                  (ngModelChange)="draftCategory.set($event)"
+                >
+                  @for (category of expenseCategories; track category) {
+                    <option [value]="category">{{ category }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-amount">Montant</label>
+
+              <input
+                id="dashboard-comptable-expense-amount"
+                class="dashboard-comptable__field-input"
+                name="expenseAmount"
+                type="text"
+                inputmode="numeric"
+                [ngModel]="draftAmount()"
+                (ngModelChange)="draftAmount.set($event)"
+              />
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-payment"
+                >Méthode de paiement</label
+              >
+
+              <div
+                class="dashboard-comptable__field-shell dashboard-comptable__field-shell--select"
+              >
+                <span class="dashboard-comptable__field-display">{{
+                  draftPaymentMethod()
+                }}</span>
+
+                <span
+                  class="dashboard-comptable__field-trailing-icon"
+                  aria-hidden="true"
+                >
+                  <img [src]="assets.modalChevron" alt="" />
+                </span>
+
+                <select
+                  id="dashboard-comptable-expense-payment"
+                  class="dashboard-comptable__field-native-select"
+                  name="expensePaymentMethod"
+                  [ngModel]="draftPaymentMethod()"
+                  (ngModelChange)="draftPaymentMethod.set($event)"
+                >
+                  @for (
+                    paymentMethod of expensePaymentMethods;
+                    track paymentMethod
+                  ) {
+                    <option [value]="paymentMethod">{{ paymentMethod }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-date">Date</label>
+
+              <div
+                class="dashboard-comptable__field-shell dashboard-comptable__field-shell--date"
+              >
+                <span
+                  class="dashboard-comptable__field-leading-icon"
+                  aria-hidden="true"
+                >
+                  <img [src]="assets.modalCalendar" alt="" />
+                </span>
+
+                <input
+                  id="dashboard-comptable-expense-date"
+                  class="dashboard-comptable__field-input dashboard-comptable__field-input--shell"
+                  name="expenseDate"
+                  type="text"
+                  [ngModel]="draftDate()"
+                  (ngModelChange)="draftDate.set($event)"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section class="dashboard-comptable__modal-section">
+            <h3>Liaison dépense</h3>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <span class="dashboard-comptable__modal-field-label"
+                >Liaison dépense</span
+              >
+
+              <div class="dashboard-comptable__expense-scope-list">
+                <button
+                  class="dashboard-comptable__expense-scope"
+                  type="button"
+                  [class.is-active]="isPropertyLinkedExpense()"
+                  [attr.aria-pressed]="isPropertyLinkedExpense()"
+                  (click)="setExpenseLinkMode('property')"
+                >
+                  <span class="dashboard-comptable__expense-scope-dot"></span>
+                  <span>Dépense lié à un bien</span>
+                </button>
+
+                <button
+                  class="dashboard-comptable__expense-scope"
+                  type="button"
+                  [class.is-active]="!isPropertyLinkedExpense()"
+                  [attr.aria-pressed]="!isPropertyLinkedExpense()"
+                  (click)="setExpenseLinkMode('agency')"
+                >
+                  <span class="dashboard-comptable__expense-scope-dot"></span>
+                  <span>Dépense Général agence</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-property"
+                >Sélectionner le bien</label
+              >
+
+              <div
+                class="dashboard-comptable__field-shell dashboard-comptable__field-shell--select"
+                [class.is-disabled]="!isPropertyLinkedExpense()"
+              >
+                <span class="dashboard-comptable__field-display">{{
+                  isPropertyLinkedExpense()
+                    ? draftProperty()
+                    : 'Agence générale'
+                }}</span>
+
+                <span
+                  class="dashboard-comptable__field-trailing-icon"
+                  aria-hidden="true"
+                >
+                  <img [src]="assets.modalChevron" alt="" />
+                </span>
+
+                <select
+                  id="dashboard-comptable-expense-property"
+                  class="dashboard-comptable__field-native-select"
+                  name="expenseProperty"
+                  [disabled]="!isPropertyLinkedExpense()"
+                  [ngModel]="draftProperty()"
+                  (ngModelChange)="selectExpenseProperty($event)"
+                >
+                  @for (property of expenseProperties; track property.id) {
+                    <option [value]="property.label">
+                      {{ property.label }}
+                    </option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <span class="dashboard-comptable__modal-field-label"
+                >Propriétaire</span
+              >
+
+              <div
+                class="dashboard-comptable__field-shell dashboard-comptable__field-shell--readonly"
+                [class.is-disabled]="!isPropertyLinkedExpense()"
+              >
+                <span class="dashboard-comptable__field-display">{{
+                  draftOwner()
+                }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section
+            class="dashboard-comptable__modal-section dashboard-comptable__modal-section--details"
+          >
+            <h3>Détails supplémentaires</h3>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-provider"
+                >Prestataire</label
+              >
+
+              <input
+                id="dashboard-comptable-expense-provider"
+                class="dashboard-comptable__field-input"
+                name="expenseProvider"
+                type="text"
+                list="dashboard-comptable-expense-provider-options"
+                [ngModel]="draftProvider()"
+                (ngModelChange)="draftProvider.set($event)"
+              />
+
+              <datalist id="dashboard-comptable-expense-provider-options">
+                @for (provider of expenseProviders; track provider) {
+                  <option [value]="provider"></option>
+                }
+              </datalist>
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <label for="dashboard-comptable-expense-reference"
+                >Référence Facture</label
+              >
+
+              <input
+                id="dashboard-comptable-expense-reference"
+                class="dashboard-comptable__field-input"
+                name="expenseReference"
+                type="text"
+                [ngModel]="draftReference()"
+                (ngModelChange)="draftReference.set($event)"
+              />
+            </div>
+
+            <div class="dashboard-comptable__modal-field-group">
+              <span class="dashboard-comptable__modal-field-label"
+                >Ajouter un fichier justificatif</span
+              >
+
+              <input
+                #expenseUploadInput
+                class="dashboard-comptable__upload-native-input"
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg,.webp"
+                (change)="
+                  updateExpenseUpload($any(expenseUploadInput.files?.item(0)))
+                "
+              />
+
+              <div class="dashboard-comptable__upload-box">
+                <button
+                  class="dashboard-comptable__upload-item"
+                  type="button"
+                  (click)="expenseUploadInput.click()"
+                >
+                  <span
+                    class="dashboard-comptable__upload-file-icon"
+                    aria-hidden="true"
+                  >
+                    <img [src]="assets.modalFile" alt="" />
+                  </span>
+
+                  <span class="dashboard-comptable__upload-copy">
+                    <strong>{{
+                      draftUpload()?.name ?? 'Ajouter un fichier'
+                    }}</strong>
+                    <span>{{
+                      draftUpload()?.sizeLabel ?? 'Aucun fichier sélectionné'
+                    }}</span>
+                  </span>
+
+                  @if (draftUpload()) {
+                    <span
+                      class="dashboard-comptable__upload-check"
+                      aria-hidden="true"
+                    >
+                      <img [src]="assets.modalFileCheck" alt="" />
+                    </span>
+                  }
+                </button>
+
+                <button
+                  class="dashboard-comptable__upload-action"
+                  type="button"
+                  (click)="expenseUploadInput.click()"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="dashboard-comptable__modal-actions">
+          <button
+            class="dashboard-comptable__modal-button dashboard-comptable__modal-button--ghost"
+            type="button"
+            (click)="closeAddExpense()"
+          >
+            Annuler
+          </button>
+
+          <button
+            class="dashboard-comptable__modal-button dashboard-comptable__modal-button--primary"
+            type="submit"
+            [disabled]="!canSaveExpense()"
+          >
+            Enregistrer la dépense
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </div>
 }

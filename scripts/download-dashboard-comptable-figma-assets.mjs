@@ -67,6 +67,30 @@ const ASSETS = [
   file: 'apps/ubax-web/public/dashboard-comptable/warning.webp',
   url: 'https://www.figma.com/api/mcp/asset/470b4c17-c780-4163-8847-d07a7793be5c',
  },
+ {
+  file: 'apps/ubax-web/public/dashboard-comptable/modal-close.webp',
+  url: 'https://www.figma.com/api/mcp/asset/f0e1d69d-5017-4d62-91a7-71df2cf24e3a',
+ },
+ {
+  file: 'apps/ubax-web/public/dashboard-comptable/modal-chevron.webp',
+  url: 'https://www.figma.com/api/mcp/asset/2667da7a-fc28-408c-8739-c385c9bd034d',
+ },
+ {
+  file: 'apps/ubax-web/public/dashboard-comptable/modal-category-icon.webp',
+  url: 'https://www.figma.com/api/mcp/asset/848a1285-e315-45bc-8d1e-9119aab31677',
+ },
+ {
+  file: 'apps/ubax-web/public/dashboard-comptable/modal-calendar.webp',
+  url: 'https://www.figma.com/api/mcp/asset/54aa7613-34f6-4952-9ff3-1387cff55333',
+ },
+ {
+  file: 'apps/ubax-web/public/dashboard-comptable/modal-file.webp',
+  url: 'https://www.figma.com/api/mcp/asset/cf43928a-52c5-4f98-ad46-e8a1dc946e38',
+ },
+ {
+  file: 'apps/ubax-web/public/dashboard-comptable/modal-file-check.webp',
+  url: 'https://www.figma.com/api/mcp/asset/90604a3b-b634-40ea-b218-452e91007b79',
+ },
 ];
 
 function resolveTarget(relativePath) {
