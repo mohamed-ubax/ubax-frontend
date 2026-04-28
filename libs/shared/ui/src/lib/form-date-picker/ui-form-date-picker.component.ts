@@ -160,9 +160,16 @@ export class UiFormDatePickerComponent implements OnDestroy {
 
   protected close(): void {
     this.isOpen.set(false);
-    this.calendarView?.destroy();
-    this.calendarView = null;
+    const el = this.calendarEl;
+    const view = this.calendarView;
     this.calendarEl = null;
+    this.calendarView = null;
+    if (el && view) {
+      el.classList.add('is-leaving');
+      el.addEventListener('animationend', () => view.destroy(), { once: true });
+    } else {
+      view?.destroy();
+    }
   }
 
   protected previousMonth(): void {
