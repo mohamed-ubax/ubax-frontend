@@ -467,32 +467,12 @@
             </div>
 
             <div class="dashboard-comptable__modal-field-group">
-              <label for="dashboard-comptable-expense-date">Date</label>
-
-              <div
-                class="dashboard-comptable__modal-date-picker dashboard-comptable__modal-interactive"
-              >
-                <button
-                  id="dashboard-comptable-expense-date"
-                  class="dashboard-comptable__field-shell dashboard-comptable__field-shell--date"
-                  type="button"
-                  [class.is-open]="expenseDatePickerOpen()"
-                  [attr.aria-expanded]="expenseDatePickerOpen()"
-                  aria-haspopup="dialog"
-                  (click)="toggleExpenseDatePicker()"
-                >
-                  <span
-                    class="dashboard-comptable__field-leading-icon"
-                    aria-hidden="true"
-                  >
-                    <img [src]="assets.modalCalendar" alt="" />
-                  </span>
-
-                  <span class="dashboard-comptable__field-display">{{
-                    draftDateLabel()
-                  }}</span>
-                </button>
-              </div>
+              <ubax-ui-form-date-picker
+                label="Date"
+                [iconSrc]="assets.modalCalendar"
+                [value]="draftDate()"
+                (valueChange)="draftDate.set($event)"
+              />
             </div>
           </section>
 
@@ -686,62 +666,6 @@
           </button>
         </div>
 
-        @if (expenseDatePickerOpen()) {
-          <button
-            class="dashboard-comptable__date-overlay"
-            type="button"
-            aria-label="Fermer le calendrier"
-            (click)="toggleExpenseDatePicker()"
-          ></button>
-
-          <div
-            class="dashboard-comptable__date-menu dashboard-comptable__date-menu--overlay dashboard-comptable__modal-interactive"
-            aria-label="Calendrier de sélection de date"
-          >
-            <div class="dashboard-comptable__date-menu-header">
-              <p>{{ expenseCalendarLabel() }}</p>
-
-              <div class="dashboard-comptable__date-menu-nav">
-                <button
-                  type="button"
-                  aria-label="Mois précédent"
-                  (click)="previousExpenseCalendarMonth()"
-                >
-                  <i class="pi pi-angle-left"></i>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Mois suivant"
-                  (click)="nextExpenseCalendarMonth()"
-                >
-                  <i class="pi pi-angle-right"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="dashboard-comptable__date-grid">
-              @for (weekday of expenseCalendarWeekdays; track weekday) {
-                <span class="dashboard-comptable__date-weekday">{{
-                  weekday
-                }}</span>
-              }
-
-              @for (week of expenseCalendarWeeks(); track $index) {
-                @for (day of week; track day.date.getTime()) {
-                  <button
-                    class="dashboard-comptable__date-day"
-                    type="button"
-                    [class.is-active]="day.active"
-                    [class.is-muted]="day.muted"
-                    (click)="selectExpenseDate(day.date)"
-                  >
-                    {{ day.label }}
-                  </button>
-                }
-              }
-            </div>
-          </div>
-        }
       </form>
     </dialog>
   </div>

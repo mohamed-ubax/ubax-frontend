@@ -1,0 +1,181 @@
+.form-date-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-date-picker__label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 30.11px;
+  color: var(--ubax-black);
+}
+
+.form-date-picker__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 55px;
+  padding: 16px 18px 16px 55px;
+  border: 0;
+  border-radius: 27.5px;
+  background: var(--ubax-page-bg);
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 22.11px;
+  color: var(--ubax-black);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: box-shadow 180ms var(--ubax-motion-ease-soft, cubic-bezier(0.16, 1, 0.3, 1));
+
+  &:hover {
+    box-shadow: 0 14px 26px rgb(13 10 44 / 0.08);
+  }
+
+  &.is-open {
+    box-shadow: inset 0 0 0 1px rgb(26 48 71 / 0.12);
+  }
+}
+
+.form-date-picker__leading-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+
+  img {
+    display: block;
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+}
+
+.form-date-picker__display {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Overlay backdrop ────────────────────────────────────────────────────── */
+
+.form-date-picker__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  padding: 0;
+  border: 0;
+  background: rgb(13 10 44 / 0.08);
+  cursor: pointer;
+}
+
+/* ── Calendar popup ──────────────────────────────────────────────────────── */
+
+.form-date-picker__calendar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 100;
+  width: min(320px, calc(100vw - 40px));
+  padding: 16px;
+  border: 1px solid rgb(166 181 191 / 0.18);
+  border-radius: 20px;
+  background: var(--ubax-surface);
+  box-shadow: 0 20px 40px rgb(38 37 53 / 0.1);
+  font-family: 'Lexend', sans-serif;
+  color: var(--ubax-text-dark);
+  transform: translate(-50%, -50%);
+}
+
+.form-date-picker__calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+
+  p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.form-date-picker__calendar-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(236 242 247 / 0.8);
+    color: var(--ubax-navy);
+    cursor: pointer;
+    transition: background-color 160ms ease;
+
+    &:hover {
+      background: rgb(232 125 30 / 0.12);
+    }
+  }
+}
+
+.form-date-picker__calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.form-date-picker__weekday,
+.form-date-picker__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.form-date-picker__weekday {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.form-date-picker__day {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+
+  &:hover {
+    background: rgb(236 242 247 / 0.9);
+  }
+
+  &.is-muted {
+    color: var(--ubax-text-faint);
+  }
+
+  &.is-active {
+    background: var(--ubax-accent);
+    box-shadow: var(--ubax-shadow-calendar-active);
+    color: var(--ubax-surface);
+  }
+}
