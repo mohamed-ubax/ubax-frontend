@@ -25,27 +25,32 @@
         <i class="pi pi-angle-down"></i>
       </span>
     </button>
-
-    @if (isOpen()) {
-      <div class="form-select__menu" role="listbox">
-        @for (option of options(); track option) {
-          <button
-            class="form-select__option"
-            [class.is-active]="value() === option"
-            role="option"
-            type="button"
-            (click)="select(option)"
-          >
-            <span class="form-select__option-label">{{ option }}</span>
-
-            @if (value() === option) {
-              <span class="form-select__option-check" aria-hidden="true">
-                <i class="pi pi-check"></i>
-              </span>
-            }
-          </button>
-        }
-      </div>
-    }
   </div>
+
+  <ng-template #menuTpl>
+    <div
+      class="form-select__menu"
+      [style.top.px]="menuTop()"
+      [style.left.px]="menuLeft()"
+      [style.width.px]="menuWidth()"
+      [style.max-height.px]="menuMaxHeight()"
+    >
+      @for (option of options(); track option) {
+        <button
+          class="form-select__option"
+          [class.is-active]="value() === option"
+          type="button"
+          (click)="select(option)"
+        >
+          <span class="form-select__option-label">{{ option }}</span>
+
+          @if (value() === option) {
+            <span class="form-select__option-check" aria-hidden="true">
+              <i class="pi pi-check"></i>
+            </span>
+          }
+        </button>
+      }
+    </div>
+  </ng-template>
 </div>

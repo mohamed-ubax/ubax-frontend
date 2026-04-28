@@ -1540,80 +1540,74 @@ label.toolbar-pill {
 
 // ── Modal overlay & animations ─────────────────────────────────────────────
 
-@keyframes overlayIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes overlayOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.93);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes modalOut {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.93);
-  }
-}
-
-.at-overlay {
+.at-modal-layer {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background: rgba(8, 18, 31, 0.48);
-  animation: overlayIn 0.2s ease forwards;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 2.5vw, 32px);
 
   &.is-closing {
-    animation: overlayOut 0.2s ease forwards;
+    pointer-events: none;
+  }
+}
+
+.at-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  background: rgb(10 18 31 / 56%);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  opacity: 1;
+  transition:
+    opacity 220ms var(--ubax-motion-ease-soft),
+    backdrop-filter 220ms var(--ubax-motion-ease-soft);
+
+  .at-modal-layer.is-closing & {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+
+  @starting-style {
+    opacity: 0;
+    backdrop-filter: blur(0);
   }
 }
 
 .at-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 1001;
-  width: min(560px, calc(100vw - 40px));
-  max-height: calc(100dvh - 48px);
-  transform: translate(-50%, -50%);
+  position: relative;
+  z-index: 1;
+  width: min(662px, calc(100vw - 32px));
+  max-height: min(736px, calc(100dvh - 32px));
+  margin: 0;
+  padding: 0;
+  border: 0;
   border-radius: 24px;
   background: var(--ubax-surface);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 32px 72px rgb(13 10 44 / 0.18);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  animation: modalIn 0.25s cubic-bezier(0.34, 1.1, 0.64, 1) forwards;
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    opacity 220ms var(--ubax-motion-ease-soft),
+    transform 220ms var(--ubax-motion-ease-soft);
+
+  &::backdrop {
+    display: none;
+  }
 
   &.is-closing {
-    animation: modalOut 0.2s ease forwards;
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.985);
+  }
+
+  @starting-style {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.965);
   }
 }
 
@@ -1623,6 +1617,7 @@ label.toolbar-pill {
   flex-shrink: 0;
   align-items: center;
   gap: 12px;
+  min-height: 82px;
   padding: 18px 24px;
   background: var(--ubax-navy);
 }
@@ -1645,18 +1640,33 @@ label.toolbar-pill {
   height: 38px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  background: #fff;
   font-size: 22px;
   line-height: 1;
-  color: var(--ubax-surface);
+  color: var(--ubax-navy);
   cursor: pointer;
+  box-shadow: 0 8px 18px rgb(13 10 44 / 0.08);
+  transition:
+    transform 180ms var(--ubax-motion-ease-soft),
+    box-shadow 180ms var(--ubax-motion-ease-soft);
+
+  &:hover {
+    transform: scale(1.04);
+    box-shadow: 0 12px 20px rgb(13 10 44 / 0.12);
+  }
+}
+
+.at-modal-form {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(min(736px, calc(100dvh - 32px)) - 82px);
 }
 
 .at-body {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px 28px;
+  gap: 28px;
+  padding: 18px 28px;
   overflow-y: auto;
   flex: 1 1 auto;
 }
@@ -1671,11 +1681,11 @@ label.toolbar-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 120px;
-    height: 120px;
+    width: 134px;
+    height: 134px;
     border-radius: 50%;
     background: var(--ubax-page-bg);
-    border: 2px dashed var(--ubax-border-pagination);
+    border: 2px dashed rgb(166 181 191 / 0.58);
     font-family: 'Lexend', sans-serif;
     font-size: 36px;
     font-weight: 600;
@@ -1721,20 +1731,33 @@ label.toolbar-pill {
 .at-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px 24px;
+  align-items: start;
 }
 
-.at-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.at-field-shell {
+  min-width: 0;
 
   &--full {
     grid-column: 1 / -1;
   }
+
+  &--phone {
+    position: relative;
+  }
+
+  &--payment {
+    grid-column: 1;
+  }
 }
 
-.at-label {
+:host ::ng-deep .at-field-shell .form-input,
+:host ::ng-deep .at-field-shell .form-select {
+  gap: 8px;
+}
+
+:host ::ng-deep .at-field-shell .form-input__label,
+:host ::ng-deep .at-field-shell .form-select__label {
   font-family: 'Lexend', sans-serif;
   font-size: 13px;
   font-weight: 400;
@@ -1742,82 +1765,128 @@ label.toolbar-pill {
   color: var(--ubax-text-primary);
 }
 
-.at-input,
-.at-select select {
-  width: 100%;
-  height: 56px;
-  padding: 0 16px;
-  border: 1px solid #f1f1f1;
-  border-radius: 10px;
+:host ::ng-deep .at-field-shell .form-input__field,
+:host ::ng-deep .at-field-shell .form-select__trigger {
+  min-height: 56px;
+  padding: 16px 18px;
+  border-radius: 18px;
   background: var(--ubax-page-bg);
   font-family: 'Lexend', sans-serif;
   font-size: 14px;
   font-weight: 300;
   line-height: 1.2;
   color: var(--ubax-text-primary);
-  outline: none;
-  box-sizing: border-box;
 }
 
-.at-phone {
-  display: flex;
-  align-items: center;
-  height: 56px;
-  border: 1px solid #f1f1f1;
-  border-radius: 10px;
-  background: var(--ubax-page-bg);
-  overflow: hidden;
+:host ::ng-deep .at-field-shell .form-input__field::placeholder {
+  color: var(--ubax-text-muted);
+  opacity: 1;
+}
 
-  &__flag {
+:host ::ng-deep .at-field-shell .form-select__trigger {
+  padding-right: 56px;
+}
+
+:host ::ng-deep .at-field-shell .form-select__menu {
+  border-radius: 18px;
+}
+
+:host ::ng-deep .at-field-shell--phone .form-input__field {
+  padding-left: 116px;
+}
+
+:host ::ng-deep .at-phone-code,
+:host ::ng-deep .at-phone-code.p-select {
+  position: absolute;
+  left: 18px;
+  bottom: 2px;
+  width: 90px;
+  min-height: 52px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -2px;
+    width: 1px;
+    height: 24px;
+    background: rgb(166 181 191 / 0.48);
+    transform: translateY(-50%);
+  }
+
+  .p-select-label {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 46px;
-    height: 100%;
-    font-size: 20px;
-    line-height: 1;
-    flex-shrink: 0;
-    border-right: 1px solid var(--ubax-divider-soft);
+    min-height: 52px;
+    padding: 0;
+    background: transparent;
   }
 
-  &__input {
-    flex: 1 1 auto;
-    min-width: 0;
-    height: 100%;
-    padding: 0 16px;
-    border: none;
+  .p-select-dropdown {
+    width: 18px;
+    min-height: 52px;
+    padding: 0;
+    justify-content: center;
     background: transparent;
-    font-family: 'Lexend', sans-serif;
-    font-size: 14px;
-    font-weight: 300;
-    line-height: 1.2;
     color: var(--ubax-text-primary);
-    outline: none;
+  }
 
-    &::placeholder {
-      color: var(--ubax-text-muted);
-      opacity: 1;
-    }
+  .p-select-dropdown-icon {
+    font-size: 13px;
   }
 }
 
-.at-select {
-  position: relative;
+.at-phone-code__selected,
+.at-phone-code__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Lexend', sans-serif;
+  color: var(--ubax-text-primary);
+}
 
-  span {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    line-height: 1;
-    color: var(--ubax-text-muted);
-    pointer-events: none;
+.at-phone-code__selected {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.at-phone-code__option {
+  width: 100%;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.at-phone-code__iso {
+  font-weight: 500;
+}
+
+.at-phone-code__dial {
+  color: var(--ubax-text-muted);
+}
+
+:host ::ng-deep .at-phone-code-panel {
+  border-radius: 18px;
+  border: 1px solid rgb(166 181 191 / 0.18);
+  box-shadow: 0 20px 40px rgb(38 37 53 / 0.1);
+  overflow: hidden;
+
+  .p-select-list {
+    padding: 8px;
   }
 
-  select {
-    appearance: none;
-    padding-right: 40px;
+  .p-select-option {
+    min-height: 42px;
+    border-radius: 12px;
+    padding: 0 12px;
+    font-family: 'Lexend', sans-serif;
+    color: var(--ubax-text-primary);
   }
 }
 
@@ -1828,7 +1897,6 @@ label.toolbar-pill {
   justify-content: center;
   gap: 12px;
   padding: 20px 28px 28px;
-  border-top: 1px solid var(--ubax-divider-soft);
 }
 
 .at-btn {
@@ -1842,9 +1910,14 @@ label.toolbar-pill {
   line-height: 1.2;
   cursor: pointer;
 
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+  }
+
   &--cancel {
-    border: 1px solid var(--ubax-border-card);
-    background: var(--ubax-surface);
+    border: 0;
+    background: #edf2f6;
     color: var(--ubax-navy);
   }
 
@@ -1929,6 +2002,19 @@ label.toolbar-pill {
   .technician-directory__grid,
   .at-form {
     grid-template-columns: 1fr;
+  }
+
+  .at-modal {
+    width: min(662px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+  }
+
+  .at-body {
+    padding-inline: 20px;
+  }
+
+  .at-footer {
+    padding-inline: 20px;
   }
 
   .interventions-card {
@@ -2032,6 +2118,60 @@ label.toolbar-pill {
       gap: 12px 16px;
       padding: 24px 0 18px;
     }
+  }
+
+  .at-modal-layer {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .at-modal {
+    width: 100%;
+    max-height: calc(100dvh - 12px);
+    border-radius: 22px 22px 18px 18px;
+  }
+
+  .at-header {
+    grid-template-columns: 1fr auto;
+    padding: 18px 18px 16px;
+
+    > span {
+      display: none;
+    }
+  }
+
+  .at-title {
+    text-align: left;
+    font-size: 18px;
+  }
+
+  .at-body {
+    gap: 24px;
+    padding: 16px 16px 0;
+  }
+
+  .at-photo__circle {
+    width: 120px;
+    height: 120px;
+  }
+
+  :host ::ng-deep .at-field-shell--phone .form-input__field {
+    padding-left: 108px;
+  }
+
+  :host ::ng-deep .at-phone-code,
+  :host ::ng-deep .at-phone-code.p-select {
+    left: 16px;
+    width: 84px;
+  }
+
+  .at-footer {
+    flex-direction: column-reverse;
+    padding: 18px 16px 20px;
+  }
+
+  .at-btn {
+    width: 100%;
   }
 
   :host ::ng-deep .interventions-period-select {

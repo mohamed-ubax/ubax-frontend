@@ -3,7 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   inject,
+  OnDestroy,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +14,8 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import {
   LazyChartComponent,
+  UiFormInputComponent,
+  UiFormSelectComponent,
   UbaxPaginatorComponent,
 } from '@ubax-workspace/shared-ui';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
@@ -117,6 +121,23 @@ interface DashboardSavSelectedTechnicianDetail
   readonly profileImage: string;
 }
 
+interface DashboardSavCountryCodeOption {
+  readonly iso: string;
+  readonly dialCode: string;
+  readonly display: string;
+}
+
+interface DashboardSavScrollLockState {
+  readonly htmlOverflow: string;
+  readonly bodyOverflow: string;
+  readonly bodyTouchAction: string;
+  readonly bodyPosition: string;
+  readonly bodyTop: string;
+  readonly bodyWidth: string;
+  readonly bodyHadOverlayClass: boolean;
+  readonly scrollY: number;
+}
+
 const SHARED_ASSET_ROOT = '/shared/demandes';
 const DASHBOARD_SAV_ASSET_ROOT = '/dashboard-sav';
 const TECHNICIAN_AVATAR_COUNT = 8;
@@ -124,6 +145,7 @@ const DEFAULT_VISIBLE_TECHNICIANS = 5;
 const DEFAULT_VISIBLE_NOTIFICATIONS = 5;
 const TICKETS_PER_PAGE = 4;
 const PHASE_TRANSITION_DURATION_MS = 260;
+const ADD_TECH_CLOSE_DURATION_MS = 220;
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
   day: '2-digit',
@@ -202,6 +224,14 @@ const STAR_ASSET_BY_TONE: Record<DashboardSavStarTone, string> = {
   full: dashboardSavAsset('technicians/star-full.webp'),
   half: dashboardSavAsset('technicians/star-half.webp'),
 };
+
+const COUNTRY_CODE_OPTIONS: readonly DashboardSavCountryCodeOption[] = [
+  { iso: 'CI', dialCode: '225', display: 'CI +225' },
+  { iso: 'SN', dialCode: '221', display: 'SN +221' },
+  { iso: 'BJ', dialCode: '229', display: 'BJ +229' },
+  { iso: 'TG', dialCode: '228', display: 'TG +228' },
+  { iso: 'ML', dialCode: '223', display: 'ML +223' },
+];
 
 const TICKET_CLIENTS = [
   {
@@ -711,15 +741,19 @@ const ALL_TICKETS: readonly DashboardSavTicket[] = [
     DatePickerModule,
     SelectModule,
     LazyChartComponent,
+    UiFormInputComponent,
+    UiFormSelectComponent,
     UbaxPaginatorComponent,
   ],
   templateUrl: './dashboard-sav-page-redesign.component.html',
   styleUrl: './dashboard-sav-page-redesign.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardSavPageComponent {
+export class DashboardSavPageComponent implements OnDestroy {
   readonly authStore = inject(AuthStore);
   private readonly document = inject(DOCUMENT);
+  private closeAddTechTimeout: ReturnType<typeof setTimeout> | null = null;
+  private scrollLockState: DashboardSavScrollLockState | null = null;
 
   readonly sharedIcons = {
     search: `${SHARED_ASSET_ROOT}/filter-search.webp`,
@@ -837,7 +871,12 @@ export class DashboardSavPageComponent {
   readonly newSpecialty = signal('Plomberie & sanitaires');
   readonly newPayment = signal('Espèces');
   readonly newPhotoUrl = signal<string | null>(null);
+  readonly selectedCountryCode = signal<DashboardSavCountryCodeOption>(
+    COUNTRY_CODE_OPTIONS[0],
+  );
   private photoObjectUrl: string | null = null;
+
+  readonly countryCodeOptions = [...COUNTRY_CODE_OPTIONS];
 
   readonly specialties = [
     'Plomberie & sanitaires',
@@ -849,6 +888,22 @@ export class DashboardSavPageComponent {
   ];
 
   readonly paymentMethods = ['Espèces', 'Virement', 'Mobile Money', 'Chèque'];
+
+  readonly addTechModalVisible = computed(
+    () => this.addTechOpen() || this.addTechClosing(),
+  );
+
+  readonly addTechInitials = computed(() => {
+    const prenomInitial = this.newPrenom().trim().slice(0, 1);
+    const nomInitial = this.newNom().trim().slice(0, 1);
+    return `${prenomInitial}${nomInitial}`.trim().toUpperCase() || 'T';
+  });
+
+  readonly canSaveTech = computed(() => {
+    return Boolean(
+      this.newPrenom().trim() && this.newNom().trim() && this.newPhone().trim(),
+    );
+  });
 
   readonly userFullName = computed(() => {
     const user = this.authStore.user();
@@ -1185,18 +1240,62 @@ export class DashboardSavPageComponent {
   readonly starIcons = computed(() => STAR_ASSET_BY_TONE);
 
   openAddTech(): void {
+    this.clearAddTechCloseTimeout();
+
+    if (this.addTechOpen() && !this.addTechClosing()) {
+      return;
+    }
+
+    const startViewTransition = this.document.startViewTransition?.bind(
+      this.document,
+    );
+
+    if (startViewTransition) {
+      const transition = startViewTransition(() => {
+        this.addTechClosing.set(false);
+        this.addTechOpen.set(true);
+        this.lockPageScroll();
+      });
+
+      void transition.finished.catch(() => undefined);
+      return;
+    }
+
+    this.lockPageScroll();
+    this.addTechClosing.set(false);
     this.addTechOpen.set(true);
-    this.document.body.style.setProperty('overflow', 'hidden');
   }
 
   closeAddTech(): void {
+    if (!this.addTechOpen()) {
+      return;
+    }
+
+    this.clearAddTechCloseTimeout();
+
+    const startViewTransition = this.document.startViewTransition?.bind(
+      this.document,
+    );
+
+    if (startViewTransition) {
+      const transition = startViewTransition(() => {
+        this.addTechClosing.set(false);
+        this.addTechOpen.set(false);
+      });
+
+      void transition.finished.finally(() => {
+        this.finalizeAddTechClose();
+      });
+      return;
+    }
+
     this.addTechClosing.set(true);
-    this.document.body.style.removeProperty('overflow');
-    setTimeout(() => {
+    this.closeAddTechTimeout = setTimeout(() => {
       this.addTechOpen.set(false);
       this.addTechClosing.set(false);
-      this.resetPhotoState();
-    }, 220);
+      this.closeAddTechTimeout = null;
+      this.finalizeAddTechClose();
+    }, ADD_TECH_CLOSE_DURATION_MS);
   }
 
   handlePhotoChange(event: Event): void {
@@ -1224,7 +1323,7 @@ export class DashboardSavPageComponent {
   saveTech(): void {
     const prenom = this.newPrenom().trim();
     const nom = this.newNom().trim();
-    const phone = this.newPhone().trim();
+    const phone = this.formatPhoneValue(this.newPhone());
 
     if (!prenom || !nom || !phone) {
       return;
@@ -1256,13 +1355,6 @@ export class DashboardSavPageComponent {
       ...technicians,
     ]);
 
-    this.newPrenom.set('');
-    this.newNom.set('');
-    this.newPhone.set('');
-    this.newSpecialty.set('Plomberie & sanitaires');
-    this.newPayment.set('Espèces');
-    this.photoObjectUrl = null;
-    this.newPhotoUrl.set(null);
     this.closeAddTech();
   }
 
@@ -1279,6 +1371,43 @@ export class DashboardSavPageComponent {
 
   stopPropagation(event: MouseEvent): void {
     event.stopPropagation();
+  }
+
+  addTechLauncherSurfaceTransitionName(): string | null {
+    return this.addTechModalVisible()
+      ? null
+      : this.toViewTransitionToken('dashboard-sav-add-tech-surface');
+  }
+
+  addTechLauncherMediaTransitionName(): string | null {
+    return this.addTechModalVisible()
+      ? null
+      : this.toViewTransitionToken('dashboard-sav-add-tech-media');
+  }
+
+  addTechModalSurfaceTransitionName(): string | null {
+    return this.addTechModalVisible()
+      ? this.toViewTransitionToken('dashboard-sav-add-tech-surface')
+      : null;
+  }
+
+  addTechModalMediaTransitionName(): string | null {
+    return this.addTechModalVisible()
+      ? this.toViewTransitionToken('dashboard-sav-add-tech-media')
+      : null;
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape(): void {
+    if (this.addTechModalVisible()) {
+      this.closeAddTech();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.clearAddTechCloseTimeout();
+    this.unlockPageScroll();
+    this.resetAddTechDraft();
   }
 
   applyTicketFilters(): void {
@@ -1578,6 +1707,106 @@ export class DashboardSavPageComponent {
 
   private toViewTransitionToken(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  }
+
+  private finalizeAddTechClose(): void {
+    this.unlockPageScroll();
+    this.resetAddTechDraft();
+  }
+
+  private clearAddTechCloseTimeout(): void {
+    if (!this.closeAddTechTimeout) {
+      return;
+    }
+
+    clearTimeout(this.closeAddTechTimeout);
+    this.closeAddTechTimeout = null;
+  }
+
+  private resetAddTechDraft(): void {
+    this.newPrenom.set('');
+    this.newNom.set('');
+    this.newPhone.set('');
+    this.newSpecialty.set('Plomberie & sanitaires');
+    this.newPayment.set('Espèces');
+    this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
+    this.resetPhotoState();
+  }
+
+  private formatPhoneValue(value: string): string {
+    const compactValue = value.replace(/\s+/g, ' ').trim();
+
+    if (!compactValue) {
+      return '';
+    }
+
+    const dialCode = this.selectedCountryCode().dialCode;
+    const withoutCountryCode = compactValue.replace(
+      new RegExp(String.raw`^\+?${dialCode}\s*`),
+      '',
+    );
+
+    return `+${dialCode} ${withoutCountryCode}`.trim();
+  }
+
+  private lockPageScroll(): void {
+    if (this.scrollLockState) {
+      return;
+    }
+
+    const { body, documentElement, defaultView } = this.document;
+
+    if (!body || !documentElement) {
+      return;
+    }
+
+    this.scrollLockState = {
+      htmlOverflow: documentElement.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyTouchAction: body.style.touchAction,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyWidth: body.style.width,
+      bodyHadOverlayClass: body.classList.contains(
+        'ubax-dashboard-overlay-open',
+      ),
+      scrollY: defaultView?.scrollY ?? documentElement.scrollTop ?? 0,
+    };
+
+    body.classList.add('ubax-dashboard-overlay-open');
+    documentElement.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.touchAction = 'none';
+    body.style.position = 'fixed';
+    body.style.top = `-${this.scrollLockState.scrollY}px`;
+    body.style.width = '100%';
+  }
+
+  private unlockPageScroll(): void {
+    if (!this.scrollLockState) {
+      return;
+    }
+
+    const { body, documentElement, defaultView } = this.document;
+
+    documentElement.style.overflow = this.scrollLockState.htmlOverflow;
+    body.style.overflow = this.scrollLockState.bodyOverflow;
+    body.style.touchAction = this.scrollLockState.bodyTouchAction;
+    body.style.position = this.scrollLockState.bodyPosition;
+    body.style.top = this.scrollLockState.bodyTop;
+    body.style.width = this.scrollLockState.bodyWidth;
+
+    if (!this.scrollLockState.bodyHadOverlayClass) {
+      body.classList.remove('ubax-dashboard-overlay-open');
+    }
+
+    defaultView?.scrollTo({
+      top: this.scrollLockState.scrollY,
+      left: 0,
+      behavior: 'auto',
+    });
+
+    this.scrollLockState = null;
   }
 
   private downloadCsv(

@@ -34,8 +34,8 @@
   text-align: left;
   cursor: pointer;
   overflow: hidden;
-  transition:
-    box-shadow 180ms var(--ubax-motion-ease-soft, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: box-shadow 180ms
+    var(--ubax-motion-ease-soft, cubic-bezier(0.16, 1, 0.3, 1));
 
   &:hover:not(:disabled) {
     box-shadow: 0 14px 26px rgb(13 10 44 / 0.08);
@@ -101,11 +101,8 @@
 }
 
 .form-select__menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  right: 0;
-  z-index: 8;
+  position: fixed;
+  z-index: 1300;
   display: grid;
   gap: 8px;
   padding: 12px;
@@ -113,6 +110,14 @@
   border-radius: 20px;
   background: var(--ubax-surface);
   box-shadow: 0 20px 40px rgb(38 37 53 / 0.1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: form-select-menu-enter 180ms
+    var(--ubax-motion-ease-soft, cubic-bezier(0.16, 1, 0.3, 1));
+
+  &.is-leaving {
+    animation: form-select-menu-leave 140ms ease forwards;
+  }
 }
 
 .form-select__option {
@@ -160,4 +165,28 @@
   flex-shrink: 0;
   color: var(--ubax-accent);
   font-size: 11px;
+}
+
+@keyframes form-select-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes form-select-menu-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
 }

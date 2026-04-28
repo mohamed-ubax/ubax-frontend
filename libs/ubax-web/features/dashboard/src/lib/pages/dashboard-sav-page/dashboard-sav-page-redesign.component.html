@@ -276,10 +276,15 @@
           type="button"
           class="dashboard-sav__add-technician"
           (click)="openAddTech()"
+          [style.view-transition-name]="addTechLauncherSurfaceTransitionName()"
         >
           <span>Ajouter un technicien</span>
 
-          <span class="dashboard-sav__add-technician-icon" aria-hidden="true">
+          <span
+            class="dashboard-sav__add-technician-icon"
+            aria-hidden="true"
+            [style.view-transition-name]="addTechLauncherMediaTransitionName()"
+          >
             <img [src]="heroAddTechnicianIcon" alt="" />
           </span>
         </button>
@@ -828,134 +833,158 @@
   }
 </div>
 
-@if (addTechOpen()) {
-  <div
-    class="at-overlay"
-    [class.is-closing]="addTechClosing()"
-    (click)="closeAddTech()"
-  ></div>
+@if (addTechModalVisible()) {
+  <div class="at-modal-layer" [class.is-closing]="addTechClosing()">
+    <button
+      class="at-modal-backdrop"
+      type="button"
+      aria-label="Fermer l'overlay d'ajout de technicien"
+      (click)="closeAddTech()"
+    ></button>
 
-  <div
-    class="at-modal"
-    [class.is-closing]="addTechClosing()"
-    (click)="stopPropagation($event)"
-  >
-    <div class="at-header">
-      <span aria-hidden="true"></span>
-      <h2 class="at-title">Ajouter un technicien</h2>
-      <button class="at-close" (click)="closeAddTech()">
-        <span aria-hidden="true">×</span>
-      </button>
-    </div>
-
-    <div class="at-body">
-      <div class="at-photo">
-        <label class="at-photo__circle" for="at-photo-input">
-          @if (newPhotoUrl()) {
-            <img [src]="newPhotoUrl()!" class="at-photo__preview" alt="" />
-          } @else {
-            {{ (newPrenom() || 'T').slice(0, 1) }}
-          }
-        </label>
-        <input
-          id="at-photo-input"
-          class="at-photo__input"
-          type="file"
-          accept="image/*"
-          (change)="handlePhotoChange($event)"
-        />
-        <label class="at-photo__link" for="at-photo-input"
-          >Modifier la photo</label
+    <dialog
+      class="at-modal"
+      [class.is-closing]="addTechClosing()"
+      [style.view-transition-name]="addTechModalSurfaceTransitionName()"
+      open
+      aria-labelledby="dashboard-sav-add-tech-title"
+      aria-modal="true"
+    >
+      <div class="at-header">
+        <span aria-hidden="true"></span>
+        <h2 id="dashboard-sav-add-tech-title" class="at-title">
+          Ajouter un technicien
+        </h2>
+        <button
+          class="at-close"
+          type="button"
+          aria-label="Fermer le formulaire d'ajout de technicien"
+          (click)="closeAddTech()"
         >
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
 
-      <div class="at-form">
-        <div class="at-field">
-          <label class="at-label" for="dashboard-sav-new-prenom">Prénom</label>
-          <input
-            id="dashboard-sav-new-prenom"
-            class="at-input"
-            type="text"
-            placeholder="Prénom"
-            [value]="newPrenom()"
-            (input)="newPrenom.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="at-field">
-          <label class="at-label" for="dashboard-sav-new-nom">Nom</label>
-          <input
-            id="dashboard-sav-new-nom"
-            class="at-input"
-            type="text"
-            placeholder="Nom"
-            [value]="newNom()"
-            (input)="newNom.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="at-field">
-          <label class="at-label" for="dashboard-sav-new-phone"
-            >Numéro de téléphone</label
-          >
-          <div class="at-phone">
-            <span class="at-phone__flag" aria-hidden="true">🇨🇮</span>
+      <form class="at-modal-form" (ngSubmit)="saveTech()">
+        <div class="at-body">
+          <div class="at-photo">
+            <label
+              class="at-photo__circle"
+              for="at-photo-input"
+              [style.view-transition-name]="addTechModalMediaTransitionName()"
+            >
+              @if (newPhotoUrl()) {
+                <img [src]="newPhotoUrl()!" class="at-photo__preview" alt="" />
+              } @else {
+                {{ addTechInitials() }}
+              }
+            </label>
             <input
-              id="dashboard-sav-new-phone"
-              class="at-phone__input"
-              type="tel"
-              placeholder="+225 07 XX XX XX XX"
-              [value]="newPhone()"
-              (input)="newPhone.set($any($event.target).value)"
+              id="at-photo-input"
+              class="at-photo__input"
+              type="file"
+              accept="image/*"
+              (change)="handlePhotoChange($event)"
+            />
+            <label class="at-photo__link" for="at-photo-input"
+              >Modifier la photo</label
+            >
+          </div>
+
+          <div class="at-form">
+            <ubax-ui-form-input
+              class="at-field-shell"
+              label="Prénom"
+              placeholder="Prénom"
+              [value]="newPrenom()"
+              (valueChange)="newPrenom.set($event)"
+            />
+
+            <ubax-ui-form-input
+              class="at-field-shell"
+              label="Nom"
+              placeholder="Nom"
+              [value]="newNom()"
+              (valueChange)="newNom.set($event)"
+            />
+
+            <div class="at-field-shell at-field-shell--phone">
+              <ubax-ui-form-input
+                label="Numéro de téléphone"
+                type="tel"
+                inputMode="tel"
+                placeholder="07 XX XX XX XX"
+                [value]="newPhone()"
+                (valueChange)="newPhone.set($event)"
+              />
+
+              <p-select
+                [options]="countryCodeOptions"
+                [ngModel]="selectedCountryCode()"
+                (ngModelChange)="selectedCountryCode.set($event)"
+                name="countryCode"
+                optionLabel="display"
+                appendTo="body"
+                styleClass="at-phone-code"
+                panelStyleClass="at-phone-code-panel"
+                inputId="dashboard-sav-phone-code"
+                ariaLabel="Choisir un indicatif téléphonique"
+              >
+                <ng-template #selectedItem let-country>
+                  <span class="at-phone-code__selected">
+                    <span class="at-phone-code__iso">{{ country?.iso }}</span>
+                    <span class="at-phone-code__dial"
+                      >+{{ country?.dialCode }}</span
+                    >
+                  </span>
+                </ng-template>
+
+                <ng-template #item let-country>
+                  <span class="at-phone-code__option">
+                    <span class="at-phone-code__iso">{{ country.iso }}</span>
+                    <span class="at-phone-code__dial"
+                      >+{{ country.dialCode }}</span
+                    >
+                  </span>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <ubax-ui-form-select
+              class="at-field-shell"
+              label="Domaine de compétence"
+              [options]="specialties"
+              [value]="newSpecialty()"
+              (valueChange)="newSpecialty.set($event)"
+            />
+
+            <ubax-ui-form-select
+              class="at-field-shell at-field-shell--payment"
+              label="Moyen de paiement souhaité"
+              [options]="paymentMethods"
+              [value]="newPayment()"
+              (valueChange)="newPayment.set($event)"
             />
           </div>
         </div>
 
-        <div class="at-field">
-          <label class="at-label" for="dashboard-sav-new-specialty"
-            >Domaine de compétence</label
+        <div class="at-footer">
+          <button
+            class="at-btn at-btn--cancel"
+            type="button"
+            (click)="closeAddTech()"
           >
-          <div class="at-select">
-            <select
-              id="dashboard-sav-new-specialty"
-              [value]="newSpecialty()"
-              (change)="newSpecialty.set($any($event.target).value)"
-            >
-              @for (specialty of specialties; track specialty) {
-                <option [value]="specialty">{{ specialty }}</option>
-              }
-            </select>
-            <span aria-hidden="true">⌄</span>
-          </div>
-        </div>
-
-        <div class="at-field at-field--full">
-          <label class="at-label" for="dashboard-sav-new-payment"
-            >Moyen de paiement souhaité</label
+            Annuler
+          </button>
+          <button
+            class="at-btn at-btn--save"
+            type="submit"
+            [disabled]="!canSaveTech()"
           >
-          <div class="at-select">
-            <select
-              id="dashboard-sav-new-payment"
-              [value]="newPayment()"
-              (change)="newPayment.set($any($event.target).value)"
-            >
-              @for (paymentMethod of paymentMethods; track paymentMethod) {
-                <option [value]="paymentMethod">{{ paymentMethod }}</option>
-              }
-            </select>
-            <span aria-hidden="true">⌄</span>
-          </div>
+            Enregistrer
+          </button>
         </div>
-      </div>
-    </div>
-
-    <div class="at-footer">
-      <button class="at-btn at-btn--cancel" (click)="closeAddTech()">
-        Annuler
-      </button>
-      <button class="at-btn at-btn--save" (click)="saveTech()">
-        Enregistrer
-      </button>
-    </div>
+      </form>
+    </dialog>
   </div>
 }
