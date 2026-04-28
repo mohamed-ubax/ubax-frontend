@@ -1,0 +1,34 @@
+.form-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: text;
+}
+
+.form-input__label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 30.11px;
+  color: var(--ubax-black);
+}
+
+.form-input__field {
+  width: 100%;
+  min-height: 55px;
+  padding: 16px 18px;
+  border: 0;
+  border-radius: 27.5px;
+  background: var(--ubax-page-bg);
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 22.11px;
+  color: var(--ubax-black);
+  outline: 0;
+  transition: box-shadow 180ms var(--ubax-motion-ease-soft, cubic-bezier(0.16, 1, 0.3, 1));
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgb(232 125 30 / 0.18);
+  }
+}

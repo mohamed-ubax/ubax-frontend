@@ -13,16 +13,15 @@ import { FormsModule } from '@angular/forms';
 import { ChartData, ChartOptions, Plugin } from 'chart.js';
 import { ChartModule } from 'primeng/chart';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
-import { DateRange, DateRangePickerComponent } from '@ubax-workspace/shared-ui';
+import {
+  DateRange,
+  DateRangePickerComponent,
+  UiFormInputComponent,
+  UiFormSelectComponent,
+} from '@ubax-workspace/shared-ui';
 
 type DashboardPeriod = 'Jour' | 'Mois' | 'Année';
 type DashboardExpenseLinkMode = 'property' | 'agency';
-type DashboardExpenseDropdown =
-  | 'category'
-  | 'payment'
-  | 'property'
-  | 'provider'
-  | null;
 
 interface DashboardKpiCard {
   readonly label: string;
@@ -642,7 +641,13 @@ function resolveExpenseIcon(category: string): {
 @Component({
   selector: 'ubax-dashboard-comptable-page',
   standalone: true,
-  imports: [ChartModule, DateRangePickerComponent, FormsModule],
+  imports: [
+    ChartModule,
+    DateRangePickerComponent,
+    FormsModule,
+    UiFormInputComponent,
+    UiFormSelectComponent,
+  ],
   templateUrl: './dashboard-comptable-page.component.html',
   styleUrl: './dashboard-comptable-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -653,6 +658,9 @@ export class DashboardComptablePageComponent {
   protected readonly expenseCategories = DRAWER_CATEGORIES;
   protected readonly expensePaymentMethods = EXPENSE_PAYMENT_METHODS;
   protected readonly expenseProperties = EXPENSE_PROPERTIES;
+  protected readonly expensePropertyLabels = EXPENSE_PROPERTIES.map(
+    (p) => p.label,
+  );
   protected readonly expenseProviders = EXPENSE_PROVIDER_OPTIONS;
   protected readonly authStore = inject(AuthStore);
   private readonly document = inject(DOCUMENT);
@@ -694,8 +702,6 @@ export class DashboardComptablePageComponent {
   protected readonly draftExpenseLinkMode =
     signal<DashboardExpenseLinkMode>('property');
   protected readonly draftUploads = signal<DashboardExpenseUpload[]>([]);
-  protected readonly activeExpenseDropdown =
-    signal<DashboardExpenseDropdown>(null);
   protected readonly expenseDatePickerOpen = signal(false);
   protected readonly expenseCalendarMonth = signal(
     new Date(
@@ -940,7 +946,7 @@ export class DashboardComptablePageComponent {
 
   @HostListener('document:keydown.escape')
   protected handleEscape(): void {
-    if (this.activeExpenseDropdown() !== null || this.expenseDatePickerOpen()) {
+    if (this.expenseDatePickerOpen()) {
       this.closeExpenseControls();
       return;
     }
@@ -1014,42 +1020,12 @@ export class DashboardComptablePageComponent {
     this.remindedIds.update((ids) => (ids.includes(id) ? ids : [...ids, id]));
   }
 
-  protected toggleExpenseDropdown(
-    dropdown: Exclude<DashboardExpenseDropdown, null>,
-  ): void {
-    this.expenseDatePickerOpen.set(false);
-    this.activeExpenseDropdown.update((currentDropdown) =>
-      currentDropdown === dropdown ? null : dropdown,
-    );
-  }
-
   protected toggleExpenseDatePicker(): void {
-    this.activeExpenseDropdown.set(null);
     this.expenseDatePickerOpen.update((isOpen) => !isOpen);
-  }
-
-  protected selectExpenseCategory(category: string): void {
-    this.draftCategory.set(category);
-    this.activeExpenseDropdown.set(null);
-  }
-
-  protected selectExpensePaymentMethod(paymentMethod: string): void {
-    this.draftPaymentMethod.set(paymentMethod);
-    this.activeExpenseDropdown.set(null);
   }
 
   protected setExpenseLinkMode(mode: DashboardExpenseLinkMode): void {
     this.draftExpenseLinkMode.set(mode);
-  }
-
-  protected selectExpenseProperty(propertyLabel: string): void {
-    this.draftProperty.set(propertyLabel);
-    this.activeExpenseDropdown.set(null);
-  }
-
-  protected selectExpenseProvider(provider: string): void {
-    this.draftProvider.set(provider);
-    this.activeExpenseDropdown.set(null);
   }
 
   protected previousExpenseCalendarMonth(): void {
@@ -1153,7 +1129,6 @@ export class DashboardComptablePageComponent {
   }
 
   private closeExpenseControls(): void {
-    this.activeExpenseDropdown.set(null);
     this.expenseDatePickerOpen.set(false);
   }
 
