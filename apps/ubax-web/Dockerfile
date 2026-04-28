@@ -12,12 +12,7 @@ RUN npm ci --no-audit --no-fund --legacy-peer-deps
 
 COPY . .
 
-# Build avec base-href ET deploy-url
- # Remplacer cette ligne
-RUN npx nx build ubax-web --configuration=staging --base-href=/tableau-de-bord/
-
-#Par cette ligne
-# RUN npx nx build ubax-web --configuration=production --base-href=/tableau-de-bord/
+RUN npx nx build ubax-web --configuration=production
 
 # ─── Stage 2 : Runtime ───────────────────────────────────────────
 FROM nginx:1.27-alpine AS runtime
@@ -25,13 +20,11 @@ FROM nginx:1.27-alpine AS runtime
 LABEL org.opencontainers.image.title="UBAX Web Admin Frontend"
 LABEL org.opencontainers.image.vendor="Spirit Tech Revolution"
 
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm /etc/nginx/conf.d/default.conf && \
+    mkdir -p /usr/share/nginx/html/app
 
-# Créer le sous-dossier pour les fichiers
-RUN mkdir -p /usr/share/nginx/html/tableau-de-bord
-
-# Copier les fichiers buildés dans le sous-dossier
-COPY --from=builder /app/dist/apps/ubax-web/browser /usr/share/nginx/html/tableau-de-bord
+# Copier les fichiers buildés dans le sous-dossier /app
+COPY --from=builder /app/dist/apps/ubax-web/browser /usr/share/nginx/html/app
 
 # Copier la config Nginx
 COPY apps/ubax-web/nginx.conf /etc/nginx/conf.d/default.conf
