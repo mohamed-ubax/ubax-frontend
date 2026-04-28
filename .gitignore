@@ -52,4 +52,5 @@ instructions.md
 .vercel
 .env*.local
 
-swagger.json
+# Generated files
+.swagger.json
