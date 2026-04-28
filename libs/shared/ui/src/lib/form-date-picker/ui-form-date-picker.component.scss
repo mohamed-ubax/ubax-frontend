@@ -65,25 +65,17 @@
   white-space: nowrap;
 }
 
-/* ── Overlay backdrop ────────────────────────────────────────────────────── */
+/* ── Dropdown wrapper ────────────────────────────────────────────────────── */
 
-.form-date-picker__backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-  padding: 0;
-  border: 0;
-  background: rgb(13 10 44 / 0.08);
-  cursor: pointer;
+.form-date-picker__wrapper {
+  position: relative;
 }
 
 /* ── Calendar popup ──────────────────────────────────────────────────────── */
 
 .form-date-picker__calendar {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 100;
+  z-index: 200;
   width: min(320px, calc(100vw - 40px));
   padding: 16px;
   border: 1px solid rgb(166 181 191 / 0.18);
@@ -92,7 +84,6 @@
   box-shadow: 0 20px 40px rgb(38 37 53 / 0.1);
   font-family: 'Lexend', sans-serif;
   color: var(--ubax-text-dark);
-  transform: translate(-50%, -50%);
 }
 
 .form-date-picker__calendar-header {

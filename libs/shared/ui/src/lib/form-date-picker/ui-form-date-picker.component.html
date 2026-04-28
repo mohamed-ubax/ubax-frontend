@@ -16,61 +16,55 @@
     }
     <span class="form-date-picker__display">{{ dateLabel() }}</span>
   </button>
+</div>
 
-  @if (isOpen()) {
-    <button
-      class="form-date-picker__backdrop"
-      type="button"
-      aria-label="Fermer le calendrier"
-      (click)="close()"
-    ></button>
+<ng-template #calendarTpl>
+  <div
+    class="form-date-picker__calendar"
+    aria-label="Calendrier de sélection de date"
+    [style.top.px]="calendarTop()"
+    [style.left.px]="calendarLeft()"
+  >
+    <div class="form-date-picker__calendar-header">
+      <p>{{ calendarLabel() }}</p>
 
-    <div
-      class="form-date-picker__calendar"
-      role="dialog"
-      aria-label="Calendrier de sélection de date"
-    >
-      <div class="form-date-picker__calendar-header">
-        <p>{{ calendarLabel() }}</p>
+      <div class="form-date-picker__calendar-nav">
+        <button
+          type="button"
+          aria-label="Mois précédent"
+          (click)="previousMonth()"
+        >
+          <i class="pi pi-angle-left"></i>
+        </button>
 
-        <div class="form-date-picker__calendar-nav">
-          <button
-            type="button"
-            aria-label="Mois précédent"
-            (click)="previousMonth()"
-          >
-            <i class="pi pi-angle-left"></i>
-          </button>
-
-          <button
-            type="button"
-            aria-label="Mois suivant"
-            (click)="nextMonth()"
-          >
-            <i class="pi pi-angle-right"></i>
-          </button>
-        </div>
-      </div>
-
-      <div class="form-date-picker__calendar-grid">
-        @for (weekday of weekdays; track weekday) {
-          <span class="form-date-picker__weekday">{{ weekday }}</span>
-        }
-
-        @for (week of calendarWeeks(); track $index) {
-          @for (day of week; track day.date.getTime()) {
-            <button
-              class="form-date-picker__day"
-              type="button"
-              [class.is-active]="day.active"
-              [class.is-muted]="day.muted"
-              (click)="selectDate(day.date)"
-            >
-              {{ day.label }}
-            </button>
-          }
-        }
+        <button
+          type="button"
+          aria-label="Mois suivant"
+          (click)="nextMonth()"
+        >
+          <i class="pi pi-angle-right"></i>
+        </button>
       </div>
     </div>
-  }
-</div>
+
+    <div class="form-date-picker__calendar-grid">
+      @for (weekday of weekdays; track weekday) {
+        <span class="form-date-picker__weekday">{{ weekday }}</span>
+      }
+
+      @for (week of calendarWeeks(); track $index) {
+        @for (day of week; track day.date.getTime()) {
+          <button
+            class="form-date-picker__day"
+            type="button"
+            [class.is-active]="day.active"
+            [class.is-muted]="day.muted"
+            (click)="selectDate(day.date)"
+          >
+            {{ day.label }}
+          </button>
+        }
+      }
+    </div>
+  </div>
+</ng-template>

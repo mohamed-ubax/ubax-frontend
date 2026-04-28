@@ -2,10 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
+  EmbeddedViewRef,
   HostListener,
+  inject,
   input,
   model,
+  OnDestroy,
+  Renderer2,
   signal,
+  TemplateRef,
+  ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
 
 interface CalendarDay {
@@ -62,11 +70,9 @@ function buildCalendarWeeks(
 
   for (let w = 0; w < weekCount; w++) {
     const week: CalendarDay[] = [];
-
     for (let d = 0; d < 7; d++) {
       const cell = new Date(gridStart);
       cell.setDate(gridStart.getDate() + w * 7 + d);
-
       week.push({
         date: cell,
         label: cell.getDate().toString(),
@@ -77,7 +83,6 @@ function buildCalendarWeeks(
           cell.getDate() === activeDate.getDate(),
       });
     }
-
     weeks.push(week);
   }
 
@@ -91,13 +96,24 @@ function buildCalendarWeeks(
   styleUrl: './ui-form-date-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UiFormDatePickerComponent {
+export class UiFormDatePickerComponent implements OnDestroy {
   readonly label = input('');
   readonly iconSrc = input('');
   readonly value = model<Date>(new Date());
 
   protected readonly isOpen = signal(false);
   protected readonly weekdays = WEEKDAYS;
+  protected readonly calendarTop = signal(0);
+  protected readonly calendarLeft = signal(0);
+
+  @ViewChild('calendarTpl') private calendarTpl!: TemplateRef<void>;
+
+  private calendarView: EmbeddedViewRef<void> | null = null;
+  private calendarEl: HTMLElement | null = null;
+
+  private readonly el = inject(ElementRef) as ElementRef<HTMLElement>;
+  private readonly vcr = inject(ViewContainerRef);
+  private readonly renderer = inject(Renderer2);
 
   private readonly calendarMonth = signal(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -115,16 +131,38 @@ export class UiFormDatePickerComponent {
 
   protected toggle(): void {
     if (this.isOpen()) {
-      this.isOpen.set(false);
+      this.close();
     } else {
       const v = this.value();
       this.calendarMonth.set(new Date(v.getFullYear(), v.getMonth(), 1));
+
+      const trigger = this.el.nativeElement.querySelector<HTMLElement>(
+        '.form-date-picker__trigger',
+      );
+      if (trigger) {
+        const rect = trigger.getBoundingClientRect();
+        this.calendarTop.set(rect.bottom + 10);
+        this.calendarLeft.set(rect.left);
+      }
+
       this.isOpen.set(true);
+      this.calendarView = this.vcr.createEmbeddedView(this.calendarTpl);
+      this.calendarView.detectChanges();
+      this.calendarEl =
+        this.calendarView.rootNodes.find(
+          (n): n is HTMLElement => n.nodeType === Node.ELEMENT_NODE,
+        ) ?? null;
+      if (this.calendarEl) {
+        this.renderer.appendChild(document.body, this.calendarEl);
+      }
     }
   }
 
   protected close(): void {
     this.isOpen.set(false);
+    this.calendarView?.destroy();
+    this.calendarView = null;
+    this.calendarEl = null;
   }
 
   protected previousMonth(): void {
@@ -139,14 +177,29 @@ export class UiFormDatePickerComponent {
 
   protected selectDate(date: Date): void {
     this.value.set(startOfDay(date));
-    this.isOpen.set(false);
+    this.close();
+  }
+
+  ngOnDestroy(): void {
+    this.calendarView?.destroy();
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node;
+    if (
+      !this.el.nativeElement.contains(target) &&
+      !this.calendarEl?.contains(target)
+    ) {
+      this.close();
+    }
   }
 
   @HostListener('document:keydown', ['$event'])
   protected onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape' && this.isOpen()) {
       event.stopImmediatePropagation();
-      this.isOpen.set(false);
+      this.close();
     }
   }
 }
