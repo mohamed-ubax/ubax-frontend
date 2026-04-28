@@ -1,4 +1,7 @@
 // Composants UI de base
+export * from './lib/form-input/ui-form-input.component';
+export * from './lib/form-select/ui-form-select.component';
+export * from './lib/form-date-picker/ui-form-date-picker.component';
 export * from './lib/button/ui-button.component';
 export * from './lib/card/ui-card.component';
 export * from './lib/input/ui-input.component';

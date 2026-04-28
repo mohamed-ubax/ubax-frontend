@@ -13,16 +13,16 @@ import { FormsModule } from '@angular/forms';
 import { ChartData, ChartOptions, Plugin } from 'chart.js';
 import { ChartModule } from 'primeng/chart';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
-import { DateRange, DateRangePickerComponent } from '@ubax-workspace/shared-ui';
+import {
+  DateRange,
+  DateRangePickerComponent,
+  UiFormDatePickerComponent,
+  UiFormInputComponent,
+  UiFormSelectComponent,
+} from '@ubax-workspace/shared-ui';
 
 type DashboardPeriod = 'Jour' | 'Mois' | 'Année';
 type DashboardExpenseLinkMode = 'property' | 'agency';
-type DashboardExpenseDropdown =
-  | 'category'
-  | 'payment'
-  | 'property'
-  | 'provider'
-  | null;
 
 interface DashboardKpiCard {
   readonly label: string;
@@ -75,13 +75,6 @@ interface DashboardExpenseUpload {
   readonly id: string;
   readonly name: string;
   readonly sizeLabel: string;
-}
-
-interface DashboardExpenseCalendarDay {
-  readonly date: Date;
-  readonly label: string;
-  readonly muted: boolean;
-  readonly active: boolean;
 }
 
 interface DashboardOverdueItem {
@@ -409,74 +402,8 @@ const EXPENSE_PROVIDER_OPTIONS = [
 
 const MODAL_CLOSE_DURATION_MS = 220;
 const DEFAULT_EXPENSE_DATE = new Date(2026, 10, 14);
-const EXPENSE_CALENDAR_WEEKDAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
-
 function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function formatExpenseFormDate(date: Date): string {
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
-}
-
-function formatExpenseMonthLabel(date: Date): string {
-  const formatted = new Intl.DateTimeFormat('fr-FR', {
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
-
-  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}
-
-function buildExpenseCalendarWeeks(
-  displayMonth: Date,
-  activeDate: Date,
-): DashboardExpenseCalendarDay[][] {
-  const firstDay = new Date(
-    displayMonth.getFullYear(),
-    displayMonth.getMonth(),
-    1,
-  );
-  const lastDay = new Date(
-    displayMonth.getFullYear(),
-    displayMonth.getMonth() + 1,
-    0,
-  );
-  const startOffset = (firstDay.getDay() + 6) % 7;
-  const weekCount = Math.ceil((startOffset + lastDay.getDate()) / 7);
-  const gridStart = new Date(
-    displayMonth.getFullYear(),
-    displayMonth.getMonth(),
-    1 - startOffset,
-  );
-  const weeks: DashboardExpenseCalendarDay[][] = [];
-
-  for (let weekIndex = 0; weekIndex < weekCount; weekIndex += 1) {
-    const week: DashboardExpenseCalendarDay[] = [];
-
-    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
-      const cellDate = new Date(gridStart);
-      cellDate.setDate(gridStart.getDate() + weekIndex * 7 + dayIndex);
-
-      week.push({
-        date: cellDate,
-        label: cellDate.getDate().toString(),
-        muted: cellDate.getMonth() !== displayMonth.getMonth(),
-        active:
-          cellDate.getFullYear() === activeDate.getFullYear() &&
-          cellDate.getMonth() === activeDate.getMonth() &&
-          cellDate.getDate() === activeDate.getDate(),
-      });
-    }
-
-    weeks.push(week);
-  }
-
-  return weeks;
 }
 
 function formatFileSize(size: number): string {
@@ -642,7 +569,14 @@ function resolveExpenseIcon(category: string): {
 @Component({
   selector: 'ubax-dashboard-comptable-page',
   standalone: true,
-  imports: [ChartModule, DateRangePickerComponent, FormsModule],
+  imports: [
+    ChartModule,
+    DateRangePickerComponent,
+    FormsModule,
+    UiFormDatePickerComponent,
+    UiFormInputComponent,
+    UiFormSelectComponent,
+  ],
   templateUrl: './dashboard-comptable-page.component.html',
   styleUrl: './dashboard-comptable-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -653,6 +587,9 @@ export class DashboardComptablePageComponent {
   protected readonly expenseCategories = DRAWER_CATEGORIES;
   protected readonly expensePaymentMethods = EXPENSE_PAYMENT_METHODS;
   protected readonly expenseProperties = EXPENSE_PROPERTIES;
+  protected readonly expensePropertyLabels = EXPENSE_PROPERTIES.map(
+    (p) => p.label,
+  );
   protected readonly expenseProviders = EXPENSE_PROVIDER_OPTIONS;
   protected readonly authStore = inject(AuthStore);
   private readonly document = inject(DOCUMENT);
@@ -694,16 +631,6 @@ export class DashboardComptablePageComponent {
   protected readonly draftExpenseLinkMode =
     signal<DashboardExpenseLinkMode>('property');
   protected readonly draftUploads = signal<DashboardExpenseUpload[]>([]);
-  protected readonly activeExpenseDropdown =
-    signal<DashboardExpenseDropdown>(null);
-  protected readonly expenseDatePickerOpen = signal(false);
-  protected readonly expenseCalendarMonth = signal(
-    new Date(
-      DEFAULT_EXPENSE_DATE.getFullYear(),
-      DEFAULT_EXPENSE_DATE.getMonth(),
-      1,
-    ),
-  );
 
   constructor() {
     effect(() => {
@@ -920,16 +847,6 @@ export class DashboardComptablePageComponent {
 
     return this.selectedExpenseProperty()?.owner ?? 'Propriétaire non assigné';
   });
-  protected readonly draftDateLabel = computed(() =>
-    formatExpenseFormDate(this.draftDate()),
-  );
-  protected readonly expenseCalendarLabel = computed(() =>
-    formatExpenseMonthLabel(this.expenseCalendarMonth()),
-  );
-  protected readonly expenseCalendarWeekdays = EXPENSE_CALENDAR_WEEKDAYS;
-  protected readonly expenseCalendarWeeks = computed(() =>
-    buildExpenseCalendarWeeks(this.expenseCalendarMonth(), this.draftDate()),
-  );
   protected readonly canSaveExpense = computed(
     () => parseAmountInput(this.draftAmount()) > 0,
   );
@@ -940,28 +857,9 @@ export class DashboardComptablePageComponent {
 
   @HostListener('document:keydown.escape')
   protected handleEscape(): void {
-    if (this.activeExpenseDropdown() !== null || this.expenseDatePickerOpen()) {
-      this.closeExpenseControls();
-      return;
-    }
-
     if (this.modalVisible()) {
       this.closeAddExpense();
     }
-  }
-
-  @HostListener('document:click', ['$event'])
-  protected handleDocumentClick(event: MouseEvent): void {
-    const target = event.target;
-
-    if (
-      target instanceof HTMLElement &&
-      target.closest('.dashboard-comptable__modal-interactive')
-    ) {
-      return;
-    }
-
-    this.closeExpenseControls();
   }
 
   protected toggleBalanceVisibility(): void {
@@ -974,10 +872,6 @@ export class DashboardComptablePageComponent {
       this.closeExpenseTimeout = null;
     }
 
-    this.closeExpenseControls();
-    this.expenseCalendarMonth.set(
-      new Date(this.draftDate().getFullYear(), this.draftDate().getMonth(), 1),
-    );
     this.addExpenseClosing.set(false);
     this.addExpenseOpen.set(true);
   }
@@ -987,7 +881,6 @@ export class DashboardComptablePageComponent {
       return;
     }
 
-    this.closeExpenseControls();
     this.addExpenseClosing.set(true);
 
     if (this.closeExpenseTimeout) {
@@ -1014,66 +907,8 @@ export class DashboardComptablePageComponent {
     this.remindedIds.update((ids) => (ids.includes(id) ? ids : [...ids, id]));
   }
 
-  protected toggleExpenseDropdown(
-    dropdown: Exclude<DashboardExpenseDropdown, null>,
-  ): void {
-    this.expenseDatePickerOpen.set(false);
-    this.activeExpenseDropdown.update((currentDropdown) =>
-      currentDropdown === dropdown ? null : dropdown,
-    );
-  }
-
-  protected toggleExpenseDatePicker(): void {
-    this.activeExpenseDropdown.set(null);
-    this.expenseDatePickerOpen.update((isOpen) => !isOpen);
-  }
-
-  protected selectExpenseCategory(category: string): void {
-    this.draftCategory.set(category);
-    this.activeExpenseDropdown.set(null);
-  }
-
-  protected selectExpensePaymentMethod(paymentMethod: string): void {
-    this.draftPaymentMethod.set(paymentMethod);
-    this.activeExpenseDropdown.set(null);
-  }
-
   protected setExpenseLinkMode(mode: DashboardExpenseLinkMode): void {
     this.draftExpenseLinkMode.set(mode);
-  }
-
-  protected selectExpenseProperty(propertyLabel: string): void {
-    this.draftProperty.set(propertyLabel);
-    this.activeExpenseDropdown.set(null);
-  }
-
-  protected selectExpenseProvider(provider: string): void {
-    this.draftProvider.set(provider);
-    this.activeExpenseDropdown.set(null);
-  }
-
-  protected previousExpenseCalendarMonth(): void {
-    const month = this.expenseCalendarMonth();
-    this.expenseCalendarMonth.set(
-      new Date(month.getFullYear(), month.getMonth() - 1, 1),
-    );
-  }
-
-  protected nextExpenseCalendarMonth(): void {
-    const month = this.expenseCalendarMonth();
-    this.expenseCalendarMonth.set(
-      new Date(month.getFullYear(), month.getMonth() + 1, 1),
-    );
-  }
-
-  protected selectExpenseDate(date: Date): void {
-    const normalizedDate = startOfDay(date);
-
-    this.draftDate.set(normalizedDate);
-    this.expenseCalendarMonth.set(
-      new Date(normalizedDate.getFullYear(), normalizedDate.getMonth(), 1),
-    );
-    this.expenseDatePickerOpen.set(false);
   }
 
   protected updateExpenseUploads(
@@ -1142,19 +977,6 @@ export class DashboardComptablePageComponent {
     this.draftDate.set(startOfDay(DEFAULT_EXPENSE_DATE));
     this.draftExpenseLinkMode.set('property');
     this.draftUploads.set([]);
-    this.closeExpenseControls();
-    this.expenseCalendarMonth.set(
-      new Date(
-        DEFAULT_EXPENSE_DATE.getFullYear(),
-        DEFAULT_EXPENSE_DATE.getMonth(),
-        1,
-      ),
-    );
-  }
-
-  private closeExpenseControls(): void {
-    this.activeExpenseDropdown.set(null);
-    this.expenseDatePickerOpen.set(false);
   }
 
   private lockPageScroll(): void {
