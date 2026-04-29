@@ -51,3 +51,6 @@ __screenshots__/
 instructions.md
 .vercel
 .env*.local
+
+# Generated files
+.swagger.json

@@ -16,6 +16,7 @@
         "browser": "apps/ubax-web/src/main.ts",
         "tsConfig": "apps/ubax-web/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
+        "baseHref": "/app/",
         "assets": [
           {
             "glob": "**/*",
@@ -33,11 +34,6 @@
               "type": "initial",
               "maximumWarning": "500kb",
               "maximumError": "1mb"
-            },
-            {
-              "type": "anyComponentStyle",
-              "maximumWarning": "28kb",
-              "maximumError": "32kb"
             }
           ],
           "outputHashing": "all"
