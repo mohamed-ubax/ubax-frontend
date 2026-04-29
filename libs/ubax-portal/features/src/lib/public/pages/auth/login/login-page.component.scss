@@ -167,6 +167,20 @@
   margin-top: 1rem;
 }
 
+.login-form__error {
+  margin: 1rem 0 0;
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(170, 36, 25, 0.16);
+  border-radius: 1rem;
+  background: #fff7f5;
+  color: #4b0b08;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .reset-label {
   margin: 0;
   color: #383737;

@@ -10,10 +10,15 @@ import {
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
+import {
+  DEFAULT_UBAX_WEB_HOME_PATH,
+  clearStoredAuthToken,
+  persistAuthToken,
+  readStoredAuthToken,
+  redirectBrowserToPortalLogin,
+} from '../../auth/auth-session';
 import { Role, User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
-
-const AUTH_TOKEN_STORAGE_KEY = 'ubax_token';
 
 interface AuthState {
   user: User | null;
@@ -22,29 +27,9 @@ interface AuthState {
   error: string | null;
 }
 
-function getLocalStorage(): Storage | null {
-  if (typeof globalThis === 'undefined' || !('localStorage' in globalThis)) {
-    return null;
-  }
-
-  return globalThis.localStorage;
-}
-
-function readStoredToken(): string | null {
-  return getLocalStorage()?.getItem(AUTH_TOKEN_STORAGE_KEY) ?? null;
-}
-
-function persistToken(token: string): void {
-  getLocalStorage()?.setItem(AUTH_TOKEN_STORAGE_KEY, token);
-}
-
-function clearStoredToken(): void {
-  getLocalStorage()?.removeItem(AUTH_TOKEN_STORAGE_KEY);
-}
-
 const initialState: AuthState = {
   user: null,
-  token: readStoredToken(),
+  token: readStoredAuthToken(),
   loading: false,
   error: null,
 };
@@ -63,7 +48,7 @@ export const AuthStore = signalStore(
   withMethods(
     (store, authSvc = inject(AuthService), router = inject(Router)) => ({
       setToken(token: string): void {
-        persistToken(token);
+        persistAuthToken(token);
         patchState(store, { token });
       },
 
@@ -90,11 +75,20 @@ export const AuthStore = signalStore(
               tapResponse({
                 next: (user) => patchState(store, { user, loading: false }),
                 error: () => {
+                  clearStoredAuthToken();
                   patchState(store, {
+                    user: null,
+                    token: null,
                     loading: false,
                     error: 'Session expirée',
                   });
-                  router.navigate(['/connexion']);
+                  if (redirectBrowserToPortalLogin()) {
+                    return;
+                  }
+
+                  router.navigate(['/connexion'], {
+                    queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
+                  });
                 },
               }),
             ),
@@ -108,14 +102,26 @@ export const AuthStore = signalStore(
             authSvc.logout().pipe(
               tapResponse({
                 next: () => {
-                  clearStoredToken();
+                  clearStoredAuthToken();
                   patchState(store, { user: null, token: null });
-                  router.navigate(['/connexion']);
+                  if (redirectBrowserToPortalLogin()) {
+                    return;
+                  }
+
+                  router.navigate(['/connexion'], {
+                    queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
+                  });
                 },
                 error: () => {
-                  clearStoredToken();
+                  clearStoredAuthToken();
                   patchState(store, { user: null, token: null });
-                  router.navigate(['/connexion']);
+                  if (redirectBrowserToPortalLogin()) {
+                    return;
+                  }
+
+                  router.navigate(['/connexion'], {
+                    queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
+                  });
                 },
               }),
             ),

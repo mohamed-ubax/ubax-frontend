@@ -54,7 +54,8 @@
       "continuous": true,
       "executor": "@angular/build:dev-server",
       "options": {
-        "port": 4201
+        "port": 3000,
+        "proxyConfig": "apps/ubax-portal/proxy.conf.json"
       },
       "configurations": {
         "production": {
@@ -78,7 +79,7 @@
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "ubax-portal:build",
-        "port": 4201,
+        "port": 3000,
         "staticFilePath": "dist/apps/ubax-portal/browser",
         "spa": true
       }
