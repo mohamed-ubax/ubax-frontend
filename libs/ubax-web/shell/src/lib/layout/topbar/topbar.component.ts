@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  HostListener,
   NgZone,
   PLATFORM_ID,
   inject,
@@ -51,10 +52,12 @@ export class TopbarComponent implements AfterViewInit {
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly elementRef = inject(ElementRef);
   protected readonly notificationCount = 3;
   protected readonly isMobileNavOpen = signal(false);
   protected readonly isCompactNav = signal(false);
   protected readonly isScrolled = signal(false);
+  protected readonly isUserMenuOpen = signal(false);
   private inlineNavRequiredWidth = 0;
   private readonly topbarInner =
     viewChild<ElementRef<HTMLElement>>('topbarInner');
@@ -122,8 +125,28 @@ export class TopbarComponent implements AfterViewInit {
     this.isMobileNavOpen.set(false);
   }
 
+  protected toggleUserMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.isUserMenuOpen.update((open) => !open);
+  }
+
+  protected closeUserMenu(): void {
+    this.isUserMenuOpen.set(false);
+  }
+
   protected logout(): void {
+    this.isUserMenuOpen.set(false);
     this.authStore.logout();
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  onDocumentClick(target: EventTarget | null): void {
+    if (
+      this.isUserMenuOpen() &&
+      !this.elementRef.nativeElement.contains(target)
+    ) {
+      this.isUserMenuOpen.set(false);
+    }
   }
 
   private observeCompactNavState(): void {
