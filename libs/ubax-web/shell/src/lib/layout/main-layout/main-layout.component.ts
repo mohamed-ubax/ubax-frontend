@@ -27,8 +27,8 @@ export class MainLayoutComponent implements OnInit {
   readonly authStore = inject(AuthStore);
 
   ngOnInit(): void {
-    // En dev, le user mock est injecté via APP_INITIALIZER (app.config.ts).
-    // En prod, on charge le profil depuis l'API si le token existe mais pas le user.
+    // Le mock dev n'est injecté que s'il a été activé explicitement. Sinon,
+    // toute session persistée est réhydratée depuis l'API réelle.
     if (this.authStore.token() && !this.authStore.user()) {
       this.authStore.loadMe();
     }

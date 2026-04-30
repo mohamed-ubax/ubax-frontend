@@ -30,8 +30,8 @@ export class AuthService {
     return this.http.get<User>('/api/auth/me');
   }
 
-  logout(): Observable<void> {
-    return this.http.post<void>('/api/auth/logout', {});
+  logout(refreshToken: string): Observable<void> {
+    return this.http.post<void>('/api/v1/auth/logout', { refreshToken });
   }
 
   refreshToken(): Observable<{ accessToken: string }> {

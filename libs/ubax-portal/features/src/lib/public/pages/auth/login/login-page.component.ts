@@ -4,14 +4,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   AuthService,
+  clearStoredAuthSession,
   DEFAULT_UBAX_WEB_HOME_PATH,
-  persistAuthToken,
+  persistAuthSession,
   resolveUbaxWebRedirectTarget,
 } from '@ubax-workspace/ubax-web-data-access';
 import { InputText } from 'primeng/inputtext';
@@ -21,10 +23,18 @@ import { firstValueFrom } from 'rxjs';
 
 interface LoginApiResponse {
   access_token?: string | null;
+  refresh_token?: string | null;
   data?: {
     accessToken?: string | null;
     access_token?: string | null;
+    refreshToken?: string | null;
+    refresh_token?: string | null;
   } | null;
+}
+
+interface LoginSessionTokens {
+  accessToken: string;
+  refreshToken: string;
 }
 
 @Component({
@@ -34,7 +44,7 @@ interface LoginApiResponse {
   styleUrl: './login-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
   email = '';
   password = '';
   protected readonly submitting = signal(false);
@@ -42,6 +52,10 @@ export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly document = inject(DOCUMENT);
+
+  ngOnInit(): void {
+    clearStoredAuthSession();
+  }
 
   protected async onSubmit(): Promise<void> {
     if (this.submitting()) {
@@ -63,16 +77,16 @@ export class LoginPageComponent {
       const response = (await firstValueFrom(
         this.authService.login({ email, password }),
       )) as LoginApiResponse;
-      const accessToken = this.extractAccessToken(response);
+      const sessionTokens = this.extractSessionTokens(response);
 
-      if (!accessToken) {
+      if (!sessionTokens) {
         this.serverError.set(
-          "La réponse d'authentification est invalide. Réessaie dans un instant.",
+          "La réponse d'authentification est invalide. Les jetons de session sont manquants.",
         );
         return;
       }
 
-      persistAuthToken(accessToken);
+      persistAuthSession(sessionTokens);
       this.document.defaultView?.location.assign(this.redirectTarget());
     } catch (error) {
       this.serverError.set(this.resolveErrorMessage(error));
@@ -88,13 +102,25 @@ export class LoginPageComponent {
     );
   }
 
-  private extractAccessToken(response: LoginApiResponse): string | null {
-    return (
+  private extractSessionTokens(
+    response: LoginApiResponse,
+  ): LoginSessionTokens | null {
+    const accessToken =
       response.access_token ??
       response.data?.accessToken ??
       response.data?.access_token ??
-      null
-    );
+      null;
+    const refreshToken =
+      response.refresh_token ??
+      response.data?.refreshToken ??
+      response.data?.refresh_token ??
+      null;
+
+    if (!accessToken || !refreshToken) {
+      return null;
+    }
+
+    return { accessToken, refreshToken };
   }
 
   private resolveErrorMessage(error: unknown): string {

@@ -9,16 +9,20 @@ import {
   withState,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap } from 'rxjs';
+import { of, pipe, switchMap, tap } from 'rxjs';
 import {
   DEFAULT_UBAX_WEB_HOME_PATH,
-  clearStoredAuthToken,
+  clearStoredAuthSession,
+  deriveUserFromAuthToken,
   persistAuthToken,
+  readStoredRefreshToken,
   readStoredAuthToken,
   redirectBrowserToPortalLogin,
 } from '../../auth/auth-session';
 import { Role, User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
+
+const initialToken = readStoredAuthToken();
 
 interface AuthState {
   user: User | null;
@@ -28,8 +32,8 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: null,
-  token: readStoredAuthToken(),
+  user: deriveUserFromAuthToken(initialToken),
+  token: initialToken,
   loading: false,
   error: null,
 };
@@ -49,7 +53,10 @@ export const AuthStore = signalStore(
     (store, authSvc = inject(AuthService), router = inject(Router)) => ({
       setToken(token: string): void {
         persistAuthToken(token);
-        patchState(store, { token });
+        patchState(store, {
+          token,
+          user: deriveUserFromAuthToken(token) ?? store.user(),
+        });
       },
 
       /** Hydrate le store après login ou depuis le mock dev */
@@ -75,7 +82,18 @@ export const AuthStore = signalStore(
               tapResponse({
                 next: (user) => patchState(store, { user, loading: false }),
                 error: () => {
-                  clearStoredAuthToken();
+                  const fallbackUser = deriveUserFromAuthToken(store.token());
+
+                  if (fallbackUser) {
+                    patchState(store, {
+                      user: fallbackUser,
+                      loading: false,
+                      error: null,
+                    });
+                    return;
+                  }
+
+                  clearStoredAuthSession();
                   patchState(store, {
                     user: null,
                     token: null,
@@ -98,11 +116,15 @@ export const AuthStore = signalStore(
 
       logout: rxMethod<void>(
         pipe(
-          switchMap(() =>
-            authSvc.logout().pipe(
+          switchMap(() => {
+            const refreshToken = readStoredRefreshToken();
+
+            return (
+              refreshToken ? authSvc.logout(refreshToken) : of(void 0)
+            ).pipe(
               tapResponse({
                 next: () => {
-                  clearStoredAuthToken();
+                  clearStoredAuthSession();
                   patchState(store, { user: null, token: null });
                   if (redirectBrowserToPortalLogin()) {
                     return;
@@ -113,7 +135,7 @@ export const AuthStore = signalStore(
                   });
                 },
                 error: () => {
-                  clearStoredAuthToken();
+                  clearStoredAuthSession();
                   patchState(store, { user: null, token: null });
                   if (redirectBrowserToPortalLogin()) {
                     return;
@@ -124,8 +146,8 @@ export const AuthStore = signalStore(
                   });
                 },
               }),
-            ),
-          ),
+            );
+          }),
         ),
       ),
     }),
