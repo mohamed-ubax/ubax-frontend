@@ -33,6 +33,9 @@ import { SelectivePreloadStrategy } from './selective-preload.strategy';
 
 registerLocaleData(localeFr);
 
+const DEV_AUTH_MOCK_STORAGE_KEY = 'ubax_enable_dev_auth_mock';
+const DEV_AUTH_MOCK_QUERY_PARAM = 'ubaxDevMockAuth';
+
 const PRIMENG_FRENCH_TRANSLATION: Translation = {
   dayNames: [
     'dimanche',
@@ -87,13 +90,34 @@ const PRIMENG_FRENCH_TRANSLATION: Translation = {
   firstDayOfWeek: 1,
 };
 
+function shouldEnableDevAuthMock(): boolean {
+  if (!isDevMode() || typeof globalThis === 'undefined') {
+    return false;
+  }
+
+  if ('location' in globalThis) {
+    const queryValue = new URLSearchParams(globalThis.location.search).get(
+      DEV_AUTH_MOCK_QUERY_PARAM,
+    );
+
+    if (queryValue !== null) {
+      return queryValue === '1' || queryValue === 'true';
+    }
+  }
+
+  if (!('localStorage' in globalThis)) {
+    return false;
+  }
+
+  return globalThis.localStorage.getItem(DEV_AUTH_MOCK_STORAGE_KEY) === 'true';
+}
+
 /**
- * En dev, initialise l'utilisateur mock AVANT que le router évalue les
- * canMatch guards — garantit que authStore.role() !== null dès le premier
- * chargement de la page.
+ * En dev, le mock d'auth n'est activé que de façon explicite pour laisser le
+ * flux réel de login/logout et ses redirections testables par défaut.
  */
 function provideMockUserInDev() {
-  if (!isDevMode()) return [];
+  if (!shouldEnableDevAuthMock()) return [];
   return [
     provideAppInitializer(() => {
       const authStore = inject(AuthStore);

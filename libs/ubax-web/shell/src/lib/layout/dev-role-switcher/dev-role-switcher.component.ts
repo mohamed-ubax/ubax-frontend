@@ -25,12 +25,14 @@ import {
 export class DevRoleSwitcherComponent implements OnInit {
   readonly authStore = inject(AuthStore);
   private readonly document = inject(DOCUMENT);
-  protected readonly enabled = isDevMode();
+  protected readonly enabled = computed(
+    () => isDevMode() && this.authStore.token() === 'dev-mock-token',
+  );
   protected readonly roleOptions = DEV_ROLE_OPTIONS;
   protected readonly selectedRole = computed(() => this.authStore.role());
 
   ngOnInit(): void {
-    if (!this.enabled || this.authStore.token() !== 'dev-mock-token') {
+    if (!this.enabled()) {
       return;
     }
 
@@ -46,6 +48,10 @@ export class DevRoleSwitcherComponent implements OnInit {
   }
 
   protected onRoleChange(rawRole: string): void {
+    if (!this.enabled()) {
+      return;
+    }
+
     const nextRole = coerceRole(rawRole);
 
     if (!nextRole || nextRole === this.authStore.role()) {
