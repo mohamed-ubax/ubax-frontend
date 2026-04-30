@@ -89,8 +89,9 @@
   <article class="login-card">
     <form
       class="login-form"
-      (ngSubmit)="(null)"
+      (ngSubmit)="onSubmit()"
       aria-label="Formulaire de connexion"
+      [attr.aria-busy]="submitting()"
       novalidate
     >
       <!-- Email field -->
@@ -157,8 +158,15 @@
         label="Se connecter"
         type="submit"
         styleClass="login-submit-btn"
+        [disabled]="submitting()"
         [fluid]="true"
+        [loading]="submitting()"
       ></p-button>
+
+      @if (serverError(); as serverError) {
+        <p class="login-form__error" role="alert">{{ serverError }}</p>
+      }
+
       <!-- Bottom links -->
       <div class="login-footer-links">
         <a routerLink="/mot-de-passe-oublie" class="help-link"

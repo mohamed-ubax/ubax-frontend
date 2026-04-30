@@ -65,21 +65,80 @@
         <i class="pi pi-cog"></i>
       </button>
 
-      <div class="topbar-user">
-        <span class="topbar-user__avatar" aria-hidden="true">
-          @if (avatarSrc(); as avatarSrc) {
-            <img
-              [src]="avatarSrc"
-              [alt]="authStore.fullName() || 'Utilisateur Ubax'"
-            />
-          } @else {
-            <span class="topbar-user__initial">{{ avatarLabel() }}</span>
-          }
-        </span>
-        <div class="topbar-user__info">
-          <span class="topbar-user__name">{{ authStore.fullName() }}</span>
-          <span class="topbar-user__role">{{ roleLabel() }}</span>
-        </div>
+      <div class="topbar-user-wrapper">
+        <button
+          class="topbar-user"
+          type="button"
+          [class.topbar-user--open]="isUserMenuOpen()"
+          [attr.aria-expanded]="isUserMenuOpen()"
+          aria-label="Menu utilisateur"
+          (click)="toggleUserMenu($event)"
+        >
+          <span class="topbar-user__avatar" aria-hidden="true">
+            @if (avatarSrc(); as avatarSrc) {
+              <img
+                [src]="avatarSrc"
+                [alt]="authStore.fullName() || 'Utilisateur Ubax'"
+              />
+            } @else {
+              <span class="topbar-user__initial">{{ avatarLabel() }}</span>
+            }
+          </span>
+          <div class="topbar-user__info">
+            <span class="topbar-user__name">{{ authStore.fullName() }}</span>
+            <span class="topbar-user__role">{{ roleLabel() }}</span>
+          </div>
+          <i class="pi pi-chevron-down topbar-user__chevron" aria-hidden="true"></i>
+        </button>
+
+        @if (isUserMenuOpen()) {
+          <div class="user-menu" role="menu" (click)="$event.stopPropagation()">
+            <div class="user-menu__header">
+              <span class="user-menu__avatar" aria-hidden="true">
+                @if (avatarSrc(); as avatarSrc) {
+                  <img
+                    [src]="avatarSrc"
+                    [alt]="authStore.fullName() || 'Utilisateur Ubax'"
+                  />
+                } @else {
+                  <span class="user-menu__initial">{{ avatarLabel() }}</span>
+                }
+              </span>
+              <div class="user-menu__identity">
+                <span class="user-menu__name">{{ authStore.fullName() }}</span>
+                <span class="user-menu__role">{{ roleLabel() }}</span>
+                <span class="user-menu__email">{{ authStore.user()?.email }}</span>
+              </div>
+            </div>
+
+            <div class="user-menu__divider"></div>
+
+            <div class="user-menu__group">
+              <button class="user-menu__item" type="button" role="menuitem">
+                <i class="pi pi-user" aria-hidden="true"></i>
+                Mon profil
+              </button>
+              <button class="user-menu__item" type="button" role="menuitem">
+                <i class="pi pi-cog" aria-hidden="true"></i>
+                Paramètres
+              </button>
+            </div>
+
+            <div class="user-menu__divider"></div>
+
+            <div class="user-menu__group">
+              <button
+                class="user-menu__item user-menu__item--danger"
+                type="button"
+                role="menuitem"
+                (click)="logout()"
+              >
+                <i class="pi pi-sign-out" aria-hidden="true"></i>
+                Se déconnecter
+              </button>
+            </div>
+          </div>
+        }
       </div>
     </div>
   </div>

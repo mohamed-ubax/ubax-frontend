@@ -1,0 +1,14 @@
+{
+  "/app": {
+    "target": "http://localhost:4201",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/api": {
+    "target": "http://173.249.7.89",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  }
+}

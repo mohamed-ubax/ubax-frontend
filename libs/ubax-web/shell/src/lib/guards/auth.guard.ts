@@ -1,6 +1,10 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
+import {
+  AuthStore,
+  currentBrowserPath,
+  redirectBrowserToPortalLogin,
+} from '@ubax-workspace/ubax-web-data-access';
 
 export const authGuard: CanActivateFn = () => {
   const authStore = inject(AuthStore);
@@ -8,5 +12,13 @@ export const authGuard: CanActivateFn = () => {
 
   if (authStore.token()) return true;
 
-  return router.createUrlTree(['/connexion']);
+  const returnTo = currentBrowserPath();
+
+  if (redirectBrowserToPortalLogin(returnTo)) {
+    return false;
+  }
+
+  return router.createUrlTree(['/connexion'], {
+    queryParams: { redirect: returnTo },
+  });
 };
