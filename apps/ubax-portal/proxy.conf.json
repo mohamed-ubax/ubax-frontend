@@ -5,6 +5,12 @@
     "changeOrigin": true,
     "logLevel": "info"
   },
+  "/admin": {
+    "target": "http://localhost:4202",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
   "/api": {
     "target": "http://173.249.7.89",
     "secure": false,
