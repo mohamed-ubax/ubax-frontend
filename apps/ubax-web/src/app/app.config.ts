@@ -24,12 +24,14 @@ import localeFr from '@angular/common/locales/fr';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
 import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
+import { provideApiConfiguration } from '@ubax-workspace/shared-api-types';
 import {
   AuthStore,
   Role,
   readStoredDevRole,
 } from '@ubax-workspace/ubax-web-data-access';
 import { SelectivePreloadStrategy } from './selective-preload.strategy';
+import { environment } from '../environments/environment';
 
 registerLocaleData(localeFr);
 
@@ -150,6 +152,7 @@ export const appConfig: ApplicationConfig = {
       withPreloading(SelectivePreloadStrategy),
       withViewTransitions(),
     ),
+    provideApiConfiguration(environment.apiRootUrl),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     providePrimeNG({
       theme: {

@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/ng-openapi-gen/ng-openapi-gen-schema.json",
+  "input": ".swagger.json",
+  "output": "libs/shared/api-types/src/lib",
+  "indexFile": "libs/shared/api-types/src/index.ts",
+  "ignoreUnusedModels": false,
+  "removeStaleFiles": true,
+  "modelIndex": true,
+  "serviceIndex": true,
+  "servicePrefix": "",
+  "serviceSuffix": "Service",
+  "modelPrefix": "",
+  "modelSuffix": "",
+  "defaultTag": "Api",
+  "orderedImports": true,
+  "enumStyle": "alias"
+}

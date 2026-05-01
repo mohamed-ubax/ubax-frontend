@@ -1,0 +1,19 @@
+{
+  "name": "shared-api-types",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/api-types/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:api-types"],
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ng-openapi-gen --config ng-openapi-gen.json",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}
