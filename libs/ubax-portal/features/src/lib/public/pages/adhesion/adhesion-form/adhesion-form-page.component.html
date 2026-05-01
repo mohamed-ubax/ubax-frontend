@@ -160,8 +160,8 @@
                 formControlName="typePartenaire"
               >
                 <option value="" disabled>Sélectionner un type</option>
-                @for (opt of typesPartenaire; track opt.value) {
-                  <option [value]="opt.value">{{ opt.label }}</option>
+                @for (opt of typesPartenaire(); track opt.value) {
+                  <option [value]="opt.value">{{ opt.description }}</option>
                 }
               </select>
               <img

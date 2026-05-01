@@ -8,6 +8,7 @@ import {
   NgZone,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   Validators,
@@ -22,6 +23,7 @@ import {
 } from '@ubax-workspace/ubax-portal-layout';
 import { Select } from 'primeng/select';
 import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
+import { CodeListService } from '../../../shared/code-list.service';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -49,6 +51,7 @@ export class AdhesionFormPageComponent {
   private readonly _lenis = inject(LenisService);
   private readonly _router = inject(Router);
   private readonly _zone = inject(NgZone);
+  private readonly _codeListService = inject(CodeListService);
   private _gsapCtx: gsap.Context | null = null;
   private _submitTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -68,10 +71,10 @@ export class AdhesionFormPageComponent {
   protected selectedCountry: CountryCode = COUNTRY_CODES[0];
 
   // ── Select options ────────────────────────────────────────────────────────
-  protected readonly typesPartenaire = [
-    { label: 'Hôtel', value: 'hotel' },
-    { label: 'Agence immobilière', value: 'agence_immo' },
-  ];
+  protected readonly typesPartenaire = toSignal(
+    this._codeListService.getByType('PARTNER_TYPE'),
+    { initialValue: [] },
+  );
 
   protected readonly paysList = [
     "Côte d'Ivoire",
