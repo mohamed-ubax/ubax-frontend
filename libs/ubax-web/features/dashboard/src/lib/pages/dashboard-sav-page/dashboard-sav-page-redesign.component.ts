@@ -577,26 +577,6 @@ function createDefaultTicketFilters(): DashboardSavTicketFilterState {
   };
 }
 
-function areFilterDatesEqual(left: Date | null, right: Date | null): boolean {
-  if (!left || !right) {
-    return left === right;
-  }
-
-  return isSameCalendarDay(left, right);
-}
-
-function areTicketFiltersEqual(
-  left: DashboardSavTicketFilterState,
-  right: DashboardSavTicketFilterState,
-): boolean {
-  return (
-    left.status === right.status &&
-    left.priority === right.priority &&
-    left.issue === right.issue &&
-    areFilterDatesEqual(left.createdAt, right.createdAt)
-  );
-}
-
 function buildTicket(
   sequence: number,
   statusTone: DashboardSavStatusTone,

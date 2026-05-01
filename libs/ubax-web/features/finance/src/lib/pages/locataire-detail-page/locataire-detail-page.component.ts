@@ -1,1 +1,1 @@
-export { LocataireDetailPageComponent as FinanceLocataireDetailPageComponent } from '../../../../../location/src/lib/pages/locataire-detail-page/locataire-detail-page.component';
+export { LocataireDetailPageComponent as FinanceLocataireDetailPageComponent } from '@ubax-workspace/ubax-web-location';

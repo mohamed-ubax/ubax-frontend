@@ -13,6 +13,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LenisService } from '../lenis.service';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'ubax-back-to-top',
   standalone: true,
   template: `

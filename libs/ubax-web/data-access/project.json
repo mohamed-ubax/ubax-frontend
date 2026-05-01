@@ -4,10 +4,25 @@
   "sourceRoot": "libs/ubax-web/data-access/src",
   "prefix": "ubax",
   "projectType": "library",
-  "tags": [],
+  "tags": [
+    "scope:web",
+    "type:data-access"
+  ],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "options": {
+        "command": "npm exec -- vitest run --config libs/ubax-web/data-access/vitest.config.mts",
+        "cwd": "{workspaceRoot}"
+      }
     }
   }
 }

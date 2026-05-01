@@ -6,7 +6,10 @@ import {
   afterNextRender,
   inject,
 } from '@angular/core';
-import { LenisService, PublicShellComponent } from '@ubax-workspace/ubax-portal-layout';
+import {
+  LenisService,
+  PublicShellComponent,
+} from '@ubax-workspace/ubax-portal-layout';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -49,15 +52,17 @@ export class PolitiqueConfidentialitePageComponent {
         ease: 'power2.out',
       });
 
-      el.querySelectorAll<HTMLElement>('.privacy-article section').forEach((section) => {
-        gsap.from(section, {
-          y: 35,
-          opacity: 0,
-          duration: 0.75,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: section, start: 'top 82%' },
-        });
-      });
+      el.querySelectorAll<HTMLElement>('.privacy-article section').forEach(
+        (section) => {
+          gsap.from(section, {
+            y: 35,
+            opacity: 0,
+            duration: 0.75,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: section, start: 'top 82%' },
+          });
+        },
+      );
     }, el);
 
     this._setupActiveToc(el);
@@ -75,7 +80,9 @@ export class PolitiqueConfidentialitePageComponent {
 
   private _setupTocClicks(el: HTMLElement): void {
     const tocItems = el.querySelectorAll<HTMLElement>('.privacy-toc li');
-    const sections = el.querySelectorAll<HTMLElement>('.privacy-article section');
+    const sections = el.querySelectorAll<HTMLElement>(
+      '.privacy-article section',
+    );
 
     tocItems.forEach((li, index) => {
       li.addEventListener('click', () => {
@@ -83,26 +90,37 @@ export class PolitiqueConfidentialitePageComponent {
         if (!target) return;
 
         const headerHeight =
-          document.querySelector<HTMLElement>('.main-header')?.getBoundingClientRect().height ?? 80;
+          document
+            .querySelector<HTMLElement>('.main-header')
+            ?.getBoundingClientRect().height ?? 80;
         const absoluteTop = target.getBoundingClientRect().top + window.scrollY;
 
-        this._lenis.instance?.scrollTo(absoluteTop - headerHeight, { duration: 1.2 });
+        this._lenis.instance?.scrollTo(absoluteTop - headerHeight, {
+          duration: 1.2,
+        });
       });
     });
   }
 
   private _setupActiveToc(el: HTMLElement): void {
-    const sections = Array.from(el.querySelectorAll<HTMLElement>('.privacy-article section'));
-    const tocItems = Array.from(el.querySelectorAll<HTMLElement>('.privacy-toc li'));
+    const sections = Array.from(
+      el.querySelectorAll<HTMLElement>('.privacy-article section'),
+    );
+    const tocItems = Array.from(
+      el.querySelectorAll<HTMLElement>('.privacy-toc li'),
+    );
     const indicator = el.querySelector<HTMLElement>('.privacy-toc__indicator');
     if (!sections.length || !tocItems.length || !indicator) return;
 
-    const tocEl = el.querySelector<HTMLElement>('.privacy-toc')!;
+    const tocEl = el.querySelector<HTMLElement>('.privacy-toc');
+    if (!tocEl) return;
+
     const liHeight = tocItems[0].getBoundingClientRect().height;
     const indicatorHeight = indicator.getBoundingClientRect().height;
     // Compute first li offset relative to TOC container to account for the heading above the list
     const firstLiOffsetTop =
-      tocItems[0].getBoundingClientRect().top - tocEl.getBoundingClientRect().top;
+      tocItems[0].getBoundingClientRect().top -
+      tocEl.getBoundingClientRect().top;
 
     const indicatorY = (index: number) =>
       firstLiOffsetTop + index * liHeight + (liHeight - indicatorHeight) / 2;
@@ -114,7 +132,9 @@ export class PolitiqueConfidentialitePageComponent {
 
     const update = () => {
       const headerBottom =
-        document.querySelector<HTMLElement>('.main-header')?.getBoundingClientRect().bottom ?? 80;
+        document
+          .querySelector<HTMLElement>('.main-header')
+          ?.getBoundingClientRect().bottom ?? 80;
 
       let activeIndex = 0;
       for (let i = sections.length - 1; i >= 0; i--) {

@@ -1,4 +1,4 @@
-import { Role } from './user.model';
+import { Role } from '@ubax-workspace/shared-data-access';
 
 const DEV_ROLE_STORAGE_KEY = 'ubax_dev_role';
 

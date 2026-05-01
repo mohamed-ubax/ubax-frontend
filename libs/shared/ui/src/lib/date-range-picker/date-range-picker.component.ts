@@ -331,7 +331,7 @@ export class DateRangePickerComponent implements OnDestroy {
   apply(): void {
     const start = this.startDate();
     const end = this.endDate() ?? start;
-    if (start) this.applied.emit({ start, end: end! });
+    if (start && end) this.applied.emit({ start, end });
     this.close();
   }
 

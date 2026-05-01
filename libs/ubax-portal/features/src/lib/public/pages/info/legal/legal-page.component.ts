@@ -6,7 +6,10 @@ import {
   afterNextRender,
   inject,
 } from '@angular/core';
-import { PublicShellComponent, LenisService } from '@ubax-workspace/ubax-portal-layout';
+import {
+  PublicShellComponent,
+  LenisService,
+} from '@ubax-workspace/ubax-portal-layout';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -90,7 +93,9 @@ export class LegalPageComponent {
         if (!target) return;
 
         const headerHeight =
-          document.querySelector<HTMLElement>('.main-header')?.getBoundingClientRect().height ?? 80;
+          document
+            .querySelector<HTMLElement>('.main-header')
+            ?.getBoundingClientRect().height ?? 80;
         const absoluteTop = target.getBoundingClientRect().top + window.scrollY;
 
         this._lenis.instance?.scrollTo(absoluteTop - headerHeight, {
@@ -111,7 +116,9 @@ export class LegalPageComponent {
     if (!sections.length || !tocItems.length || !indicator) return;
 
     // Read real computed values — independent of offsetParent quirks
-    const tocEl = el.querySelector<HTMLElement>('.legal-toc')!;
+    const tocEl = el.querySelector<HTMLElement>('.legal-toc');
+    if (!tocEl) return;
+
     const tocPaddingTop = Number.parseFloat(getComputedStyle(tocEl).paddingTop);
     const liHeight = tocItems[0].getBoundingClientRect().height;
     const indicatorHeight = indicator.getBoundingClientRect().height;
@@ -127,7 +134,8 @@ export class LegalPageComponent {
 
     const update = () => {
       const headerBottom =
-        document.querySelector<HTMLElement>('.main-header')
+        document
+          .querySelector<HTMLElement>('.main-header')
           ?.getBoundingClientRect().bottom ?? 80;
 
       // Find the last section whose top edge has crossed the header bottom

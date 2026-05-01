@@ -15,7 +15,7 @@ import {
   DEFAULT_UBAX_WEB_HOME_PATH,
   persistAuthSession,
   resolveUbaxWebRedirectTarget,
-} from '@ubax-workspace/ubax-web-data-access';
+} from '@ubax-workspace/shared-data-access';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
 import { Button } from 'primeng/button';

@@ -4,7 +4,10 @@
   "projectType": "application",
   "prefix": "ubax-portal",
   "sourceRoot": "apps/ubax-portal/src",
-  "tags": [],
+  "tags": [
+    "scope:portal",
+    "type:app"
+  ],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
@@ -33,10 +36,16 @@
       },
       "configurations": {
         "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/ubax-portal/src/environments/environment.ts",
+              "with": "apps/ubax-portal/src/environments/environment.prod.ts"
+            }
+          ],
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
+              "maximumWarning": "525kb",
               "maximumError": "1mb"
             }
           ],

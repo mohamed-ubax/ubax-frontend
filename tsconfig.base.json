@@ -22,6 +22,12 @@
         "libs/ubax-portal/features/src/index.ts"
       ],
       "@ubax-workspace/shared-ui": ["libs/shared/ui/src/index.ts"],
+      "@ubax-workspace/shared-api-types": [
+        "libs/shared/api-types/src/index.ts"
+      ],
+      "@ubax-workspace/shared-data-access": [
+        "libs/shared/data-access/src/index.ts"
+      ],
       "@ubax-workspace/ubax-web-shell": ["libs/ubax-web/shell/src/index.ts"],
       "@ubax-workspace/ubax-web-shell/web-routes": [
         "libs/ubax-web/shell/src/lib/web.routes.ts"
@@ -49,6 +55,9 @@
       ],
       "@ubax-workspace/ubax-web-hotel": [
         "libs/ubax-web/features/hotel/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-espaces": [
+        "libs/ubax-web/features/espaces/src/index.ts"
       ],
       "@ubax-workspace/ubax-web-demandes": [
         "libs/ubax-web/features/demandes/src/index.ts"

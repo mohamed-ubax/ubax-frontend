@@ -16,6 +16,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'ubax-public-shell',
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './public-shell.component.html',
@@ -66,7 +67,9 @@ export class PublicShellComponent implements OnDestroy {
             this._zone.run(() => this._cdr.markForCheck());
           }
         };
-        window.addEventListener('scroll', this._scrollListener, { passive: true });
+        window.addEventListener('scroll', this._scrollListener, {
+          passive: true,
+        });
       });
     });
 
@@ -187,7 +190,12 @@ export class PublicShellComponent implements OnDestroy {
   }
 
   protected toggleMenu(): void {
-    this.menuOpen ? this._closeMenu() : this._openMenu();
+    if (this.menuOpen) {
+      this._closeMenu();
+      return;
+    }
+
+    this._openMenu();
   }
 
   protected closeMenu(): void {

@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe, DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,

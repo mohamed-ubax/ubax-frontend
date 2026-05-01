@@ -11,23 +11,23 @@ export const hotelRoutes: Route[] = [
   {
     path: 'espaces',
     loadComponent: () =>
-      import(
-        '../../../espaces/src/lib/pages/espaces-list-page/espaces-list-page.component'
-      ).then((m) => m.EspacesListPageComponent),
+      import('@ubax-workspace/ubax-web-espaces').then(
+        (m) => m.EspacesListPageComponent,
+      ),
   },
   {
     path: 'espaces/ajouter',
     loadComponent: () =>
-      import(
-        '../../../espaces/src/lib/pages/espace-add-page/espace-add-page.component'
-      ).then((m) => m.EspaceAddPageComponent),
+      import('@ubax-workspace/ubax-web-espaces').then(
+        (m) => m.EspaceAddPageComponent,
+      ),
   },
   {
     path: 'espaces/:id',
     loadComponent: () =>
-      import(
-        '../../../espaces/src/lib/pages/espace-detail-page/espace-detail-page.component'
-      ).then((m) => m.EspaceDetailPageComponent),
+      import('@ubax-workspace/ubax-web-espaces').then(
+        (m) => m.EspaceDetailPageComponent,
+      ),
   },
   {
     path: '',
