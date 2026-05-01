@@ -24,6 +24,7 @@ type AuthStoreContract = {
   setToken(token: string): void;
   setUser(user: User): void;
   setRole(role: Role): void;
+  expireSession(): void;
   loadMe(): void;
   logout(): void;
 };
@@ -174,6 +175,33 @@ describe('AuthStore', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/connexion'], {
       queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
     });
+  });
+
+  it('expire la session immédiatement sans appel réseau', () => {
+    const token = createJwt({
+      sub: 'u-expire',
+      email: 'expire@ubax.com',
+      given_name: 'Expire',
+      family_name: 'Session',
+      roles: ['DG'],
+    });
+
+    globalThis.localStorage.setItem(
+      AUTH_REFRESH_TOKEN_STORAGE_KEY,
+      'refresh-token',
+    );
+    store.setToken(token);
+
+    store.expireSession();
+
+    expect(store.user()).toBeNull();
+    expect(store.token()).toBeNull();
+    expect(store.error()).toBe('Session expirée');
+    expect(globalThis.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBeNull();
+    expect(
+      globalThis.localStorage.getItem(AUTH_REFRESH_TOKEN_STORAGE_KEY),
+    ).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/connexion']);
   });
 
   it('logs out with the stored refresh token and resets the auth state', () => {

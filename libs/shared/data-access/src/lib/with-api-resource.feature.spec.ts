@@ -11,6 +11,8 @@ import {
   StrictHttpResponse,
 } from '@ubax-workspace/shared-api-types';
 import { createApiStore } from './create-api-store';
+import type { PaginationMeta } from './api-resource.types';
+import { NOTIFICATION_HANDLER } from './notification.token';
 
 type ResourceItem = {
   id: string;
@@ -51,6 +53,8 @@ type ResourceStoreContract = {
   isSaving(): boolean;
   hasError(): boolean;
   error(): string | null;
+  pagination(): PaginationMeta | null;
+  hasPagination(): boolean;
   select(id: string | null): void;
   clearError(): void;
   load(params: ListParams): void;
@@ -228,5 +232,73 @@ describe('withApiResource', () => {
     store.clearError();
 
     expect(store.error()).toBeNull();
+  });
+
+  describe('NOTIFICATION_HANDLER', () => {
+    it('appelle notif.error quand le chargement échoue', () => {
+      const notif = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+
+      const notifInjector = Injector.create({
+        providers: [
+          { provide: HttpClient, useValue: {} },
+          {
+            provide: ApiConfiguration,
+            useValue: { rootUrl: 'https://test.local' },
+          },
+          { provide: NOTIFICATION_HANDLER, useValue: notif },
+          { provide: resourceStoreToken, useClass: resourceStoreClass },
+        ],
+      });
+
+      const notifStore = notifInjector.get(resourceStoreToken);
+
+      listRequest.mockImplementationOnce(() =>
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 503,
+              url: 'https://test.local/resources',
+            }),
+        ),
+      );
+
+      notifStore.load({ page: 1 });
+
+      expect(notif.error).toHaveBeenCalledTimes(1);
+      expect(notif.error).toHaveBeenCalledWith(expect.stringContaining('503'));
+    });
+  });
+
+  describe('pagination', () => {
+    it('extrait les métadonnées Spring Boot Page et les expose via pagination()', () => {
+      listRequest.mockImplementationOnce(() =>
+        of(
+          toStrictResponse({
+            content: [{ id: '1', name: 'Item 1' }],
+            totalElements: 42,
+            totalPages: 5,
+            number: 2,
+            size: 10,
+          } as unknown as ListResponse),
+        ),
+      );
+
+      store.load({ page: 2 });
+
+      expect(store.pagination()).toEqual({
+        totalElements: 42,
+        totalPages: 5,
+        currentPage: 2,
+        pageSize: 10,
+      } satisfies PaginationMeta);
+      expect(store.hasPagination()).toBe(true);
+    });
+
+    it('laisse pagination() à null quand la réponse ne contient pas de métadonnées de page', () => {
+      store.load({ page: 0 });
+
+      expect(store.pagination()).toBeNull();
+      expect(store.hasPagination()).toBe(false);
+    });
   });
 });
