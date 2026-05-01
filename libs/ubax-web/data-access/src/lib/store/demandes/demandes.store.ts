@@ -1,4 +1,5 @@
 import { computed, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { tapResponse } from '@ngrx/operators';
 import {
   patchState,
@@ -7,62 +8,174 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import {
-  setAllEntities,
-  updateEntity,
-  withEntities,
-} from '@ngrx/signals/entities';
+import { updateEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap } from 'rxjs';
-import { Demande, DemandeStatut } from '../../models/demande.model';
-import { DemandesService } from '../../services/demandes.service';
+import { withApiResource } from '@ubax-workspace/shared-data-access';
+import {
+  ApiConfiguration,
+  assign,
+  AssignTicketRequest,
+  create,
+  getById1,
+  list,
+  updateStatus,
+  UpdateTicketStatusRequest,
+} from '@ubax-workspace/shared-api-types';
+import { map, pipe, switchMap, tap } from 'rxjs';
 
-interface DemandesState {
-  loading: boolean;
-  error: string | null;
-  selectedId: string | null;
+/**
+ * Type ticket local (CustomResponse.data contient les tickets).
+ * Le swagger type la réponse list en CustomResponse — on l'extrait via mapList.
+ */
+export interface Ticket {
+  id: string;
+  title?: string;
+  description?: string;
+  status?:
+    | 'OPEN'
+    | 'IN_ANALYSIS'
+    | 'TECHNICIAN_SENT'
+    | 'RESOLVED'
+    | 'CLOSED'
+    | 'CANCELLED';
+  priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  category?: string;
+  assignedToId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
 }
 
+/**
+ * DemandesStore — gestion des tickets SAV / maintenance.
+ * Branché sur les vrais endpoints /v1/tickets.
+ *
+ * Méthodes disponibles (héritées de withApiResource) :
+ *   store.load(params?)   — GET /v1/tickets (filtre par statut, assignedToId, page, size)
+ *   store.loadOne(id)     — GET /v1/tickets/:id
+ *   store.create(params)  — POST /v1/tickets
+ *
+ * Méthodes spécifiques :
+ *   store.changerStatut({ ticketId, body })  — PATCH statut du ticket
+ *   store.assignerTechnicien({ ticketId, body }) — assigner un technicien
+ */
 export const DemandesStore = signalStore(
   { providedIn: 'root' },
-  withEntities<Demande>(),
-  withState<DemandesState>({ loading: false, error: null, selectedId: null }),
-  withComputed(({ entities, selectedId }) => ({
-    nouvellesDemandes: computed(() => entities().filter((d) => d.statut === 'nouvelle')),
-    demandesEnCours: computed(() => entities().filter((d) => d.statut === 'en_cours')),
-    demandesUrgentes: computed(() => entities().filter((d) => d.priorite === 'urgente')),
-    selectedDemande: computed(() => entities().find((d) => d.id === selectedId()) ?? null),
-  })),
-  withMethods((store, svc = inject(DemandesService)) => ({
-    selectDemande(id: string | null): void {
-      patchState(store, { selectedId: id });
+  withApiResource({
+    list,
+    getById: getById1,
+    buildGetByIdParams: (id) => ({ ticketId: id }),
+    mapGetById: (raw, requestedId) => {
+      if (raw && typeof raw === 'object') {
+        const data = (raw as { data?: unknown }).data;
+        if (data && typeof data === 'object') {
+          const ticket = data as Ticket;
+          return { ...ticket, id: ticket.id ?? requestedId };
+        }
+      }
+
+      const ticket = raw as Ticket;
+      return { ...ticket, id: ticket.id ?? requestedId };
     },
+    create,
+    mapList: (raw: unknown) => {
+      if (Array.isArray(raw)) return raw;
 
-    loadAll: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, { loading: true })),
-        switchMap(() =>
-          svc.getAll().pipe(
-            tapResponse({
-              next: (demandes) => patchState(store, setAllEntities(demandes), { loading: false }),
-              error: () => patchState(store, { loading: false, error: 'Erreur chargement demandes' }),
-            }),
-          ),
-        ),
-      ),
-    ),
+      if (raw && typeof raw === 'object') {
+        const data = (raw as { data?: unknown }).data;
+        if (Array.isArray(data)) return data;
+        if (data && typeof data === 'object') {
+          const nested = (data as { content?: unknown }).content;
+          if (Array.isArray(nested)) {
+            return nested;
+          }
+        }
+      }
 
-    updateStatut: rxMethod<{ id: string; statut: DemandeStatut; notes?: string }>(
-      pipe(
-        switchMap(({ id, statut, notes }) =>
-          svc.updateStatut(id, statut, notes).pipe(
-            tapResponse({
-              next: (d) => patchState(store, updateEntity({ id: d.id, changes: d })),
-              error: () => patchState(store, { error: 'Erreur mise à jour statut' }),
-            }),
-          ),
-        ),
-      ),
+      return [];
+    },
+  }),
+  withState({
+    filterStatut: null as Ticket['status'] | null,
+  }),
+  withComputed(({ entities, filterStatut }) => ({
+    ticketsOuverts: computed(() =>
+      entities().filter((t) => t.status === 'OPEN'),
     ),
+    ticketsEnAnalyse: computed(() =>
+      entities().filter((t) => t.status === 'IN_ANALYSIS'),
+    ),
+    ticketsTechnicienEnvoye: computed(() =>
+      entities().filter((t) => t.status === 'TECHNICIAN_SENT'),
+    ),
+    ticketsResolus: computed(() =>
+      entities().filter((t) => t.status === 'RESOLVED'),
+    ),
+    ticketsUrgents: computed(() =>
+      entities().filter((t) => t.priority === 'URGENT'),
+    ),
+    ticketsFiltres: computed(() => {
+      const s = filterStatut();
+      return s ? entities().filter((t) => t.status === s) : entities();
+    }),
   })),
+  withMethods(
+    (
+      store,
+      http = inject(HttpClient),
+      apiConfig = inject(ApiConfiguration),
+    ) => ({
+      setFilterStatut(statut: Ticket['status'] | null): void {
+        patchState(store, { filterStatut: statut });
+      },
+
+      changerStatut: rxMethod<{
+        ticketId: string;
+        body: UpdateTicketStatusRequest;
+      }>(
+        pipe(
+          tap(() => patchState(store, { saving: true, error: null })),
+          switchMap(({ ticketId, body }) =>
+            updateStatus(http, apiConfig.rootUrl, { ticketId, body }).pipe(
+              map((r) => r.body as Ticket),
+              tapResponse({
+                next: (ticket: Ticket) =>
+                  patchState(
+                    store,
+                    updateEntity({ id: ticket.id, changes: ticket }),
+                    { saving: false },
+                  ),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { saving: false, error: err.message }),
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      assignerTechnicien: rxMethod<{
+        ticketId: string;
+        body: AssignTicketRequest;
+      }>(
+        pipe(
+          tap(() => patchState(store, { saving: true, error: null })),
+          switchMap(({ ticketId, body }) =>
+            assign(http, apiConfig.rootUrl, { ticketId, body }).pipe(
+              map((r) => r.body as Ticket),
+              tapResponse({
+                next: (ticket: Ticket) =>
+                  patchState(
+                    store,
+                    updateEntity({ id: ticket.id, changes: ticket }),
+                    { saving: false },
+                  ),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { saving: false, error: err.message }),
+              }),
+            ),
+          ),
+        ),
+      ),
+    }),
+  ),
 );

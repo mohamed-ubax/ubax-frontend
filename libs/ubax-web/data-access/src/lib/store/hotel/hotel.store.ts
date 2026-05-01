@@ -1,4 +1,5 @@
 import { computed, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { tapResponse } from '@ngrx/operators';
 import {
   patchState,
@@ -7,96 +8,146 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import {
-  addEntity,
-  setAllEntities,
-  updateEntity,
-  withEntities,
-} from '@ngrx/signals/entities';
+import { addEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { forkJoin, pipe, switchMap, tap } from 'rxjs';
-import { Chambre, Employe } from '../../models/hotel.model';
-import { HotelService } from '../../services/hotel.service';
+import { withApiResource } from '@ubax-workspace/shared-data-access';
+import {
+  addMember,
+  AddTeamMemberRequest,
+  AdminUserResponse,
+  ApiConfiguration,
+  assignSubRoles,
+  AssignSubRolesRequest,
+  getTeamMembers,
+  revokeSubRole,
+} from '@ubax-workspace/shared-api-types';
+import { map, pipe, switchMap, tap } from 'rxjs';
 
-interface HotelState {
-  employes: Employe[];
-  loading: boolean;
-  error: string | null;
-  selectedEmployeId: string | null;
-}
+type HotelTeamMember = AdminUserResponse & {
+  active?: boolean;
+  roles?: Array<string>;
+};
 
+const mapTeamList = (raw: unknown): HotelTeamMember[] => {
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object') {
+    const record = raw as { content?: unknown; data?: unknown };
+
+    if (Array.isArray(record.content)) return record.content;
+    if (Array.isArray(record.data)) return record.data;
+    if (record.data && typeof record.data === 'object') {
+      const nested = (record.data as { content?: unknown }).content;
+      if (Array.isArray(nested)) {
+        return nested;
+      }
+    }
+  }
+
+  return [];
+};
+
+/**
+ * HotelStore — gestion de l'équipe hôtel.
+ * Branché sur /v1/hotel/team (AdminUserResponse).
+ *
+ * Méthodes disponibles (héritées de withApiResource) :
+ *   store.load()      — GET /v1/hotel/team
+ *   store.select(id)  — sélection locale
+ *
+ * Méthodes spécifiques :
+ *   store.inviterMembre(body)                     — POST /v1/hotel/team
+ *   store.assignerSousRoles({ userId, body })     — POST /v1/hotel/team/:userId/sub-roles
+ *   store.revoquerSousRole({ userId, role })      — DELETE /v1/hotel/team/:userId/sub-roles/:role
+ */
 export const HotelStore = signalStore(
   { providedIn: 'root' },
-  withEntities<Chambre>(),
-  withState<HotelState>({ employes: [], loading: false, error: null, selectedEmployeId: null }),
-  withComputed(({ entities, employes, selectedEmployeId }) => ({
-    chambresDisponibles: computed(() => entities().filter((c) => c.statut === 'disponible')),
-    chambresOccupees: computed(() => entities().filter((c) => c.statut === 'occupee')),
-    tauxOccupation: computed(() => {
-      const total = entities().length;
-      if (total === 0) return 0;
-      return Math.round((entities().filter((c) => c.statut === 'occupee').length / total) * 100);
+  withApiResource({
+    list: getTeamMembers,
+    mapList: mapTeamList,
+    idSelector: (m) => m.userId ?? m.keycloakId ?? m.email ?? '',
+  }),
+  withState({
+    filterRole: null as string | null,
+  }),
+  withComputed(({ entities, filterRole }) => ({
+    membresActifs: computed(() => entities().filter((m) => Boolean(m.active))),
+    membresFiltres: computed(() => {
+      const role = filterRole();
+      if (!role) return entities();
+      return entities().filter(
+        (m) => Array.isArray(m.roles) && m.roles.includes(role),
+      );
     }),
-    employesActifs: computed(() => employes().filter((e) => e.actif)),
-    selectedEmploye: computed(() => employes().find((e) => e.id === selectedEmployeId()) ?? null),
+    totalMembres: computed(() => entities().length),
   })),
-  withMethods((store, svc = inject(HotelService)) => ({
-    selectEmploye(id: string | null): void {
-      patchState(store, { selectedEmployeId: id });
-    },
+  withMethods(
+    (
+      store,
+      http = inject(HttpClient),
+      apiConfig = inject(ApiConfiguration),
+    ) => ({
+      setFilterRole(role: string | null): void {
+        patchState(store, { filterRole: role });
+      },
 
-    loadAll: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, { loading: true })),
-        switchMap(() =>
-          forkJoin({ chambres: svc.getChambres(), employes: svc.getEmployes() }).pipe(
-            tapResponse({
-              next: ({ chambres, employes }) =>
-                patchState(store, setAllEntities(chambres), { employes, loading: false }),
-              error: () => patchState(store, { loading: false, error: 'Erreur chargement hotel' }),
-            }),
+      inviterMembre: rxMethod<AddTeamMemberRequest>(
+        pipe(
+          tap(() => patchState(store, { saving: true, error: null })),
+          switchMap((body: AddTeamMemberRequest) =>
+            addMember(http, apiConfig.rootUrl, { body }).pipe(
+              map((r) => r.body as HotelTeamMember),
+              tapResponse({
+                next: (membre: HotelTeamMember) =>
+                  patchState(
+                    store,
+                    addEntity(membre, {
+                      selectId: (m: HotelTeamMember) =>
+                        m.userId ?? m.keycloakId ?? m.email ?? '',
+                    }),
+                    { saving: false },
+                  ),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { saving: false, error: err.message }),
+              }),
+            ),
           ),
         ),
       ),
-    ),
 
-    addChambre: rxMethod<Omit<Chambre, 'id'>>(
-      pipe(
-        switchMap((payload) =>
-          svc.createChambre(payload).pipe(
-            tapResponse({
-              next: (chambre) => patchState(store, addEntity(chambre)),
-              error: () => patchState(store, { error: 'Erreur création chambre' }),
-            }),
+      assignerSousRoles: rxMethod<{
+        userId: string;
+        body: AssignSubRolesRequest;
+      }>(
+        pipe(
+          tap(() => patchState(store, { saving: true, error: null })),
+          switchMap(({ userId, body }) =>
+            assignSubRoles(http, apiConfig.rootUrl, {
+              userId,
+              body: body.roles ?? [],
+            }).pipe(
+              tapResponse({
+                next: () => patchState(store, { saving: false }),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { saving: false, error: err.message }),
+              }),
+            ),
           ),
         ),
       ),
-    ),
 
-    updateChambre: rxMethod<{ id: string; changes: Partial<Chambre> }>(
-      pipe(
-        switchMap(({ id, changes }) =>
-          svc.updateChambre(id, changes).pipe(
-            tapResponse({
-              next: (c) => patchState(store, updateEntity({ id: c.id, changes: c })),
-              error: () => patchState(store, { error: 'Erreur mise à jour chambre' }),
-            }),
+      revoquerSousRole: rxMethod<{ userId: string; role: string }>(
+        pipe(
+          switchMap(({ userId, role }) =>
+            revokeSubRole(http, apiConfig.rootUrl, { userId, role }).pipe(
+              tapResponse({
+                next: () => undefined,
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { error: err.message }),
+              }),
+            ),
           ),
         ),
       ),
-    ),
-
-    addEmploye: rxMethod<Omit<Employe, 'id'>>(
-      pipe(
-        switchMap((payload) =>
-          svc.createEmploye(payload).pipe(
-            tapResponse({
-              next: (e) => patchState(store, { employes: [...store.employes(), e] }),
-              error: () => patchState(store, { error: 'Erreur création employé' }),
-            }),
-          ),
-        ),
-      ),
-    ),
-  })),
+    }),
+  ),
 );

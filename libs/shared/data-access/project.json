@@ -1,11 +1,10 @@
 {
-  "name": "ubax-web-data-access",
+  "name": "shared-data-access",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/ubax-web/data-access/src",
-  "prefix": "ubax",
+  "sourceRoot": "libs/shared/data-access/src",
   "projectType": "library",
   "tags": [
-    "scope:web",
+    "scope:shared",
     "type:data-access"
   ],
   "targets": {
@@ -20,7 +19,7 @@
         "^production"
       ],
       "options": {
-        "command": "npm exec -- vitest run --config libs/ubax-web/data-access/vitest.config.mts",
+        "command": "npm exec -- vitest run --config libs/shared/data-access/vitest.config.mts",
         "cwd": "{workspaceRoot}"
       }
     }

@@ -11,16 +11,17 @@ import {
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { of, pipe, switchMap, tap } from 'rxjs';
 import {
+  AuthService,
   DEFAULT_UBAX_WEB_HOME_PATH,
+  Role,
   clearStoredAuthSession,
   deriveUserFromAuthToken,
   persistAuthToken,
   readStoredRefreshToken,
   readStoredAuthToken,
   redirectBrowserToPortalLogin,
-} from '../../auth/auth-session';
-import { Role, User } from '../../models/user.model';
-import { AuthService } from '../../services/auth.service';
+  type User,
+} from '@ubax-workspace/shared-data-access';
 
 const initialToken = readStoredAuthToken();
 
