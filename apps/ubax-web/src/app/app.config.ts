@@ -30,6 +30,9 @@ import {
   Role,
   readStoredDevRole,
 } from '@ubax-workspace/ubax-web-data-access';
+import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NotificationService } from '@ubax-workspace/ubax-web-shell';
+import { MessageService } from 'primeng/api';
 import { SelectivePreloadStrategy } from './selective-preload.strategy';
 import { environment } from '../environments/environment';
 
@@ -154,6 +157,8 @@ export const appConfig: ApplicationConfig = {
     ),
     provideApiConfiguration(environment.apiRootUrl),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    MessageService,
+    { provide: NOTIFICATION_HANDLER, useExisting: NotificationService },
     providePrimeNG({
       theme: {
         preset: UbaxPreset,

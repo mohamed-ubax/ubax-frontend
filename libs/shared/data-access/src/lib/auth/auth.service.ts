@@ -6,8 +6,12 @@ import {
   logout as logoutFn,
   type LogoutRequest,
 } from '@ubax-workspace/shared-api-types';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { User } from './user.model';
+import {
+  persistAuthSession,
+  readStoredRefreshToken,
+} from './auth-session';
 
 export interface LoginRequest {
   email: string;
@@ -47,10 +51,22 @@ export class AuthService {
     );
   }
 
-  refreshToken(): Observable<{ accessToken: string }> {
-    return this.http.post<{ accessToken: string }>(
-      `${this.apiConfig.rootUrl}/auth/refresh`,
-      {},
-    );
+  refreshToken(): Observable<LoginResponse> {
+    const storedRefreshToken = readStoredRefreshToken();
+    return this.http
+      .post<LoginResponse>(
+        `${this.apiConfig.rootUrl}/auth/refresh`,
+        storedRefreshToken ? { refreshToken: storedRefreshToken } : {},
+      )
+      .pipe(
+        tap((response) => {
+          if (response.access_token) {
+            persistAuthSession({
+              accessToken: response.access_token,
+              refreshToken: response.refresh_token ?? storedRefreshToken ?? '',
+            });
+          }
+        }),
+      );
   }
 }

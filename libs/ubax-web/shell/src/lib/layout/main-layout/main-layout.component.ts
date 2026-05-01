@@ -5,6 +5,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Toast } from 'primeng/toast';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
 import { DevRoleSwitcherComponent } from '../dev-role-switcher/dev-role-switcher.component';
 import { UbaxAutoMotionDirective } from '../motion/auto-motion.directive';
@@ -15,6 +16,7 @@ import { TopbarComponent } from '../topbar/topbar.component';
   standalone: true,
   imports: [
     RouterOutlet,
+    Toast,
     TopbarComponent,
     DevRoleSwitcherComponent,
     UbaxAutoMotionDirective,

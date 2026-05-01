@@ -65,6 +65,14 @@ export const AuthStore = signalStore(
         patchState(store, { user });
       },
 
+      /** Vide la session localement sans appel réseau — utilisé par l'intercepteur quand le refresh échoue */
+      expireSession(): void {
+        clearStoredAuthSession();
+        patchState(store, { user: null, token: null, error: 'Session expirée' });
+        if (redirectBrowserToPortalLogin()) return;
+        router.navigate(['/connexion']);
+      },
+
       setRole(role: Role): void {
         const currentUser = store.user();
 
