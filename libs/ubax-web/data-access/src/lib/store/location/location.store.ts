@@ -19,7 +19,7 @@ import {
   reject,
   TenantResponse,
 } from '@ubax-workspace/shared-api-types';
-import { map, pipe, switchMap, tap } from 'rxjs';
+import { exhaustMap, map, pipe, tap } from 'rxjs';
 
 type Tenant = TenantResponse & { id: string };
 
@@ -117,7 +117,7 @@ export const LocationStore = signalStore(
       qualifier: rxMethod<string>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap((id: string) =>
+          exhaustMap((id: string) =>
             qualify(http, apiConfig.rootUrl, { id }).pipe(
               map((r) => normalizeTenant(r.body as TenantResponse, id)),
               tapResponse({
@@ -138,7 +138,7 @@ export const LocationStore = signalStore(
       rejeter: rxMethod<{ id: string; reason: string }>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap(({ id, reason }) =>
+          exhaustMap(({ id, reason }) =>
             reject(http, apiConfig.rootUrl, { id, reason }).pipe(
               map((r) => normalizeTenant(r.body as TenantResponse, id)),
               tapResponse({

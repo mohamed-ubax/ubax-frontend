@@ -21,7 +21,7 @@ import {
   updateStatus,
   UpdateTicketStatusRequest,
 } from '@ubax-workspace/shared-api-types';
-import { map, pipe, switchMap, tap } from 'rxjs';
+import { exhaustMap, map, pipe, tap } from 'rxjs';
 
 /**
  * Type ticket local (CustomResponse.data contient les tickets).
@@ -135,7 +135,7 @@ export const DemandesStore = signalStore(
       }>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap(({ ticketId, body }) =>
+          exhaustMap(({ ticketId, body }) =>
             updateStatus(http, apiConfig.rootUrl, { ticketId, body }).pipe(
               map((r) => r.body as Ticket),
               tapResponse({
@@ -159,7 +159,7 @@ export const DemandesStore = signalStore(
       }>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap(({ ticketId, body }) =>
+          exhaustMap(({ ticketId, body }) =>
             assign(http, apiConfig.rootUrl, { ticketId, body }).pipe(
               map((r) => r.body as Ticket),
               tapResponse({

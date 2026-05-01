@@ -21,7 +21,7 @@ import {
   getTeamMembers,
   revokeSubRole,
 } from '@ubax-workspace/shared-api-types';
-import { map, pipe, switchMap, tap } from 'rxjs';
+import { exhaustMap, map, pipe, tap } from 'rxjs';
 
 type HotelTeamMember = AdminUserResponse & {
   active?: boolean;
@@ -93,7 +93,7 @@ export const HotelStore = signalStore(
       inviterMembre: rxMethod<AddTeamMemberRequest>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap((body: AddTeamMemberRequest) =>
+          exhaustMap((body: AddTeamMemberRequest) =>
             addMember(http, apiConfig.rootUrl, { body }).pipe(
               map((r) => r.body as HotelTeamMember),
               tapResponse({
@@ -120,7 +120,7 @@ export const HotelStore = signalStore(
       }>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap(({ userId, body }) =>
+          exhaustMap(({ userId, body }) =>
             assignSubRoles(http, apiConfig.rootUrl, {
               userId,
               body: body.roles ?? [],
@@ -137,7 +137,7 @@ export const HotelStore = signalStore(
 
       revoquerSousRole: rxMethod<{ userId: string; role: string }>(
         pipe(
-          switchMap(({ userId, role }) =>
+          exhaustMap(({ userId, role }) =>
             revokeSubRole(http, apiConfig.rootUrl, { userId, role }).pipe(
               tapResponse({
                 next: () => undefined,
