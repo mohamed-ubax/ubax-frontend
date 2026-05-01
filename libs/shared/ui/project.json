@@ -4,5 +4,8 @@
   "sourceRoot": "libs/shared/ui/src",
   "prefix": "ubax",
   "projectType": "library",
-  "tags": []
+  "tags": [
+    "scope:shared",
+    "type:ui"
+  ]
 }

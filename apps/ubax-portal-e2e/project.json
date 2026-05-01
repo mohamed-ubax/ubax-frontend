@@ -3,7 +3,13 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/ubax-portal-e2e/src",
-  "implicitDependencies": ["ubax-portal"],
+  "tags": [
+    "scope:portal",
+    "type:e2e"
+  ],
+  "implicitDependencies": [
+    "ubax-portal"
+  ],
   "// targets": "to see all targets run: nx show project ubax-portal-e2e --web",
   "targets": {}
 }

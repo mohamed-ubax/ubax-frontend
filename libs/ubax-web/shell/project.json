@@ -4,7 +4,10 @@
   "sourceRoot": "libs/ubax-web/shell/src",
   "prefix": "ubax",
   "projectType": "library",
-  "tags": [],
+  "tags": [
+    "scope:web",
+    "type:shell"
+  ],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"

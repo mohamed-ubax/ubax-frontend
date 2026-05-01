@@ -4,5 +4,8 @@
   "sourceRoot": "libs/ubax-portal/features/src",
   "prefix": "ubax",
   "projectType": "library",
-  "tags": []
+  "tags": [
+    "scope:portal",
+    "type:feature"
+  ]
 }

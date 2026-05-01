@@ -4,7 +4,10 @@
   "sourceRoot": "libs/ubax-portal/layout/src",
   "prefix": "ubax",
   "projectType": "library",
-  "tags": [],
+  "tags": [
+    "scope:portal",
+    "type:layout"
+  ],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"
