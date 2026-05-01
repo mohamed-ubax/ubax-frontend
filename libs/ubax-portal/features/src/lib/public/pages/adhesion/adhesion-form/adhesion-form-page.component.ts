@@ -1,14 +1,15 @@
 import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  ElementRef,
   inject,
   NgZone,
   signal,
+  computed,
+  Component,
+  DestroyRef,
+  afterNextRender,
+  ElementRef,
+  ChangeDetectionStrategy,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   Validators,
@@ -16,16 +17,20 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
-  BackToTopComponent,
   LenisService,
+  BackToTopComponent,
   PublicShellComponent,
 } from '@ubax-workspace/ubax-portal-layout';
-import { Select } from 'primeng/select';
-import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
-import { CodeListService } from '../../../shared/code-list.service';
 import gsap from 'gsap';
+import { firstValueFrom } from 'rxjs';
+import { Select } from 'primeng/select';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { PartnerService } from '../services/partner.service';
+import { CodeListService } from '../../../shared/code-list.service';
+import { type PartnerApplyRequest } from '../models/partner-application.model';
+import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
 
 type LegalDocumentType = 'rccm' | 'dfe' | 'contratBail';
 
@@ -33,16 +38,16 @@ type LegalDocumentType = 'rccm' | 'dfe' | 'contratBail';
   selector: 'ubax-adhesion-form-page',
   standalone: true,
   imports: [
-    PublicShellComponent,
+    Select,
+    RouterLink,
+    FormsModule,
     BackToTopComponent,
     ReactiveFormsModule,
-    FormsModule,
-    RouterLink,
-    Select,
+    PublicShellComponent,
   ],
-  templateUrl: './adhesion-form-page.component.html',
   styleUrl: './adhesion-form-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './adhesion-form-page.component.html',
 })
 export class AdhesionFormPageComponent {
   private readonly _fb = inject(FormBuilder);
@@ -52,13 +57,20 @@ export class AdhesionFormPageComponent {
   private readonly _router = inject(Router);
   private readonly _zone = inject(NgZone);
   private readonly _codeListService = inject(CodeListService);
+  private readonly _partnerService = inject(PartnerService);
   private _gsapCtx: gsap.Context | null = null;
-  private _submitTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // ── UI state ─────────────────────────────────────────────────────────────
+  // ── UI state ──────────────────────────────────────────────────────────────
   protected readonly submitted = signal(false);
   protected readonly loading = signal(false);
   protected readonly serverError = signal<string | null>(null);
+
+  // ── Partner type (reactive) ───────────────────────────────────────────────
+  protected readonly partnerType = signal<string>('');
+  protected readonly isHotel = computed(() => this.partnerType() === 'HOTEL');
+  protected readonly isAgence = computed(
+    () => this.partnerType() === 'AGENCE_IMMOBILIERE',
+  );
 
   // ── File state ────────────────────────────────────────────────────────────
   protected readonly logoFile = signal<File | null>(null);
@@ -76,6 +88,11 @@ export class AdhesionFormPageComponent {
     { initialValue: [] },
   );
 
+  protected readonly statutsJuridiques = toSignal(
+    this._codeListService.getByType('LEGAL_STATUS'),
+    { initialValue: [] },
+  );
+
   protected readonly paysList = [
     "Côte d'Ivoire",
     'Sénégal',
@@ -89,6 +106,7 @@ export class AdhesionFormPageComponent {
     'Ghana',
     'Cameroun',
     'Maroc',
+    'SN',
   ];
 
   protected readonly villesList = [
@@ -108,54 +126,36 @@ export class AdhesionFormPageComponent {
     'Casablanca',
   ];
 
-  protected readonly statutsJuridiques = [
-    {
-      label: 'SARL',
-      value: 'sarl',
-    },
-    {
-      label: 'Entreprise individuelle',
-      value: 'entreprise_individuelle',
-    },
-    {
-      label: 'SCI',
-      value: 'sci',
-    },
-    {
-      label: 'SAS',
-      value: 'sas',
-    },
-    {
-      label: 'SA',
-      value: 'sa',
-    },
-    {
-      label: 'SCCV',
-      value: 'sccv',
-    },
-  ];
-
   // ── Reactive form ─────────────────────────────────────────────────────────
   protected readonly form = this._fb.group({
-    // Section 1 — Informations partenaires
     typePartenaire: ['', Validators.required],
     raisonSociale: ['', Validators.required],
-    representantLegal: [''],
+    representantLegal: ['', Validators.required],
     telephone: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    // Localisation
     pays: ['', Validators.required],
-    ville: ['', Validators.required],
-    adressePostale: ['', Validators.required],
-    quartier: ['', Validators.required],
-    // Section 2 — Informations établissement
+    // ville & adressePostale : requis uniquement pour HOTEL (validateurs dynamiques)
+    ville: [''],
+    adressePostale: [''],
+    quartier: [''],
+    latitude: [null as number | null, [Validators.min(-90), Validators.max(90)]],
+    longitude: [null as number | null, [Validators.min(-180), Validators.max(180)]],
     description: [''],
     statutJuridique: ['', Validators.required],
-    numeroAgrement: [''],
+    numeroAgrement: ['', Validators.required],
     acceptTerms: [false, Validators.requiredTrue],
   });
 
   constructor() {
+    this.form
+      .get('typePartenaire')
+      ?.valueChanges.pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((type) => {
+        this.partnerType.set(type ?? '');
+        this._updateLocationValidators(type ?? '');
+        if (type !== 'AGENCE_IMMOBILIERE') this.contratBailFile.set(null);
+      });
+
     afterNextRender(() => {
       this._zone.runOutsideAngular(() => {
         gsap.registerPlugin(ScrollTrigger);
@@ -169,12 +169,25 @@ export class AdhesionFormPageComponent {
     this._destroyRef.onDestroy(() => {
       this._gsapCtx?.revert();
       this._gsapCtx = null;
-
-      if (this._submitTimer) {
-        clearTimeout(this._submitTimer);
-        this._submitTimer = null;
-      }
     });
+  }
+
+  // ── Dynamic validators ────────────────────────────────────────────────────
+  private _updateLocationValidators(type: string): void {
+    const ville = this.form.get('ville');
+    const adressePostale = this.form.get('adressePostale');
+    if (!ville || !adressePostale) return;
+
+    if (type === 'HOTEL') {
+      ville.setValidators(Validators.required);
+      adressePostale.setValidators(Validators.required);
+    } else {
+      ville.clearValidators();
+      adressePostale.clearValidators();
+    }
+
+    ville.updateValueAndValidity({ emitEvent: false });
+    adressePostale.updateValueAndValidity({ emitEvent: false });
   }
 
   // ── GSAP entrance animations ──────────────────────────────────────────────
@@ -304,6 +317,28 @@ export class AdhesionFormPageComponent {
     return !!(ctrl?.invalid && (ctrl.touched || this.submitted()));
   }
 
+  protected isFileMissing(type: 'rccm' | 'dfe' | 'bail'): boolean {
+    if (!this.submitted()) return false;
+    switch (type) {
+      case 'rccm':
+        return !this.rccmFile();
+      case 'dfe':
+        return !this.dfeFile();
+      case 'bail':
+        return this.isAgence() && !this.contratBailFile();
+    }
+  }
+
+  // ── Phone input ───────────────────────────────────────────────────────────
+  protected onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const stripped = input.value.replace(/\D/g, '');
+    if (stripped !== input.value) {
+      input.value = stripped;
+      this.form.get('telephone')?.setValue(stripped, { emitEvent: false });
+    }
+  }
+
   // ── Logo upload ───────────────────────────────────────────────────────────
   protected onLogoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
@@ -358,13 +393,16 @@ export class AdhesionFormPageComponent {
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────
-  protected onSubmit(): void {
+  protected async onSubmit(): Promise<void> {
     this.submitted.set(true);
     this.serverError.set(null);
     this.form.markAllAsTouched();
 
-    if (this.form.invalid) {
-      // Scroll smoothly to the first invalid field using Lenis when available.
+    const rccmMissing = !this.rccmFile();
+    const dfeMissing = !this.dfeFile();
+    const bailMissing = this.isAgence() && !this.contratBailFile();
+
+    if (this.form.invalid || rccmMissing || dfeMissing || bailMissing) {
       const firstInvalid = this._el.nativeElement.querySelector(
         '.form-field__input.ng-invalid, .form-field__select.ng-invalid, .form-field__textarea.ng-invalid, .form-consent__checkbox.ng-invalid',
       ) as HTMLElement | null;
@@ -397,11 +435,59 @@ export class AdhesionFormPageComponent {
 
     this.loading.set(true);
 
-    // Wire to real API endpoint here — simulate for now
-    this._submitTimer = setTimeout(() => {
-      this.loading.set(false);
-      this._submitTimer = null;
+    const v = this.form.value;
+    const data: PartnerApplyRequest = {
+      partnerType: v.typePartenaire ?? '',
+      companyName: v.raisonSociale ?? '',
+      legalRepresentative: v.representantLegal ?? '',
+      phone: `+${this.selectedCountry.dialCode}${v.telephone ?? ''}`,
+      email: v.email ?? '',
+      country: v.pays ?? '',
+      city: v.ville || undefined,
+      postalAddress: v.adressePostale || undefined,
+      zone: v.quartier || undefined,
+      latitude: v.latitude ?? undefined,
+      longitude: v.longitude ?? undefined,
+      description: v.description || undefined,
+      legalStatus: v.statutJuridique ?? '',
+      registrationNumber: v.numeroAgrement ?? '',
+    };
+
+    const rccm = this.rccmFile();
+    const dfe = this.dfeFile();
+    const bail = this.contratBailFile();
+    const logo = this.logoFile();
+
+    const formData = new FormData();
+    // formData.append('data', JSON.stringify(data));
+    formData.append(
+      'data',
+      new Blob([JSON.stringify(data)], { type: 'application/json' }),
+    );
+    if (rccm) formData.append('rccm', rccm);
+    if (dfe) formData.append('dfe', dfe);
+    if (bail) formData.append('bail', bail);
+    if (logo) formData.append('logo', logo);
+
+    try {
+      await firstValueFrom(this._partnerService.apply(formData));
       void this._router.navigateByUrl('/adhesion/validation');
-    }, 1200);
+    } catch (error) {
+      this.serverError.set(this._resolveError(error));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private _resolveError(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 409)
+        return "Une demande d'adhésion existe déjà pour cet email.";
+      if (error.status === 400)
+        return 'Données invalides. Vérifiez vos informations.';
+      if (error.status === 0)
+        return 'Le serveur est inaccessible. Réessayez dans un instant.';
+    }
+    return 'Une erreur est survenue. Réessayez dans un instant.';
   }
 }

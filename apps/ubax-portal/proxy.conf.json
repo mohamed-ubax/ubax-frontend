@@ -5,19 +5,16 @@
     "changeOrigin": true,
     "logLevel": "info"
   },
-  "/api": {
-    "target": "http://173.249.7.89/api/v1",
+  "/admin": {
+    "target": "http://localhost:4202",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"
   },
-  "/code-list": {
+  "/api": {
     "target": "http://173.249.7.89",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "info",
-    "pathRewrite": {
-      "^/code-list": "/api/v1/code-list"
-    }
+    "logLevel": "info"
   }
 }
