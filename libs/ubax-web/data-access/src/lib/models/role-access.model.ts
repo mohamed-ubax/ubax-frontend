@@ -2,17 +2,15 @@ import { Role } from '@ubax-workspace/shared-data-access';
 
 const DEV_ROLE_STORAGE_KEY = 'ubax_dev_role';
 
-export interface NavItemConfig {
+export type NavItemConfig = {
   readonly label: string;
   readonly path: string;
   readonly activePaths?: readonly string[];
-  readonly roles: readonly Role[];
-}
+  readonly roles: readonly Role[];};
 
-export interface RoleOption {
+export type RoleOption = {
   readonly role: Role;
-  readonly label: string;
-}
+  readonly label: string;};
 
 export const ROLE_LABELS: Record<Role, string> = {
   [Role.DG]: "Directeur d'agence",

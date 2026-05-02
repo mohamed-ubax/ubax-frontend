@@ -7,10 +7,9 @@ import {
 } from '@angular/core';
 import { UbaxMorphTabsDirective } from '../morph-tabs/morph-tabs.directive';
 
-export interface PageTab {
+export type PageTab = {
   label: string;
-  value: string;
-}
+  value: string;};
 
 @Component({
   selector: 'ubax-page-tabs',

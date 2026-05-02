@@ -14,11 +14,10 @@ import {
   formatMonthLabel,
 } from '../../reservation-commercial.data';
 
-interface MiniCalendarCell {
+type MiniCalendarCell = {
   readonly label: string;
   readonly muted: boolean;
-  readonly active: boolean;
-}
+  readonly active: boolean;};
 
 type MiniCalendarWeek = readonly MiniCalendarCell[];
 

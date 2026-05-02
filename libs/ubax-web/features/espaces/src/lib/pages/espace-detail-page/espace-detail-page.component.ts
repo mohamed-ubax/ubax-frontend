@@ -9,30 +9,27 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
-interface GuestProfile {
+type GuestProfile = {
   readonly clientId: string;
   readonly name: string;
   readonly code: string;
-  readonly avatar: string;
-}
+  readonly avatar: string;};
 
-interface ReservationDetail {
+type ReservationDetail = {
   readonly title: string;
   readonly type: string;
   readonly capacity: string;
   readonly bookingDate: string;
   readonly bookingTime: string;
   readonly stayDuration: string;
-  readonly facilities: readonly string[];
-}
+  readonly facilities: readonly string[];};
 
-interface GalleryPhoto {
+type GalleryPhoto = {
   readonly src: string;
   readonly alt: string;
-  readonly previewCount?: number;
-}
+  readonly previewCount?: number;};
 
-interface HistoryRow {
+type HistoryRow = {
   readonly id: number;
   readonly clientId: string;
   readonly guestName: string;
@@ -40,16 +37,14 @@ interface HistoryRow {
   readonly duration: string;
   readonly period: string;
   readonly status: 'Confirmé';
-  readonly avatar: string;
-}
+  readonly avatar: string;};
 
-interface SpaceDetailData {
+type SpaceDetailData = {
   readonly guest: GuestProfile;
   readonly reservation: ReservationDetail;
   readonly totalGalleryCount: number;
   readonly galleryPhotos: readonly GalleryPhoto[];
-  readonly historyRows: readonly HistoryRow[];
-}
+  readonly historyRows: readonly HistoryRow[];};
 
 const DEFAULT_DETAIL_ID = '1';
 

@@ -14,22 +14,20 @@ import {
 type BienViewMode = 'grid' | 'list';
 type FilterDropdownKey = 'type' | 'category' | 'status';
 
-interface BienSummaryCard {
+type BienSummaryCard = {
   readonly label: string;
   readonly value: string;
   readonly trend?: string;
   readonly orb: string;
   readonly icon: string;
-  readonly iconAlt: string;
-}
+  readonly iconAlt: string;};
 
-interface FilterOption {
+type FilterOption = {
   readonly label: string;
   readonly value: string;
-  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';
-}
+  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';};
 
-interface GridBienCard {
+type GridBienCard = {
   readonly id: number;
   readonly title: string;
   readonly location: string;
@@ -40,10 +38,9 @@ interface GridBienCard {
   readonly avatar: string;
   readonly type: string;
   readonly category: string;
-  readonly status: string;
-}
+  readonly status: string;};
 
-interface ListBienCard {
+type ListBienCard = {
   readonly id: number;
   readonly title: string;
   readonly location: string;
@@ -54,8 +51,7 @@ interface ListBienCard {
   readonly avatar: string;
   readonly type: string;
   readonly category: string;
-  readonly status: string;
-}
+  readonly status: string;};
 
 const GRID_VIEW_ICON =
   'https://www.figma.com/api/mcp/asset/a3395e9c-0140-4d15-8e27-c62f9e413242';

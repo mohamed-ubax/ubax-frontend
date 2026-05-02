@@ -1,26 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-interface ComptableToolbarField {
+type ComptableToolbarField = {
   readonly label: string;
   readonly icon: string;
-  readonly kind: 'search' | 'date' | 'export';
-}
+  readonly kind: 'search' | 'date' | 'export';};
 
-interface ComptableSummaryMetric {
+type ComptableSummaryMetric = {
   readonly label: string;
   readonly value: number;
   readonly accent: string;
-  readonly icon: string;
-}
+  readonly icon: string;};
 
-interface ComptableCalendarDay {
+type ComptableCalendarDay = {
   readonly label: string;
   readonly isActive?: boolean;
-  readonly isMuted?: boolean;
-}
+  readonly isMuted?: boolean;};
 
-interface ComptableRequestRow {
+type ComptableRequestRow = {
   readonly ref: string;
   readonly client: string;
   readonly image: string;
@@ -28,14 +25,12 @@ interface ComptableRequestRow {
   readonly requestType: string;
   readonly amount: string;
   readonly status: string;
-  readonly date: string;
-}
+  readonly date: string;};
 
-interface ComptableNotificationItem {
+type ComptableNotificationItem = {
   readonly title: string;
   readonly message: string;
-  readonly time: string;
-}
+  readonly time: string;};
 
 const SHARED_ASSET_ROOT = '/shared/demandes';
 const COMPTABLE_ASSET_ROOT = '/demandes/comptable';

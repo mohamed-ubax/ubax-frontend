@@ -11,16 +11,14 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 
-export interface FilterSelectOption {
+export type FilterSelectOption = {
   label: string;
-  value: unknown;
-}
+  value: unknown;};
 
-export interface FilterSelectConfig {
+export type FilterSelectConfig = {
   placeholder: string;
   options: FilterSelectOption[];
-  key: string;
-}
+  key: string;};
 
 @Component({
   selector: 'ubax-filter-bar',

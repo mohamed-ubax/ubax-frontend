@@ -15,7 +15,7 @@ import {
 type ClientTabId = 'all' | 'active' | 'upcoming' | 'archived';
 type ClientListTone = 'active' | 'upcoming' | 'archived';
 
-interface ClientListRow {
+type ClientListRow = {
   readonly id: string;
   readonly code: string;
   readonly name: string;
@@ -28,8 +28,7 @@ interface ClientListRow {
   readonly total: string;
   readonly status: string;
   readonly tone: ClientListTone;
-  readonly primarySpaceId: string;
-}
+  readonly primarySpaceId: string;};
 
 const TAB_LABELS: Record<ClientTabId, string> = {
   all: 'Tous les clients',

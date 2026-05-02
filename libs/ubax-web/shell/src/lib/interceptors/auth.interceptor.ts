@@ -6,7 +6,10 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
-import { AuthService } from '@ubax-workspace/shared-data-access';
+import {
+  AuthService,
+  type LoginResponse,
+} from '@ubax-workspace/shared-data-access';
 import { catchError, switchMap, throwError } from 'rxjs';
 
 const AUTH_SKIP_PATHS = ['/auth/login', '/auth/refresh', '/auth/logout'];
@@ -20,6 +23,15 @@ function withBearer(
   token: string,
 ): HttpRequest<unknown> {
   return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+}
+
+function hasAccessToken(
+  response: LoginResponse,
+): response is LoginResponse & { access_token: string } {
+  return (
+    typeof response.access_token === 'string' &&
+    response.access_token.length > 0
+  );
 }
 
 export const authInterceptor: HttpInterceptorFn = (
@@ -40,6 +52,13 @@ export const authInterceptor: HttpInterceptorFn = (
 
       return authService.refreshToken().pipe(
         switchMap((response) => {
+          if (!hasAccessToken(response)) {
+            authStore.expireSession();
+            return throwError(
+              () => new Error('Missing access token in refresh response'),
+            );
+          }
+
           authStore.setToken(response.access_token);
           return next(withBearer(req, response.access_token));
         }),

@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-interface Category {
+type Category = {
   label: string;
-  color: string;
-}
+  color: string;};
 
 @Component({
   standalone: true,

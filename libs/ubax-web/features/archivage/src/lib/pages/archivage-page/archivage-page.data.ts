@@ -15,36 +15,31 @@ export type ArchivageFieldId =
 
 export type ArchivageCellTone = 'success' | 'warning' | 'danger';
 
-export interface ArchivageFilterField {
+export type ArchivageFilterField = {
   readonly id: ArchivageFieldId;
   readonly label: string;
   readonly kind: 'text' | 'date' | 'select';
-  readonly options?: readonly string[];
-}
+  readonly options?: readonly string[];};
 
-export interface ArchivageTextCell {
+export type ArchivageTextCell = {
   readonly kind: 'text';
   readonly value: string;
-  readonly emphasis?: boolean;
-}
+  readonly emphasis?: boolean;};
 
-export interface ArchivageAvatarCell {
+export type ArchivageAvatarCell = {
   readonly kind: 'avatar';
   readonly imageSrc: string;
-  readonly value: string;
-}
+  readonly value: string;};
 
-export interface ArchivageBadgeCell {
+export type ArchivageBadgeCell = {
   readonly kind: 'badge';
   readonly label: string;
-  readonly tone: ArchivageCellTone;
-}
+  readonly tone: ArchivageCellTone;};
 
-export interface ArchivageActionsCell {
+export type ArchivageActionsCell = {
   readonly kind: 'actions';
   readonly primaryLabel: string;
-  readonly secondaryLabel: string;
-}
+  readonly secondaryLabel: string;};
 
 export type ArchivageCell =
   | ArchivageTextCell
@@ -52,7 +47,7 @@ export type ArchivageCell =
   | ArchivageBadgeCell
   | ArchivageActionsCell;
 
-export interface ArchivageRow {
+export type ArchivageRow = {
   readonly id: string;
   readonly searchIndex: string;
   readonly startDate: string;
@@ -60,18 +55,16 @@ export interface ArchivageRow {
   readonly owner?: string;
   readonly archivedBy?: string;
   readonly type?: string;
-  readonly cells: readonly ArchivageCell[];
-}
+  readonly cells: readonly ArchivageCell[];};
 
-export interface ArchivageTabDefinition {
+export type ArchivageTabDefinition = {
   readonly id: ArchivageTabId;
   readonly label: string;
   readonly title: string;
   readonly filterVariant: 'pill' | 'advanced';
   readonly columns: readonly string[];
   readonly filterFields: readonly ArchivageFilterField[];
-  readonly rows: readonly ArchivageRow[];
-}
+  readonly rows: readonly ArchivageRow[];};
 
 const ASSET_ROOT = '/archivages/commercial';
 const ICON_ROOT = `${ASSET_ROOT}/icons`;

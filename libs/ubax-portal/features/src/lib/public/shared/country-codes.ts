@@ -1,9 +1,8 @@
-export interface CountryCode {
+export type CountryCode = {
   name: string;
   iso2: string;
   dialCode: string;
-  flagUrl: string;
-}
+  flagUrl: string;};
 
 const createFlagUrl = (iso2: string) =>
   `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`;

@@ -23,12 +23,20 @@ import {
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, map, pipe, tap } from 'rxjs';
 
-type HotelTeamMember = AdminUserResponse & {
-  active?: boolean;
-  roles?: Array<string>;
+const readMemberActive = (member: AdminUserResponse): boolean =>
+  Boolean((member as { active?: unknown }).active);
+
+const readMemberRoles = (member: AdminUserResponse): string[] => {
+  const roles = (member as { roles?: unknown }).roles;
+
+  if (!Array.isArray(roles)) {
+    return [];
+  }
+
+  return roles.filter((role): role is string => typeof role === 'string');
 };
 
-const mapTeamList = (raw: unknown): HotelTeamMember[] => {
+const mapTeamList = (raw: unknown): AdminUserResponse[] => {
   if (Array.isArray(raw)) return raw;
   if (raw && typeof raw === 'object') {
     const record = raw as { content?: unknown; data?: unknown };
@@ -70,12 +78,12 @@ export const HotelStore = signalStore(
     filterRole: null as string | null,
   }),
   withComputed(({ entities, filterRole }) => ({
-    membresActifs: computed(() => entities().filter((m) => Boolean(m.active))),
+    membresActifs: computed(() => entities().filter(readMemberActive)),
     membresFiltres: computed(() => {
       const role = filterRole();
       if (!role) return entities();
-      return entities().filter(
-        (m) => Array.isArray(m.roles) && m.roles.includes(role),
+      return entities().filter((member) =>
+        readMemberRoles(member).includes(role),
       );
     }),
     totalMembres: computed(() => entities().length),
@@ -95,13 +103,13 @@ export const HotelStore = signalStore(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap((body: AddTeamMemberRequest) =>
             addMember(http, apiConfig.rootUrl, { body }).pipe(
-              map((r) => r.body as HotelTeamMember),
+              map((r) => r.body as AdminUserResponse),
               tapResponse({
-                next: (membre: HotelTeamMember) =>
+                next: (membre: AdminUserResponse) =>
                   patchState(
                     store,
                     addEntity(membre, {
-                      selectId: (m: HotelTeamMember) =>
+                      selectId: (m: AdminUserResponse) =>
                         m.userId ?? m.keycloakId ?? m.email ?? '',
                     }),
                     { saving: false },

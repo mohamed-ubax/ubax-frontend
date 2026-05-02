@@ -25,12 +25,11 @@ import {
 
 const initialToken = readStoredAuthToken();
 
-interface AuthState {
+type AuthState = {
   user: User | null;
   token: string | null;
   loading: boolean;
-  error: string | null;
-}
+  error: string | null;};
 
 const initialState: AuthState = {
   user: deriveUserFromAuthToken(initialToken),

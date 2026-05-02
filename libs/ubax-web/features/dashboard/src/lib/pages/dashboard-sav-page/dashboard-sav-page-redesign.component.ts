@@ -28,19 +28,17 @@ type DashboardSavTicketPriorityFilter = 'all' | DashboardSavPriorityTone;
 type DashboardSavInterventionPeriod = 'current-month' | 'quarter' | 'year';
 type DashboardSavStarTone = 'full' | 'half';
 
-interface DashboardSavSelectOption<TValue> {
+type DashboardSavSelectOption<TValue> = {
   readonly label: string;
-  readonly value: TValue;
-}
+  readonly value: TValue;};
 
-interface DashboardSavTicketFilterState {
+type DashboardSavTicketFilterState = {
   readonly status: DashboardSavTicketStatusFilter;
   readonly priority: DashboardSavTicketPriorityFilter;
   readonly issue: string;
-  readonly createdAt: Date | null;
-}
+  readonly createdAt: Date | null;};
 
-interface DashboardSavTicket {
+type DashboardSavTicket = {
   readonly id: string;
   readonly client: string;
   readonly avatar: string;
@@ -52,19 +50,17 @@ interface DashboardSavTicket {
   readonly createdAtLabel: string;
   readonly createdAtDate: Date;
   readonly status: string;
-  readonly statusTone: DashboardSavStatusTone;
-}
+  readonly statusTone: DashboardSavStatusTone;};
 
-interface DashboardSavSummaryMetric {
+type DashboardSavSummaryMetric = {
   readonly label: string;
   readonly value: number;
   readonly background: string;
   readonly accent: string;
   readonly orbSrc: string;
-  readonly iconSrc: string;
-}
+  readonly iconSrc: string;};
 
-interface DashboardSavNotificationItem {
+type DashboardSavNotificationItem = {
   readonly id: string;
   readonly title: string;
   readonly property: string;
@@ -74,16 +70,14 @@ interface DashboardSavNotificationItem {
   readonly tone: DashboardSavNotificationTone;
   readonly iconBackground: string;
   readonly iconSrc: string;
-  readonly accent: string;
-}
+  readonly accent: string;};
 
-interface DashboardSavInterventionSnapshot {
+type DashboardSavInterventionSnapshot = {
   readonly pending: number;
   readonly progress: number;
-  readonly completed: number;
-}
+  readonly completed: number;};
 
-interface DashboardSavTechnician {
+type DashboardSavTechnician = {
   readonly id: string;
   readonly name: string;
   readonly initials: string;
@@ -92,10 +86,9 @@ interface DashboardSavTechnician {
   readonly tickets: number;
   readonly phone: string;
   readonly color: string;
-  readonly image: string;
-}
+  readonly image: string;};
 
-interface DashboardSavTechIntervention {
+type DashboardSavTechIntervention = {
   readonly id: string;
   readonly client: string;
   readonly avatar: string;
@@ -103,31 +96,25 @@ interface DashboardSavTechIntervention {
   readonly city: string;
   readonly issue: string;
   readonly status: string;
-  readonly date: string;
-}
+  readonly date: string;};
 
-interface DashboardSavTechnicianDetail {
+type DashboardSavTechnicianDetail = {
   readonly joinedOn: string;
   readonly contractStatus: string;
   readonly employeeCode: string;
   readonly resolvedTickets: string;
   readonly totalPaid: string;
-  readonly history: readonly DashboardSavTechIntervention[];
-}
+  readonly history: readonly DashboardSavTechIntervention[];};
 
-interface DashboardSavSelectedTechnicianDetail
-  extends DashboardSavTechnician,
-    DashboardSavTechnicianDetail {
-  readonly profileImage: string;
-}
+type DashboardSavSelectedTechnicianDetail = DashboardSavTechnician & DashboardSavTechnicianDetail & {
+  readonly profileImage: string;};
 
-interface DashboardSavCountryCodeOption {
+type DashboardSavCountryCodeOption = {
   readonly iso: string;
   readonly dialCode: string;
-  readonly display: string;
-}
+  readonly display: string;};
 
-interface DashboardSavScrollLockState {
+type DashboardSavScrollLockState = {
   readonly htmlOverflow: string;
   readonly bodyOverflow: string;
   readonly bodyTouchAction: string;
@@ -135,8 +122,7 @@ interface DashboardSavScrollLockState {
   readonly bodyTop: string;
   readonly bodyWidth: string;
   readonly bodyHadOverlayClass: boolean;
-  readonly scrollY: number;
-}
+  readonly scrollY: number;};
 
 const SHARED_ASSET_ROOT = '/shared/demandes';
 const DASHBOARD_SAV_ASSET_ROOT = '/dashboard-sav';

@@ -3,7 +3,7 @@ export type ReservationTone = 'success' | 'warning' | 'danger';
 export type ReservationEventTone = 'green' | 'orange' | 'blue';
 export type ReservationKpiTone = 'new' | 'arrival' | 'departure' | 'revenue';
 
-export interface ReservationKpiCard {
+export type ReservationKpiCard = {
   readonly tone: ReservationKpiTone;
   readonly label: string;
   readonly value: string;
@@ -11,17 +11,15 @@ export interface ReservationKpiCard {
   readonly caption: string;
   readonly icon: string;
   readonly trendIcon: string;
-  readonly compactValue?: boolean;
-}
+  readonly compactValue?: boolean;};
 
-export interface ReservationAvailabilityMetric {
+export type ReservationAvailabilityMetric = {
   readonly label: string;
   readonly value: number;
   readonly tone: 'green' | 'orange' | 'blue' | 'red';
-  readonly share: number;
-}
+  readonly share: number;};
 
-export interface ReservationPropertyCard {
+export type ReservationPropertyCard = {
   readonly id: string;
   readonly badge: string;
   readonly title: string;
@@ -30,10 +28,9 @@ export interface ReservationPropertyCard {
   readonly tenantRole: string;
   readonly price: string;
   readonly image: string;
-  readonly avatar: string;
-}
+  readonly avatar: string;};
 
-export interface CommercialOverviewSnapshot {
+export type CommercialOverviewSnapshot = {
   readonly month: Date;
   readonly newReservations: number;
   readonly arrivals: number;
@@ -43,24 +40,21 @@ export interface CommercialOverviewSnapshot {
   readonly arrivalsDelta: string;
   readonly departuresDelta: string;
   readonly totalRevenueDelta: string;
-  readonly availability: readonly ReservationAvailabilityMetric[];
-}
+  readonly availability: readonly ReservationAvailabilityMetric[];};
 
-export interface CommercialRevenuePoint {
+export type CommercialRevenuePoint = {
   readonly label: string;
   readonly month: Date;
-  readonly value: number;
-}
+  readonly value: number;};
 
-export interface ReservationPricing {
+export type ReservationPricing = {
   readonly nightlyAmount: string;
   readonly nights: number;
   readonly subtotal: string;
   readonly cityTax: string;
-  readonly total: string;
-}
+  readonly total: string;};
 
-export interface CommercialReservation {
+export type CommercialReservation = {
   readonly id: string;
   readonly code: string;
   readonly guest: string;
@@ -90,10 +84,9 @@ export interface CommercialReservation {
   readonly paymentLogo: string;
   readonly amenities: readonly string[];
   readonly pricing: ReservationPricing;
-  readonly searchIndex: string;
-}
+  readonly searchIndex: string;};
 
-interface CommercialReservationSeed {
+type CommercialReservationSeed = {
   readonly id: string;
   readonly code: string;
   readonly guest: string;
@@ -121,8 +114,7 @@ interface CommercialReservationSeed {
   readonly profileAvatar?: string;
   readonly profileCover?: string;
   readonly amenities?: readonly string[];
-  readonly pricing?: ReservationPricing;
-}
+  readonly pricing?: ReservationPricing;};
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const MONTHS = [

@@ -3,40 +3,34 @@ import { RouterLink } from '@angular/router';
 
 type CalendarView = 'jour' | 'semaine' | 'mois' | 'annee';
 
-interface Document {
-  nom: string;
-}
+type Document = {
+  nom: string;};
 
-interface SalaryPayment {
+type SalaryPayment = {
   label: string;
   date: string;
   mois: string;
-  montant: string;
-}
+  montant: string;};
 
-interface CalendarDay {
+type CalendarDay = {
   date: number;
   isGhost: boolean; // days from prev/next month
-  events: CalendarEvent[];
-}
+  events: CalendarEvent[];};
 
-interface CalendarEvent {
+type CalendarEvent = {
   type: 'shift' | 'conge';
-  label: string;
-}
+  label: string;};
 
-interface EmployePageAction {
+type EmployePageAction = {
   readonly label: string;
   readonly iconSrc: string;
-  readonly variant: 'edit' | 'archive';
-}
+  readonly variant: 'edit' | 'archive';};
 
-interface EmployeProfileContact {
+type EmployeProfileContact = {
   readonly label: string;
   readonly value: string;
   readonly iconSrc: string;
-  readonly hasFramedIcon?: boolean;
-}
+  readonly hasFramedIcon?: boolean;};
 
 @Component({
   selector: 'ubax-employe-detail-page',

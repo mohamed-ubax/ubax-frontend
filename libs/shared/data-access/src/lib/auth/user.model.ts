@@ -6,11 +6,11 @@ export enum Role {
   HOTEL = 'HOTEL',
 }
 
-export interface User {
+export type User = {
   id: string;
   nom: string;
   prenom: string;
   email: string;
   avatar?: string;
   role: Role;
-}
+};

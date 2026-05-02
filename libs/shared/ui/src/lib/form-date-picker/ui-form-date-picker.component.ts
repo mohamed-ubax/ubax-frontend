@@ -16,12 +16,11 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 
-interface CalendarDay {
+type CalendarDay = {
   readonly date: Date;
   readonly label: string;
   readonly muted: boolean;
-  readonly active: boolean;
-}
+  readonly active: boolean;};
 
 const WEEKDAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'] as const;
 

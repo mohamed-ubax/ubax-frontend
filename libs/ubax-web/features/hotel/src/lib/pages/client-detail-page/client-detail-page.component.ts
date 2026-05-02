@@ -24,7 +24,7 @@ type ReservationHistorySortKey =
   | 'status';
 type ReservationHistorySortDirection = 'asc' | 'desc';
 
-interface ReservationHistoryEntry {
+type ReservationHistoryEntry = {
   readonly id: string;
   readonly spaceId: string;
   readonly thumbnail: string;
@@ -36,8 +36,7 @@ interface ReservationHistoryEntry {
   readonly amountValue: number;
   readonly createdAt: number;
   readonly status: string;
-  readonly tone: ReservationHistoryTone;
-}
+  readonly tone: ReservationHistoryTone;};
 
 const DEFAULT_SPACE_ID = '1';
 

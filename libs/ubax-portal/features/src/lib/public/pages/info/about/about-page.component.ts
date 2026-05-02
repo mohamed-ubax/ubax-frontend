@@ -11,17 +11,15 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AboutCtaSectionComponent } from '../../../shared/about-cta-section.component';
 
-interface AboutPoint {
+type AboutPoint = {
   readonly emoji: string;
   readonly title: string;
-  readonly description: string;
-}
+  readonly description: string;};
 
-interface AboutPlatformCard {
+type AboutPlatformCard = {
   readonly title: string;
   readonly description: string;
-  readonly emoji: string;
-}
+  readonly emoji: string;};
 
 @Component({
   selector: 'ubax-about-page',

@@ -26,20 +26,18 @@ type DashboardCommercialProspectCode =
   | 'dim';
 type DashboardCommercialStateTone = 'orange' | 'blue' | 'red' | 'green';
 
-interface DashboardCommercialKpiCard {
+type DashboardCommercialKpiCard = {
   label: string;
   value: string;
   iconSrc: string;
   iconAlt: string;
-  variant: 'properties' | 'prospects' | 'appointments' | 'closed';
-}
+  variant: 'properties' | 'prospects' | 'appointments' | 'closed';};
 
-interface DashboardCommercialPlanningTimeLabel {
+type DashboardCommercialPlanningTimeLabel = {
   label: string;
-  hour: number;
-}
+  hour: number;};
 
-interface DashboardCommercialPlanningEventRecord {
+type DashboardCommercialPlanningEventRecord = {
   id: string;
   customer: string;
   property: string;
@@ -48,10 +46,9 @@ interface DashboardCommercialPlanningEventRecord {
   durationHours: 1 | 2 | 3;
   avatarFile: string;
   status: DashboardCommercialPlanningStatus;
-  route: string;
-}
+  route: string;};
 
-interface DashboardCommercialPlanningEventView {
+type DashboardCommercialPlanningEventView = {
   id: string;
   customer: string;
   property: string;
@@ -62,44 +59,38 @@ interface DashboardCommercialPlanningEventView {
   status: DashboardCommercialPlanningStatus;
   startClass: string;
   spanClass: string;
-  route: string;
-}
+  route: string;};
 
-interface DashboardCommercialPlanningDay {
+type DashboardCommercialPlanningDay = {
   key: string;
   label: string;
   date: string;
-  events: readonly DashboardCommercialPlanningEventView[];
-}
+  events: readonly DashboardCommercialPlanningEventView[];};
 
-interface DashboardCommercialActivityOption {
+type DashboardCommercialActivityOption = {
   label: string;
-  value: DashboardCommercialActivityPeriod;
-}
+  value: DashboardCommercialActivityPeriod;};
 
-interface DashboardCommercialProspectPoint {
+type DashboardCommercialProspectPoint = {
   code: DashboardCommercialProspectCode;
   label: string;
   value: number;
-  highlighted: boolean;
-}
+  highlighted: boolean;};
 
-interface DashboardCommercialStateItem {
+type DashboardCommercialStateItem = {
   label: string;
   value: number;
-  tone: DashboardCommercialStateTone;
-}
+  tone: DashboardCommercialStateTone;};
 
-interface DashboardCommercialActivitySnapshot {
+type DashboardCommercialActivitySnapshot = {
   totalProperties: number;
   newProspects: number;
   closedDeals: number;
   highlightedProspectCode: DashboardCommercialProspectCode;
   prospects: readonly Omit<DashboardCommercialProspectPoint, 'highlighted'>[];
-  stateItems: readonly DashboardCommercialStateItem[];
-}
+  stateItems: readonly DashboardCommercialStateItem[];};
 
-interface DashboardCommercialPropertyCard {
+type DashboardCommercialPropertyCard = {
   id: string;
   imageSrc: string;
   ownerAvatarSrc: string;
@@ -109,8 +100,7 @@ interface DashboardCommercialPropertyCard {
   role: string;
   price: string;
   badge: string;
-  route: string;
-}
+  route: string;};
 
 type DashboardCommercialPlanningRecordInput = Omit<
   DashboardCommercialPlanningEventRecord,

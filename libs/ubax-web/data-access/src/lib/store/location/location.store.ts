@@ -69,7 +69,7 @@ const mapPaginated = (raw: unknown): Tenant[] => {
  */
 export const LocationStore = signalStore(
   { providedIn: 'root' },
-  withApiResource({
+  withApiResource<Tenant, typeof list4, typeof getById2>({
     list: list4,
     getById: getById2,
     idSelector: (tenant) => tenant.id,

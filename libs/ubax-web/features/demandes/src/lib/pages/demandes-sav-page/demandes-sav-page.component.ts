@@ -16,37 +16,33 @@ type SavStatusTone = 'open' | 'progress' | 'success';
 type SavTicketStatusFilter = 'all' | SavStatusTone;
 type SavTicketPriorityFilter = 'all' | SavPriorityTone;
 
-interface SavSummaryMetric {
+type SavSummaryMetric = {
   readonly label: string;
   readonly value: number;
   readonly accent: string;
   readonly background: string;
-  readonly icon: string;
-}
+  readonly icon: string;};
 
-interface SavIssueCard {
+type SavIssueCard = {
   readonly id: string;
   readonly title: string;
   readonly client: string;
   readonly location: string;
   readonly phone: string;
   readonly image: string;
-  readonly createdAt: Date;
-}
+  readonly createdAt: Date;};
 
-interface SavSelectOption<TValue> {
+type SavSelectOption<TValue> = {
   readonly label: string;
-  readonly value: TValue;
-}
+  readonly value: TValue;};
 
-interface SavTicketFilterState {
+type SavTicketFilterState = {
   readonly status: SavTicketStatusFilter;
   readonly priority: SavTicketPriorityFilter;
   readonly issue: string;
-  readonly createdAt: Date | null;
-}
+  readonly createdAt: Date | null;};
 
-interface SavTicketRow {
+type SavTicketRow = {
   readonly id: string;
   readonly client: string;
   readonly avatar: string;
@@ -58,16 +54,14 @@ interface SavTicketRow {
   readonly createdAt: string;
   readonly createdAtDate: Date;
   readonly status: string;
-  readonly statusTone: SavStatusTone;
-}
+  readonly statusTone: SavStatusTone;};
 
-interface SavNotificationItem {
+type SavNotificationItem = {
   readonly id: string;
   readonly title: string;
   readonly message: string;
   readonly time: string;
-  readonly createdAt: Date;
-}
+  readonly createdAt: Date;};
 
 const SHARED_ASSET_ROOT = '/shared/demandes';
 const SAV_ASSET_ROOT = '/demandes/sav';

@@ -7,14 +7,13 @@ import {
   update1,
 } from '@ubax-workspace/shared-api-types';
 
-export interface CodeListApiConfig {
+export type CodeListApiConfig = {
   list: typeof findAll;
   getById: typeof findById;
   create: typeof create5;
   update: typeof update1;
   findAllByType: typeof findAllByType;
-  findAllByTypeAdmin: typeof findAllByTypeAdmin;
-}
+  findAllByTypeAdmin: typeof findAllByTypeAdmin;};
 
 export const codeListApiConfig = {
   list: findAll,

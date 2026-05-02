@@ -18,14 +18,13 @@ import {
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-interface CandidatureForm {
+type CandidatureForm = {
   nom: string;
   email: string;
   telephone: string;
   metier: string;
   niveauExperience: string;
-  lettreMotivation: string;
-}
+  lettreMotivation: string;};
 
 // Minimal job title map — mirrors the data in carrieres-detail
 const JOB_TITLES: Record<number, string> = {

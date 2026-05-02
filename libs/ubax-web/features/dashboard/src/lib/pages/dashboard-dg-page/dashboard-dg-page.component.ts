@@ -16,15 +16,14 @@ import {
   UbaxPaginatorComponent,
 } from '@ubax-workspace/shared-ui';
 
-interface DashboardKpiCard {
+type DashboardKpiCard = {
   readonly label: string;
   readonly value: string;
   readonly trend?: string;
   readonly tone: 'all' | 'active' | 'rented' | 'sold';
-  readonly iconSrc: string;
-}
+  readonly iconSrc: string;};
 
-interface DashboardPropertyRow {
+type DashboardPropertyRow = {
   readonly uid: string;
   readonly id: string;
   readonly name: string;
@@ -33,16 +32,14 @@ interface DashboardPropertyRow {
   readonly price: string;
   readonly tenant: string;
   readonly status: string;
-  readonly avatar: string;
-}
+  readonly avatar: string;};
 
-interface DashboardDonutLegendItem {
+type DashboardDonutLegendItem = {
   readonly count: number;
   readonly label: string;
-  readonly tone: 'occupied' | 'available' | 'reserved' | 'maintenance';
-}
+  readonly tone: 'occupied' | 'available' | 'reserved' | 'maintenance';};
 
-interface DashboardRevenueBar {
+type DashboardRevenueBar = {
   readonly label: string;
   readonly slug:
     | 'jan'
@@ -58,18 +55,16 @@ interface DashboardRevenueBar {
     | 'nov'
     | 'dec';
   readonly value: number;
-  readonly highlighted?: boolean;
-}
+  readonly highlighted?: boolean;};
 
-interface DashboardTransaction {
+type DashboardTransaction = {
   readonly uid: string;
   readonly title: string;
   readonly date: string;
   readonly customer: string;
   readonly amount: string;
   readonly month: string;
-  readonly logo: string;
-}
+  readonly logo: string;};
 
 const PAGE_SIZE = 8;
 const REVENUE_MAX = 10_000_000;

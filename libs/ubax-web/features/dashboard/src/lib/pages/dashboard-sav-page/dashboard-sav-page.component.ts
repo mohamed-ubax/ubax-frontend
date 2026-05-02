@@ -12,7 +12,7 @@ import {
   LazyChartComponent,
 } from '@ubax-workspace/shared-ui';
 
-export interface Technician {
+export type Technician = {
   id: string;
   name: string;
   initials: string;
@@ -20,10 +20,9 @@ export interface Technician {
   rating: number;
   tickets: number;
   phone: string;
-  color: string;
-}
+  color: string;};
 
-export interface Ticket {
+export type Ticket = {
   id: string;
   client: string;
   initials: string;
@@ -31,8 +30,7 @@ export interface Ticket {
   probleme: string;
   priorite: 'Urgent' | 'Normal';
   date: string;
-  statut: 'Résolu' | 'En cours' | 'En attente';
-}
+  statut: 'Résolu' | 'En cours' | 'En attente';};
 
 @Component({
   selector: 'ubax-dashboard-sav-page',

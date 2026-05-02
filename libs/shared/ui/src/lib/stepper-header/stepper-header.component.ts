@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-export interface StepperStep {
-  label: string;
-}
+export type StepperStep = {
+  label: string;};
 
 @Component({
   selector: 'ubax-stepper-header',

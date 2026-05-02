@@ -2,37 +2,33 @@ export type FinanceTransactionType = 'loyer' | 'depense';
 export type FinanceTransactionStatus = 'payee' | 'en-attente';
 export type FinanceTransactionFilterValue = 'all' | FinanceTransactionType;
 
-export interface FinanceSummaryCard {
+export type FinanceSummaryCard = {
   readonly label: string;
   readonly amount: string;
   readonly tone: 'success' | 'info' | 'warning' | 'balance';
   readonly icon?: string;
-  readonly iconAlt?: string;
-}
+  readonly iconAlt?: string;};
 
-export interface FinanceSelectOption<T extends string = string> {
+export type FinanceSelectOption<T extends string = string> = {
   readonly value: T;
-  readonly label: string;
-}
+  readonly label: string;};
 
-export interface FinanceTransactionRow {
+export type FinanceTransactionRow = {
   readonly date: string;
   readonly reference: string;
   readonly type: FinanceTransactionType;
   readonly property: string;
   readonly tenant: string;
   readonly amount: string;
-  readonly status: FinanceTransactionStatus;
-}
+  readonly status: FinanceTransactionStatus;};
 
-export interface FinanceOverdueSidebarItem {
+export type FinanceOverdueSidebarItem = {
   readonly name: string;
   readonly property: string;
   readonly amount: string;
-  readonly avatar: string;
-}
+  readonly avatar: string;};
 
-export interface FinanceOverdueRow {
+export type FinanceOverdueRow = {
   readonly id: string;
   readonly tenant: string;
   readonly property: string;
@@ -40,24 +36,21 @@ export interface FinanceOverdueRow {
   readonly dueDate: string;
   readonly delay: string;
   readonly penalty: string;
-  readonly period: string;
-}
+  readonly period: string;};
 
-export interface FinanceExpenseLegendItem {
+export type FinanceExpenseLegendItem = {
   readonly label: string;
   readonly ratio: string;
   readonly value: number;
-  readonly tone: 'blue' | 'yellow' | 'green' | 'purple' | 'orange';
-}
+  readonly tone: 'blue' | 'yellow' | 'green' | 'purple' | 'orange';};
 
-export interface FinanceRevenuePoint {
+export type FinanceRevenuePoint = {
   readonly label: string;
   readonly amount: number;
   readonly amountLabel: string;
-  readonly highlighted?: boolean;
-}
+  readonly highlighted?: boolean;};
 
-export interface FinanceTenantProfile {
+export type FinanceTenantProfile = {
   readonly name: string;
   readonly role: string;
   readonly avatar: string;
@@ -69,30 +62,25 @@ export interface FinanceTenantProfile {
   readonly propertyStatus: string;
   readonly paymentDuration: string;
   readonly rating: string;
-  readonly ratingCount: string;
-}
+  readonly ratingCount: string;};
 
-export interface FinanceTenantPaymentState {
+export type FinanceTenantPaymentState = {
   readonly unpaid: string;
   readonly remaining: string;
-  readonly paid: string;
-}
+  readonly paid: string;};
 
-export interface FinanceTenantInfoCard {
-  readonly items: readonly { icon: string; text: string }[];
-}
+export type FinanceTenantInfoCard = {
+  readonly items: readonly { icon: string; text: string }[];};
 
-export interface FinanceTenantDocument {
-  readonly name: string;
-}
+export type FinanceTenantDocument = {
+  readonly name: string;};
 
-export interface FinanceTenantPayment {
+export type FinanceTenantPayment = {
   readonly logo: string;
   readonly title: string;
   readonly date: string;
   readonly amount: string;
-  readonly period: string;
-}
+  readonly period: string;};
 
 export const FINANCE_ASSETS = {
   chartGrid: 'finances/shared/chart-grid.webp',

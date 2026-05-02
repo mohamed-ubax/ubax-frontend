@@ -4,29 +4,15 @@ import {
   ApiConfiguration,
   login as loginFn,
   logout as logoutFn,
+  type LoginRequest,
+  type LoginResponse,
   type LogoutRequest,
 } from '@ubax-workspace/shared-api-types';
 import { map, Observable, tap } from 'rxjs';
 import { User } from './user.model';
-import {
-  persistAuthSession,
-  readStoredRefreshToken,
-} from './auth-session';
+import { persistAuthSession, readStoredRefreshToken } from './auth-session';
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  refresh_expires_in: number;
-  token_type: string;
-  session_state: string;
-  scope: string;
-}
+export type { LoginRequest, LoginResponse };
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
