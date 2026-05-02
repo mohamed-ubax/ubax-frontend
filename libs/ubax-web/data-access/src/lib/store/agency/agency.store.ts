@@ -1,5 +1,5 @@
-import { computed, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { computed, inject } from '@angular/core';
 import { tapResponse } from '@ngrx/operators';
 import {
   patchState,
@@ -12,14 +12,14 @@ import { addEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
-  addMember,
+  addMember1,
   AddTeamMemberRequest,
   AdminUserResponse,
   ApiConfiguration,
-  assignSubRoles,
+  assignSubRoles1,
   AssignSubRolesRequest,
-  getTeamMembers,
-  revokeSubRole,
+  getTeamMembers1,
+  revokeSubRole1,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, map, pipe, tap } from 'rxjs';
 import {
@@ -29,23 +29,10 @@ import {
   teamMemberIdSelector,
 } from '../team/team-member.helpers';
 
-/**
- * HotelStore — gestion de l'équipe hôtel.
- * Branché sur /v1/hotel/team (AdminUserResponse).
- *
- * Méthodes disponibles (héritées de withApiResource) :
- *   store.load()      — GET /v1/hotel/team
- *   store.select(id)  — sélection locale
- *
- * Méthodes spécifiques :
- *   store.inviterMembre(body)                     — POST /v1/hotel/team
- *   store.assignerSousRoles({ userId, body })     — POST /v1/hotel/team/:userId/sub-roles
- *   store.revoquerSousRole({ userId, role })      — DELETE /v1/hotel/team/:userId/sub-roles/:role
- */
-export const HotelStore = signalStore(
+export const AgencyStore = signalStore(
   { providedIn: 'root' },
   withApiResource({
-    list: getTeamMembers,
+    list: getTeamMembers1,
     mapList: mapTeamList,
     idSelector: teamMemberIdSelector,
   }),
@@ -77,17 +64,17 @@ export const HotelStore = signalStore(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap((body: AddTeamMemberRequest) =>
-            addMember(http, apiConfig.rootUrl, { body }).pipe(
+            addMember1(http, apiConfig.rootUrl, { body }).pipe(
               map((r) => r.body as AdminUserResponse),
               tapResponse({
                 next: (membre: AdminUserResponse) =>
-                    patchState(
-                      store,
-                      addEntity(membre, {
-                        selectId: teamMemberIdSelector,
-                      }),
-                      { saving: false },
-                    ),
+                  patchState(
+                    store,
+                    addEntity(membre, {
+                      selectId: teamMemberIdSelector,
+                    }),
+                    { saving: false },
+                  ),
                 error: (err: HttpErrorResponse) =>
                   patchState(store, { saving: false, error: err.message }),
               }),
@@ -103,7 +90,7 @@ export const HotelStore = signalStore(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap(({ userId, body }) =>
-            assignSubRoles(http, apiConfig.rootUrl, {
+            assignSubRoles1(http, apiConfig.rootUrl, {
               userId,
               body: body.roles ?? [],
             }).pipe(
@@ -120,7 +107,7 @@ export const HotelStore = signalStore(
       revoquerSousRole: rxMethod<{ userId: string; role: string }>(
         pipe(
           exhaustMap(({ userId, role }) =>
-            revokeSubRole(http, apiConfig.rootUrl, { userId, role }).pipe(
+            revokeSubRole1(http, apiConfig.rootUrl, { userId, role }).pipe(
               tapResponse({
                 next: () => undefined,
                 error: (err: HttpErrorResponse) =>

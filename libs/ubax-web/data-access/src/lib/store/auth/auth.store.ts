@@ -19,12 +19,16 @@ import {
   clearStoredAuthSession,
   deriveUserFromAuthToken,
   persistAuthToken,
+  readUserIdCandidatesFromAuthToken,
   readStoredRefreshToken,
   readStoredAuthToken,
   redirectBrowserToPortalLogin,
   type User,
 } from '@ubax-workspace/shared-data-access';
-import { pickPrimarySubRole } from '../../models/role-access.model';
+import {
+  pickPrimarySubRole,
+  resolveWebHomePath,
+} from '../../models/role-access.model';
 
 const initialToken = readStoredAuthToken();
 
@@ -49,6 +53,24 @@ function needsSubRoles(mainRole: UbaxRole): boolean {
     mainRole === UbaxRole.ADMIN ||
     mainRole === UbaxRole.SUPER_ADMIN
   );
+}
+
+function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
+  if (!user || user.mainRole !== UbaxRole.PARTNER || user.scope === null) {
+    return;
+  }
+
+  const currentUrl = router.url.split('?')[0].split('#')[0];
+
+  if (currentUrl !== '/' && currentUrl !== '/tableau-de-bord') {
+    return;
+  }
+
+  const homePath = resolveWebHomePath(user);
+
+  if (homePath !== currentUrl) {
+    void router.navigateByUrl(homePath, { replaceUrl: true });
+  }
 }
 
 export const AuthStore = signalStore(
@@ -123,7 +145,11 @@ export const AuthStore = signalStore(
             }
 
             return authSvc
-              .getMySubRoles(currentUser.mainRole, currentUser.id)
+              .getMySubRoles(
+                currentUser.mainRole,
+                [currentUser.id, ...readUserIdCandidatesFromAuthToken(store.token())],
+                currentUser.email,
+              )
               .pipe(
                 tapResponse({
                   next: ({ scope, subRoles }) => {
@@ -138,9 +164,12 @@ export const AuthStore = signalStore(
                         ? UbaxSubRole.DIRECTEUR_GENERAL
                         : null);
 
+                    const nextUser = { ...latestUser, subRole, scope };
+
                     patchState(store, {
-                      user: { ...latestUser, subRole, scope },
+                      user: nextUser,
                     });
+                    maybeRedirectToResolvedHome(router, nextUser);
                   },
                   error: () => {
                     // Non-fatal : sub-roles indisponibles, on continue sans eux
@@ -173,6 +202,8 @@ export const AuthStore = signalStore(
               if (needsSubRoles(derivedUser.mainRole)) {
                 store.loadSubRoles();
               }
+
+              maybeRedirectToResolvedHome(router, derivedUser);
 
               return;
             }

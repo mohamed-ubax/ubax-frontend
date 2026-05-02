@@ -2,7 +2,7 @@ import '@angular/compiler';
 import { Buffer } from 'node:buffer';
 import { Injector, ProviderToken, Type } from '@angular/core';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import {
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
   AUTH_TOKEN_STORAGE_KEY,
@@ -80,6 +80,8 @@ describe('AuthStore', () => {
   };
   let router: {
     navigate: ReturnType<typeof vi.fn>;
+    navigateByUrl: ReturnType<typeof vi.fn>;
+    url: string;
   };
 
   beforeEach(() => {
@@ -104,6 +106,8 @@ describe('AuthStore', () => {
     };
     router = {
       navigate: vi.fn().mockResolvedValue(true),
+      navigateByUrl: vi.fn().mockResolvedValue(true),
+      url: '/tableau-de-bord',
     };
 
     const injector = Injector.create({
@@ -168,7 +172,8 @@ describe('AuthStore', () => {
 
     expect(authService.getMySubRoles).toHaveBeenCalledWith(
       UbaxRole.PARTNER,
-      'partner-1',
+      ['partner-1'],
+      'awa@ubax.com',
     );
     expect(store.user()).toEqual({
       id: 'partner-1',
@@ -182,6 +187,9 @@ describe('AuthStore', () => {
     });
     expect(store.loading()).toBe(false);
     expect(store.error()).toBeNull();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/equipe', {
+      replaceUrl: true,
+    });
   });
 
   it('falls back to Directeur Général when admin sub-roles are empty', () => {
@@ -233,6 +241,60 @@ describe('AuthStore', () => {
     expect(store.subRole()).toBe(UbaxSubRole.DIRECTEUR_AGENCE);
     expect(store.scope()).toBe('AGENCE');
     expect(store.isPartner()).toBe(true);
+  });
+
+  it('keeps the JWT-inferred agence profile when sub-roles loading fails', () => {
+    const token = createJwt({
+      sub: 'partner-2',
+      email: 'agency@ubax.com',
+      given_name: 'Moussa',
+      family_name: 'Ndiaye',
+      realm_access: {
+        roles: ['UBAX_PARTNER', 'DIRECTEUR_AGENCE'],
+      },
+    });
+
+    authService.getMySubRoles.mockReturnValue(
+      throwError(() => new Error('sub-roles unavailable')),
+    );
+
+    store.setToken(token);
+    store.loadMe();
+
+    expect(store.user()).toEqual({
+      id: 'partner-2',
+      nom: 'Ndiaye',
+      prenom: 'Moussa',
+      email: 'agency@ubax.com',
+      avatar: undefined,
+      mainRole: UbaxRole.PARTNER,
+      subRole: UbaxSubRole.DIRECTEUR_AGENCE,
+      scope: 'AGENCE',
+    });
+  });
+
+  it('redirects a hotel partner to the hotel home when scope is resolved', () => {
+    const token = createJwt({
+      sub: 'partner-hotel',
+      email: 'hotel@ubax.com',
+      given_name: 'Ina',
+      family_name: 'Ba',
+      roles: ['UBAX_PARTNER'],
+    });
+
+    authService.getMySubRoles.mockReturnValue(
+      of({
+        scope: 'HOTEL',
+        subRoles: [UbaxSubRole.GERANT_HOTEL],
+      }),
+    );
+
+    store.setToken(token);
+    store.loadMe();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/hotel/reservations', {
+      replaceUrl: true,
+    });
   });
 
   it('clears the session and navigates to login when the profile request fails without a valid token fallback', () => {

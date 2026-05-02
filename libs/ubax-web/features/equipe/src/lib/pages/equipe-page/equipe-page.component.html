@@ -1,0 +1,223 @@
+<div class="agency-members-page" data-ubax-motion="page">
+  <header class="agency-members-page__header">
+    <h1 class="agency-members-page__title">Liste des membres</h1>
+
+    <div
+      class="agency-members-page__toolbar"
+      aria-label="Actions de la liste des membres"
+    >
+      <label
+        class="agency-members-page__pill agency-members-page__pill--search"
+        aria-label="Rechercher un membre"
+      >
+        <input
+          type="search"
+          placeholder="Rechercher"
+          [value]="searchValue()"
+          (input)="updateSearch($event)"
+        />
+
+        <span class="agency-members-page__icon-shell" aria-hidden="true">
+          <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M16.0863 16.0925L19.75 19.75M18.5926 9.65625C18.5926 12.0183 17.6527 14.2837 15.9796 15.9539C14.3066 17.6242 12.0374 18.5625 9.67131 18.5625C7.30523 18.5625 5.03606 17.6242 3.36299 15.9539C1.68992 14.2837 0.75 12.0183 0.75 9.65625C0.75 7.29417 1.68992 5.02883 3.36299 3.35858C5.03606 1.68833 7.30523 0.75 9.67131 0.75C12.0374 0.75 14.3066 1.68833 15.9796 3.35858C17.6527 5.02883 18.5926 7.29417 18.5926 9.65625Z"
+              fill="none"
+              stroke="#1c1c1c"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+            />
+          </svg>
+        </span>
+      </label>
+
+      <div class="agency-members-page__filter">
+        <button
+          type="button"
+          class="agency-members-page__pill agency-members-page__pill--filter"
+          [class.is-open]="isRoleMenuOpen()"
+          (click)="toggleRoleMenu($event)"
+        >
+          <span>{{ selectedRoleLabel() }}</span>
+
+          <span class="agency-members-page__chevron" aria-hidden="true">
+            <svg viewBox="0 0 15 8" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                fill="#1c1c1c"
+              />
+            </svg>
+          </span>
+        </button>
+
+        @if (isRoleMenuOpen()) {
+          <div class="agency-members-page__filter-menu">
+            <button
+              type="button"
+              class="agency-members-page__filter-option"
+              [class.is-active]="selectedRoleKey() === null"
+              (click)="selectRole(null)"
+            >
+              Tous les rôles
+            </button>
+
+            @for (option of roleOptions(); track option.key) {
+              <button
+                type="button"
+                class="agency-members-page__filter-option"
+                [class.is-active]="selectedRoleKey() === option.key"
+                (click)="selectRole(option)"
+              >
+                {{ option.label }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <button type="button" class="agency-members-page__action-button">
+        <span class="agency-members-page__action-icon" aria-hidden="true">
+          <svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M13 24.375C6.7275 24.375 1.625 19.2725 1.625 13C1.625 6.7275 6.7275 1.625 13 1.625C19.2725 1.625 24.375 6.7275 24.375 13C24.375 19.2725 19.2725 24.375 13 24.375ZM13 3.25C7.62125 3.25 3.25 7.62125 3.25 13C3.25 18.3787 7.62125 22.75 13 22.75C18.3787 22.75 22.75 18.3787 22.75 13C22.75 7.62125 18.3787 3.25 13 3.25Z"
+              fill="#ffffff"
+            />
+            <path
+              d="M13 18.6875C12.545 18.6875 12.1875 18.33 12.1875 17.875V8.125C12.1875 7.67 12.545 7.3125 13 7.3125C13.455 7.3125 13.8125 7.67 13.8125 8.125V17.875C13.8125 18.33 13.455 18.6875 13 18.6875Z"
+              fill="#ffffff"
+            />
+            <path
+              d="M17.875 13.8125H8.125C7.67 13.8125 7.3125 13.455 7.3125 13C7.3125 12.545 7.67 12.1875 8.125 12.1875H17.875C18.33 12.1875 18.6875 12.545 18.6875 13C18.6875 13.455 18.33 13.8125 17.875 13.8125Z"
+              fill="#ffffff"
+            />
+          </svg>
+        </span>
+        <span>Auto - assignation</span>
+      </button>
+
+      <button type="button" class="agency-members-page__action-button">
+        <span class="agency-members-page__action-icon" aria-hidden="true">
+          <svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M13 24.375C6.7275 24.375 1.625 19.2725 1.625 13C1.625 6.7275 6.7275 1.625 13 1.625C19.2725 1.625 24.375 6.7275 24.375 13C24.375 19.2725 19.2725 24.375 13 24.375ZM13 3.25C7.62125 3.25 3.25 7.62125 3.25 13C3.25 18.3787 7.62125 22.75 13 22.75C18.3787 22.75 22.75 18.3787 22.75 13C22.75 7.62125 18.3787 3.25 13 3.25Z"
+              fill="#ffffff"
+            />
+            <path
+              d="M13 18.6875C12.545 18.6875 12.1875 18.33 12.1875 17.875V8.125C12.1875 7.67 12.545 7.3125 13 7.3125C13.455 7.3125 13.8125 7.67 13.8125 8.125V17.875C13.8125 18.33 13.455 18.6875 13 18.6875Z"
+              fill="#ffffff"
+            />
+            <path
+              d="M17.875 13.8125H8.125C7.67 13.8125 7.3125 13.455 7.3125 13C7.3125 12.545 7.67 12.1875 8.125 12.1875H17.875C18.33 12.1875 18.6875 12.545 18.6875 13C18.6875 13.455 18.33 13.8125 17.875 13.8125Z"
+              fill="#ffffff"
+            />
+          </svg>
+        </span>
+        <span>Ajouter un membre</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="agency-members-page__content">
+    <aside class="agency-members-page__promo-card">
+      <div class="agency-members-page__promo-backdrop" aria-hidden="true">
+        <img [src]="promoBackdropSrc" alt="" />
+      </div>
+
+      <div class="agency-members-page__promo-overlay" aria-hidden="true"></div>
+
+      <div class="agency-members-page__promo-body">
+        <h2 class="agency-members-page__promo-title">
+          Centralisez et contrôlez votre personnel
+        </h2>
+
+        <img
+          class="agency-members-page__promo-image"
+          [src]="promoImageSrc"
+          alt=""
+        />
+      </div>
+    </aside>
+
+    <div class="agency-members-page__table-stage">
+      <section class="agency-members-page__table-card">
+        <ubax-ui-data-table
+          class="agency-members-page__table"
+          [columns]="tableColumns"
+          [rows]="pagedRows()"
+          emptyStateLabel="Aucun membre ne correspond aux filtres actuels."
+        >
+          <ng-template ubaxDataTableCell="firstName" let-row>
+            <div class="agency-members-page__member-cell">
+              <img
+                class="agency-members-page__member-avatar"
+                [src]="row.avatarSrc"
+                [alt]="row.firstName + ' ' + row.lastName"
+              />
+              <span class="agency-members-page__member-name">
+                {{ row.firstName }}
+              </span>
+            </div>
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="actions">
+            <div class="agency-members-page__action-list">
+              <button
+                type="button"
+                class="agency-members-page__row-action"
+                aria-label="Voir le membre"
+              >
+                <svg viewBox="0 0 14 18" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M7 6.75C7.46413 6.75 7.90925 6.98705 8.23744 7.40901C8.56563 7.83097 8.75 8.40326 8.75 9C8.75 9.59674 8.56563 10.169 8.23744 10.591C7.90925 11.0129 7.46413 11.25 7 11.25C6.53587 11.25 6.09075 11.0129 5.76256 10.591C5.43437 10.169 5.25 9.59674 5.25 9C5.25 8.40326 5.43437 7.83097 5.76256 7.40901C6.09075 6.98705 6.53587 6.75 7 6.75ZM7 3.375C9.91667 3.375 12.4075 5.7075 13.4167 9C12.4075 12.2925 9.91667 14.625 7 14.625C4.08333 14.625 1.5925 12.2925 0.583333 9C1.5925 5.7075 4.08333 3.375 7 3.375ZM1.855 9C2.32648 10.2377 3.0586 11.2806 3.96811 12.0099C4.87763 12.7393 5.92806 13.126 7 13.126C8.07194 13.126 9.12237 12.7393 10.0319 12.0099C10.9414 11.2806 11.6735 10.2377 12.145 9C11.6735 7.76227 10.9414 6.71944 10.0319 5.99006C9.12237 5.26068 8.07194 4.87401 7 4.87401C5.92806 4.87401 4.87763 5.26068 3.96811 5.99006C3.0586 6.71944 2.32648 7.76227 1.855 9Z"
+                    fill="#1c1c1c"
+                  />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                class="agency-members-page__row-action"
+                aria-label="Modifier le membre"
+              >
+                <svg viewBox="0 0 11.25 15" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M6.25 0C6.4093 0.000200251 6.56252 0.0693311 6.67835 0.193268C6.79419 0.317204 6.8639 0.486592 6.87323 0.666821C6.88257 0.847051 6.83083 1.02452 6.72858 1.16296C6.62634 1.30141 6.48131 1.39038 6.32312 1.41171L6.25 1.41667H1.25V11.3333H10V5.66667C10.0002 5.48613 10.0612 5.31248 10.1705 5.1812C10.2799 5.04992 10.4293 4.97092 10.5884 4.96034C10.7474 4.94976 10.904 5.00839 11.0261 5.12427C11.1483 5.24015 11.2268 5.40452 11.2456 5.58379L11.25 5.66667V11.3333C11.2501 11.6907 11.131 12.035 10.9166 12.2971C10.7021 12.5591 10.4082 12.7197 10.0937 12.7465L10 12.75H1.25C0.93464 12.7501 0.630896 12.6151 0.399658 12.3721C0.168419 12.1291 0.0267771 11.796 0.00312513 11.4396L6.26675e-08 11.3333V1.41667C-9.9737e-05 1.05926 0.119004 0.715015 0.333436 0.452945C0.547867 0.190875 0.841778 0.0303474 1.15625 0.00354175L1.25 0H6.25ZM10.1519 0.242958C10.2643 0.11592 10.4153 0.0421646 10.574 0.0366717C10.7327 0.0311789 10.8873 0.0943607 11.0064 0.213385C11.1255 0.332408 11.2002 0.498349 11.2152 0.677503C11.2303 0.856656 11.1846 1.03559 11.0875 1.17796L11.0356 1.24525L4.84812 8.25704C4.73565 8.38408 4.58473 8.45784 4.42601 8.46333C4.26729 8.46882 4.11268 8.40564 3.99358 8.28662C3.87447 8.16759 3.79981 8.00165 3.78475 7.8225C3.76969 7.64334 3.81537 7.46441 3.9125 7.32204L3.96437 7.25546L10.1519 0.242958Z"
+                    fill="#1c1c1c"
+                  />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                class="agency-members-page__row-action"
+                aria-label="Supprimer le membre"
+              >
+                <svg viewBox="0 0 17 20" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M12.569 7.5L11.9824 14.4983C11.8937 15.5592 11.8497 16.0892 11.6472 16.49C11.4696 16.8428 11.2084 17.125 10.8966 17.3008C10.5426 17.5 10.0971 17.5 9.20328 17.5H7.55535C6.66225 17.5 6.21605 17.5 5.86203 17.3C5.54993 17.1243 5.28847 16.8421 5.11068 16.4892C4.90958 16.0892 4.86489 15.5592 4.77551 14.4983L4.18966 7.5M9.42672 12.9167V8.75M7.3319 12.9167V8.75M3.14224 5.41667H6.36478M6.36478 5.41667L6.63432 3.19C6.71253 2.785 6.99463 2.5 7.31863 2.5H9.43999C9.76399 2.5 10.0454 2.785 10.1243 3.19L10.3938 5.41667M6.36478 5.41667H10.3938M10.3938 5.41667H13.6164"
+                    fill="none"
+                    stroke="#1c1c1c"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.2"
+                  />
+                </svg>
+              </button>
+            </div>
+          </ng-template>
+        </ubax-ui-data-table>
+      </section>
+    </div>
+  </section>
+
+  <footer class="agency-members-page__pagination-shell">
+    <ubax-ui-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [arrowLeftSrc]="paginationArrowLeftSrc"
+      [arrowRightSrc]="paginationArrowRightSrc"
+      variant="members"
+      (pageChange)="updatePage($event)"
+    />
+  </footer>
+</div>

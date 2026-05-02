@@ -265,10 +265,16 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
   {
     label: 'Tableau de bord',
     path: '/tableau-de-bord',
-    mainRoles: [UbaxRole.PARTNER, UbaxRole.ADMIN, UbaxRole.SUPER_ADMIN],
+    mainRoles: [UbaxRole.ADMIN, UbaxRole.SUPER_ADMIN],
   },
 
   // ── Partenaire — agence ──────────────────────────────────────────────────
+  {
+    label: 'Membres',
+    path: '/equipe',
+    mainRoles: [UbaxRole.PARTNER],
+    scope: 'AGENCE',
+  },
   {
     label: 'Biens',
     path: '/biens',
@@ -309,13 +315,6 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
   },
-  {
-    label: 'Mon équipe',
-    path: '/equipe',
-    mainRoles: [UbaxRole.PARTNER],
-    scope: 'AGENCE',
-  },
-
   // ── Partenaire — hôtel ───────────────────────────────────────────────────
   {
     label: 'Réservations',
@@ -377,4 +376,22 @@ export function topbarNavItemsForUser(
 ): readonly NavItemConfig[] {
   if (!user) return [];
   return TOPBAR_NAV_ITEMS.filter((item) => userCanSeeNavItem(user, item));
+}
+
+export function resolveWebHomePath(user: User | null | undefined): string {
+  if (!user) {
+    return '/tableau-de-bord';
+  }
+
+  if (user.mainRole === UbaxRole.PARTNER) {
+    if (user.scope === 'AGENCE') {
+      return '/equipe';
+    }
+
+    if (user.scope === 'HOTEL') {
+      return '/hotel/reservations';
+    }
+  }
+
+  return '/tableau-de-bord';
 }

@@ -1,0 +1,71 @@
+<table class="ui-data-table">
+  <colgroup>
+    @for (column of columns(); track column.key) {
+      <col [style.width]="column.width ?? null" />
+    }
+  </colgroup>
+
+  <thead>
+    <tr>
+      @for (column of columns(); track column.key) {
+        <th
+          [attr.data-column-key]="column.key"
+          [class.ui-data-table__cell--center]="column.align === 'center'"
+          [class.ui-data-table__cell--end]="column.align === 'end'"
+        >
+          <span class="ui-data-table__header-copy">
+            <span>{{ column.header }}</span>
+
+            @if (column.headerIconSrc) {
+              <img
+                class="ui-data-table__header-icon"
+                [class.ui-data-table__header-icon--rotate]="
+                  column.rotateHeaderIcon
+                "
+                [src]="column.headerIconSrc"
+                alt=""
+                aria-hidden="true"
+              />
+            }
+          </span>
+        </th>
+      }
+    </tr>
+  </thead>
+
+  <tbody>
+    @if (rows().length) {
+      @for (row of rows(); track trackRow($index, row)) {
+        <tr>
+          @for (column of columns(); track column.key) {
+            <td
+              [attr.data-column-key]="column.key"
+              [class.ui-data-table__cell--center]="column.align === 'center'"
+              [class.ui-data-table__cell--end]="column.align === 'end'"
+            >
+              @if (cellTemplate(column.key); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="{
+                    $implicit: row,
+                    row: row,
+                    value: resolveCellValue(row, column),
+                    column: column,
+                  }"
+                />
+              } @else {
+                {{ resolveCellValue(row, column) ?? '' }}
+              }
+            </td>
+          }
+        </tr>
+      }
+    } @else {
+      <tr>
+        <td class="ui-data-table__empty" [attr.colspan]="columns().length">
+          {{ emptyStateLabel() }}
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

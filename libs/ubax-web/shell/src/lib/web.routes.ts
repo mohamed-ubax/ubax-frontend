@@ -87,6 +87,15 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: ROUTE_ROLE_ACCESS.archivages,
       },
+      {
+        path: 'equipe',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-equipe').then(
+            (m) => m.equipeRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.teamAgence,
+      },
 
       // ── Hotel ───────────────────────────────────────────────────────────────
       {

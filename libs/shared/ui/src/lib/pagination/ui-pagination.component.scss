@@ -141,6 +141,44 @@
   }
 }
 
+// ── Members variant (agency team list) ────────────────────────────────────────
+
+.ui-pagination--members {
+  gap: 11px;
+
+  .ui-pagination__arrow {
+    width: 52px;
+    height: 50px;
+    border-radius: 10px;
+    background: #fff;
+    border-color: #cfd6dc;
+
+    img {
+      width: 18px;
+      height: 18px;
+      filter: none;
+    }
+  }
+
+  .ui-pagination__page {
+    width: 58px;
+    height: 58px;
+    border-color: #cfd6dc;
+    color: var(--ubax-navy, #1a3047);
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+
+    &--active {
+      background: var(--ubax-navy, #1a3047);
+      border-color: var(--ubax-navy, #1a3047);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+    }
+  }
+}
+
 // ── Responsive ─────────────────────────────────────────────────────────────
 
 @media (max-width: 768px) {

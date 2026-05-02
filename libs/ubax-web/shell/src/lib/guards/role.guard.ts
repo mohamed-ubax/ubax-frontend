@@ -19,7 +19,7 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return router.createUrlTree(['/tableau-de-bord']);
   }
 
-  if (scope && user.scope !== scope) {
+  if (scope && user.scope !== null && user.scope !== scope) {
     return router.createUrlTree(['/tableau-de-bord']);
   }
 

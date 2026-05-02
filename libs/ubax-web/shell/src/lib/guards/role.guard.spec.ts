@@ -31,6 +31,7 @@ describe('roleGuard', () => {
 
   const partnerAgence = { mainRole: UbaxRole.PARTNER, subRole: null, scope: 'AGENCE' as UbaxScope };
   const partnerHotel = { mainRole: UbaxRole.PARTNER, subRole: null, scope: 'HOTEL' as UbaxScope };
+  const partnerPendingScope = { mainRole: UbaxRole.PARTNER, subRole: null, scope: null };
   const admin = { mainRole: UbaxRole.ADMIN, subRole: null, scope: 'UBAX_INTERNAL' as UbaxScope };
 
   it("retourne true quand aucun rôle n'est requis sur la route", () => {
@@ -116,5 +117,18 @@ describe('roleGuard', () => {
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/tableau-de-bord']);
     expect(result).not.toBe(true);
+  });
+
+  it("laisse passer un partenaire tant que le scope n'est pas encore chargé", () => {
+    const injector = createInjector(partnerPendingScope);
+
+    const result = runInInjectionContext(injector, () =>
+      roleGuard(
+        mockRoute({ roles: [UbaxRole.PARTNER], scope: 'AGENCE' }),
+        {} as RouterStateSnapshot,
+      ),
+    );
+
+    expect(result).toBe(true);
   });
 });

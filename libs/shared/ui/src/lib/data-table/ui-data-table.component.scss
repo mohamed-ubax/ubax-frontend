@@ -1,0 +1,103 @@
+:host {
+  display: block;
+  width: 100%;
+  --ui-data-table-header-bg: var(--ubax-navy, #1a3047);
+  --ui-data-table-header-radius: 20px;
+  --ui-data-table-header-height: 68px;
+  --ui-data-table-header-padding-inline: 30px;
+  --ui-data-table-header-color: #ffffff;
+  --ui-data-table-header-font-size: 16px;
+  --ui-data-table-header-font-weight: 600;
+  --ui-data-table-row-height: 81px;
+  --ui-data-table-row-padding-inline: 24px;
+  --ui-data-table-row-divider: rgba(207, 214, 220, 0.7);
+  --ui-data-table-cell-color: #1c1c1c;
+  --ui-data-table-cell-font-size: 15px;
+}
+
+.ui-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.ui-data-table thead tr {
+  height: var(--ui-data-table-header-height);
+}
+
+.ui-data-table th,
+.ui-data-table td {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ui-data-table th {
+  padding: 0 var(--ui-data-table-header-padding-inline);
+  background: var(--ui-data-table-header-bg);
+  color: var(--ui-data-table-header-color);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--ui-data-table-header-font-size);
+  font-style: normal;
+  font-weight: var(--ui-data-table-header-font-weight);
+  line-height: 24px;
+}
+
+.ui-data-table th:first-child {
+  border-top-left-radius: var(--ui-data-table-header-radius);
+  border-bottom-left-radius: var(--ui-data-table-header-radius);
+}
+
+.ui-data-table th:last-child {
+  border-top-right-radius: var(--ui-data-table-header-radius);
+  border-bottom-right-radius: var(--ui-data-table-header-radius);
+}
+
+.ui-data-table tbody tr {
+  height: var(--ui-data-table-row-height);
+}
+
+.ui-data-table td {
+  padding: 0 var(--ui-data-table-row-padding-inline);
+  border-bottom: 1px solid var(--ui-data-table-row-divider);
+  color: var(--ui-data-table-cell-color);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--ui-data-table-cell-font-size);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.ui-data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ui-data-table__header-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.ui-data-table__header-icon {
+  width: 12px;
+  height: 7px;
+  object-fit: contain;
+}
+
+.ui-data-table__header-icon--rotate {
+  transform: rotate(90deg);
+}
+
+.ui-data-table__cell--center {
+  text-align: center;
+}
+
+.ui-data-table__cell--end {
+  text-align: right;
+}
+
+.ui-data-table__empty {
+  height: 160px;
+  text-align: center;
+  color: rgba(28, 28, 28, 0.65);
+}

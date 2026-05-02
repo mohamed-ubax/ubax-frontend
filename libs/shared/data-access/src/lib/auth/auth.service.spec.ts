@@ -120,27 +120,68 @@ describe('AuthService', () => {
     );
   });
 
-  it('getMySubRoles bascule sur hotel si la route agence échoue pour un partenaire', async () => {
+  it('getMySubRoles résout le userId via la liste agence, puis appelle sub-roles', async () => {
+    const memberList = [
+      { keycloakId: 'kc-123', userId: 'backend-42', email: 'a@ubax.com' },
+    ];
     http.get
-      .mockReturnValueOnce(throwError(() => new Error('not found')))
-      .mockReturnValueOnce(of({ data: ['GERANT_HOTEL'] }));
+      .mockReturnValueOnce(of({ data: memberList })) // GET /v1/agency/team
+      .mockReturnValueOnce(of({ data: ['DIRECTEUR_AGENCE'] })); // GET sub-roles
 
     const result = await firstValueFrom(
-      service.getMySubRoles(UbaxRole.PARTNER, 'partner-1'),
+      service.getMySubRoles(UbaxRole.PARTNER, ['kc-123'], 'a@ubax.com'),
+    );
+
+    expect(result).toEqual({
+      scope: 'AGENCE',
+      subRoles: ['DIRECTEUR_AGENCE'],
+    });
+    expect(http.get).toHaveBeenNthCalledWith(
+      1,
+      'https://test.local/v1/agency/team',
+    );
+    expect(http.get).toHaveBeenNthCalledWith(
+      2,
+      'https://test.local/v1/agency/team/backend-42/sub-roles',
+    );
+  });
+
+  it('getMySubRoles bascule sur hotel si la liste agence ne contient pas le user', async () => {
+    const hotelMemberList = [
+      { keycloakId: 'kc-123', userId: 'hotel-7', email: 'a@ubax.com' },
+    ];
+    http.get
+      .mockReturnValueOnce(of({ data: [] })) // GET /v1/agency/team → user not found
+      .mockReturnValueOnce(of({ data: hotelMemberList })) // GET /v1/hotel/team
+      .mockReturnValueOnce(of({ data: ['GERANT_HOTEL'] })); // GET hotel sub-roles
+
+    const result = await firstValueFrom(
+      service.getMySubRoles(UbaxRole.PARTNER, ['kc-123'], 'a@ubax.com'),
     );
 
     expect(result).toEqual({
       scope: 'HOTEL',
       subRoles: ['GERANT_HOTEL'],
     });
-    expect(http.get).toHaveBeenNthCalledWith(
-      1,
-      'https://test.local/v1/agency/team/partner-1/sub-roles',
+  });
+
+  it('getMySubRoles bascule sur hotel si le endpoint agence est inaccessible (4xx/5xx)', async () => {
+    const hotelMemberList = [
+      { keycloakId: 'kc-partner', userId: 'hotel-99', email: 'partner@ubax.com' },
+    ];
+    http.get
+      .mockReturnValueOnce(throwError(() => new Error('forbidden'))) // GET /v1/agency/team fails
+      .mockReturnValueOnce(of({ data: hotelMemberList })) // GET /v1/hotel/team
+      .mockReturnValueOnce(of({ data: ['GERANT_HOTEL'] })); // hotel sub-roles
+
+    const result = await firstValueFrom(
+      service.getMySubRoles(UbaxRole.PARTNER, ['kc-partner'], 'partner@ubax.com'),
     );
-    expect(http.get).toHaveBeenNthCalledWith(
-      2,
-      'https://test.local/v1/hotel/team/partner-1/sub-roles',
-    );
+
+    expect(result).toEqual({
+      scope: 'HOTEL',
+      subRoles: ['GERANT_HOTEL'],
+    });
   });
 
   it('logout envoie le refresh token dans le corps de la requête', async () => {

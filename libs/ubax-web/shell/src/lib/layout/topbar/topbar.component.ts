@@ -146,7 +146,7 @@ export class TopbarComponent implements AfterViewInit {
   onDocumentClick(target: EventTarget | null): void {
     if (
       this.isUserMenuOpen() &&
-      !this.elementRef.nativeElement.contains(target)
+      (!(target instanceof Node) || !this.elementRef.nativeElement.contains(target))
     ) {
       this.isUserMenuOpen.set(false);
     }
