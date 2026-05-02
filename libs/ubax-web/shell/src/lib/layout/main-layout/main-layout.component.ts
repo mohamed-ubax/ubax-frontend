@@ -29,9 +29,9 @@ export class MainLayoutComponent implements OnInit {
   readonly authStore = inject(AuthStore);
 
   ngOnInit(): void {
-    // Le mock dev n'est injecté que s'il a été activé explicitement. Sinon,
-    // toute session persistée est réhydratée depuis l'API réelle.
-    if (this.authStore.token() && !this.authStore.user()) {
+    // Le profil principal vient du JWT, puis les sous-rôles/scope sont
+    // enrichis depuis l'API quand une session persistée existe.
+    if (this.authStore.token()) {
       this.authStore.loadMe();
     }
   }

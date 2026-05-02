@@ -13,7 +13,7 @@ import {
   redirectBrowserToPortalLogin,
   resolveUbaxWebRedirectTarget,
 } from './auth-session';
-import { Role } from './user.model';
+import { UbaxRole } from './user.model';
 
 function createJwt(payload: Record<string, unknown>): string {
   const encode = (value: Record<string, unknown>) =>
@@ -80,7 +80,9 @@ describe('auth-session helpers', () => {
       prenom: 'Jane',
       email: 'jane.doe@ubax.com',
       avatar: undefined,
-      role: Role.DG,
+      mainRole: UbaxRole.ADMIN,
+      subRole: null,
+      scope: null,
     });
   });
 

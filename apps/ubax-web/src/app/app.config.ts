@@ -27,8 +27,8 @@ import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
 import { provideApiConfiguration } from '@ubax-workspace/shared-api-types';
 import {
   AuthStore,
-  Role,
-  readStoredDevRole,
+  DEV_PROFILES,
+  readStoredDevProfile,
 } from '@ubax-workspace/ubax-web-data-access';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
 import { NotificationService } from '@ubax-workspace/ubax-web-shell';
@@ -126,7 +126,10 @@ function provideMockUserInDev() {
   return [
     provideAppInitializer(() => {
       const authStore = inject(AuthStore);
-      const initialRole = readStoredDevRole() ?? Role.HOTEL;
+      const profile =
+        readStoredDevProfile() ??
+        DEV_PROFILES.find((p) => p.label === 'Gérant hôtel') ??
+        DEV_PROFILES[0];
 
       if (!authStore.token()) {
         authStore.setToken('dev-mock-token');
@@ -138,7 +141,9 @@ function provideMockUserInDev() {
           prenom: 'Jean-Marc',
           email: 'jm.kouassi@ubax.io',
           avatar: 'header/header-user-avatar.webp',
-          role: initialRole,
+          mainRole: profile.mainRole,
+          subRole: profile.subRole,
+          scope: profile.scope,
         });
       }
     }),

@@ -17,12 +17,14 @@ export {
   readStoredRefreshToken,
   redirectBrowserToPortalLogin,
   resolveUbaxWebRedirectTarget,
-  Role,
+  UbaxRole,
+  UbaxSubRole,
 } from '@ubax-workspace/shared-data-access';
 export type {
   LoginRequest,
   LoginResponse,
   StoredAuthSession,
+  UbaxScope,
   User,
 } from '@ubax-workspace/shared-data-access';
 export * from './lib/models/role-access.model';

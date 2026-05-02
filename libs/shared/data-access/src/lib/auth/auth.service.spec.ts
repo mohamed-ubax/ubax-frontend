@@ -1,7 +1,7 @@
 import '@angular/compiler';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injector } from '@angular/core';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
 import * as apiTypes from '@ubax-workspace/shared-api-types';
 import {
@@ -9,6 +9,7 @@ import {
   AUTH_TOKEN_STORAGE_KEY,
   persistAuthSession,
 } from './auth-session';
+import { UbaxRole } from './user.model';
 import { AuthService, type LoginResponse } from './auth.service';
 
 vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
@@ -100,20 +101,46 @@ describe('AuthService', () => {
     );
   });
 
-  it('getMe appelle /auth/me et retourne le profil', async () => {
-    const user = {
-      id: 'u-1',
-      nom: 'Doe',
-      prenom: 'Jane',
-      email: 'jane@ubax.com',
-      role: 'DG',
-    };
-    http.get.mockReturnValue(of(user));
+  it('getMySubRoles appelle le endpoint admin interne pour les admins', async () => {
+    http.get.mockReturnValue(of({ data: ['DIRECTEUR_GENERAL', 'FINANCE'] }));
 
-    const result = await firstValueFrom(service.getMe());
+    const result = await firstValueFrom(
+      service.getMySubRoles(UbaxRole.ADMIN, 'admin-1'),
+    );
 
-    expect(result).toEqual(user);
-    expect(http.get).toHaveBeenCalledWith('https://test.local/auth/me');
+    expect(result).toEqual({
+      scope: 'UBAX_INTERNAL',
+      subRoles: ['DIRECTEUR_GENERAL', 'FINANCE'],
+    });
+    expect(http.get).toHaveBeenCalledWith(
+      'https://test.local/v1/admin/users/admin-1/sub-roles',
+      {
+        params: { scope: 'UBAX_INTERNAL' },
+      },
+    );
+  });
+
+  it('getMySubRoles bascule sur hotel si la route agence échoue pour un partenaire', async () => {
+    http.get
+      .mockReturnValueOnce(throwError(() => new Error('not found')))
+      .mockReturnValueOnce(of({ data: ['GERANT_HOTEL'] }));
+
+    const result = await firstValueFrom(
+      service.getMySubRoles(UbaxRole.PARTNER, 'partner-1'),
+    );
+
+    expect(result).toEqual({
+      scope: 'HOTEL',
+      subRoles: ['GERANT_HOTEL'],
+    });
+    expect(http.get).toHaveBeenNthCalledWith(
+      1,
+      'https://test.local/v1/agency/team/partner-1/sub-roles',
+    );
+    expect(http.get).toHaveBeenNthCalledWith(
+      2,
+      'https://test.local/v1/hotel/team/partner-1/sub-roles',
+    );
   });
 
   it('logout envoie le refresh token dans le corps de la requête', async () => {

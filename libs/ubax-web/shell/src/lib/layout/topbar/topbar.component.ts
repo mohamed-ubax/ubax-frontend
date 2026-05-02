@@ -18,9 +18,10 @@ import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 import {
   AuthStore,
   NavItemConfig,
-  ROLE_LABELS,
-  Role,
-  topbarNavItemsForRole,
+  ROLE_BADGE_CONFIG,
+  SUB_ROLE_LABELS,
+  UbaxRole,
+  topbarNavItemsForUser,
 } from '@ubax-workspace/ubax-web-data-access';
 import { filter, map } from 'rxjs';
 
@@ -78,8 +79,10 @@ export class TopbarComponent implements AfterViewInit {
   );
 
   protected roleLabel(): string {
-    const role = this.authStore.user()?.role;
-    return role ? (ROLE_LABELS[role] ?? role) : '';
+    const user = this.authStore.user();
+    if (!user) return '';
+    if (user.subRole) return SUB_ROLE_LABELS[user.subRole] ?? user.subRole;
+    return ROLE_BADGE_CONFIG[user.mainRole]?.label ?? user.mainRole;
   }
 
   protected avatarSrc(): string | null {
@@ -94,11 +97,11 @@ export class TopbarComponent implements AfterViewInit {
   }
 
   protected visibleItems(): readonly NavItemConfig[] {
-    return topbarNavItemsForRole(this.authStore.role());
+    return topbarNavItemsForUser(this.authStore.user());
   }
 
   protected logoSrc(): string {
-    return this.authStore.role() === Role.HOTEL
+    return this.authStore.scope() === 'HOTEL'
       ? 'header/header-hotel-logo.webp'
       : 'header/header-logo.webp';
   }

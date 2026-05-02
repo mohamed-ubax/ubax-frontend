@@ -1,4 +1,4 @@
-import { Role, User } from './user.model';
+import { UbaxRole, User } from './user.model';
 
 export const AUTH_TOKEN_STORAGE_KEY = 'ubax_token';
 export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'ubax_refresh_token';
@@ -11,16 +11,13 @@ export type StoredAuthSession = {
 
 type JwtPayload = Record<string, unknown>;
 
-const TOKEN_ROLE_PATTERNS: ReadonlyArray<readonly [RegExp, Role]> = [
-  [
-    /GERANT_HOTEL|RECEPTIONNISTE|RESPONSABLE_HEBERGEMENT|COMPTABLE_HOTEL|HOTEL/,
-    Role.HOTEL,
-  ],
-  [/UBAX_SUPER_ADMIN|UBAX_ADMIN/, Role.DG],
-  [/DIRECTEUR_GENERAL|DIRECTEUR_AGENCE|\bDG\b/, Role.DG],
-  [/COMMERCIAL/, Role.COMMERCIAL],
-  [/AGENT_SAV|SUPPORT_CLIENT|\bSAV\b/, Role.SAV],
-  [/COMPTABLE_AGENCE|COMPTABLE|FINANCE/, Role.COMPTABLE],
+// Only the 5 Keycloak main roles are in the JWT — sub-roles come from GET /sub-roles
+const MAIN_ROLE_PATTERNS: ReadonlyArray<readonly [RegExp, UbaxRole]> = [
+  [/\bUBAX_SUPER_ADMIN\b/, UbaxRole.SUPER_ADMIN],
+  [/\bUBAX_ADMIN\b/, UbaxRole.ADMIN],
+  [/\bUBAX_PARTNER\b/, UbaxRole.PARTNER],
+  [/\bUBAX_OWNER\b/, UbaxRole.OWNER],
+  [/\bUBAX_CLIENT\b/, UbaxRole.CLIENT],
 ];
 
 function getLocalStorage(): Storage | null {
@@ -135,21 +132,16 @@ function normalizeRoleValue(role: string): string {
     .replace(/[^A-Z0-9]+/g, '_');
 }
 
-function inferRoleFromPayload(payload: JwtPayload): Role | null {
+function inferMainRoleFromPayload(payload: JwtPayload): UbaxRole | null {
   const candidates = [
     ...readStringArray(payload['role']),
     ...readStringArray(payload['roles']),
-    ...readStringArray(payload['groups']),
-    ...readStringArray(payload['group']),
-    ...readStringArray(payload['subRole']),
-    ...readStringArray(payload['sub_role']),
-    ...readStringArray(payload['subRoles']),
     ...readStringArray(payload['authorities']),
     ...readNestedRoles(payload),
   ].map(normalizeRoleValue);
 
   for (const candidate of candidates) {
-    for (const [pattern, role] of TOKEN_ROLE_PATTERNS) {
+    for (const [pattern, role] of MAIN_ROLE_PATTERNS) {
       if (pattern.test(candidate)) {
         return role;
       }
@@ -215,9 +207,9 @@ export function deriveUserFromAuthToken(
     return null;
   }
 
-  const role = inferRoleFromPayload(payload);
+  const mainRole = inferMainRoleFromPayload(payload);
 
-  if (!role) {
+  if (!mainRole) {
     return null;
   }
 
@@ -235,7 +227,10 @@ export function deriveUserFromAuthToken(
     avatar:
       readString(payload, ['picture', 'avatar', 'avatar_url', 'avatarUrl']) ??
       undefined,
-    role,
+    mainRole,
+    // Sub-role and scope are not in the JWT — fetched separately via GET /sub-roles
+    subRole: null,
+    scope: null,
   };
 }
 
