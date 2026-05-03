@@ -21,6 +21,7 @@ import {
   canTeamWrite,
   pickPrimarySubRole,
   SUB_ROLE_LABELS,
+  UbaxRole,
   UbaxSubRole,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
@@ -49,7 +50,7 @@ type RoleOption = {
   readonly label: string;
 };
 
-type MemberPanelMode = 'view' | 'assign' | 'revoke';
+type MemberPanelMode = 'view' | 'edit';
 
 const MEMBER_PAGE_SIZE = 6;
 
@@ -138,18 +139,18 @@ export class EquipePageComponent {
   readonly searchValue = signal('');
   readonly selectedRoleKey = signal<string | null>(null);
 
-  // Auto-assign drawer (current user assigns roles to themselves)
+  // Auto-assign drawer — PARTNER_ADMIN auto-assigns sub-roles to themselves
   readonly isAutoAssignDrawerOpen = signal(false);
   readonly autoAssignRoles = signal<string[]>([]);
 
-  // Add member drawer (Figma design)
+  // Add member drawer
   readonly isAddMemberDrawerOpen = signal(false);
 
-  // Member panel (view / assign / revoke for other members)
+  // Member panel (view details / edit roles)
   readonly activeMemberPanelMode = signal<MemberPanelMode | null>(null);
   readonly selectedMemberId = signal<string | null>(null);
-  readonly assignPanelRoles = signal<string[]>([]);
-  readonly assignPanelSeededFor = signal<string | null>(null);
+  readonly editPanelRoles = signal<string[]>([]);
+  readonly editPanelSeededFor = signal<string | null>(null);
 
   readonly addMemberForm = this.formBuilder.group({
     firstName: ['', [Validators.required]],
@@ -157,6 +158,14 @@ export class EquipePageComponent {
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
     role: ['', [Validators.required]],
+  });
+
+  readonly editMemberForm = this.formBuilder.group({
+    firstName: [{ value: '', disabled: true }],
+    lastName: [{ value: '', disabled: true }],
+    email: [{ value: '', disabled: true }],
+    phone: [{ value: '', disabled: true }],
+    role: [''],
   });
 
   readonly tableColumns: readonly UiDataTableColumn<AgencyMemberTableRow>[] = [
@@ -224,10 +233,12 @@ export class EquipePageComponent {
     canTeamWrite(this.authStore.user()),
   );
 
-  // DB userId of the currently logged-in user (resolved from team members list)
+  // DB userId of the currently logged-in user — resolved via getByKeycloakId or hydrated team entities
   readonly currentUserMemberId = computed(() => {
-    const user = this.authStore.user();
+    const dbId = this.agencyStore.currentUserDbId();
+    if (dbId) return dbId;
 
+    const user = this.authStore.user();
     if (!user) return null;
 
     const keycloakId = user.id;
@@ -242,23 +253,33 @@ export class EquipePageComponent {
           (email && m.email === email),
       );
 
-    return member ? readMemberId(member) : null;
+    if (member) return readMemberId(member);
+
+    return null;
   });
 
   // True when the current user already has at least one sub-role assigned
   readonly hasCurrentUserSelfAssigned = computed(() => {
+    // If subRole is already loaded in the auth token, auto-assign is done
+    if (this.authStore.subRole() !== null) return true;
+
     const memberId = this.currentUserMemberId();
     if (!memberId) return false;
+
     const rolesInStore = this.agencyStore.memberSubRoles()[memberId];
-    // Sub-roles loaded in agencyStore are authoritative; fall back to JWT sub-role
-    if (rolesInStore !== undefined) return rolesInStore.length > 0;
-    return this.authStore.subRole() !== null;
+    return rolesInStore !== undefined ? rolesInStore.length > 0 : false;
   });
 
-  // PARTNER sans sous-rôle : peut s'auto-assigner mais pas encore gérer l'équipe
-  readonly canSelfAssign = computed(
-    () => this.authStore.isPartner() && !this.hasCurrentUserSelfAssigned(),
-  );
+  // PARTNER_ADMIN or PARTNER with no scope yet can self-assign
+  readonly canSelfAssign = computed(() => {
+    if (this.hasCurrentUserSelfAssigned()) return false;
+    const user = this.authStore.user();
+    if (!user) return false;
+    const isPartnerAdmin = user.mainRole === UbaxRole.PARTNER_ADMIN;
+    const isPartnerWithoutScope =
+      user.mainRole === UbaxRole.PARTNER && user.scope === null;
+    return isPartnerAdmin || isPartnerWithoutScope;
+  });
 
   readonly memberRows = computed(() =>
     this.agencyStore.membresFiltres().map((member, index) => {
@@ -356,19 +377,25 @@ export class EquipePageComponent {
       : null;
   });
 
-  readonly memberPanelTitle = computed(() => {
-    switch (this.activeMemberPanelMode()) {
-      case 'assign':
-        return 'Assigner des sous-rôles';
-      case 'revoke':
-        return 'Révoquer des sous-rôles';
-      default:
-        return 'Consulter les sous-rôles';
-    }
+  readonly selectedMemberPrimaryRole = computed(() => {
+    const roles = this.selectedMemberRoles();
+    return pickPrimarySubRole(roles) ?? null;
   });
 
   constructor() {
     this.agencyStore.load?.({});
+
+    // Load the DB userId for PARTNER_ADMIN or PARTNER without scope via Keycloak ID
+    effect(() => {
+      const user = this.authStore.user();
+      if (!user?.id || this.agencyStore.currentUserDbId()) return;
+      const isPartnerAdmin = user.mainRole === UbaxRole.PARTNER_ADMIN;
+      const isPartnerWithoutScope =
+        user.mainRole === UbaxRole.PARTNER && user.scope === null;
+      if (isPartnerAdmin || isPartnerWithoutScope) {
+        this.agencyStore.loadCurrentUserDbId(user.id);
+      }
+    });
 
     effect(() => {
       const totalPages = this.totalPages();
@@ -390,10 +417,7 @@ export class EquipePageComponent {
           return;
         }
 
-        if (
-          Object.prototype.hasOwnProperty.call(cachedSubRoles, memberId) ||
-          loadingMap[memberId]
-        ) {
+        if (Object.hasOwn(cachedSubRoles, memberId) || loadingMap[memberId]) {
           return;
         }
 
@@ -401,6 +425,7 @@ export class EquipePageComponent {
       });
     });
 
+    // Seed edit panel roles when the selected member's sub-roles are loaded
     effect(() => {
       const memberId = this.selectedMemberId();
       const panelMode = this.activeMemberPanelMode();
@@ -408,15 +433,15 @@ export class EquipePageComponent {
 
       if (
         !memberId ||
-        panelMode !== 'assign' ||
-        !Object.prototype.hasOwnProperty.call(cachedSubRoles, memberId) ||
-        this.assignPanelSeededFor() === memberId
+        panelMode !== 'edit' ||
+        !Object.hasOwn(cachedSubRoles, memberId) ||
+        this.editPanelSeededFor() === memberId
       ) {
         return;
       }
 
-      this.assignPanelRoles.set([...(cachedSubRoles[memberId] ?? [])]);
-      this.assignPanelSeededFor.set(memberId);
+      this.editPanelRoles.set([...(cachedSubRoles[memberId] ?? [])]);
+      this.editPanelSeededFor.set(memberId);
     });
   }
 
@@ -445,11 +470,19 @@ export class EquipePageComponent {
     this.currentPage.set(page);
   }
 
-  // ── Auto-assign (current user self-assigns sub-roles) ────────────────────
+  // ── Auto-assign (PARTNER_ADMIN self-assigns sub-roles) ───────────────────
 
   openAutoAssignDrawer(): void {
     this.autoAssignRoles.set([]);
     this.agencyStore.loadCodelistRoles('ROLE_AGENCE');
+
+    // Ensure DB userId is loaded — retry if the initial effect hasn't resolved yet
+    const user = this.authStore.user();
+
+    if (user?.id && !this.agencyStore.currentUserDbId()) {
+      this.agencyStore.loadCurrentUserDbId(user.id);
+    }
+
     this.isAutoAssignDrawerOpen.set(true);
   }
 
@@ -466,13 +499,23 @@ export class EquipePageComponent {
     if (!selectedRoles.length) return;
 
     const userId = this.currentUserMemberId();
-    if (!userId) return;
+    if (!userId) {
+      const user = this.authStore.user();
+
+      if (user?.id) {
+        this.agencyStore.loadCurrentUserDbId(user.id);
+      }
+
+      return;
+    }
 
     this.agencyStore.assignerSousRoles({
       userId,
       body: { scope: 'AGENCE', roles: selectedRoles },
     });
 
+    // Refresh auth store so canManageMembers and canSelfAssign update reactively
+    this.authStore.loadSubRoles();
     this.closeAutoAssignDrawer();
   }
 
@@ -507,7 +550,7 @@ export class EquipePageComponent {
     this.closeAddMemberDrawer();
   }
 
-  // ── Member panel (view / assign / revoke for any member) ─────────────────
+  // ── Member panel (view details / edit roles) ─────────────────────────────
 
   openMemberPanel(row: AgencyMemberTableRow, mode: MemberPanelMode): void {
     this.selectedMemberId.set(row.memberId);
@@ -515,48 +558,53 @@ export class EquipePageComponent {
 
     if (
       row.memberId &&
-      !Object.prototype.hasOwnProperty.call(
-        this.agencyStore.memberSubRoles(),
-        row.memberId,
-      )
+      !Object.hasOwn(this.agencyStore.memberSubRoles(), row.memberId)
     ) {
       this.agencyStore.loadMemberSubRoles(row.memberId);
     }
 
-    if (mode === 'assign') {
-      this.assignPanelSeededFor.set(null);
-      this.assignPanelRoles.set([...row.roleKeys]);
+    if (mode === 'edit') {
+      this.editPanelSeededFor.set(null);
+      this.editPanelRoles.set([...row.roleKeys]);
+
+      const member = this.agencyStore
+        .entities()
+        .find((m) => readMemberId(m) === row.memberId);
+
+      this.editMemberForm.patchValue({
+        firstName: member?.firstName ?? '',
+        lastName: member?.lastName ?? '',
+        email: member?.email ?? '',
+        phone: member?.phone ?? '',
+        role: pickPrimarySubRole(row.roleKeys) ?? '',
+      });
     }
   }
 
   closeMemberPanel(): void {
     this.selectedMemberId.set(null);
     this.activeMemberPanelMode.set(null);
-    this.assignPanelRoles.set([]);
-    this.assignPanelSeededFor.set(null);
+    this.editPanelRoles.set([]);
+    this.editPanelSeededFor.set(null);
   }
 
-  submitMemberRoleAssignments(): void {
-    const memberId = this.selectedMemberId();
+  toggleEditPanelRole(role: UbaxSubRole): void {
+    this.editPanelRoles.update((roles) => toggleArrayValue(roles, role));
+  }
 
-    if (!memberId) {
-      return;
-    }
+  submitEditMember(): void {
+    const memberId = this.selectedMemberId();
+    if (!memberId) return;
 
     const currentRoles = this.selectedMemberRoles();
-    const nextRoles = this.assignPanelRoles();
-    const rolesToAdd = nextRoles.filter((role) => !currentRoles.includes(role));
-    const rolesToRemove = currentRoles.filter(
-      (role) => !nextRoles.includes(role),
-    );
+    const nextRoles = this.editPanelRoles();
+    const rolesToAdd = nextRoles.filter((r) => !currentRoles.includes(r));
+    const rolesToRemove = currentRoles.filter((r) => !nextRoles.includes(r));
 
     if (rolesToAdd.length) {
       this.agencyStore.assignerSousRoles({
         userId: memberId,
-        body: {
-          scope: 'AGENCE',
-          roles: rolesToAdd,
-        },
+        body: { scope: 'AGENCE', roles: rolesToAdd },
       });
     }
 
@@ -567,22 +615,12 @@ export class EquipePageComponent {
     this.closeMemberPanel();
   }
 
-  revokeRole(role: string): void {
-    const memberId = this.selectedMemberId();
-
-    if (!memberId) {
-      return;
-    }
-
-    this.agencyStore.revoquerSousRole({ userId: memberId, role });
-  }
-
-  toggleAssignPanelRole(role: UbaxSubRole): void {
-    this.assignPanelRoles.update((roles) => toggleArrayValue(roles, role));
-  }
-
   hasSelectedRole(roles: readonly string[], id: string): boolean {
     return roles.includes(id);
+  }
+
+  getInitials(firstName: string, lastName: string): string {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   }
 
   @HostListener('document:click', ['$event.target'])

@@ -56,7 +56,13 @@ function needsSubRoles(mainRole: UbaxRole): boolean {
 }
 
 function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
-  if (user?.mainRole !== UbaxRole.PARTNER_ADMIN || user.scope === null) {
+  if (!user) return;
+
+  const isPartnerAdmin = user.mainRole === UbaxRole.PARTNER_ADMIN;
+  const isPartnerWithoutScope =
+    user.mainRole === UbaxRole.PARTNER && user.scope === null;
+
+  if (!isPartnerAdmin && !isPartnerWithoutScope) {
     return;
   }
 

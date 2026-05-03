@@ -19,6 +19,7 @@ import {
   assignSubRoles1,
   AssignSubRolesRequest,
   findAllByType,
+  getByKeycloakId,
   getSubRoles1,
   getTeamMembers1,
   LaCodeListDto,
@@ -100,6 +101,7 @@ export const AgencyStore = signalStore(
     codelistRoles: [] as LaCodeListDto[],
     codelistRolesLoading: false,
     codelistRolesError: null as string | null,
+    currentUserDbId: null as string | null,
   }),
   withComputed(({ entities, filterRole, memberSubRoles, codelistRoles }) => ({
     membresActifs: computed(() => entities().filter(readTeamMemberActive)),
@@ -355,6 +357,23 @@ export const AgencyStore = signalStore(
                   }),
                 error: (err: HttpErrorResponse) =>
                   patchState(store, { saving: false, error: err.message }),
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      loadCurrentUserDbId: rxMethod<string>(
+        pipe(
+          exhaustMap((keycloakId) =>
+            getByKeycloakId(http, apiConfig.rootUrl, { keycloakId }).pipe(
+              map((response) => response.body?.userId ?? null),
+              tapResponse({
+                next: (userId) => {
+                  if (userId) patchState(store, { currentUserDbId: userId });
+                },
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
+                error: (_err: unknown) => {},
               }),
             ),
           ),

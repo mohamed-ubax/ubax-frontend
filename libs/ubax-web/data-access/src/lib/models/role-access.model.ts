@@ -236,7 +236,7 @@ export const ROUTE_ROLE_ACCESS = {
   demandes: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
   finances: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
   archivages: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
-  teamAgence: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
+  teamAgence: { roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN], scope: 'AGENCE' as UbaxScope },
 
   // Espace partenaire — hôtel
   hotel: { roles: [UbaxRole.PARTNER], scope: 'HOTEL' as UbaxScope },
@@ -384,7 +384,15 @@ export function resolveWebHomePath(user: User | null | undefined): string {
     return '/tableau-de-bord';
   }
 
+  if (user.mainRole === UbaxRole.PARTNER_ADMIN) {
+    return '/equipe';
+  }
+
   if (user.mainRole === UbaxRole.PARTNER) {
+    if (user.scope === null) {
+      return '/equipe';
+    }
+
     if (user.scope === 'AGENCE') {
       return '/equipe';
     }
