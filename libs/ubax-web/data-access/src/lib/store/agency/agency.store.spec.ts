@@ -18,6 +18,7 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
   return {
     ...actual,
     getTeamMembers1: vi.fn(),
+    getSubRoles1: vi.fn(),
     addMember1: vi.fn(),
     assignSubRoles1: vi.fn(),
     revokeSubRole1: vi.fn(),
@@ -30,7 +31,6 @@ function toStrictResponse<T>(body: T): StrictHttpResponse<T> {
 
 type AgencyTeamMember = AdminUserResponse & {
   active?: boolean;
-  roles?: Array<string>;
 };
 
 const MEMBERS: AgencyTeamMember[] = [
@@ -39,23 +39,29 @@ const MEMBERS: AgencyTeamMember[] = [
     keycloakId: 'kc-a1',
     email: 'alpha@ubax.com',
     active: true,
-    roles: ['DIRECTEUR_AGENCE'],
+    roles: ['PARTNER'],
   },
   {
     userId: 'a-2',
     keycloakId: 'kc-a2',
     email: 'beta@ubax.com',
     active: false,
-    roles: ['COMMERCIAL'],
+    roles: ['PARTNER'],
   },
   {
     userId: 'a-3',
     keycloakId: 'kc-a3',
     email: 'gamma@ubax.com',
     active: true,
-    roles: ['DIRECTEUR_AGENCE', 'COMPTABLE_AGENCE'],
+    roles: ['PARTNER'],
   },
 ];
+
+const SUB_ROLES_BY_USER_ID: Record<string, string[]> = {
+  'a-1': ['DIRECTEUR_AGENCE'],
+  'a-2': ['COMMERCIAL'],
+  'a-3': ['DIRECTEUR_AGENCE', 'COMPTABLE_AGENCE'],
+};
 
 type AgencyStoreContract = {
   entities(): AgencyTeamMember[];
@@ -66,7 +72,11 @@ type AgencyStoreContract = {
   membresActifs(): AgencyTeamMember[];
   membresFiltres(): AgencyTeamMember[];
   totalMembres(): number;
+  memberSubRoles(): Record<string, readonly string[]>;
+  memberSubRolesLoading(): Record<string, boolean>;
+  memberSubRolesError(): Record<string, string | null>;
   load(params?: unknown): void;
+  loadMemberSubRoles(userId: string): void;
   setFilterRole(role: string | null): void;
   inviterMembre(body: AddTeamMemberRequest): void;
   assignerSousRoles(params: { userId: string; body: AssignSubRolesRequest }): void;
@@ -84,6 +94,14 @@ describe('AgencyStore', () => {
     vi.mocked(apiTypes.getTeamMembers1).mockImplementation(() =>
       of(toStrictResponse(MEMBERS)),
     );
+    vi.mocked(apiTypes.getSubRoles1).mockImplementation(
+      (_http, _rootUrl, params: any) =>
+        of(
+          toStrictResponse({
+            data: SUB_ROLES_BY_USER_ID[params?.userId] ?? [],
+          }),
+        ) as any,
+    );
     vi.mocked(apiTypes.addMember1).mockImplementation(
       (_http, _rootUrl, params: any) =>
         of(
@@ -91,8 +109,10 @@ describe('AgencyStore', () => {
             userId: 'new-a1',
             keycloakId: 'kc-new-a1',
             email: params?.body?.email ?? 'new@ubax.com',
+            firstName: params?.body?.firstName ?? 'New',
+            lastName: params?.body?.lastName ?? 'Member',
             active: true,
-            roles: [],
+            roles: ['PARTNER'],
           } as AgencyTeamMember),
         ) as any,
     );
@@ -119,7 +139,10 @@ describe('AgencyStore', () => {
 
   describe('computed selectors', () => {
     beforeEach(() => {
-      store.load();
+      store.load({});
+      Object.keys(SUB_ROLES_BY_USER_ID).forEach((userId) =>
+        store.loadMemberSubRoles(userId),
+      );
     });
 
     it('expose le nombre total de membres', () => {
@@ -136,30 +159,67 @@ describe('AgencyStore', () => {
       expect(store.membresFiltres()).toHaveLength(MEMBERS.length);
     });
 
-    it('filtre les membres par rôle', () => {
+    it('filtre les membres par sous-rôle hydraté', () => {
       store.setFilterRole('DIRECTEUR_AGENCE');
+
       expect(store.membresFiltres()).toHaveLength(2);
-      expect(
-        store.membresFiltres().every((m) =>
-          m.roles?.includes('DIRECTEUR_AGENCE'),
-        ),
-      ).toBe(true);
+      expect(store.memberSubRoles()['a-1']).toEqual(['DIRECTEUR_AGENCE']);
+      expect(store.memberSubRoles()['a-3']).toEqual([
+        'DIRECTEUR_AGENCE',
+        'COMPTABLE_AGENCE',
+      ]);
+    });
+  });
+
+  describe('loadMemberSubRoles', () => {
+    it('hydrate les sous-rôles pour un membre donné', () => {
+      store.load({});
+      store.loadMemberSubRoles('a-2');
+
+      expect(store.memberSubRoles()['a-2']).toEqual(['COMMERCIAL']);
+      expect(store.memberSubRolesLoading()['a-2']).toBe(false);
+      expect(store.memberSubRolesError()['a-2']).toBeNull();
+    });
+
+    it("capture l'erreur d'hydratation sans casser le store", () => {
+      vi.mocked(apiTypes.getSubRoles1).mockReturnValueOnce(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 503,
+              url: '/v1/agency/team/a-1/sub-roles',
+            }),
+        ) as any,
+      );
+
+      store.load({});
+      store.loadMemberSubRoles('a-1');
+
+      expect(store.memberSubRoles()['a-1']).toEqual([]);
+      expect(store.memberSubRolesLoading()['a-1']).toBe(false);
+      expect(store.memberSubRolesError()['a-1']).toContain('503');
     });
   });
 
   describe('inviterMembre', () => {
-    it('ajoute un nouveau membre à la liste', () => {
-      store.load();
-      store.inviterMembre({ email: 'new@ubax.com' } as AddTeamMemberRequest);
+    it('ajoute un nouveau membre à la liste et met en cache ses sous-rôles saisis', () => {
+      store.load({});
+      store.inviterMembre({
+        email: 'new@ubax.com',
+        firstName: 'Nouvel',
+        lastName: 'Agent',
+        subRoles: ['COMMERCIAL'],
+      } as AddTeamMemberRequest);
 
       expect(store.entities()).toHaveLength(MEMBERS.length + 1);
       expect(store.entities().some((m) => m.userId === 'new-a1')).toBe(true);
+      expect(store.memberSubRoles()['new-a1']).toEqual(['COMMERCIAL']);
       expect(store.isSaving()).toBe(false);
       expect(store.hasError()).toBe(false);
     });
 
     it("capture une erreur si l'invitation échoue", () => {
-      store.load();
+      store.load({});
       vi.mocked(apiTypes.addMember1).mockReturnValueOnce(
         throwError(
           () =>
@@ -173,6 +233,41 @@ describe('AgencyStore', () => {
       store.inviterMembre({ email: 'fail@ubax.com' } as AddTeamMemberRequest);
 
       expect(store.hasError()).toBe(true);
+      expect(store.isSaving()).toBe(false);
+    });
+  });
+
+  describe('assignerSousRoles et revoquerSousRole', () => {
+    beforeEach(() => {
+      store.load({});
+      store.loadMemberSubRoles('a-2');
+    });
+
+    it('met à jour le cache local après assignation', () => {
+      store.assignerSousRoles({
+        userId: 'a-2',
+        body: { scope: 'AGENCE', roles: ['COMPTABLE_AGENCE'] },
+      });
+
+      expect(store.memberSubRoles()['a-2']).toEqual([
+        'COMMERCIAL',
+        'COMPTABLE_AGENCE',
+      ]);
+      expect(store.isSaving()).toBe(false);
+    });
+
+    it('met à jour le cache local après révocation', () => {
+      store.assignerSousRoles({
+        userId: 'a-2',
+        body: { scope: 'AGENCE', roles: ['COMPTABLE_AGENCE'] },
+      });
+
+      store.revoquerSousRole({
+        userId: 'a-2',
+        role: 'COMMERCIAL',
+      });
+
+      expect(store.memberSubRoles()['a-2']).toEqual(['COMPTABLE_AGENCE']);
       expect(store.isSaving()).toBe(false);
     });
   });

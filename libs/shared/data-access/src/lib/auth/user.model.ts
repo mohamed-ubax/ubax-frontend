@@ -4,6 +4,7 @@ export enum UbaxRole {
   PARTNER = 'UBAX_PARTNER',
   OWNER = 'UBAX_OWNER',
   CLIENT = 'UBAX_CLIENT',
+  PARTNER_ADMIN = 'PARTNER_ADMIN',
 }
 
 export enum UbaxSubRole {

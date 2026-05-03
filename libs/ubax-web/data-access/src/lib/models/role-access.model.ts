@@ -107,6 +107,7 @@ export const ROLE_BADGE_CONFIG: Record<UbaxRole, RoleBadgeConfig> = {
   [UbaxRole.PARTNER]: { label: 'Partenaire', color: '#2563EB' },
   [UbaxRole.OWNER]: { label: 'Propriétaire', color: '#7C3AED' },
   [UbaxRole.CLIENT]: { label: 'Client', color: '#16A34A' },
+  [UbaxRole.PARTNER_ADMIN]: { label: 'Admin Partenaire', color: '#2563EB' },
 };
 
 // ─── Sous-rôles par scope ────────────────────────────────────────────────────

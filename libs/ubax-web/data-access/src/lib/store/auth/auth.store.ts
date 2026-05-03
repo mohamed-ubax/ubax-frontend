@@ -49,14 +49,14 @@ const initialState: AuthState = {
 /** Roles whose sub-roles live in the DB and must be fetched after login */
 function needsSubRoles(mainRole: UbaxRole): boolean {
   return (
-    mainRole === UbaxRole.PARTNER ||
+    mainRole === UbaxRole.PARTNER_ADMIN ||
     mainRole === UbaxRole.ADMIN ||
     mainRole === UbaxRole.SUPER_ADMIN
   );
 }
 
 function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
-  if (!user || user.mainRole !== UbaxRole.PARTNER || user.scope === null) {
+  if (user?.mainRole !== UbaxRole.PARTNER_ADMIN || user.scope === null) {
     return;
   }
 
@@ -87,7 +87,7 @@ export const AuthStore = signalStore(
         user()?.mainRole === UbaxRole.ADMIN ||
         user()?.mainRole === UbaxRole.SUPER_ADMIN,
     ),
-    isPartner: computed(() => user()?.mainRole === UbaxRole.PARTNER),
+    isPartner: computed(() => user()?.mainRole === UbaxRole.PARTNER_ADMIN),
     fullName: computed(() => {
       const u = user();
       return u ? `${u.prenom} ${u.nom}` : '';
@@ -147,7 +147,10 @@ export const AuthStore = signalStore(
             return authSvc
               .getMySubRoles(
                 currentUser.mainRole,
-                [currentUser.id, ...readUserIdCandidatesFromAuthToken(store.token())],
+                [
+                  currentUser.id,
+                  ...readUserIdCandidatesFromAuthToken(store.token()),
+                ],
                 currentUser.email,
               )
               .pipe(

@@ -1,7 +1,12 @@
 import { AdminUserResponse } from '@ubax-workspace/shared-api-types';
 
-export const teamMemberIdSelector = (member: AdminUserResponse): string =>
+export type TeamMemberSubRolesMap = Record<string, readonly string[]>;
+
+export const resolveTeamMemberId = (member: AdminUserResponse): string =>
   member.userId ?? member.keycloakId ?? member.email ?? '';
+
+export const teamMemberIdSelector = (member: AdminUserResponse): string =>
+  resolveTeamMemberId(member);
 
 export const readTeamMemberActive = (member: AdminUserResponse): boolean =>
   Boolean((member as { active?: unknown }).active);
@@ -14,6 +19,22 @@ export const readTeamMemberRoles = (member: AdminUserResponse): string[] => {
   }
 
   return roles.filter((role): role is string => typeof role === 'string');
+};
+
+export const readResolvedTeamMemberRoles = (
+  member: AdminUserResponse,
+  memberSubRoles: TeamMemberSubRolesMap,
+): string[] => {
+  const memberId = resolveTeamMemberId(member);
+
+  if (
+    memberId &&
+    Object.prototype.hasOwnProperty.call(memberSubRoles, memberId)
+  ) {
+    return [...(memberSubRoles[memberId] ?? [])];
+  }
+
+  return readTeamMemberRoles(member);
 };
 
 export const mapTeamList = (raw: unknown): AdminUserResponse[] => {

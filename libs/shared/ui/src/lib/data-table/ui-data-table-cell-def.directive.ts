@@ -9,6 +9,7 @@ export class UiDataTableCellDefDirective {
   readonly key = input.required<string>({ alias: 'ubaxDataTableCell' });
 
   constructor(
-    readonly templateRef: TemplateRef<UiDataTableCellContext<object>>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly templateRef: TemplateRef<UiDataTableCellContext<any>>,
   ) {}
 }

@@ -9,13 +9,20 @@ import {
   signal,
 } from '@angular/core';
 import {
-  AgencyStore,
-  pickPrimarySubRole,
-  ROLE_BADGE_CONFIG,
-  SUB_ROLE_LABELS,
-} from '@ubax-workspace/ubax-web-data-access';
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { AdminUserResponse } from '@ubax-workspace/shared-api-types';
-import { UbaxRole } from '@ubax-workspace/shared-data-access';
+import {
+  AGENCE_SUB_ROLES,
+  AgencyStore,
+  AuthStore,
+  canTeamWrite,
+  pickPrimarySubRole,
+  SUB_ROLE_LABELS,
+  UbaxSubRole,
+} from '@ubax-workspace/ubax-web-data-access';
 import {
   UiDataTableCellDefDirective,
   UiDataTableColumn,
@@ -25,18 +32,24 @@ import {
 
 type AgencyMemberTableRow = {
   readonly id: string;
+  readonly memberId: string;
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
   readonly phone: string;
   readonly roleLabel: string;
+  readonly roleKeys: readonly string[];
+  readonly rolesLoading: boolean;
+  readonly rolesError: string | null;
   readonly avatarSrc: string;
 };
 
 type RoleOption = {
-  readonly key: string;
+  readonly key: UbaxSubRole;
   readonly label: string;
 };
+
+type MemberPanelMode = 'view' | 'assign' | 'revoke';
 
 const MEMBER_PAGE_SIZE = 6;
 
@@ -50,70 +63,50 @@ const MEMBER_AVATAR_FALLBACKS = [
 ] as const;
 
 function normalizeSearchText(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replaceAll(/[\u0300-\u036f]/g, '');
+  return value.toLowerCase().normalize('NFD').replaceAll(/[̀-ͯ]/g, '');
 }
 
-function readMemberRoleKeys(member: AdminUserResponse): string[] {
-  const roles = (member as { roles?: unknown }).roles;
-
-  if (!Array.isArray(roles)) {
-    return [];
-  }
-
-  return roles.filter((role): role is string => typeof role === 'string');
+function readMemberId(member: AdminUserResponse): string {
+  return member.userId ?? member.keycloakId ?? member.email ?? '';
 }
 
-function resolveRoleLabel(member: AdminUserResponse): string {
-  const roles = readMemberRoleKeys(member);
-  const primarySubRole = pickPrimarySubRole(roles);
-
-  if (primarySubRole) {
-    return SUB_ROLE_LABELS[primarySubRole] ?? primarySubRole;
+function formatRoleLabel(
+  roleKeys: readonly string[],
+  loading: boolean,
+  error: string | null,
+): string {
+  if (loading) {
+    return 'Chargement...';
   }
 
-  const primaryRole = roles.find((role) =>
-    Object.prototype.hasOwnProperty.call(ROLE_BADGE_CONFIG, role),
-  ) as UbaxRole | undefined;
+  if (error) {
+    return 'Sous-rôles indisponibles';
+  }
+
+  if (!roleKeys.length) {
+    return 'Aucun sous-rôle';
+  }
+
+  const primaryRole = pickPrimarySubRole(roleKeys);
 
   if (primaryRole) {
-    return ROLE_BADGE_CONFIG[primaryRole].label;
+    return SUB_ROLE_LABELS[primaryRole] ?? primaryRole;
   }
 
-  return 'Membre';
+  return roleKeys.join(', ');
 }
 
-function toRoleOption(member: AdminUserResponse): RoleOption | null {
-  const roles = readMemberRoleKeys(member);
-  const primarySubRole = pickPrimarySubRole(roles);
-
-  if (primarySubRole) {
-    return {
-      key: primarySubRole,
-      label: SUB_ROLE_LABELS[primarySubRole] ?? primarySubRole,
-    };
-  }
-
-  const primaryRole = roles.find((role) =>
-    Object.prototype.hasOwnProperty.call(ROLE_BADGE_CONFIG, role),
-  ) as UbaxRole | undefined;
-
-  if (!primaryRole) {
-    return null;
-  }
-
-  return {
-    key: primaryRole,
-    label: ROLE_BADGE_CONFIG[primaryRole].label,
-  };
+function toggleArrayValue(values: readonly string[], role: string): string[] {
+  return values.includes(role)
+    ? values.filter((item) => item !== role)
+    : [...values, role];
 }
 
 @Component({
   selector: 'ubax-equipe-page',
   standalone: true,
   imports: [
+    ReactiveFormsModule,
     UiDataTableComponent,
     UiDataTableCellDefDirective,
     UiPaginationComponent,
@@ -124,7 +117,10 @@ function toRoleOption(member: AdminUserResponse): RoleOption | null {
 })
 export class EquipePageComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private readonly agencyStore = inject(AgencyStore);
+  private readonly formBuilder = inject(NonNullableFormBuilder);
+  readonly agencyStore = inject(AgencyStore);
+  private readonly authStore = inject(AuthStore);
+  readonly subRoleLabels = SUB_ROLE_LABELS as Record<string, string>;
 
   readonly paginationArrowLeftSrc =
     'https://www.figma.com/api/mcp/asset/934d8cf3-8a97-4ced-a530-7c8eef886fc2';
@@ -141,6 +137,27 @@ export class EquipePageComponent {
   readonly isRoleMenuOpen = signal(false);
   readonly searchValue = signal('');
   readonly selectedRoleKey = signal<string | null>(null);
+
+  // Auto-assign drawer (current user assigns roles to themselves)
+  readonly isAutoAssignDrawerOpen = signal(false);
+  readonly autoAssignRoles = signal<string[]>([]);
+
+  // Add member drawer (Figma design)
+  readonly isAddMemberDrawerOpen = signal(false);
+
+  // Member panel (view / assign / revoke for other members)
+  readonly activeMemberPanelMode = signal<MemberPanelMode | null>(null);
+  readonly selectedMemberId = signal<string | null>(null);
+  readonly assignPanelRoles = signal<string[]>([]);
+  readonly assignPanelSeededFor = signal<string | null>(null);
+
+  readonly addMemberForm = this.formBuilder.group({
+    firstName: ['', [Validators.required]],
+    lastName: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
+    phone: [''],
+    role: ['', [Validators.required]],
+  });
 
   readonly tableColumns: readonly UiDataTableColumn<AgencyMemberTableRow>[] = [
     {
@@ -183,19 +200,12 @@ export class EquipePageComponent {
     },
   ];
 
-  readonly roleOptions = computed(() => {
-    const options = new Map<string, RoleOption>();
-
-    this.agencyStore.entities().forEach((member) => {
-      const option = toRoleOption(member);
-
-      if (option) {
-        options.set(option.key, option);
-      }
-    });
-
-    return Array.from(options.values());
-  });
+  readonly roleOptions: readonly RoleOption[] = AGENCE_SUB_ROLES.map(
+    (role) => ({
+      key: role,
+      label: SUB_ROLE_LABELS[role] ?? role,
+    }),
+  );
 
   readonly selectedRoleLabel = computed(() => {
     const selectedKey = this.selectedRoleKey();
@@ -205,21 +215,79 @@ export class EquipePageComponent {
     }
 
     return (
-      this.roleOptions().find((option) => option.key === selectedKey)?.label ??
+      this.roleOptions.find((option) => option.key === selectedKey)?.label ??
       'Rôle'
     );
   });
 
+  readonly canManageMembers = computed(() =>
+    canTeamWrite(this.authStore.user()),
+  );
+
+  // DB userId of the currently logged-in user (resolved from team members list)
+  readonly currentUserMemberId = computed(() => {
+    const user = this.authStore.user();
+
+    if (!user) return null;
+
+    const keycloakId = user.id;
+    const email = user.email;
+
+    const member = this.agencyStore
+      .entities()
+      .find(
+        (m) =>
+          (keycloakId &&
+            (m.keycloakId === keycloakId || m.userId === keycloakId)) ||
+          (email && m.email === email),
+      );
+
+    return member ? readMemberId(member) : null;
+  });
+
+  // True when the current user already has at least one sub-role assigned
+  readonly hasCurrentUserSelfAssigned = computed(() => {
+    const memberId = this.currentUserMemberId();
+    if (!memberId) return false;
+    const rolesInStore = this.agencyStore.memberSubRoles()[memberId];
+    // Sub-roles loaded in agencyStore are authoritative; fall back to JWT sub-role
+    if (rolesInStore !== undefined) return rolesInStore.length > 0;
+    return this.authStore.subRole() !== null;
+  });
+
+  // PARTNER sans sous-rôle : peut s'auto-assigner mais pas encore gérer l'équipe
+  readonly canSelfAssign = computed(
+    () => this.authStore.isPartner() && !this.hasCurrentUserSelfAssigned(),
+  );
+
   readonly memberRows = computed(() =>
-    this.agencyStore.membresFiltres().map((member, index) => ({
-      id: member.userId ?? member.keycloakId ?? member.email ?? `${index}`,
-      firstName: member.firstName ?? '—',
-      lastName: member.lastName ?? '—',
-      email: member.email ?? '—',
-      phone: member.phone ?? '—',
-      roleLabel: resolveRoleLabel(member),
-      avatarSrc: MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
-    })),
+    this.agencyStore.membresFiltres().map((member, index) => {
+      const memberId = readMemberId(member);
+      const roleKeys = memberId
+        ? [...(this.agencyStore.memberSubRoles()[memberId] ?? [])]
+        : [];
+      const rolesLoading = memberId
+        ? (this.agencyStore.memberSubRolesLoading()[memberId] ?? false)
+        : false;
+      const rolesError = memberId
+        ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
+        : null;
+
+      return {
+        id: memberId || `${index}`,
+        memberId,
+        firstName: member.firstName ?? '—',
+        lastName: member.lastName ?? '—',
+        email: member.email ?? '—',
+        phone: member.phone ?? '—',
+        roleLabel: formatRoleLabel(roleKeys, rolesLoading, rolesError),
+        roleKeys,
+        rolesLoading,
+        rolesError,
+        avatarSrc:
+          MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
+      };
+    }),
   );
 
   readonly filteredRows = computed(() => {
@@ -232,13 +300,9 @@ export class EquipePageComponent {
 
     return rows.filter((row) =>
       normalizeSearchText(
-        [
-          row.firstName,
-          row.lastName,
-          row.email,
-          row.phone,
-          row.roleLabel,
-        ].join(' '),
+        [row.firstName, row.lastName, row.email, row.phone, row.roleLabel].join(
+          ' ',
+        ),
       ).includes(search),
     );
   });
@@ -252,6 +316,57 @@ export class EquipePageComponent {
     return this.filteredRows().slice(start, start + MEMBER_PAGE_SIZE);
   });
 
+  readonly selectedMember = computed(() => {
+    const memberId = this.selectedMemberId();
+
+    if (!memberId) {
+      return null;
+    }
+
+    return (
+      this.agencyStore
+        .entities()
+        .find((member) => readMemberId(member) === memberId) ?? null
+    );
+  });
+
+  readonly selectedMemberRoles = computed(() => {
+    const memberId = this.selectedMemberId();
+
+    if (!memberId) {
+      return [];
+    }
+
+    return [...(this.agencyStore.memberSubRoles()[memberId] ?? [])];
+  });
+
+  readonly selectedMemberRolesLoading = computed(() => {
+    const memberId = this.selectedMemberId();
+
+    return memberId
+      ? (this.agencyStore.memberSubRolesLoading()[memberId] ?? false)
+      : false;
+  });
+
+  readonly selectedMemberRolesError = computed(() => {
+    const memberId = this.selectedMemberId();
+
+    return memberId
+      ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
+      : null;
+  });
+
+  readonly memberPanelTitle = computed(() => {
+    switch (this.activeMemberPanelMode()) {
+      case 'assign':
+        return 'Assigner des sous-rôles';
+      case 'revoke':
+        return 'Révoquer des sous-rôles';
+      default:
+        return 'Consulter les sous-rôles';
+    }
+  });
+
   constructor() {
     this.agencyStore.load?.({});
 
@@ -261,6 +376,47 @@ export class EquipePageComponent {
       if (this.currentPage() > totalPages) {
         this.currentPage.set(totalPages);
       }
+    });
+
+    effect(() => {
+      const members = this.agencyStore.entities();
+      const cachedSubRoles = this.agencyStore.memberSubRoles();
+      const loadingMap = this.agencyStore.memberSubRolesLoading();
+
+      members.forEach((member) => {
+        const memberId = readMemberId(member);
+
+        if (!memberId) {
+          return;
+        }
+
+        if (
+          Object.prototype.hasOwnProperty.call(cachedSubRoles, memberId) ||
+          loadingMap[memberId]
+        ) {
+          return;
+        }
+
+        this.agencyStore.loadMemberSubRoles(memberId);
+      });
+    });
+
+    effect(() => {
+      const memberId = this.selectedMemberId();
+      const panelMode = this.activeMemberPanelMode();
+      const cachedSubRoles = this.agencyStore.memberSubRoles();
+
+      if (
+        !memberId ||
+        panelMode !== 'assign' ||
+        !Object.prototype.hasOwnProperty.call(cachedSubRoles, memberId) ||
+        this.assignPanelSeededFor() === memberId
+      ) {
+        return;
+      }
+
+      this.assignPanelRoles.set([...(cachedSubRoles[memberId] ?? [])]);
+      this.assignPanelSeededFor.set(memberId);
     });
   }
 
@@ -289,9 +445,152 @@ export class EquipePageComponent {
     this.currentPage.set(page);
   }
 
+  // ── Auto-assign (current user self-assigns sub-roles) ────────────────────
+
+  openAutoAssignDrawer(): void {
+    this.autoAssignRoles.set([]);
+    this.agencyStore.loadCodelistRoles('ROLE_AGENCE');
+    this.isAutoAssignDrawerOpen.set(true);
+  }
+
+  closeAutoAssignDrawer(): void {
+    this.isAutoAssignDrawerOpen.set(false);
+  }
+
+  toggleAutoAssignRole(id: string): void {
+    this.autoAssignRoles.update((roles) => toggleArrayValue(roles, id));
+  }
+
+  submitAutoAssign(): void {
+    const selectedRoles = this.autoAssignRoles();
+    if (!selectedRoles.length) return;
+
+    const userId = this.currentUserMemberId();
+    if (!userId) return;
+
+    this.agencyStore.assignerSousRoles({
+      userId,
+      body: { scope: 'AGENCE', roles: selectedRoles },
+    });
+
+    this.closeAutoAssignDrawer();
+  }
+
+  // ── Add member drawer ────────────────────────────────────────────────────
+
+  openAddMemberDrawer(): void {
+    this.addMemberForm.reset();
+    this.isAddMemberDrawerOpen.set(true);
+  }
+
+  closeAddMemberDrawer(): void {
+    this.isAddMemberDrawerOpen.set(false);
+  }
+
+  submitAddMember(): void {
+    if (this.addMemberForm.invalid) {
+      this.addMemberForm.markAllAsTouched();
+      return;
+    }
+
+    const { firstName, lastName, email, phone, role } =
+      this.addMemberForm.getRawValue();
+
+    this.agencyStore.inviterMembre({
+      firstName,
+      lastName,
+      email,
+      phone: phone || undefined,
+      subRoles: role ? [role] : [],
+    });
+
+    this.closeAddMemberDrawer();
+  }
+
+  // ── Member panel (view / assign / revoke for any member) ─────────────────
+
+  openMemberPanel(row: AgencyMemberTableRow, mode: MemberPanelMode): void {
+    this.selectedMemberId.set(row.memberId);
+    this.activeMemberPanelMode.set(mode);
+
+    if (
+      row.memberId &&
+      !Object.prototype.hasOwnProperty.call(
+        this.agencyStore.memberSubRoles(),
+        row.memberId,
+      )
+    ) {
+      this.agencyStore.loadMemberSubRoles(row.memberId);
+    }
+
+    if (mode === 'assign') {
+      this.assignPanelSeededFor.set(null);
+      this.assignPanelRoles.set([...row.roleKeys]);
+    }
+  }
+
+  closeMemberPanel(): void {
+    this.selectedMemberId.set(null);
+    this.activeMemberPanelMode.set(null);
+    this.assignPanelRoles.set([]);
+    this.assignPanelSeededFor.set(null);
+  }
+
+  submitMemberRoleAssignments(): void {
+    const memberId = this.selectedMemberId();
+
+    if (!memberId) {
+      return;
+    }
+
+    const currentRoles = this.selectedMemberRoles();
+    const nextRoles = this.assignPanelRoles();
+    const rolesToAdd = nextRoles.filter((role) => !currentRoles.includes(role));
+    const rolesToRemove = currentRoles.filter(
+      (role) => !nextRoles.includes(role),
+    );
+
+    if (rolesToAdd.length) {
+      this.agencyStore.assignerSousRoles({
+        userId: memberId,
+        body: {
+          scope: 'AGENCE',
+          roles: rolesToAdd,
+        },
+      });
+    }
+
+    rolesToRemove.forEach((role) => {
+      this.agencyStore.revoquerSousRole({ userId: memberId, role });
+    });
+
+    this.closeMemberPanel();
+  }
+
+  revokeRole(role: string): void {
+    const memberId = this.selectedMemberId();
+
+    if (!memberId) {
+      return;
+    }
+
+    this.agencyStore.revoquerSousRole({ userId: memberId, role });
+  }
+
+  toggleAssignPanelRole(role: UbaxSubRole): void {
+    this.assignPanelRoles.update((roles) => toggleArrayValue(roles, role));
+  }
+
+  hasSelectedRole(roles: readonly string[], id: string): boolean {
+    return roles.includes(id);
+  }
+
   @HostListener('document:click', ['$event.target'])
   closeRoleMenu(target: EventTarget | null): void {
-    if (!(target instanceof Node) || !this.elementRef.nativeElement.contains(target)) {
+    if (
+      !(target instanceof Node) ||
+      !this.elementRef.nativeElement.contains(target)
+    ) {
       this.isRoleMenuOpen.set(false);
     }
   }

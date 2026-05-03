@@ -8,7 +8,15 @@ import {
   type LoginResponse,
   type LogoutRequest,
 } from '@ubax-workspace/shared-api-types';
-import { catchError, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import {
+  catchError,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { UbaxRole, type UbaxScope } from './user.model';
 import { persistAuthSession, readStoredRefreshToken } from './auth-session';
 
@@ -122,9 +130,12 @@ export class AuthService {
     if (mainRole === UbaxRole.ADMIN || mainRole === UbaxRole.SUPER_ADMIN) {
       return tryNext(normalizedUserIds, (userId) =>
         this.http
-          .get<{ data: unknown }>(`${root}/v1/admin/users/${userId}/sub-roles`, {
-            params: { scope: 'UBAX_INTERNAL' },
-          })
+          .get<{ data: unknown }>(
+            `${root}/v1/admin/users/${userId}/sub-roles`,
+            {
+              params: { scope: 'UBAX_INTERNAL' },
+            },
+          )
           .pipe(
             map((res) => ({
               scope: 'UBAX_INTERNAL' as UbaxScope,
@@ -202,23 +213,19 @@ export class AuthService {
         // Appel sub-roles avec le vrai userId backend
         const subRolesUrl = `${teamUrl}/${backendUserId}/sub-roles`;
 
-        return this.http
-          .get<{ data: unknown }>(subRolesUrl)
-          .pipe(
-            map((subRes) => ({
+        return this.http.get<{ data: unknown }>(subRolesUrl).pipe(
+          map((subRes) => ({
+            scope,
+            subRoles: extractStringArray(subRes.data),
+          })),
+          catchError(() =>
+            // Sub-roles endpoint indisponible → utilise les rôles de la liste
+            of({
               scope,
-              subRoles: extractStringArray(subRes.data),
-            })),
-            catchError(() =>
-              // Sub-roles endpoint indisponible → utilise les rôles de la liste
-              of({
-                scope,
-                subRoles: extractStringArray(
-                  found['roles'] ?? found['subRoles'],
-                ),
-              }),
-            ),
-          );
+              subRoles: extractStringArray(found['roles'] ?? found['subRoles']),
+            }),
+          ),
+        );
       }),
     );
   }

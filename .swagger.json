@@ -4109,6 +4109,99 @@
         ]
       }
     },
+    "/v1/users/{userId}": {
+      "get": {
+        "tags": [
+          "Mobile"
+        ],
+        "summary": "Récupérer son profil via l'userId interne",
+        "description": "🔑 **Authentifié** – Retourne le profil de l'utilisateur connecté. L'`userId` fourni doit correspondre au token JWT du caller.",
+        "operationId": "getByUserId",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil retourné",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token absent ou invalide"
+          },
+          "403": {
+            "description": "userId ne correspond pas au token"
+          },
+          "404": {
+            "description": "Utilisateur introuvable"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/users/keycloak/{keycloakId}": {
+      "get": {
+        "tags": [
+          "Mobile"
+        ],
+        "summary": "Récupérer son profil via le keycloakId",
+        "description": "🔑 **Authentifié** – Retourne le profil de l'utilisateur connecté. Le `keycloakId` fourni doit correspondre au token JWT du caller.",
+        "operationId": "getByKeycloakId",
+        "parameters": [
+          {
+            "name": "keycloakId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil retourné",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token absent ou invalide"
+          },
+          "403": {
+            "description": "keycloakId ne correspond pas au token"
+          },
+          "404": {
+            "description": "Utilisateur introuvable"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/tickets/{ticketId}": {
       "get": {
         "tags": [
@@ -6283,7 +6376,8 @@
               "OWNER",
               "ADMIN",
               "SUPER_ADMIN",
-              "PARTNER"
+              "PARTNER",
+              "PARTNER_ADMIN"
             ]
           }
         },
@@ -6322,7 +6416,8 @@
                 "OWNER",
                 "ADMIN",
                 "SUPER_ADMIN",
-                "PARTNER"
+                "PARTNER",
+                "PARTNER_ADMIN"
               ]
             },
             "uniqueItems": true
@@ -7583,7 +7678,8 @@
               "OWNER",
               "ADMIN",
               "SUPER_ADMIN",
-              "PARTNER"
+              "PARTNER",
+              "PARTNER_ADMIN"
             ]
           }
         },
@@ -7696,7 +7792,8 @@
                 "OWNER",
                 "ADMIN",
                 "SUPER_ADMIN",
-                "PARTNER"
+                "PARTNER",
+                "PARTNER_ADMIN"
               ]
             },
             "uniqueItems": true
@@ -7824,7 +7921,8 @@
               "OWNER",
               "ADMIN",
               "SUPER_ADMIN",
-              "PARTNER"
+              "PARTNER",
+              "PARTNER_ADMIN"
             ]
           }
         },
@@ -8145,6 +8243,102 @@
         "required": [
           "decision"
         ]
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "keycloakId": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLIENT",
+                "OWNER",
+                "ADMIN",
+                "SUPER_ADMIN",
+                "PARTNER",
+                "PARTNER_ADMIN"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "agencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agencyName": {
+            "type": "string"
+          },
+          "hotelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hotelName": {
+            "type": "string"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "phoneVerified": {
+            "type": "boolean"
+          },
+          "identityVerified": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "Pageable": {
         "type": "object",
