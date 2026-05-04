@@ -594,22 +594,20 @@
         >
           <div class="agency-members-page__drawer-field-grid">
             <!-- Prénom -->
-            <label class="agency-members-page__drawer-field">
-              <span class="agency-members-page__drawer-field-label"
-                >Prenom</span
-              >
-              <div class="agency-members-page__drawer-input-wrap">
-                <input
-                  type="text"
-                  class="agency-members-page__drawer-input"
-                  placeholder="Saisir le prénom"
-                  formControlName="firstName"
-                  [class.agency-members-page__drawer-input--error]="
+            <div class="agency-members-page__drawer-field">
+              <ubax-ui-form-input
+                label="Prenom"
+                variant="drawer"
+                placeholder="Saisir le prénom"
+                [invalid]="
+                  !!(
                     addMemberForm.get('firstName')?.invalid &&
                     addMemberForm.get('firstName')?.touched
-                  "
-                />
-              </div>
+                  )
+                "
+                [value]="addMemberForm.controls.firstName.value"
+                (valueChange)="patchAddMemberField('firstName', $event)"
+              />
               @if (
                 addMemberForm.get('firstName')?.invalid &&
                 addMemberForm.get('firstName')?.touched
@@ -628,23 +626,23 @@
                   }
                 </span>
               }
-            </label>
+            </div>
 
             <!-- Nom -->
-            <label class="agency-members-page__drawer-field">
-              <span class="agency-members-page__drawer-field-label">Nom</span>
-              <div class="agency-members-page__drawer-input-wrap">
-                <input
-                  type="text"
-                  class="agency-members-page__drawer-input"
-                  placeholder="Saisir le nom"
-                  formControlName="lastName"
-                  [class.agency-members-page__drawer-input--error]="
+            <div class="agency-members-page__drawer-field">
+              <ubax-ui-form-input
+                label="Nom"
+                variant="drawer"
+                placeholder="Saisir le nom"
+                [invalid]="
+                  !!(
                     addMemberForm.get('lastName')?.invalid &&
                     addMemberForm.get('lastName')?.touched
-                  "
-                />
-              </div>
+                  )
+                "
+                [value]="addMemberForm.controls.lastName.value"
+                (valueChange)="patchAddMemberField('lastName', $event)"
+              />
               @if (
                 addMemberForm.get('lastName')?.invalid &&
                 addMemberForm.get('lastName')?.touched
@@ -663,23 +661,24 @@
                   }
                 </span>
               }
-            </label>
+            </div>
 
             <!-- Email -->
-            <label class="agency-members-page__drawer-field">
-              <span class="agency-members-page__drawer-field-label">Email</span>
-              <div class="agency-members-page__drawer-input-wrap">
-                <input
-                  type="email"
-                  class="agency-members-page__drawer-input"
-                  placeholder="email@exemple.com"
-                  formControlName="email"
-                  [class.agency-members-page__drawer-input--error]="
+            <div class="agency-members-page__drawer-field">
+              <ubax-ui-form-input
+                label="Email"
+                variant="drawer"
+                type="email"
+                placeholder="email@exemple.com"
+                [invalid]="
+                  !!(
                     addMemberForm.get('email')?.invalid &&
                     addMemberForm.get('email')?.touched
-                  "
-                />
-              </div>
+                  )
+                "
+                [value]="addMemberForm.controls.email.value"
+                (valueChange)="patchAddMemberField('email', $event)"
+              />
               @if (
                 addMemberForm.get('email')?.invalid &&
                 addMemberForm.get('email')?.touched
@@ -692,14 +691,20 @@
                   }
                 </span>
               }
-            </label>
+            </div>
 
             <!-- Téléphone -->
-            <label class="agency-members-page__drawer-field">
+            <div class="agency-members-page__drawer-field">
               <span class="agency-members-page__drawer-field-label"
                 >Téléphone</span
               >
-              <div class="agency-members-page__phone-wrap">
+              <div
+                class="agency-members-page__phone-wrap"
+                [class.agency-members-page__phone-wrap--invalid]="
+                  addMemberForm.get('phone')?.invalid &&
+                  addMemberForm.get('phone')?.touched
+                "
+              >
                 <div
                   class="agency-members-page__phone-prefix"
                   aria-label="Indicatif pays : +225"
@@ -729,11 +734,28 @@
                 <input
                   type="tel"
                   class="agency-members-page__phone-input"
-                  placeholder="070000000"
-                  formControlName="phone"
+                  placeholder="0700000000"
+                  inputmode="tel"
+                  autocomplete="tel-national"
+                  [value]="addMemberPhoneDraft()"
+                  (input)="onAddMemberPhoneNationalInput($event)"
                 />
               </div>
-            </label>
+              @if (
+                addMemberForm.get('phone')?.invalid &&
+                addMemberForm.get('phone')?.touched
+              ) {
+                <span class="agency-members-page__field-error">
+                  @if (addMemberForm.get('phone')?.errors?.['required']) {
+                    Le téléphone est requis
+                  } @else if (
+                    addMemberForm.get('phone')?.errors?.['phoneFormat']
+                  ) {
+                    Numéro invalide : 10 chiffres (ex. 0701234567)
+                  }
+                </span>
+              }
+            </div>
 
             <!-- Rôles (multiselect) -->
             <div
@@ -768,32 +790,68 @@
               <span class="agency-members-page__drawer-field-label"
                 >Documents</span
               >
-              <label
-                class="agency-members-page__documents-zone"
-                aria-label="Insérer des documents"
-              >
-                <input
-                  type="file"
-                  class="agency-members-page__documents-input"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png"
-                />
-                <svg
-                  viewBox="0 0 39 39"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
+              <div class="agency-members-page__documents-stack">
+                <label
+                  class="agency-members-page__documents-zone"
+                  aria-label="Insérer des documents"
                 >
-                  <path
-                    d="M34.125 24.375V32.5C34.125 33.4946 33.7299 34.4484 33.0267 35.1517C32.3234 35.8549 31.3696 36.25 30.375 36.25H8.625C7.63044 36.25 6.67661 35.8549 5.97335 35.1517C5.27009 34.4484 4.875 33.4946 4.875 32.5V24.375M27.625 13L19.5 4.875L11.375 13M19.5 4.875V29.25"
-                    stroke="#1A3047"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                  <input
+                    type="file"
+                    class="agency-members-page__documents-input"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,application/pdf"
+                    (change)="onAddMemberDocumentsChange($event)"
                   />
-                </svg>
-                <span>Insérer des documents</span>
-              </label>
+                  <svg
+                    viewBox="0 0 39 39"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M34.125 24.375V32.5C34.125 33.4946 33.7299 34.4484 33.0267 35.1517C32.3234 35.8549 31.3696 36.25 30.375 36.25H8.625C7.63044 36.25 6.67661 35.8549 5.97335 35.1517C5.27009 34.4484 4.875 33.4946 4.875 32.5V24.375M27.625 13L19.5 4.875L11.375 13M19.5 4.875V29.25"
+                      stroke="#1A3047"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  <span>{{
+                    addMemberAttachments().length
+                      ? "Ajouter d'autres documents"
+                      : 'Insérer des documents'
+                  }}</span>
+                </label>
+                @if (addMemberAttachments().length) {
+                  <ul
+                    class="agency-members-page__documents-list"
+                    aria-label="Documents sélectionnés"
+                  >
+                    @for (
+                      doc of addMemberAttachments();
+                      track doc.file.lastModified + doc.file.size + idx;
+                      let idx = $index
+                    ) {
+                      <li class="agency-members-page__documents-list-item">
+                        <span class="agency-members-page__documents-list-name">{{
+                          doc.name
+                        }}</span>
+                        <span class="agency-members-page__documents-list-meta">{{
+                          doc.sizeLabel
+                        }}</span>
+                        <button
+                          type="button"
+                          class="agency-members-page__documents-list-remove"
+                          [attr.aria-label]="'Retirer ' + doc.name"
+                          (click)="removeAddMemberAttachment(idx)"
+                        >
+                          Retirer
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
             </div>
           </div>
 

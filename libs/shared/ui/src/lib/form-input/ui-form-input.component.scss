@@ -1,8 +1,17 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .form-input {
   display: flex;
   flex-direction: column;
   gap: 6px;
   cursor: text;
+}
+
+.form-input--drawer {
+  gap: 10px;
 }
 
 .form-input__label {
@@ -11,6 +20,13 @@
   font-weight: 400;
   line-height: 30.11px;
   color: var(--ubax-black);
+}
+
+.form-input__label--drawer {
+  font-weight: 500;
+  line-height: 1.2;
+  color: #1c1c1c;
+  font-feature-settings: 'dlig' 1;
 }
 
 .form-input__field {
@@ -30,5 +46,31 @@
 
   &:focus {
     box-shadow: 0 0 0 2px rgb(232 125 30 / 0.18);
+  }
+}
+
+.form-input__field--drawer {
+  min-height: 61px;
+  padding: 0 17px;
+  border-radius: 10px;
+  background: #f7f7f7;
+  font-size: 13px;
+  line-height: 22px;
+
+  &::placeholder {
+    color: #1c1c1c;
+    opacity: 1;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgb(26 48 71 / 0.12);
+  }
+}
+
+.form-input__field--invalid {
+  box-shadow: 0 0 0 1px #e7000b;
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgb(231 0 11 / 0.2);
   }
 }

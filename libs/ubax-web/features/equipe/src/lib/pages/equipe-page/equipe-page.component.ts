@@ -11,8 +11,10 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import {
+  AbstractControl,
   NonNullableFormBuilder,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { AdminUserResponse } from '@ubax-workspace/shared-api-types';
@@ -31,6 +33,7 @@ import {
   UiDataTableColumn,
   UiDataTableComponent,
   UiDataTableEmptyDefDirective,
+  UiFormInputComponent,
   UiPaginationComponent,
 } from '@ubax-workspace/shared-ui';
 
@@ -106,6 +109,36 @@ function toggleArrayValue(values: readonly string[], role: string): string[] {
     : [...values, role];
 }
 
+function composeCiE164Phone(nationalDigits: string): string {
+  const digits = nationalDigits.replaceAll(/\D/g, '');
+  if (!digits.length) {
+    return '';
+  }
+  const body = digits.startsWith('0') ? digits.slice(1) : digits;
+  if (body.length !== 9 || !/^[1-9]\d{8}$/.test(body)) {
+    return '';
+  }
+  return `+225${body}`;
+}
+
+function addMemberPhoneValidator(control: AbstractControl): ValidationErrors | null {
+  const raw = (control.value as string) ?? '';
+  if (!raw.trim()) {
+    return null;
+  }
+  return /^\+225[1-9]\d{8}$/.test(raw) ? null : { phoneFormat: true };
+}
+
+function formatAttachmentSize(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} o`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} Ko`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
 @Component({
   selector: 'ubax-equipe-page',
   standalone: true,
@@ -114,6 +147,7 @@ function toggleArrayValue(values: readonly string[], role: string): string[] {
     UiDataTableComponent,
     UiDataTableCellDefDirective,
     UiDataTableEmptyDefDirective,
+    UiFormInputComponent,
     UiPaginationComponent,
   ],
   templateUrl: './equipe-page.component.html',
@@ -178,7 +212,7 @@ export class EquipePageComponent {
       [Validators.required, Validators.minLength(2), Validators.maxLength(100)],
     ],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['', [Validators.required, Validators.pattern(/^\+[1-9]\d{1,14}$/)]],
+    phone: ['', [Validators.required, addMemberPhoneValidator]],
   });
 
   // Signal pour gérer les rôles sélectionnés (multiselect)
@@ -194,6 +228,14 @@ export class EquipePageComponent {
   // Photo upload
   readonly avatarPreview = signal<string | null>(null);
   private selectedAvatarFile: File | null = null;
+
+  /** Fichiers joints dans le formulaire d'ajout (préparation UI ; l'API n'expose pas encore l'upload). */
+  readonly addMemberAttachments = signal<
+    readonly { readonly name: string; readonly sizeLabel: string; readonly file: File }[]
+  >([]);
+
+  /** Affichage national (ex. 07…) pendant la saisie ; le contrôle `phone` garde l'E.164 +225… */
+  readonly addMemberPhoneDraft = signal('');
 
   readonly editMemberForm = this.formBuilder.group({
     firstName: [{ value: '', disabled: true }],
@@ -621,7 +663,9 @@ export class EquipePageComponent {
 
   openAddMemberDrawer(): void {
     this.addMemberForm.reset();
+    this.addMemberPhoneDraft.set('');
     this.selectedSubRoles.set([]);
+    this.addMemberAttachments.set([]);
     this.successMessage.set(null);
     this.addMemberError.set(null);
     this.addMemberSubmitted.set(false);
@@ -632,6 +676,49 @@ export class EquipePageComponent {
     this.isAddMemberDrawerOpen.set(false);
     this.addMemberError.set(null);
     this.successMessage.set(null);
+    this.addMemberAttachments.set([]);
+    this.addMemberPhoneDraft.set('');
+  }
+
+  patchAddMemberField(
+    field: 'firstName' | 'lastName' | 'email',
+    value: string,
+  ): void {
+    const control = this.addMemberForm.get(field);
+    control?.setValue(value);
+    control?.markAsTouched();
+  }
+
+  onAddMemberPhoneNationalInput(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+    const raw = target.value;
+    this.addMemberPhoneDraft.set(raw);
+    const composed = composeCiE164Phone(raw);
+    this.addMemberForm.get('phone')?.setValue(composed);
+    this.addMemberForm.get('phone')?.markAsTouched();
+  }
+
+  onAddMemberDocumentsChange(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || !target.files?.length) {
+      return;
+    }
+    const next = Array.from(target.files).map((file) => ({
+      name: file.name,
+      sizeLabel: formatAttachmentSize(file.size),
+      file,
+    }));
+    this.addMemberAttachments.update((current) => [...current, ...next]);
+    target.value = '';
+  }
+
+  removeAddMemberAttachment(index: number): void {
+    this.addMemberAttachments.update((items) =>
+      items.filter((_, itemIndex) => itemIndex !== index),
+    );
   }
 
   submitAddMember(): void {
