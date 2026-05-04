@@ -49,6 +49,7 @@ const initialState: AuthState = {
 /** Roles whose sub-roles live in the DB and must be fetched after login */
 function needsSubRoles(mainRole: UbaxRole): boolean {
   return (
+    mainRole === UbaxRole.PARTNER ||
     mainRole === UbaxRole.PARTNER_ADMIN ||
     mainRole === UbaxRole.ADMIN ||
     mainRole === UbaxRole.SUPER_ADMIN

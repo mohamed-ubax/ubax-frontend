@@ -11,23 +11,30 @@ import { AddTeamMemberRequest } from '../../models/add-team-member-request';
 import { CustomResponse } from '../../models/custom-response';
 
 export interface AddMember1$Params {
-      body: AddTeamMemberRequest
+  body: AddTeamMemberRequest;
 }
 
-export function addMember1(http: HttpClient, rootUrl: string, params: AddMember1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function addMember1(
+  http: HttpClient,
+  rootUrl: string,
+  params: AddMember1$Params,
+  context?: HttpContext,
+): Observable<StrictHttpResponse<CustomResponse>> {
   const rb = new RequestBuilder(rootUrl, addMember1.PATH, 'post');
   if (params) {
     rb.body(params.body, 'application/json');
   }
 
-  return http.request(
-    rb.build({ responseType: 'blob', accept: '*/*', context })
-  ).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
-    })
-  );
+  return http
+    .request(
+      rb.build({ responseType: 'json', accept: 'application/json', context }),
+    )
+    .pipe(
+      filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<CustomResponse>;
+      }),
+    );
 }
 
 addMember1.PATH = '/v1/agency/team';

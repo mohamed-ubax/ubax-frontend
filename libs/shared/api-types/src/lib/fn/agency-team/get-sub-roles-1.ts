@@ -13,20 +13,27 @@ export interface GetSubRoles1$Params {
   userId: string;
 }
 
-export function getSubRoles1(http: HttpClient, rootUrl: string, params: GetSubRoles1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function getSubRoles1(
+  http: HttpClient,
+  rootUrl: string,
+  params: GetSubRoles1$Params,
+  context?: HttpContext,
+): Observable<StrictHttpResponse<CustomResponse>> {
   const rb = new RequestBuilder(rootUrl, getSubRoles1.PATH, 'get');
   if (params) {
     rb.path('userId', params.userId, {});
   }
 
-  return http.request(
-    rb.build({ responseType: 'blob', accept: '*/*', context })
-  ).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
-    })
-  );
+  return http
+    .request(
+      rb.build({ responseType: 'json', accept: 'application/json', context }),
+    )
+    .pipe(
+      filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<CustomResponse>;
+      }),
+    );
 }
 
 getSubRoles1.PATH = '/v1/agency/team/{userId}/sub-roles';

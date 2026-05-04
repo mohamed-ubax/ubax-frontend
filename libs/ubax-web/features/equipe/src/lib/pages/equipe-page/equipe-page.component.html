@@ -231,456 +231,19 @@
 <!-- ── Auto-assignation drawer (PARTNER_ADMIN) ────────────────────────────── -->
 
 @if (isAutoAssignDrawerOpen()) {
-  <div
-    class="agency-members-page__overlay agency-members-page__overlay--drawer"
-    (click)="closeAutoAssignDrawer()"
-  >
-    <aside
-      class="agency-members-page__add-member-drawer"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="auto-assign-title"
-      (click)="$event.stopPropagation()"
+  <div class="agency-members-page__drawer-portal">
+    <div
+      class="agency-members-page__overlay agency-members-page__overlay--drawer"
+      (click)="closeAutoAssignDrawer()"
     >
-      <!-- Dark navy header -->
-      <header class="agency-members-page__add-drawer-header">
-        <img
-          class="agency-members-page__add-drawer-header-bg"
-          [src]="promoBackdropSrc"
-          alt=""
-          aria-hidden="true"
-        />
-        <div
-          class="agency-members-page__add-drawer-header-overlay"
-          aria-hidden="true"
-        ></div>
-        <div class="agency-members-page__add-drawer-header-content">
-          <h2
-            id="auto-assign-title"
-            class="agency-members-page__add-drawer-title"
-          >
-            Auto - assignation
-          </h2>
-          <button
-            type="button"
-            class="agency-members-page__add-drawer-close"
-            aria-label="Fermer"
-            (click)="closeAutoAssignDrawer()"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M18 6L6 18M6 6l12 12"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      <!-- Avatar zone (decorative) -->
-      <div class="agency-members-page__avatar-zone">
-        <div
-          class="agency-members-page__avatar-circle"
-          role="presentation"
-          aria-hidden="true"
-        >
-          <svg
-            viewBox="0 0 52 52"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="26" cy="20" r="10" stroke="#1A3047" stroke-width="2" />
-            <path
-              d="M8 44c0-9.941 8.059-18 18-18s18 8.059 18 18"
-              stroke="#1A3047"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </div>
-      </div>
-
-      <!-- Role selection -->
-      <div class="agency-members-page__auto-assign-body">
-        <h3 class="agency-members-page__auto-assign-section-title">
-          Sélectionner un sous-rôle
-        </h3>
-        <p class="agency-members-page__auto-assign-section-hint">
-          Choisissez le ou les sous-rôles à vous assigner
-        </p>
-
-        @if (agencyStore.codelistRolesLoading()) {
-          <p class="agency-members-page__info-state">Chargement des rôles...</p>
-        } @else if (agencyStore.codelistRolesError()) {
-          <p class="agency-members-page__error-state">
-            Impossible de charger les rôles disponibles.
-          </p>
-        } @else {
-          <div class="agency-members-page__auto-assign-role-list">
-            @for (
-              option of agencyStore.codelistRoleOptions();
-              track option.id
-            ) {
-              <label
-                class="agency-members-page__auto-assign-role-item"
-                [class.is-checked]="
-                  hasSelectedRole(autoAssignRoles(), option.value)
-                "
-              >
-                <div class="agency-members-page__auto-assign-role-label">
-                  <span
-                    class="agency-members-page__auto-assign-role-icon"
-                    aria-hidden="true"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle
-                        cx="12"
-                        cy="8"
-                        r="4"
-                        stroke="#1A3047"
-                        stroke-width="1.5"
-                      />
-                      <path
-                        d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
-                        stroke="#1A3047"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                      />
-                    </svg>
-                  </span>
-                  <span>{{ option.label }}</span>
-                </div>
-                <input
-                  type="checkbox"
-                  class="agency-members-page__auto-assign-checkbox"
-                  [checked]="hasSelectedRole(autoAssignRoles(), option.value)"
-                  (change)="toggleAutoAssignRole(option.value)"
-                  [attr.aria-label]="option.label"
-                />
-              </label>
-            }
-          </div>
-        }
-      </div>
-
-      <footer class="agency-members-page__add-drawer-footer">
-        <button
-          type="button"
-          class="agency-members-page__drawer-cancel-btn"
-          (click)="closeAutoAssignDrawer()"
-        >
-          Annuler
-        </button>
-        <button
-          type="button"
-          class="agency-members-page__drawer-save-btn"
-          [disabled]="
-            !autoAssignRoles().length ||
-            !currentUserMemberId() ||
-            agencyStore.isSaving() ||
-            agencyStore.codelistRolesLoading()
-          "
-          (click)="submitAutoAssign()"
-        >
-          Assigner
-        </button>
-      </footer>
-    </aside>
-  </div>
-}
-
-<!-- ── Ajouter un membre — drawer droit ─────────────────────────────────── -->
-
-@if (isAddMemberDrawerOpen()) {
-  <div
-    class="agency-members-page__overlay agency-members-page__overlay--drawer"
-    (click)="closeAddMemberDrawer()"
-  >
-    <aside
-      class="agency-members-page__add-member-drawer"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="add-member-drawer-title"
-      (click)="$event.stopPropagation()"
-    >
-      <!-- Dark navy header -->
-      <header class="agency-members-page__add-drawer-header">
-        <img
-          class="agency-members-page__add-drawer-header-bg"
-          [src]="promoBackdropSrc"
-          alt=""
-          aria-hidden="true"
-        />
-        <div
-          class="agency-members-page__add-drawer-header-overlay"
-          aria-hidden="true"
-        ></div>
-        <div class="agency-members-page__add-drawer-header-content">
-          <h2
-            id="add-member-drawer-title"
-            class="agency-members-page__add-drawer-title"
-          >
-            Ajouter un membre
-          </h2>
-          <button
-            type="button"
-            class="agency-members-page__add-drawer-close"
-            aria-label="Fermer"
-            (click)="closeAddMemberDrawer()"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M18 6L6 18M6 6l12 12"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      <!-- Avatar upload -->
-      <div class="agency-members-page__avatar-zone">
-        <div
-          class="agency-members-page__avatar-circle"
-          role="img"
-          aria-label="Photo de profil"
-        >
-          <svg
-            viewBox="0 0 52 52"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M34.667 6.5H17.333A5.833 5.833 0 0 0 11.5 12.333v27.334A5.833 5.833 0 0 0 17.333 45.5h17.334A5.833 5.833 0 0 0 40.5 39.667V12.333A5.833 5.833 0 0 0 34.667 6.5Z"
-              stroke="#1A3047"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M26 33.583a5.833 5.833 0 1 0 0-11.666 5.833 5.833 0 0 0 0 11.666ZM26 16.25h.024"
-              stroke="#1A3047"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span>Ajouter une photo</span>
-        </div>
-      </div>
-
-      <!-- Form -->
-      <form
-        class="agency-members-page__add-drawer-form"
-        [formGroup]="addMemberForm"
-        (ngSubmit)="submitAddMember()"
+      <aside
+        class="agency-members-page__add-member-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auto-assign-title"
+        (click)="$event.stopPropagation()"
       >
-        <div class="agency-members-page__drawer-field-grid">
-          <!-- Prénom -->
-          <label class="agency-members-page__drawer-field">
-            <span class="agency-members-page__drawer-field-label">Prenom</span>
-            <div class="agency-members-page__drawer-input-wrap">
-              <input
-                type="text"
-                class="agency-members-page__drawer-input"
-                placeholder="Saisir le prénom"
-                formControlName="firstName"
-              />
-            </div>
-          </label>
-
-          <!-- Nom -->
-          <label class="agency-members-page__drawer-field">
-            <span class="agency-members-page__drawer-field-label">Nom</span>
-            <div class="agency-members-page__drawer-input-wrap">
-              <input
-                type="text"
-                class="agency-members-page__drawer-input"
-                placeholder="Saisir le nom"
-                formControlName="lastName"
-              />
-            </div>
-          </label>
-
-          <!-- Email -->
-          <label class="agency-members-page__drawer-field">
-            <span class="agency-members-page__drawer-field-label">Email</span>
-            <div class="agency-members-page__drawer-input-wrap">
-              <input
-                type="email"
-                class="agency-members-page__drawer-input"
-                placeholder="email"
-                formControlName="email"
-              />
-            </div>
-          </label>
-
-          <!-- Téléphone -->
-          <label class="agency-members-page__drawer-field">
-            <span class="agency-members-page__drawer-field-label"
-              >Téléphone</span
-            >
-            <div class="agency-members-page__phone-wrap">
-              <div
-                class="agency-members-page__phone-prefix"
-                aria-label="Indicatif pays : +225"
-              >
-                <span class="agency-members-page__phone-flag" aria-hidden="true"
-                  >🇨🇮</span
-                >
-                <span>+225</span>
-                <svg
-                  class="agency-members-page__phone-chevron"
-                  viewBox="0 0 22 22"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M5.5 8.25L11 13.75L16.5 8.25"
-                    stroke="#181818"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </div>
-              <input
-                type="tel"
-                class="agency-members-page__phone-input"
-                placeholder="070000000"
-                formControlName="phone"
-              />
-            </div>
-          </label>
-
-          <!-- Rôle -->
-          <div
-            class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
-          >
-            <span class="agency-members-page__drawer-field-label">Rôle</span>
-            <div class="agency-members-page__drawer-select-wrap">
-              <select
-                class="agency-members-page__drawer-select"
-                formControlName="role"
-              >
-                <option value="">Selectionner le rôle</option>
-                @for (option of roleOptions; track option.key) {
-                  <option [value]="option.key">{{ option.label }}</option>
-                }
-              </select>
-              <span
-                class="agency-members-page__drawer-select-chevron"
-                aria-hidden="true"
-              >
-                <svg
-                  viewBox="0 0 22 22"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5.5 8.25L11 13.75L16.5 8.25"
-                    stroke="#181818"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </span>
-            </div>
-          </div>
-
-          <!-- Documents -->
-          <div
-            class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
-          >
-            <span class="agency-members-page__drawer-field-label"
-              >Documents</span
-            >
-            <label
-              class="agency-members-page__documents-zone"
-              aria-label="Insérer des documents"
-            >
-              <input
-                type="file"
-                class="agency-members-page__documents-input"
-                multiple
-                accept=".pdf,.jpg,.jpeg,.png"
-              />
-              <svg
-                viewBox="0 0 39 39"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  d="M34.125 24.375V32.5C34.125 33.4946 33.7299 34.4484 33.0267 35.1517C32.3234 35.8549 31.3696 36.25 30.375 36.25H8.625C7.63044 36.25 6.67661 35.8549 5.97335 35.1517C5.27009 34.4484 4.875 33.4946 4.875 32.5V24.375M27.625 13L19.5 4.875L11.375 13M19.5 4.875V29.25"
-                  stroke="#1A3047"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <span>Insérer des documents</span>
-            </label>
-          </div>
-        </div>
-
-        <footer class="agency-members-page__add-drawer-footer">
-          <button
-            type="button"
-            class="agency-members-page__drawer-cancel-btn"
-            (click)="closeAddMemberDrawer()"
-          >
-            Annuler
-          </button>
-          <button
-            type="submit"
-            class="agency-members-page__drawer-save-btn"
-            [disabled]="addMemberForm.invalid || agencyStore.isSaving()"
-          >
-            Enregistrer
-          </button>
-        </footer>
-      </form>
-    </aside>
-  </div>
-}
-
-<!-- ── Panneau membre : détails ou édition ────────────────────────────────── -->
-
-@if (activeMemberPanelMode(); as panelMode) {
-  <div
-    class="agency-members-page__overlay agency-members-page__overlay--drawer"
-    (click)="closeMemberPanel()"
-  >
-    <aside
-      class="agency-members-page__add-member-drawer"
-      role="dialog"
-      aria-modal="true"
-      [attr.aria-labelledby]="
-        panelMode === 'edit' ? 'member-edit-title' : 'member-view-title'
-      "
-      (click)="$event.stopPropagation()"
-    >
-      @if (selectedMember(); as member) {
-        <!-- Dark header with member initials -->
+        <!-- Dark navy header -->
         <header class="agency-members-page__add-drawer-header">
           <img
             class="agency-members-page__add-drawer-header-bg"
@@ -694,22 +257,16 @@
           ></div>
           <div class="agency-members-page__add-drawer-header-content">
             <h2
-              [id]="
-                panelMode === 'edit' ? 'member-edit-title' : 'member-view-title'
-              "
+              id="auto-assign-title"
               class="agency-members-page__add-drawer-title"
             >
-              {{
-                panelMode === 'edit'
-                  ? 'Modifier le membre'
-                  : 'Détails du membre'
-              }}
+              Auto - assignation
             </h2>
             <button
               type="button"
               class="agency-members-page__add-drawer-close"
               aria-label="Fermer"
-              (click)="closeMemberPanel()"
+              (click)="closeAutoAssignDrawer()"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -727,86 +284,482 @@
           </div>
         </header>
 
-        <!-- Member avatar initials -->
+        <!-- Avatar zone (decorative) -->
         <div class="agency-members-page__avatar-zone">
           <div
-            class="agency-members-page__avatar-circle agency-members-page__avatar-circle--filled"
-            role="img"
-            [attr.aria-label]="member.firstName + ' ' + member.lastName"
+            class="agency-members-page__avatar-circle"
+            role="presentation"
+            aria-hidden="true"
           >
-            <span class="agency-members-page__avatar-initials">
-              {{ getInitials(member.firstName ?? '', member.lastName ?? '') }}
-            </span>
+            <svg
+              viewBox="0 0 52 52"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="26"
+                cy="20"
+                r="10"
+                stroke="#1A3047"
+                stroke-width="2"
+              />
+              <path
+                d="M8 44c0-9.941 8.059-18 18-18s18 8.059 18 18"
+                stroke="#1A3047"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
           </div>
         </div>
 
-        <!-- ── View mode (détails) ── -->
-        @if (panelMode === 'view') {
-          <div class="agency-members-page__member-details-body">
-            <section class="agency-members-page__details-section">
-              <div class="agency-members-page__details-grid">
-                <div class="agency-members-page__details-field">
-                  <span class="agency-members-page__details-label">Prénom</span>
-                  <span class="agency-members-page__details-value">{{
-                    member.firstName ?? '—'
-                  }}</span>
-                </div>
-                <div class="agency-members-page__details-field">
-                  <span class="agency-members-page__details-label">Nom</span>
-                  <span class="agency-members-page__details-value">{{
-                    member.lastName ?? '—'
-                  }}</span>
-                </div>
-                <div class="agency-members-page__details-field">
-                  <span class="agency-members-page__details-label">Email</span>
-                  <span class="agency-members-page__details-value">{{
-                    member.email ?? '—'
-                  }}</span>
-                </div>
-                <div class="agency-members-page__details-field">
-                  <span class="agency-members-page__details-label"
-                    >Téléphone</span
-                  >
-                  <span class="agency-members-page__details-value">{{
-                    member.phone ?? '—'
-                  }}</span>
-                </div>
-              </div>
-            </section>
+        <!-- Role selection -->
+        <div class="agency-members-page__auto-assign-body">
+          <h3 class="agency-members-page__auto-assign-section-title">
+            Sélectionner un sous-rôle
+          </h3>
+          <p class="agency-members-page__auto-assign-section-hint">
+            Choisissez le ou les sous-rôles à vous assigner
+          </p>
 
-            <!-- Sub-roles -->
-            <section class="agency-members-page__details-section">
-              <h3 class="agency-members-page__details-section-title">Rôle</h3>
-
-              @if (selectedMemberRolesLoading()) {
-                <p class="agency-members-page__info-state">
-                  Chargement du rôle...
-                </p>
-              } @else if (selectedMemberRolesError()) {
-                <p class="agency-members-page__error-state">
-                  {{ selectedMemberRolesError() }}
-                </p>
-              } @else if (selectedMemberRoles().length) {
-                <div class="agency-members-page__role-badge-wrap">
-                  @for (role of selectedMemberRoles(); track role) {
-                    <span class="agency-members-page__role-badge">
-                      {{ subRoleLabels[$any(role)] ?? role }}
+          @if (agencyStore.codelistRolesLoading()) {
+            <p class="agency-members-page__info-state">
+              Chargement des rôles...
+            </p>
+          } @else if (agencyStore.codelistRolesError()) {
+            <p class="agency-members-page__error-state">
+              Impossible de charger les rôles disponibles.
+            </p>
+          } @else {
+            <div class="agency-members-page__auto-assign-role-list">
+              @for (
+                option of agencyStore.codelistRoleOptions();
+                track option.id
+              ) {
+                <label
+                  class="agency-members-page__auto-assign-role-item"
+                  [class.is-checked]="
+                    hasSelectedRole(autoAssignRoles(), option.value)
+                  "
+                >
+                  <div class="agency-members-page__auto-assign-role-label">
+                    <span
+                      class="agency-members-page__auto-assign-role-icon"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle
+                          cx="12"
+                          cy="8"
+                          r="4"
+                          stroke="#1A3047"
+                          stroke-width="1.5"
+                        />
+                        <path
+                          d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
+                          stroke="#1A3047"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                        />
+                      </svg>
                     </span>
-                  }
-                </div>
-              } @else {
-                <p class="agency-members-page__info-state">
-                  Aucun sous-rôle attribué.
-                </p>
+                    <span>{{ option.label }}</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="agency-members-page__auto-assign-checkbox"
+                    [checked]="hasSelectedRole(autoAssignRoles(), option.value)"
+                    (change)="toggleAutoAssignRole(option.value)"
+                    [attr.aria-label]="option.label"
+                  />
+                </label>
               }
-            </section>
+            </div>
+          }
+        </div>
 
-            <!-- Documents (placeholder) -->
-            <section class="agency-members-page__details-section">
-              <h3 class="agency-members-page__details-section-title">
-                Documents insérés
-              </h3>
-              <div class="agency-members-page__documents-placeholder">
+        <footer class="agency-members-page__add-drawer-footer">
+          <button
+            type="button"
+            class="agency-members-page__drawer-cancel-btn"
+            (click)="closeAutoAssignDrawer()"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="agency-members-page__drawer-save-btn"
+            [disabled]="
+              !autoAssignRoles().length ||
+              !currentUserMemberId() ||
+              agencyStore.isSaving() ||
+              agencyStore.codelistRolesLoading()
+            "
+            (click)="submitAutoAssign()"
+          >
+            Assigner
+          </button>
+        </footer>
+      </aside>
+    </div>
+  </div>
+}
+
+<!-- ── Ajouter un membre — drawer droit ─────────────────────────────────── -->
+
+@if (isAddMemberDrawerOpen()) {
+  <div class="agency-members-page__drawer-portal">
+    <div
+      class="agency-members-page__overlay agency-members-page__overlay--drawer is-opening"
+      (click)="closeAddMemberDrawer()"
+    >
+      <aside
+        class="agency-members-page__add-member-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-member-drawer-title"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Dark navy header -->
+        <header class="agency-members-page__add-drawer-header">
+          <img
+            class="agency-members-page__add-drawer-header-bg"
+            [src]="promoBackdropSrc"
+            alt=""
+            aria-hidden="true"
+          />
+          <div
+            class="agency-members-page__add-drawer-header-overlay"
+            aria-hidden="true"
+          ></div>
+          <div class="agency-members-page__add-drawer-header-content">
+            <h2
+              id="add-member-drawer-title"
+              class="agency-members-page__add-drawer-title"
+            >
+              Ajouter un membre
+            </h2>
+            <button
+              type="button"
+              class="agency-members-page__add-drawer-close"
+              aria-label="Fermer"
+              (click)="closeAddMemberDrawer()"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Avatar upload -->
+        <div class="agency-members-page__avatar-zone">
+          <input
+            type="file"
+            id="avatarInput"
+            accept="image/*"
+            style="display: none"
+            (change)="onAvatarSelected($event)"
+          />
+          <div
+            class="agency-members-page__avatar-circle"
+            role="button"
+            tabindex="0"
+            aria-label="Ajouter une photo de profil"
+            (click)="onAvatarClick()"
+            (keydown.enter)="onAvatarClick()"
+          >
+            @if (avatarPreview(); as preview) {
+              <img
+                [src]="preview"
+                alt="Photo de profil"
+                class="agency-members-page__avatar-preview"
+              />
+              <button
+                type="button"
+                class="agency-members-page__avatar-remove"
+                aria-label="Supprimer la photo"
+                (click)="removeAvatar($event)"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+            } @else {
+              <!-- Camera with plus icon -->
+              <svg
+                class="agency-members-page__avatar-icon"
+                viewBox="0 0 48 48"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  x="4"
+                  y="12"
+                  width="40"
+                  height="28"
+                  rx="4"
+                  stroke="#1A3047"
+                  stroke-width="2"
+                />
+                <circle
+                  cx="24"
+                  cy="26"
+                  r="8"
+                  stroke="#1A3047"
+                  stroke-width="2"
+                />
+                <circle cx="24" cy="26" r="3" fill="#1A3047" />
+                <path
+                  d="M32 14V10C32 8.89543 31.1046 8 30 8H18C16.8954 8 16 8.89543 16 10V14"
+                  stroke="#1A3047"
+                  stroke-width="2"
+                />
+                <circle cx="36" cy="18" r="4" fill="#1A3047" />
+                <path
+                  d="M35 18H37M36 17V19"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <span class="agency-members-page__avatar-text"
+                >Ajouter une photo</span
+              >
+            }
+          </div>
+        </div>
+
+        <!-- Messages de succès et d'erreur globaux -->
+        @if (successMessage()) {
+          <div
+            class="agency-members-page__alert agency-members-page__alert--success"
+          >
+            {{ successMessage() }}
+          </div>
+        }
+        @if (addMemberError()) {
+          <div
+            class="agency-members-page__alert agency-members-page__alert--error"
+          >
+            {{ addMemberError() }}
+          </div>
+        }
+
+        <!-- Form -->
+        <form
+          class="agency-members-page__add-drawer-form"
+          [formGroup]="addMemberForm"
+          (ngSubmit)="submitAddMember()"
+        >
+          <div class="agency-members-page__drawer-field-grid">
+            <!-- Prénom -->
+            <label class="agency-members-page__drawer-field">
+              <span class="agency-members-page__drawer-field-label"
+                >Prenom</span
+              >
+              <div class="agency-members-page__drawer-input-wrap">
+                <input
+                  type="text"
+                  class="agency-members-page__drawer-input"
+                  placeholder="Saisir le prénom"
+                  formControlName="firstName"
+                  [class.agency-members-page__drawer-input--error]="
+                    addMemberForm.get('firstName')?.invalid &&
+                    addMemberForm.get('firstName')?.touched
+                  "
+                />
+              </div>
+              @if (
+                addMemberForm.get('firstName')?.invalid &&
+                addMemberForm.get('firstName')?.touched
+              ) {
+                <span class="agency-members-page__field-error">
+                  @if (addMemberForm.get('firstName')?.errors?.['required']) {
+                    Le prénom est requis
+                  } @else if (
+                    addMemberForm.get('firstName')?.errors?.['minlength']
+                  ) {
+                    Le prénom doit avoir au moins 2 caractères
+                  } @else if (
+                    addMemberForm.get('firstName')?.errors?.['maxlength']
+                  ) {
+                    Le prénom ne peut pas dépasser 100 caractères
+                  }
+                </span>
+              }
+            </label>
+
+            <!-- Nom -->
+            <label class="agency-members-page__drawer-field">
+              <span class="agency-members-page__drawer-field-label">Nom</span>
+              <div class="agency-members-page__drawer-input-wrap">
+                <input
+                  type="text"
+                  class="agency-members-page__drawer-input"
+                  placeholder="Saisir le nom"
+                  formControlName="lastName"
+                  [class.agency-members-page__drawer-input--error]="
+                    addMemberForm.get('lastName')?.invalid &&
+                    addMemberForm.get('lastName')?.touched
+                  "
+                />
+              </div>
+              @if (
+                addMemberForm.get('lastName')?.invalid &&
+                addMemberForm.get('lastName')?.touched
+              ) {
+                <span class="agency-members-page__field-error">
+                  @if (addMemberForm.get('lastName')?.errors?.['required']) {
+                    Le nom est requis
+                  } @else if (
+                    addMemberForm.get('lastName')?.errors?.['minlength']
+                  ) {
+                    Le nom doit avoir au moins 2 caractères
+                  } @else if (
+                    addMemberForm.get('lastName')?.errors?.['maxlength']
+                  ) {
+                    Le nom ne peut pas dépasser 100 caractères
+                  }
+                </span>
+              }
+            </label>
+
+            <!-- Email -->
+            <label class="agency-members-page__drawer-field">
+              <span class="agency-members-page__drawer-field-label">Email</span>
+              <div class="agency-members-page__drawer-input-wrap">
+                <input
+                  type="email"
+                  class="agency-members-page__drawer-input"
+                  placeholder="email@exemple.com"
+                  formControlName="email"
+                  [class.agency-members-page__drawer-input--error]="
+                    addMemberForm.get('email')?.invalid &&
+                    addMemberForm.get('email')?.touched
+                  "
+                />
+              </div>
+              @if (
+                addMemberForm.get('email')?.invalid &&
+                addMemberForm.get('email')?.touched
+              ) {
+                <span class="agency-members-page__field-error">
+                  @if (addMemberForm.get('email')?.errors?.['required']) {
+                    L'email est requis
+                  } @else if (addMemberForm.get('email')?.errors?.['email']) {
+                    Format d'email invalide
+                  }
+                </span>
+              }
+            </label>
+
+            <!-- Téléphone -->
+            <label class="agency-members-page__drawer-field">
+              <span class="agency-members-page__drawer-field-label"
+                >Téléphone</span
+              >
+              <div class="agency-members-page__phone-wrap">
+                <div
+                  class="agency-members-page__phone-prefix"
+                  aria-label="Indicatif pays : +225"
+                >
+                  <span
+                    class="agency-members-page__phone-flag"
+                    aria-hidden="true"
+                    >🇨🇮</span
+                  >
+                  <span>+225</span>
+                  <svg
+                    class="agency-members-page__phone-chevron"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M5.5 8.25L11 13.75L16.5 8.25"
+                      stroke="#181818"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="tel"
+                  class="agency-members-page__phone-input"
+                  placeholder="070000000"
+                  formControlName="phone"
+                />
+              </div>
+            </label>
+
+            <!-- Rôles (multiselect) -->
+            <div
+              class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+            >
+              <span class="agency-members-page__drawer-field-label">Rôles</span>
+              <div class="agency-members-page__subroles-list">
+                @for (option of roleOptions; track option.key) {
+                  <label class="agency-members-page__subrole-checkbox">
+                    <input
+                      type="checkbox"
+                      [checked]="isSubRoleSelected(option.key)"
+                      (change)="toggleSubRole(option.key)"
+                    />
+                    <span class="agency-members-page__subrole-label">{{
+                      option.label
+                    }}</span>
+                  </label>
+                }
+              </div>
+              @if (selectedSubRoles().length === 0 && addMemberForm.touched) {
+                <span class="agency-members-page__field-error">
+                  Au moins un rôle doit être sélectionné
+                </span>
+              }
+            </div>
+
+            <!-- Documents -->
+            <div
+              class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+            >
+              <span class="agency-members-page__drawer-field-label"
+                >Documents</span
+              >
+              <label
+                class="agency-members-page__documents-zone"
+                aria-label="Insérer des documents"
+              >
+                <input
+                  type="file"
+                  class="agency-members-page__documents-input"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png"
+                />
                 <svg
                   viewBox="0 0 39 39"
                   fill="none"
@@ -814,201 +767,225 @@
                   aria-hidden="true"
                 >
                   <path
-                    d="M22.75 3.25H9.75C8.79174 3.25 7.87252 3.63058 7.19832 4.30478C6.52411 4.97899 6.14353 5.89821 6.14353 6.85647V32.1435C6.14353 33.1018 6.52411 34.021 7.19832 34.6952C7.87252 35.3694 8.79174 35.75 9.75 35.75H29.25C30.2083 35.75 31.1275 35.3694 31.8017 34.6952C32.4759 34.021 32.8565 33.1018 32.8565 32.1435V13.3565L22.75 3.25Z"
+                    d="M34.125 24.375V32.5C34.125 33.4946 33.7299 34.4484 33.0267 35.1517C32.3234 35.8549 31.3696 36.25 30.375 36.25H8.625C7.63044 36.25 6.67661 35.8549 5.97335 35.1517C5.27009 34.4484 4.875 33.4946 4.875 32.5V24.375M27.625 13L19.5 4.875L11.375 13M19.5 4.875V29.25"
                     stroke="#1A3047"
-                    stroke-width="1.8"
+                    stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                  />
-                  <path
-                    d="M22.75 3.25V13.3565H32.8565"
-                    stroke="#1A3047"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M14.625 20.5625H24.375M14.625 26.8125H24.375"
-                    stroke="#1A3047"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
                   />
                 </svg>
-                <span>Aucun document</span>
-              </div>
-            </section>
+                <span>Insérer des documents</span>
+              </label>
+            </div>
           </div>
 
           <footer class="agency-members-page__add-drawer-footer">
             <button
               type="button"
-              class="agency-members-page__drawer-save-btn"
-              style="flex: 1"
-              (click)="closeMemberPanel()"
+              class="agency-members-page__drawer-cancel-btn"
+              (click)="closeAddMemberDrawer()"
             >
-              Fermer
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="agency-members-page__drawer-save-btn"
+              [disabled]="
+                addMemberForm.invalid ||
+                selectedSubRoles().length === 0 ||
+                agencyStore.isSaving()
+              "
+            >
+              Enregistrer
             </button>
           </footer>
-        }
+        </form>
+      </aside>
+    </div>
+  </div>
+}
 
-        <!-- ── Edit mode ── -->
-        @if (panelMode === 'edit') {
-          <form
-            class="agency-members-page__add-drawer-form"
-            [formGroup]="editMemberForm"
-            (ngSubmit)="submitEditMember()"
-          >
-            <div class="agency-members-page__drawer-field-grid">
-              <!-- Prénom (read-only) -->
-              <label class="agency-members-page__drawer-field">
-                <span class="agency-members-page__drawer-field-label"
-                  >Prenom</span
-                >
-                <div
-                  class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
-                >
-                  <input
-                    type="text"
-                    class="agency-members-page__drawer-input"
-                    formControlName="firstName"
-                    [placeholder]="member.firstName ?? 'Prénom'"
-                    readonly
-                  />
-                </div>
-              </label>
+<!-- ── Panneau membre : détails ou édition ────────────────────────────────── -->
 
-              <!-- Nom (read-only) -->
-              <label class="agency-members-page__drawer-field">
-                <span class="agency-members-page__drawer-field-label">Nom</span>
-                <div
-                  class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
-                >
-                  <input
-                    type="text"
-                    class="agency-members-page__drawer-input"
-                    formControlName="lastName"
-                    [placeholder]="member.lastName ?? 'Nom'"
-                    readonly
-                  />
-                </div>
-              </label>
-
-              <!-- Email (read-only) -->
-              <label class="agency-members-page__drawer-field">
-                <span class="agency-members-page__drawer-field-label"
-                  >Email</span
-                >
-                <div
-                  class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
-                >
-                  <input
-                    type="email"
-                    class="agency-members-page__drawer-input"
-                    formControlName="email"
-                    [placeholder]="member.email ?? 'Email'"
-                    readonly
-                  />
-                </div>
-              </label>
-
-              <!-- Téléphone (read-only) -->
-              <label class="agency-members-page__drawer-field">
-                <span class="agency-members-page__drawer-field-label"
-                  >Téléphone</span
-                >
-                <div
-                  class="agency-members-page__phone-wrap agency-members-page__phone-wrap--readonly"
-                >
-                  <div
-                    class="agency-members-page__phone-prefix"
-                    aria-label="Indicatif pays : +225"
-                  >
-                    <span
-                      class="agency-members-page__phone-flag"
-                      aria-hidden="true"
-                      >🇨🇮</span
-                    >
-                    <span>+225</span>
-                  </div>
-                  <input
-                    type="tel"
-                    class="agency-members-page__phone-input"
-                    formControlName="phone"
-                    [placeholder]="member.phone ?? 'Téléphone'"
-                    readonly
-                  />
-                </div>
-              </label>
-
-              <!-- Rôle (modifiable) -->
-              <div
-                class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+@if (activeMemberPanelMode(); as panelMode) {
+  <div class="agency-members-page__drawer-portal">
+    <div
+      class="agency-members-page__overlay agency-members-page__overlay--drawer"
+      (click)="closeMemberPanel()"
+    >
+      <aside
+        class="agency-members-page__add-member-drawer"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-labelledby]="
+          panelMode === 'edit' ? 'member-edit-title' : 'member-view-title'
+        "
+        (click)="$event.stopPropagation()"
+      >
+        @if (selectedMember(); as member) {
+          <!-- Dark header with member initials -->
+          <header class="agency-members-page__add-drawer-header">
+            <img
+              class="agency-members-page__add-drawer-header-bg"
+              [src]="promoBackdropSrc"
+              alt=""
+              aria-hidden="true"
+            />
+            <div
+              class="agency-members-page__add-drawer-header-overlay"
+              aria-hidden="true"
+            ></div>
+            <div class="agency-members-page__add-drawer-header-content">
+              <h2
+                [id]="
+                  panelMode === 'edit'
+                    ? 'member-edit-title'
+                    : 'member-view-title'
+                "
+                class="agency-members-page__add-drawer-title"
               >
-                <span class="agency-members-page__drawer-field-label"
-                  >Rôle</span
+                {{
+                  panelMode === 'edit'
+                    ? 'Modifier le membre'
+                    : 'Détails du membre'
+                }}
+              </h2>
+              <button
+                type="button"
+                class="agency-members-page__add-drawer-close"
+                aria-label="Fermer"
+                (click)="closeMemberPanel()"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                <div class="agency-members-page__edit-roles-grid">
-                  @for (option of roleOptions; track option.key) {
-                    <label
-                      class="agency-members-page__auto-assign-role-item"
-                      [class.is-checked]="
-                        hasSelectedRole(editPanelRoles(), option.key)
-                      "
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </header>
+
+          <!-- Member avatar initials -->
+          <div class="agency-members-page__avatar-zone">
+            <div
+              class="agency-members-page__avatar-circle agency-members-page__avatar-circle--filled"
+              role="img"
+              [attr.aria-label]="member.firstName + ' ' + member.lastName"
+            >
+              <span class="agency-members-page__avatar-initials">
+                {{ getInitials(member.firstName ?? '', member.lastName ?? '') }}
+              </span>
+            </div>
+          </div>
+
+          <!-- ── View mode (détails) ── -->
+          @if (panelMode === 'view') {
+            <div class="agency-members-page__member-details-body">
+              <section class="agency-members-page__details-section">
+                <div class="agency-members-page__details-grid">
+                  <div class="agency-members-page__details-field">
+                    <span class="agency-members-page__details-label"
+                      >Prénom</span
                     >
-                      <div class="agency-members-page__auto-assign-role-label">
-                        <span
-                          class="agency-members-page__auto-assign-role-icon"
-                          aria-hidden="true"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <circle
-                              cx="12"
-                              cy="8"
-                              r="4"
-                              stroke="#1A3047"
-                              stroke-width="1.5"
-                            />
-                            <path
-                              d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
-                              stroke="#1A3047"
-                              stroke-width="1.5"
-                              stroke-linecap="round"
-                            />
-                          </svg>
-                        </span>
-                        <span>{{ option.label }}</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        class="agency-members-page__auto-assign-checkbox"
-                        [checked]="
-                          hasSelectedRole(editPanelRoles(), option.key)
-                        "
-                        (change)="toggleEditPanelRole(option.key)"
-                        [attr.aria-label]="option.label"
-                      />
-                    </label>
-                  }
+                    <span class="agency-members-page__details-value">{{
+                      member.firstName ?? '—'
+                    }}</span>
+                  </div>
+                  <div class="agency-members-page__details-field">
+                    <span class="agency-members-page__details-label">Nom</span>
+                    <span class="agency-members-page__details-value">{{
+                      member.lastName ?? '—'
+                    }}</span>
+                  </div>
+                  <div class="agency-members-page__details-field">
+                    <span class="agency-members-page__details-label"
+                      >Email</span
+                    >
+                    <span class="agency-members-page__details-value">{{
+                      member.email ?? '—'
+                    }}</span>
+                  </div>
+                  <div class="agency-members-page__details-field">
+                    <span class="agency-members-page__details-label"
+                      >Téléphone</span
+                    >
+                    <span class="agency-members-page__details-value">{{
+                      member.phone ?? '—'
+                    }}</span>
+                  </div>
                 </div>
+              </section>
+
+              <!-- Sub-roles -->
+              <section class="agency-members-page__details-section">
+                <h3 class="agency-members-page__details-section-title">Rôle</h3>
 
                 @if (selectedMemberRolesLoading()) {
                   <p class="agency-members-page__info-state">
-                    Chargement des rôles...
+                    Chargement du rôle...
+                  </p>
+                } @else if (selectedMemberRolesError()) {
+                  <p class="agency-members-page__error-state">
+                    {{ selectedMemberRolesError() }}
+                  </p>
+                } @else if (selectedMemberRoles().length) {
+                  <div class="agency-members-page__role-badge-wrap">
+                    @for (role of selectedMemberRoles(); track role) {
+                      <span class="agency-members-page__role-badge">
+                        {{ subRoleLabels[$any(role)] }}
+                        @if (canManageMembers()) {
+                          <button
+                            type="button"
+                            class="agency-members-page__role-badge-remove"
+                            aria-label="Révoquer le rôle {{
+                              subRoleLabels[$any(role)]
+                            }}"
+                            (click)="
+                              openRevokeConfirmation(
+                                role,
+                                selectedMemberId()!,
+                                (selectedMember()?.firstName ?? '') +
+                                  ' ' +
+                                  (selectedMember()?.lastName ?? '')
+                              )
+                            "
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M18 6L6 18M6 6l12 12"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                              />
+                            </svg>
+                          </button>
+                        }
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  <p class="agency-members-page__info-state">
+                    Aucun sous-rôle attribué.
                   </p>
                 }
-              </div>
+              </section>
 
-              <!-- Documents -->
-              <div
-                class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
-              >
-                <span class="agency-members-page__drawer-field-label"
-                  >Documents</span
-                >
+              <!-- Documents (placeholder) -->
+              <section class="agency-members-page__details-section">
+                <h3 class="agency-members-page__details-section-title">
+                  Documents insérés
+                </h3>
                 <div class="agency-members-page__documents-placeholder">
                   <svg
                     viewBox="0 0 39 39"
@@ -1039,28 +1016,309 @@
                   </svg>
                   <span>Aucun document</span>
                 </div>
-              </div>
+              </section>
             </div>
 
             <footer class="agency-members-page__add-drawer-footer">
               <button
                 type="button"
-                class="agency-members-page__drawer-cancel-btn"
+                class="agency-members-page__drawer-save-btn"
+                style="flex: 1"
                 (click)="closeMemberPanel()"
               >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                class="agency-members-page__drawer-save-btn"
-                [disabled]="agencyStore.isSaving()"
-              >
-                Modifier
+                Fermer
               </button>
             </footer>
-          </form>
+          }
+
+          <!-- ── Edit mode ── -->
+          @if (panelMode === 'edit') {
+            <form
+              class="agency-members-page__add-drawer-form"
+              [formGroup]="editMemberForm"
+              (ngSubmit)="submitEditMember()"
+            >
+              <div class="agency-members-page__drawer-field-grid">
+                <!-- Prénom (read-only) -->
+                <label class="agency-members-page__drawer-field">
+                  <span class="agency-members-page__drawer-field-label"
+                    >Prenom</span
+                  >
+                  <div
+                    class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
+                  >
+                    <input
+                      type="text"
+                      class="agency-members-page__drawer-input"
+                      formControlName="firstName"
+                      [placeholder]="member.firstName ?? 'Prénom'"
+                      readonly
+                    />
+                  </div>
+                </label>
+
+                <!-- Nom (read-only) -->
+                <label class="agency-members-page__drawer-field">
+                  <span class="agency-members-page__drawer-field-label"
+                    >Nom</span
+                  >
+                  <div
+                    class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
+                  >
+                    <input
+                      type="text"
+                      class="agency-members-page__drawer-input"
+                      formControlName="lastName"
+                      [placeholder]="member.lastName ?? 'Nom'"
+                      readonly
+                    />
+                  </div>
+                </label>
+
+                <!-- Email (read-only) -->
+                <label class="agency-members-page__drawer-field">
+                  <span class="agency-members-page__drawer-field-label"
+                    >Email</span
+                  >
+                  <div
+                    class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
+                  >
+                    <input
+                      type="email"
+                      class="agency-members-page__drawer-input"
+                      formControlName="email"
+                      [placeholder]="member.email ?? 'Email'"
+                      readonly
+                    />
+                  </div>
+                </label>
+
+                <!-- Téléphone (read-only) -->
+                <label class="agency-members-page__drawer-field">
+                  <span class="agency-members-page__drawer-field-label"
+                    >Téléphone</span
+                  >
+                  <div
+                    class="agency-members-page__phone-wrap agency-members-page__phone-wrap--readonly"
+                  >
+                    <div
+                      class="agency-members-page__phone-prefix"
+                      aria-label="Indicatif pays : +225"
+                    >
+                      <span
+                        class="agency-members-page__phone-flag"
+                        aria-hidden="true"
+                        >🇨🇮</span
+                      >
+                      <span>+225</span>
+                    </div>
+                    <input
+                      type="tel"
+                      class="agency-members-page__phone-input"
+                      formControlName="phone"
+                      [placeholder]="member.phone ?? 'Téléphone'"
+                      readonly
+                    />
+                  </div>
+                </label>
+
+                <!-- Rôle (modifiable) -->
+                <div
+                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+                >
+                  <span class="agency-members-page__drawer-field-label"
+                    >Rôle</span
+                  >
+                  <div class="agency-members-page__edit-roles-grid">
+                    @for (option of roleOptions; track option.key) {
+                      <label
+                        class="agency-members-page__auto-assign-role-item"
+                        [class.is-checked]="
+                          hasSelectedRole(editPanelRoles(), option.key)
+                        "
+                      >
+                        <div
+                          class="agency-members-page__auto-assign-role-label"
+                        >
+                          <span
+                            class="agency-members-page__auto-assign-role-icon"
+                            aria-hidden="true"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <circle
+                                cx="12"
+                                cy="8"
+                                r="4"
+                                stroke="#1A3047"
+                                stroke-width="1.5"
+                              />
+                              <path
+                                d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
+                                stroke="#1A3047"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                              />
+                            </svg>
+                          </span>
+                          <span>{{ option.label }}</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          class="agency-members-page__auto-assign-checkbox"
+                          [checked]="
+                            hasSelectedRole(editPanelRoles(), option.key)
+                          "
+                          (change)="toggleEditPanelRole(option.key)"
+                          [attr.aria-label]="option.label"
+                        />
+                      </label>
+                    }
+                  </div>
+
+                  @if (selectedMemberRolesLoading()) {
+                    <p class="agency-members-page__info-state">
+                      Chargement des rôles...
+                    </p>
+                  }
+                </div>
+
+                <!-- Documents -->
+                <div
+                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+                >
+                  <span class="agency-members-page__drawer-field-label"
+                    >Documents</span
+                  >
+                  <div class="agency-members-page__documents-placeholder">
+                    <svg
+                      viewBox="0 0 39 39"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M22.75 3.25H9.75C8.79174 3.25 7.87252 3.63058 7.19832 4.30478C6.52411 4.97899 6.14353 5.89821 6.14353 6.85647V32.1435C6.14353 33.1018 6.52411 34.021 7.19832 34.6952C7.87252 35.3694 8.79174 35.75 9.75 35.75H29.25C30.2083 35.75 31.1275 35.3694 31.8017 34.6952C32.4759 34.021 32.8565 33.1018 32.8565 32.1435V13.3565L22.75 3.25Z"
+                        stroke="#1A3047"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M22.75 3.25V13.3565H32.8565"
+                        stroke="#1A3047"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M14.625 20.5625H24.375M14.625 26.8125H24.375"
+                        stroke="#1A3047"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    <span>Aucun document</span>
+                  </div>
+                </div>
+              </div>
+
+              <footer class="agency-members-page__add-drawer-footer">
+                <button
+                  type="button"
+                  class="agency-members-page__drawer-cancel-btn"
+                  (click)="closeMemberPanel()"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  class="agency-members-page__drawer-save-btn"
+                  [disabled]="agencyStore.isSaving()"
+                >
+                  Modifier
+                </button>
+              </footer>
+            </form>
+          }
+        } @else {
+          <!-- Loading state when member not found -->
+          <div class="agency-members-page__panel-loading">
+            <p>Chargement des informations du membre...</p>
+          </div>
         }
-      }
-    </aside>
+      </aside>
+    </div>
+  </div>
+}
+
+<!-- ── Confirmation Dialog for Role Revocation ───────────────────────────── -->
+
+@if (confirmDialogOpen()) {
+  <div class="agency-members-page__drawer-portal">
+    <div
+      class="agency-members-page__overlay agency-members-page__overlay--confirm"
+      (click)="closeConfirmDialog()"
+    >
+      <div
+        class="agency-members-page__confirm-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="agency-members-page__confirm-dialog-header">
+          <svg
+            class="agency-members-page__confirm-dialog-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="10" stroke="#DC2626" stroke-width="2" />
+            <path
+              d="M12 8V12M12 16H12.01"
+              stroke="#DC2626"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          <h3
+            id="confirm-dialog-title"
+            class="agency-members-page__confirm-dialog-title"
+          >
+            {{ confirmDialogTitle() }}
+          </h3>
+        </div>
+
+        <p class="agency-members-page__confirm-dialog-message">
+          {{ confirmDialogMessage() }}
+        </p>
+
+        <div class="agency-members-page__confirm-dialog-actions">
+          <button
+            type="button"
+            class="agency-members-page__confirm-dialog-btn agency-members-page__confirm-dialog-btn--cancel"
+            (click)="closeConfirmDialog()"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="agency-members-page__confirm-dialog-btn agency-members-page__confirm-dialog-btn--confirm"
+            [disabled]="agencyStore.isSaving()"
+            (click)="confirmRevokeRole()"
+          >
+            @if (agencyStore.isSaving()) {
+              <span>Suppression...</span>
+            } @else {
+              <span>Confirmer</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 }

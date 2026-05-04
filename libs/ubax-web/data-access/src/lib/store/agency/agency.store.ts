@@ -8,7 +8,6 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { addEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
@@ -43,7 +42,20 @@ function extractStringArray(data: unknown): string[] {
     return [];
   }
 
-  return data.filter((item): item is string => typeof item === 'string');
+  // Handle array of strings directly
+  const stringItems = data.filter(
+    (item): item is string => typeof item === 'string',
+  );
+  if (stringItems.length > 0) return stringItems;
+
+  // Handle array of objects with 'role' property (API returns [{ role: 'DIRECTEUR_AGENCE', ... }])
+  const roleItems = data
+    .filter(
+      (item) => typeof item === 'object' && item !== null && 'role' in item,
+    )
+    .map((item) => (item as { role: unknown }).role)
+    .filter((role): role is string => typeof role === 'string');
+  return roleItems;
 }
 
 function setMemberRoles(
@@ -257,36 +269,33 @@ export const AgencyStore = signalStore(
                 next: (membre: AdminUserResponse) => {
                   const memberId = resolveTeamMemberId(membre);
 
-                  patchState(
-                    store,
-                    addEntity(membre, {
-                      selectId: teamMemberIdSelector,
-                    }),
-                    {
-                      saving: false,
-                      memberSubRoles: memberId
-                        ? setMemberRoles(
-                            store.memberSubRoles(),
-                            memberId,
-                            body.subRoles ?? [],
-                          )
-                        : store.memberSubRoles(),
-                      memberSubRolesLoading: memberId
-                        ? setMemberLoading(
-                            store.memberSubRolesLoading(),
-                            memberId,
-                            false,
-                          )
-                        : store.memberSubRolesLoading(),
-                      memberSubRolesError: memberId
-                        ? setMemberError(
-                            store.memberSubRolesError(),
-                            memberId,
-                            null,
-                          )
-                        : store.memberSubRolesError(),
-                    },
-                  );
+                  // Reload the team members list to ensure consistency
+                  (store as { load: (params?: unknown) => void }).load({});
+
+                  patchState(store, {
+                    saving: false,
+                    memberSubRoles: memberId
+                      ? setMemberRoles(
+                          store.memberSubRoles(),
+                          memberId,
+                          body.subRoles ?? [],
+                        )
+                      : store.memberSubRoles(),
+                    memberSubRolesLoading: memberId
+                      ? setMemberLoading(
+                          store.memberSubRolesLoading(),
+                          memberId,
+                          false,
+                        )
+                      : store.memberSubRolesLoading(),
+                    memberSubRolesError: memberId
+                      ? setMemberError(
+                          store.memberSubRolesError(),
+                          memberId,
+                          null,
+                        )
+                      : store.memberSubRolesError(),
+                  });
                 },
                 error: (err: HttpErrorResponse) =>
                   patchState(store, { saving: false, error: err.message }),
@@ -367,7 +376,12 @@ export const AgencyStore = signalStore(
         pipe(
           exhaustMap((keycloakId) =>
             getByKeycloakId(http, apiConfig.rootUrl, { keycloakId }).pipe(
-              map((response) => response.body?.userId ?? null),
+              map(
+                (response) =>
+                  (response.body as any)?.data?.userId ??
+                  response.body?.userId ??
+                  null,
+              ),
               tapResponse({
                 next: (userId) => {
                   if (userId) patchState(store, { currentUserDbId: userId });

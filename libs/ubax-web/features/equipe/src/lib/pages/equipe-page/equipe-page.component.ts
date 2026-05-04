@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   computed,
@@ -8,6 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -121,6 +123,8 @@ export class EquipePageComponent {
   private readonly formBuilder = inject(NonNullableFormBuilder);
   readonly agencyStore = inject(AgencyStore);
   private readonly authStore = inject(AuthStore);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   readonly subRoleLabels = SUB_ROLE_LABELS as Record<string, string>;
 
   readonly paginationArrowLeftSrc =
@@ -152,13 +156,39 @@ export class EquipePageComponent {
   readonly editPanelRoles = signal<string[]>([]);
   readonly editPanelSeededFor = signal<string | null>(null);
 
+  // Confirmation dialog for role revocation
+  readonly confirmDialogOpen = signal(false);
+  readonly confirmDialogTitle = signal('');
+  readonly confirmDialogMessage = signal('');
+  readonly confirmDialogRoleToRevoke = signal<string | null>(null);
+  readonly confirmDialogMemberId = signal<string | null>(null);
+
   readonly addMemberForm = this.formBuilder.group({
-    firstName: ['', [Validators.required]],
-    lastName: ['', [Validators.required]],
+    firstName: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(100)],
+    ],
+    lastName: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(100)],
+    ],
     email: ['', [Validators.required, Validators.email]],
-    phone: [''],
-    role: ['', [Validators.required]],
+    phone: ['', [Validators.required, Validators.pattern(/^\+[1-9]\d{1,14}$/)]],
   });
+
+  // Signal pour gérer les rôles sélectionnés (multiselect)
+  readonly selectedSubRoles = signal<string[]>([]);
+
+  // Messages de feedback
+  readonly successMessage = signal<string | null>(null);
+  readonly addMemberError = signal<string | null>(null);
+
+  // Flag pour savoir si le formulaire a été soumis (évite les faux positifs)
+  private addMemberSubmitted = signal(false);
+
+  // Photo upload
+  readonly avatarPreview = signal<string | null>(null);
+  private selectedAvatarFile: File | null = null;
 
   readonly editMemberForm = this.formBuilder.group({
     firstName: [{ value: '', disabled: true }],
@@ -275,6 +305,7 @@ export class EquipePageComponent {
     if (this.hasCurrentUserSelfAssigned()) return false;
     const user = this.authStore.user();
     if (!user) return false;
+    if (user.subRole) return false;
     const isPartnerAdmin = user.mainRole === UbaxRole.PARTNER_ADMIN;
     const isPartnerWithoutScope =
       user.mainRole === UbaxRole.PARTNER && user.scope === null;
@@ -385,6 +416,24 @@ export class EquipePageComponent {
   constructor() {
     this.agencyStore.load?.({});
 
+    // Toggle body class when any drawer/overlay is open (reduces topbar z-index)
+    effect(() => {
+      const isAnyOverlayOpen =
+        this.isAutoAssignDrawerOpen() ||
+        this.isAddMemberDrawerOpen() ||
+        this.activeMemberPanelMode() !== null ||
+        this.confirmDialogOpen();
+
+      this.document.body.classList.toggle(
+        'ubax-equipe-overlay-open',
+        isAnyOverlayOpen,
+      );
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.document.body.classList.remove('ubax-equipe-overlay-open');
+    });
+
     // Load the DB userId for PARTNER_ADMIN or PARTNER without scope via Keycloak ID
     effect(() => {
       const user = this.authStore.user();
@@ -442,6 +491,50 @@ export class EquipePageComponent {
 
       this.editPanelRoles.set([...(cachedSubRoles[memberId] ?? [])]);
       this.editPanelSeededFor.set(memberId);
+    });
+
+    // Handle add member success/error feedback
+    effect(() => {
+      const isSaving = this.agencyStore.isSaving();
+      const error = this.agencyStore.error();
+
+      // Only handle feedback when drawer is open
+      if (!this.isAddMemberDrawerOpen()) {
+        return;
+      }
+
+      // If just finished saving and no error, show success
+      // Note: we check addMemberSubmitted to avoid triggering on initial drawer open
+      if (
+        !isSaving &&
+        !error &&
+        this.addMemberSubmitted() &&
+        !this.successMessage()
+      ) {
+        this.successMessage.set('Membre ajouté avec succès !');
+        this.selectedSubRoles.set([]);
+        this.addMemberSubmitted.set(false);
+        // Auto-close after 2 seconds
+        setTimeout(() => {
+          this.closeAddMemberDrawer();
+        }, 2000);
+      }
+
+      // If there's an error, display it
+      if (error && !this.addMemberError()) {
+        // Check for 409 Conflict (email already exists)
+        if (
+          error.toLowerCase().includes('409') ||
+          error.toLowerCase().includes('conflict') ||
+          error.toLowerCase().includes('already')
+        ) {
+          this.addMemberError.set('Cet email est déjà utilisé.');
+        } else {
+          this.addMemberError.set(
+            "Une erreur est survenue lors de l'ajout du membre.",
+          );
+        }
+      }
     });
   }
 
@@ -523,31 +616,52 @@ export class EquipePageComponent {
 
   openAddMemberDrawer(): void {
     this.addMemberForm.reset();
+    this.selectedSubRoles.set([]);
+    this.successMessage.set(null);
+    this.addMemberError.set(null);
+    this.addMemberSubmitted.set(false);
     this.isAddMemberDrawerOpen.set(true);
   }
 
   closeAddMemberDrawer(): void {
     this.isAddMemberDrawerOpen.set(false);
+    this.addMemberError.set(null);
+    this.successMessage.set(null);
   }
 
   submitAddMember(): void {
-    if (this.addMemberForm.invalid) {
+    if (this.addMemberForm.invalid || this.selectedSubRoles().length === 0) {
       this.addMemberForm.markAllAsTouched();
       return;
     }
 
-    const { firstName, lastName, email, phone, role } =
+    const { firstName, lastName, email, phone } =
       this.addMemberForm.getRawValue();
+
+    this.addMemberSubmitted.set(true);
+    this.addMemberError.set(null);
 
     this.agencyStore.inviterMembre({
       firstName,
       lastName,
       email,
       phone: phone || undefined,
-      subRoles: role ? [role] : [],
+      subRoles: this.selectedSubRoles(),
     });
+  }
 
-    this.closeAddMemberDrawer();
+  // Gérer la sélection/désélection d'un rôle
+  toggleSubRole(roleKey: string): void {
+    const current = this.selectedSubRoles();
+    if (current.includes(roleKey)) {
+      this.selectedSubRoles.set(current.filter((r) => r !== roleKey));
+    } else {
+      this.selectedSubRoles.set([...current, roleKey]);
+    }
+  }
+
+  isSubRoleSelected(roleKey: string): boolean {
+    return this.selectedSubRoles().includes(roleKey);
   }
 
   // ── Member panel (view details / edit roles) ─────────────────────────────
@@ -615,12 +729,78 @@ export class EquipePageComponent {
     this.closeMemberPanel();
   }
 
+  // ── Role revocation with confirmation ────────────────────────────────────
+
+  openRevokeConfirmation(
+    role: string,
+    memberId: string,
+    memberName: string,
+  ): void {
+    const roleLabel = this.subRoleLabels[role] ?? role;
+    this.confirmDialogTitle.set('Confirmer la révocation');
+    this.confirmDialogMessage.set(
+      `Êtes-vous sûr de vouloir révoquer le rôle "${roleLabel}" de ${memberName} ?`,
+    );
+    this.confirmDialogRoleToRevoke.set(role);
+    this.confirmDialogMemberId.set(memberId);
+    this.confirmDialogOpen.set(true);
+  }
+
+  closeConfirmDialog(): void {
+    this.confirmDialogOpen.set(false);
+    this.confirmDialogRoleToRevoke.set(null);
+    this.confirmDialogMemberId.set(null);
+  }
+
+  confirmRevokeRole(): void {
+    const role = this.confirmDialogRoleToRevoke();
+    const memberId = this.confirmDialogMemberId();
+
+    if (role && memberId) {
+      this.agencyStore.revoquerSousRole({ userId: memberId, role });
+    }
+
+    this.closeConfirmDialog();
+  }
+
   hasSelectedRole(roles: readonly string[], id: string): boolean {
     return roles.includes(id);
   }
 
   getInitials(firstName: string, lastName: string): string {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  }
+
+  // ── Photo upload ───────────────────────────────────────────────────────────
+
+  onAvatarClick(): void {
+    document.getElementById('avatarInput')?.click();
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.selectedAvatarFile = file;
+
+    // Preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.avatarPreview.set(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeAvatar(event: Event): void {
+    event.stopPropagation();
+    this.selectedAvatarFile = null;
+    this.avatarPreview.set(null);
+    // Reset file input
+    const input = document.getElementById('avatarInput') as HTMLInputElement;
+    if (input) {
+      input.value = '';
+    }
   }
 
   @HostListener('document:click', ['$event.target'])

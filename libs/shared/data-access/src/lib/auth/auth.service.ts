@@ -33,7 +33,20 @@ export type MySubRolesResponse = {
 
 function extractStringArray(data: unknown): string[] {
   if (Array.isArray(data)) {
-    return data.filter((item): item is string => typeof item === 'string');
+    // Handle array of strings directly
+    const stringItems = data.filter(
+      (item): item is string => typeof item === 'string',
+    );
+    if (stringItems.length > 0) return stringItems;
+
+    // Handle array of objects with 'role' property (API returns [{ role: 'DIRECTEUR_AGENCE', ... }])
+    const roleItems = data
+      .filter(
+        (item) => typeof item === 'object' && item !== null && 'role' in item,
+      )
+      .map((item) => (item as { role: unknown }).role)
+      .filter((role): role is string => typeof role === 'string');
+    return roleItems;
   }
   return [];
 }
