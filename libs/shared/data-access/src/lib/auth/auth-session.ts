@@ -1,27 +1,61 @@
-import { Role, User } from './user.model';
+import { UbaxRole, UbaxScope, UbaxSubRole, User } from './user.model';
 
 export const AUTH_TOKEN_STORAGE_KEY = 'ubax_token';
 export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'ubax_refresh_token';
 export const DEFAULT_UBAX_WEB_HOME_PATH = '/app/tableau-de-bord';
 
-export interface StoredAuthSession {
+export type StoredAuthSession = {
   accessToken: string;
   refreshToken: string;
-}
+};
 
 type JwtPayload = Record<string, unknown>;
 
-const TOKEN_ROLE_PATTERNS: ReadonlyArray<readonly [RegExp, Role]> = [
-  [
-    /GERANT_HOTEL|RECEPTIONNISTE|RESPONSABLE_HEBERGEMENT|COMPTABLE_HOTEL|HOTEL/,
-    Role.HOTEL,
-  ],
-  [/UBAX_SUPER_ADMIN|UBAX_ADMIN/, Role.DG],
-  [/DIRECTEUR_GENERAL|DIRECTEUR_AGENCE|\bDG\b/, Role.DG],
-  [/COMMERCIAL/, Role.COMMERCIAL],
-  [/AGENT_SAV|SUPPORT_CLIENT|\bSAV\b/, Role.SAV],
-  [/COMPTABLE_AGENCE|COMPTABLE|FINANCE/, Role.COMPTABLE],
+// Main roles always come from the JWT. When sub-roles are also present there,
+// we use them as a safe fallback before the GET /sub-roles enrichment completes.
+const MAIN_ROLE_PATTERNS: ReadonlyArray<readonly [RegExp, UbaxRole]> = [
+  [/\bUBAX_SUPER_ADMIN\b/, UbaxRole.SUPER_ADMIN],
+  [/\bUBAX_ADMIN\b/, UbaxRole.ADMIN],
+  [/\bUBAX_PARTNER\b/, UbaxRole.PARTNER],
+  [/\bUBAX_OWNER\b/, UbaxRole.OWNER],
+  [/\bUBAX_CLIENT\b/, UbaxRole.CLIENT],
 ];
+
+const SUB_ROLE_PRIORITY: readonly UbaxSubRole[] = [
+  UbaxSubRole.DIRECTEUR_AGENCE,
+  UbaxSubRole.GERANT_HOTEL,
+  UbaxSubRole.DIRECTEUR_GENERAL,
+  UbaxSubRole.COMMERCIAL,
+  UbaxSubRole.COMPTABLE_AGENCE,
+  UbaxSubRole.COMPTABLE_HOTEL,
+  UbaxSubRole.FINANCE,
+  UbaxSubRole.AGENT_SAV,
+  UbaxSubRole.RECEPTIONNISTE,
+  UbaxSubRole.RESPONSABLE_HEBERGEMENT,
+  UbaxSubRole.SUPPORT_CLIENT,
+  UbaxSubRole.OPERATIONS,
+];
+
+const AGENCE_SUB_ROLES = new Set<UbaxSubRole>([
+  UbaxSubRole.DIRECTEUR_AGENCE,
+  UbaxSubRole.COMMERCIAL,
+  UbaxSubRole.COMPTABLE_AGENCE,
+  UbaxSubRole.AGENT_SAV,
+]);
+
+const HOTEL_SUB_ROLES = new Set<UbaxSubRole>([
+  UbaxSubRole.GERANT_HOTEL,
+  UbaxSubRole.RECEPTIONNISTE,
+  UbaxSubRole.COMPTABLE_HOTEL,
+  UbaxSubRole.RESPONSABLE_HEBERGEMENT,
+]);
+
+const INTERNAL_SUB_ROLES = new Set<UbaxSubRole>([
+  UbaxSubRole.DIRECTEUR_GENERAL,
+  UbaxSubRole.SUPPORT_CLIENT,
+  UbaxSubRole.OPERATIONS,
+  UbaxSubRole.FINANCE,
+]);
 
 function getLocalStorage(): Storage | null {
   if (typeof globalThis === 'undefined' || !('localStorage' in globalThis)) {
@@ -95,6 +129,12 @@ function readString(
   return null;
 }
 
+function uniqueNonEmptyStrings(values: readonly (string | null)[]): string[] {
+  return Array.from(
+    new Set(values.filter((value): value is string => Boolean(value?.trim()))),
+  );
+}
+
 function readStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.filter((item): item is string => typeof item === 'string');
@@ -135,26 +175,73 @@ function normalizeRoleValue(role: string): string {
     .replace(/[^A-Z0-9]+/g, '_');
 }
 
-function inferRoleFromPayload(payload: JwtPayload): Role | null {
-  const candidates = [
+function readRoleCandidates(payload: JwtPayload): string[] {
+  return [
     ...readStringArray(payload['role']),
     ...readStringArray(payload['roles']),
-    ...readStringArray(payload['groups']),
-    ...readStringArray(payload['group']),
-    ...readStringArray(payload['subRole']),
-    ...readStringArray(payload['sub_role']),
-    ...readStringArray(payload['subRoles']),
     ...readStringArray(payload['authorities']),
     ...readNestedRoles(payload),
   ].map(normalizeRoleValue);
+}
+
+function inferMainRoleFromPayload(payload: JwtPayload): UbaxRole | null {
+  const candidates = readRoleCandidates(payload);
 
   for (const candidate of candidates) {
-    for (const [pattern, role] of TOKEN_ROLE_PATTERNS) {
+    for (const [pattern, role] of MAIN_ROLE_PATTERNS) {
       if (pattern.test(candidate)) {
         return role;
       }
     }
   }
+
+  return null;
+}
+
+function inferSubRoleFromPayload(payload: JwtPayload): UbaxSubRole | null {
+  const candidates = new Set(readRoleCandidates(payload));
+
+  for (const subRole of SUB_ROLE_PRIORITY) {
+    if (candidates.has(subRole)) {
+      return subRole;
+    }
+  }
+
+  return null;
+}
+
+function inferScopeFromPayload(
+  payload: JwtPayload,
+  subRole: UbaxSubRole | null,
+): UbaxScope | null {
+  const explicitScope = [
+    ...readStringArray(payload['ubax_scope']),
+    ...readStringArray(payload['ubaxScope']),
+    ...readStringArray(payload['user_scope']),
+    ...readStringArray(payload['userScope']),
+    ...readStringArray(payload['scope']),
+  ]
+    .map(normalizeRoleValue)
+    .find(
+      (value): value is UbaxScope =>
+        value === 'AGENCE' || value === 'HOTEL' || value === 'UBAX_INTERNAL',
+    );
+
+  if (explicitScope) {
+    return explicitScope;
+  }
+
+  if (subRole) {
+    if (AGENCE_SUB_ROLES.has(subRole)) return 'AGENCE';
+    if (HOTEL_SUB_ROLES.has(subRole)) return 'HOTEL';
+    if (INTERNAL_SUB_ROLES.has(subRole)) return 'UBAX_INTERNAL';
+  }
+
+  const candidates = new Set(readRoleCandidates(payload));
+
+  if (candidates.has('AGENCE')) return 'AGENCE';
+  if (candidates.has('HOTEL')) return 'HOTEL';
+  if (candidates.has('UBAX_INTERNAL')) return 'UBAX_INTERNAL';
 
   return null;
 }
@@ -202,6 +289,32 @@ function inferNames(
   };
 }
 
+function extractUserIdCandidates(payload: JwtPayload): string[] {
+  return uniqueNonEmptyStrings([
+    readString(payload, ['userId']),
+    readString(payload, ['user_id']),
+    readString(payload, ['id']),
+    readString(payload, ['keycloakId']),
+    readString(payload, ['sub']),
+  ]);
+}
+
+export function readUserIdCandidatesFromAuthToken(
+  token: string | null | undefined,
+): string[] {
+  if (!token) {
+    return [];
+  }
+
+  const payload = decodeJwtPayload(token);
+
+  if (!payload) {
+    return [];
+  }
+
+  return extractUserIdCandidates(payload);
+}
+
 export function deriveUserFromAuthToken(
   token: string | null | undefined,
 ): User | null {
@@ -215,27 +328,31 @@ export function deriveUserFromAuthToken(
     return null;
   }
 
-  const role = inferRoleFromPayload(payload);
+  const mainRole = inferMainRoleFromPayload(payload);
 
-  if (!role) {
+  if (!mainRole) {
     return null;
   }
+
+  const subRole = inferSubRoleFromPayload(payload);
+  const scope = inferScopeFromPayload(payload, subRole);
 
   const email =
     readString(payload, ['email', 'preferred_username', 'upn']) ?? '';
   const { prenom, nom } = inferNames(payload, email);
+  const [resolvedUserId] = extractUserIdCandidates(payload);
 
   return {
-    id:
-      readString(payload, ['sub', 'userId', 'user_id', 'id', 'keycloakId']) ??
-      (email || 'current-user'),
+    id: resolvedUserId ?? email ?? 'current-user',
     nom,
     prenom,
     email,
     avatar:
       readString(payload, ['picture', 'avatar', 'avatar_url', 'avatarUrl']) ??
       undefined,
-    role,
+    mainRole,
+    subRole,
+    scope,
   };
 }
 

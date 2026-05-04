@@ -18,15 +18,18 @@ import {
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
-import { map, pipe, switchMap, tap } from 'rxjs';
+import { exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
 import {
+  API_ERROR_MESSAGES,
   ApiFnParams,
   ApiFnResponse,
   ApiHttpFn,
   ApiResourceConfig,
   ApiResourceState,
   AnyApiFn,
+  PaginationMeta,
 } from './api-resource.types';
+import { NOTIFICATION_HANDLER } from './notification.token';
 
 type EntityDictionary<TItem> = Record<string, TItem>;
 
@@ -39,6 +42,7 @@ type ApiResourceFeatureSignals<TItem> = {
   saving(): boolean;
   error(): string | null;
   selectedId(): string | null;
+  pagination(): PaginationMeta | null;
 };
 
 type ApiResourceFeatureStore<TItem> = ApiResourceFeatureSignals<TItem> &
@@ -67,11 +71,6 @@ function defaultMapItem<TItem, TRaw>(raw: TRaw): TItem {
   return raw as unknown as TItem;
 }
 
-/**
- * Extrait un tableau depuis une réponse brute.
- * Gère Spring Boot pagination ({ content: T[] }), CustomResponse ({ data: T[] })
- * et les tableaux directs.
- */
 function defaultMapList<T>(raw: unknown): T[] {
   if (Array.isArray(raw)) return raw as T[];
   if (raw && typeof raw === 'object') {
@@ -86,37 +85,28 @@ function defaultMapList<T>(raw: unknown): T[] {
   return [];
 }
 
-/**
- * withApiResource<TItem>(config)
- *
- * Feature NgRx Signals générique qui apporte :
- *   - withEntities<TItem>() — stockage normalisé par id
- *   - loading / saving / error / selectedId — état commun
- *   - load(params?)     — charge la liste via config.list
- *   - loadOne(id)       — charge un item via config.getById
- *   - create(params)    — crée un item via config.create
- *   - update(params)    — met à jour un item via config.update
- *   - remove(id)        — supprime un item via config.delete
- *   - select(id|null)   — sélectionne un item localement
- *   - clearError()      — vide l'erreur
- *
- * Usage dans un store métier :
- *
- *   export const BiensStore = signalStore(
- *     { providedIn: 'root' },
- *     withApiResource<PropertyResponse>({ list: list1, getById, create: create2, ... }),
- *     withComputed(({ entities }) => ({
- *       biensPublies: computed(() => entities().filter(b => b.status === 'PUBLISHED')),
- *     }))
- *   );
- *
- * Usage direct dans un composant (scope composant) :
- *
- *   const TenantStore = createApiStore<TenantResponse>({ list: list4, getById: getById2 });
- *
- *   @Component({ providers: [TenantStore] })
- *   class MyComponent { store = inject(TenantStore); }
- */
+function defaultMapPagination(raw: unknown): PaginationMeta | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Record<string, unknown>;
+
+  // Spring Boot Page : { totalElements, totalPages, number, size }
+  const src =
+    typeof r['totalElements'] === 'number'
+      ? r
+      : r['data'] && typeof r['data'] === 'object'
+        ? (r['data'] as Record<string, unknown>)
+        : null;
+
+  if (!src || typeof src['totalElements'] !== 'number') return null;
+
+  return {
+    totalElements: src['totalElements'] as number,
+    totalPages: (src['totalPages'] as number) ?? 1,
+    currentPage: (src['number'] as number) ?? 0,
+    pageSize: (src['size'] as number) ?? 20,
+  };
+}
+
 export function withApiResource<
   TItem,
   TListFn extends ApiFnLike | undefined = undefined,
@@ -138,6 +128,10 @@ export function withApiResource<
   const mapList =
     config.mapList ??
     ((raw: ApiFnResponse<NonNullable<TListFn>>) => defaultMapList<TItem>(raw));
+  const mapPagination =
+    config.mapPagination ??
+    ((raw: ApiFnResponse<NonNullable<TListFn>>) =>
+      defaultMapPagination(raw));
   const mapGetById =
     config.mapGetById ??
     ((raw: ApiFnResponse<NonNullable<TGetByIdFn>>) =>
@@ -150,7 +144,6 @@ export function withApiResource<
     config.mapUpdate ??
     ((raw: ApiFnResponse<NonNullable<TUpdateFn>>) =>
       defaultMapItem<TItem, ApiFnResponse<NonNullable<TUpdateFn>>>(raw));
-  // Options entity passées aux opérations (setAllEntities, addEntity…)
   const entityOpts = { selectId };
   const listRequest = config.list as
     | ApiHttpFn<
@@ -196,6 +189,7 @@ export function withApiResource<
       saving: false,
       error: null,
       selectedId: null,
+      pagination: null,
     }),
     withComputed((store: ApiResourceFeatureSignals<TItem>) => ({
       selectedItem: computed(() => {
@@ -207,12 +201,14 @@ export function withApiResource<
       isLoading: computed(() => store.loading()),
       isSaving: computed(() => store.saving()),
       hasError: computed(() => store.error() !== null),
+      hasPagination: computed(() => store.pagination() !== null),
     })),
     withMethods(
       (
         store: ApiResourceFeatureStore<TItem>,
         http = inject(HttpClient),
         apiConfig = inject(ApiConfiguration),
+        notif = inject(NOTIFICATION_HANDLER, { optional: true }),
       ) => {
         const rootUrl = () => apiConfig.rootUrl;
 
@@ -231,19 +227,25 @@ export function withApiResource<
                 tap(() => patchState(store, { loading: true, error: null })),
                 switchMap((params: ApiFnParams<NonNullable<TListFn>>) =>
                   listRequest(http, rootUrl(), params).pipe(
-                    map((r) =>
-                      mapList(r.body as ApiFnResponse<NonNullable<TListFn>>),
-                    ),
+                    map((r) => {
+                      const body = r.body as ApiFnResponse<NonNullable<TListFn>>;
+                      return {
+                        items: mapList(body),
+                        pagination: mapPagination(body),
+                      };
+                    }),
                     tapResponse({
-                      next: (items: TItem[]) =>
-                        patchState(store, setAllEntities(items, entityOpts), {
-                          loading: false,
-                        }),
-                      error: (err: HttpErrorResponse) =>
-                        patchState(store, {
-                          loading: false,
-                          error: err.message ?? 'Erreur de chargement',
-                        }),
+                      next: ({ items, pagination }) =>
+                        patchState(
+                          store,
+                          setAllEntities(items, entityOpts),
+                          { loading: false, pagination },
+                        ),
+                      error: (err: HttpErrorResponse) => {
+                        const msg = err.message ?? API_ERROR_MESSAGES.load;
+                        notif?.error(msg);
+                        patchState(store, { loading: false, error: msg });
+                      },
                     }),
                   ),
                 ),
@@ -269,11 +271,11 @@ export function withApiResource<
                           loading: false,
                           selectedId: selectId(item),
                         }),
-                      error: (err: HttpErrorResponse) =>
-                        patchState(store, {
-                          loading: false,
-                          error: err.message ?? 'Erreur de chargement',
-                        }),
+                      error: (err: HttpErrorResponse) => {
+                        const msg = err.message ?? API_ERROR_MESSAGES.load;
+                        notif?.error(msg);
+                        patchState(store, { loading: false, error: msg });
+                      },
                     }),
                   ),
                 ),
@@ -281,11 +283,12 @@ export function withApiResource<
             ),
           }),
 
+          // exhaustMap : ignore les soumissions supplémentaires tant qu'une création est en cours
           ...(createRequest && {
             create: rxMethod<ApiFnParams<NonNullable<TCreateFn>>>(
               pipe(
                 tap(() => patchState(store, { saving: true, error: null })),
-                switchMap((params: ApiFnParams<NonNullable<TCreateFn>>) =>
+                exhaustMap((params: ApiFnParams<NonNullable<TCreateFn>>) =>
                   createRequest(http, rootUrl(), params).pipe(
                     map((r) =>
                       mapCreate(
@@ -297,11 +300,11 @@ export function withApiResource<
                         patchState(store, addEntity(item, entityOpts), {
                           saving: false,
                         }),
-                      error: (err: HttpErrorResponse) =>
-                        patchState(store, {
-                          saving: false,
-                          error: err.message ?? 'Erreur de création',
-                        }),
+                      error: (err: HttpErrorResponse) => {
+                        const msg = err.message ?? API_ERROR_MESSAGES.create;
+                        notif?.error(msg);
+                        patchState(store, { saving: false, error: msg });
+                      },
                     }),
                   ),
                 ),
@@ -309,11 +312,12 @@ export function withApiResource<
             ),
           }),
 
+          // exhaustMap : ignore les sauvegardes supplémentaires tant qu'une mise à jour est en cours
           ...(updateRequest && {
             update: rxMethod<ApiFnParams<NonNullable<TUpdateFn>>>(
               pipe(
                 tap(() => patchState(store, { saving: true, error: null })),
-                switchMap((params: ApiFnParams<NonNullable<TUpdateFn>>) =>
+                exhaustMap((params: ApiFnParams<NonNullable<TUpdateFn>>) =>
                   updateRequest(http, rootUrl(), params).pipe(
                     map((r) =>
                       mapUpdate(
@@ -330,11 +334,11 @@ export function withApiResource<
                           }),
                           { saving: false },
                         ),
-                      error: (err: HttpErrorResponse) =>
-                        patchState(store, {
-                          saving: false,
-                          error: err.message ?? 'Erreur de mise à jour',
-                        }),
+                      error: (err: HttpErrorResponse) => {
+                        const msg = err.message ?? API_ERROR_MESSAGES.update;
+                        notif?.error(msg);
+                        patchState(store, { saving: false, error: msg });
+                      },
                     }),
                   ),
                 ),
@@ -345,14 +349,15 @@ export function withApiResource<
           ...(deleteRequest && {
             remove: rxMethod<string>(
               pipe(
-                switchMap((id: string) =>
+                exhaustMap((id: string) =>
                   deleteRequest(http, rootUrl(), buildDeleteParams(id)).pipe(
                     tapResponse({
                       next: () => patchState(store, removeEntity(id)),
-                      error: (err: HttpErrorResponse) =>
-                        patchState(store, {
-                          error: err.message ?? 'Erreur de suppression',
-                        }),
+                      error: (err: HttpErrorResponse) => {
+                        const msg = err.message ?? API_ERROR_MESSAGES.remove;
+                        notif?.error(msg);
+                        patchState(store, { error: msg });
+                      },
                     }),
                   ),
                 ),

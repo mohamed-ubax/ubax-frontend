@@ -57,4 +57,5 @@ export type { TenantResponse } from './models/tenant-response';
 export type { TenantUpdateRequest } from './models/tenant-update-request';
 export type { UpdateRepairCostRequest } from './models/update-repair-cost-request';
 export type { UpdateTicketStatusRequest } from './models/update-ticket-status-request';
+export type { UserResponse } from './models/user-response';
 export type { VerifyOtpRequest } from './models/verify-otp-request';

@@ -11,25 +11,22 @@ type EditableDraftField =
   | 'longStayRate'
   | 'notes';
 
-interface TypeCardOption {
+type TypeCardOption = {
   readonly value: EspaceType;
   readonly title: string;
   readonly description: string;
-  readonly icon: string;
-}
+  readonly icon: string;};
 
-interface TypeItem {
+type TypeItem = {
+  readonly id: string;
+  readonly label: string;};
+
+type EquipmentItem = {
   readonly id: string;
   readonly label: string;
-}
+  readonly icon: string;};
 
-interface EquipmentItem {
-  readonly id: string;
-  readonly label: string;
-  readonly icon: string;
-}
-
-interface BaseDraft {
+type BaseDraft = {
   code: string;
   name: string;
   typeHint: string;
@@ -44,21 +41,18 @@ interface BaseDraft {
   standardRate: string;
   weekendRate: string;
   longStayRate: string;
-  notes: string;
-}
+  notes: string;};
 
-interface RoomDraft extends BaseDraft {
+type RoomDraft = BaseDraft & {
   adults: string;
   children: string;
   area: string;
   bedType: string;
-  bedOptions: readonly string[];
-}
+  bedOptions: readonly string[];};
 
-interface HallDraft extends BaseDraft {
+type HallDraft = BaseDraft & {
   people: string;
-  area: string;
-}
+  area: string;};
 
 @Component({
   selector: 'ubax-espace-add-page',

@@ -7,6 +7,9 @@ export * from './lib/card/ui-card.component';
 export * from './lib/input/ui-input.component';
 export * from './lib/accordion/ui-accordion.component';
 export * from './lib/accordion/ui-accordion.types';
+export * from './lib/data-table/ui-data-table.component';
+export * from './lib/data-table/ui-data-table.types';
+export * from './lib/data-table/ui-data-table-cell-def.directive';
 export * from './lib/pagination/ui-pagination.component';
 
 // Layout partagés ubax-web

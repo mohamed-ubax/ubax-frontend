@@ -35,14 +35,7 @@ type ApiFnLike = AnyApiFn<never, unknown>;
  * TRaw   : la shape brute de la réponse list (souvent un wrapper paginé)
  *           par défaut = TItem[] si le backend retourne directement un tableau
  */
-export interface ApiResourceConfig<
-  TItem,
-  TListFn extends ApiFnLike | undefined = undefined,
-  TGetByIdFn extends ApiFnLike | undefined = undefined,
-  TCreateFn extends ApiFnLike | undefined = undefined,
-  TUpdateFn extends ApiFnLike | undefined = undefined,
-  TDeleteFn extends ApiFnLike | undefined = undefined,
-> {
+export type ApiResourceConfig<TItem, TListFn extends ApiFnLike | undefined = undefined, TGetByIdFn extends ApiFnLike | undefined = undefined, TCreateFn extends ApiFnLike | undefined = undefined, TUpdateFn extends ApiFnLike | undefined = undefined, TDeleteFn extends ApiFnLike | undefined = undefined> = {
   /**
    * Fonction de liste (GET /resource).
    * Correspond à une fn/* générée par ng-openapi-gen.
@@ -56,6 +49,15 @@ export interface ApiResourceConfig<
    * Défaut : tente content, data, ou identity.
    */
   mapList?: (raw: ApiFnResponse<NonNullable<TListFn>>) => TItem[];
+
+  /**
+   * Extrait les métadonnées de pagination depuis la réponse brute de list.
+   * Si absent, tente d'extraire totalElements / totalPages automatiquement.
+   * Retourner null si la réponse n'est pas paginée.
+   */
+  mapPagination?: (
+    raw: ApiFnResponse<NonNullable<TListFn>>,
+  ) => PaginationMeta | null;
 
   /**
    * Fonction get-by-id (GET /resource/:id).
@@ -100,8 +102,7 @@ export interface ApiResourceConfig<
    * Sélecteur d'identifiant de l'entité.
    * Défaut : item => item.id si présent
    */
-  idSelector?: (item: TItem) => string;
-}
+  idSelector?: (item: TItem) => string;};
 
 export function defineApiResourceConfig<
   TItem,
@@ -130,10 +131,23 @@ export function defineApiResourceConfig<
   return config;
 }
 
+export type PaginationMeta = {
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;};
+
 // État commun à toute ressource API
-export interface ApiResourceState {
+export type ApiResourceState = {
   loading: boolean;
   saving: boolean;
   error: string | null;
   selectedId: string | null;
-}
+  pagination: PaginationMeta | null;};
+
+export const API_ERROR_MESSAGES = {
+  load: 'Erreur lors du chargement',
+  create: 'Erreur lors de la création',
+  update: 'Erreur lors de la mise à jour',
+  remove: 'Erreur lors de la suppression',
+} as const;

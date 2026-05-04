@@ -51,6 +51,10 @@ body.ubax-dashboard-overlay-open ubax-topbar {
   z-index: 0;
 }
 
+body.ubax-equipe-overlay-open ubax-topbar {
+  z-index: 0;
+}
+
 .dashboard-comptable__modal-dropdown,
 .dashboard-comptable__modal-date-picker {
   position: relative;

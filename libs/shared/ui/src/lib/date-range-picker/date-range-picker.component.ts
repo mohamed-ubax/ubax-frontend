@@ -11,16 +11,14 @@ import {
   signal,
 } from '@angular/core';
 
-export interface DateRange {
+export type DateRange = {
   start: Date;
-  end: Date;
-}
+  end: Date;};
 
-interface CalendarDay {
+type CalendarDay = {
   date: Date;
   dayNum: number;
-  isCurrentMonth: boolean;
-}
+  isCurrentMonth: boolean;};
 
 const MONTH_NAMES = [
   'Janvier',

@@ -62,6 +62,9 @@
       "@ubax-workspace/ubax-web-demandes": [
         "libs/ubax-web/features/demandes/src/index.ts"
       ],
+      "@ubax-workspace/ubax-web-equipe": [
+        "libs/ubax-web/features/equipe/src/index.ts"
+      ],
       "@ubax-workspace/ubax-web-archivage": [
         "libs/ubax-web/features/archivage/src/index.ts"
       ]

@@ -24,29 +24,26 @@ import {
 type DashboardPeriod = 'Jour' | 'Mois' | 'Année';
 type DashboardExpenseLinkMode = 'property' | 'agency';
 
-interface DashboardKpiCard {
+type DashboardKpiCard = {
   readonly label: string;
   readonly amount: number;
   readonly tone: 'revenue' | 'rent' | 'pending' | 'commission';
   readonly icon: string;
-  readonly iconAlt: string;
-}
+  readonly iconAlt: string;};
 
-interface RevenuePoint {
+type RevenuePoint = {
   readonly label: string;
   readonly amount: number;
   readonly tooltipLabel: string;
-  readonly highlighted?: boolean;
-}
+  readonly highlighted?: boolean;};
 
-interface RevenueSplitItem {
+type RevenueSplitItem = {
   readonly label: string;
   readonly value: number;
   readonly percentage: string;
-  readonly tone: 'short' | 'location' | 'sale';
-}
+  readonly tone: 'short' | 'location' | 'sale';};
 
-interface DashboardTransaction {
+type DashboardTransaction = {
   readonly id: string;
   readonly title: string;
   readonly date: string;
@@ -54,35 +51,30 @@ interface DashboardTransaction {
   readonly amount: number;
   readonly month: string;
   readonly logo: string;
-  readonly logoAlt: string;
-}
+  readonly logoAlt: string;};
 
-interface DashboardExpense {
+type DashboardExpense = {
   readonly id: string;
   readonly label: string;
   readonly amount: number;
   readonly icon: string;
-  readonly iconAlt: string;
-}
+  readonly iconAlt: string;};
 
-interface DashboardExpensePropertyOption {
+type DashboardExpensePropertyOption = {
   readonly id: string;
   readonly label: string;
-  readonly owner: string;
-}
+  readonly owner: string;};
 
-interface DashboardExpenseUpload {
+type DashboardExpenseUpload = {
   readonly id: string;
   readonly name: string;
-  readonly sizeLabel: string;
-}
+  readonly sizeLabel: string;};
 
-interface DashboardOverdueItem {
+type DashboardOverdueItem = {
   readonly id: string;
   readonly name: string;
   readonly property: string;
-  readonly type: string;
-}
+  readonly type: string;};
 
 const DASHBOARD_COMPTABLE_ASSETS = {
   search: 'finances/shared/search-icon.webp',

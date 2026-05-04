@@ -6,5 +6,5 @@ export interface CreateAdminRequest {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  role: 'CLIENT' | 'OWNER' | 'ADMIN' | 'SUPER_ADMIN' | 'PARTNER';
+  role: 'CLIENT' | 'OWNER' | 'ADMIN' | 'SUPER_ADMIN' | 'PARTNER' | 'PARTNER_ADMIN';
 }

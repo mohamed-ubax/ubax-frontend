@@ -21,14 +21,13 @@ import {
 } from '../../reservation-commercial.data';
 import { ReservationMiniCalendarComponent } from '../../components/reservation-mini-calendar/reservation-mini-calendar.component';
 
-interface CalendarDay {
+type CalendarDay = {
   readonly date: Date;
   readonly label: number;
   readonly isCurrentMonth: boolean;
-  readonly isActive: boolean;
-}
+  readonly isActive: boolean;};
 
-interface CalendarReservationEvent {
+type CalendarReservationEvent = {
   readonly id: string;
   readonly guest: string;
   readonly property: string;
@@ -41,25 +40,21 @@ interface CalendarReservationEvent {
   readonly startCol: number;
   readonly endCol: number;
   readonly row: number;
-  readonly spanDays: number;
-}
+  readonly spanDays: number;};
 
-interface CalendarWeek {
+type CalendarWeek = {
   readonly days: readonly CalendarDay[];
   readonly events: readonly CalendarReservationEvent[];
-  readonly rowCount: number;
-}
+  readonly rowCount: number;};
 
-interface LegendEntry {
+type LegendEntry = {
   readonly property: string;
-  readonly tone: 'green' | 'orange' | 'blue';
-}
+  readonly tone: 'green' | 'orange' | 'blue';};
 
-interface PropertyFilterOption {
+type PropertyFilterOption = {
   readonly value: string;
   readonly label: string;
-  readonly tone: 'neutral' | 'green' | 'orange' | 'blue';
-}
+  readonly tone: 'neutral' | 'green' | 'orange' | 'blue';};
 
 const PROPERTY_FILTER_ORDER = ['Résidence', 'Villa', 'Appartement'] as const;
 const PROPERTY_FILTER_TONES: Record<string, PropertyFilterOption['tone']> = {

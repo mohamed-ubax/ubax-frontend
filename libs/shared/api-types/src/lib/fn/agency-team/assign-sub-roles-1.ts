@@ -11,24 +11,31 @@ import { CustomResponse } from '../../models/custom-response';
 
 export interface AssignSubRoles1$Params {
   userId: string;
-      body: Array<string>
+  body: Array<string>;
 }
 
-export function assignSubRoles1(http: HttpClient, rootUrl: string, params: AssignSubRoles1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function assignSubRoles1(
+  http: HttpClient,
+  rootUrl: string,
+  params: AssignSubRoles1$Params,
+  context?: HttpContext,
+): Observable<StrictHttpResponse<CustomResponse>> {
   const rb = new RequestBuilder(rootUrl, assignSubRoles1.PATH, 'post');
   if (params) {
     rb.path('userId', params.userId, {});
     rb.body(params.body, 'application/json');
   }
 
-  return http.request(
-    rb.build({ responseType: 'blob', accept: '*/*', context })
-  ).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
-    })
-  );
+  return http
+    .request(
+      rb.build({ responseType: 'json', accept: 'application/json', context }),
+    )
+    .pipe(
+      filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<CustomResponse>;
+      }),
+    );
 }
 
 assignSubRoles1.PATH = '/v1/agency/team/{userId}/sub-roles';

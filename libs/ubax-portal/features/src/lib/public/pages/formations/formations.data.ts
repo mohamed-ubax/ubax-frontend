@@ -1,18 +1,16 @@
-export interface GuideSection {
+export type GuideSection = {
   heading?: string;
   paragraphs: string[];
-  list?: string[];
-}
+  list?: string[];};
 
-export interface Guide {
+export type Guide = {
   slug: string;
   image: string;
   heroImage: string;
   title: string;
   excerpt: string;
   date: string;
-  sections: GuideSection[];
-}
+  sections: GuideSection[];};
 
 export const ALL_GUIDES: Guide[] = [
   {

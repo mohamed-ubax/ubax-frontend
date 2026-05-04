@@ -9,10 +9,10 @@ import {
 } from '@angular/core';
 import {
   AuthStore,
-  DEV_ROLE_OPTIONS,
-  coerceRole,
-  persistDevRole,
-  readStoredDevRole,
+  DEV_PROFILES,
+  type DevProfile,
+  persistDevProfile,
+  readStoredDevProfile,
 } from '@ubax-workspace/ubax-web-data-access';
 
 @Component({
@@ -25,42 +25,61 @@ import {
 export class DevRoleSwitcherComponent implements OnInit {
   readonly authStore = inject(AuthStore);
   private readonly document = inject(DOCUMENT);
+
   protected readonly enabled = computed(
     () => isDevMode() && this.authStore.token() === 'dev-mock-token',
   );
-  protected readonly roleOptions = DEV_ROLE_OPTIONS;
-  protected readonly selectedRole = computed(() => this.authStore.role());
+  protected readonly devProfiles = DEV_PROFILES;
+  protected readonly selectedLabel = computed(() => {
+    const user = this.authStore.user();
+    if (!user) return null;
+    return (
+      DEV_PROFILES.find(
+        (p) => p.mainRole === user.mainRole && p.subRole === user.subRole,
+      )?.label ?? null
+    );
+  });
 
   ngOnInit(): void {
-    if (!this.enabled()) {
+    if (!this.enabled()) return;
+
+    const stored = readStoredDevProfile();
+    if (!stored) return;
+
+    const current = this.authStore.user();
+    if (
+      current?.mainRole === stored.mainRole &&
+      current?.subRole === stored.subRole
+    ) {
       return;
     }
 
-    const storedRole = readStoredDevRole();
-    const currentRole = this.authStore.role();
-
-    if (!storedRole || storedRole === currentRole) {
-      return;
-    }
-
-    this.authStore.setRole(storedRole);
+    this.applyProfile(stored);
     this.reloadDashboard();
   }
 
-  protected onRoleChange(rawRole: string): void {
-    if (!this.enabled()) {
-      return;
-    }
+  protected onProfileChange(event: Event): void {
+    if (!this.enabled()) return;
 
-    const nextRole = coerceRole(rawRole);
+    const label = (event.target as HTMLSelectElement).value;
+    const profile = DEV_PROFILES.find((p) => p.label === label);
+    if (!profile || profile.label === this.selectedLabel()) return;
 
-    if (!nextRole || nextRole === this.authStore.role()) {
-      return;
-    }
-
-    persistDevRole(nextRole);
-    this.authStore.setRole(nextRole);
+    persistDevProfile(label);
+    this.applyProfile(profile);
     this.reloadDashboard();
+  }
+
+  private applyProfile(profile: DevProfile): void {
+    const current = this.authStore.user();
+    if (!current) return;
+
+    this.authStore.setUser({
+      ...current,
+      mainRole: profile.mainRole,
+      subRole: profile.subRole,
+      scope: profile.scope,
+    });
   }
 
   private reloadDashboard(): void {

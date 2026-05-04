@@ -21,30 +21,13 @@ import {
   getTeamMembers,
   revokeSubRole,
 } from '@ubax-workspace/shared-api-types';
-import { map, pipe, switchMap, tap } from 'rxjs';
-
-type HotelTeamMember = AdminUserResponse & {
-  active?: boolean;
-  roles?: Array<string>;
-};
-
-const mapTeamList = (raw: unknown): HotelTeamMember[] => {
-  if (Array.isArray(raw)) return raw;
-  if (raw && typeof raw === 'object') {
-    const record = raw as { content?: unknown; data?: unknown };
-
-    if (Array.isArray(record.content)) return record.content;
-    if (Array.isArray(record.data)) return record.data;
-    if (record.data && typeof record.data === 'object') {
-      const nested = (record.data as { content?: unknown }).content;
-      if (Array.isArray(nested)) {
-        return nested;
-      }
-    }
-  }
-
-  return [];
-};
+import { exhaustMap, map, pipe, tap } from 'rxjs';
+import {
+  mapTeamList,
+  readTeamMemberActive,
+  readTeamMemberRoles,
+  teamMemberIdSelector,
+} from '../team/team-member.helpers';
 
 /**
  * HotelStore — gestion de l'équipe hôtel.
@@ -64,18 +47,18 @@ export const HotelStore = signalStore(
   withApiResource({
     list: getTeamMembers,
     mapList: mapTeamList,
-    idSelector: (m) => m.userId ?? m.keycloakId ?? m.email ?? '',
+    idSelector: teamMemberIdSelector,
   }),
   withState({
     filterRole: null as string | null,
   }),
   withComputed(({ entities, filterRole }) => ({
-    membresActifs: computed(() => entities().filter((m) => Boolean(m.active))),
+    membresActifs: computed(() => entities().filter(readTeamMemberActive)),
     membresFiltres: computed(() => {
       const role = filterRole();
       if (!role) return entities();
-      return entities().filter(
-        (m) => Array.isArray(m.roles) && m.roles.includes(role),
+      return entities().filter((member) =>
+        readTeamMemberRoles(member).includes(role),
       );
     }),
     totalMembres: computed(() => entities().length),
@@ -93,19 +76,18 @@ export const HotelStore = signalStore(
       inviterMembre: rxMethod<AddTeamMemberRequest>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap((body: AddTeamMemberRequest) =>
+          exhaustMap((body: AddTeamMemberRequest) =>
             addMember(http, apiConfig.rootUrl, { body }).pipe(
-              map((r) => r.body as HotelTeamMember),
+              map((r) => r.body as AdminUserResponse),
               tapResponse({
-                next: (membre: HotelTeamMember) =>
-                  patchState(
-                    store,
-                    addEntity(membre, {
-                      selectId: (m: HotelTeamMember) =>
-                        m.userId ?? m.keycloakId ?? m.email ?? '',
-                    }),
-                    { saving: false },
-                  ),
+                next: (membre: AdminUserResponse) =>
+                    patchState(
+                      store,
+                      addEntity(membre, {
+                        selectId: teamMemberIdSelector,
+                      }),
+                      { saving: false },
+                    ),
                 error: (err: HttpErrorResponse) =>
                   patchState(store, { saving: false, error: err.message }),
               }),
@@ -120,7 +102,7 @@ export const HotelStore = signalStore(
       }>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap(({ userId, body }) =>
+          exhaustMap(({ userId, body }) =>
             assignSubRoles(http, apiConfig.rootUrl, {
               userId,
               body: body.roles ?? [],
@@ -137,7 +119,7 @@ export const HotelStore = signalStore(
 
       revoquerSousRole: rxMethod<{ userId: string; role: string }>(
         pipe(
-          switchMap(({ userId, role }) =>
+          exhaustMap(({ userId, role }) =>
             revokeSubRole(http, apiConfig.rootUrl, { userId, role }).pipe(
               tapResponse({
                 next: () => undefined,

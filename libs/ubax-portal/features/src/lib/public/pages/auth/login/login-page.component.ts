@@ -13,6 +13,7 @@ import {
   AuthService,
   clearStoredAuthSession,
   DEFAULT_UBAX_WEB_HOME_PATH,
+  type LoginResponse,
   persistAuthSession,
   resolveUbaxWebRedirectTarget,
 } from '@ubax-workspace/shared-data-access';
@@ -21,7 +22,7 @@ import { Password } from 'primeng/password';
 import { Button } from 'primeng/button';
 import { firstValueFrom } from 'rxjs';
 
-interface LoginApiResponse {
+type LoginApiResponse = LoginResponse & {
   access_token?: string | null;
   refresh_token?: string | null;
   data?: {
@@ -30,12 +31,9 @@ interface LoginApiResponse {
     refreshToken?: string | null;
     refresh_token?: string | null;
   } | null;
-}
+};
 
-interface LoginSessionTokens {
-  accessToken: string;
-  refreshToken: string;
-}
+type LoginSessionTokens = Parameters<typeof persistAuthSession>[0];
 
 @Component({
   selector: 'ubax-login-page',

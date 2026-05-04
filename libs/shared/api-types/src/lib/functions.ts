@@ -91,6 +91,10 @@ export type { ForgotPasswordSendOtp$Params as ForgotPasswordSendOtp$Params } fro
 export { forgotPasswordSendOtp as forgotPasswordSendOtp } from './fn/mobile/forgot-password-send-otp';
 export type { ForgotPasswordReset$Params as ForgotPasswordReset$Params } from './fn/mobile/forgot-password-reset';
 export { forgotPasswordReset as forgotPasswordReset } from './fn/mobile/forgot-password-reset';
+export type { GetByUserId$Params as GetByUserId$Params } from './fn/mobile/get-by-user-id';
+export { getByUserId as getByUserId } from './fn/mobile/get-by-user-id';
+export type { GetByKeycloakId$Params as GetByKeycloakId$Params } from './fn/mobile/get-by-keycloak-id';
+export { getByKeycloakId as getByKeycloakId } from './fn/mobile/get-by-keycloak-id';
 export type { List$Params as List$Params } from './fn/ticketing/list';
 export { list as list } from './fn/ticketing/list';
 export type { Create$Params as Create$Params } from './fn/ticketing/create';

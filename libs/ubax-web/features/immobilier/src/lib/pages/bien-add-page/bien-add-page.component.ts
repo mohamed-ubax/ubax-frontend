@@ -1,27 +1,22 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
-interface AddBienMedia {
+type AddBienMedia = {
   readonly src: string;
-  readonly alt: string;
-}
+  readonly alt: string;};
 
-interface AddBienCounter {
+type AddBienCounter = {
   readonly label: string;
-  readonly value: string;
-}
+  readonly value: string;};
 
-interface AddBienCommodity {
+type AddBienCommodity = {
   readonly label: string;
-  readonly selected: boolean;
-}
+  readonly selected: boolean;};
 
-interface AddBienStep {
-  readonly label: string;
-}
+type AddBienStep = {
+  readonly label: string;};
 
-interface AddBienSummaryItem {
-  readonly text: string;
-}
+type AddBienSummaryItem = {
+  readonly text: string;};
 
 const STEPS: readonly AddBienStep[] = [
   { label: 'Informations générales' },

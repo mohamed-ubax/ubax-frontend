@@ -14,7 +14,7 @@ import {
 type TabId = 'all' | 'active' | 'inactive';
 type EmployeStatusTone = 'active' | 'inactive';
 
-interface EmployeRow {
+type EmployeRow = {
   readonly id: string;
   readonly nom: string;
   readonly poste: string;
@@ -23,14 +23,12 @@ interface EmployeRow {
   readonly horaires: string;
   readonly telephone: string;
   readonly avatarSrc: string;
-  readonly statusTone: EmployeStatusTone;
-}
+  readonly statusTone: EmployeStatusTone;};
 
-interface EmployeTab {
+type EmployeTab = {
   readonly id: TabId;
   readonly label: string;
-  readonly count: number;
-}
+  readonly count: number;};
 
 const EMPLOYES_TABS: readonly EmployeTab[] = [
   { id: 'all', label: 'Tous les employés', count: 22 },

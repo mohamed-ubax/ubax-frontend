@@ -17,12 +17,14 @@ export {
   readStoredRefreshToken,
   redirectBrowserToPortalLogin,
   resolveUbaxWebRedirectTarget,
-  Role,
+  UbaxRole,
+  UbaxSubRole,
 } from '@ubax-workspace/shared-data-access';
 export type {
   LoginRequest,
   LoginResponse,
   StoredAuthSession,
+  UbaxScope,
   User,
 } from '@ubax-workspace/shared-data-access';
 export * from './lib/models/role-access.model';
@@ -33,6 +35,7 @@ export { DemandesStore } from './lib/store/demandes/demandes.store';
 export type { Ticket } from './lib/store/demandes/demandes.store';
 export * from './lib/store/location/location.store'; // qualifier, rejeter
 export * from './lib/store/hotel/hotel.store'; // inviterMembre, assignerSousRoles
+export * from './lib/store/agency/agency.store'; // inviterMembre agence, sous-rôles
 
 // ─── Configs API prêtes à l'emploi avec createApiStore ───────────────────────
 // Usage : const BiensStore = createApiStore(biensApiConfig);

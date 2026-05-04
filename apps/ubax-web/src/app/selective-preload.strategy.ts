@@ -2,8 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { PreloadingStrategy, Route } from '@angular/router';
 import {
   AuthStore,
-  Role,
-  roleCanAccess,
+  type RouteAccess,
 } from '@ubax-workspace/ubax-web-data-access';
 import { Observable, of } from 'rxjs';
 
@@ -16,11 +15,17 @@ export class SelectivePreloadStrategy implements PreloadingStrategy {
       return of(null);
     }
 
-    const allowedRoles = route.data['roles'] as readonly Role[] | undefined;
-    const currentRole = this.authStore.role();
+    const { roles, scope } = (route.data as Partial<RouteAccess>) ?? {};
+    const user = this.authStore.user();
 
-    if (allowedRoles?.length && !roleCanAccess(currentRole, allowedRoles)) {
-      return of(null);
+    if (roles?.length) {
+      if (!user || !roles.includes(user.mainRole)) {
+        return of(null);
+      }
+
+      if (scope && user.scope !== scope) {
+        return of(null);
+      }
     }
 
     return load();

@@ -9,11 +9,10 @@ import { FormsModule } from '@angular/forms';
 
 type Role = 'administrateur' | 'concierge' | 'employe';
 
-interface DayToggle {
+type DayToggle = {
   id: string;
   label: string;
-  selected: boolean;
-}
+  selected: boolean;};
 
 @Component({
   selector: 'ubax-employe-add-page',

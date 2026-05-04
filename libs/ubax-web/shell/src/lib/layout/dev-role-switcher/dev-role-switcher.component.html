@@ -1,23 +1,23 @@
 @if (enabled()) {
   <aside
     class="dev-role-switcher"
-    aria-label="Sélecteur de rôle de développement"
+    aria-label="Sélecteur de profil de développement"
   >
     <p class="dev-role-switcher__eyebrow">Mode dev</p>
     <div class="dev-role-switcher__body">
       <label class="dev-role-switcher__field">
-        <span class="dev-role-switcher__label">Rôle simulé</span>
+        <span class="dev-role-switcher__label">Profil simulé</span>
         <span class="dev-role-switcher__select-shell">
           <select
             class="dev-role-switcher__select"
-            (change)="onRoleChange($any($event.target).value)"
+            (change)="onProfileChange($event)"
           >
-            @for (option of roleOptions; track option.role) {
+            @for (profile of devProfiles; track profile.label) {
               <option
-                [value]="option.role"
-                [selected]="option.role === selectedRole()"
+                [value]="profile.label"
+                [selected]="profile.label === selectedLabel()"
               >
-                {{ option.label }}
+                {{ profile.label }}
               </option>
             }
           </select>
@@ -25,7 +25,7 @@
         </span>
       </label>
       <p class="dev-role-switcher__hint">
-        Menus et gardes suivent ce rôle immédiatement.
+        Menus et gardes suivent ce profil immédiatement.
       </p>
     </div>
   </aside>

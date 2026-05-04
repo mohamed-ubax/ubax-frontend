@@ -6,7 +6,7 @@ import {
   output,
 } from '@angular/core';
 
-export interface CommercialRequestDetail {
+export type CommercialRequestDetail = {
   readonly firstName: string;
   readonly lastName: string;
   readonly phone: string;
@@ -16,8 +16,7 @@ export interface CommercialRequestDetail {
   readonly requestTitle: string;
   readonly requestMessage: readonly string[];
   readonly replyTitle: string;
-  readonly replyMessage: string;
-}
+  readonly replyMessage: string;};
 
 @Component({
   selector: 'ubax-demande-detail-panel',

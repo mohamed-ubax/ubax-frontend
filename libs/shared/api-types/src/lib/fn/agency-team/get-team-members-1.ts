@@ -9,22 +9,28 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface GetTeamMembers1$Params {
-}
+export interface GetTeamMembers1$Params {}
 
-export function getTeamMembers1(http: HttpClient, rootUrl: string, params?: GetTeamMembers1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function getTeamMembers1(
+  http: HttpClient,
+  rootUrl: string,
+  params?: GetTeamMembers1$Params,
+  context?: HttpContext,
+): Observable<StrictHttpResponse<CustomResponse>> {
   const rb = new RequestBuilder(rootUrl, getTeamMembers1.PATH, 'get');
   if (params) {
   }
 
-  return http.request(
-    rb.build({ responseType: 'blob', accept: '*/*', context })
-  ).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
-    })
-  );
+  return http
+    .request(
+      rb.build({ responseType: 'json', accept: 'application/json', context }),
+    )
+    .pipe(
+      filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<CustomResponse>;
+      }),
+    );
 }
 
 getTeamMembers1.PATH = '/v1/agency/team';

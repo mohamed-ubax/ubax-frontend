@@ -11,6 +11,18 @@
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "options": {
+        "command": "npm exec -- vitest run --config libs/ubax-web/shell/vitest.config.mts",
+        "cwd": "{workspaceRoot}"
+      }
     }
   }
 }

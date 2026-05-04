@@ -6,21 +6,18 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-interface BienDocument {
-  readonly name: string;
-}
+type BienDocument = {
+  readonly name: string;};
 
-interface BienMetric {
+type BienMetric = {
   readonly label: string;
-  readonly value: string;
-}
+  readonly value: string;};
 
-interface BienComment {
+type BienComment = {
   readonly author: string;
   readonly avatar: string;
   readonly rating: number;
-  readonly review: string;
-}
+  readonly review: string;};
 
 const GALLERY_IMAGES = [
   'shared/rooms/room-photo-01.webp',

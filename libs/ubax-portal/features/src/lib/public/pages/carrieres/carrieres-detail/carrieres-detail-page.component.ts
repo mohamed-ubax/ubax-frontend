@@ -15,12 +15,11 @@ import {
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-interface JobSection {
+type JobSection = {
   label: string;
-  content: string;
-}
+  content: string;};
 
-interface JobDetail {
+type JobDetail = {
   id: number;
   company: string;
   title: string;
@@ -28,8 +27,7 @@ interface JobDetail {
   contractType: string;
   availability: string;
   remuneration: string;
-  sections: JobSection[];
-}
+  sections: JobSection[];};
 
 // ── Mock job database ────────────────────────────────────────────────────────
 const JOB_DATABASE: JobDetail[] = [

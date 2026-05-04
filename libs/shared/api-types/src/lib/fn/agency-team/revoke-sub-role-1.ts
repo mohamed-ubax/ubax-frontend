@@ -14,21 +14,28 @@ export interface RevokeSubRole1$Params {
   role: string;
 }
 
-export function revokeSubRole1(http: HttpClient, rootUrl: string, params: RevokeSubRole1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function revokeSubRole1(
+  http: HttpClient,
+  rootUrl: string,
+  params: RevokeSubRole1$Params,
+  context?: HttpContext,
+): Observable<StrictHttpResponse<CustomResponse>> {
   const rb = new RequestBuilder(rootUrl, revokeSubRole1.PATH, 'delete');
   if (params) {
     rb.path('userId', params.userId, {});
     rb.path('role', params.role, {});
   }
 
-  return http.request(
-    rb.build({ responseType: 'blob', accept: '*/*', context })
-  ).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
-    })
-  );
+  return http
+    .request(
+      rb.build({ responseType: 'json', accept: 'application/json', context }),
+    )
+    .pipe(
+      filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<CustomResponse>;
+      }),
+    );
 }
 
 revokeSubRole1.PATH = '/v1/agency/team/{userId}/sub-roles/{role}';

@@ -1,12 +1,24 @@
-<label class="form-input">
+<label
+  class="form-input"
+  [class.form-input--drawer]="variant() === 'drawer'"
+>
   @if (label()) {
-    <span class="form-input__label">{{ label() }}</span>
+    <span
+      class="form-input__label"
+      [class.form-input__label--drawer]="variant() === 'drawer'"
+      >{{ label() }}</span
+    >
   }
   <input
     class="form-input__field"
+    [class.form-input__field--drawer]="variant() === 'drawer'"
+    [class.form-input__field--invalid]="invalid()"
+    [class.form-input__field--readonly]="readOnly()"
     [attr.type]="type()"
     [attr.placeholder]="placeholder() || null"
     [attr.inputmode]="inputMode() || null"
+    [attr.readonly]="readOnly() ? '' : null"
+    [disabled]="disabled()"
     [value]="value()"
     (input)="value.set($any($event.target).value)"
   />

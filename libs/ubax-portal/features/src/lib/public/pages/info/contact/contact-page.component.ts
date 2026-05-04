@@ -15,18 +15,16 @@ import { COUNTRY_CODES, type CountryCode } from '../../../shared/country-codes';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-interface ContactChannel {
+type ContactChannel = {
   icon: string;
   label: string;
   value: string;
-  href: string;
-}
+  href: string;};
 
-interface SocialLink {
+type SocialLink = {
   icon: string;
   label: string;
-  href: string;
-}
+  href: string;};
 
 @Component({
   selector: 'ubax-contact-page',

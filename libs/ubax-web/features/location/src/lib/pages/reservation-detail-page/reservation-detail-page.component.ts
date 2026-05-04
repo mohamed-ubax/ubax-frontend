@@ -13,18 +13,16 @@ import {
   getReservationById,
 } from '../../reservation-commercial.data';
 
-interface ReservationContactItem {
+type ReservationContactItem = {
   readonly label: string;
   readonly value: string;
   readonly icon: string;
   readonly href?: string;
-  readonly external?: boolean;
-}
+  readonly external?: boolean;};
 
-interface ReservationPricingRow {
+type ReservationPricingRow = {
   readonly label: string;
-  readonly value: string;
-}
+  readonly value: string;};
 
 @Component({
   selector: 'ubax-reservation-detail-page',

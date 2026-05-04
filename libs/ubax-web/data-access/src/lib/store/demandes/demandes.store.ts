@@ -16,35 +16,35 @@ import {
   assign,
   AssignTicketRequest,
   create,
+  CreateTicketRequest,
+  CustomResponse,
   getById1,
   list,
+  List$Params,
   updateStatus,
   UpdateTicketStatusRequest,
 } from '@ubax-workspace/shared-api-types';
-import { map, pipe, switchMap, tap } from 'rxjs';
+import { exhaustMap, map, pipe, tap } from 'rxjs';
 
 /**
- * Type ticket local (CustomResponse.data contient les tickets).
- * Le swagger type la réponse list en CustomResponse — on l'extrait via mapList.
+ * Adaptateur local dérivé des contrats générés.
+ * La spec Swagger retourne encore `CustomResponse` pour les endpoints tickets,
+ * donc il n'existe pas encore de `TicketResponse` généré exploitable.
  */
-export interface Ticket {
+type TicketPayload = NonNullable<CustomResponse['data']>;
+
+export type Ticket = TicketPayload & {
   id: string;
-  title?: string;
-  description?: string;
-  status?:
-    | 'OPEN'
-    | 'IN_ANALYSIS'
-    | 'TECHNICIAN_SENT'
-    | 'RESOLVED'
-    | 'CLOSED'
-    | 'CANCELLED';
-  priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
-  category?: string;
-  assignedToId?: string;
+  title?: CreateTicketRequest['title'];
+  description?: CreateTicketRequest['description'];
+  status?: List$Params['status'];
+  priority?: CreateTicketRequest['priority'];
+  category?: CreateTicketRequest['category'];
+  assignedToId?: AssignTicketRequest['assignedToId'];
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown;
-}
+};
 
 /**
  * DemandesStore — gestion des tickets SAV / maintenance.
@@ -135,7 +135,7 @@ export const DemandesStore = signalStore(
       }>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap(({ ticketId, body }) =>
+          exhaustMap(({ ticketId, body }) =>
             updateStatus(http, apiConfig.rootUrl, { ticketId, body }).pipe(
               map((r) => r.body as Ticket),
               tapResponse({
@@ -159,7 +159,7 @@ export const DemandesStore = signalStore(
       }>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
-          switchMap(({ ticketId, body }) =>
+          exhaustMap(({ ticketId, body }) =>
             assign(http, apiConfig.rootUrl, { ticketId, body }).pipe(
               map((r) => r.body as Ticket),
               tapResponse({

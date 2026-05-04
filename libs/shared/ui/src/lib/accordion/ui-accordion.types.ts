@@ -1,4 +1,3 @@
-export interface UiAccordionItem {
+export type UiAccordionItem = {
   title: string;
-  content: string;
-}
+  content: string;};

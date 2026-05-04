@@ -7,6 +7,6 @@ export interface AdminUserResponse {
   keycloakId?: string;
   lastName?: string;
   phone?: string;
-  roles?: Array<'CLIENT' | 'OWNER' | 'ADMIN' | 'SUPER_ADMIN' | 'PARTNER'>;
+  roles?: Array<'CLIENT' | 'OWNER' | 'ADMIN' | 'SUPER_ADMIN' | 'PARTNER' | 'PARTNER_ADMIN'>;
   userId?: string;
 }

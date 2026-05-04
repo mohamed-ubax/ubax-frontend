@@ -18,7 +18,7 @@ import {
   PublicShellComponent,
 } from '@ubax-workspace/ubax-portal-layout';
 
-interface JobOffer {
+type JobOffer = {
   id: number;
   company: string;
   type: string;
@@ -27,14 +27,12 @@ interface JobOffer {
   langue: string;
   sexe: string;
   echeance: string;
-  postedAt: string;
-}
+  postedAt: string;};
 
-interface CultureCard {
+type CultureCard = {
   title: string;
   body: string;
-  accent?: boolean;
-}
+  accent?: boolean;};
 
 @Component({
   selector: 'ubax-carrieres-page',

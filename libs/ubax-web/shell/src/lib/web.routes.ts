@@ -12,7 +12,6 @@ export const webRoutes: Route[] = [
       ),
     canActivate: [authGuard],
     children: [
-      // Redirection racine selon rôle (gérée dans DashboardRoutes)
       {
         path: '',
         redirectTo: 'tableau-de-bord',
@@ -36,7 +35,7 @@ export const webRoutes: Route[] = [
             (m) => m.immobilierRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: ROUTE_ROLE_ACCESS.biens },
+        data: ROUTE_ROLE_ACCESS.biens,
       },
 
       // ── Location / Réservations ─────────────────────────────────────────────
@@ -49,7 +48,7 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: {
           preload: true,
-          roles: ROUTE_ROLE_ACCESS.reservations,
+          ...ROUTE_ROLE_ACCESS.reservations,
         },
       },
 
@@ -63,7 +62,7 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: {
           preload: true,
-          roles: ROUTE_ROLE_ACCESS.demandes,
+          ...ROUTE_ROLE_ACCESS.demandes,
         },
       },
 
@@ -75,7 +74,7 @@ export const webRoutes: Route[] = [
             (m) => m.financeRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: ROUTE_ROLE_ACCESS.finances },
+        data: ROUTE_ROLE_ACCESS.finances,
       },
 
       // ── Archivage ───────────────────────────────────────────────────────────
@@ -86,7 +85,16 @@ export const webRoutes: Route[] = [
             (m) => m.archivageRoutes,
           ),
         canActivate: [roleGuard],
-        data: { roles: ROUTE_ROLE_ACCESS.archivages },
+        data: ROUTE_ROLE_ACCESS.archivages,
+      },
+      {
+        path: 'equipe',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-equipe').then(
+            (m) => m.equipeRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.teamAgence,
       },
 
       // ── Hotel ───────────────────────────────────────────────────────────────
@@ -95,7 +103,7 @@ export const webRoutes: Route[] = [
         loadChildren: () =>
           import('@ubax-workspace/ubax-web-hotel').then((m) => m.hotelRoutes),
         canActivate: [roleGuard],
-        data: { roles: ROUTE_ROLE_ACCESS.hotel },
+        data: ROUTE_ROLE_ACCESS.hotel,
       },
     ],
   },

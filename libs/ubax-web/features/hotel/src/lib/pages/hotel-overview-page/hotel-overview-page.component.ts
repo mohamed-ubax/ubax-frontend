@@ -7,49 +7,43 @@ import { LazyChartComponent } from '@ubax-workspace/shared-ui';
 
 type TrendRangeKey = 'jan-jun' | 'apr-sep' | 'jul-dec';
 
-interface ReservationMonth {
+type ReservationMonth = {
   label: string;
-  active?: boolean;
-}
+  active?: boolean;};
 
-interface TrendRangeOption {
+type TrendRangeOption = {
   label: string;
-  value: TrendRangeKey;
-}
+  value: TrendRangeKey;};
 
-interface TrendRangeConfig {
+type TrendRangeConfig = {
   months: string[];
   values: number[];
   activeIndex: number;
   count: number;
-  growth: string;
-}
+  growth: string;};
 
-interface NotificationItem {
+type NotificationItem = {
   id: number;
   type: 'new' | 'cancel' | 'confirm';
   title: string;
   subtitle: string;
-  time: string;
-}
+  time: string;};
 
-interface ReservationRow {
+type ReservationRow = {
   id: number;
   image: string;
   guest: string;
   room: string;
   duration: string;
   dates: string;
-  status: string;
-}
+  status: string;};
 
-interface PropertyCard {
+type PropertyCard = {
   id: number;
   image: string;
   tenantAvatar: string;
   tenantName: string;
-  price: string;
-}
+  price: string;};
 
 @Component({
   selector: 'ubax-hotel-overview-page',

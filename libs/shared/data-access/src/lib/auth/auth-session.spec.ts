@@ -8,12 +8,13 @@ import {
   currentBrowserPath,
   deriveUserFromAuthToken,
   persistAuthSession,
+  readUserIdCandidatesFromAuthToken,
   readStoredAuthToken,
   readStoredRefreshToken,
   redirectBrowserToPortalLogin,
   resolveUbaxWebRedirectTarget,
 } from './auth-session';
-import { Role } from './user.model';
+import { UbaxRole, UbaxSubRole } from './user.model';
 
 function createJwt(payload: Record<string, unknown>): string {
   const encode = (value: Record<string, unknown>) =>
@@ -80,8 +81,49 @@ describe('auth-session helpers', () => {
       prenom: 'Jane',
       email: 'jane.doe@ubax.com',
       avatar: undefined,
-      role: Role.DG,
+      mainRole: UbaxRole.ADMIN,
+      subRole: null,
+      scope: null,
     });
+  });
+
+  it('infers the partner scope and sub-role from JWT roles when available', () => {
+    const token = createJwt({
+      sub: 'partner-1',
+      email: 'awa@ubax.com',
+      given_name: 'Awa',
+      family_name: 'Diallo',
+      realm_access: {
+        roles: ['UBAX_PARTNER', 'DIRECTEUR_AGENCE'],
+      },
+    });
+
+    expect(deriveUserFromAuthToken(token)).toEqual({
+      id: 'partner-1',
+      nom: 'Diallo',
+      prenom: 'Awa',
+      email: 'awa@ubax.com',
+      avatar: undefined,
+      mainRole: UbaxRole.PARTNER,
+      subRole: UbaxSubRole.DIRECTEUR_AGENCE,
+      scope: 'AGENCE',
+    });
+  });
+
+  it('prefers backend user ids over the keycloak subject when both exist', () => {
+    const token = createJwt({
+      sub: 'kc-123',
+      userId: 'user-42',
+      keycloakId: 'kc-123',
+      email: 'awa@ubax.com',
+      roles: ['UBAX_PARTNER'],
+    });
+
+    expect(readUserIdCandidatesFromAuthToken(token)).toEqual([
+      'user-42',
+      'kc-123',
+    ]);
+    expect(deriveUserFromAuthToken(token)?.id).toBe('user-42');
   });
 
   it('persists and clears the auth session tokens', () => {

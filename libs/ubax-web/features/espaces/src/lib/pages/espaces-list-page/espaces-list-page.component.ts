@@ -15,14 +15,13 @@ type RoomStatus = 'Disponible' | 'Réservé';
 type RoomViewMode = 'grid' | 'list';
 type FilterDropdownKey = 'type' | 'status';
 
-interface SummaryCard {
+type SummaryCard = {
   readonly label: string;
   readonly value: string;
   readonly icon: string;
-  readonly theme: 'all' | 'reserved' | 'online' | 'occupied' | 'revenue';
-}
+  readonly theme: 'all' | 'reserved' | 'online' | 'occupied' | 'revenue';};
 
-interface RoomCard {
+type RoomCard = {
   readonly id: number;
   readonly title: string;
   readonly location: string;
@@ -34,14 +33,12 @@ interface RoomCard {
   readonly priceValue: string;
   readonly priceUnit: string;
   readonly image: string;
-  readonly avatar: string;
-}
+  readonly avatar: string;};
 
-interface FilterOption {
+type FilterOption = {
   readonly label: string;
   readonly value: string;
-  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';
-}
+  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';};
 
 const baseRooms: Omit<RoomCard, 'id'>[] = [
   {

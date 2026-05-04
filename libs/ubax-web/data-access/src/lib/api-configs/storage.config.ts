@@ -9,7 +9,7 @@ import {
   uploadAgencyLogo,
 } from '@ubax-workspace/shared-api-types';
 
-export interface StorageApiConfig {
+export type StorageApiConfig = {
   generatePresignedUrl: typeof generatePresignedUrl;
   upload: typeof upload;
   uploadAgencyLogo: typeof uploadAgencyLogo;
@@ -17,8 +17,7 @@ export interface StorageApiConfig {
   presignTicketAttachment: typeof presignTicketAttachment;
   presignTenantDocument: typeof presignTenantDocument;
   presignPropertyMedia: typeof presignPropertyMedia;
-  presignPropertyDocument: typeof presignPropertyDocument;
-}
+  presignPropertyDocument: typeof presignPropertyDocument;};
 
 export const storageApiConfig = {
   generatePresignedUrl,

@@ -22,19 +22,17 @@ import {
   type ArchivageTabId,
 } from './archivage-page.data';
 
-interface ArchivageFiltersState {
+type ArchivageFiltersState = {
   readonly keyword: string;
   readonly startDate: Date | null;
   readonly endDate: Date | null;
   readonly owner: string;
   readonly archivedBy: string;
-  readonly type: string;
-}
+  readonly type: string;};
 
-interface ArchivageSelectOption {
+type ArchivageSelectOption = {
   readonly label: string;
-  readonly value: string;
-}
+  readonly value: string;};
 
 const FRENCH_MONTH_NAMES = [
   'Janvier',

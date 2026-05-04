@@ -19,7 +19,9 @@ export class UiPaginationComponent {
   readonly arrowLeftSrc = input<string>('');
   readonly arrowRightSrc = input<string>('');
   readonly ariaLabel = input<string>('Pagination');
-  readonly variant = input<'default' | 'glass' | 'light'>('default');
+  readonly variant = input<'default' | 'glass' | 'light' | 'members'>(
+    'default',
+  );
 
   readonly pageChange = output<number>();
 

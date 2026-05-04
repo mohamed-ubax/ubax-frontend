@@ -2,24 +2,21 @@ import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-interface LocataireInfoItem {
+type LocataireInfoItem = {
   readonly icon: string;
   readonly text: string;
-  readonly tone: 'phone' | 'mail' | 'id-card' | 'work' | 'calendar' | 'file';
-}
+  readonly tone: 'phone' | 'mail' | 'id-card' | 'work' | 'calendar' | 'file';};
 
-interface LocataireDocument {
-  readonly name: string;
-}
+type LocataireDocument = {
+  readonly name: string;};
 
-interface LocatairePaymentItem {
+type LocatairePaymentItem = {
   readonly logo: string;
   readonly title: string;
   readonly amount: string;
   readonly period: string;
   readonly date: string;
-  readonly widePeriod: boolean;
-}
+  readonly widePeriod: boolean;};
 
 const ASSET_ROOT = 'reservations/locataire-detail';
 

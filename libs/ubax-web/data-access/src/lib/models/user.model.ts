@@ -1,2 +1,2 @@
-export { Role } from '@ubax-workspace/shared-data-access';
-export type { User } from '@ubax-workspace/shared-data-access';
+export { UbaxRole, UbaxSubRole } from '@ubax-workspace/shared-data-access';
+export type { UbaxScope, User } from '@ubax-workspace/shared-data-access';

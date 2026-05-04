@@ -1,26 +1,23 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-interface BailleurRevenueCard {
+type BailleurRevenueCard = {
   readonly label: string;
   readonly value: string;
-  readonly tone: 'accent' | 'navy' | 'success';
-}
+  readonly tone: 'accent' | 'navy' | 'success';};
 
-interface BailleurDocument {
-  readonly name: string;
-}
+type BailleurDocument = {
+  readonly name: string;};
 
-interface BailleurPayment {
+type BailleurPayment = {
   readonly logo: string;
   readonly title: string;
   readonly property: string;
   readonly amount: string;
   readonly period: string;
-  readonly date: string;
-}
+  readonly date: string;};
 
-interface BailleurProperty {
+type BailleurProperty = {
   readonly image: string;
   readonly title: string;
   readonly location: string;
@@ -29,8 +26,7 @@ interface BailleurProperty {
   readonly tenantAvatar: string;
   readonly price: string;
   readonly status: string;
-  readonly statusTone: 'accent' | 'success' | 'info';
-}
+  readonly statusTone: 'accent' | 'success' | 'info';};
 
 const REVENUE_CARDS: readonly BailleurRevenueCard[] = [
   {
