@@ -534,7 +534,7 @@ export class EquipePageComponent {
   });
 
   constructor() {
-    this.agencyStore.load?.({});
+    this.agencyStore.load({});
 
     // Toggle body class when any drawer/overlay is open (reduces topbar z-index)
     effect(() => {
@@ -574,25 +574,7 @@ export class EquipePageComponent {
       }
     });
 
-    effect(() => {
-      const members = this.agencyStore.entities();
-      const cachedSubRoles = this.agencyStore.memberSubRoles();
-      const loadingMap = this.agencyStore.memberSubRolesLoading();
-
-      members.forEach((member) => {
-        const memberId = readMemberId(member);
-
-        if (!memberId) {
-          return;
-        }
-
-        if (Object.hasOwn(cachedSubRoles, memberId) || loadingMap[memberId]) {
-          return;
-        }
-
-        this.agencyStore.loadMemberSubRoles(memberId);
-      });
-    });
+    // Subroles are now loaded directly from the team endpoint, no need for individual loading
 
     // Sous-rôles édition : synchroniser avec l’API quand le cache se remplit
     effect(() => {

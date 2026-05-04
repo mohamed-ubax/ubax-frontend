@@ -54,3 +54,57 @@ export const mapTeamList = (raw: unknown): AdminUserResponse[] => {
 
   return [];
 };
+
+export const extractSubRolesFromTeamResponse = (
+  response: unknown,
+): TeamMemberSubRolesMap => {
+  const subRolesMap: TeamMemberSubRolesMap = {};
+
+  if (!response || typeof response !== 'object') {
+    return subRolesMap;
+  }
+
+  const responseObj = response as Record<string, unknown>;
+
+  // Handle different response structures
+  let members: unknown[] = [];
+
+  if (Array.isArray(response)) {
+    members = response;
+  } else if (responseObj['data']) {
+    if (Array.isArray(responseObj['data'])) {
+      members = responseObj['data'];
+    } else if (
+      (responseObj['data'] as Record<string, unknown>)['content'] &&
+      Array.isArray((responseObj['data'] as Record<string, unknown>)['content'])
+    ) {
+      members = (responseObj['data'] as Record<string, unknown>)[
+        'content'
+      ] as unknown[];
+    }
+  } else if (responseObj['content'] && Array.isArray(responseObj['content'])) {
+    members = responseObj['content'];
+  }
+
+  // Extract subroles from each member
+  members.forEach((member) => {
+    if (member && typeof member === 'object') {
+      const memberObj = member as Record<string, unknown>;
+      const memberId = resolveTeamMemberId(member as AdminUserResponse);
+
+      if (memberId && memberObj['subroles']) {
+        // Handle subroles array
+        if (Array.isArray(memberObj['subroles'])) {
+          subRolesMap[memberId] = (memberObj['subroles'] as unknown[]).filter(
+            (role: unknown): role is string => typeof role === 'string',
+          );
+        } else if (typeof memberObj['subroles'] === 'string') {
+          // Handle single subrole as string
+          subRolesMap[memberId] = [memberObj['subroles'] as string];
+        }
+      }
+    }
+  });
+
+  return subRolesMap;
+};

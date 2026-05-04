@@ -24,7 +24,7 @@ import localeFr from '@angular/common/locales/fr';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
 import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
-import { provideApiConfiguration } from '@ubax-workspace/shared-api-types';
+import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
 import {
   AuthStore,
   DEV_PROFILES,
@@ -160,7 +160,10 @@ export const appConfig: ApplicationConfig = {
       withPreloading(SelectivePreloadStrategy),
       withViewTransitions(),
     ),
-    provideApiConfiguration(environment.apiRootUrl),
+    {
+      provide: ApiConfiguration,
+      useValue: { rootUrl: environment.apiRootUrl },
+    },
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     MessageService,
     { provide: NOTIFICATION_HANDLER, useExisting: NotificationService },

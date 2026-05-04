@@ -32,6 +32,7 @@ import {
   readTeamMemberActive,
   resolveTeamMemberId,
   teamMemberIdSelector,
+  extractSubRolesFromTeamResponse,
   type TeamMemberSubRolesMap,
 } from '../team/team-member.helpers';
 
@@ -151,6 +152,48 @@ export const AgencyStore = signalStore(
       setFilterRole(role: string | null): void {
         patchState(store, { filterRole: role });
       },
+
+      load: rxMethod<Record<string, never>>(
+        pipe(
+          tap(() => patchState(store, { loading: true, error: null })),
+          exhaustMap(() =>
+            getTeamMembers1(http, apiConfig.rootUrl, {}).pipe(
+              tapResponse({
+                next: (response) => {
+                  const teamData = response.body?.data ?? response.body;
+                  const members = mapTeamList(teamData);
+                  const subRoles = extractSubRolesFromTeamResponse(teamData);
+
+                  patchState(store, {
+                    entityMap: {},
+                    ids: [],
+                    memberSubRoles: subRoles,
+                    loading: false,
+                    error: null,
+                  });
+
+                  // Add members to the store using the entity collection pattern
+                  members.forEach((member) => {
+                    const memberId = teamMemberIdSelector(member);
+                    patchState(store, {
+                      entityMap: {
+                        ...store.entityMap(),
+                        [memberId]: member,
+                      },
+                      ids: [...store.ids(), memberId],
+                    });
+                  });
+                },
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, {
+                    loading: false,
+                    error: err.message,
+                  }),
+              }),
+            ),
+          ),
+        ),
+      ),
 
       loadCodelistRoles: rxMethod<string>(
         pipe(
@@ -381,8 +424,12 @@ export const AgencyStore = signalStore(
             getByKeycloakId(http, apiConfig.rootUrl, { keycloakId }).pipe(
               map(
                 (response) =>
-                  (response.body as any)?.data?.userId ??
-                  response.body?.userId ??
+                  ((
+                    (response.body as Record<string, unknown>)?.[
+                      'data'
+                    ] as Record<string, unknown>
+                  )?.['userId'] as string) ??
+                  ((response.body as { userId?: unknown })?.userId as string) ??
                   null,
               ),
               tapResponse({
@@ -390,7 +437,7 @@ export const AgencyStore = signalStore(
                   if (userId) patchState(store, { currentUserDbId: userId });
                 },
                 // eslint-disable-next-line @typescript-eslint/no-empty-function
-                error: (_err: unknown) => {},
+                error: () => {},
               }),
             ),
           ),

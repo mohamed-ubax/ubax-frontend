@@ -8456,7 +8456,7 @@
           "subRoles": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UserSubRoleResponse"
+              "type": "string"
             }
           },
           "emailVerified": {
@@ -8480,34 +8480,6 @@
             "format": "date-time"
           },
           "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "UserSubRoleResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "role": {
-            "type": "string"
-          },
-          "scope": {
-            "type": "string",
-            "enum": [
-              "UBAX_INTERNAL",
-              "AGENCE",
-              "HOTEL"
-            ]
-          },
-          "createdAt": {
             "type": "string",
             "format": "date-time"
           }
