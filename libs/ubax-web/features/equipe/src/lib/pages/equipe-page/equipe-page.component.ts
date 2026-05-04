@@ -30,6 +30,7 @@ import {
   UiDataTableCellDefDirective,
   UiDataTableColumn,
   UiDataTableComponent,
+  UiDataTableEmptyDefDirective,
   UiPaginationComponent,
 } from '@ubax-workspace/shared-ui';
 
@@ -112,6 +113,7 @@ function toggleArrayValue(values: readonly string[], role: string): string[] {
     ReactiveFormsModule,
     UiDataTableComponent,
     UiDataTableCellDefDirective,
+    UiDataTableEmptyDefDirective,
     UiPaginationComponent,
   ],
   templateUrl: './equipe-page.component.html',
@@ -137,6 +139,9 @@ export class EquipePageComponent {
     'https://www.figma.com/api/mcp/asset/8333bdb6-b124-4abb-af6c-2763f66389b0';
   readonly roleSortIconSrc =
     'https://www.figma.com/api/mcp/asset/7759e876-c630-4d2f-8ad7-2eeebb07e59d';
+  /** Illustration « no records » (frame Liste des membres — Figma node 1217:3865). */
+  readonly membersEmptyIllustrationSrc =
+    'https://www.figma.com/api/mcp/asset/f1a345aa-0603-4b2e-872f-0d9edc18c22e';
 
   readonly currentPage = signal(1);
   readonly isRoleMenuOpen = signal(false);

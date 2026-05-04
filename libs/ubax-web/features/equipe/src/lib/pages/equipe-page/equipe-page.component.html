@@ -154,12 +154,29 @@
 
     <div class="agency-members-page__table-stage">
       <section class="agency-members-page__table-card">
-        <ubax-ui-data-table
-          class="agency-members-page__table"
-          [columns]="tableColumns"
-          [rows]="pagedRows()"
-          emptyStateLabel="Aucun membre dans votre équipe pour le moment."
-        >
+        <div class="agency-members-page__table-scroll">
+          <ubax-ui-data-table
+            class="agency-members-page__table"
+            [columns]="tableColumns"
+            [rows]="pagedRows()"
+            emptyStateLabel="Commencez par ajouter un membre !"
+          >
+            <ng-template ubaxDataTableEmpty>
+              <div class="agency-members-page__empty-state" role="status">
+                <img
+                  class="agency-members-page__empty-state-illustration"
+                  [src]="membersEmptyIllustrationSrc"
+                  alt=""
+                  width="211"
+                  height="231"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <p class="agency-members-page__empty-state-caption">
+                  Commencez par ajouter un membre !
+                </p>
+              </div>
+            </ng-template>
           <ng-template ubaxDataTableCell="firstName" let-row>
             <div class="agency-members-page__member-cell">
               <img
@@ -211,21 +228,22 @@
               }
             </div>
           </ng-template>
-        </ubax-ui-data-table>
+          </ubax-ui-data-table>
+        </div>
       </section>
     </div>
-  </section>
 
-  <footer class="agency-members-page__pagination-shell">
-    <ubax-ui-pagination
-      [currentPage]="currentPage()"
-      [totalPages]="totalPages()"
-      [arrowLeftSrc]="paginationArrowLeftSrc"
-      [arrowRightSrc]="paginationArrowRightSrc"
-      variant="members"
-      (pageChange)="updatePage($event)"
-    />
-  </footer>
+    <footer class="agency-members-page__pagination-shell">
+      <ubax-ui-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [arrowLeftSrc]="paginationArrowLeftSrc"
+        [arrowRightSrc]="paginationArrowRightSrc"
+        variant="members"
+        (pageChange)="updatePage($event)"
+      />
+    </footer>
+  </section>
 </div>
 
 <!-- ── Auto-assignation drawer (PARTNER_ADMIN) ────────────────────────────── -->

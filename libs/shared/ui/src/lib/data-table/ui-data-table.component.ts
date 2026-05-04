@@ -3,10 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   TemplateRef,
+  contentChild,
   contentChildren,
   input,
 } from '@angular/core';
-import { UiDataTableCellDefDirective } from './ui-data-table-cell-def.directive';
+import {
+  UiDataTableCellDefDirective,
+  UiDataTableEmptyDefDirective,
+} from './ui-data-table-cell-def.directive';
 import {
   UiDataTableCellContext,
   UiDataTableColumn,
@@ -29,6 +33,11 @@ export class UiDataTableComponent {
   readonly emptyStateLabel = input<string>('Aucune donnée disponible.');
 
   private readonly cellDefs = contentChildren(UiDataTableCellDefDirective);
+  private readonly emptyDef = contentChild(UiDataTableEmptyDefDirective);
+
+  protected emptyStateTemplate(): TemplateRef<void> | null {
+    return this.emptyDef()?.templateRef ?? null;
+  }
 
   protected cellTemplate(
     key: string,

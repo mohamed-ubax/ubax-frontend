@@ -13,3 +13,11 @@ export class UiDataTableCellDefDirective {
     readonly templateRef: TemplateRef<UiDataTableCellContext<any>>,
   ) {}
 }
+
+@Directive({
+  selector: 'ng-template[ubaxDataTableEmpty]',
+  standalone: true,
+})
+export class UiDataTableEmptyDefDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}

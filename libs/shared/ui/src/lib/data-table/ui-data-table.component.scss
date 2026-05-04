@@ -57,6 +57,15 @@
   height: var(--ui-data-table-row-height);
 }
 
+.ui-data-table tbody tr.ui-data-table__empty-row {
+  height: auto;
+}
+
+.ui-data-table tbody tr.ui-data-table__empty-row td {
+  height: auto;
+  border-bottom: 0;
+}
+
 .ui-data-table td {
   padding: 0 var(--ui-data-table-row-padding-inline);
   border-bottom: 1px solid var(--ui-data-table-row-divider);
@@ -97,7 +106,10 @@
 }
 
 .ui-data-table__empty {
-  height: 160px;
+  box-sizing: border-box;
+  min-height: 320px;
+  padding: 48px 24px 56px;
   text-align: center;
+  vertical-align: middle;
   color: rgba(28, 28, 28, 0.65);
 }

@@ -61,9 +61,13 @@
         </tr>
       }
     } @else {
-      <tr>
+      <tr class="ui-data-table__empty-row">
         <td class="ui-data-table__empty" [attr.colspan]="columns().length">
-          {{ emptyStateLabel() }}
+          @if (emptyStateTemplate(); as emptyTpl) {
+            <ng-container [ngTemplateOutlet]="emptyTpl" />
+          } @else {
+            {{ emptyStateLabel() }}
+          }
         </td>
       </tr>
     }
