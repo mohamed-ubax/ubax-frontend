@@ -9,6 +9,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { addEntity } from '@ngrx/signals/entities';
 import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
   addMember1,
@@ -269,33 +270,35 @@ export const AgencyStore = signalStore(
                 next: (membre: AdminUserResponse) => {
                   const memberId = resolveTeamMemberId(membre);
 
-                  // Reload the team members list to ensure consistency
-                  (store as { load: (params?: unknown) => void }).load({});
-
-                  patchState(store, {
-                    saving: false,
-                    memberSubRoles: memberId
-                      ? setMemberRoles(
-                          store.memberSubRoles(),
-                          memberId,
-                          body.subRoles ?? [],
-                        )
-                      : store.memberSubRoles(),
-                    memberSubRolesLoading: memberId
-                      ? setMemberLoading(
-                          store.memberSubRolesLoading(),
-                          memberId,
-                          false,
-                        )
-                      : store.memberSubRolesLoading(),
-                    memberSubRolesError: memberId
-                      ? setMemberError(
-                          store.memberSubRolesError(),
-                          memberId,
-                          null,
-                        )
-                      : store.memberSubRolesError(),
-                  });
+                  // Add new member directly to entities and update sub-roles cache
+                  patchState(
+                    store,
+                    addEntity(membre, { selectId: teamMemberIdSelector }),
+                    {
+                      saving: false,
+                      memberSubRoles: memberId
+                        ? setMemberRoles(
+                            store.memberSubRoles(),
+                            memberId,
+                            body.subRoles ?? [],
+                          )
+                        : store.memberSubRoles(),
+                      memberSubRolesLoading: memberId
+                        ? setMemberLoading(
+                            store.memberSubRolesLoading(),
+                            memberId,
+                            false,
+                          )
+                        : store.memberSubRolesLoading(),
+                      memberSubRolesError: memberId
+                        ? setMemberError(
+                            store.memberSubRolesError(),
+                            memberId,
+                            null,
+                          )
+                        : store.memberSubRolesError(),
+                    },
+                  );
                 },
                 error: (err: HttpErrorResponse) =>
                   patchState(store, { saving: false, error: err.message }),
