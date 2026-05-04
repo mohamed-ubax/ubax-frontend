@@ -962,29 +962,74 @@
   }
 }
 
+// Liquid glass (Figma drawer — blur + texture + reflets)
 .agency-members-page__add-drawer-close--glass {
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(26px) saturate(195%) brightness(1.06);
+  -webkit-backdrop-filter: blur(26px) saturate(195%) brightness(1.06);
   box-shadow:
-    0 6px 28px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 10px 36px rgba(0, 0, 0, 0.22),
+    0 2px 8px rgba(26, 48, 71, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -1px 0 rgba(26, 48, 71, 0.12);
   transition:
-    background 160ms ease,
-    box-shadow 160ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
     transform 160ms ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.62);
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      0 12px 40px rgba(0, 0, 0, 0.26),
+      0 2px 10px rgba(26, 48, 71, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.78),
+      inset 0 -1px 0 rgba(26, 48, 71, 0.1);
   }
 
   &:active {
     transform: scale(0.96);
   }
+}
+
+.agency-members-page__drawer-close-glass-texture {
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.42;
+  filter: saturate(1.35) contrast(1.02);
+  mix-blend-mode: soft-light;
+}
+
+.agency-members-page__drawer-close-glass-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    130% 100% at 18% 8%,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.12) 38%,
+    rgba(255, 255, 255, 0) 62%
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.agency-members-page__drawer-close-icon {
+  position: relative;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28));
 }
 
 // Avatar upload zone
@@ -1254,37 +1299,6 @@
   }
 }
 
-:host ::ng-deep .equipe-member-role-select.p-select {
-  width: 100%;
-  min-height: 61px;
-  border: 0;
-  border-radius: 10px;
-  background: #f7f7f7;
-  box-shadow: none;
-}
-
-:host ::ng-deep .equipe-member-role-select .p-select-label,
-:host ::ng-deep .equipe-member-role-select.p-select .p-select-label {
-  display: flex;
-  align-items: center;
-  min-height: 61px;
-  padding: 0 17px;
-  font-family: 'Lexend', system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  color: #1c1c1c;
-}
-
-:host ::ng-deep .equipe-member-role-select .p-select-dropdown {
-  width: 40px;
-  color: #181818;
-}
-
-:host ::ng-deep .equipe-member-role-select-overlay.p-select-overlay,
-:host ::ng-deep .equipe-member-role-select-overlay {
-  z-index: 12010 !important;
-}
-
 .agency-members-page__drawer-save-btn--full {
   flex: 1 1 auto;
   width: 100%;
@@ -1395,6 +1409,70 @@
   .pi {
     font-size: 14px;
   }
+}
+
+// Modifier membre — puces rôles (Figma #ffeddd / #e87d1e, retrait « − »)
+.agency-members-page__edit-role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.agency-members-page__edit-role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 10px 0 16px;
+  border-radius: 10px;
+  background: #ffeddd;
+  color: #e87d1e;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  max-width: 100%;
+}
+
+.agency-members-page__edit-role-chip-label {
+  min-width: 0;
+  padding: 6px 0;
+}
+
+.agency-members-page__edit-role-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(232, 125, 30, 0.28);
+  color: #e87d1e;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: rgba(232, 125, 30, 0.42);
+    transform: scale(1.06);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.agency-members-page__edit-role-chip-minus {
+  display: block;
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentcolor;
 }
 
 .agency-members-page__phone-input {
@@ -1563,7 +1641,6 @@
   flex-shrink: 0;
   margin-top: auto;
   padding: 20px 32px 28px;
-  border-top: 1px solid rgba(26, 48, 71, 0.08);
   background: var(--ubax-surface);
 }
 

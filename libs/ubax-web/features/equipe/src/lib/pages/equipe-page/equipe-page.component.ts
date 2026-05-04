@@ -135,21 +135,6 @@ function composeE164Phone(dialCode: string, nationalDigits: string): string {
   return `+${dialCode}${body}`;
 }
 
-/**
- * Met le rôle choisi en tête (affichage / priorité) et conserve tous les autres
- * sous-rôles déjà attribués (aucune perte silencieuse à l'enregistrement).
- */
-function mergeSubRolesWithNewPrimary(
-  current: readonly string[],
-  selected: string,
-): string[] {
-  if (!selected) {
-    return [...current];
-  }
-  const rest = current.filter((r) => r !== selected);
-  return Array.from(new Set([selected, ...rest]));
-}
-
 function parseE164ToCountryAndNational(
   e164: string,
 ): { country: CountryDialCode; nationalDigits: string } {
@@ -231,6 +216,9 @@ export class EquipePageComponent {
   @ViewChild('addMemberRolesRoot', { read: ElementRef })
   private readonly addMemberRolesRoot?: ElementRef<HTMLElement>;
 
+  @ViewChild('editMemberRolesRoot', { read: ElementRef })
+  private readonly editMemberRolesRoot?: ElementRef<HTMLElement>;
+
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly formBuilder = inject(NonNullableFormBuilder);
   readonly agencyStore = inject(AgencyStore);
@@ -255,6 +243,9 @@ export class EquipePageComponent {
   /** Icône « flat-color-icons:file » — zone Documents (Figma Gestion immobilier Ubax). */
   readonly addMemberDocumentsIconSrc =
     'https://www.figma.com/api/mcp/asset/da1bd0ea-f910-42d7-9183-6f9a5ec1990f';
+  /** Calque vitré du bouton fermer drawer (Figma node 1207:4881 — ellipse sous le close). */
+  readonly drawerCloseGlassTextureSrc =
+    'https://www.figma.com/api/mcp/asset/c4ec08bc-4d4c-4369-abe5-0cc0f58f27d7';
 
   readonly currentPage = signal(1);
   readonly isRoleMenuOpen = signal(false);
@@ -268,10 +259,13 @@ export class EquipePageComponent {
   // Add member drawer
   readonly isAddMemberDrawerOpen = signal(false);
   readonly addMemberRolesMenuOpen = signal(false);
+  readonly editMemberRolesMenuOpen = signal(false);
 
   // Member panel (view details / edit roles)
   readonly activeMemberPanelMode = signal<MemberPanelMode | null>(null);
   readonly selectedMemberId = signal<string | null>(null);
+  /** Sous-rôles édités (puces orange + liste déroulante — Figma modifier membre). */
+  readonly editPanelRoles = signal<string[]>([]);
   /** Après chargement API des sous-rôles, évite d'écraser la sélection utilisateur. */
   readonly editMemberRoleSeededFor = signal<string | null>(null);
 
@@ -324,7 +318,6 @@ export class EquipePageComponent {
     lastName: [''],
     email: [''],
     phone: [''],
-    role: [''],
   });
 
   /** Indicatif + brouillon national pour l'affichage téléphone (édition — aligné sur l'ajout). */
@@ -614,7 +607,7 @@ export class EquipePageComponent {
       });
     });
 
-    // Rôle unique (select) : synchroniser avec les sous-rôles chargés depuis l'API
+    // Sous-rôles édition : synchroniser avec l’API quand le cache se remplit
     effect(() => {
       const memberId = this.selectedMemberId();
       const panelMode = this.activeMemberPanelMode();
@@ -630,15 +623,7 @@ export class EquipePageComponent {
       }
 
       const roles = cachedSubRoles[memberId] ?? [];
-      if (!roles.length) {
-        this.editMemberRoleSeededFor.set(memberId);
-        return;
-      }
-      const primary = pickPrimarySubRole(roles) ?? roles[0];
-      this.editMemberForm.patchValue(
-        { role: primary ?? '' },
-        { emitEvent: false },
-      );
+      this.editPanelRoles.set([...roles]);
       this.editMemberRoleSeededFor.set(memberId);
     });
 
@@ -898,9 +883,43 @@ export class EquipePageComponent {
     return this.selectedSubRoles().includes(roleKey);
   }
 
+  toggleEditMemberRolesMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.editMemberRolesMenuOpen.update((open) => !open);
+  }
+
+  editMemberRolesSummary(): string {
+    const keys = this.editPanelRoles();
+    if (!keys.length) {
+      return 'Selectionner un rôle (s)';
+    }
+    return keys
+      .map((k) => this.subRoleLabels[k] ?? k)
+      .sort()
+      .join(', ');
+  }
+
+  onEditMemberRoleOptionClick(
+    roleKey: UbaxSubRole,
+    event: MouseEvent | KeyboardEvent,
+  ): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggleEditPanelRole(roleKey);
+  }
+
+  isEditPanelRoleSelected(roleKey: string): boolean {
+    return this.editPanelRoles().includes(roleKey);
+  }
+
+  removeEditPanelRole(roleKey: string): void {
+    this.editPanelRoles.update((roles) => roles.filter((r) => r !== roleKey));
+  }
+
   // ── Member panel (view details / edit roles) ─────────────────────────────
 
   openMemberPanel(row: AgencyMemberTableRow, mode: MemberPanelMode): void {
+    this.editMemberRolesMenuOpen.set(false);
     this.selectedMemberId.set(row.memberId);
     this.activeMemberPanelMode.set(mode);
 
@@ -923,28 +942,23 @@ export class EquipePageComponent {
       this.editMemberPhoneCountry.set(parsed.country);
       this.editMemberPhoneDraft.set(parsed.nationalDigits);
 
-      const cached = row.memberId
-        ? (this.agencyStore.memberSubRoles()[row.memberId] ?? null)
-        : null;
-      const roleFromCache =
-        cached && cached.length > 0
-          ? (pickPrimarySubRole(cached) ?? cached[0])
-          : (pickPrimarySubRole(row.roleKeys) ?? row.roleKeys[0] ?? '');
+      if (
+        row.memberId &&
+        Object.hasOwn(this.agencyStore.memberSubRoles(), row.memberId)
+      ) {
+        const fromStore = this.agencyStore.memberSubRoles()[row.memberId] ?? [];
+        this.editPanelRoles.set([...fromStore]);
+        this.editMemberRoleSeededFor.set(row.memberId);
+      } else {
+        this.editPanelRoles.set([...row.roleKeys]);
+      }
 
       this.editMemberForm.patchValue({
         firstName: member?.firstName ?? '',
         lastName: member?.lastName ?? '',
         email: member?.email ?? '',
         phone: phoneStr,
-        role: roleFromCache ?? '',
       });
-
-      if (
-        row.memberId &&
-        Object.hasOwn(this.agencyStore.memberSubRoles(), row.memberId)
-      ) {
-        this.editMemberRoleSeededFor.set(row.memberId);
-      }
     }
   }
 
@@ -952,8 +966,14 @@ export class EquipePageComponent {
     this.selectedMemberId.set(null);
     this.activeMemberPanelMode.set(null);
     this.editMemberRoleSeededFor.set(null);
+    this.editPanelRoles.set([]);
+    this.editMemberRolesMenuOpen.set(false);
     this.editMemberPhoneDraft.set('');
     this.editMemberPhoneCountry.set(readDefaultPhoneCountry());
+  }
+
+  toggleEditPanelRole(role: UbaxSubRole): void {
+    this.editPanelRoles.update((roles) => toggleArrayValue(roles, role));
   }
 
   submitEditMember(): void {
@@ -961,8 +981,7 @@ export class EquipePageComponent {
     if (!memberId) return;
 
     const currentRoles = this.selectedMemberRoles();
-    const roleValue = this.editMemberForm.get('role')?.value ?? '';
-    const nextRoles = mergeSubRolesWithNewPrimary(currentRoles, roleValue);
+    const nextRoles = this.editPanelRoles();
     const rolesToAdd = nextRoles.filter((r) => !currentRoles.includes(r));
     const rolesToRemove = currentRoles.filter((r) => !nextRoles.includes(r));
 
@@ -1081,5 +1100,15 @@ export class EquipePageComponent {
       }
     }
 
+    if (this.editMemberRolesMenuOpen()) {
+      const editRoot = this.editMemberRolesRoot?.nativeElement;
+      if (
+        !editRoot ||
+        !(target instanceof Node) ||
+        !editRoot.contains(target)
+      ) {
+        this.editMemberRolesMenuOpen.set(false);
+      }
+    }
   }
 }

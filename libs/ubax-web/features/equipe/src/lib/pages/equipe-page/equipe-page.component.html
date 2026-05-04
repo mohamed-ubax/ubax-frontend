@@ -286,7 +286,18 @@
               aria-label="Fermer"
               (click)="closeAutoAssignDrawer()"
             >
+              <img
+                class="agency-members-page__drawer-close-glass-texture"
+                [src]="drawerCloseGlassTextureSrc"
+                alt=""
+                aria-hidden="true"
+              />
+              <span
+                class="agency-members-page__drawer-close-glass-sheen"
+                aria-hidden="true"
+              ></span>
               <svg
+                class="agency-members-page__drawer-close-icon"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -455,7 +466,18 @@
               aria-label="Fermer"
               (click)="closeAddMemberDrawer()"
             >
+              <img
+                class="agency-members-page__drawer-close-glass-texture"
+                [src]="drawerCloseGlassTextureSrc"
+                alt=""
+                aria-hidden="true"
+              />
+              <span
+                class="agency-members-page__drawer-close-glass-sheen"
+                aria-hidden="true"
+              ></span>
               <svg
+                class="agency-members-page__drawer-close-icon"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -830,6 +852,33 @@
                   </ul>
                 }
               </div>
+              @if (selectedSubRoles().length) {
+                <div
+                  class="agency-members-page__edit-role-chips"
+                  aria-label="Rôles sélectionnés"
+                >
+                  @for (role of selectedSubRoles(); track role) {
+                    <span class="agency-members-page__edit-role-chip">
+                      <span class="agency-members-page__edit-role-chip-label">{{
+                        subRoleLabels[$any(role)]
+                      }}</span>
+                      <button
+                        type="button"
+                        class="agency-members-page__edit-role-chip-remove"
+                        [attr.aria-label]="
+                          'Retirer le rôle ' + subRoleLabels[$any(role)]
+                        "
+                        (click)="toggleSubRole(role)"
+                      >
+                        <span
+                          class="agency-members-page__edit-role-chip-minus"
+                          aria-hidden="true"
+                        ></span>
+                      </button>
+                    </span>
+                  }
+                </div>
+              }
               @if (selectedSubRoles().length === 0 && addMemberForm.touched) {
                 <span class="agency-members-page__field-error">
                   Au moins un rôle doit être sélectionné
@@ -982,7 +1031,18 @@
                 aria-label="Fermer"
                 (click)="closeMemberPanel()"
               >
+                <img
+                  class="agency-members-page__drawer-close-glass-texture"
+                  [src]="drawerCloseGlassTextureSrc"
+                  alt=""
+                  aria-hidden="true"
+                />
+                <span
+                  class="agency-members-page__drawer-close-glass-sheen"
+                  aria-hidden="true"
+                ></span>
                 <svg
+                  class="agency-members-page__drawer-close-icon"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -1302,21 +1362,91 @@
                   </div>
 
                   <div
-                    class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+                    #editMemberRolesRoot
+                    class="agency-members-page__drawer-field agency-members-page__drawer-field--full agency-members-page__roles-dropdown-root"
                   >
                     <span class="agency-members-page__drawer-field-label">Rôle</span>
-                    <p-select
-                      formControlName="role"
-                      inputId="editMemberRole"
-                      [options]="roleOptions"
-                      optionLabel="label"
-                      optionValue="key"
-                      placeholder="Sélectionner un rôle"
-                      appendTo="body"
-                      styleClass="equipe-member-role-select"
-                      panelStyleClass="equipe-member-role-select-overlay"
-                      [showClear]="false"
-                    />
+                    <div class="agency-members-page__roles-dropdown">
+                      <button
+                        type="button"
+                        class="agency-members-page__roles-dropdown-trigger"
+                        [class.agency-members-page__roles-dropdown-trigger--open]="
+                          editMemberRolesMenuOpen()
+                        "
+                        [attr.aria-expanded]="editMemberRolesMenuOpen()"
+                        aria-haspopup="listbox"
+                        (click)="toggleEditMemberRolesMenu($event)"
+                      >
+                        <span class="agency-members-page__roles-dropdown-label">{{
+                          editMemberRolesSummary()
+                        }}</span>
+                        <i class="pi pi-angle-down" aria-hidden="true"></i>
+                      </button>
+                      @if (editMemberRolesMenuOpen()) {
+                        <ul
+                          class="agency-members-page__roles-dropdown-panel"
+                          role="listbox"
+                          aria-multiselectable="true"
+                        >
+                          @for (option of roleOptions; track option.key) {
+                            <li
+                              role="option"
+                              [attr.aria-selected]="
+                                isEditPanelRoleSelected(option.key)
+                              "
+                            >
+                              <button
+                                type="button"
+                                class="agency-members-page__roles-dropdown-option"
+                                [class.is-selected]="
+                                  isEditPanelRoleSelected(option.key)
+                                "
+                                (click)="
+                                  onEditMemberRoleOptionClick(option.key, $event)
+                                "
+                              >
+                                <span
+                                  class="agency-members-page__roles-dropdown-check"
+                                  aria-hidden="true"
+                                >
+                                  @if (isEditPanelRoleSelected(option.key)) {
+                                    <i class="pi pi-check"></i>
+                                  }
+                                </span>
+                                <span>{{ option.label }}</span>
+                              </button>
+                            </li>
+                          }
+                        </ul>
+                      }
+                    </div>
+                    @if (editPanelRoles().length) {
+                      <div
+                        class="agency-members-page__edit-role-chips"
+                        aria-label="Rôles attribués"
+                      >
+                        @for (role of editPanelRoles(); track role) {
+                          <span class="agency-members-page__edit-role-chip">
+                            <span class="agency-members-page__edit-role-chip-label">{{
+                              subRoleLabels[$any(role)]
+                            }}</span>
+                            <button
+                              type="button"
+                              class="agency-members-page__edit-role-chip-remove"
+                              [attr.aria-label]="
+                                'Retirer le rôle ' + subRoleLabels[$any(role)]
+                              "
+                              (click)="removeEditPanelRole(role)"
+                            >
+                              <span
+                                class="agency-members-page__edit-role-chip-minus"
+                                aria-hidden="true"
+                              ></span>
+                            </button>
+                          </span>
+                        }
+                      </div>
+                    }
                     @if (selectedMemberRolesLoading()) {
                       <p class="agency-members-page__info-state">
                         Chargement des rôles...
@@ -1358,7 +1488,9 @@
                 type="submit"
                 form="editMemberForm"
                 class="agency-members-page__drawer-save-btn"
-                [disabled]="agencyStore.isSaving()"
+                [disabled]="
+                  agencyStore.isSaving() || editPanelRoles().length === 0
+                "
               >
                 Modifier
               </button>
