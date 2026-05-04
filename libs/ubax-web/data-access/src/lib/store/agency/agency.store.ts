@@ -25,7 +25,7 @@ import {
   LaCodeListDto,
   revokeSubRole1,
 } from '@ubax-workspace/shared-api-types';
-import { exhaustMap, map, of, pipe, tap } from 'rxjs';
+import { exhaustMap, map, mergeMap, of, pipe, tap } from 'rxjs';
 import {
   mapTeamList,
   readResolvedTeamMemberRoles,
@@ -210,7 +210,7 @@ export const AgencyStore = signalStore(
               ),
             });
           }),
-          exhaustMap((userId) => {
+          mergeMap((userId) => {
             if (!userId) {
               return of([] as string[]);
             }

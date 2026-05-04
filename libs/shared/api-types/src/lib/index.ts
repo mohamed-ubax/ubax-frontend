@@ -63,6 +63,7 @@ export type { TenantUpdateRequest } from './models/tenant-update-request';
 export type { UpdateRepairCostRequest } from './models/update-repair-cost-request';
 export type { UpdateTicketStatusRequest } from './models/update-ticket-status-request';
 export type { UserResponse } from './models/user-response';
+export type { UserSubRoleResponse } from './models/user-sub-role-response';
 export type { VerifyOtpRequest } from './models/verify-otp-request';
 
 export type { GetById$Params as GetById$Params } from './fn/property/get-by-id';
@@ -239,6 +240,8 @@ export type { GetSubRoles$Params as GetSubRoles$Params } from './fn/hotel-team/g
 export { getSubRoles as getSubRoles } from './fn/hotel-team/get-sub-roles';
 export type { AssignSubRoles$Params as AssignSubRoles$Params } from './fn/hotel-team/assign-sub-roles';
 export { assignSubRoles as assignSubRoles } from './fn/hotel-team/assign-sub-roles';
+export type { RemoveMember$Params as RemoveMember$Params } from './fn/hotel-team/remove-member';
+export { removeMember as removeMember } from './fn/hotel-team/remove-member';
 export type { RevokeSubRole$Params as RevokeSubRole$Params } from './fn/hotel-team/revoke-sub-role';
 export { revokeSubRole as revokeSubRole } from './fn/hotel-team/revoke-sub-role';
 export type { List3$Params as List3$Params } from './fn/expense/list-3';
@@ -273,6 +276,8 @@ export type { GetSubRoles1$Params as GetSubRoles1$Params } from './fn/agency-tea
 export { getSubRoles1 as getSubRoles1 } from './fn/agency-team/get-sub-roles-1';
 export type { AssignSubRoles1$Params as AssignSubRoles1$Params } from './fn/agency-team/assign-sub-roles-1';
 export { assignSubRoles1 as assignSubRoles1 } from './fn/agency-team/assign-sub-roles-1';
+export type { RemoveMember1$Params as RemoveMember1$Params } from './fn/agency-team/remove-member-1';
+export { removeMember1 as removeMember1 } from './fn/agency-team/remove-member-1';
 export type { RevokeSubRole1$Params as RevokeSubRole1$Params } from './fn/agency-team/revoke-sub-role-1';
 export { revokeSubRole1 as revokeSubRole1 } from './fn/agency-team/revoke-sub-role-1';
 export type { GetSubRoles2$Params as GetSubRoles2$Params } from './fn/user-sub-roles/get-sub-roles-2';

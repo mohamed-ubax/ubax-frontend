@@ -135,9 +135,10 @@ function composeE164Phone(dialCode: string, nationalDigits: string): string {
   return `+${dialCode}${body}`;
 }
 
-function parseE164ToCountryAndNational(
-  e164: string,
-): { country: CountryDialCode; nationalDigits: string } {
+function parseE164ToCountryAndNational(e164: string): {
+  country: CountryDialCode;
+  nationalDigits: string;
+} {
   const trimmed = (e164 ?? '').trim();
   if (!trimmed.startsWith('+')) {
     return { country: readDefaultPhoneCountry(), nationalDigits: '' };
@@ -160,7 +161,9 @@ function parseE164ToCountryAndNational(
   return { country: readDefaultPhoneCountry(), nationalDigits: withoutPlus };
 }
 
-function addMemberPhoneValidator(control: AbstractControl): ValidationErrors | null {
+function addMemberPhoneValidator(
+  control: AbstractControl,
+): ValidationErrors | null {
   const raw = (control.value as string) ?? '';
   if (!raw.trim()) {
     return null;
@@ -183,16 +186,6 @@ function readDefaultPhoneCountry(): CountryDialCode {
     dialCode: '225',
     flagUrl: 'https://flagcdn.com/w80/ci.png',
   };
-}
-
-function formatAttachmentSize(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} o`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} Ko`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 }
 
 @Component({
@@ -240,9 +233,6 @@ export class EquipePageComponent {
   /** Illustration « no records » (frame Liste des membres — Figma node 1217:3865). */
   readonly membersEmptyIllustrationSrc =
     'https://www.figma.com/api/mcp/asset/f1a345aa-0603-4b2e-872f-0d9edc18c22e';
-  /** Icône « flat-color-icons:file » — zone Documents (Figma Gestion immobilier Ubax). */
-  readonly addMemberDocumentsIconSrc =
-    'https://www.figma.com/api/mcp/asset/da1bd0ea-f910-42d7-9183-6f9a5ec1990f';
   /** Calque vitré du bouton fermer drawer (Figma node 1207:4881 — ellipse sous le close). */
   readonly drawerCloseGlassTextureSrc =
     'https://www.figma.com/api/mcp/asset/c4ec08bc-4d4c-4369-abe5-0cc0f58f27d7';
@@ -303,14 +293,11 @@ export class EquipePageComponent {
   readonly avatarPreview = signal<string | null>(null);
   private selectedAvatarFile: File | null = null;
 
-  /** Fichiers joints dans le formulaire d'ajout (préparation UI ; l'API n'expose pas encore l'upload). */
-  readonly addMemberAttachments = signal<
-    readonly { readonly name: string; readonly sizeLabel: string; readonly file: File }[]
-  >([]);
-
   /** Affichage national (ex. 07…) pendant la saisie ; le contrôle `phone` garde l'E.164. */
   readonly addMemberPhoneDraft = signal('');
-  readonly selectedPhoneCountry = signal<CountryDialCode>(readDefaultPhoneCountry());
+  readonly selectedPhoneCountry = signal<CountryDialCode>(
+    readDefaultPhoneCountry(),
+  );
   readonly countryDialOptions = COUNTRY_CODES;
 
   readonly editMemberForm = this.formBuilder.group({
@@ -321,38 +308,38 @@ export class EquipePageComponent {
   });
 
   /** Indicatif + brouillon national pour l'affichage téléphone (édition — aligné sur l'ajout). */
-  readonly editMemberPhoneCountry = signal<CountryDialCode>(readDefaultPhoneCountry());
+  readonly editMemberPhoneCountry = signal<CountryDialCode>(
+    readDefaultPhoneCountry(),
+  );
   readonly editMemberPhoneDraft = signal('');
 
   readonly tableColumns: readonly UiDataTableColumn<AgencyMemberTableRow>[] = [
     {
       key: 'firstName',
       header: 'Prenom',
-      width: '221px',
       value: (row) => row.firstName,
     },
     {
       key: 'lastName',
       header: 'Nom',
-      width: '171px',
+      width: '160px',
       value: (row) => row.lastName,
     },
     {
       key: 'email',
       header: 'Email',
-      width: '194px',
       value: (row) => row.email,
     },
     {
       key: 'phone',
       header: 'Téléphone',
-      width: '241px',
+      width: '160px',
       value: (row) => row.phone,
     },
     {
       key: 'roleLabel',
       header: 'Rôle',
-      width: '172px',
+      width: '200px',
       value: (row) => row.roleLabel,
       headerIconSrc: this.roleSortIconSrc,
       rotateHeaderIcon: true,
@@ -753,7 +740,6 @@ export class EquipePageComponent {
     this.addMemberPhoneDraft.set('');
     this.selectedPhoneCountry.set(readDefaultPhoneCountry());
     this.selectedSubRoles.set([]);
-    this.addMemberAttachments.set([]);
     this.addMemberRolesMenuOpen.set(false);
     this.successMessage.set(null);
     this.addMemberError.set(null);
@@ -766,7 +752,6 @@ export class EquipePageComponent {
     this.addMemberRolesMenuOpen.set(false);
     this.addMemberError.set(null);
     this.successMessage.set(null);
-    this.addMemberAttachments.set([]);
     this.addMemberPhoneDraft.set('');
   }
 
@@ -786,7 +771,10 @@ export class EquipePageComponent {
     }
     const raw = target.value;
     this.addMemberPhoneDraft.set(raw);
-    const composed = composeE164Phone(this.selectedPhoneCountry().dialCode, raw);
+    const composed = composeE164Phone(
+      this.selectedPhoneCountry().dialCode,
+      raw,
+    );
     this.addMemberForm.get('phone')?.setValue(composed);
     this.addMemberForm.get('phone')?.markAsTouched();
   }
@@ -817,26 +805,6 @@ export class EquipePageComponent {
       .map((k) => this.subRoleLabels[k] ?? k)
       .sort()
       .join(', ');
-  }
-
-  onAddMemberDocumentsChange(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement) || !target.files?.length) {
-      return;
-    }
-    const next = Array.from(target.files).map((file) => ({
-      name: file.name,
-      sizeLabel: formatAttachmentSize(file.size),
-      file,
-    }));
-    this.addMemberAttachments.update((current) => [...current, ...next]);
-    target.value = '';
-  }
-
-  removeAddMemberAttachment(index: number): void {
-    this.addMemberAttachments.update((items) =>
-      items.filter((_, itemIndex) => itemIndex !== index),
-    );
   }
 
   submitAddMember(): void {
@@ -1033,6 +1001,10 @@ export class EquipePageComponent {
     this.closeConfirmDialog();
   }
 
+  formatSubRoleLabels(roles: readonly string[]): string {
+    return roles.map((role) => this.subRoleLabels[role] ?? role).join(', ');
+  }
+
   hasSelectedRole(roles: readonly string[], id: string): boolean {
     return roles.includes(id);
   }
@@ -1091,11 +1063,7 @@ export class EquipePageComponent {
 
     if (this.addMemberRolesMenuOpen()) {
       const addRoot = this.addMemberRolesRoot?.nativeElement;
-      if (
-        !addRoot ||
-        !(target instanceof Node) ||
-        !addRoot.contains(target)
-      ) {
+      if (!addRoot || !(target instanceof Node) || !addRoot.contains(target)) {
         this.addMemberRolesMenuOpen.set(false);
       }
     }

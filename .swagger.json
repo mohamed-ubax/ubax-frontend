@@ -5806,6 +5806,74 @@
         ]
       }
     },
+    "/v1/hotel/team/{userId}": {
+      "delete": {
+        "tags": [
+          "Hotel Team"
+        ],
+        "summary": "Retirer un membre de l'équipe hôtel",
+        "description": "🏨 **Rôle requis :** `PARTNER` · gérant (`GERANT_HOTEL`) ou fondateur du même hôtel.\n\nDésactive le compte dans Keycloak et marque l'utilisateur comme supprimé en base (soft delete). Le fondateur de la structure et votre propre compte ne peuvent pas être retirés.",
+        "operationId": "removeMember",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre retiré",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Auto-suppression ou membre déjà supprimé",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas les droits nécessaires",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Membre introuvable",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/hotel/team/{userId}/sub-roles/{role}": {
       "delete": {
         "tags": [
@@ -5846,6 +5914,74 @@
           },
           "404": {
             "description": "Sous-rôle introuvable",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/agency/team/{userId}": {
+      "delete": {
+        "tags": [
+          "Agency Team"
+        ],
+        "summary": "Retirer un membre de l'équipe agence",
+        "description": "🏢 **Rôle requis :** `PARTNER` · directeur (`DIRECTEUR_AGENCE`) ou fondateur de la même agence.\n\nDésactive le compte dans Keycloak et marque l'utilisateur comme supprimé en base (soft delete). Le fondateur de la structure et votre propre compte ne peuvent pas être retirés.",
+        "operationId": "removeMember_1",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre retiré",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Auto-suppression ou membre déjà supprimé",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas les droits nécessaires",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Membre introuvable",
             "content": {
               "*/*": {
                 "schema": {
@@ -8314,6 +8450,15 @@
           "hotelName": {
             "type": "string"
           },
+          "partnerType": {
+            "type": "string"
+          },
+          "subRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSubRoleResponse"
+            }
+          },
           "emailVerified": {
             "type": "boolean"
           },
@@ -8335,6 +8480,34 @@
             "format": "date-time"
           },
           "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserSubRoleResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "UBAX_INTERNAL",
+              "AGENCE",
+              "HOTEL"
+            ]
+          },
+          "createdAt": {
             "type": "string",
             "format": "date-time"
           }
