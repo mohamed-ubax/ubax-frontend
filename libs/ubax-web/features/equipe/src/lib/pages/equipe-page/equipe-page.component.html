@@ -282,7 +282,7 @@
             </h2>
             <button
               type="button"
-              class="agency-members-page__add-drawer-close"
+              class="agency-members-page__add-drawer-close agency-members-page__add-drawer-close--glass"
               aria-label="Fermer"
               (click)="closeAutoAssignDrawer()"
             >
@@ -463,7 +463,7 @@
             </h2>
             <button
               type="button"
-              class="agency-members-page__add-drawer-close"
+              class="agency-members-page__add-drawer-close agency-members-page__add-drawer-close--glass"
               aria-label="Fermer"
               (click)="closeAddMemberDrawer()"
             >
@@ -483,6 +483,7 @@
           </div>
         </header>
 
+        <div class="agency-members-page__add-drawer-body">
         <!-- Avatar upload -->
         <div class="agency-members-page__avatar-zone">
           <input
@@ -588,6 +589,7 @@
 
         <!-- Form -->
         <form
+          id="addMemberForm"
           class="agency-members-page__add-drawer-form"
           [formGroup]="addMemberForm"
           (ngSubmit)="submitAddMember()"
@@ -705,32 +707,60 @@
                   addMemberForm.get('phone')?.touched
                 "
               >
-                <div
-                  class="agency-members-page__phone-prefix"
-                  aria-label="Indicatif pays : +225"
+                <p-select
+                  [ngModel]="selectedPhoneCountry().iso2"
+                  (ngModelChange)="onAddMemberPhoneCountryIsoChange($event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  inputId="addMemberPhoneCountry"
+                  [options]="countryDialOptions"
+                  optionLabel="name"
+                  optionValue="iso2"
+                  [filter]="true"
+                  filterBy="name,dialCode,iso2"
+                  filterPlaceholder="Rechercher un pays..."
+                  appendTo="body"
+                  styleClass="equipe-country-picker"
+                  panelStyleClass="equipe-country-picker-overlay"
+                  [showClear]="false"
+                  aria-label="Indicatif téléphonique"
                 >
-                  <span
-                    class="agency-members-page__phone-flag"
-                    aria-hidden="true"
-                    >🇨🇮</span
-                  >
-                  <span>+225</span>
-                  <svg
-                    class="agency-members-page__phone-chevron"
-                    viewBox="0 0 22 22"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M5.5 8.25L11 13.75L16.5 8.25"
-                      stroke="#181818"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </div>
+                  <ng-template #selectedItem let-country>
+                    <div class="equipe-cp-trigger">
+                      <span class="equipe-cp-flag-badge" aria-hidden="true">
+                        <img
+                          class="equipe-cp-flag-image"
+                          [src]="country?.flagUrl"
+                          alt=""
+                        />
+                      </span>
+                      <span class="equipe-cp-dial">+{{ country?.dialCode }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i
+                      class="pi pi-angle-down equipe-cp-dropdown-icon"
+                      aria-hidden="true"
+                    ></i>
+                  </ng-template>
+                  <ng-template #item let-country>
+                    <div class="equipe-cp-item">
+                      <span
+                        class="equipe-cp-flag-badge equipe-cp-flag-badge--option"
+                        aria-hidden="true"
+                      >
+                        <img
+                          class="equipe-cp-flag-image"
+                          [src]="country.flagUrl"
+                          alt=""
+                        />
+                      </span>
+                      <span class="equipe-cp-item-name">{{ country.name }}</span>
+                      <span class="equipe-cp-item-dial"
+                        >+{{ country.dialCode }}</span
+                      >
+                    </div>
+                  </ng-template>
+                </p-select>
                 <input
                   type="tel"
                   class="agency-members-page__phone-input"
@@ -751,29 +781,65 @@
                   } @else if (
                     addMemberForm.get('phone')?.errors?.['phoneFormat']
                   ) {
-                    Numéro invalide : 10 chiffres (ex. 0701234567)
+                    @if (selectedPhoneCountry().dialCode === '225') {
+                      Numéro invalide pour la CI : 10 chiffres (ex. 0701234567)
+                    } @else {
+                      Numéro invalide pour l’indicatif sélectionné
+                    }
                   }
                 </span>
               }
             </div>
 
-            <!-- Rôles (multiselect) -->
+            <!-- Rôles (liste déroulante multi) -->
             <div
-              class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+              #addMemberRolesRoot
+              class="agency-members-page__drawer-field agency-members-page__drawer-field--full agency-members-page__roles-dropdown-root"
             >
               <span class="agency-members-page__drawer-field-label">Rôles</span>
-              <div class="agency-members-page__subroles-list">
-                @for (option of roleOptions; track option.key) {
-                  <label class="agency-members-page__subrole-checkbox">
-                    <input
-                      type="checkbox"
-                      [checked]="isSubRoleSelected(option.key)"
-                      (change)="toggleSubRole(option.key)"
-                    />
-                    <span class="agency-members-page__subrole-label">{{
-                      option.label
-                    }}</span>
-                  </label>
+              <div class="agency-members-page__roles-dropdown">
+                <button
+                  type="button"
+                  class="agency-members-page__roles-dropdown-trigger"
+                  [class.agency-members-page__roles-dropdown-trigger--open]="
+                    addMemberRolesMenuOpen()
+                  "
+                  [attr.aria-expanded]="addMemberRolesMenuOpen()"
+                  aria-haspopup="listbox"
+                  (click)="toggleAddMemberRolesMenu($event)"
+                >
+                  <span class="agency-members-page__roles-dropdown-label">{{
+                    addMemberRolesSummary()
+                  }}</span>
+                  <i class="pi pi-angle-down" aria-hidden="true"></i>
+                </button>
+                @if (addMemberRolesMenuOpen()) {
+                  <ul
+                    class="agency-members-page__roles-dropdown-panel"
+                    role="listbox"
+                    aria-multiselectable="true"
+                  >
+                    @for (option of roleOptions; track option.key) {
+                      <li role="option" [attr.aria-selected]="isSubRoleSelected(option.key)">
+                        <button
+                          type="button"
+                          class="agency-members-page__roles-dropdown-option"
+                          [class.is-selected]="isSubRoleSelected(option.key)"
+                          (click)="onAddMemberRoleOptionClick(option.key, $event)"
+                        >
+                          <span
+                            class="agency-members-page__roles-dropdown-check"
+                            aria-hidden="true"
+                          >
+                            @if (isSubRoleSelected(option.key)) {
+                              <i class="pi pi-check"></i>
+                            }
+                          </span>
+                          <span>{{ option.label }}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
                 }
               </div>
               @if (selectedSubRoles().length === 0 && addMemberForm.touched) {
@@ -802,20 +868,14 @@
                     accept=".pdf,.jpg,.jpeg,.png,application/pdf"
                     (change)="onAddMemberDocumentsChange($event)"
                   />
-                  <svg
-                    viewBox="0 0 39 39"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <img
+                    class="agency-members-page__documents-zone-icon"
+                    [src]="addMemberDocumentsIconSrc"
+                    alt=""
                     aria-hidden="true"
-                  >
-                    <path
-                      d="M34.125 24.375V32.5C34.125 33.4946 33.7299 34.4484 33.0267 35.1517C32.3234 35.8549 31.3696 36.25 30.375 36.25H8.625C7.63044 36.25 6.67661 35.8549 5.97335 35.1517C5.27009 34.4484 4.875 33.4946 4.875 32.5V24.375M27.625 13L19.5 4.875L11.375 13M19.5 4.875V29.25"
-                      stroke="#1A3047"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
+                    width="39"
+                    height="39"
+                  />
                   <span>{{
                     addMemberAttachments().length
                       ? "Ajouter d'autres documents"
@@ -829,7 +889,7 @@
                   >
                     @for (
                       doc of addMemberAttachments();
-                      track doc.file.lastModified + doc.file.size + idx;
+                      track doc.name + doc.file.lastModified + doc.file.size;
                       let idx = $index
                     ) {
                       <li class="agency-members-page__documents-list-item">
@@ -854,6 +914,8 @@
               </div>
             </div>
           </div>
+        </form>
+        </div>
 
           <footer class="agency-members-page__add-drawer-footer">
             <button
@@ -865,6 +927,7 @@
             </button>
             <button
               type="submit"
+              form="addMemberForm"
               class="agency-members-page__drawer-save-btn"
               [disabled]="
                 addMemberForm.invalid ||
@@ -875,7 +938,6 @@
               Enregistrer
             </button>
           </footer>
-        </form>
       </aside>
     </div>
   </div>
@@ -928,7 +990,7 @@
               </h2>
               <button
                 type="button"
-                class="agency-members-page__add-drawer-close"
+                class="agency-members-page__add-drawer-close agency-members-page__add-drawer-close--glass"
                 aria-label="Fermer"
                 (click)="closeMemberPanel()"
               >
@@ -1200,58 +1262,66 @@
 
                 <!-- Rôle (modifiable) -->
                 <div
-                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+                  #editMemberRolesRoot
+                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full agency-members-page__roles-dropdown-root"
                 >
                   <span class="agency-members-page__drawer-field-label"
                     >Rôle</span
                   >
-                  <div class="agency-members-page__edit-roles-grid">
-                    @for (option of roleOptions; track option.key) {
-                      <label
-                        class="agency-members-page__auto-assign-role-item"
-                        [class.is-checked]="
-                          hasSelectedRole(editPanelRoles(), option.key)
-                        "
+                  <div class="agency-members-page__roles-dropdown">
+                    <button
+                      type="button"
+                      class="agency-members-page__roles-dropdown-trigger"
+                      [class.agency-members-page__roles-dropdown-trigger--open]="
+                        editMemberRolesMenuOpen()
+                      "
+                      [attr.aria-expanded]="editMemberRolesMenuOpen()"
+                      aria-haspopup="listbox"
+                      (click)="toggleEditMemberRolesMenu($event)"
+                    >
+                      <span class="agency-members-page__roles-dropdown-label">{{
+                        editMemberRolesSummary()
+                      }}</span>
+                      <i class="pi pi-angle-down" aria-hidden="true"></i>
+                    </button>
+                    @if (editMemberRolesMenuOpen()) {
+                      <ul
+                        class="agency-members-page__roles-dropdown-panel"
+                        role="listbox"
+                        aria-multiselectable="true"
                       >
-                        <div
-                          class="agency-members-page__auto-assign-role-label"
-                        >
-                          <span
-                            class="agency-members-page__auto-assign-role-icon"
-                            aria-hidden="true"
+                        @for (option of roleOptions; track option.key) {
+                          <li
+                            role="option"
+                            [attr.aria-selected]="
+                              hasSelectedRole(editPanelRoles(), option.key)
+                            "
                           >
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              type="button"
+                              class="agency-members-page__roles-dropdown-option"
+                              [class.is-selected]="
+                                hasSelectedRole(editPanelRoles(), option.key)
+                              "
+                              (click)="
+                                onEditMemberRoleOptionClick(option.key, $event)
+                              "
                             >
-                              <circle
-                                cx="12"
-                                cy="8"
-                                r="4"
-                                stroke="#1A3047"
-                                stroke-width="1.5"
-                              />
-                              <path
-                                d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
-                                stroke="#1A3047"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                              />
-                            </svg>
-                          </span>
-                          <span>{{ option.label }}</span>
-                        </div>
-                        <input
-                          type="checkbox"
-                          class="agency-members-page__auto-assign-checkbox"
-                          [checked]="
-                            hasSelectedRole(editPanelRoles(), option.key)
-                          "
-                          (change)="toggleEditPanelRole(option.key)"
-                          [attr.aria-label]="option.label"
-                        />
-                      </label>
+                              <span
+                                class="agency-members-page__roles-dropdown-check"
+                                aria-hidden="true"
+                              >
+                                @if (
+                                  hasSelectedRole(editPanelRoles(), option.key)
+                                ) {
+                                  <i class="pi pi-check"></i>
+                                }
+                              </span>
+                              <span>{{ option.label }}</span>
+                            </button>
+                          </li>
+                        }
+                      </ul>
                     }
                   </div>
 

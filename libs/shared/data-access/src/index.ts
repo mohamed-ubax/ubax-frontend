@@ -17,3 +17,4 @@ export type { NotificationHandler } from './lib/notification.token';
 export * from './lib/auth/auth.service';
 export * from './lib/auth/auth-session';
 export * from './lib/auth/user.model';
+export * from './lib/phone/country-dial-codes';

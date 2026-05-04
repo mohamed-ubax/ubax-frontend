@@ -4,6 +4,7 @@ import {
   DestroyRef,
   ElementRef,
   HostListener,
+  ViewChild,
   computed,
   effect,
   inject,
@@ -12,12 +13,18 @@ import {
 import { DOCUMENT } from '@angular/common';
 import {
   AbstractControl,
+  FormsModule,
   NonNullableFormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
 } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { AdminUserResponse } from '@ubax-workspace/shared-api-types';
+import {
+  COUNTRY_CODES,
+  type CountryDialCode,
+} from '@ubax-workspace/shared-data-access';
 import {
   AGENCE_SUB_ROLES,
   AgencyStore,
@@ -109,16 +116,23 @@ function toggleArrayValue(values: readonly string[], role: string): string[] {
     : [...values, role];
 }
 
-function composeCiE164Phone(nationalDigits: string): string {
+function composeE164Phone(dialCode: string, nationalDigits: string): string {
   const digits = nationalDigits.replaceAll(/\D/g, '');
   if (!digits.length) {
     return '';
   }
+  if (dialCode === '225') {
+    const body = digits.startsWith('0') ? digits.slice(1) : digits;
+    if (body.length !== 9 || !/^[1-9]\d{8}$/.test(body)) {
+      return '';
+    }
+    return `+225${body}`;
+  }
   const body = digits.startsWith('0') ? digits.slice(1) : digits;
-  if (body.length !== 9 || !/^[1-9]\d{8}$/.test(body)) {
+  if (body.length < 6 || body.length > 14 || !/^\d+$/.test(body)) {
     return '';
   }
-  return `+225${body}`;
+  return `+${dialCode}${body}`;
 }
 
 function addMemberPhoneValidator(control: AbstractControl): ValidationErrors | null {
@@ -126,7 +140,24 @@ function addMemberPhoneValidator(control: AbstractControl): ValidationErrors | n
   if (!raw.trim()) {
     return null;
   }
-  return /^\+225[1-9]\d{8}$/.test(raw) ? null : { phoneFormat: true };
+  return /^\+[1-9]\d{6,14}$/.test(raw) ? null : { phoneFormat: true };
+}
+
+function readDefaultPhoneCountry(): CountryDialCode {
+  const ci = COUNTRY_CODES.find((c) => c.iso2 === 'CI');
+  if (ci) {
+    return ci;
+  }
+  const first = COUNTRY_CODES[0];
+  if (first) {
+    return first;
+  }
+  return {
+    name: "Cote d'Ivoire",
+    iso2: 'CI',
+    dialCode: '225',
+    flagUrl: 'https://flagcdn.com/w80/ci.png',
+  };
 }
 
 function formatAttachmentSize(bytes: number): string {
@@ -144,6 +175,8 @@ function formatAttachmentSize(bytes: number): string {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    FormsModule,
+    SelectModule,
     UiDataTableComponent,
     UiDataTableCellDefDirective,
     UiDataTableEmptyDefDirective,
@@ -155,6 +188,12 @@ function formatAttachmentSize(bytes: number): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EquipePageComponent {
+  @ViewChild('addMemberRolesRoot', { read: ElementRef })
+  private readonly addMemberRolesRoot?: ElementRef<HTMLElement>;
+
+  @ViewChild('editMemberRolesRoot', { read: ElementRef })
+  private readonly editMemberRolesRoot?: ElementRef<HTMLElement>;
+
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly formBuilder = inject(NonNullableFormBuilder);
   readonly agencyStore = inject(AgencyStore);
@@ -176,6 +215,9 @@ export class EquipePageComponent {
   /** Illustration « no records » (frame Liste des membres — Figma node 1217:3865). */
   readonly membersEmptyIllustrationSrc =
     'https://www.figma.com/api/mcp/asset/f1a345aa-0603-4b2e-872f-0d9edc18c22e';
+  /** Icône « flat-color-icons:file » — zone Documents (Figma Gestion immobilier Ubax). */
+  readonly addMemberDocumentsIconSrc =
+    'https://www.figma.com/api/mcp/asset/da1bd0ea-f910-42d7-9183-6f9a5ec1990f';
 
   readonly currentPage = signal(1);
   readonly isRoleMenuOpen = signal(false);
@@ -188,6 +230,8 @@ export class EquipePageComponent {
 
   // Add member drawer
   readonly isAddMemberDrawerOpen = signal(false);
+  readonly addMemberRolesMenuOpen = signal(false);
+  readonly editMemberRolesMenuOpen = signal(false);
 
   // Member panel (view details / edit roles)
   readonly activeMemberPanelMode = signal<MemberPanelMode | null>(null);
@@ -234,8 +278,10 @@ export class EquipePageComponent {
     readonly { readonly name: string; readonly sizeLabel: string; readonly file: File }[]
   >([]);
 
-  /** Affichage national (ex. 07…) pendant la saisie ; le contrôle `phone` garde l'E.164 +225… */
+  /** Affichage national (ex. 07…) pendant la saisie ; le contrôle `phone` garde l'E.164. */
   readonly addMemberPhoneDraft = signal('');
+  readonly selectedPhoneCountry = signal<CountryDialCode>(readDefaultPhoneCountry());
+  readonly countryDialOptions = COUNTRY_CODES;
 
   readonly editMemberForm = this.formBuilder.group({
     firstName: [{ value: '', disabled: true }],
@@ -664,8 +710,10 @@ export class EquipePageComponent {
   openAddMemberDrawer(): void {
     this.addMemberForm.reset();
     this.addMemberPhoneDraft.set('');
+    this.selectedPhoneCountry.set(readDefaultPhoneCountry());
     this.selectedSubRoles.set([]);
     this.addMemberAttachments.set([]);
+    this.addMemberRolesMenuOpen.set(false);
     this.successMessage.set(null);
     this.addMemberError.set(null);
     this.addMemberSubmitted.set(false);
@@ -674,6 +722,7 @@ export class EquipePageComponent {
 
   closeAddMemberDrawer(): void {
     this.isAddMemberDrawerOpen.set(false);
+    this.addMemberRolesMenuOpen.set(false);
     this.addMemberError.set(null);
     this.successMessage.set(null);
     this.addMemberAttachments.set([]);
@@ -696,9 +745,62 @@ export class EquipePageComponent {
     }
     const raw = target.value;
     this.addMemberPhoneDraft.set(raw);
-    const composed = composeCiE164Phone(raw);
+    const composed = composeE164Phone(this.selectedPhoneCountry().dialCode, raw);
     this.addMemberForm.get('phone')?.setValue(composed);
     this.addMemberForm.get('phone')?.markAsTouched();
+  }
+
+  onAddMemberPhoneCountryIsoChange(iso2: string): void {
+    const country =
+      COUNTRY_CODES.find((c) => c.iso2 === iso2) ?? readDefaultPhoneCountry();
+    this.selectedPhoneCountry.set(country);
+    const composed = composeE164Phone(
+      country.dialCode,
+      this.addMemberPhoneDraft(),
+    );
+    this.addMemberForm.get('phone')?.setValue(composed);
+    this.addMemberForm.get('phone')?.markAsTouched();
+  }
+
+  toggleAddMemberRolesMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.addMemberRolesMenuOpen.update((open) => !open);
+  }
+
+  addMemberRolesSummary(): string {
+    const keys = this.selectedSubRoles();
+    if (!keys.length) {
+      return 'Sélectionner un ou plusieurs rôles';
+    }
+    return keys
+      .map((k) => this.subRoleLabels[k] ?? k)
+      .sort()
+      .join(', ');
+  }
+
+  toggleEditMemberRolesMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.editMemberRolesMenuOpen.update((open) => !open);
+  }
+
+  editMemberRolesSummary(): string {
+    const keys = this.editPanelRoles();
+    if (!keys.length) {
+      return 'Sélectionner un ou plusieurs rôles';
+    }
+    return keys
+      .map((k) => this.subRoleLabels[k] ?? k)
+      .sort()
+      .join(', ');
+  }
+
+  onEditMemberRoleOptionClick(
+    roleKey: UbaxSubRole,
+    event: MouseEvent | KeyboardEvent,
+  ): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggleEditPanelRole(roleKey);
   }
 
   onAddMemberDocumentsChange(event: Event): void {
@@ -752,6 +854,15 @@ export class EquipePageComponent {
     }
   }
 
+  onAddMemberRoleOptionClick(
+    roleKey: string,
+    event: MouseEvent | KeyboardEvent,
+  ): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggleSubRole(roleKey);
+  }
+
   isSubRoleSelected(roleKey: string): boolean {
     return this.selectedSubRoles().includes(roleKey);
   }
@@ -759,6 +870,7 @@ export class EquipePageComponent {
   // ── Member panel (view details / edit roles) ─────────────────────────────
 
   openMemberPanel(row: AgencyMemberTableRow, mode: MemberPanelMode): void {
+    this.editMemberRolesMenuOpen.set(false);
     this.selectedMemberId.set(row.memberId);
     this.activeMemberPanelMode.set(mode);
 
@@ -792,6 +904,7 @@ export class EquipePageComponent {
     this.activeMemberPanelMode.set(null);
     this.editPanelRoles.set([]);
     this.editPanelSeededFor.set(null);
+    this.editMemberRolesMenuOpen.set(false);
   }
 
   toggleEditPanelRole(role: UbaxSubRole): void {
@@ -902,6 +1015,28 @@ export class EquipePageComponent {
       !this.elementRef.nativeElement.contains(target)
     ) {
       this.isRoleMenuOpen.set(false);
+    }
+
+    if (this.addMemberRolesMenuOpen()) {
+      const addRoot = this.addMemberRolesRoot?.nativeElement;
+      if (
+        !addRoot ||
+        !(target instanceof Node) ||
+        !addRoot.contains(target)
+      ) {
+        this.addMemberRolesMenuOpen.set(false);
+      }
+    }
+
+    if (this.editMemberRolesMenuOpen()) {
+      const editRoot = this.editMemberRolesRoot?.nativeElement;
+      if (
+        !editRoot ||
+        !(target instanceof Node) ||
+        !editRoot.contains(target)
+      ) {
+        this.editMemberRolesMenuOpen.set(false);
+      }
     }
   }
 }
