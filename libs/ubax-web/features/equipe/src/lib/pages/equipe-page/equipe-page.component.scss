@@ -1104,7 +1104,8 @@
   border-radius: 10px;
   overflow: hidden;
   box-sizing: border-box;
-  transition: box-shadow 180ms var(--ubax-motion-ease-soft, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: box-shadow 180ms
+    var(--ubax-motion-ease-soft, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 .agency-members-page__phone-wrap--invalid {
@@ -1978,7 +1979,7 @@
 
 .agency-members-page__confirm-dialog {
   width: 100%;
-  max-width: 420px;
+  max-width: 40rem;
   padding: 28px;
   border-radius: 16px;
   background: var(--ubax-surface);
