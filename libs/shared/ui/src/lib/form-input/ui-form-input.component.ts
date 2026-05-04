@@ -17,5 +17,7 @@ export class UiFormInputComponent {
   readonly variant = input<UiFormInputVariant>('default');
   readonly invalid = input(false);
   readonly disabled = input(false);
+  /** Affichage non éditable sans style `disabled` (meilleure lisibilité en lecture seule). */
+  readonly readOnly = input(false);
   readonly value = model('');
 }

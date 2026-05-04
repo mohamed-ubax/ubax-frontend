@@ -302,32 +302,19 @@
           </div>
         </header>
 
-        <!-- Avatar zone (decorative) -->
+        <div class="agency-members-page__add-drawer-body">
+        <!-- Avatar (initiales — même pattern que détail / ajout membre) -->
         <div class="agency-members-page__avatar-zone">
           <div
-            class="agency-members-page__avatar-circle"
-            role="presentation"
-            aria-hidden="true"
+            class="agency-members-page__avatar-circle agency-members-page__avatar-circle--filled"
+            role="img"
+            [attr.aria-label]="
+              (authStore.user()?.prenom ?? '') + ' ' + (authStore.user()?.nom ?? '')
+            "
           >
-            <svg
-              viewBox="0 0 52 52"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="26"
-                cy="20"
-                r="10"
-                stroke="#1A3047"
-                stroke-width="2"
-              />
-              <path
-                d="M8 44c0-9.941 8.059-18 18-18s18 8.059 18 18"
-                stroke="#1A3047"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
+            <span class="agency-members-page__avatar-initials">{{
+              autoAssignUserInitials()
+            }}</span>
           </div>
         </div>
 
@@ -398,6 +385,7 @@
               }
             </div>
           }
+        </div>
         </div>
 
         <footer class="agency-members-page__add-drawer-footer">
@@ -1023,145 +1011,187 @@
             </div>
           </div>
 
-          <!-- ── View mode (détails) ── -->
+          <!-- ── View mode (détails) — même grille / champs que l'ajout ── -->
           @if (panelMode === 'view') {
-            <div class="agency-members-page__member-details-body">
-              <section class="agency-members-page__details-section">
-                <div class="agency-members-page__details-grid">
-                  <div class="agency-members-page__details-field">
-                    <span class="agency-members-page__details-label"
-                      >Prénom</span
-                    >
-                    <span class="agency-members-page__details-value">{{
-                      member.firstName ?? '—'
-                    }}</span>
-                  </div>
-                  <div class="agency-members-page__details-field">
-                    <span class="agency-members-page__details-label">Nom</span>
-                    <span class="agency-members-page__details-value">{{
-                      member.lastName ?? '—'
-                    }}</span>
-                  </div>
-                  <div class="agency-members-page__details-field">
-                    <span class="agency-members-page__details-label"
-                      >Email</span
-                    >
-                    <span class="agency-members-page__details-value">{{
-                      member.email ?? '—'
-                    }}</span>
-                  </div>
-                  <div class="agency-members-page__details-field">
-                    <span class="agency-members-page__details-label"
-                      >Téléphone</span
-                    >
-                    <span class="agency-members-page__details-value">{{
-                      member.phone ?? '—'
-                    }}</span>
-                  </div>
+            <div class="agency-members-page__add-drawer-body">
+              <div class="agency-members-page__drawer-field-grid">
+                <div class="agency-members-page__drawer-field">
+                  <ubax-ui-form-input
+                    label="Prenom"
+                    variant="drawer"
+                    [readOnly]="true"
+                    [value]="member.firstName ?? ''"
+                  />
                 </div>
-              </section>
-
-              <!-- Sub-roles -->
-              <section class="agency-members-page__details-section">
-                <h3 class="agency-members-page__details-section-title">Rôle</h3>
-
-                @if (selectedMemberRolesLoading()) {
-                  <p class="agency-members-page__info-state">
-                    Chargement du rôle...
-                  </p>
-                } @else if (selectedMemberRolesError()) {
-                  <p class="agency-members-page__error-state">
-                    {{ selectedMemberRolesError() }}
-                  </p>
-                } @else if (selectedMemberRoles().length) {
-                  <div class="agency-members-page__role-badge-wrap">
-                    @for (role of selectedMemberRoles(); track role) {
-                      <span class="agency-members-page__role-badge">
-                        {{ subRoleLabels[$any(role)] }}
-                        @if (canManageMembers()) {
-                          <button
-                            type="button"
-                            class="agency-members-page__role-badge-remove"
-                            aria-label="Révoquer le rôle {{
-                              subRoleLabels[$any(role)]
-                            }}"
-                            (click)="
-                              openRevokeConfirmation(
-                                role,
-                                selectedMemberId()!,
-                                (selectedMember()?.firstName ?? '') +
-                                  ' ' +
-                                  (selectedMember()?.lastName ?? '')
-                              )
-                            "
-                          >
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M18 6L6 18M6 6l12 12"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                              />
-                            </svg>
-                          </button>
-                        }
-                      </span>
-                    }
-                  </div>
-                } @else {
-                  <p class="agency-members-page__info-state">
-                    Aucun sous-rôle attribué.
-                  </p>
-                }
-              </section>
-
-              <!-- Documents (placeholder) -->
-              <section class="agency-members-page__details-section">
-                <h3 class="agency-members-page__details-section-title">
-                  Documents insérés
-                </h3>
-                <div class="agency-members-page__documents-placeholder">
-                  <svg
-                    viewBox="0 0 39 39"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
+                <div class="agency-members-page__drawer-field">
+                  <ubax-ui-form-input
+                    label="Nom"
+                    variant="drawer"
+                    [readOnly]="true"
+                    [value]="member.lastName ?? ''"
+                  />
+                </div>
+                <div class="agency-members-page__drawer-field">
+                  <ubax-ui-form-input
+                    label="Email"
+                    variant="drawer"
+                    type="email"
+                    [readOnly]="true"
+                    [value]="member.email ?? ''"
+                  />
+                </div>
+                <div class="agency-members-page__drawer-field">
+                  <span class="agency-members-page__drawer-field-label"
+                    >Téléphone</span
                   >
-                    <path
-                      d="M22.75 3.25H9.75C8.79174 3.25 7.87252 3.63058 7.19832 4.30478C6.52411 4.97899 6.14353 5.89821 6.14353 6.85647V32.1435C6.14353 33.1018 6.52411 34.021 7.19832 34.6952C7.87252 35.3694 8.79174 35.75 9.75 35.75H29.25C30.2083 35.75 31.1275 35.3694 31.8017 34.6952C32.4759 34.021 32.8565 33.1018 32.8565 32.1435V13.3565L22.75 3.25Z"
-                      stroke="#1A3047"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                  <div
+                    class="agency-members-page__phone-wrap agency-members-page__phone-wrap--readonly"
+                  >
+                    <p-select
+                      [ngModel]="memberDialDisplay(member).country.iso2"
+                      [disabled]="true"
+                      [ngModelOptions]="{ standalone: true }"
+                      inputId="viewMemberPhoneCountry"
+                      [options]="countryDialOptions"
+                      optionLabel="name"
+                      optionValue="iso2"
+                      appendTo="body"
+                      styleClass="equipe-country-picker equipe-country-picker--readonly"
+                      panelStyleClass="equipe-country-picker-overlay"
+                      [showClear]="false"
+                      [attr.aria-label]="
+                        'Indicatif : +' + memberDialDisplay(member).country.dialCode
+                      "
+                    >
+                      <ng-template #selectedItem let-country>
+                        <div class="equipe-cp-trigger">
+                          <span class="equipe-cp-flag-badge" aria-hidden="true">
+                            <img
+                              class="equipe-cp-flag-image"
+                              [src]="country?.flagUrl"
+                              alt=""
+                            />
+                          </span>
+                          <span class="equipe-cp-dial">+{{ country?.dialCode }}</span>
+                        </div>
+                      </ng-template>
+                      <ng-template #dropdownicon>
+                        <i
+                          class="pi pi-angle-down equipe-cp-dropdown-icon"
+                          aria-hidden="true"
+                        ></i>
+                      </ng-template>
+                      <ng-template #item let-country>
+                        <div class="equipe-cp-item">
+                          <span
+                            class="equipe-cp-flag-badge equipe-cp-flag-badge--option"
+                            aria-hidden="true"
+                          >
+                            <img
+                              class="equipe-cp-flag-image"
+                              [src]="country.flagUrl"
+                              alt=""
+                            />
+                          </span>
+                          <span class="equipe-cp-item-name">{{ country.name }}</span>
+                          <span class="equipe-cp-item-dial"
+                            >+{{ country.dialCode }}</span
+                          >
+                        </div>
+                      </ng-template>
+                    </p-select>
+                    <input
+                      type="tel"
+                      class="agency-members-page__phone-input"
+                      readonly
+                      [value]="memberDialDisplay(member).nationalDigits || member.phone || ''"
                     />
-                    <path
-                      d="M22.75 3.25V13.3565H32.8565"
-                      stroke="#1A3047"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M14.625 20.5625H24.375M14.625 26.8125H24.375"
-                      stroke="#1A3047"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                  <span>Aucun document</span>
+                  </div>
                 </div>
-              </section>
+
+                <div
+                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+                >
+                  <span class="agency-members-page__drawer-field-label">Rôle</span>
+                  @if (selectedMemberRolesLoading()) {
+                    <p class="agency-members-page__info-state">
+                      Chargement du rôle...
+                    </p>
+                  } @else if (selectedMemberRolesError()) {
+                    <p class="agency-members-page__error-state">
+                      {{ selectedMemberRolesError() }}
+                    </p>
+                  } @else if (selectedMemberRoles().length) {
+                    <div class="agency-members-page__role-badge-wrap">
+                      @for (role of selectedMemberRoles(); track role) {
+                        <span class="agency-members-page__role-badge">
+                          {{ subRoleLabels[$any(role)] }}
+                          @if (canManageMembers()) {
+                            <button
+                              type="button"
+                              class="agency-members-page__role-badge-remove"
+                              aria-label="Révoquer le rôle {{
+                                subRoleLabels[$any(role)]
+                              }}"
+                              (click)="
+                                openRevokeConfirmation(
+                                  role,
+                                  selectedMemberId()!,
+                                  (selectedMember()?.firstName ?? '') +
+                                    ' ' +
+                                    (selectedMember()?.lastName ?? '')
+                                )
+                              "
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M18 6L6 18M6 6l12 12"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                />
+                              </svg>
+                            </button>
+                          }
+                        </span>
+                      }
+                    </div>
+                  } @else {
+                    <p class="agency-members-page__info-state">
+                      Aucun sous-rôle attribué.
+                    </p>
+                  }
+                </div>
+
+                <div
+                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+                >
+                  <span class="agency-members-page__drawer-field-label"
+                    >Documents insérés</span
+                  >
+                  <div class="agency-members-page__documents-placeholder">
+                    <img
+                      class="agency-members-page__documents-zone-icon"
+                      [src]="addMemberDocumentsIconSrc"
+                      alt=""
+                      aria-hidden="true"
+                      width="39"
+                      height="39"
+                    />
+                    <span>Aucun document</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <footer class="agency-members-page__add-drawer-footer">
               <button
                 type="button"
-                class="agency-members-page__drawer-save-btn"
-                style="flex: 1"
+                class="agency-members-page__drawer-save-btn agency-members-page__drawer-save-btn--full"
                 (click)="closeMemberPanel()"
               >
                 Fermer
@@ -1169,226 +1199,170 @@
             </footer>
           }
 
-          <!-- ── Edit mode ── -->
+          <!-- ── Edit mode — champs alignés sur l'ajout ; rôle = liste unique Figma ── -->
           @if (panelMode === 'edit') {
             <form
-              class="agency-members-page__add-drawer-form"
+              id="editMemberForm"
+              class="agency-members-page__add-drawer-body"
               [formGroup]="editMemberForm"
               (ngSubmit)="submitEditMember()"
             >
-              <div class="agency-members-page__drawer-field-grid">
-                <!-- Prénom (read-only) -->
-                <label class="agency-members-page__drawer-field">
-                  <span class="agency-members-page__drawer-field-label"
-                    >Prenom</span
-                  >
-                  <div
-                    class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
-                  >
-                    <input
-                      type="text"
-                      class="agency-members-page__drawer-input"
-                      formControlName="firstName"
-                      [placeholder]="member.firstName ?? 'Prénom'"
-                      readonly
+              <div class="agency-members-page__add-drawer-form">
+                <div class="agency-members-page__drawer-field-grid">
+                  <div class="agency-members-page__drawer-field">
+                    <ubax-ui-form-input
+                      label="Prenom"
+                      variant="drawer"
+                      [readOnly]="true"
+                      [value]="editMemberForm.controls.firstName.value"
                     />
                   </div>
-                </label>
-
-                <!-- Nom (read-only) -->
-                <label class="agency-members-page__drawer-field">
-                  <span class="agency-members-page__drawer-field-label"
-                    >Nom</span
-                  >
-                  <div
-                    class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
-                  >
-                    <input
-                      type="text"
-                      class="agency-members-page__drawer-input"
-                      formControlName="lastName"
-                      [placeholder]="member.lastName ?? 'Nom'"
-                      readonly
+                  <div class="agency-members-page__drawer-field">
+                    <ubax-ui-form-input
+                      label="Nom"
+                      variant="drawer"
+                      [readOnly]="true"
+                      [value]="editMemberForm.controls.lastName.value"
                     />
                   </div>
-                </label>
-
-                <!-- Email (read-only) -->
-                <label class="agency-members-page__drawer-field">
-                  <span class="agency-members-page__drawer-field-label"
-                    >Email</span
-                  >
-                  <div
-                    class="agency-members-page__drawer-input-wrap agency-members-page__drawer-input-wrap--readonly"
-                  >
-                    <input
+                  <div class="agency-members-page__drawer-field">
+                    <ubax-ui-form-input
+                      label="Email"
+                      variant="drawer"
                       type="email"
-                      class="agency-members-page__drawer-input"
-                      formControlName="email"
-                      [placeholder]="member.email ?? 'Email'"
-                      readonly
+                      [readOnly]="true"
+                      [value]="editMemberForm.controls.email.value"
                     />
                   </div>
-                </label>
-
-                <!-- Téléphone (read-only) -->
-                <label class="agency-members-page__drawer-field">
-                  <span class="agency-members-page__drawer-field-label"
-                    >Téléphone</span
-                  >
-                  <div
-                    class="agency-members-page__phone-wrap agency-members-page__phone-wrap--readonly"
-                  >
+                  <div class="agency-members-page__drawer-field">
+                    <span class="agency-members-page__drawer-field-label"
+                      >Téléphone</span
+                    >
                     <div
-                      class="agency-members-page__phone-prefix"
-                      aria-label="Indicatif pays : +225"
+                      class="agency-members-page__phone-wrap agency-members-page__phone-wrap--readonly"
                     >
-                      <span
-                        class="agency-members-page__phone-flag"
-                        aria-hidden="true"
-                        >🇨🇮</span
+                      <p-select
+                        [ngModel]="editMemberPhoneCountry().iso2"
+                        [disabled]="true"
+                        [ngModelOptions]="{ standalone: true }"
+                        inputId="editMemberPhoneCountry"
+                        [options]="countryDialOptions"
+                        optionLabel="name"
+                        optionValue="iso2"
+                        appendTo="body"
+                        styleClass="equipe-country-picker equipe-country-picker--readonly"
+                        panelStyleClass="equipe-country-picker-overlay"
+                        [showClear]="false"
+                        aria-label="Indicatif téléphonique"
                       >
-                      <span>+225</span>
-                    </div>
-                    <input
-                      type="tel"
-                      class="agency-members-page__phone-input"
-                      formControlName="phone"
-                      [placeholder]="member.phone ?? 'Téléphone'"
-                      readonly
-                    />
-                  </div>
-                </label>
-
-                <!-- Rôle (modifiable) -->
-                <div
-                  #editMemberRolesRoot
-                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full agency-members-page__roles-dropdown-root"
-                >
-                  <span class="agency-members-page__drawer-field-label"
-                    >Rôle</span
-                  >
-                  <div class="agency-members-page__roles-dropdown">
-                    <button
-                      type="button"
-                      class="agency-members-page__roles-dropdown-trigger"
-                      [class.agency-members-page__roles-dropdown-trigger--open]="
-                        editMemberRolesMenuOpen()
-                      "
-                      [attr.aria-expanded]="editMemberRolesMenuOpen()"
-                      aria-haspopup="listbox"
-                      (click)="toggleEditMemberRolesMenu($event)"
-                    >
-                      <span class="agency-members-page__roles-dropdown-label">{{
-                        editMemberRolesSummary()
-                      }}</span>
-                      <i class="pi pi-angle-down" aria-hidden="true"></i>
-                    </button>
-                    @if (editMemberRolesMenuOpen()) {
-                      <ul
-                        class="agency-members-page__roles-dropdown-panel"
-                        role="listbox"
-                        aria-multiselectable="true"
-                      >
-                        @for (option of roleOptions; track option.key) {
-                          <li
-                            role="option"
-                            [attr.aria-selected]="
-                              hasSelectedRole(editPanelRoles(), option.key)
-                            "
-                          >
-                            <button
-                              type="button"
-                              class="agency-members-page__roles-dropdown-option"
-                              [class.is-selected]="
-                                hasSelectedRole(editPanelRoles(), option.key)
-                              "
-                              (click)="
-                                onEditMemberRoleOptionClick(option.key, $event)
-                              "
+                        <ng-template #selectedItem let-country>
+                          <div class="equipe-cp-trigger">
+                            <span class="equipe-cp-flag-badge" aria-hidden="true">
+                              <img
+                                class="equipe-cp-flag-image"
+                                [src]="country?.flagUrl"
+                                alt=""
+                              />
+                            </span>
+                            <span class="equipe-cp-dial">+{{ country?.dialCode }}</span>
+                          </div>
+                        </ng-template>
+                        <ng-template #dropdownicon>
+                          <i
+                            class="pi pi-angle-down equipe-cp-dropdown-icon"
+                            aria-hidden="true"
+                          ></i>
+                        </ng-template>
+                        <ng-template #item let-country>
+                          <div class="equipe-cp-item">
+                            <span
+                              class="equipe-cp-flag-badge equipe-cp-flag-badge--option"
+                              aria-hidden="true"
                             >
-                              <span
-                                class="agency-members-page__roles-dropdown-check"
-                                aria-hidden="true"
-                              >
-                                @if (
-                                  hasSelectedRole(editPanelRoles(), option.key)
-                                ) {
-                                  <i class="pi pi-check"></i>
-                                }
-                              </span>
-                              <span>{{ option.label }}</span>
-                            </button>
-                          </li>
-                        }
-                      </ul>
+                              <img
+                                class="equipe-cp-flag-image"
+                                [src]="country.flagUrl"
+                                alt=""
+                              />
+                            </span>
+                            <span class="equipe-cp-item-name">{{ country.name }}</span>
+                            <span class="equipe-cp-item-dial"
+                              >+{{ country.dialCode }}</span
+                            >
+                          </div>
+                        </ng-template>
+                      </p-select>
+                      <input
+                        type="tel"
+                        class="agency-members-page__phone-input"
+                        readonly
+                        [value]="editMemberPhoneDraft()"
+                      />
+                    </div>
+                  </div>
+
+                  <div
+                    class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
+                  >
+                    <span class="agency-members-page__drawer-field-label">Rôle</span>
+                    <p-select
+                      formControlName="role"
+                      inputId="editMemberRole"
+                      [options]="roleOptions"
+                      optionLabel="label"
+                      optionValue="key"
+                      placeholder="Sélectionner un rôle"
+                      appendTo="body"
+                      styleClass="equipe-member-role-select"
+                      panelStyleClass="equipe-member-role-select-overlay"
+                      [showClear]="false"
+                    />
+                    @if (selectedMemberRolesLoading()) {
+                      <p class="agency-members-page__info-state">
+                        Chargement des rôles...
+                      </p>
                     }
                   </div>
 
-                  @if (selectedMemberRolesLoading()) {
-                    <p class="agency-members-page__info-state">
-                      Chargement des rôles...
-                    </p>
-                  }
-                </div>
-
-                <!-- Documents -->
-                <div
-                  class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
-                >
-                  <span class="agency-members-page__drawer-field-label"
-                    >Documents</span
+                  <div
+                    class="agency-members-page__drawer-field agency-members-page__drawer-field--full"
                   >
-                  <div class="agency-members-page__documents-placeholder">
-                    <svg
-                      viewBox="0 0 39 39"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      aria-hidden="true"
+                    <span class="agency-members-page__drawer-field-label"
+                      >Documents</span
                     >
-                      <path
-                        d="M22.75 3.25H9.75C8.79174 3.25 7.87252 3.63058 7.19832 4.30478C6.52411 4.97899 6.14353 5.89821 6.14353 6.85647V32.1435C6.14353 33.1018 6.52411 34.021 7.19832 34.6952C7.87252 35.3694 8.79174 35.75 9.75 35.75H29.25C30.2083 35.75 31.1275 35.3694 31.8017 34.6952C32.4759 34.021 32.8565 33.1018 32.8565 32.1435V13.3565L22.75 3.25Z"
-                        stroke="#1A3047"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                    <div class="agency-members-page__documents-placeholder">
+                      <img
+                        class="agency-members-page__documents-zone-icon"
+                        [src]="addMemberDocumentsIconSrc"
+                        alt=""
+                        aria-hidden="true"
+                        width="39"
+                        height="39"
                       />
-                      <path
-                        d="M22.75 3.25V13.3565H32.8565"
-                        stroke="#1A3047"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                      <path
-                        d="M14.625 20.5625H24.375M14.625 26.8125H24.375"
-                        stroke="#1A3047"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                      />
-                    </svg>
-                    <span>Aucun document</span>
+                      <span>Aucun document</span>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <footer class="agency-members-page__add-drawer-footer">
-                <button
-                  type="button"
-                  class="agency-members-page__drawer-cancel-btn"
-                  (click)="closeMemberPanel()"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  class="agency-members-page__drawer-save-btn"
-                  [disabled]="agencyStore.isSaving()"
-                >
-                  Modifier
-                </button>
-              </footer>
             </form>
+
+            <footer class="agency-members-page__add-drawer-footer">
+              <button
+                type="button"
+                class="agency-members-page__drawer-cancel-btn"
+                (click)="closeMemberPanel()"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                form="editMemberForm"
+                class="agency-members-page__drawer-save-btn"
+                [disabled]="agencyStore.isSaving()"
+              >
+                Modifier
+              </button>
+            </footer>
           }
         } @else {
           <!-- Loading state when member not found -->
