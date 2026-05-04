@@ -1,6 +1,10 @@
 import '@angular/compiler';
 import { Injector, runInInjectionContext } from '@angular/core';
-import { Router, type ActivatedRouteSnapshot, type RouterStateSnapshot } from '@angular/router';
+import {
+  Router,
+  type ActivatedRouteSnapshot,
+  type RouterStateSnapshot,
+} from '@angular/router';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
 import { authGuard } from './auth.guard';
 
@@ -43,7 +47,7 @@ describe('authGuard', () => {
 
     expect(router.createUrlTree).toHaveBeenCalledWith(
       ['/connexion'],
-      expect.objectContaining({ queryParams: expect.any(Object) }),
+      expect.objectContaining({ queryParams: expect.anything() }),
     );
     expect(result).toEqual({ redirectTo: '/connexion' });
   });

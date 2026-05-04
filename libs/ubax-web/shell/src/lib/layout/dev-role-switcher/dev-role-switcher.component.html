@@ -10,7 +10,7 @@
         <span class="dev-role-switcher__select-shell">
           <select
             class="dev-role-switcher__select"
-            (change)="onProfileChange($any($event.target).value)"
+            (change)="onProfileChange($event)"
           >
             @for (profile of devProfiles; track profile.label) {
               <option

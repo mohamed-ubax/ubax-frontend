@@ -20,7 +20,6 @@ import {
   NavItemConfig,
   ROLE_BADGE_CONFIG,
   SUB_ROLE_LABELS,
-  UbaxRole,
   topbarNavItemsForUser,
 } from '@ubax-workspace/ubax-web-data-access';
 import { filter, map } from 'rxjs';
@@ -146,7 +145,8 @@ export class TopbarComponent implements AfterViewInit {
   onDocumentClick(target: EventTarget | null): void {
     if (
       this.isUserMenuOpen() &&
-      (!(target instanceof Node) || !this.elementRef.nativeElement.contains(target))
+      (!(target instanceof Node) ||
+        !this.elementRef.nativeElement.contains(target))
     ) {
       this.isUserMenuOpen.set(false);
     }

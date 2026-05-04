@@ -58,9 +58,10 @@ export class DevRoleSwitcherComponent implements OnInit {
     this.reloadDashboard();
   }
 
-  protected onProfileChange(label: string): void {
+  protected onProfileChange(event: Event): void {
     if (!this.enabled()) return;
 
+    const label = (event.target as HTMLSelectElement).value;
     const profile = DEV_PROFILES.find((p) => p.label === label);
     if (!profile || profile.label === this.selectedLabel()) return;
 

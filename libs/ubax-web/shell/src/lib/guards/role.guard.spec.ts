@@ -1,6 +1,10 @@
 import '@angular/compiler';
 import { Injector, runInInjectionContext } from '@angular/core';
-import { Router, type ActivatedRouteSnapshot, type RouterStateSnapshot } from '@angular/router';
+import {
+  Router,
+  type ActivatedRouteSnapshot,
+  type RouterStateSnapshot,
+} from '@angular/router';
 import {
   AuthStore,
   UbaxRole,
@@ -13,9 +17,13 @@ import type { User } from '@ubax-workspace/shared-data-access';
 describe('roleGuard', () => {
   let router: { createUrlTree: ReturnType<typeof vi.fn> };
 
-  function createInjector(user: Pick<User, 'mainRole' | 'subRole' | 'scope'> | null): Injector {
+  function createInjector(
+    user: Pick<User, 'mainRole' | 'subRole' | 'scope'> | null,
+  ): Injector {
     router = {
-      createUrlTree: vi.fn().mockReturnValue({ redirectTo: '/tableau-de-bord' }),
+      createUrlTree: vi
+        .fn()
+        .mockReturnValue({ redirectTo: '/tableau-de-bord' }),
     };
     return Injector.create({
       providers: [
@@ -29,10 +37,26 @@ describe('roleGuard', () => {
     return { data: access ?? {} } as unknown as ActivatedRouteSnapshot;
   }
 
-  const partnerAgence = { mainRole: UbaxRole.PARTNER, subRole: null, scope: 'AGENCE' as UbaxScope };
-  const partnerHotel = { mainRole: UbaxRole.PARTNER, subRole: null, scope: 'HOTEL' as UbaxScope };
-  const partnerPendingScope = { mainRole: UbaxRole.PARTNER, subRole: null, scope: null };
-  const admin = { mainRole: UbaxRole.ADMIN, subRole: null, scope: 'UBAX_INTERNAL' as UbaxScope };
+  const partnerAgence = {
+    mainRole: UbaxRole.PARTNER,
+    subRole: null,
+    scope: 'AGENCE' as UbaxScope,
+  };
+  const partnerHotel = {
+    mainRole: UbaxRole.PARTNER,
+    subRole: null,
+    scope: 'HOTEL' as UbaxScope,
+  };
+  const partnerPendingScope = {
+    mainRole: UbaxRole.PARTNER,
+    subRole: null,
+    scope: null,
+  };
+  const admin = {
+    mainRole: UbaxRole.ADMIN,
+    subRole: null,
+    scope: 'UBAX_INTERNAL' as UbaxScope,
+  };
 
   it("retourne true quand aucun rôle n'est requis sur la route", () => {
     const injector = createInjector(null);
@@ -85,7 +109,10 @@ describe('roleGuard', () => {
     const injector = createInjector(null);
 
     const result = runInInjectionContext(injector, () =>
-      roleGuard(mockRoute({ roles: [UbaxRole.PARTNER] }), {} as RouterStateSnapshot),
+      roleGuard(
+        mockRoute({ roles: [UbaxRole.PARTNER] }),
+        {} as RouterStateSnapshot,
+      ),
     );
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/tableau-de-bord']);
@@ -105,7 +132,7 @@ describe('roleGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('redirige un partenaire hôtel qui tente d'accéder à une route agence', () => {
+  it("redirige un partenaire hôtel qui tente d'accéder à une route agence", () => {
     const injector = createInjector(partnerHotel);
 
     const result = runInInjectionContext(injector, () =>
