@@ -64,6 +64,7 @@ type RoleOption = {
 };
 
 type MemberPanelMode = 'view' | 'edit';
+type ConfirmDialogAction = 'revoke-role' | 'deactivate-member' | null;
 
 const MEMBER_PAGE_SIZE = 6;
 
@@ -265,6 +266,7 @@ export class EquipePageComponent {
   readonly confirmDialogMessage = signal('');
   readonly confirmDialogRoleToRevoke = signal<string | null>(null);
   readonly confirmDialogMemberId = signal<string | null>(null);
+  readonly confirmDialogAction = signal<ConfirmDialogAction>(null);
 
   readonly addMemberForm = this.formBuilder.group({
     firstName: [
@@ -375,6 +377,10 @@ export class EquipePageComponent {
     canTeamWrite(this.authStore.user()),
   );
 
+  private readonly members = computed(
+    () => this.agencyStore.entities() as AdminUserResponse[],
+  );
+
   // DB userId of the currently logged-in user — resolved via getByKeycloakId or hydrated team entities
   readonly currentUserMemberId = computed(() => {
     const dbId = this.agencyStore.currentUserDbId();
@@ -386,14 +392,12 @@ export class EquipePageComponent {
     const keycloakId = user.id;
     const email = user.email;
 
-    const member = this.agencyStore
-      .entities()
-      .find(
-        (m) =>
-          (keycloakId &&
-            (m.keycloakId === keycloakId || m.userId === keycloakId)) ||
-          (email && m.email === email),
-      );
+    const member = this.members().find(
+      (m) =>
+        (keycloakId &&
+          (m.keycloakId === keycloakId || m.userId === keycloakId)) ||
+        (email && m.email === email),
+    );
 
     if (member) return readMemberId(member);
 
@@ -433,33 +437,35 @@ export class EquipePageComponent {
   });
 
   readonly memberRows = computed(() =>
-    this.agencyStore.membresFiltres().map((member, index) => {
-      const memberId = readMemberId(member);
-      const roleKeys = memberId
-        ? [...(this.agencyStore.memberSubRoles()[memberId] ?? [])]
-        : [];
-      const rolesLoading = memberId
-        ? (this.agencyStore.memberSubRolesLoading()[memberId] ?? false)
-        : false;
-      const rolesError = memberId
-        ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
-        : null;
+    (this.agencyStore.membresFiltres() as AdminUserResponse[]).map(
+      (member, index) => {
+        const memberId = readMemberId(member);
+        const roleKeys = memberId
+          ? [...(this.agencyStore.memberSubRoles()[memberId] ?? [])]
+          : [];
+        const rolesLoading = memberId
+          ? (this.agencyStore.memberSubRolesLoading()[memberId] ?? false)
+          : false;
+        const rolesError = memberId
+          ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
+          : null;
 
-      return {
-        id: memberId || `${index}`,
-        memberId,
-        firstName: member.firstName ?? '—',
-        lastName: member.lastName ?? '—',
-        email: member.email ?? '—',
-        phone: member.phone ?? '—',
-        roleLabel: formatRoleLabel(roleKeys, rolesLoading, rolesError),
-        roleKeys,
-        rolesLoading,
-        rolesError,
-        avatarSrc:
-          MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
-      };
-    }),
+        return {
+          id: memberId || `${index}`,
+          memberId,
+          firstName: member.firstName ?? '—',
+          lastName: member.lastName ?? '—',
+          email: member.email ?? '—',
+          phone: member.phone ?? '—',
+          roleLabel: formatRoleLabel(roleKeys, rolesLoading, rolesError),
+          roleKeys,
+          rolesLoading,
+          rolesError,
+          avatarSrc:
+            MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
+        };
+      },
+    ),
   );
 
   readonly filteredRows = computed(() => {
@@ -496,9 +502,7 @@ export class EquipePageComponent {
     }
 
     return (
-      this.agencyStore
-        .entities()
-        .find((member) => readMemberId(member) === memberId) ?? null
+      this.members().find((member) => readMemberId(member) === memberId) ?? null
     );
   });
 
@@ -873,19 +877,12 @@ export class EquipePageComponent {
     this.selectedMemberId.set(row.memberId);
     this.activeMemberPanelMode.set(mode);
 
-    if (
-      row.memberId &&
-      !Object.hasOwn(this.agencyStore.memberSubRoles(), row.memberId)
-    ) {
-      this.agencyStore.loadMemberSubRoles(row.memberId);
-    }
-
     if (mode === 'edit') {
       this.editMemberRoleSeededFor.set(null);
 
-      const member = this.agencyStore
-        .entities()
-        .find((m) => readMemberId(m) === row.memberId);
+      const member = this.members().find(
+        (m) => readMemberId(m) === row.memberId,
+      );
 
       const phoneStr = member?.phone ?? '';
       const parsed = parseE164ToCountryAndNational(phoneStr);
@@ -961,23 +958,54 @@ export class EquipePageComponent {
     this.confirmDialogMessage.set(
       `Êtes-vous sûr de vouloir révoquer le rôle "${roleLabel}" de ${memberName} ?`,
     );
+    this.confirmDialogAction.set('revoke-role');
     this.confirmDialogRoleToRevoke.set(role);
     this.confirmDialogMemberId.set(memberId);
     this.confirmDialogOpen.set(true);
   }
 
+  canDeactivateRow(row: AgencyMemberTableRow): boolean {
+    const currentUserId = this.currentUserMemberId();
+
+    return (
+      this.canManageMembers() &&
+      row.memberId.length > 0 &&
+      row.memberId !== currentUserId
+    );
+  }
+
+  openDeactivateMemberConfirmation(row: AgencyMemberTableRow): void {
+    const fullName = `${row.firstName} ${row.lastName}`.trim();
+    const memberDisplay = fullName === '' ? row.email : fullName;
+
+    this.confirmDialogTitle.set('Confirmer la désactivation');
+    this.confirmDialogMessage.set(
+      `Êtes-vous sûr de vouloir désactiver le membre "${memberDisplay}" ?`,
+    );
+    this.confirmDialogAction.set('deactivate-member');
+    this.confirmDialogRoleToRevoke.set(null);
+    this.confirmDialogMemberId.set(row.memberId);
+    this.confirmDialogOpen.set(true);
+  }
+
   closeConfirmDialog(): void {
     this.confirmDialogOpen.set(false);
+    this.confirmDialogAction.set(null);
     this.confirmDialogRoleToRevoke.set(null);
     this.confirmDialogMemberId.set(null);
   }
 
-  confirmRevokeRole(): void {
+  confirmDialogSubmit(): void {
+    const action = this.confirmDialogAction();
     const role = this.confirmDialogRoleToRevoke();
     const memberId = this.confirmDialogMemberId();
 
-    if (role && memberId) {
+    if (action === 'revoke-role' && role && memberId) {
       this.agencyStore.revoquerSousRole({ userId: memberId, role });
+    }
+
+    if (action === 'deactivate-member' && memberId) {
+      this.agencyStore.desactiverMembre(memberId);
     }
 
     this.closeConfirmDialog();

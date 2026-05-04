@@ -9,7 +9,11 @@ import {
   withState,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { addEntity } from '@ngrx/signals/entities';
+import {
+  addEntity,
+  removeEntity,
+  setAllEntities,
+} from '@ngrx/signals/entities';
 import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
   addMember1,
@@ -23,9 +27,19 @@ import {
   getSubRoles1,
   getTeamMembers1,
   LaCodeListDto,
+  removeMember1,
   revokeSubRole1,
 } from '@ubax-workspace/shared-api-types';
-import { exhaustMap, map, mergeMap, of, pipe, tap } from 'rxjs';
+import {
+  exhaustMap,
+  from,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  pipe,
+  tap,
+} from 'rxjs';
 import {
   mapTeamList,
   readResolvedTeamMemberRoles,
@@ -100,11 +114,41 @@ function mergeUniqueRoles(
   return Array.from(new Set([...current, ...next]));
 }
 
+function removeMemberKey<T extends Record<string, unknown>>(
+  current: T,
+  userId: string,
+): T {
+  const { [userId]: _removed, ...rest } = current;
+  return rest as T;
+}
+
+function parseResponseBody(body: unknown): Observable<unknown> {
+  if (typeof Blob === 'undefined' || !(body instanceof Blob)) {
+    return of(body);
+  }
+
+  return from(
+    body
+      .text()
+      .then((text) => {
+        const trimmed = text.trim();
+        if (!trimmed) {
+          return {};
+        }
+
+        try {
+          return JSON.parse(trimmed) as unknown;
+        } catch {
+          return {};
+        }
+      })
+      .catch(() => ({})),
+  );
+}
+
 export const AgencyStore = signalStore(
   { providedIn: 'root' },
-  withApiResource({
-    list: getTeamMembers1,
-    mapList: mapTeamList,
+  withApiResource<AdminUserResponse>({
     idSelector: teamMemberIdSelector,
   }),
   withState({
@@ -158,31 +202,30 @@ export const AgencyStore = signalStore(
           tap(() => patchState(store, { loading: true, error: null })),
           exhaustMap(() =>
             getTeamMembers1(http, apiConfig.rootUrl, {}).pipe(
+              mergeMap((response) => parseResponseBody(response.body)),
               tapResponse({
-                next: (response) => {
-                  const teamData = response.body?.data ?? response.body;
+                next: (body) => {
+                  const teamData =
+                    body &&
+                    typeof body === 'object' &&
+                    'data' in (body as Record<string, unknown>)
+                      ? (body as Record<string, unknown>)['data']
+                      : body;
                   const members = mapTeamList(teamData);
                   const subRoles = extractSubRolesFromTeamResponse(teamData);
 
                   patchState(store, {
-                    entityMap: {},
-                    ids: [],
                     memberSubRoles: subRoles,
                     loading: false,
                     error: null,
                   });
 
-                  // Add members to the store using the entity collection pattern
-                  members.forEach((member) => {
-                    const memberId = teamMemberIdSelector(member);
-                    patchState(store, {
-                      entityMap: {
-                        ...store.entityMap(),
-                        [memberId]: member,
-                      },
-                      ids: [...store.ids(), memberId],
-                    });
-                  });
+                  patchState(
+                    store,
+                    setAllEntities<AdminUserResponse>(members, {
+                      selectId: teamMemberIdSelector,
+                    }),
+                  );
                 },
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
@@ -316,7 +359,9 @@ export const AgencyStore = signalStore(
                   // Add new member directly to entities and update sub-roles cache
                   patchState(
                     store,
-                    addEntity(membre, { selectId: teamMemberIdSelector }),
+                    addEntity<AdminUserResponse>(membre, {
+                      selectId: teamMemberIdSelector,
+                    }),
                     {
                       saving: false,
                       memberSubRoles: memberId
@@ -408,6 +453,36 @@ export const AgencyStore = signalStore(
                       store.memberSubRolesError(),
                       userId,
                       null,
+                    ),
+                  }),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { saving: false, error: err.message }),
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      desactiverMembre: rxMethod<string>(
+        pipe(
+          tap(() => patchState(store, { saving: true, error: null })),
+          exhaustMap((userId) =>
+            removeMember1(http, apiConfig.rootUrl, { userId }).pipe(
+              tapResponse({
+                next: () =>
+                  patchState(store, removeEntity(userId), {
+                    saving: false,
+                    memberSubRoles: removeMemberKey(
+                      store.memberSubRoles(),
+                      userId,
+                    ),
+                    memberSubRolesLoading: removeMemberKey(
+                      store.memberSubRolesLoading(),
+                      userId,
+                    ),
+                    memberSubRolesError: removeMemberKey(
+                      store.memberSubRolesError(),
+                      userId,
                     ),
                   }),
                 error: (err: HttpErrorResponse) =>

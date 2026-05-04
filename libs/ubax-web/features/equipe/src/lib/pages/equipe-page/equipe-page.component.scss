@@ -378,6 +378,15 @@
   cursor: pointer;
 }
 
+.agency-members-page__row-action--danger {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.agency-members-page__row-action--danger:hover {
+  background: rgba(220, 38, 38, 0.18);
+}
+
 .agency-members-page__row-action svg {
   display: block;
 }

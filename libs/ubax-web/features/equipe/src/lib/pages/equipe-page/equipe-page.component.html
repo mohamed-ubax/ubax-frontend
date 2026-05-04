@@ -211,6 +211,26 @@
                     </svg>
                   </button>
                 }
+
+                @if (canDeactivateRow(row)) {
+                  <button
+                    type="button"
+                    class="agency-members-page__row-action agency-members-page__row-action--danger"
+                    aria-label="Désactiver le membre"
+                    (click)="openDeactivateMemberConfirmation(row)"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M9 3.75h6a.75.75 0 0 1 .75.75v1.5h3a.75.75 0 0 1 0 1.5h-.796l-.707 11.03A2.25 2.25 0 0 1 15.003 21h-6.006a2.25 2.25 0 0 1-2.244-2.47L6.046 7.5H5.25a.75.75 0 0 1 0-1.5h3V4.5A.75.75 0 0 1 9 3.75Zm1.5 2.25h3V5.25h-3V6Zm-2.244 1.5.695 10.843a.75.75 0 0 0 .748.657h6.602a.75.75 0 0 0 .748-.657L17.744 7.5H8.256Zm2.244 2.25a.75.75 0 0 1 .75.75v5.25a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75Zm3 0a.75.75 0 0 1 .75.75v5.25a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </button>
+                }
               </div>
             </ng-template>
           </ubax-ui-data-table>
@@ -1295,10 +1315,10 @@
             type="button"
             class="agency-members-page__confirm-dialog-btn agency-members-page__confirm-dialog-btn--confirm"
             [disabled]="agencyStore.isSaving()"
-            (click)="confirmRevokeRole()"
+            (click)="confirmDialogSubmit()"
           >
             @if (agencyStore.isSaving()) {
-              <span>Suppression...</span>
+              <span>Traitement...</span>
             } @else {
               <span>Confirmer</span>
             }
