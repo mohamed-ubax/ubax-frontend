@@ -7,3 +7,4 @@ export * from './lib/guards/role.guard';
 export * from './lib/layout/main-layout/main-layout.component';
 export * from './lib/layout/topbar/topbar.component';
 export * from './lib/services/notification.service';
+export * from './lib/services/inactivity.service';
