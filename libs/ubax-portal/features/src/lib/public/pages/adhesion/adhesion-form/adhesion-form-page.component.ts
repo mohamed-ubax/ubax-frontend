@@ -93,38 +93,15 @@ export class AdhesionFormPageComponent {
     { initialValue: [] },
   );
 
-  protected readonly paysList = [
-    "Côte d'Ivoire",
-    'Sénégal',
-    'Mali',
-    'Burkina Faso',
-    'Guinée',
-    'Niger',
-    'Togo',
-    'Bénin',
-    'Nigeria',
-    'Ghana',
-    'Cameroun',
-    'Maroc',
-    'SN',
-  ];
+  protected readonly paysList = toSignal(
+    this._codeListService.getByType('COUNTRY'),
+    { initialValue: [] },
+  );
 
-  protected readonly villesList = [
-    'Abidjan',
-    'Bouaké',
-    'Daloa',
-    'Yamoussoukro',
-    'San Pedro',
-    'Dakar',
-    'Bamako',
-    'Ouagadougou',
-    'Conakry',
-    'Lomé',
-    'Cotonou',
-    'Accra',
-    'Lagos',
-    'Casablanca',
-  ];
+  protected readonly villesList = toSignal(
+    this._codeListService.getByType('CITY'),
+    { initialValue: [] },
+  );
 
   // ── Reactive form ─────────────────────────────────────────────────────────
   protected readonly form = this._fb.group({
@@ -138,8 +115,14 @@ export class AdhesionFormPageComponent {
     ville: [''],
     adressePostale: [''],
     quartier: [''],
-    latitude: [null as number | null, [Validators.min(-90), Validators.max(90)]],
-    longitude: [null as number | null, [Validators.min(-180), Validators.max(180)]],
+    latitude: [
+      null as number | null,
+      [Validators.min(-90), Validators.max(90)],
+    ],
+    longitude: [
+      null as number | null,
+      [Validators.min(-180), Validators.max(180)],
+    ],
     description: [''],
     statutJuridique: ['', Validators.required],
     numeroAgrement: ['', Validators.required],
@@ -453,20 +436,20 @@ export class AdhesionFormPageComponent {
       registrationNumber: v.numeroAgrement ?? '',
     };
 
-    const rccm = this.rccmFile();
     const dfe = this.dfeFile();
-    const bail = this.contratBailFile();
     const logo = this.logoFile();
+    const rccm = this.rccmFile();
+    const bail = this.contratBailFile();
 
     const formData = new FormData();
-    // formData.append('data', JSON.stringify(data));
     formData.append(
       'data',
       new Blob([JSON.stringify(data)], { type: 'application/json' }),
+      'data.json',
     );
     if (rccm) formData.append('rccm', rccm);
     if (dfe) formData.append('dfe', dfe);
-    if (bail) formData.append('bail', bail);
+    formData.append('bail', bail ?? new File([], 'bail'));
     if (logo) formData.append('logo', logo);
 
     try {

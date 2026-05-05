@@ -381,8 +381,10 @@
                 formControlName="pays"
               >
                 <option value="" disabled>Sélectionner un Pays</option>
-                @for (p of paysList; track p) {
-                  <option [value]="p">{{ p }}</option>
+                @for (p of paysList(); track p.id ?? p.value) {
+                  <option [value]="p.value ?? ''">
+                    {{ p.description ?? p.value ?? '' }}
+                  </option>
                 }
               </select>
               <img
@@ -424,8 +426,10 @@
                 formControlName="ville"
               >
                 <option value="" disabled>Selectionner une ville</option>
-                @for (v of villesList; track v) {
-                  <option [value]="v">{{ v }}</option>
+                @for (v of villesList(); track v.id ?? v.value) {
+                  <option [value]="v.value ?? ''">
+                    {{ v.value ?? '' }}
+                  </option>
                 }
               </select>
               <img
@@ -806,63 +810,64 @@
                 }
               </div>
               @if (isAgence()) {
-              <div class="form-field">
-                <label class="form-field__label" for="contratBailInput">
-                  Contrat de bail
-                  @if (isAgence()) {
-                    <img
-                      class="form-field__required"
-                      src="assets/portal-assets/adhesion/icons/mdi_required.svg"
-                      alt="obligatoire"
-                      width="14"
-                      height="14"
-                    />
-                  }
-                </label>
-                <div
-                  class="upload-file-row"
-                  [class.is-invalid]="isFileMissing('bail')"
-                >
-                  <button
-                    type="button"
-                    class="upload-file-row__btn"
-                    (click)="contratBailInput.click()"
+                <div class="form-field">
+                  <label class="form-field__label" for="contratBailInput">
+                    Contrat de bail
+                    @if (isAgence()) {
+                      <img
+                        class="form-field__required"
+                        src="assets/portal-assets/adhesion/icons/mdi_required.svg"
+                        alt="obligatoire"
+                        width="14"
+                        height="14"
+                      />
+                    }
+                  </label>
+                  <div
+                    class="upload-file-row"
+                    [class.is-invalid]="isFileMissing('bail')"
                   >
-                    Choisir un fichier
-                  </button>
-                  <span class="upload-file-row__name">
-                    {{
-                      legalDocumentFile('contratBail')?.name ??
-                        'Aucun fichier choisi'
-                    }}
-                  </span>
-                  @if (legalDocumentFile('contratBail')) {
                     <button
                       type="button"
-                      class="upload-file-row__remove"
-                      (click)="removeLegalDocument('contratBail')"
-                      aria-label="Supprimer le contrat de bail"
+                      class="upload-file-row__btn"
+                      (click)="contratBailInput.click()"
                     >
-                      <i class="pi pi-times"></i>
+                      Choisir un fichier
                     </button>
+                    <span class="upload-file-row__name">
+                      {{
+                        legalDocumentFile('contratBail')?.name ??
+                          'Aucun fichier choisi'
+                      }}
+                    </span>
+                    @if (legalDocumentFile('contratBail')) {
+                      <button
+                        type="button"
+                        class="upload-file-row__remove"
+                        (click)="removeLegalDocument('contratBail')"
+                        aria-label="Supprimer le contrat de bail"
+                      >
+                        <i class="pi pi-times"></i>
+                      </button>
+                    }
+                    <input
+                      #contratBailInput
+                      id="contratBailInput"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      class="upload-file-row__input"
+                      (change)="onLegalDocumentSelected('contratBail', $event)"
+                      aria-label="Choisir le contrat de bail"
+                    />
+                  </div>
+                  @if (isFileMissing('bail')) {
+                    <span class="form-field__error" role="alert"
+                      >Ce document est obligatoire</span
+                    >
                   }
-                  <input
-                    #contratBailInput
-                    id="contratBailInput"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    class="upload-file-row__input"
-                    (change)="onLegalDocumentSelected('contratBail', $event)"
-                    aria-label="Choisir le contrat de bail"
-                  />
                 </div>
-                @if (isFileMissing('bail')) {
-                  <span class="form-field__error" role="alert"
-                    >Ce document est obligatoire</span
-                  >
-                }
-              </div>
-              } <!-- /if !isHotel -->
+              }
+              <!-- /if !isHotel -->
             </div>
           </div>
           <!-- /right col -->
