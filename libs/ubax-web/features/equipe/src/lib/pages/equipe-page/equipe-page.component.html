@@ -183,6 +183,8 @@
                   class="agency-members-page__member-avatar"
                   [src]="row.avatarSrc"
                   [alt]="row.firstName + ' ' + row.lastName"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <span class="agency-members-page__member-name">
                   {{ row.firstName }}

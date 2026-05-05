@@ -59,6 +59,7 @@ import {
   resolveTeamMemberId,
   teamMemberIdSelector,
   extractSubRolesFromTeamResponse,
+  extractAvatarUrlsFromTeamResponse,
   type TeamMemberSubRolesMap,
 } from '../team/team-member.helpers';
 
@@ -279,9 +280,11 @@ export const AgencyStore = signalStore(
                       : body;
                   const members = mapTeamList(teamData);
                   const subRoles = extractSubRolesFromTeamResponse(teamData);
+                  const avatarsFromResponse = extractAvatarUrlsFromTeamResponse(teamData);
 
                   patchState(store, {
                     memberSubRoles: subRoles,
+                    memberAvatars: avatarsFromResponse,
                     teamScope: scope,
                     loading: false,
                     error: null,
@@ -295,13 +298,18 @@ export const AgencyStore = signalStore(
                   );
 
                   // Charger les avatars en parallèle sans bloquer
-                  if (!members.length) {
+                  // Ne déclencher getByUserId que pour les membres dont l'avatarUrl
+                  // n'est PAS déjà présente dans la réponse équipe
+                  const membersNeedingAvatarFetch = members.filter((m) => {
+                    const key = resolveTeamMemberId(m);
+                    return !!(m.userId ?? m.keycloakId) && !avatarsFromResponse[key];
+                  });
+
+                  if (!membersNeedingAvatarFetch.length) {
                     return of(null);
                   }
 
-                  return from(
-                    members.filter((m) => !!(m.userId ?? m.keycloakId)),
-                  ).pipe(
+                  return from(membersNeedingAvatarFetch).pipe(
                     mergeMap((member) => {
                       // Utiliser userId backend en priorité pour l'appel API
                       const apiUserId = member.userId ?? member.keycloakId ?? '';

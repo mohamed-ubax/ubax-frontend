@@ -18,8 +18,8 @@ type BienSummaryCard = {
   readonly label: string;
   readonly value: string;
   readonly trend?: string;
-  readonly orb: string;
-  readonly icon: string;
+  readonly orbKey: string;
+  readonly iconKey: string;
   readonly iconAlt: string;};
 
 type FilterOption = {
@@ -53,55 +53,34 @@ type ListBienCard = {
   readonly category: string;
   readonly status: string;};
 
-const GRID_VIEW_ICON =
-  'https://www.figma.com/api/mcp/asset/a3395e9c-0140-4d15-8e27-c62f9e413242';
-const LIST_VIEW_ICON =
-  'https://www.figma.com/api/mcp/asset/fb3c7b52-9fec-4c87-bc40-3f8a49741320';
-const CHEVRON_ICON =
-  'https://www.figma.com/api/mcp/asset/86daf4b9-f7f0-44d2-bb03-7d98311f009b';
-const ADD_ICON =
-  'https://www.figma.com/api/mcp/asset/787c6e72-0b6a-4671-80f1-73ed60203660';
-const TREND_ICON =
-  'https://www.figma.com/api/mcp/asset/57d3047b-920e-47a4-ad69-e474ee443a28';
-const GRID_LOCATION_ICON =
-  'https://www.figma.com/api/mcp/asset/49956718-6daf-4e3d-9aa4-8f3c295cfaff';
-const GRID_ARROW_ICON =
-  'https://www.figma.com/api/mcp/asset/dae5dfe5-5012-458d-93c8-619314893376';
-const LIST_LOCATION_ICON_OUTER =
-  'https://www.figma.com/api/mcp/asset/f786dbe7-71e4-47c7-942c-08d51b50fb61';
-const LIST_LOCATION_ICON_INNER =
-  'https://www.figma.com/api/mcp/asset/4dcca9fa-196a-4ae5-9cee-c7372a208670';
-const LIST_ARROW_ICON =
-  'https://www.figma.com/api/mcp/asset/6ac6d82e-a489-4322-baf9-e4ffa4554bfa';
-
 const SUMMARY_CARDS: readonly BienSummaryCard[] = [
   {
     label: 'Tous les biens',
     value: '45',
     trend: '+2%',
-    orb: 'https://www.figma.com/api/mcp/asset/74a52733-4b72-4585-a52a-34e28faf3190',
-    icon: 'https://www.figma.com/api/mcp/asset/781a21e1-737d-400e-b9ad-14a19d85dcbe',
+    orbKey: 'tous',
+    iconKey: 'tous',
     iconAlt: 'Tous les biens',
   },
   {
     label: 'Annonces actives',
     value: '10',
-    orb: 'https://www.figma.com/api/mcp/asset/3769ce0a-f4e2-4935-aa35-6efc56057d34',
-    icon: 'https://www.figma.com/api/mcp/asset/745dde1e-a423-412c-aafd-e650a8a0e55a',
+    orbKey: 'annonces',
+    iconKey: 'annonces',
     iconAlt: 'Annonces actives',
   },
   {
     label: 'Biens Loués',
     value: '33',
-    orb: 'https://www.figma.com/api/mcp/asset/4817705a-6738-48ec-8a50-5b38256d3368',
-    icon: 'https://www.figma.com/api/mcp/asset/4b03a51a-f8c6-41da-a747-51f5796eef28',
+    orbKey: 'loues',
+    iconKey: 'loues',
     iconAlt: 'Biens loués',
   },
   {
     label: 'Biens Vendus',
     value: '2',
-    orb: 'https://www.figma.com/api/mcp/asset/c01cae6d-564b-4cac-a146-61321dc56338',
-    icon: 'https://www.figma.com/api/mcp/asset/617aaacc-b9de-4461-89fe-474a0c272322',
+    orbKey: 'vendus',
+    iconKey: 'vendus',
     iconAlt: 'Biens vendus',
   },
 ];
@@ -290,17 +269,6 @@ const LIST_CARD_SEEDS: readonly Omit<ListBienCard, 'id'>[] = [
 })
 export class BiensListPageComponent {
   protected readonly summaryCards = SUMMARY_CARDS;
-
-  protected readonly gridViewIcon = GRID_VIEW_ICON;
-  protected readonly listViewIcon = LIST_VIEW_ICON;
-  protected readonly chevronIcon = CHEVRON_ICON;
-  protected readonly addIcon = ADD_ICON;
-  protected readonly trendIcon = TREND_ICON;
-  protected readonly gridLocationIcon = GRID_LOCATION_ICON;
-  protected readonly gridArrowIcon = GRID_ARROW_ICON;
-  protected readonly listLocationOuterIcon = LIST_LOCATION_ICON_OUTER;
-  protected readonly listLocationInnerIcon = LIST_LOCATION_ICON_INNER;
-  protected readonly listArrowIcon = LIST_ARROW_ICON;
 
   protected readonly viewMode = signal<BienViewMode>('grid');
   protected readonly currentPage = signal(1);

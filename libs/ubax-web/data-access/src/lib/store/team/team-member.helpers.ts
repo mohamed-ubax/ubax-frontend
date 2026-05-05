@@ -139,3 +139,28 @@ export const extractSubRolesFromTeamResponse = (
 
   return subRolesMap;
 };
+
+export const extractAvatarUrlsFromTeamResponse = (
+  response: unknown,
+): Record<string, string> => {
+  const avatarMap: Record<string, string> = {};
+
+  const members = readNestedCollection(response);
+
+  members.forEach((member) => {
+    if (member && typeof member === 'object') {
+      const memberObj = member as Record<string, unknown>;
+      const memberId = resolveTeamMemberId(member as AdminUserResponse);
+      const avatarUrl =
+        (memberObj['avatarUrl'] as string | null | undefined) ??
+        (memberObj['avatar_url'] as string | null | undefined) ??
+        null;
+
+      if (memberId && avatarUrl) {
+        avatarMap[memberId] = avatarUrl;
+      }
+    }
+  });
+
+  return avatarMap;
+};
