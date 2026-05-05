@@ -71,8 +71,12 @@ export type { GetRoles$Params as GetRoles$Params } from './fn/administration-pla
 export { getRoles as getRoles } from './fn/administration-plateforme/get-roles';
 export type { GetHotelMembers$Params as GetHotelMembers$Params } from './fn/administration-plateforme/get-hotel-members';
 export { getHotelMembers as getHotelMembers } from './fn/administration-plateforme/get-hotel-members';
+export type { GetInactiveHotelMembers$Params as GetInactiveHotelMembers$Params } from './fn/administration-plateforme/get-inactive-hotel-members';
+export { getInactiveHotelMembers as getInactiveHotelMembers } from './fn/administration-plateforme/get-inactive-hotel-members';
 export type { GetAgencyMembers$Params as GetAgencyMembers$Params } from './fn/administration-plateforme/get-agency-members';
 export { getAgencyMembers as getAgencyMembers } from './fn/administration-plateforme/get-agency-members';
+export type { GetInactiveAgencyMembers$Params as GetInactiveAgencyMembers$Params } from './fn/administration-plateforme/get-inactive-agency-members';
+export { getInactiveAgencyMembers as getInactiveAgencyMembers } from './fn/administration-plateforme/get-inactive-agency-members';
 export type { DeleteAdmin$Params as DeleteAdmin$Params } from './fn/administration-plateforme/delete-admin';
 export { deleteAdmin as deleteAdmin } from './fn/administration-plateforme/delete-admin';
 export type { UploadAvatar$Params as UploadAvatar$Params } from './fn/mobile/upload-avatar';
@@ -175,6 +179,10 @@ export type { GetSubRoles$Params as GetSubRoles$Params } from './fn/hotel-team/g
 export { getSubRoles as getSubRoles } from './fn/hotel-team/get-sub-roles';
 export type { AssignSubRoles$Params as AssignSubRoles$Params } from './fn/hotel-team/assign-sub-roles';
 export { assignSubRoles as assignSubRoles } from './fn/hotel-team/assign-sub-roles';
+export type { ActivateMember$Params as ActivateMember$Params } from './fn/hotel-team/activate-member';
+export { activateMember as activateMember } from './fn/hotel-team/activate-member';
+export type { GetInactiveTeamMembers$Params as GetInactiveTeamMembers$Params } from './fn/hotel-team/get-inactive-team-members';
+export { getInactiveTeamMembers as getInactiveTeamMembers } from './fn/hotel-team/get-inactive-team-members';
 export type { RemoveMember$Params as RemoveMember$Params } from './fn/hotel-team/remove-member';
 export { removeMember as removeMember } from './fn/hotel-team/remove-member';
 export type { RevokeSubRole$Params as RevokeSubRole$Params } from './fn/hotel-team/revoke-sub-role';
@@ -211,6 +219,10 @@ export type { GetSubRoles1$Params as GetSubRoles1$Params } from './fn/agency-tea
 export { getSubRoles1 as getSubRoles1 } from './fn/agency-team/get-sub-roles-1';
 export type { AssignSubRoles1$Params as AssignSubRoles1$Params } from './fn/agency-team/assign-sub-roles-1';
 export { assignSubRoles1 as assignSubRoles1 } from './fn/agency-team/assign-sub-roles-1';
+export type { ActivateMember1$Params as ActivateMember1$Params } from './fn/agency-team/activate-member-1';
+export { activateMember1 as activateMember1 } from './fn/agency-team/activate-member-1';
+export type { GetInactiveTeamMembers1$Params as GetInactiveTeamMembers1$Params } from './fn/agency-team/get-inactive-team-members-1';
+export { getInactiveTeamMembers1 as getInactiveTeamMembers1 } from './fn/agency-team/get-inactive-team-members-1';
 export type { RemoveMember1$Params as RemoveMember1$Params } from './fn/agency-team/remove-member-1';
 export { removeMember1 as removeMember1 } from './fn/agency-team/remove-member-1';
 export type { RevokeSubRole1$Params as RevokeSubRole1$Params } from './fn/agency-team/revoke-sub-role-1';
