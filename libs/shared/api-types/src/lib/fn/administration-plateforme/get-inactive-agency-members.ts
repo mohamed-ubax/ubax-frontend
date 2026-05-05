@@ -9,16 +9,14 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface RevokeSubRole1$Params {
-  userId: string;
-  role: string;
+export interface GetInactiveAgencyMembers$Params {
+  agencyId: string;
 }
 
-export function revokeSubRole1(http: HttpClient, rootUrl: string, params: RevokeSubRole1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, revokeSubRole1.PATH, 'delete');
+export function getInactiveAgencyMembers(http: HttpClient, rootUrl: string, params: GetInactiveAgencyMembers$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, getInactiveAgencyMembers.PATH, 'get');
   if (params) {
-    rb.path('userId', params.userId, {});
-    rb.path('role', params.role, {});
+    rb.path('agencyId', params.agencyId, {});
   }
 
   return http.request(
@@ -31,4 +29,4 @@ export function revokeSubRole1(http: HttpClient, rootUrl: string, params: Revoke
   );
 }
 
-revokeSubRole1.PATH = '/v1/agency/team/{userId}/sub-roles/{role}';
+getInactiveAgencyMembers.PATH = '/v1/admin/agencies/{agencyId}/members/inactive';

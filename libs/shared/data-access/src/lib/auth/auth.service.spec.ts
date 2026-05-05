@@ -15,7 +15,12 @@ import { AuthService, type LoginResponse } from './auth.service';
 vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
   const actual =
     await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
-  return { ...actual, login: vi.fn(), logout: vi.fn() };
+  return {
+    ...actual,
+    login: vi.fn(),
+    logout: vi.fn(),
+    getByKeycloakId: vi.fn(),
+  };
 });
 
 function createStorageMock(): Storage {
@@ -55,7 +60,11 @@ const LOGIN_RESPONSE: LoginResponse = {
 
 describe('AuthService', () => {
   let service: AuthService;
-  let http: { get: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn> };
+  let http: {
+    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+    request: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     Object.defineProperty(globalThis, 'localStorage', {
@@ -65,7 +74,7 @@ describe('AuthService', () => {
 
     vi.clearAllMocks();
 
-    http = { get: vi.fn(), post: vi.fn() };
+    http = { get: vi.fn(), post: vi.fn(), request: vi.fn() };
 
     vi.mocked(apiTypes.login).mockReturnValue(
       of(new HttpResponse({ body: LOGIN_RESPONSE })) as any,
@@ -124,6 +133,9 @@ describe('AuthService', () => {
     const memberList = [
       { keycloakId: 'kc-123', userId: 'backend-42', email: 'a@ubax.com' },
     ];
+    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+      of({ body: { partnerType: 'AGENCE_IMMOBILIERE' } }) as any,
+    );
     http.get
       .mockReturnValueOnce(of({ data: memberList })) // GET /v1/agency/team
       .mockReturnValueOnce(of({ data: ['DIRECTEUR_AGENCE'] })); // GET sub-roles
@@ -150,8 +162,10 @@ describe('AuthService', () => {
     const hotelMemberList = [
       { keycloakId: 'kc-123', userId: 'hotel-7', email: 'a@ubax.com' },
     ];
+    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+      of({ body: { partnerType: 'HOTEL' } }) as any,
+    );
     http.get
-      .mockReturnValueOnce(of({ data: [] })) // GET /v1/agency/team → user not found
       .mockReturnValueOnce(of({ data: hotelMemberList })) // GET /v1/hotel/team
       .mockReturnValueOnce(of({ data: ['GERANT_HOTEL'] })); // GET hotel sub-roles
 
@@ -167,15 +181,26 @@ describe('AuthService', () => {
 
   it('getMySubRoles bascule sur hotel si le endpoint agence est inaccessible (4xx/5xx)', async () => {
     const hotelMemberList = [
-      { keycloakId: 'kc-partner', userId: 'hotel-99', email: 'partner@ubax.com' },
+      {
+        keycloakId: 'kc-partner',
+        userId: 'hotel-99',
+        email: 'partner@ubax.com',
+      },
     ];
+    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+      of({ body: { partnerType: 'AGENCE_IMMOBILIERE' } }) as any,
+    );
     http.get
       .mockReturnValueOnce(throwError(() => new Error('forbidden'))) // GET /v1/agency/team fails
       .mockReturnValueOnce(of({ data: hotelMemberList })) // GET /v1/hotel/team
       .mockReturnValueOnce(of({ data: ['GERANT_HOTEL'] })); // hotel sub-roles
 
     const result = await firstValueFrom(
-      service.getMySubRoles(UbaxRole.PARTNER, ['kc-partner'], 'partner@ubax.com'),
+      service.getMySubRoles(
+        UbaxRole.PARTNER,
+        ['kc-partner'],
+        'partner@ubax.com',
+      ),
     );
 
     expect(result).toEqual({

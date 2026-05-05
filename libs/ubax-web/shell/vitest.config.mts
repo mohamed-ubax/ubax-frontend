@@ -12,6 +12,14 @@ export default defineConfig({
         __dirname,
         '../../shared/data-access/src/index.ts',
       ),
+      '@ubax-workspace/ubax-web-data-access/auth-store': resolve(
+        __dirname,
+        '../data-access/src/lib/store/auth/auth.store.ts',
+      ),
+      '@ubax-workspace/ubax-web-data-access/role-access': resolve(
+        __dirname,
+        '../data-access/src/lib/models/role-access.model.ts',
+      ),
       '@ubax-workspace/ubax-web-data-access': resolve(
         __dirname,
         '../data-access/src/index.ts',

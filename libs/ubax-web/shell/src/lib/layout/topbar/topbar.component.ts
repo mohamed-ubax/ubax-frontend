@@ -15,13 +15,13 @@ import { isPlatformBrowser } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import {
-  AuthStore,
   NavItemConfig,
   ROLE_BADGE_CONFIG,
   SUB_ROLE_LABELS,
   topbarNavItemsForUser,
-} from '@ubax-workspace/ubax-web-data-access';
+} from '@ubax-workspace/ubax-web-data-access/role-access';
 import { filter, map } from 'rxjs';
 
 const COMPACT_EXIT_BUFFER = 8;

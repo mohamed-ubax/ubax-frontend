@@ -30,9 +30,11 @@ import {
   AgencyStore,
   AuthStore,
   canTeamWrite,
+  HOTEL_SUB_ROLES,
   pickPrimarySubRole,
   SUB_ROLE_LABELS,
   UbaxRole,
+  UbaxScope,
   UbaxSubRole,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
@@ -64,6 +66,7 @@ type RoleOption = {
 };
 
 type MemberPanelMode = 'view' | 'edit';
+type ConfirmDialogAction = 'revoke-role' | 'deactivate-member' | null;
 
 const MEMBER_PAGE_SIZE = 6;
 
@@ -135,9 +138,10 @@ function composeE164Phone(dialCode: string, nationalDigits: string): string {
   return `+${dialCode}${body}`;
 }
 
-function parseE164ToCountryAndNational(
-  e164: string,
-): { country: CountryDialCode; nationalDigits: string } {
+function parseE164ToCountryAndNational(e164: string): {
+  country: CountryDialCode;
+  nationalDigits: string;
+} {
   const trimmed = (e164 ?? '').trim();
   if (!trimmed.startsWith('+')) {
     return { country: readDefaultPhoneCountry(), nationalDigits: '' };
@@ -160,7 +164,9 @@ function parseE164ToCountryAndNational(
   return { country: readDefaultPhoneCountry(), nationalDigits: withoutPlus };
 }
 
-function addMemberPhoneValidator(control: AbstractControl): ValidationErrors | null {
+function addMemberPhoneValidator(
+  control: AbstractControl,
+): ValidationErrors | null {
   const raw = (control.value as string) ?? '';
   if (!raw.trim()) {
     return null;
@@ -183,16 +189,6 @@ function readDefaultPhoneCountry(): CountryDialCode {
     dialCode: '225',
     flagUrl: 'https://flagcdn.com/w80/ci.png',
   };
-}
-
-function formatAttachmentSize(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} o`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} Ko`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 }
 
 @Component({
@@ -240,9 +236,6 @@ export class EquipePageComponent {
   /** Illustration « no records » (frame Liste des membres — Figma node 1217:3865). */
   readonly membersEmptyIllustrationSrc =
     'https://www.figma.com/api/mcp/asset/f1a345aa-0603-4b2e-872f-0d9edc18c22e';
-  /** Icône « flat-color-icons:file » — zone Documents (Figma Gestion immobilier Ubax). */
-  readonly addMemberDocumentsIconSrc =
-    'https://www.figma.com/api/mcp/asset/da1bd0ea-f910-42d7-9183-6f9a5ec1990f';
   /** Calque vitré du bouton fermer drawer (Figma node 1207:4881 — ellipse sous le close). */
   readonly drawerCloseGlassTextureSrc =
     'https://www.figma.com/api/mcp/asset/c4ec08bc-4d4c-4369-abe5-0cc0f58f27d7';
@@ -251,6 +244,7 @@ export class EquipePageComponent {
   readonly isRoleMenuOpen = signal(false);
   readonly searchValue = signal('');
   readonly selectedRoleKey = signal<string | null>(null);
+  private readonly loadedTeamScope = signal<UbaxScope | null>(null);
 
   // Auto-assign drawer — PARTNER_ADMIN auto-assigns sub-roles to themselves
   readonly isAutoAssignDrawerOpen = signal(false);
@@ -275,6 +269,7 @@ export class EquipePageComponent {
   readonly confirmDialogMessage = signal('');
   readonly confirmDialogRoleToRevoke = signal<string | null>(null);
   readonly confirmDialogMemberId = signal<string | null>(null);
+  readonly confirmDialogAction = signal<ConfirmDialogAction>(null);
 
   readonly addMemberForm = this.formBuilder.group({
     firstName: [
@@ -303,14 +298,11 @@ export class EquipePageComponent {
   readonly avatarPreview = signal<string | null>(null);
   private selectedAvatarFile: File | null = null;
 
-  /** Fichiers joints dans le formulaire d'ajout (préparation UI ; l'API n'expose pas encore l'upload). */
-  readonly addMemberAttachments = signal<
-    readonly { readonly name: string; readonly sizeLabel: string; readonly file: File }[]
-  >([]);
-
   /** Affichage national (ex. 07…) pendant la saisie ; le contrôle `phone` garde l'E.164. */
   readonly addMemberPhoneDraft = signal('');
-  readonly selectedPhoneCountry = signal<CountryDialCode>(readDefaultPhoneCountry());
+  readonly selectedPhoneCountry = signal<CountryDialCode>(
+    readDefaultPhoneCountry(),
+  );
   readonly countryDialOptions = COUNTRY_CODES;
 
   readonly editMemberForm = this.formBuilder.group({
@@ -321,38 +313,38 @@ export class EquipePageComponent {
   });
 
   /** Indicatif + brouillon national pour l'affichage téléphone (édition — aligné sur l'ajout). */
-  readonly editMemberPhoneCountry = signal<CountryDialCode>(readDefaultPhoneCountry());
+  readonly editMemberPhoneCountry = signal<CountryDialCode>(
+    readDefaultPhoneCountry(),
+  );
   readonly editMemberPhoneDraft = signal('');
 
   readonly tableColumns: readonly UiDataTableColumn<AgencyMemberTableRow>[] = [
     {
       key: 'firstName',
       header: 'Prenom',
-      width: '221px',
       value: (row) => row.firstName,
     },
     {
       key: 'lastName',
       header: 'Nom',
-      width: '171px',
+      width: '160px',
       value: (row) => row.lastName,
     },
     {
       key: 'email',
       header: 'Email',
-      width: '194px',
       value: (row) => row.email,
     },
     {
       key: 'phone',
       header: 'Téléphone',
-      width: '241px',
+      width: '160px',
       value: (row) => row.phone,
     },
     {
       key: 'roleLabel',
       header: 'Rôle',
-      width: '172px',
+      width: '200px',
       value: (row) => row.roleLabel,
       headerIconSrc: this.roleSortIconSrc,
       rotateHeaderIcon: true,
@@ -365,11 +357,18 @@ export class EquipePageComponent {
     },
   ];
 
-  /** Copie mutable pour `p-select` (PrimeNG attend un `any[]`). */
-  readonly roleOptions: RoleOption[] = AGENCE_SUB_ROLES.map((role) => ({
-    key: role,
-    label: SUB_ROLE_LABELS[role] ?? role,
-  }));
+  readonly resolvedTeamScope = computed<UbaxScope | null>(
+    () => this.authStore.scope() ?? this.agencyStore.teamScope(),
+  );
+
+  readonly roleOptions = computed<readonly RoleOption[]>(() => {
+    const scope = this.resolvedTeamScope();
+    const roles = scope === 'HOTEL' ? HOTEL_SUB_ROLES : AGENCE_SUB_ROLES;
+    return roles.map((role) => ({
+      key: role,
+      label: SUB_ROLE_LABELS[role] ?? role,
+    }));
+  });
 
   readonly selectedRoleLabel = computed(() => {
     const selectedKey = this.selectedRoleKey();
@@ -379,13 +378,17 @@ export class EquipePageComponent {
     }
 
     return (
-      this.roleOptions.find((option) => option.key === selectedKey)?.label ??
+      this.roleOptions().find((option) => option.key === selectedKey)?.label ??
       'Rôle'
     );
   });
 
   readonly canManageMembers = computed(() =>
     canTeamWrite(this.authStore.user()),
+  );
+
+  private readonly members = computed(
+    () => this.agencyStore.entities() as AdminUserResponse[],
   );
 
   // DB userId of the currently logged-in user — resolved via getByKeycloakId or hydrated team entities
@@ -399,14 +402,12 @@ export class EquipePageComponent {
     const keycloakId = user.id;
     const email = user.email;
 
-    const member = this.agencyStore
-      .entities()
-      .find(
-        (m) =>
-          (keycloakId &&
-            (m.keycloakId === keycloakId || m.userId === keycloakId)) ||
-          (email && m.email === email),
-      );
+    const member = this.members().find(
+      (m) =>
+        (keycloakId &&
+          (m.keycloakId === keycloakId || m.userId === keycloakId)) ||
+        (email && m.email === email),
+    );
 
     if (member) return readMemberId(member);
 
@@ -425,16 +426,15 @@ export class EquipePageComponent {
     return rolesInStore !== undefined ? rolesInStore.length > 0 : false;
   });
 
-  // PARTNER_ADMIN or PARTNER with no scope yet can self-assign
+  // PARTNER_ADMIN/PARTNER without sub-role can self-assign
   readonly canSelfAssign = computed(() => {
     if (this.hasCurrentUserSelfAssigned()) return false;
     const user = this.authStore.user();
     if (!user) return false;
     if (user.subRole) return false;
     const isPartnerAdmin = user.mainRole === UbaxRole.PARTNER_ADMIN;
-    const isPartnerWithoutScope =
-      user.mainRole === UbaxRole.PARTNER && user.scope === null;
-    return isPartnerAdmin || isPartnerWithoutScope;
+    const isPartner = user.mainRole === UbaxRole.PARTNER;
+    return isPartnerAdmin || isPartner;
   });
 
   readonly autoAssignUserInitials = computed(() => {
@@ -446,33 +446,35 @@ export class EquipePageComponent {
   });
 
   readonly memberRows = computed(() =>
-    this.agencyStore.membresFiltres().map((member, index) => {
-      const memberId = readMemberId(member);
-      const roleKeys = memberId
-        ? [...(this.agencyStore.memberSubRoles()[memberId] ?? [])]
-        : [];
-      const rolesLoading = memberId
-        ? (this.agencyStore.memberSubRolesLoading()[memberId] ?? false)
-        : false;
-      const rolesError = memberId
-        ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
-        : null;
+    (this.agencyStore.membresFiltres() as AdminUserResponse[]).map(
+      (member, index) => {
+        const memberId = readMemberId(member);
+        const roleKeys = memberId
+          ? [...(this.agencyStore.memberSubRoles()[memberId] ?? [])]
+          : [];
+        const rolesLoading = memberId
+          ? (this.agencyStore.memberSubRolesLoading()[memberId] ?? false)
+          : false;
+        const rolesError = memberId
+          ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
+          : null;
 
-      return {
-        id: memberId || `${index}`,
-        memberId,
-        firstName: member.firstName ?? '—',
-        lastName: member.lastName ?? '—',
-        email: member.email ?? '—',
-        phone: member.phone ?? '—',
-        roleLabel: formatRoleLabel(roleKeys, rolesLoading, rolesError),
-        roleKeys,
-        rolesLoading,
-        rolesError,
-        avatarSrc:
-          MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
-      };
-    }),
+        return {
+          id: memberId || `${index}`,
+          memberId,
+          firstName: member.firstName ?? '—',
+          lastName: member.lastName ?? '—',
+          email: member.email ?? '—',
+          phone: member.phone ?? '—',
+          roleLabel: formatRoleLabel(roleKeys, rolesLoading, rolesError),
+          roleKeys,
+          rolesLoading,
+          rolesError,
+          avatarSrc:
+            MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
+        };
+      },
+    ),
   );
 
   readonly filteredRows = computed(() => {
@@ -509,9 +511,7 @@ export class EquipePageComponent {
     }
 
     return (
-      this.agencyStore
-        .entities()
-        .find((member) => readMemberId(member) === memberId) ?? null
+      this.members().find((member) => readMemberId(member) === memberId) ?? null
     );
   });
 
@@ -547,7 +547,29 @@ export class EquipePageComponent {
   });
 
   constructor() {
-    this.agencyStore.load?.({});
+    effect(() => {
+      const user = this.authStore.user();
+      if (!user) return;
+
+      const isPartnerRole =
+        user.mainRole === UbaxRole.PARTNER ||
+        user.mainRole === UbaxRole.PARTNER_ADMIN;
+
+      const resolvedScope = this.resolvedTeamScope();
+
+      if (isPartnerRole && !resolvedScope) {
+        return;
+      }
+
+      const scopeToLoad = resolvedScope ?? 'AGENCE';
+
+      if (this.loadedTeamScope() === scopeToLoad) {
+        return;
+      }
+
+      this.loadedTeamScope.set(scopeToLoad);
+      this.agencyStore.load({ scope: scopeToLoad });
+    });
 
     // Toggle body class when any drawer/overlay is open (reduces topbar z-index)
     effect(() => {
@@ -587,25 +609,7 @@ export class EquipePageComponent {
       }
     });
 
-    effect(() => {
-      const members = this.agencyStore.entities();
-      const cachedSubRoles = this.agencyStore.memberSubRoles();
-      const loadingMap = this.agencyStore.memberSubRolesLoading();
-
-      members.forEach((member) => {
-        const memberId = readMemberId(member);
-
-        if (!memberId) {
-          return;
-        }
-
-        if (Object.hasOwn(cachedSubRoles, memberId) || loadingMap[memberId]) {
-          return;
-        }
-
-        this.agencyStore.loadMemberSubRoles(memberId);
-      });
-    });
+    // Subroles are now loaded directly from the team endpoint, no need for individual loading
 
     // Sous-rôles édition : synchroniser avec l’API quand le cache se remplit
     effect(() => {
@@ -701,7 +705,10 @@ export class EquipePageComponent {
 
   openAutoAssignDrawer(): void {
     this.autoAssignRoles.set([]);
-    this.agencyStore.loadCodelistRoles('ROLE_AGENCE');
+    const scope = this.resolvedTeamScope() ?? 'AGENCE';
+    this.agencyStore.loadCodelistRoles(
+      scope === 'HOTEL' ? 'ROLE_HOTEL' : 'ROLE_AGENCE',
+    );
 
     // Ensure DB userId is loaded — retry if the initial effect hasn't resolved yet
     const user = this.authStore.user();
@@ -724,6 +731,7 @@ export class EquipePageComponent {
   submitAutoAssign(): void {
     const selectedRoles = this.autoAssignRoles();
     if (!selectedRoles.length) return;
+    const scope = this.resolvedTeamScope() ?? 'AGENCE';
 
     const userId = this.currentUserMemberId();
     if (!userId) {
@@ -738,7 +746,7 @@ export class EquipePageComponent {
 
     this.agencyStore.assignerSousRoles({
       userId,
-      body: { scope: 'AGENCE', roles: selectedRoles },
+      body: { scope, roles: selectedRoles },
     });
 
     // Refresh auth store so canManageMembers and canSelfAssign update reactively
@@ -753,7 +761,6 @@ export class EquipePageComponent {
     this.addMemberPhoneDraft.set('');
     this.selectedPhoneCountry.set(readDefaultPhoneCountry());
     this.selectedSubRoles.set([]);
-    this.addMemberAttachments.set([]);
     this.addMemberRolesMenuOpen.set(false);
     this.successMessage.set(null);
     this.addMemberError.set(null);
@@ -766,7 +773,6 @@ export class EquipePageComponent {
     this.addMemberRolesMenuOpen.set(false);
     this.addMemberError.set(null);
     this.successMessage.set(null);
-    this.addMemberAttachments.set([]);
     this.addMemberPhoneDraft.set('');
   }
 
@@ -786,7 +792,10 @@ export class EquipePageComponent {
     }
     const raw = target.value;
     this.addMemberPhoneDraft.set(raw);
-    const composed = composeE164Phone(this.selectedPhoneCountry().dialCode, raw);
+    const composed = composeE164Phone(
+      this.selectedPhoneCountry().dialCode,
+      raw,
+    );
     this.addMemberForm.get('phone')?.setValue(composed);
     this.addMemberForm.get('phone')?.markAsTouched();
   }
@@ -817,26 +826,6 @@ export class EquipePageComponent {
       .map((k) => this.subRoleLabels[k] ?? k)
       .sort()
       .join(', ');
-  }
-
-  onAddMemberDocumentsChange(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement) || !target.files?.length) {
-      return;
-    }
-    const next = Array.from(target.files).map((file) => ({
-      name: file.name,
-      sizeLabel: formatAttachmentSize(file.size),
-      file,
-    }));
-    this.addMemberAttachments.update((current) => [...current, ...next]);
-    target.value = '';
-  }
-
-  removeAddMemberAttachment(index: number): void {
-    this.addMemberAttachments.update((items) =>
-      items.filter((_, itemIndex) => itemIndex !== index),
-    );
   }
 
   submitAddMember(): void {
@@ -923,19 +912,12 @@ export class EquipePageComponent {
     this.selectedMemberId.set(row.memberId);
     this.activeMemberPanelMode.set(mode);
 
-    if (
-      row.memberId &&
-      !Object.hasOwn(this.agencyStore.memberSubRoles(), row.memberId)
-    ) {
-      this.agencyStore.loadMemberSubRoles(row.memberId);
-    }
-
     if (mode === 'edit') {
       this.editMemberRoleSeededFor.set(null);
 
-      const member = this.agencyStore
-        .entities()
-        .find((m) => readMemberId(m) === row.memberId);
+      const member = this.members().find(
+        (m) => readMemberId(m) === row.memberId,
+      );
 
       const phoneStr = member?.phone ?? '';
       const parsed = parseE164ToCountryAndNational(phoneStr);
@@ -979,6 +961,7 @@ export class EquipePageComponent {
   submitEditMember(): void {
     const memberId = this.selectedMemberId();
     if (!memberId) return;
+    const scope = this.resolvedTeamScope() ?? 'AGENCE';
 
     const currentRoles = this.selectedMemberRoles();
     const nextRoles = this.editPanelRoles();
@@ -988,7 +971,7 @@ export class EquipePageComponent {
     if (rolesToAdd.length) {
       this.agencyStore.assignerSousRoles({
         userId: memberId,
-        body: { scope: 'AGENCE', roles: rolesToAdd },
+        body: { scope, roles: rolesToAdd },
       });
     }
 
@@ -1011,26 +994,61 @@ export class EquipePageComponent {
     this.confirmDialogMessage.set(
       `Êtes-vous sûr de vouloir révoquer le rôle "${roleLabel}" de ${memberName} ?`,
     );
+    this.confirmDialogAction.set('revoke-role');
     this.confirmDialogRoleToRevoke.set(role);
     this.confirmDialogMemberId.set(memberId);
     this.confirmDialogOpen.set(true);
   }
 
+  canDeactivateRow(row: AgencyMemberTableRow): boolean {
+    const currentUserId = this.currentUserMemberId();
+
+    return (
+      this.canManageMembers() &&
+      row.memberId.length > 0 &&
+      row.memberId !== currentUserId
+    );
+  }
+
+  openDeactivateMemberConfirmation(row: AgencyMemberTableRow): void {
+    const fullName = `${row.firstName} ${row.lastName}`.trim();
+    const memberDisplay = fullName === '' ? row.email : fullName;
+
+    this.confirmDialogTitle.set('Confirmer la désactivation');
+    this.confirmDialogMessage.set(
+      `Êtes-vous sûr de vouloir désactiver le membre "${memberDisplay}" ?`,
+    );
+    this.confirmDialogAction.set('deactivate-member');
+    this.confirmDialogRoleToRevoke.set(null);
+    this.confirmDialogMemberId.set(row.memberId);
+    this.confirmDialogOpen.set(true);
+  }
+
   closeConfirmDialog(): void {
     this.confirmDialogOpen.set(false);
+    this.confirmDialogAction.set(null);
     this.confirmDialogRoleToRevoke.set(null);
     this.confirmDialogMemberId.set(null);
   }
 
-  confirmRevokeRole(): void {
+  confirmDialogSubmit(): void {
+    const action = this.confirmDialogAction();
     const role = this.confirmDialogRoleToRevoke();
     const memberId = this.confirmDialogMemberId();
 
-    if (role && memberId) {
+    if (action === 'revoke-role' && role && memberId) {
       this.agencyStore.revoquerSousRole({ userId: memberId, role });
     }
 
+    if (action === 'deactivate-member' && memberId) {
+      this.agencyStore.desactiverMembre(memberId);
+    }
+
     this.closeConfirmDialog();
+  }
+
+  formatSubRoleLabels(roles: readonly string[]): string {
+    return roles.map((role) => this.subRoleLabels[role] ?? role).join(', ');
   }
 
   hasSelectedRole(roles: readonly string[], id: string): boolean {
@@ -1091,11 +1109,7 @@ export class EquipePageComponent {
 
     if (this.addMemberRolesMenuOpen()) {
       const addRoot = this.addMemberRolesRoot?.nativeElement;
-      if (
-        !addRoot ||
-        !(target instanceof Node) ||
-        !addRoot.contains(target)
-      ) {
+      if (!addRoot || !(target instanceof Node) || !addRoot.contains(target)) {
         this.addMemberRolesMenuOpen.set(false);
       }
     }

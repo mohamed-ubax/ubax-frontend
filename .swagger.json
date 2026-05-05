@@ -4045,6 +4045,74 @@
         ]
       }
     },
+    "/v1/hotel/team/{userId}/activate": {
+      "patch": {
+        "tags": [
+          "Hotel Team"
+        ],
+        "summary": "Réactiver un membre retiré de l'équipe hôtel",
+        "description": "🏨 **Rôle requis :** `PARTNER` · gérant (`GERANT_HOTEL`) ou fondateur du même hôtel.\n\nAnnule le soft delete et réactive le compte dans Keycloak.",
+        "operationId": "activateMember",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre réactivé",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Membre déjà actif",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas les droits nécessaires",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Membre introuvable",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/bailleur/agency/applications/{id}/decision": {
       "patch": {
         "tags": [
@@ -4100,6 +4168,74 @@
           },
           "409": {
             "description": "Demande déjà traitée (statut != PENDING)"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/agency/team/{userId}/activate": {
+      "patch": {
+        "tags": [
+          "Agency Team"
+        ],
+        "summary": "Réactiver un membre retiré de l'équipe agence",
+        "description": "🏢 **Rôle requis :** `PARTNER` · directeur (`DIRECTEUR_AGENCE`) ou fondateur de la même agence.\n\nAnnule le soft delete et réactive le compte dans Keycloak.",
+        "operationId": "activateMember_1",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre réactivé",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Membre déjà actif",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas les droits nécessaires",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Membre introuvable",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5154,6 +5290,43 @@
         ]
       }
     },
+    "/v1/hotel/team/inactive": {
+      "get": {
+        "tags": [
+          "Hotel Team"
+        ],
+        "summary": "Lister les membres inactifs de l'équipe hôtel",
+        "description": "🏨 **Rôle requis :** `PARTNER` du même hôtel.\n\nRetourne les membres ayant été retirés (soft-deleted) de votre hôtel.",
+        "operationId": "getInactiveTeamMembers",
+        "responses": {
+          "200": {
+            "description": "Liste retournée",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas PARTNER de cet hôtel",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/expenses/{id}": {
       "get": {
         "tags": [
@@ -5612,6 +5785,43 @@
         ]
       }
     },
+    "/v1/agency/team/inactive": {
+      "get": {
+        "tags": [
+          "Agency Team"
+        ],
+        "summary": "Lister les membres inactifs de l'équipe agence",
+        "description": "🏢 **Rôle requis :** `PARTNER` de la même agence.\n\nRetourne les membres ayant été retirés (soft-deleted) de votre agence.",
+        "operationId": "getInactiveTeamMembers_1",
+        "responses": {
+          "200": {
+            "description": "Liste retournée",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas PARTNER de cette agence",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/admin/hotels/{hotelId}/members": {
       "get": {
         "tags": [
@@ -5660,6 +5870,54 @@
         ]
       }
     },
+    "/v1/admin/hotels/{hotelId}/members/inactive": {
+      "get": {
+        "tags": [
+          "Administration Plateforme"
+        ],
+        "summary": "Membres inactifs d'un hôtel (back-office)",
+        "description": "🛡 **Rôle requis :** `ADMIN` ou `SUPER_ADMIN`.\n\nRetourne les membres retirés (soft-deleted) d'un hôtel partenaire.",
+        "operationId": "getInactiveHotelMembers",
+        "parameters": [
+          {
+            "name": "hotelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste retournée",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ADMIN requis",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/admin/agencies/{agencyId}/members": {
       "get": {
         "tags": [
@@ -5668,6 +5926,54 @@
         "summary": "Membres d'une agence (back-office)",
         "description": "🛡 **Rôle requis :** `ADMIN` ou `SUPER_ADMIN`.\n\nRetourne tous les membres actifs d'une agence partenaire, quel que soit le PARTNER appelant. Utilisé pour le support et l'audit.",
         "operationId": "getAgencyMembers",
+        "parameters": [
+          {
+            "name": "agencyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste retournée",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ADMIN requis",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/agencies/{agencyId}/members/inactive": {
+      "get": {
+        "tags": [
+          "Administration Plateforme"
+        ],
+        "summary": "Membres inactifs d'une agence (back-office)",
+        "description": "🛡 **Rôle requis :** `ADMIN` ou `SUPER_ADMIN`.\n\nRetourne les membres retirés (soft-deleted) d'une agence partenaire.",
+        "operationId": "getInactiveAgencyMembers",
         "parameters": [
           {
             "name": "agencyId",
@@ -5806,6 +6112,74 @@
         ]
       }
     },
+    "/v1/hotel/team/{userId}": {
+      "delete": {
+        "tags": [
+          "Hotel Team"
+        ],
+        "summary": "Retirer un membre de l'équipe hôtel",
+        "description": "🏨 **Rôle requis :** `PARTNER` · gérant (`GERANT_HOTEL`) ou fondateur du même hôtel.\n\nDésactive le compte dans Keycloak et marque l'utilisateur comme supprimé en base (soft delete). Le fondateur de la structure et votre propre compte ne peuvent pas être retirés.",
+        "operationId": "removeMember",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre retiré",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Auto-suppression ou membre déjà supprimé",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas les droits nécessaires",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Membre introuvable",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/hotel/team/{userId}/sub-roles/{role}": {
       "delete": {
         "tags": [
@@ -5846,6 +6220,74 @@
           },
           "404": {
             "description": "Sous-rôle introuvable",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/agency/team/{userId}": {
+      "delete": {
+        "tags": [
+          "Agency Team"
+        ],
+        "summary": "Retirer un membre de l'équipe agence",
+        "description": "🏢 **Rôle requis :** `PARTNER` · directeur (`DIRECTEUR_AGENCE`) ou fondateur de la même agence.\n\nDésactive le compte dans Keycloak et marque l'utilisateur comme supprimé en base (soft delete). Le fondateur de la structure et votre propre compte ne peuvent pas être retirés.",
+        "operationId": "removeMember_1",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre retiré",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Auto-suppression ou membre déjà supprimé",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Pas les droits nécessaires",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Membre introuvable",
             "content": {
               "*/*": {
                 "schema": {
@@ -8313,6 +8755,15 @@
           },
           "hotelName": {
             "type": "string"
+          },
+          "partnerType": {
+            "type": "string"
+          },
+          "subRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "emailVerified": {
             "type": "boolean"

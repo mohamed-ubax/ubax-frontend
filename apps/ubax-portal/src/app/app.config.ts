@@ -9,7 +9,7 @@ import { SelectivePreloadStrategy } from './selective-preload.strategy';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeuix/styled';
 import Aura from '@primeuix/themes/aura';
-import { provideApiConfiguration } from '@ubax-workspace/shared-api-types';
+import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
 import { appRoutes } from './app.routes';
 import { environment } from '../environments/environment';
 
@@ -49,7 +49,10 @@ const UbaxPreset = definePreset(Aura, {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideApiConfiguration(environment.apiRootUrl),
+    {
+      provide: ApiConfiguration,
+      useValue: { rootUrl: environment.apiRootUrl },
+    },
     provideHttpClient(withFetch()),
     provideRouter(
       appRoutes,

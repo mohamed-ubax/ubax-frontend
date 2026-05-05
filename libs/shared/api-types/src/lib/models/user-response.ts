@@ -21,9 +21,11 @@ export interface UserResponse {
   language?: string;
   lastLoginAt?: string;
   lastName?: string;
+  partnerType?: string;
   phone?: string;
   phoneVerified?: boolean;
   roles?: Array<'CLIENT' | 'OWNER' | 'ADMIN' | 'SUPER_ADMIN' | 'PARTNER' | 'PARTNER_ADMIN'>;
+  subRoles?: Array<string>;
   updatedAt?: string;
   userId?: string;
 }

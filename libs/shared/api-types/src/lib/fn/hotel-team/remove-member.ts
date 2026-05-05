@@ -9,16 +9,14 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface RevokeSubRole1$Params {
+export interface RemoveMember$Params {
   userId: string;
-  role: string;
 }
 
-export function revokeSubRole1(http: HttpClient, rootUrl: string, params: RevokeSubRole1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, revokeSubRole1.PATH, 'delete');
+export function removeMember(http: HttpClient, rootUrl: string, params: RemoveMember$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, removeMember.PATH, 'delete');
   if (params) {
     rb.path('userId', params.userId, {});
-    rb.path('role', params.role, {});
   }
 
   return http.request(
@@ -31,4 +29,4 @@ export function revokeSubRole1(http: HttpClient, rootUrl: string, params: Revoke
   );
 }
 
-revokeSubRole1.PATH = '/v1/agency/team/{userId}/sub-roles/{role}';
+removeMember.PATH = '/v1/hotel/team/{userId}';

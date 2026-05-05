@@ -38,8 +38,17 @@
       "@ubax-workspace/ubax-web-shell/theme": [
         "libs/ubax-web/shell/src/lib/theme/ubax-preset.ts"
       ],
+      "@ubax-workspace/ubax-web-shell/notification-service": [
+        "libs/ubax-web/shell/src/lib/services/notification.service.ts"
+      ],
       "@ubax-workspace/ubax-web-data-access": [
         "libs/ubax-web/data-access/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-data-access/auth-store": [
+        "libs/ubax-web/data-access/src/lib/store/auth/auth.store.ts"
+      ],
+      "@ubax-workspace/ubax-web-data-access/role-access": [
+        "libs/ubax-web/data-access/src/lib/models/role-access.model.ts"
       ],
       "@ubax-workspace/ubax-web-dashboard": [
         "libs/ubax-web/features/dashboard/src/index.ts"

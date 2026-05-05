@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { ROUTE_ROLE_ACCESS } from '@ubax-workspace/ubax-web-data-access';
+import { ROUTE_ROLE_ACCESS } from '@ubax-workspace/ubax-web-data-access/role-access';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 
@@ -90,9 +90,7 @@ export const webRoutes: Route[] = [
       {
         path: 'equipe',
         loadChildren: () =>
-          import('@ubax-workspace/ubax-web-equipe').then(
-            (m) => m.equipeRoutes,
-          ),
+          import('@ubax-workspace/ubax-web-equipe').then((m) => m.equipeRoutes),
         canActivate: [roleGuard],
         data: ROUTE_ROLE_ACCESS.teamAgence,
       },

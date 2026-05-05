@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
   ApiConfiguration,
+  getByKeycloakId,
   login as loginFn,
   logout as logoutFn,
   type LoginRequest,
@@ -61,6 +62,55 @@ function normalizeUserIds(userIds: readonly string[] | string): string[] {
   );
 }
 
+function mapPartnerTypeToScope(partnerType: unknown): UbaxScope | null {
+  if (typeof partnerType !== 'string') {
+    return null;
+  }
+
+  const normalized = partnerType.trim().toUpperCase();
+
+  if (normalized === 'HOTEL') {
+    return 'HOTEL';
+  }
+
+  if (
+    normalized === 'AGENCE_IMMOBILIERE' ||
+    normalized === 'AGENCE' ||
+    normalized === 'IMMOBILIER'
+  ) {
+    return 'AGENCE';
+  }
+
+  return null;
+}
+
+function readScopeFromUserProfile(raw: unknown): UbaxScope | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+
+  const payload = raw as Record<string, unknown>;
+  const data =
+    payload['data'] && typeof payload['data'] === 'object'
+      ? (payload['data'] as Record<string, unknown>)
+      : payload;
+
+  const scopeFromType = mapPartnerTypeToScope(data['partnerType']);
+  if (scopeFromType) {
+    return scopeFromType;
+  }
+
+  if (typeof data['hotelId'] === 'string' && data['hotelId']) {
+    return 'HOTEL';
+  }
+
+  if (typeof data['agencyId'] === 'string' && data['agencyId']) {
+    return 'AGENCE';
+  }
+
+  return null;
+}
+
 /**
  * Extrait la liste des membres d'une réponse d'équipe (gère les formats
  * { data: [...] }, { data: { content: [...] } }, ou directement un tableau).
@@ -95,6 +145,29 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
 
+  private resolvePreferredPartnerScope(
+    keycloakCandidates: readonly string[],
+  ): Observable<UbaxScope | null> {
+    const root = this.apiConfig.rootUrl;
+
+    const tryNext = (
+      remainingIds: readonly string[],
+    ): Observable<UbaxScope | null> => {
+      const [currentId, ...nextIds] = remainingIds;
+
+      if (!currentId) {
+        return of(null);
+      }
+
+      return getByKeycloakId(this.http, root, { keycloakId: currentId }).pipe(
+        map((response) => readScopeFromUserProfile(response.body)),
+        catchError(() => (nextIds.length ? tryNext(nextIds) : of(null))),
+      );
+    };
+
+    return tryNext(keycloakCandidates);
+  }
+
   login(payload: LoginRequest): Observable<LoginResponse> {
     return loginFn(this.http, this.apiConfig.rootUrl, { body: payload }).pipe(
       map((response) => response.body as LoginResponse),
@@ -117,6 +190,7 @@ export class AuthService {
     mainRole: UbaxRole,
     userIds: readonly string[] | string,
     email = '',
+    preferredScope: UbaxScope | null = null,
   ): Observable<MySubRolesResponse> {
     const root = this.apiConfig.rootUrl;
     const normalizedUserIds = normalizeUserIds(userIds);
@@ -158,23 +232,44 @@ export class AuthService {
       );
     }
 
-    // Pour PARTNER :
-    // 1. Appel de la liste d'équipe pour résoudre le userId backend
-    // 2. Appel sub-roles avec ce userId
-    return this.resolveSubRolesViaTeam(
-      `${root}/v1/agency/team`,
-      'AGENCE',
-      normalizedUserIds,
-      email,
-    ).pipe(
-      catchError(() =>
-        this.resolveSubRolesViaTeam(
-          `${root}/v1/hotel/team`,
-          'HOTEL',
-          normalizedUserIds,
-          email,
-        ),
-      ),
+    const agencyRequest = () =>
+      this.resolveSubRolesViaTeam(
+        `${root}/v1/agency/team`,
+        'AGENCE',
+        normalizedUserIds,
+        email,
+      );
+
+    const hotelRequest = () =>
+      this.resolveSubRolesViaTeam(
+        `${root}/v1/hotel/team`,
+        'HOTEL',
+        normalizedUserIds,
+        email,
+      );
+
+    const runTeamResolution = (scopeHint: UbaxScope | null) => {
+      // Pour PARTNER :
+      // 1. Tente d'abord le scope préféré (si connu)
+      // 2. Fallback sur l'autre endpoint équipe
+      if (scopeHint === 'HOTEL') {
+        return hotelRequest().pipe(catchError(() => agencyRequest()));
+      }
+
+      if (scopeHint === 'AGENCE') {
+        return agencyRequest().pipe(catchError(() => hotelRequest()));
+      }
+
+      // Scope inconnu : conserve le fallback historique
+      return agencyRequest().pipe(catchError(() => hotelRequest()));
+    };
+
+    if (preferredScope) {
+      return runTeamResolution(preferredScope);
+    }
+
+    return this.resolvePreferredPartnerScope(normalizedUserIds).pipe(
+      switchMap((resolvedScope) => runTeamResolution(resolvedScope)),
     );
   }
 

@@ -228,19 +228,43 @@ export const ROUTE_ROLE_ACCESS = {
   administrateurs: { roles: [UbaxRole.ADMIN, UbaxRole.SUPER_ADMIN] },
 
   // Espace partenaire commun
-  dashboard: { roles: [UbaxRole.PARTNER] },
+  dashboard: { roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN] },
 
   // Espace partenaire — agence
-  biens: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
-  reservations: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
-  demandes: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
-  finances: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
-  archivages: { roles: [UbaxRole.PARTNER], scope: 'AGENCE' as UbaxScope },
-  teamAgence: { roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN], scope: 'AGENCE' as UbaxScope },
+  biens: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  reservations: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  demandes: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  finances: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  archivages: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  teamAgence: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
 
   // Espace partenaire — hôtel
-  hotel: { roles: [UbaxRole.PARTNER], scope: 'HOTEL' as UbaxScope },
-  teamHotel: { roles: [UbaxRole.PARTNER], scope: 'HOTEL' as UbaxScope },
+  hotel: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'HOTEL' as UbaxScope,
+  },
+  teamHotel: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'HOTEL' as UbaxScope,
+  },
 } as const satisfies Record<string, RouteAccess>;
 
 // ─── Navigation topbar ───────────────────────────────────────────────────────
@@ -273,27 +297,28 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
   {
     label: 'Membres',
     path: '/equipe',
-    mainRoles: [UbaxRole.PARTNER],
+    activePaths: ['/equipe', '/hotel/equipe'],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
   },
   {
     label: 'Biens',
     path: '/biens',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
   },
   {
     label: 'Réservations',
     path: '/reservations',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
   },
   {
     label: 'Demandes clientèles',
     path: '/demandes',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
     subRoles: [
       UbaxSubRole.DIRECTEUR_AGENCE,
@@ -305,62 +330,66 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
   {
     label: 'Finances',
     path: '/finances',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMPTABLE_AGENCE],
   },
   {
     label: 'Archivages',
     path: '/archivages',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
   },
   // ── Partenaire — hôtel ───────────────────────────────────────────────────
   {
+    label: 'Membres',
+    path: '/hotel/equipe',
+    activePaths: ['/hotel/equipe', '/equipe'],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'HOTEL',
+  },
+  {
     label: 'Réservations',
     path: '/hotel/reservations',
     activePaths: ['/hotel/reservations'],
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
   },
   {
     label: 'Espaces',
     path: '/hotel/espaces',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
   },
   {
     label: 'Clients',
     path: '/hotel/clients',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
   },
   {
     label: 'Employés',
     path: '/hotel/employes',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
   },
   {
     label: 'Facturation',
     path: '/hotel/facturation',
-    mainRoles: [UbaxRole.PARTNER],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
     subRoles: [UbaxSubRole.GERANT_HOTEL, UbaxSubRole.COMPTABLE_HOTEL],
-  },
-  {
-    label: 'Mon équipe',
-    path: '/hotel/equipe',
-    mainRoles: [UbaxRole.PARTNER],
-    scope: 'HOTEL',
   },
 ];
 
 function userCanSeeNavItem(user: User, item: NavItemConfig): boolean {
   if (item.mainRoles && !item.mainRoles.includes(user.mainRole)) return false;
 
-  if (user.mainRole === UbaxRole.PARTNER) {
+  if (
+    user.mainRole === UbaxRole.PARTNER ||
+    user.mainRole === UbaxRole.PARTNER_ADMIN
+  ) {
     if (item.scope && item.scope !== user.scope) return false;
 
     // Only filter by sub-role when both sides are known
@@ -376,6 +405,16 @@ export function topbarNavItemsForUser(
   user: User | null | undefined,
 ): readonly NavItemConfig[] {
   if (!user) return [];
+
+  // PARTNER_ADMIN without sub-role can only access team page until self-assignment.
+  if (user.mainRole === UbaxRole.PARTNER_ADMIN && user.subRole === null) {
+    if (user.scope === 'HOTEL') {
+      return TOPBAR_NAV_ITEMS.filter((item) => item.path === '/hotel/equipe');
+    }
+
+    return TOPBAR_NAV_ITEMS.filter((item) => item.path === '/equipe');
+  }
+
   return TOPBAR_NAV_ITEMS.filter((item) => userCanSeeNavItem(user, item));
 }
 
@@ -385,6 +424,9 @@ export function resolveWebHomePath(user: User | null | undefined): string {
   }
 
   if (user.mainRole === UbaxRole.PARTNER_ADMIN) {
+    if (user.scope === 'HOTEL') {
+      return '/hotel/equipe';
+    }
     return '/equipe';
   }
 
@@ -398,7 +440,7 @@ export function resolveWebHomePath(user: User | null | undefined): string {
     }
 
     if (user.scope === 'HOTEL') {
-      return '/hotel/reservations';
+      return '/hotel/equipe';
     }
   }
 

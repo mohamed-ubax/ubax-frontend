@@ -9,16 +9,14 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface RevokeSubRole1$Params {
-  userId: string;
-  role: string;
+export interface GetInactiveHotelMembers$Params {
+  hotelId: string;
 }
 
-export function revokeSubRole1(http: HttpClient, rootUrl: string, params: RevokeSubRole1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, revokeSubRole1.PATH, 'delete');
+export function getInactiveHotelMembers(http: HttpClient, rootUrl: string, params: GetInactiveHotelMembers$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, getInactiveHotelMembers.PATH, 'get');
   if (params) {
-    rb.path('userId', params.userId, {});
-    rb.path('role', params.role, {});
+    rb.path('hotelId', params.hotelId, {});
   }
 
   return http.request(
@@ -31,4 +29,4 @@ export function revokeSubRole1(http: HttpClient, rootUrl: string, params: Revoke
   );
 }
 
-revokeSubRole1.PATH = '/v1/agency/team/{userId}/sub-roles/{role}';
+getInactiveHotelMembers.PATH = '/v1/admin/hotels/{hotelId}/members/inactive';

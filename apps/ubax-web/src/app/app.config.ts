@@ -24,14 +24,14 @@ import localeFr from '@angular/common/locales/fr';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
 import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
-import { provideApiConfiguration } from '@ubax-workspace/shared-api-types';
+import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
 import {
-  AuthStore,
   DEV_PROFILES,
   readStoredDevProfile,
-} from '@ubax-workspace/ubax-web-data-access';
+} from '@ubax-workspace/ubax-web-data-access/role-access';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
-import { NotificationService } from '@ubax-workspace/ubax-web-shell';
+import { NotificationService } from '@ubax-workspace/ubax-web-shell/notification-service';
 import { MessageService } from 'primeng/api';
 import { SelectivePreloadStrategy } from './selective-preload.strategy';
 import { environment } from '../environments/environment';
@@ -160,7 +160,10 @@ export const appConfig: ApplicationConfig = {
       withPreloading(SelectivePreloadStrategy),
       withViewTransitions(),
     ),
-    provideApiConfiguration(environment.apiRootUrl),
+    {
+      provide: ApiConfiguration,
+      useValue: { rootUrl: environment.apiRootUrl },
+    },
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     MessageService,
     { provide: NOTIFICATION_HANDLER, useExisting: NotificationService },

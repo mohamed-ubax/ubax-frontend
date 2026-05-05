@@ -21,6 +21,83 @@ export const readTeamMemberRoles = (member: AdminUserResponse): string[] => {
   return roles.filter((role): role is string => typeof role === 'string');
 };
 
+function readArrayField(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): unknown[] {
+  for (const key of keys) {
+    const value = source[key];
+    if (Array.isArray(value)) {
+      return value;
+    }
+  }
+
+  return [];
+}
+
+function readNestedCollection(source: unknown): unknown[] {
+  if (Array.isArray(source)) {
+    return source;
+  }
+
+  if (!source || typeof source !== 'object') {
+    return [];
+  }
+
+  const record = source as Record<string, unknown>;
+  const direct = readArrayField(record, [
+    'content',
+    'data',
+    'members',
+    'items',
+    'results',
+  ]);
+
+  if (direct.length > 0) {
+    return direct;
+  }
+
+  const nestedCandidates = [
+    record['data'],
+    record['payload'],
+    record['result'],
+  ];
+
+  for (const candidate of nestedCandidates) {
+    const nested = readNestedCollection(candidate);
+    if (nested.length > 0) {
+      return nested;
+    }
+  }
+
+  return [];
+}
+
+function extractMemberSubRoles(member: Record<string, unknown>): string[] {
+  const raw = member['subroles'] ?? member['subRoles'] ?? member['sub-roles'];
+
+  if (!Array.isArray(raw)) {
+    return typeof raw === 'string' && raw.trim().length > 0 ? [raw] : [];
+  }
+
+  return raw
+    .map((role) => {
+      if (typeof role === 'string') {
+        return role;
+      }
+
+      if (role && typeof role === 'object') {
+        const roleRecord = role as Record<string, unknown>;
+        const roleValue =
+          roleRecord['role'] ?? roleRecord['name'] ?? roleRecord['value'];
+        return typeof roleValue === 'string' ? roleValue : null;
+      }
+
+      return null;
+    })
+    .filter((role): role is string => typeof role === 'string');
+}
+
 export const readResolvedTeamMemberRoles = (
   member: AdminUserResponse,
   memberSubRoles: TeamMemberSubRolesMap,
@@ -38,19 +115,27 @@ export const readResolvedTeamMemberRoles = (
 };
 
 export const mapTeamList = (raw: unknown): AdminUserResponse[] => {
-  if (Array.isArray(raw)) return raw;
-  if (raw && typeof raw === 'object') {
-    const record = raw as { content?: unknown; data?: unknown };
+  return readNestedCollection(raw) as AdminUserResponse[];
+};
 
-    if (Array.isArray(record.content)) return record.content;
-    if (Array.isArray(record.data)) return record.data;
-    if (record.data && typeof record.data === 'object') {
-      const nested = (record.data as { content?: unknown }).content;
-      if (Array.isArray(nested)) {
-        return nested;
+export const extractSubRolesFromTeamResponse = (
+  response: unknown,
+): TeamMemberSubRolesMap => {
+  const subRolesMap: TeamMemberSubRolesMap = {};
+
+  const members = readNestedCollection(response);
+
+  // Extract subroles from each member
+  members.forEach((member) => {
+    if (member && typeof member === 'object') {
+      const memberObj = member as Record<string, unknown>;
+      const memberId = resolveTeamMemberId(member as AdminUserResponse);
+
+      if (memberId) {
+        subRolesMap[memberId] = extractMemberSubRoles(memberObj);
       }
     }
-  }
+  });
 
-  return [];
+  return subRolesMap;
 };

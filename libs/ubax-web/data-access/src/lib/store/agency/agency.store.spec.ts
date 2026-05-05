@@ -1,5 +1,9 @@
 import '@angular/compiler';
-import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpResponse,
+} from '@angular/common/http';
 import { Injector, ProviderToken, Type } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import {
@@ -21,6 +25,7 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     getSubRoles1: vi.fn(),
     addMember1: vi.fn(),
     assignSubRoles1: vi.fn(),
+    removeMember1: vi.fn(),
     revokeSubRole1: vi.fn(),
   };
 });
@@ -79,7 +84,11 @@ type AgencyStoreContract = {
   loadMemberSubRoles(userId: string): void;
   setFilterRole(role: string | null): void;
   inviterMembre(body: AddTeamMemberRequest): void;
-  assignerSousRoles(params: { userId: string; body: AssignSubRolesRequest }): void;
+  assignerSousRoles(params: {
+    userId: string;
+    body: AssignSubRolesRequest;
+  }): void;
+  desactiverMembre(userId: string): void;
   revoquerSousRole(params: { userId: string; role: string }): void;
 };
 
@@ -116,11 +125,14 @@ describe('AgencyStore', () => {
           } as AgencyTeamMember),
         ) as any,
     );
-    vi.mocked(apiTypes.assignSubRoles1).mockImplementation(() =>
-      of(new HttpResponse({ status: 200 })) as any,
+    vi.mocked(apiTypes.assignSubRoles1).mockImplementation(
+      () => of(new HttpResponse({ status: 200 })) as any,
     );
-    vi.mocked(apiTypes.revokeSubRole1).mockImplementation(() =>
-      of(new HttpResponse({ status: 200 })) as any,
+    vi.mocked(apiTypes.removeMember1).mockImplementation(
+      () => of(new HttpResponse({ status: 204 })) as any,
+    );
+    vi.mocked(apiTypes.revokeSubRole1).mockImplementation(
+      () => of(new HttpResponse({ status: 200 })) as any,
     );
 
     const injector = Injector.create({
@@ -268,6 +280,40 @@ describe('AgencyStore', () => {
       });
 
       expect(store.memberSubRoles()['a-2']).toEqual(['COMPTABLE_AGENCE']);
+      expect(store.isSaving()).toBe(false);
+    });
+  });
+
+  describe('desactiverMembre', () => {
+    it('retire le membre et nettoie les caches de sous-rôles', () => {
+      store.load({});
+      store.loadMemberSubRoles('a-2');
+
+      store.desactiverMembre('a-2');
+
+      expect(store.entities().some((m) => m.userId === 'a-2')).toBe(false);
+      expect(store.memberSubRoles()['a-2']).toBeUndefined();
+      expect(store.memberSubRolesLoading()['a-2']).toBeUndefined();
+      expect(store.memberSubRolesError()['a-2']).toBeUndefined();
+      expect(store.isSaving()).toBe(false);
+    });
+
+    it('conserve la liste si la désactivation échoue', () => {
+      store.load({});
+      vi.mocked(apiTypes.removeMember1).mockReturnValueOnce(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 403,
+              url: '/v1/agency/team/a-2',
+            }),
+        ) as any,
+      );
+
+      store.desactiverMembre('a-2');
+
+      expect(store.entities().some((m) => m.userId === 'a-2')).toBe(true);
+      expect(store.hasError()).toBe(true);
       expect(store.isSaving()).toBe(false);
     });
   });
