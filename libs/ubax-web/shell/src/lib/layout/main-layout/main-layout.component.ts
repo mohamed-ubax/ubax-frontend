@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Toast } from 'primeng/toast';
-import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { DevRoleSwitcherComponent } from '../dev-role-switcher/dev-role-switcher.component';
 import { UbaxAutoMotionDirective } from '../motion/auto-motion.directive';
 import { TopbarComponent } from '../topbar/topbar.component';

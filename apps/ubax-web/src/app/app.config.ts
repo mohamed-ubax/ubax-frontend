@@ -26,12 +26,12 @@ import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
 import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
 import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
 import {
-  AuthStore,
   DEV_PROFILES,
   readStoredDevProfile,
-} from '@ubax-workspace/ubax-web-data-access';
+} from '@ubax-workspace/ubax-web-data-access/role-access';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
-import { NotificationService } from '@ubax-workspace/ubax-web-shell';
+import { NotificationService } from '@ubax-workspace/ubax-web-shell/notification-service';
 import { MessageService } from 'primeng/api';
 import { SelectivePreloadStrategy } from './selective-preload.strategy';
 import { environment } from '../environments/environment';
