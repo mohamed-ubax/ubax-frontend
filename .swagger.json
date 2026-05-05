@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "UBAX Platform API",
-    "description": "API REST de la plateforme immobilière **UBAX** (Afrique).\n\n## Authentification\nToutes les routes protégées nécessitent un **Bearer JWT** obtenu via `POST /v1/auth/login`. Le token est émis par **Keycloak** (realm `ubax-plateform`).\n\n## Rôles Keycloak (Niveau 1)\n| Rôle realm Keycloak | Enum `UserRole` | Accès |\n|---|---|---|\n| `UBAX_SUPER_ADMIN` | `SUPER_ADMIN` | Accès total — configuration, gestion admins |\n| `UBAX_ADMIN` | `ADMIN` | Opérations courantes back-office UBAX |\n| `UBAX_PARTNER` | `PARTNER` | Partenaire agence **ou** hôtel |\n| `UBAX_OWNER` | `OWNER` | Propriétaire particulier |\n| `UBAX_CLIENT` | `CLIENT` | Acheteur / locataire |\n\n## Sous-rôles applicatifs (Niveau 2 — table `user_sub_roles`)\n| Scope | Sous-rôles | Qui assigne | Endpoint |\n|---|---|---|---|\n| `UBAX_INTERNAL` | DIRECTEUR_GENERAL · SUPPORT_CLIENT · OPERATIONS · FINANCE · COMMERCIAL | `SUPER_ADMIN` | `/v1/admin/users/{id}/sub-roles` |\n| `AGENCE` | DIRECTEUR_AGENCE · COMMERCIAL · COMPTABLE_AGENCE · AGENT_SAV | `PARTNER` (même agence) | `/v1/agency/team/{id}/sub-roles` |\n| `HOTEL` | GERANT_HOTEL · RECEPTIONNISTE · COMPTABLE_HOTEL · RESPONSABLE_HEBERGEMENT | `PARTNER` (même hôtel) | `/v1/hotel/team/{id}/sub-roles` |\n\n\u003E Un utilisateur peut cumuler plusieurs sous-rôles. L'auto-assignation est autorisée pour les scopes AGENCE et HOTEL.",
+    "description": "API REST de la plateforme immobilière **UBAX** (Afrique).\n\n## Authentification\nToutes les routes protégées nécessitent un **Bearer JWT** obtenu via `POST /v1/auth/login`. Le token est émis par **Keycloak** (realm `ubax-plateform`).\n\n## Rôles Keycloak (Niveau 1)\n| Rôle realm Keycloak | Enum `UserRole` | Accès |\n|---|---|---|\n| `UBAX_SUPER_ADMIN` | `SUPER_ADMIN` | Accès total — configuration, gestion admins |\n| `UBAX_ADMIN` | `ADMIN` | Opérations courantes back-office UBAX |\n| `UBAX_PARTNER` | `PARTNER` | Partenaire agence **ou** hôtel |\n| `UBAX_OWNER` | `OWNER` | Propriétaire particulier |\n| `UBAX_CLIENT` | `CLIENT` | Acheteur / locataire |\n\n## Sous-rôles applicatifs (Niveau 2 — table `user_sub_roles`)\n| Scope | Sous-rôles | Qui assigne | Endpoint |\n|---|---|---|---|\n| `UBAX_INTERNAL` | DIRECTEUR_GENERAL · SUPPORT_CLIENT · OPERATIONS · FINANCE · COMMERCIAL | `SUPER_ADMIN` | `/v1/admin/users/{id}/sub-roles` |\n| `AGENCE` | DIRECTEUR_AGENCE · COMMERCIAL · COMPTABLE_AGENCE · AGENT_SAV | `PARTNER` (même agence) | `/v1/agency/team/{id}/sub-roles` |\n| `HOTEL` | GERANT_HOTEL · RECEPTIONNISTE · COMPTABLE_HOTEL · RESPONSABLE_HEBERGEMENT | `PARTNER` (même hôtel) | `/v1/hotel/team/{id}/sub-roles` |\n\n> Un utilisateur peut cumuler plusieurs sous-rôles. L'auto-assignation est autorisée pour les scopes AGENCE et HOTEL.",
     "contact": {
       "name": "UBAX Platform",
       "email": "tech@ubax.africa"
@@ -18,11 +18,11 @@
   "tags": [
     {
       "name": "Hotel Team",
-      "description": "🏨 **PARTNER (même hôtel)** – Gestion de l'équipe hôtel.\n\n| Méthode | Endpoint | Description |\n|---|---|---|\n| `GET` | `/v1/hotel/team` | Lister les membres de l'équipe |\n| `POST` | `/v1/hotel/team` | Inviter un nouveau membre (email set-password envoyé) |\n| `POST` | `/v1/hotel/team/{id}/sub-roles` | Assigner des sous-rôles (cumulatif) |\n| `GET` | `/v1/hotel/team/{id}/sub-roles` | Consulter les sous-rôles d'un membre |\n| `DELETE` | `/v1/hotel/team/{id}/sub-roles/{role}` | Révoquer un sous-rôle |\n\n**Sous-rôles disponibles :** `GERANT_HOTEL` · `RECEPTIONNISTE` · `COMPTABLE_HOTEL` · `RESPONSABLE_HEBERGEMENT`\n\n\u003E L'auto-assignation est autorisée. Les sous-rôles sont cumulatifs."
+      "description": "🏨 **PARTNER (même hôtel)** – Gestion de l'équipe hôtel.\n\n| Méthode | Endpoint | Description |\n|---|---|---|\n| `GET` | `/v1/hotel/team` | Lister les membres de l'équipe |\n| `POST` | `/v1/hotel/team` | Inviter un nouveau membre (email set-password envoyé) |\n| `POST` | `/v1/hotel/team/{id}/sub-roles` | Assigner des sous-rôles (cumulatif) |\n| `GET` | `/v1/hotel/team/{id}/sub-roles` | Consulter les sous-rôles d'un membre |\n| `DELETE` | `/v1/hotel/team/{id}/sub-roles/{role}` | Révoquer un sous-rôle |\n\n**Sous-rôles disponibles :** `GERANT_HOTEL` · `RECEPTIONNISTE` · `COMPTABLE_HOTEL` · `RESPONSABLE_HEBERGEMENT`\n\n> L'auto-assignation est autorisée. Les sous-rôles sont cumulatifs."
     },
     {
       "name": "CodeList",
-      "description": "🌐 **Public** (lecture par type) · 🛡 **ADMIN** (lecture restreinte + écriture) – Référentiels dynamiques.\n\n**Types sous-rôles :**\n- `ROLE_AGENCE` → sous-rôles agence (public) : DIRECTEUR_AGENCE · COMMERCIAL · COMPTABLE_AGENCE · AGENT_SAV\n- `ROLE_HOTEL` → sous-rôles hôtel (public) : GERANT_HOTEL · RECEPTIONNISTE · COMPTABLE_HOTEL · RESPONSABLE_HEBERGEMENT\n- `ROLE_UBAX_INTERNAL` → sous-rôles internes UBAX **(ADMIN uniquement)** : DIRECTEUR_GENERAL · SUPPORT_CLIENT · OPERATIONS · FINANCE · COMMERCIAL\n\n\u003E Pour `ROLE_UBAX_INTERNAL`, utiliser `GET /v1/code-list/admin/type/ROLE_UBAX_INTERNAL`."
+      "description": "🌐 **Public** (lecture par type) · 🛡 **ADMIN** (lecture restreinte + écriture) – Référentiels dynamiques.\n\n**Types sous-rôles :**\n- `ROLE_AGENCE` → sous-rôles agence (public) : DIRECTEUR_AGENCE · COMMERCIAL · COMPTABLE_AGENCE · AGENT_SAV\n- `ROLE_HOTEL` → sous-rôles hôtel (public) : GERANT_HOTEL · RECEPTIONNISTE · COMPTABLE_HOTEL · RESPONSABLE_HEBERGEMENT\n- `ROLE_UBAX_INTERNAL` → sous-rôles internes UBAX **(ADMIN uniquement)** : DIRECTEUR_GENERAL · SUPPORT_CLIENT · OPERATIONS · FINANCE · COMMERCIAL\n\n> Pour `ROLE_UBAX_INTERNAL`, utiliser `GET /v1/code-list/admin/type/ROLE_UBAX_INTERNAL`."
     },
     {
       "name": "Payment",
@@ -54,7 +54,7 @@
     },
     {
       "name": "Agency Team",
-      "description": "🏢 **PARTNER (même agence)** – Gestion de l'équipe agence.\n\n| Méthode | Endpoint | Description |\n|---|---|---|\n| `GET` | `/v1/agency/team` | Lister les membres de l'équipe |\n| `POST` | `/v1/agency/team` | Inviter un nouveau membre (email set-password envoyé) |\n| `POST` | `/v1/agency/team/{id}/sub-roles` | Assigner des sous-rôles (cumulatif) |\n| `GET` | `/v1/agency/team/{id}/sub-roles` | Consulter les sous-rôles d'un membre |\n| `DELETE` | `/v1/agency/team/{id}/sub-roles/{role}` | Révoquer un sous-rôle |\n\n**Sous-rôles disponibles :** `DIRECTEUR_AGENCE` · `COMMERCIAL` · `COMPTABLE_AGENCE` · `AGENT_SAV`\n\n\u003E L'auto-assignation est autorisée. Les sous-rôles sont cumulatifs."
+      "description": "🏢 **PARTNER (même agence)** – Gestion de l'équipe agence.\n\n| Méthode | Endpoint | Description |\n|---|---|---|\n| `GET` | `/v1/agency/team` | Lister les membres de l'équipe |\n| `POST` | `/v1/agency/team` | Inviter un nouveau membre (email set-password envoyé) |\n| `POST` | `/v1/agency/team/{id}/sub-roles` | Assigner des sous-rôles (cumulatif) |\n| `GET` | `/v1/agency/team/{id}/sub-roles` | Consulter les sous-rôles d'un membre |\n| `DELETE` | `/v1/agency/team/{id}/sub-roles/{role}` | Révoquer un sous-rôle |\n\n**Sous-rôles disponibles :** `DIRECTEUR_AGENCE` · `COMMERCIAL` · `COMPTABLE_AGENCE` · `AGENT_SAV`\n\n> L'auto-assignation est autorisée. Les sous-rôles sont cumulatifs."
     },
     {
       "name": "Storage",
@@ -94,7 +94,7 @@
     },
     {
       "name": "User Sub-Roles",
-      "description": "👑 **SUPER_ADMIN** – Gestion des sous-rôles internes UBAX (scope `UBAX_INTERNAL` uniquement).\n\nCes sous-rôles ne sont **pas portés par le JWT** — ils sont vérifiés en base à chaque appel.\n\n**Sous-rôles UBAX_INTERNAL :** DIRECTEUR_GENERAL · SUPPORT_CLIENT · OPERATIONS · FINANCE · COMMERCIAL\n\n\u003E ⚠️ Les scopes `AGENCE` et `HOTEL` sont gérés exclusivement via **Agency Team** et **Hotel Team**."
+      "description": "👑 **SUPER_ADMIN** – Gestion des sous-rôles internes UBAX (scope `UBAX_INTERNAL` uniquement).\n\nCes sous-rôles ne sont **pas portés par le JWT** — ils sont vérifiés en base à chaque appel.\n\n**Sous-rôles UBAX_INTERNAL :** DIRECTEUR_GENERAL · SUPPORT_CLIENT · OPERATIONS · FINANCE · COMMERCIAL\n\n> ⚠️ Les scopes `AGENCE` et `HOTEL` sont gérés exclusivement via **Agency Team** et **Hotel Team**."
     },
     {
       "name": "Tenant",
@@ -1558,7 +1558,7 @@
           "Payment"
         ],
         "summary": "Enregistrer un paiement",
-        "description": "🏢 **Rôles requis :** `AGENCY` · `AGENT` · `PARTNER` · `ADMIN` · `SUPER_ADMIN`\n\nEnregistre un paiement (loyer, caution, commission, vente). Le statut initial est calculé automatiquement : `PAID` si `paidDate` et `amountPaid \u003E= amount`, `PARTIAL` si paiement incomplet, `LATE` si l'échéance est déjà dépassée, sinon `PENDING`.",
+        "description": "🏢 **Rôles requis :** `AGENCY` · `AGENT` · `PARTNER` · `ADMIN` · `SUPER_ADMIN`\n\nEnregistre un paiement (loyer, caution, commission, vente). Le statut initial est calculé automatiquement : `PAID` si `paidDate` et `amountPaid >= amount`, `PARTIAL` si paiement incomplet, `LATE` si l'échéance est déjà dépassée, sinon `PENDING`.",
         "operationId": "create_3",
         "requestBody": {
           "content": {
@@ -2981,7 +2981,7 @@
           "User Sub-Roles"
         ],
         "summary": "Assigner des sous-rôles UBAX_INTERNAL",
-        "description": "👑 **Rôle requis :** `SUPER_ADMIN`.\n\nAssigne un ou plusieurs sous-rôles de scope `UBAX_INTERNAL` à un administrateur. Les sous-rôles existants sont préservés (assignation additive).\n\n\u003E ⚠️ Seul le scope `UBAX_INTERNAL` est accepté ici. Pour les scopes `AGENCE` et `HOTEL`, utilisez `/v1/agency/team` ou `/v1/hotel/team`.",
+        "description": "👑 **Rôle requis :** `SUPER_ADMIN`.\n\nAssigne un ou plusieurs sous-rôles de scope `UBAX_INTERNAL` à un administrateur. Les sous-rôles existants sont préservés (assignation additive).\n\n> ⚠️ Seul le scope `UBAX_INTERNAL` est accepté ici. Pour les scopes `AGENCE` et `HOTEL`, utilisez `/v1/agency/team` ou `/v1/hotel/team`.",
         "operationId": "assignSubRoles_2",
         "parameters": [
           {
@@ -3917,7 +3917,7 @@
           "Payment"
         ],
         "summary": "Mettre à jour le statut d'un paiement",
-        "description": "🏢 **Rôles requis :** `AGENCY` · `AGENT` · `PARTNER` · `ADMIN` · `SUPER_ADMIN`\n\nPermet de marquer un paiement comme `PAID`, `PARTIAL`, `LATE` ou `CANCELLED`. Un paiement `CANCELLED` ne peut plus être modifié.\n\nSi `status = PARTIAL` et `amountPaid \u003E= amount`, le statut est automatiquement corrigé en `PAID`.",
+        "description": "🏢 **Rôles requis :** `AGENCY` · `AGENT` · `PARTNER` · `ADMIN` · `SUPER_ADMIN`\n\nPermet de marquer un paiement comme `PAID`, `PARTIAL`, `LATE` ou `CANCELLED`. Un paiement `CANCELLED` ne peut plus être modifié.\n\nSi `status = PARTIAL` et `amountPaid >= amount`, le statut est automatiquement corrigé en `PAID`.",
         "operationId": "updateStatus_2",
         "parameters": [
           {
@@ -5474,7 +5474,7 @@
           "CodeList"
         ],
         "summary": "Liste des valeurs par type",
-        "description": "🌐 **Public** — Retourne toutes les entrées d'un type donné.\n\n**Types disponibles :** PROPERTY_TYPE · TRANSACTION_TYPE · PROPERTY_CONDITION · PROPERTY_DOCUMENT_TYPE · MEDIA_TYPE · PARTNER_TYPE · EMPLOYMENT_STATUS · ID_DOCUMENT_TYPE · TICKET_CATEGORY · TICKET_PRIORITY · TICKET_ATTACHMENT_TYPE · COST_IMPUTED_TO · CONTRACT_TYPE · SUBSCRIPTION_PLAN · ALERT_FREQUENCY · NEWSLETTER_FREQUENCY · DISPLAY_MODE · **ROLE_AGENCE** · **ROLE_HOTEL**\n\n\u003E ⚠️ `ROLE_UBAX_INTERNAL` est restreint. Utiliser `GET /v1/code-list/admin/type/ROLE_UBAX_INTERNAL` (ADMIN requis).",
+        "description": "🌐 **Public** — Retourne toutes les entrées d'un type donné.\n\n**Types disponibles :** PROPERTY_TYPE · TRANSACTION_TYPE · PROPERTY_CONDITION · PROPERTY_DOCUMENT_TYPE · MEDIA_TYPE · PARTNER_TYPE · EMPLOYMENT_STATUS · ID_DOCUMENT_TYPE · TICKET_CATEGORY · TICKET_PRIORITY · TICKET_ATTACHMENT_TYPE · COST_IMPUTED_TO · CONTRACT_TYPE · SUBSCRIPTION_PLAN · ALERT_FREQUENCY · NEWSLETTER_FREQUENCY · DISPLAY_MODE · **ROLE_AGENCE** · **ROLE_HOTEL**\n\n> ⚠️ `ROLE_UBAX_INTERNAL` est restreint. Utiliser `GET /v1/code-list/admin/type/ROLE_UBAX_INTERNAL` (ADMIN requis).",
         "operationId": "findAllByType",
         "parameters": [
           {
@@ -6409,7 +6409,7 @@
           "User Sub-Roles"
         ],
         "summary": "Révoquer un sous-rôle UBAX_INTERNAL",
-        "description": "👑 **Rôle requis :** `SUPER_ADMIN`.\n\nRévoque un sous-rôle de scope `UBAX_INTERNAL` d'un administrateur.\n\n\u003E ⚠️ Seul le scope `UBAX_INTERNAL` est accepté ici. Pour les scopes `AGENCE` et `HOTEL`, utilisez `/v1/agency/team` ou `/v1/hotel/team`.",
+        "description": "👑 **Rôle requis :** `SUPER_ADMIN`.\n\nRévoque un sous-rôle de scope `UBAX_INTERNAL` d'un administrateur.\n\n> ⚠️ Seul le scope `UBAX_INTERNAL` est accepté ici. Pour les scopes `AGENCE` et `HOTEL`, utilisez `/v1/agency/team` ou `/v1/hotel/team`.",
         "operationId": "revokeSubRole_2",
         "parameters": [
           {
@@ -7618,10 +7618,16 @@
             "type": "string"
           },
           "companyName": {
-            "type": "string"
+            "type": "string",
+            "description": "Raison sociale ou dénomination commerciale"
           },
-          "legalRepresentative": {
-            "type": "string"
+          "legalRepFirstName": {
+            "type": "string",
+            "description": "Prénom du représentant légal"
+          },
+          "legalRepLastName": {
+            "type": "string",
+            "description": "Nom de famille du représentant légal"
           },
           "phone": {
             "type": "string"
@@ -8947,7 +8953,7 @@
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
-        "description": "JWT obtenu via `POST /v1/auth/login`. Format : `Authorization: Bearer \u003Ctoken\u003E`",
+        "description": "JWT obtenu via `POST /v1/auth/login`. Format : `Authorization: Bearer <token>`",
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
