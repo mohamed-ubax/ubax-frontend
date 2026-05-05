@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
-import { AuthService } from '@ubax-workspace/shared-data-access';
 
 /** Durée d'inactivité avant déconnexion automatique (30 minutes). */
 const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
@@ -33,17 +32,15 @@ const ACTIVITY_EVENTS: ReadonlyArray<string> = [
  * Démarre un timer de 30 minutes dès l'appel à `start()`.
  * Chaque interaction utilisateur réinitialise le timer.
  *
- * À l'expiration du timer :
- *  1. Tente un refresh token silencieux pour prolonger la session.
- *  2. Si le refresh réussit → le timer repart pour 30 minutes supplémentaires.
- *  3. Si le refresh échoue (refresh token expiré ou révoqué) → déconnexion.
+ * À l'expiration du timer, la session est immédiatement révoquée côté client.
+ * Le maintien de session pendant l'activité est géré par l'authInterceptor
+ * (refresh automatique sur 401).
  *
  * Utiliser `stop()` pour désactiver le service (ex. : page de connexion).
  */
 @Injectable({ providedIn: 'root' })
 export class InactivityService implements OnDestroy {
   private readonly authStore = inject(AuthStore);
-  private readonly authService = inject(AuthService);
   private readonly ngZone = inject(NgZone);
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -106,31 +103,10 @@ export class InactivityService implements OnDestroy {
     }, INACTIVITY_TIMEOUT_MS);
   }
 
-  /**
-   * Appelé après 30 minutes d'inactivité.
-   * Tente un refresh silencieux avant de décider de déconnecter.
-   */
+  /** Appelé après 30 minutes d'inactivité — déconnexion immédiate. */
   private onInactivityTimeout(): void {
-    this.authService.refreshToken().subscribe({
-      next: (response) => {
-        if (response.access_token) {
-          // Refresh réussi : on met à jour le token en store et on repart
-          // pour 30 minutes supplémentaires.
-          this.authStore.setToken(response.access_token);
-          // Le timer a déjà été consommé — on le replanifie.
-          this.scheduleTimeout();
-        } else {
-          // Réponse inattendue sans access_token → déconnexion.
-          this.stop();
-          this.authStore.expireSession();
-        }
-      },
-      error: () => {
-        // Refresh token expiré ou révoqué → déconnexion.
-        this.stop();
-        this.authStore.expireSession();
-      },
-    });
+    this.stop();
+    this.authStore.expireSession();
   }
 
   private clearTimer(): void {
