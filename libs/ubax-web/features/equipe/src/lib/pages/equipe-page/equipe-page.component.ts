@@ -30,9 +30,11 @@ import {
   AgencyStore,
   AuthStore,
   canTeamWrite,
+  HOTEL_SUB_ROLES,
   pickPrimarySubRole,
   SUB_ROLE_LABELS,
   UbaxRole,
+  UbaxScope,
   UbaxSubRole,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
@@ -242,6 +244,7 @@ export class EquipePageComponent {
   readonly isRoleMenuOpen = signal(false);
   readonly searchValue = signal('');
   readonly selectedRoleKey = signal<string | null>(null);
+  private readonly loadedTeamScope = signal<UbaxScope | null>(null);
 
   // Auto-assign drawer — PARTNER_ADMIN auto-assigns sub-roles to themselves
   readonly isAutoAssignDrawerOpen = signal(false);
@@ -354,11 +357,18 @@ export class EquipePageComponent {
     },
   ];
 
-  /** Copie mutable pour `p-select` (PrimeNG attend un `any[]`). */
-  readonly roleOptions: RoleOption[] = AGENCE_SUB_ROLES.map((role) => ({
-    key: role,
-    label: SUB_ROLE_LABELS[role] ?? role,
-  }));
+  readonly resolvedTeamScope = computed<UbaxScope | null>(
+    () => this.authStore.scope() ?? this.agencyStore.teamScope(),
+  );
+
+  readonly roleOptions = computed<readonly RoleOption[]>(() => {
+    const scope = this.resolvedTeamScope();
+    const roles = scope === 'HOTEL' ? HOTEL_SUB_ROLES : AGENCE_SUB_ROLES;
+    return roles.map((role) => ({
+      key: role,
+      label: SUB_ROLE_LABELS[role] ?? role,
+    }));
+  });
 
   readonly selectedRoleLabel = computed(() => {
     const selectedKey = this.selectedRoleKey();
@@ -368,7 +378,7 @@ export class EquipePageComponent {
     }
 
     return (
-      this.roleOptions.find((option) => option.key === selectedKey)?.label ??
+      this.roleOptions().find((option) => option.key === selectedKey)?.label ??
       'Rôle'
     );
   });
@@ -416,16 +426,15 @@ export class EquipePageComponent {
     return rolesInStore !== undefined ? rolesInStore.length > 0 : false;
   });
 
-  // PARTNER_ADMIN or PARTNER with no scope yet can self-assign
+  // PARTNER_ADMIN/PARTNER without sub-role can self-assign
   readonly canSelfAssign = computed(() => {
     if (this.hasCurrentUserSelfAssigned()) return false;
     const user = this.authStore.user();
     if (!user) return false;
     if (user.subRole) return false;
     const isPartnerAdmin = user.mainRole === UbaxRole.PARTNER_ADMIN;
-    const isPartnerWithoutScope =
-      user.mainRole === UbaxRole.PARTNER && user.scope === null;
-    return isPartnerAdmin || isPartnerWithoutScope;
+    const isPartner = user.mainRole === UbaxRole.PARTNER;
+    return isPartnerAdmin || isPartner;
   });
 
   readonly autoAssignUserInitials = computed(() => {
@@ -538,7 +547,29 @@ export class EquipePageComponent {
   });
 
   constructor() {
-    this.agencyStore.load({});
+    effect(() => {
+      const user = this.authStore.user();
+      if (!user) return;
+
+      const isPartnerRole =
+        user.mainRole === UbaxRole.PARTNER ||
+        user.mainRole === UbaxRole.PARTNER_ADMIN;
+
+      const resolvedScope = this.resolvedTeamScope();
+
+      if (isPartnerRole && !resolvedScope) {
+        return;
+      }
+
+      const scopeToLoad = resolvedScope ?? 'AGENCE';
+
+      if (this.loadedTeamScope() === scopeToLoad) {
+        return;
+      }
+
+      this.loadedTeamScope.set(scopeToLoad);
+      this.agencyStore.load({ scope: scopeToLoad });
+    });
 
     // Toggle body class when any drawer/overlay is open (reduces topbar z-index)
     effect(() => {
@@ -674,7 +705,10 @@ export class EquipePageComponent {
 
   openAutoAssignDrawer(): void {
     this.autoAssignRoles.set([]);
-    this.agencyStore.loadCodelistRoles('ROLE_AGENCE');
+    const scope = this.resolvedTeamScope() ?? 'AGENCE';
+    this.agencyStore.loadCodelistRoles(
+      scope === 'HOTEL' ? 'ROLE_HOTEL' : 'ROLE_AGENCE',
+    );
 
     // Ensure DB userId is loaded — retry if the initial effect hasn't resolved yet
     const user = this.authStore.user();
@@ -697,6 +731,7 @@ export class EquipePageComponent {
   submitAutoAssign(): void {
     const selectedRoles = this.autoAssignRoles();
     if (!selectedRoles.length) return;
+    const scope = this.resolvedTeamScope() ?? 'AGENCE';
 
     const userId = this.currentUserMemberId();
     if (!userId) {
@@ -711,7 +746,7 @@ export class EquipePageComponent {
 
     this.agencyStore.assignerSousRoles({
       userId,
-      body: { scope: 'AGENCE', roles: selectedRoles },
+      body: { scope, roles: selectedRoles },
     });
 
     // Refresh auth store so canManageMembers and canSelfAssign update reactively
@@ -926,6 +961,7 @@ export class EquipePageComponent {
   submitEditMember(): void {
     const memberId = this.selectedMemberId();
     if (!memberId) return;
+    const scope = this.resolvedTeamScope() ?? 'AGENCE';
 
     const currentRoles = this.selectedMemberRoles();
     const nextRoles = this.editPanelRoles();
@@ -935,7 +971,7 @@ export class EquipePageComponent {
     if (rolesToAdd.length) {
       this.agencyStore.assignerSousRoles({
         userId: memberId,
-        body: { scope: 'AGENCE', roles: rolesToAdd },
+        body: { scope, roles: rolesToAdd },
       });
     }
 

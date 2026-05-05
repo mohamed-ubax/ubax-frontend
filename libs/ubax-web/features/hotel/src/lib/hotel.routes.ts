@@ -106,4 +106,9 @@ export const hotelRoutes: Route[] = [
         './pages/ajouter-depense-page/ajouter-depense-page.component'
       ).then((m) => m.AjouterDepensePageComponent),
   },
+  {
+    path: 'equipe',
+    loadChildren: () =>
+      import('@ubax-workspace/ubax-web-equipe').then((m) => m.equipeRoutes),
+  },
 ];

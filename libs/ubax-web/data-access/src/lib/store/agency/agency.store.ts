@@ -14,20 +14,26 @@ import {
   removeEntity,
   setAllEntities,
 } from '@ngrx/signals/entities';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { UbaxScope, withApiResource } from '@ubax-workspace/shared-data-access';
 import {
+  addMember,
   addMember1,
   AddTeamMemberRequest,
   AdminUserResponse,
   ApiConfiguration,
+  assignSubRoles,
   assignSubRoles1,
   AssignSubRolesRequest,
   findAllByType,
   getByKeycloakId,
+  getSubRoles,
   getSubRoles1,
+  getTeamMembers,
   getTeamMembers1,
   LaCodeListDto,
+  removeMember,
   removeMember1,
+  revokeSubRole,
   revokeSubRole1,
 } from '@ubax-workspace/shared-api-types';
 import {
@@ -146,6 +152,28 @@ function parseResponseBody(body: unknown): Observable<unknown> {
   );
 }
 
+function mapPartnerTypeToScope(partnerType: unknown): UbaxScope | null {
+  if (typeof partnerType !== 'string') {
+    return null;
+  }
+
+  const normalized = partnerType.trim().toUpperCase();
+
+  if (normalized === 'HOTEL') {
+    return 'HOTEL';
+  }
+
+  if (
+    normalized === 'AGENCE_IMMOBILIERE' ||
+    normalized === 'AGENCE' ||
+    normalized === 'IMMOBILIER'
+  ) {
+    return 'AGENCE';
+  }
+
+  return null;
+}
+
 export const AgencyStore = signalStore(
   { providedIn: 'root' },
   withApiResource<AdminUserResponse>({
@@ -160,6 +188,7 @@ export const AgencyStore = signalStore(
     codelistRolesLoading: false,
     codelistRolesError: null as string | null,
     currentUserDbId: null as string | null,
+    teamScope: null as UbaxScope | null,
   }),
   withComputed(({ entities, filterRole, memberSubRoles, codelistRoles }) => ({
     membresActifs: computed(() => entities().filter(readTeamMemberActive)),
@@ -192,332 +221,412 @@ export const AgencyStore = signalStore(
       store,
       http = inject(HttpClient),
       apiConfig = inject(ApiConfiguration),
-    ) => ({
-      setFilterRole(role: string | null): void {
-        patchState(store, { filterRole: role });
-      },
+    ) => {
+      const resolveScope = (scope?: UbaxScope | null): UbaxScope =>
+        scope ?? store.teamScope() ?? 'AGENCE';
 
-      load: rxMethod<Record<string, never>>(
-        pipe(
-          tap(() => patchState(store, { loading: true, error: null })),
-          exhaustMap(() =>
-            getTeamMembers1(http, apiConfig.rootUrl, {}).pipe(
-              mergeMap((response) => parseResponseBody(response.body)),
-              tapResponse({
-                next: (body) => {
-                  const teamData =
-                    body &&
-                    typeof body === 'object' &&
-                    'data' in (body as Record<string, unknown>)
-                      ? (body as Record<string, unknown>)['data']
-                      : body;
-                  const members = mapTeamList(teamData);
-                  const subRoles = extractSubRolesFromTeamResponse(teamData);
+      return {
+        setFilterRole(role: string | null): void {
+          patchState(store, { filterRole: role });
+        },
 
-                  patchState(store, {
-                    memberSubRoles: subRoles,
-                    loading: false,
-                    error: null,
-                  });
+        load: rxMethod<{ scope?: UbaxScope }>(
+          pipe(
+            tap(() => patchState(store, { loading: true, error: null })),
+            exhaustMap((params) => {
+              const scope = resolveScope(params?.scope);
+              const request =
+                scope === 'HOTEL'
+                  ? getTeamMembers(http, apiConfig.rootUrl, {})
+                  : getTeamMembers1(http, apiConfig.rootUrl, {});
 
-                  patchState(
-                    store,
-                    setAllEntities<AdminUserResponse>(members, {
-                      selectId: teamMemberIdSelector,
+              return request.pipe(
+                mergeMap((response) => parseResponseBody(response.body)),
+                tapResponse({
+                  next: (body) => {
+                    const teamData =
+                      body &&
+                      typeof body === 'object' &&
+                      'data' in (body as Record<string, unknown>)
+                        ? (body as Record<string, unknown>)['data']
+                        : body;
+                    const members = mapTeamList(teamData);
+                    const subRoles = extractSubRolesFromTeamResponse(teamData);
+
+                    patchState(store, {
+                      memberSubRoles: subRoles,
+                      teamScope: scope,
+                      loading: false,
+                      error: null,
+                    });
+
+                    patchState(
+                      store,
+                      setAllEntities<AdminUserResponse>(members, {
+                        selectId: teamMemberIdSelector,
+                      }),
+                    );
+                  },
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, {
+                      loading: false,
+                      error: err.message,
                     }),
-                  );
-                },
-                error: (err: HttpErrorResponse) =>
-                  patchState(store, {
-                    loading: false,
-                    error: err.message,
-                  }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      loadCodelistRoles: rxMethod<string>(
-        pipe(
-          tap(() =>
-            patchState(store, {
-              codelistRolesLoading: true,
-              codelistRolesError: null,
+                }),
+              );
             }),
           ),
-          exhaustMap((type) =>
-            findAllByType(http, apiConfig.rootUrl, { type }).pipe(
-              map((response) => {
-                const body = response.body as unknown;
-                if (Array.isArray(body)) return body as LaCodeListDto[];
-                if (body && typeof body === 'object') {
-                  const data = (body as Record<string, unknown>)['data'];
-                  if (Array.isArray(data)) return data as LaCodeListDto[];
-                }
-                return [];
-              }),
-              tapResponse({
-                next: (roles) =>
-                  patchState(store, {
-                    codelistRoles: roles,
-                    codelistRolesLoading: false,
-                    codelistRolesError: null,
-                  }),
-                error: (err: HttpErrorResponse) =>
-                  patchState(store, {
-                    codelistRoles: [],
-                    codelistRolesLoading: false,
-                    codelistRolesError: err.message,
-                  }),
+        ),
+
+        loadCodelistRoles: rxMethod<string>(
+          pipe(
+            tap(() =>
+              patchState(store, {
+                codelistRolesLoading: true,
+                codelistRolesError: null,
               }),
             ),
-          ),
-        ),
-      ),
-
-      loadMemberSubRoles: rxMethod<string>(
-        pipe(
-          tap((userId) => {
-            if (!userId) {
-              return;
-            }
-
-            patchState(store, {
-              memberSubRolesLoading: setMemberLoading(
-                store.memberSubRolesLoading(),
-                userId,
-                true,
-              ),
-              memberSubRolesError: setMemberError(
-                store.memberSubRolesError(),
-                userId,
-                null,
-              ),
-            });
-          }),
-          mergeMap((userId) => {
-            if (!userId) {
-              return of([] as string[]);
-            }
-
-            return getSubRoles1(http, apiConfig.rootUrl, { userId }).pipe(
-              map((response) => extractStringArray(response.body?.data)),
-              tapResponse({
-                next: (subRoles) =>
-                  patchState(store, {
-                    memberSubRoles: setMemberRoles(
-                      store.memberSubRoles(),
-                      userId,
-                      subRoles,
-                    ),
-                    memberSubRolesLoading: setMemberLoading(
-                      store.memberSubRolesLoading(),
-                      userId,
-                      false,
-                    ),
-                    memberSubRolesError: setMemberError(
-                      store.memberSubRolesError(),
-                      userId,
-                      null,
-                    ),
-                  }),
-                error: (err: HttpErrorResponse) =>
-                  patchState(store, {
-                    memberSubRoles: setMemberRoles(
-                      store.memberSubRoles(),
-                      userId,
-                      [],
-                    ),
-                    memberSubRolesLoading: setMemberLoading(
-                      store.memberSubRolesLoading(),
-                      userId,
-                      false,
-                    ),
-                    memberSubRolesError: setMemberError(
-                      store.memberSubRolesError(),
-                      userId,
-                      err.message,
-                    ),
-                  }),
-              }),
-            );
-          }),
-        ),
-      ),
-
-      inviterMembre: rxMethod<AddTeamMemberRequest>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap((body: AddTeamMemberRequest) =>
-            addMember1(http, apiConfig.rootUrl, { body }).pipe(
-              map((response) => response.body as AdminUserResponse),
-              tapResponse({
-                next: (membre: AdminUserResponse) => {
-                  const memberId = resolveTeamMemberId(membre);
-
-                  // Add new member directly to entities and update sub-roles cache
-                  patchState(
-                    store,
-                    addEntity<AdminUserResponse>(membre, {
-                      selectId: teamMemberIdSelector,
+            exhaustMap((type) =>
+              findAllByType(http, apiConfig.rootUrl, { type }).pipe(
+                map((response) => {
+                  const body = response.body as unknown;
+                  if (Array.isArray(body)) return body as LaCodeListDto[];
+                  if (body && typeof body === 'object') {
+                    const data = (body as Record<string, unknown>)['data'];
+                    if (Array.isArray(data)) return data as LaCodeListDto[];
+                  }
+                  return [];
+                }),
+                tapResponse({
+                  next: (roles) =>
+                    patchState(store, {
+                      codelistRoles: roles,
+                      codelistRolesLoading: false,
+                      codelistRolesError: null,
                     }),
-                    {
-                      saving: false,
-                      memberSubRoles: memberId
-                        ? setMemberRoles(
-                            store.memberSubRoles(),
-                            memberId,
-                            body.subRoles ?? [],
-                          )
-                        : store.memberSubRoles(),
-                      memberSubRolesLoading: memberId
-                        ? setMemberLoading(
-                            store.memberSubRolesLoading(),
-                            memberId,
-                            false,
-                          )
-                        : store.memberSubRolesLoading(),
-                      memberSubRolesError: memberId
-                        ? setMemberError(
-                            store.memberSubRolesError(),
-                            memberId,
-                            null,
-                          )
-                        : store.memberSubRolesError(),
-                    },
-                  );
-                },
-                error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      assignerSousRoles: rxMethod<{
-        userId: string;
-        body: AssignSubRolesRequest;
-      }>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap(({ userId, body }) =>
-            assignSubRoles1(http, apiConfig.rootUrl, {
-              userId,
-              body: body.roles ?? [],
-            }).pipe(
-              tapResponse({
-                next: () =>
-                  patchState(store, {
-                    saving: false,
-                    memberSubRoles: setMemberRoles(
-                      store.memberSubRoles(),
-                      userId,
-                      mergeUniqueRoles(
-                        store.memberSubRoles()[userId] ?? [],
-                        body.roles ?? [],
-                      ),
-                    ),
-                    memberSubRolesError: setMemberError(
-                      store.memberSubRolesError(),
-                      userId,
-                      null,
-                    ),
-                  }),
-                error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      revoquerSousRole: rxMethod<{ userId: string; role: string }>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap(({ userId, role }) =>
-            revokeSubRole1(http, apiConfig.rootUrl, { userId, role }).pipe(
-              tapResponse({
-                next: () =>
-                  patchState(store, {
-                    saving: false,
-                    memberSubRoles: setMemberRoles(
-                      store.memberSubRoles(),
-                      userId,
-                      (store.memberSubRoles()[userId] ?? []).filter(
-                        (item) => item !== role,
-                      ),
-                    ),
-                    memberSubRolesError: setMemberError(
-                      store.memberSubRolesError(),
-                      userId,
-                      null,
-                    ),
-                  }),
-                error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      desactiverMembre: rxMethod<string>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap((userId) =>
-            removeMember1(http, apiConfig.rootUrl, { userId }).pipe(
-              tapResponse({
-                next: () =>
-                  patchState(store, removeEntity(userId), {
-                    saving: false,
-                    memberSubRoles: removeMemberKey(
-                      store.memberSubRoles(),
-                      userId,
-                    ),
-                    memberSubRolesLoading: removeMemberKey(
-                      store.memberSubRolesLoading(),
-                      userId,
-                    ),
-                    memberSubRolesError: removeMemberKey(
-                      store.memberSubRolesError(),
-                      userId,
-                    ),
-                  }),
-                error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      loadCurrentUserDbId: rxMethod<string>(
-        pipe(
-          exhaustMap((keycloakId) =>
-            getByKeycloakId(http, apiConfig.rootUrl, { keycloakId }).pipe(
-              map(
-                (response) =>
-                  ((
-                    (response.body as Record<string, unknown>)?.[
-                      'data'
-                    ] as Record<string, unknown>
-                  )?.['userId'] as string) ??
-                  ((response.body as { userId?: unknown })?.userId as string) ??
-                  null,
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, {
+                      codelistRoles: [],
+                      codelistRolesLoading: false,
+                      codelistRolesError: err.message,
+                    }),
+                }),
               ),
-              tapResponse({
-                next: (userId) => {
-                  if (userId) patchState(store, { currentUserDbId: userId });
-                },
-                // eslint-disable-next-line @typescript-eslint/no-empty-function
-                error: () => {},
-              }),
             ),
           ),
         ),
-      ),
-    }),
+
+        loadMemberSubRoles: rxMethod<string>(
+          pipe(
+            tap((userId) => {
+              if (!userId) {
+                return;
+              }
+
+              patchState(store, {
+                memberSubRolesLoading: setMemberLoading(
+                  store.memberSubRolesLoading(),
+                  userId,
+                  true,
+                ),
+                memberSubRolesError: setMemberError(
+                  store.memberSubRolesError(),
+                  userId,
+                  null,
+                ),
+              });
+            }),
+            mergeMap((userId) => {
+              if (!userId) {
+                return of([] as string[]);
+              }
+
+              const scope = resolveScope();
+              const request =
+                scope === 'HOTEL'
+                  ? getSubRoles(http, apiConfig.rootUrl, { userId })
+                  : getSubRoles1(http, apiConfig.rootUrl, { userId });
+
+              return request.pipe(
+                map((response) => extractStringArray(response.body?.data)),
+                tapResponse({
+                  next: (subRoles) =>
+                    patchState(store, {
+                      memberSubRoles: setMemberRoles(
+                        store.memberSubRoles(),
+                        userId,
+                        subRoles,
+                      ),
+                      memberSubRolesLoading: setMemberLoading(
+                        store.memberSubRolesLoading(),
+                        userId,
+                        false,
+                      ),
+                      memberSubRolesError: setMemberError(
+                        store.memberSubRolesError(),
+                        userId,
+                        null,
+                      ),
+                    }),
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, {
+                      memberSubRoles: setMemberRoles(
+                        store.memberSubRoles(),
+                        userId,
+                        [],
+                      ),
+                      memberSubRolesLoading: setMemberLoading(
+                        store.memberSubRolesLoading(),
+                        userId,
+                        false,
+                      ),
+                      memberSubRolesError: setMemberError(
+                        store.memberSubRolesError(),
+                        userId,
+                        err.message,
+                      ),
+                    }),
+                }),
+              );
+            }),
+          ),
+        ),
+
+        inviterMembre: rxMethod<AddTeamMemberRequest>(
+          pipe(
+            tap(() => patchState(store, { saving: true, error: null })),
+            exhaustMap((body: AddTeamMemberRequest) => {
+              const scope = resolveScope();
+              const request =
+                scope === 'HOTEL'
+                  ? addMember(http, apiConfig.rootUrl, { body })
+                  : addMember1(http, apiConfig.rootUrl, { body });
+
+              return request.pipe(
+                map((response) => response.body as AdminUserResponse),
+                tapResponse({
+                  next: (membre: AdminUserResponse) => {
+                    const memberId = resolveTeamMemberId(membre);
+
+                    // Add new member directly to entities and update sub-roles cache
+                    patchState(
+                      store,
+                      addEntity<AdminUserResponse>(membre, {
+                        selectId: teamMemberIdSelector,
+                      }),
+                      {
+                        saving: false,
+                        memberSubRoles: memberId
+                          ? setMemberRoles(
+                              store.memberSubRoles(),
+                              memberId,
+                              body.subRoles ?? [],
+                            )
+                          : store.memberSubRoles(),
+                        memberSubRolesLoading: memberId
+                          ? setMemberLoading(
+                              store.memberSubRolesLoading(),
+                              memberId,
+                              false,
+                            )
+                          : store.memberSubRolesLoading(),
+                        memberSubRolesError: memberId
+                          ? setMemberError(
+                              store.memberSubRolesError(),
+                              memberId,
+                              null,
+                            )
+                          : store.memberSubRolesError(),
+                      },
+                    );
+                  },
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, { saving: false, error: err.message }),
+                }),
+              );
+            }),
+          ),
+        ),
+
+        assignerSousRoles: rxMethod<{
+          userId: string;
+          body: AssignSubRolesRequest;
+        }>(
+          pipe(
+            tap(() => patchState(store, { saving: true, error: null })),
+            exhaustMap(({ userId, body }) => {
+              const scope = resolveScope(body.scope ?? null);
+              const request =
+                scope === 'HOTEL'
+                  ? assignSubRoles(http, apiConfig.rootUrl, {
+                      userId,
+                      body: body.roles ?? [],
+                    })
+                  : assignSubRoles1(http, apiConfig.rootUrl, {
+                      userId,
+                      body: body.roles ?? [],
+                    });
+
+              return request.pipe(
+                tapResponse({
+                  next: () =>
+                    patchState(store, {
+                      saving: false,
+                      teamScope: scope,
+                      memberSubRoles: setMemberRoles(
+                        store.memberSubRoles(),
+                        userId,
+                        mergeUniqueRoles(
+                          store.memberSubRoles()[userId] ?? [],
+                          body.roles ?? [],
+                        ),
+                      ),
+                      memberSubRolesError: setMemberError(
+                        store.memberSubRolesError(),
+                        userId,
+                        null,
+                      ),
+                    }),
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, { saving: false, error: err.message }),
+                }),
+              );
+            }),
+          ),
+        ),
+
+        revoquerSousRole: rxMethod<{ userId: string; role: string }>(
+          pipe(
+            tap(() => patchState(store, { saving: true, error: null })),
+            exhaustMap(({ userId, role }) => {
+              const scope = resolveScope();
+              const request =
+                scope === 'HOTEL'
+                  ? revokeSubRole(http, apiConfig.rootUrl, { userId, role })
+                  : revokeSubRole1(http, apiConfig.rootUrl, { userId, role });
+
+              return request.pipe(
+                tapResponse({
+                  next: () =>
+                    patchState(store, {
+                      saving: false,
+                      memberSubRoles: setMemberRoles(
+                        store.memberSubRoles(),
+                        userId,
+                        (store.memberSubRoles()[userId] ?? []).filter(
+                          (item) => item !== role,
+                        ),
+                      ),
+                      memberSubRolesError: setMemberError(
+                        store.memberSubRolesError(),
+                        userId,
+                        null,
+                      ),
+                    }),
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, { saving: false, error: err.message }),
+                }),
+              );
+            }),
+          ),
+        ),
+
+        desactiverMembre: rxMethod<string>(
+          pipe(
+            tap(() => patchState(store, { saving: true, error: null })),
+            exhaustMap((userId) => {
+              const scope = resolveScope();
+              const request =
+                scope === 'HOTEL'
+                  ? removeMember(http, apiConfig.rootUrl, { userId })
+                  : removeMember1(http, apiConfig.rootUrl, { userId });
+
+              return request.pipe(
+                tapResponse({
+                  next: () =>
+                    patchState(store, removeEntity(userId), {
+                      saving: false,
+                      memberSubRoles: removeMemberKey(
+                        store.memberSubRoles(),
+                        userId,
+                      ),
+                      memberSubRolesLoading: removeMemberKey(
+                        store.memberSubRolesLoading(),
+                        userId,
+                      ),
+                      memberSubRolesError: removeMemberKey(
+                        store.memberSubRolesError(),
+                        userId,
+                      ),
+                    }),
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, { saving: false, error: err.message }),
+                }),
+              );
+            }),
+          ),
+        ),
+
+        loadCurrentUserDbId: rxMethod<string>(
+          pipe(
+            exhaustMap((keycloakId) =>
+              getByKeycloakId(http, apiConfig.rootUrl, { keycloakId }).pipe(
+                map((response) => {
+                  const rawBody = response.body as Record<
+                    string,
+                    unknown
+                  > | null;
+                  const data =
+                    rawBody &&
+                    typeof rawBody === 'object' &&
+                    rawBody['data'] &&
+                    typeof rawBody['data'] === 'object'
+                      ? (rawBody['data'] as Record<string, unknown>)
+                      : rawBody;
+
+                  const userId =
+                    (typeof data?.['userId'] === 'string'
+                      ? data['userId']
+                      : null) ?? null;
+
+                  const partnerType = data?.['partnerType'];
+                  const partnerScopeFromType =
+                    mapPartnerTypeToScope(partnerType);
+                  let scopeFromIds: UbaxScope | null = null;
+                  if (
+                    typeof data?.['hotelId'] === 'string' &&
+                    data['hotelId']
+                  ) {
+                    scopeFromIds = 'HOTEL';
+                  } else if (
+                    typeof data?.['agencyId'] === 'string' &&
+                    data['agencyId']
+                  ) {
+                    scopeFromIds = 'AGENCE';
+                  }
+
+                  return {
+                    userId,
+                    teamScope: partnerScopeFromType ?? scopeFromIds,
+                  };
+                }),
+                tapResponse({
+                  next: ({ userId, teamScope }) => {
+                    if (userId || teamScope) {
+                      patchState(store, {
+                        currentUserDbId: userId ?? store.currentUserDbId(),
+                        teamScope: teamScope ?? store.teamScope(),
+                      });
+                    }
+                  },
+                  // eslint-disable-next-line @typescript-eslint/no-empty-function
+                  error: () => {},
+                }),
+              ),
+            ),
+          ),
+        ),
+      };
+    },
   ),
 );

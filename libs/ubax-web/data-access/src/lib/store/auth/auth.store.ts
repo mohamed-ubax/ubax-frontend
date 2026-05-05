@@ -68,7 +68,17 @@ function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
 
   const currentUrl = router.url.split('?')[0].split('#')[0];
 
-  if (currentUrl !== '/' && currentUrl !== '/tableau-de-bord') {
+  const isHotelContext = user.scope === 'HOTEL';
+  const isAgencyContext = user.scope === 'AGENCE';
+  const isOnHotelRoute = currentUrl.startsWith('/hotel');
+
+  const isScopeMismatch =
+    (isHotelContext && !isOnHotelRoute) || (isAgencyContext && isOnHotelRoute);
+
+  const shouldRedirect =
+    currentUrl === '/' || currentUrl === '/tableau-de-bord' || isScopeMismatch;
+
+  if (!shouldRedirect) {
     return;
   }
 
@@ -77,6 +87,16 @@ function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
   if (homePath !== currentUrl) {
     void router.navigateByUrl(homePath, { replaceUrl: true });
   }
+}
+
+function inferScopeFromUrl(url: string): UbaxScope | null {
+  const normalizedUrl = url.split('?')[0].split('#')[0].toLowerCase();
+
+  if (normalizedUrl.startsWith('/hotel')) {
+    return 'HOTEL';
+  }
+
+  return null;
 }
 
 export const AuthStore = signalStore(
@@ -162,6 +182,7 @@ export const AuthStore = signalStore(
                 currentUser.mainRole,
                 userIdCandidates,
                 currentUser.email,
+                currentUser.scope ?? inferScopeFromUrl(router.url),
               )
               .pipe(
                 tapResponse({

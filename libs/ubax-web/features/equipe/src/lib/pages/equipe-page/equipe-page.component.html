@@ -61,7 +61,7 @@
               Tous les rôles
             </button>
 
-            @for (option of roleOptions; track option.key) {
+            @for (option of roleOptions(); track option.key) {
               <button
                 type="button"
                 class="agency-members-page__filter-option"
@@ -845,7 +845,7 @@
                       role="listbox"
                       aria-multiselectable="true"
                     >
-                      @for (option of roleOptions; track option.key) {
+                      @for (option of roleOptions(); track option.key) {
                         <li
                           role="option"
                           [attr.aria-selected]="isSubRoleSelected(option.key)"
@@ -1157,7 +1157,7 @@
                           role="listbox"
                           aria-multiselectable="true"
                         >
-                          @for (option of roleOptions; track option.key) {
+                          @for (option of roleOptions(); track option.key) {
                             <li
                               role="option"
                               [attr.aria-selected]="

@@ -896,7 +896,9 @@
   flex-direction: column;
   align-self: flex-start;
   width: min(747px, calc(100vw - 64px));
-  max-height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+  min-height: calc(100dvh - 64px);
+  max-height: calc(100dvh - 64px);
   overflow: hidden;
   border-radius: 20px;
   background: var(--ubax-surface);
@@ -1318,7 +1320,7 @@
 
 .agency-members-page__roles-dropdown-root {
   position: relative;
-  z-index: 2;
+  z-index: 24;
 }
 
 .agency-members-page__roles-dropdown {
@@ -1368,8 +1370,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(100% + 8px);
-  z-index: 5;
+  top: auto;
+  bottom: calc(100% + 8px);
+  z-index: 40;
   margin: 0;
   padding: 8px;
   list-style: none;
@@ -1377,7 +1380,7 @@
   border: 1px solid rgba(207, 214, 220, 0.9);
   background: #fff;
   box-shadow: 0 16px 40px rgba(26, 48, 71, 0.14);
-  max-height: 260px;
+  max-height: min(300px, 40dvh);
   overflow-y: auto;
 }
 
@@ -2189,8 +2192,9 @@
   .agency-members-page__add-member-drawer {
     align-self: stretch;
     width: 100%;
-    max-height: none;
-    min-height: 100vh;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
     border-radius: 0;
   }
 
