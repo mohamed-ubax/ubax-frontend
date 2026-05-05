@@ -174,6 +174,7 @@ describe('AuthStore', () => {
       UbaxRole.PARTNER,
       ['partner-1'],
       'awa@ubax.com',
+      null,
     );
     expect(store.user()).toEqual({
       id: 'partner-1',
@@ -292,7 +293,7 @@ describe('AuthStore', () => {
     store.setToken(token);
     store.loadMe();
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/hotel/reservations', {
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/hotel/equipe', {
       replaceUrl: true,
     });
   });
