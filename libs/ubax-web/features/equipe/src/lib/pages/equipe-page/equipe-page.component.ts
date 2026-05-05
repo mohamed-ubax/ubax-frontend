@@ -245,6 +245,7 @@ export class EquipePageComponent {
   readonly searchValue = signal('');
   readonly selectedRoleKey = signal<string | null>(null);
   private readonly loadedTeamScope = signal<UbaxScope | null>(null);
+  private readonly loadedForUserId = signal<string | null>(null);
 
   // Auto-assign drawer — PARTNER_ADMIN auto-assigns sub-roles to themselves
   readonly isAutoAssignDrawerOpen = signal(false);
@@ -358,7 +359,10 @@ export class EquipePageComponent {
   ];
 
   readonly resolvedTeamScope = computed<UbaxScope | null>(
-    () => this.authStore.scope() ?? this.agencyStore.teamScope(),
+    // authStore.scope() est la source de vérité — hydraté par loadSubRoles()
+    // après le login. agencyStore.teamScope() n'est utilisé qu'en fallback
+    // une fois que le store a déjà chargé (scope confirmé par l'API).
+    () => this.authStore.scope() ?? (this.agencyStore.entities().length > 0 ? this.agencyStore.teamScope() : null),
   );
 
   readonly roleOptions = computed<readonly RoleOption[]>(() => {
@@ -459,6 +463,10 @@ export class EquipePageComponent {
           ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
           : null;
 
+        const storedAvatar = memberId
+          ? (this.agencyStore.memberAvatars()[memberId] ?? null)
+          : null;
+
         return {
           id: memberId || `${index}`,
           memberId,
@@ -471,6 +479,7 @@ export class EquipePageComponent {
           rolesLoading,
           rolesError,
           avatarSrc:
+            storedAvatar ??
             MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
         };
       },
@@ -546,6 +555,12 @@ export class EquipePageComponent {
     return pickPrimarySubRole(roles) ?? null;
   });
 
+  readonly selectedMemberAvatarSrc = computed(() => {
+    const memberId = this.selectedMemberId();
+    if (!memberId) return null;
+    return this.agencyStore.memberAvatars()[memberId] ?? null;
+  });
+
   constructor() {
     effect(() => {
       const user = this.authStore.user();
@@ -555,19 +570,30 @@ export class EquipePageComponent {
         user.mainRole === UbaxRole.PARTNER ||
         user.mainRole === UbaxRole.PARTNER_ADMIN;
 
+      // Détecter un changement d'utilisateur → reset complet du store
+      if (this.loadedForUserId() !== null && this.loadedForUserId() !== user.id) {
+        this.agencyStore.reset();
+        this.loadedTeamScope.set(null);
+        this.loadedForUserId.set(null);
+      }
+
       const resolvedScope = this.resolvedTeamScope();
 
+      // Pour PARTNER/PARTNER_ADMIN, attendre que le scope soit résolu
+      // (loadSubRoles() est asynchrone — scope arrive après le premier rendu)
       if (isPartnerRole && !resolvedScope) {
         return;
       }
 
       const scopeToLoad = resolvedScope ?? 'AGENCE';
 
-      if (this.loadedTeamScope() === scopeToLoad) {
+      // Ne recharger que si le scope a changé ou si c'est le premier chargement
+      if (this.loadedTeamScope() === scopeToLoad && this.loadedForUserId() === user.id) {
         return;
       }
 
       this.loadedTeamScope.set(scopeToLoad);
+      this.loadedForUserId.set(user.id);
       this.agencyStore.load({ scope: scopeToLoad });
     });
 
@@ -765,6 +791,8 @@ export class EquipePageComponent {
     this.successMessage.set(null);
     this.addMemberError.set(null);
     this.addMemberSubmitted.set(false);
+    this.selectedAvatarFile = null;
+    this.avatarPreview.set(null);
     this.isAddMemberDrawerOpen.set(true);
   }
 
@@ -774,6 +802,8 @@ export class EquipePageComponent {
     this.addMemberError.set(null);
     this.successMessage.set(null);
     this.addMemberPhoneDraft.set('');
+    this.selectedAvatarFile = null;
+    this.avatarPreview.set(null);
   }
 
   patchAddMemberField(
@@ -846,6 +876,7 @@ export class EquipePageComponent {
       email,
       phone: phone || undefined,
       subRoles: this.selectedSubRoles(),
+      avatarFile: this.selectedAvatarFile ?? undefined,
     });
   }
 

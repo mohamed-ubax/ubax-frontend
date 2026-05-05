@@ -1012,9 +1012,17 @@
               role="img"
               [attr.aria-label]="member.firstName + ' ' + member.lastName"
             >
-              <span class="agency-members-page__avatar-initials">
-                {{ getInitials(member.firstName ?? '', member.lastName ?? '') }}
-              </span>
+              @if (selectedMemberAvatarSrc(); as avatarSrc) {
+                <img
+                  [src]="avatarSrc"
+                  [alt]="member.firstName + ' ' + member.lastName"
+                  class="agency-members-page__avatar-preview"
+                />
+              } @else {
+                <span class="agency-members-page__avatar-initials">
+                  {{ getInitials(member.firstName ?? '', member.lastName ?? '') }}
+                </span>
+              }
             </div>
           </div>
 

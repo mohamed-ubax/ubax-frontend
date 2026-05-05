@@ -89,16 +89,6 @@ function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
   }
 }
 
-function inferScopeFromUrl(url: string): UbaxScope | null {
-  const normalizedUrl = url.split('?')[0].split('#')[0].toLowerCase();
-
-  if (normalizedUrl.startsWith('/hotel')) {
-    return 'HOTEL';
-  }
-
-  return null;
-}
-
 export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
@@ -182,7 +172,7 @@ export const AuthStore = signalStore(
                 currentUser.mainRole,
                 userIdCandidates,
                 currentUser.email,
-                currentUser.scope ?? inferScopeFromUrl(router.url),
+                currentUser.scope ?? null,
               )
               .pipe(
                 tapResponse({
