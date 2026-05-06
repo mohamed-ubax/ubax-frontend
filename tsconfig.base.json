@@ -79,6 +79,9 @@
       ],
       "@ubax-workspace/ubax-web-archivage": [
         "libs/ubax-web/features/archivage/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-profil": [
+        "libs/ubax-web/features/profil/src/index.ts"
       ]
     }
   },

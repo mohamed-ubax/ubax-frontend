@@ -456,9 +456,9 @@
                 formControlName="ville"
               >
                 <option value="" disabled>Selectionner une ville</option>
-                @for (v of villesList(); track v.id ?? v.value) {
+                @for (v of filteredVillesList(); track v.id ?? v.value) {
                   <option [value]="v.value ?? ''">
-                    {{ v.value ?? '' }}
+                    {{ v.description ?? v.value ?? '' }}
                   </option>
                 }
               </select>

@@ -1,0 +1,143 @@
+<div class="profil-page" data-ubax-motion="page">
+  <ubax-page-header title="Mon Profil" [backLink]="'/tableau-de-bord'" />
+
+  <div class="profil-page__content">
+    <!-- Card principale -->
+    <div class="profil-card">
+      <!-- Section Avatar -->
+      <div class="profil-card__section profil-card__section--avatar">
+        <h2 class="profil-card__section-title">Photo de profil</h2>
+        <p class="profil-card__section-hint">
+          Personnalisez votre profil avec une photo
+        </p>
+
+        <div class="profil-avatar-zone">
+          <input
+            type="file"
+            id="avatarInput"
+            accept="image/*"
+            style="display: none"
+            (change)="onAvatarSelected($event)"
+          />
+
+          <div
+            class="profil-avatar-circle"
+            [class.profil-avatar-circle--has-image]="currentAvatarSrc() !== '/profil/avatar-placeholder.svg'"
+            role="button"
+            tabindex="0"
+            aria-label="Modifier la photo de profil"
+            (click)="onAvatarClick()"
+            (keydown.enter)="onAvatarClick()"
+          >
+            @if (currentAvatarSrc() !== '/profil/avatar-placeholder.svg') {
+              <img
+                [src]="currentAvatarSrc()"
+                alt="Photo de profil"
+                class="profil-avatar-image"
+              />
+              @if (avatarPreview()) {
+                <button
+                  type="button"
+                  class="profil-avatar-remove"
+                  aria-label="Supprimer la photo"
+                  (click)="removeAvatar($event)"
+                >
+                  <i class="pi pi-times"></i>
+                </button>
+              }
+            } @else {
+              <div class="profil-avatar-placeholder">
+                <span class="profil-avatar-initials">{{ userInitials() }}</span>
+                <div class="profil-avatar-overlay">
+                  <i class="pi pi-camera"></i>
+                  <span>Ajouter</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="profil-avatar-info">
+            <p class="profil-avatar-info-text">
+              Format accepté : JPG, PNG, GIF (max. 5 Mo)
+            </p>
+          </div>
+        </div>
+
+        <!-- Messages de feedback -->
+        @if (uploadSuccess()) {
+          <div class="profil-alert profil-alert--success">
+            <i class="pi pi-check-circle"></i>
+            <span>Photo de profil mise à jour avec succès !</span>
+          </div>
+        }
+        @if (uploadError()) {
+          <div class="profil-alert profil-alert--error">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>{{ uploadError() }}</span>
+          </div>
+        }
+
+        <!-- Actions -->
+        @if (hasAvatarChange()) {
+          <div class="profil-actions">
+            <button
+              type="button"
+              class="profil-btn profil-btn--secondary"
+              [disabled]="isUploading()"
+              (click)="cancelChanges()"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              class="profil-btn profil-btn--primary"
+              [disabled]="isUploading()"
+              (click)="saveAvatar()"
+            >
+              @if (isUploading()) {
+                <i class="pi pi-spin pi-spinner"></i>
+                <span>Enregistrement...</span>
+              } @else {
+                <span>Enregistrer</span>
+              }
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="profil-card__divider"></div>
+
+      <!-- Section Informations personnelles -->
+      <div class="profil-card__section">
+        <h2 class="profil-card__section-title">Informations personnelles</h2>
+        <p class="profil-card__section-hint">
+          Vos informations de compte
+        </p>
+
+        <div class="profil-info-grid">
+          <div class="profil-info-item">
+            <span class="profil-info-label">Prénom</span>
+            <span class="profil-info-value">{{ authStore.user()?.prenom ?? '—' }}</span>
+          </div>
+
+          <div class="profil-info-item">
+            <span class="profil-info-label">Nom</span>
+            <span class="profil-info-value">{{ authStore.user()?.nom ?? '—' }}</span>
+          </div>
+
+          <div class="profil-info-item profil-info-item--full">
+            <span class="profil-info-label">Email</span>
+            <span class="profil-info-value">{{ authStore.user()?.email ?? '—' }}</span>
+          </div>
+
+          <div class="profil-info-item profil-info-item--full">
+            <span class="profil-info-label">Rôle</span>
+            <span class="profil-info-value profil-info-value--badge">
+              {{ authStore.user()?.subRole ?? authStore.user()?.mainRole ?? '—' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
