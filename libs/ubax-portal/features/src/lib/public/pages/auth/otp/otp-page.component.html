@@ -1,18 +1,23 @@
 <section class="recovery-flow recovery-flow--otp">
+  <!-- ── Intro ── -->
   <div class="recovery-flow__intro">
     <h1 class="recovery-flow__title">Vérification du code</h1>
     <p class="recovery-flow__description">
-      Saisissez le code à 6 chiffres envoyé par mail sur {{ recoveryEmail }}
+      Saisissez le code à 6 chiffres envoyé par mail à<br />
+      <strong>{{ recoveryEmail }}</strong>
     </p>
   </div>
 
+  <!-- ── Card ── -->
   <article class="recovery-card recovery-card--otp">
     <form
       class="recovery-form"
       (ngSubmit)="onSubmit()"
       aria-label="Vérification du code reçu par mail"
+      [attr.aria-busy]="submitting()"
       novalidate
     >
+      <!-- OTP input -->
       <p-inputotp
         class="recovery-otp-wrapper"
         [(ngModel)]="otpCode"
@@ -21,24 +26,47 @@
         [integerOnly]="true"
         [autofocus]="true"
         styleClass="recovery-otp"
+        aria-label="Code de vérification à 6 chiffres"
       ></p-inputotp>
 
+      <!-- Feedback messages -->
+      @if (serverError(); as error) {
+        <p class="recovery-server-error" role="alert">{{ error }}</p>
+      }
+
+      @if (resendSuccess()) {
+        <p class="recovery-resend-success" role="status" aria-live="polite">
+          Un nouveau code a été envoyé à {{ recoveryEmail }}.
+        </p>
+      }
+
+      <!-- Actions -->
       <div class="recovery-actions">
         <p-button
           type="submit"
           styleClass="recovery-btn"
           [fluid]="true"
-          label="Vérifier"
-          [disabled]="!canVerifyCode"
+          label="Vérifier le code"
+          [disabled]="!canVerifyCode || submitting()"
+          [loading]="submitting()"
         ></p-button>
 
         <p-button
           type="button"
           styleClass="recovery-btn recovery-btn--accent"
           [fluid]="true"
-          label="Renvoyer le code"
+          [label]="resendCooldown() > 0 ? 'Renvoyer le code (' + resendCooldown() + 's)' : 'Renvoyer le code'"
+          [disabled]="resendCooldown() > 0 || resending()"
+          [loading]="resending()"
           (onClick)="onResendCode()"
         ></p-button>
+      </div>
+
+      <!-- Back link -->
+      <div class="recovery-back-link">
+        <a routerLink="/mot-de-passe-oublie" class="recovery-link">
+          ← Modifier l'adresse mail
+        </a>
       </div>
     </form>
   </article>
