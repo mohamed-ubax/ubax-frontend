@@ -32,13 +32,6 @@ export const publicRoutes: Routes = [
       ).then((m) => m.ForgotPasswordPageComponent),
   },
   {
-    path: 'verification-code',
-    loadComponent: () =>
-      import('./pages/auth/otp/otp-page.component').then(
-        (m) => m.OtpPageComponent,
-      ),
-  },
-  {
     path: 'nouveau-mot-de-passe',
     loadComponent: () =>
       import('./pages/auth/reset-password/reset-password-page.component').then(

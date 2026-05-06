@@ -2,7 +2,6 @@
   ChangeDetectionStrategy,
   Component,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,12 +9,20 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 import { Password } from 'primeng/password';
-import { ForgotPasswordService } from '../../../services/forgot-password.service';
+import { HttpClient } from '@angular/common/http';
+import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
+import { firstValueFrom } from 'rxjs';
 
 /** Règles de complexité minimale */
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
+/**
+ * Page de réinitialisation du mot de passe.
+ * Accessible via le lien Keycloak reçu par email.
+ * Keycloak gère lui-même la validation du token — cette page
+ * n'a qu'à soumettre le nouveau mot de passe.
+ */
 @Component({
   selector: 'ubax-reset-password-page',
   imports: [FormsModule, Password, Button, RouterLink],
@@ -23,31 +30,16 @@ const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
   styleUrl: '../auth-pages.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResetPasswordPageComponent implements OnInit {
+export class ResetPasswordPageComponent {
   protected newPassword = '';
   protected confirmPassword = '';
   protected readonly submitting = signal(false);
   protected readonly serverError = signal<string | null>(null);
   protected readonly success = signal(false);
 
-  private email = '';
-  private otp = '';
-
   private readonly router = inject(Router);
-  private readonly forgotPasswordService = inject(ForgotPasswordService);
-
-  ngOnInit(): void {
-    const ctx = this.forgotPasswordService.readContext();
-
-    if (!ctx?.email || !ctx?.otp) {
-      // Contexte incomplet → retour à l'étape 1
-      void this.router.navigateByUrl('/mot-de-passe-oublie');
-      return;
-    }
-
-    this.email = ctx.email;
-    this.otp = ctx.otp;
-  }
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
 
   protected get passwordStrengthValid(): boolean {
     return PASSWORD_PATTERN.test(this.newPassword);
@@ -82,17 +74,16 @@ export class ResetPasswordPageComponent implements OnInit {
     this.serverError.set(null);
 
     try {
-      await this.forgotPasswordService
-        .resetPassword(this.email, this.otp, this.newPassword)
-        .toPromise();
+      // Le token Keycloak est géré par Keycloak lui-même via le lien email.
+      // Cette page est rendue dans le contexte de la session Keycloak active.
+      await firstValueFrom(
+        this.http.post(`${this.apiConfig.rootUrl}/v1/auth/reset-password`, {
+          newPassword: this.newPassword,
+        }),
+      );
 
-      // Nettoyage du contexte de récupération
-      this.forgotPasswordService.clearContext();
       this.success.set(true);
-
-      setTimeout(() => {
-        void this.router.navigateByUrl('/connexion');
-      }, 2200);
+      setTimeout(() => void this.router.navigateByUrl('/connexion'), 2200);
     } catch (error) {
       this.serverError.set(this.resolveErrorMessage(error));
     } finally {
@@ -103,7 +94,7 @@ export class ResetPasswordPageComponent implements OnInit {
   private resolveErrorMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 400 || error.status === 422) {
-        return 'Code expiré ou invalide. Recommence la procédure de récupération.';
+        return 'Le lien a expiré ou est invalide. Recommence la procédure depuis la page de connexion.';
       }
       if (error.status === 0) {
         return 'Le serveur est inaccessible. Réessaie dans un instant.';
