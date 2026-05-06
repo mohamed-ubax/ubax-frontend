@@ -62,12 +62,12 @@
         ></p-button>
       </div>
 
-      <!-- Back link -->
-      <div class="recovery-back-link">
-        <a routerLink="/mot-de-passe-oublie" class="recovery-link">
-          ← Modifier l'adresse mail
-        </a>
-      </div>
+      <a routerLink="/mot-de-passe-oublie" class="recovery-back-btn" aria-label="Modifier l'adresse mail">
+        <svg class="recovery-back-btn__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Modifier l'adresse mail</span>
+      </a>
     </form>
   </article>
 </section>
