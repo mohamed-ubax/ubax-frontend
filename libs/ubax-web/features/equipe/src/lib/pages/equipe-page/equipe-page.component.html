@@ -7,8 +7,7 @@
       aria-label="Actions de la liste des membres"
     >
       <!-- Toolbar masquée pendant le chargement initial pour éviter tout flicker -->
-      @if (viewState() !== 'loading') {
-      <label
+      @if (viewState() !== 'loading') {      <label
         class="agency-members-page__pill agency-members-page__pill--search"
         aria-label="Rechercher un membre"
       >
@@ -130,7 +129,12 @@
           <span>Ajouter un membre</span>
         </button>
       }
-      } <!-- end @if viewState !== loading -->
+      } @else {
+        <!-- Skeleton toolbar : reproduit les pills pendant le chargement -->
+        <div class="agency-members-page__sk-pill agency-members-page__sk-pill--search" aria-hidden="true"></div>
+        <div class="agency-members-page__sk-pill agency-members-page__sk-pill--filter" aria-hidden="true"></div>
+        <div class="agency-members-page__sk-pill agency-members-page__sk-pill--action" aria-hidden="true"></div>
+      }
     </div>
   </header>
 

@@ -89,7 +89,7 @@ import {
       display: flex;
       flex-direction: column;
       min-height: 595px;
-      padding: 0 17px;
+      padding: 27px 17px 0;
       border-radius: 20px;
       background: #fff;
       overflow: hidden;

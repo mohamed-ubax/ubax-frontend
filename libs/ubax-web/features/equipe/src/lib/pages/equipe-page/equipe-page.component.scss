@@ -2313,3 +2313,50 @@
   pointer-events: none;
   opacity: 0;
 }
+
+// Pills skeleton — reproduisent exactement les dimensions des vrais pills
+.agency-members-page__sk-pill {
+  border-radius: 36px;
+  background: #e2e8f0;
+  animation: equipe-toolbar-sk-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.agency-members-page__sk-pill--search {
+  width: 250px;
+  height: 64px;
+}
+
+.agency-members-page__sk-pill--filter {
+  width: 250px;
+  height: 64px;
+  animation-delay: 0.12s;
+}
+
+.agency-members-page__sk-pill--action {
+  width: 220px;
+  height: 61px;
+  background: rgba(26, 48, 71, 0.15);
+  animation-delay: 0.24s;
+}
+
+@keyframes equipe-toolbar-sk-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@media (max-width: 1560px) {
+  .agency-members-page__sk-pill--search,
+  .agency-members-page__sk-pill--filter,
+  .agency-members-page__sk-pill--action {
+    width: 100%;
+  }
+}
+
+@media (max-width: 980px) {
+  .agency-members-page__sk-pill--search,
+  .agency-members-page__sk-pill--filter,
+  .agency-members-page__sk-pill--action {
+    width: 100%;
+  }
+}
