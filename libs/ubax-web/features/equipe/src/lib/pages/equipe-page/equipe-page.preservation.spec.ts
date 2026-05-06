@@ -16,7 +16,7 @@ import {
   readResolvedTeamMemberRoles,
   resolveTeamMemberId,
   type TeamMemberSubRolesMap,
-} from '../../../../../../../../libs/ubax-web/data-access/src/lib/store/team/team-member.helpers';
+} from '@ubax-workspace/ubax-web-data-access';
 
 const COMPONENT_TS_PATH = resolve(__dirname, 'equipe-page.component.ts');
 
@@ -31,14 +31,18 @@ const COMPONENT_TS_PATH = resolve(__dirname, 'equipe-page.component.ts');
  */
 function readFallbackValues(source: string): string[] {
   // After fix: single constant MEMBER_AVATAR_FALLBACK
-  const singleMatch = /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(source);
+  const singleMatch = /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(
+    source,
+  );
   if (singleMatch?.[1]) {
     return [singleMatch[1]];
   }
 
   // Before fix: array MEMBER_AVATAR_FALLBACKS
   const arrayMatch =
-    /const MEMBER_AVATAR_FALLBACKS\s*=\s*\[([\s\S]*?)\]\s*as const/.exec(source);
+    /const MEMBER_AVATAR_FALLBACKS\s*=\s*\[([\s\S]*?)\]\s*as const/.exec(
+      source,
+    );
   if (!arrayMatch?.[1]) {
     return [];
   }
@@ -152,7 +156,12 @@ describe('Property: Preservation avatar reel (Requirements 3.1)', () => {
       const memberId = resolveTeamMemberId(member);
       const storedAvatar = memberAvatars[memberId];
 
-      const avatarSrc = computeAvatarSrc(memberId, memberAvatars, fallbacks, index);
+      const avatarSrc = computeAvatarSrc(
+        memberId,
+        memberAvatars,
+        fallbacks,
+        index,
+      );
 
       expect(avatarSrc).toBe(storedAvatar);
       expect(avatarSrc).not.toBe(fallbacks[index % fallbacks.length]);
@@ -167,7 +176,12 @@ describe('Property: Preservation avatar reel (Requirements 3.1)', () => {
       const member = members[index];
       const memberId = resolveTeamMemberId(member);
 
-      const avatarSrc = computeAvatarSrc(memberId, emptyAvatarMap, fallbacks, index);
+      const avatarSrc = computeAvatarSrc(
+        memberId,
+        emptyAvatarMap,
+        fallbacks,
+        index,
+      );
 
       expect(avatarSrc).toBe(fallbacks[index % fallbacks.length]);
     }
@@ -205,7 +219,12 @@ describe('Property: Preservation avatar reel (Requirements 3.1)', () => {
 
     // Test with many different indices
     for (let index = 0; index < 50; index++) {
-      const avatarSrc = computeAvatarSrc(memberId, memberAvatars, fallbacks, index);
+      const avatarSrc = computeAvatarSrc(
+        memberId,
+        memberAvatars,
+        fallbacks,
+        index,
+      );
       expect(avatarSrc).toBe(storedUrl);
     }
   });
@@ -227,7 +246,12 @@ describe('Property: Preservation avatar reel (Requirements 3.1)', () => {
       const memberId = resolveTeamMemberId(member);
       const storedAvatar = partialAvatarMap[memberId] ?? null;
 
-      const avatarSrc = computeAvatarSrc(memberId, partialAvatarMap, fallbacks, index);
+      const avatarSrc = computeAvatarSrc(
+        memberId,
+        partialAvatarMap,
+        fallbacks,
+        index,
+      );
 
       if (storedAvatar !== null) {
         // Even index: stored avatar must be used
@@ -241,10 +265,16 @@ describe('Property: Preservation avatar reel (Requirements 3.1)', () => {
 
   it('member with empty string memberId uses fallback (not stored avatar)', () => {
     // Edge case: member with no userId, keycloakId, or email → memberId = ''
-    const member = makeMember({ userId: undefined, keycloakId: undefined, email: undefined });
+    const member = makeMember({
+      userId: undefined,
+      keycloakId: undefined,
+      email: undefined,
+    });
     const memberId = resolveTeamMemberId(member);
     // memberId will be '' since all fields are undefined
-    const memberAvatars: Record<string, string> = { '': 'https://cdn.example.com/ghost.jpg' };
+    const memberAvatars: Record<string, string> = {
+      '': 'https://cdn.example.com/ghost.jpg',
+    };
 
     // The component checks: const storedAvatar = memberId ? (memberAvatars[memberId] ?? null) : null;
     // When memberId is '', the ternary returns null → fallback is used
@@ -399,7 +429,11 @@ describe('Property: Preservation filtrage par role (Requirements 3.2)', () => {
     ]);
 
     const filteredByA = applyRoleFilter(members, 'DIRECTEUR_AGENCE', subRoles);
-    const filteredByBFromA = applyRoleFilter(filteredByA, 'COMMERCIAL', subRoles);
+    const filteredByBFromA = applyRoleFilter(
+      filteredByA,
+      'COMMERCIAL',
+      subRoles,
+    );
 
     // No member has both roles, so the intersection is empty
     expect(filteredByBFromA).toHaveLength(0);
@@ -446,7 +480,11 @@ describe('Property: Preservation filtrage par role (Requirements 3.2)', () => {
 
     // Reverse the member list
     const reversedMembers = [...members].reverse();
-    const reversedResult = applyRoleFilter(reversedMembers, targetRole, subRoles);
+    const reversedResult = applyRoleFilter(
+      reversedMembers,
+      targetRole,
+      subRoles,
+    );
 
     // Same members should be returned (possibly in different order)
     expect(reversedResult).toHaveLength(originalResult.length);
