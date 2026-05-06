@@ -37,6 +37,7 @@ export type { PaymentCreateRequest } from './models/payment-create-request';
 export type { PaymentResponse } from './models/payment-response';
 export type { PaymentStatusUpdateRequest } from './models/payment-status-update-request';
 export type { PhoneLoginRequest } from './models/phone-login-request';
+export type { PresignedReadUrlResponse } from './models/presigned-read-url-response';
 export type { PresignedUrlResponse } from './models/presigned-url-response';
 export type { PropertyBoostRequest } from './models/property-boost-request';
 export type { PropertyCreateRequest } from './models/property-create-request';
@@ -209,6 +210,8 @@ export type { PresignTicketAttachment$Params as PresignTicketAttachment$Params }
 export { presignTicketAttachment as presignTicketAttachment } from './fn/storage/presign-ticket-attachment';
 export type { PresignTenantDocument$Params as PresignTenantDocument$Params } from './fn/storage/presign-tenant-document';
 export { presignTenantDocument as presignTenantDocument } from './fn/storage/presign-tenant-document';
+export type { GenerateReadUrl$Params as GenerateReadUrl$Params } from './fn/storage/generate-read-url';
+export { generateReadUrl as generateReadUrl } from './fn/storage/generate-read-url';
 export type { PresignPropertyMedia$Params as PresignPropertyMedia$Params } from './fn/storage/presign-property-media';
 export { presignPropertyMedia as presignPropertyMedia } from './fn/storage/presign-property-media';
 export type { PresignPropertyDocument$Params as PresignPropertyDocument$Params } from './fn/storage/presign-property-document';

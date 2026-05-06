@@ -145,6 +145,8 @@ export type { PresignTicketAttachment$Params as PresignTicketAttachment$Params }
 export { presignTicketAttachment as presignTicketAttachment } from './fn/storage/presign-ticket-attachment';
 export type { PresignTenantDocument$Params as PresignTenantDocument$Params } from './fn/storage/presign-tenant-document';
 export { presignTenantDocument as presignTenantDocument } from './fn/storage/presign-tenant-document';
+export type { GenerateReadUrl$Params as GenerateReadUrl$Params } from './fn/storage/generate-read-url';
+export { generateReadUrl as generateReadUrl } from './fn/storage/generate-read-url';
 export type { PresignPropertyMedia$Params as PresignPropertyMedia$Params } from './fn/storage/presign-property-media';
 export { presignPropertyMedia as presignPropertyMedia } from './fn/storage/presign-property-media';
 export type { PresignPropertyDocument$Params as PresignPropertyDocument$Params } from './fn/storage/presign-property-document';

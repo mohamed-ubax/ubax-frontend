@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "api:fetch-swagger": "curl -fsSL -o .swagger.json http://173.249.7.89/api/api-docs && node -e \"const fs=require('fs');const p='.swagger.json';const d=JSON.parse(fs.readFileSync(p,'utf8'));fs.writeFileSync(p,JSON.stringify(d,null,2)+'\\n');\"",
+    "api:fetch-swagger": "node scripts/fetch-swagger.mjs",
     "api:generate": "ng-openapi-gen --config ng-openapi-gen.json",
     "api:sync": "npm run api:fetch-swagger && npm run api:generate",
     "lint:workspace": "nx run-many -t lint -p ubax-web,ubax-portal,ubax-web-shell,shared-data-access,ubax-web-data-access,ubax-web-dashboard,ubax-web-hotel,ubax-web-location,ubax-web-demandes,ubax-web-finance,ubax-web-archivage,ubax-web-immobilier,ubax-web-espaces,ubax-web-equipe,ubax-portal-features,layout,shared-ui --outputStyle=static",

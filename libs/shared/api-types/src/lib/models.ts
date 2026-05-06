@@ -32,6 +32,7 @@ export type { PaymentCreateRequest } from './models/payment-create-request';
 export type { PaymentResponse } from './models/payment-response';
 export type { PaymentStatusUpdateRequest } from './models/payment-status-update-request';
 export type { PhoneLoginRequest } from './models/phone-login-request';
+export type { PresignedReadUrlResponse } from './models/presigned-read-url-response';
 export type { PresignedUrlResponse } from './models/presigned-url-response';
 export type { PropertyBoostRequest } from './models/property-boost-request';
 export type { PropertyCreateRequest } from './models/property-create-request';
