@@ -16,7 +16,7 @@ import {
   readResolvedTeamMemberRoles,
   resolveTeamMemberId,
   type TeamMemberSubRolesMap,
-} from '@ubax-workspace/ubax-web-data-access';
+} from '@ubax-workspace/ubax-web-data-access/team-member';
 
 const COMPONENT_TS_PATH = resolve(__dirname, 'equipe-page.component.ts');
 
