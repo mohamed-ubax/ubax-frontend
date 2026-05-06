@@ -233,6 +233,7 @@ export class EquipePageComponent {
 
   readonly currentPage = signal(1);
   readonly isRoleMenuOpen = signal(false);
+  readonly isRoleMenuClosing = signal(false);
   readonly searchValue = signal('');
   readonly selectedRoleKey = signal<string | null>(null);
   private readonly loadedTeamScope = signal<UbaxScope | null>(null);
@@ -762,15 +763,28 @@ export class EquipePageComponent {
     }
   }
 
+  private closeRoleMenuWithAnimation(): void {
+    if (!this.isRoleMenuOpen()) return;
+    this.isRoleMenuClosing.set(true);
+    setTimeout(() => {
+      this.isRoleMenuOpen.set(false);
+      this.isRoleMenuClosing.set(false);
+    }, 140);
+  }
+
   toggleRoleMenu(event: MouseEvent): void {
     event.stopPropagation();
-    this.isRoleMenuOpen.update((isOpen) => !isOpen);
+    if (this.isRoleMenuOpen()) {
+      this.closeRoleMenuWithAnimation();
+    } else {
+      this.isRoleMenuOpen.set(true);
+    }
   }
 
   selectRole(option: RoleOption | null): void {
     this.selectedRoleKey.set(option?.key ?? null);
     this.agencyStore.setFilterRole(option?.key ?? null);
-    this.isRoleMenuOpen.set(false);
+    this.closeRoleMenuWithAnimation();
     this.currentPage.set(1);
   }
 
@@ -1186,7 +1200,7 @@ export class EquipePageComponent {
       !(target instanceof Node) ||
       !this.elementRef.nativeElement.contains(target)
     ) {
-      this.isRoleMenuOpen.set(false);
+      this.closeRoleMenuWithAnimation();
     }
 
     if (this.addMemberRolesMenuOpen()) {
