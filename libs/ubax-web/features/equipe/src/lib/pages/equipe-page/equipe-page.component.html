@@ -7,7 +7,8 @@
       aria-label="Actions de la liste des membres"
     >
       <!-- Toolbar masquée pendant le chargement initial pour éviter tout flicker -->
-      @if (viewState() !== 'loading') {      <label
+      @if (viewState() !== 'loading' && !isLeavingSkeleton()) {
+      <div class="agency-members-page__toolbar-inner agency-members-page__toolbar-inner--entering">      <label
         class="agency-members-page__pill agency-members-page__pill--search"
         aria-label="Rechercher un membre"
       >
@@ -129,6 +130,7 @@
           <span>Ajouter un membre</span>
         </button>
       }
+      </div>
       } @else {
         <!-- Skeleton toolbar : reproduit les pills pendant le chargement -->
         <div class="agency-members-page__sk-pill agency-members-page__sk-pill--search" aria-hidden="true"></div>
@@ -141,9 +143,10 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        ÉTAT LOADING — skeleton pleine page, aucun contenu métier visible
   ════════════════════════════════════════════════════════════════════════ -->
-  @if (viewState() === 'loading') {
+  @if (viewState() === 'loading' || isLeavingSkeleton()) {
     <section
       class="agency-members-page__content"
+      [class.is-leaving]="isLeavingSkeleton()"
       aria-label="Chargement en cours"
       aria-busy="true"
     >
@@ -156,7 +159,7 @@
        ÉTAT ERROR — message d'erreur centré, layout identique au skeleton
   ════════════════════════════════════════════════════════════════════════ -->
   @if (viewState() === 'error') {
-    <section class="agency-members-page__content" role="alert">
+    <section class="agency-members-page__content agency-members-page__content--entering" role="alert">
       <aside class="agency-members-page__promo-card">
         <div class="agency-members-page__promo-backdrop" aria-hidden="true">
           <img [src]="promoBackdropSrc" alt="" />
@@ -210,7 +213,7 @@
        ÉTATS SUCCESS + EMPTY — même layout, seul le contenu de la table diffère
   ════════════════════════════════════════════════════════════════════════ -->
   @if (viewState() === 'success' || viewState() === 'empty') {
-  <section class="agency-members-page__content">
+  <section class="agency-members-page__content agency-members-page__content--entering">
     <aside class="agency-members-page__promo-card">
       <div class="agency-members-page__promo-backdrop" aria-hidden="true">
         <img [src]="promoBackdropSrc" alt="" />

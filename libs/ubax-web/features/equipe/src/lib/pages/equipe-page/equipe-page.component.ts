@@ -245,6 +245,14 @@ export class EquipePageComponent {
   private readonly hasLoaded = signal(false);
 
   /**
+   * Pendant la transition skeleton → contenu réel, on garde le skeleton
+   * visible (opacity fade-out) le temps de l'animation CSS (300 ms).
+   * Cela évite le flash blanc entre la disparition du skeleton et
+   * l'apparition du contenu.
+   */
+  readonly isLeavingSkeleton = signal(false);
+
+  /**
    * État d'affichage canonique — UN SEUL état à la fois.
    * Le template ne doit jamais lire loading/error/isEmpty directement.
    */
@@ -586,7 +594,13 @@ export class EquipePageComponent {
       } else if (!this.hasLoaded()) {
         // Transition loading→false OU store déjà peuplé (cache hit)
         if (wasLoading || hasEntities || hasError) {
-          this.hasLoaded.set(true);
+          // 1. Déclencher le fade-out du skeleton (classe CSS is-leaving)
+          this.isLeavingSkeleton.set(true);
+          // 2. Après la durée de l'animation (320 ms), basculer vers le contenu réel
+          setTimeout(() => {
+            this.hasLoaded.set(true);
+            this.isLeavingSkeleton.set(false);
+          }, 320);
         }
       }
     });
@@ -605,6 +619,7 @@ export class EquipePageComponent {
         this.loadedTeamScope.set(null);
         this.loadedForUserId.set(null);
         this.hasLoaded.set(false);
+        this.isLeavingSkeleton.set(false);
       }
 
       const resolvedScope = this.resolvedTeamScope();

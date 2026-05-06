@@ -2360,3 +2360,80 @@
     width: 100%;
   }
 }
+
+// ── Transitions ViewState skeleton ↔ contenu réel ──────────────────────────
+//
+// Stratégie :
+//   - Le skeleton sort avec fade-out + scale(0.98) sur 320 ms
+//   - Le contenu réel entre avec fade-in + translateY(8px→0) sur 380 ms
+//   - La toolbar entre avec fade-in + translateY(-4px→0) sur 300 ms
+//   - Toutes les animations respectent prefers-reduced-motion
+
+// Sortie du skeleton (classe .is-leaving ajoutée par isLeavingSkeleton signal)
+.agency-members-page__content.is-leaving {
+  animation: equipe-content-fade-out 320ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+// Entrée du contenu réel (success / empty / error)
+.agency-members-page__content--entering {
+  animation: equipe-content-fade-in 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+// Entrée de la toolbar réelle
+.agency-members-page__toolbar-inner {
+  display: contents; // transparent pour le layout flex parent
+}
+
+.agency-members-page__toolbar-inner--entering {
+  // On anime les enfants directs via un wrapper display:flex
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 24px;
+  animation: equipe-toolbar-fade-in 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+// ── Keyframes ────────────────────────────────────────────────────────────────
+
+@keyframes equipe-content-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+@keyframes equipe-content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes equipe-toolbar-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Respect de prefers-reduced-motion
+@media (prefers-reduced-motion: reduce) {
+  .agency-members-page__content.is-leaving,
+  .agency-members-page__content--entering,
+  .agency-members-page__toolbar-inner--entering {
+    animation: none;
+  }
+}
