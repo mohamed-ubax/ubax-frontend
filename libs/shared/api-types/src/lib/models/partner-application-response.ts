@@ -5,6 +5,10 @@ import { ApplicationStatusLogResponse } from '../models/application-status-log-r
 export interface PartnerApplicationResponse {
   bailUrl?: string;
   city?: string;
+
+  /**
+   * Raison sociale ou dénomination commerciale
+   */
   companyName?: string;
   country?: string;
   createdAt?: string;
@@ -13,7 +17,16 @@ export interface PartnerApplicationResponse {
   email?: string;
   id?: string;
   latitude?: number;
-  legalRepresentative?: string;
+
+  /**
+   * Prénom du représentant légal
+   */
+  legalRepFirstName?: string;
+
+  /**
+   * Nom de famille du représentant légal
+   */
+  legalRepLastName?: string;
   legalStatus?: string;
   logoUrl?: string;
   longitude?: number;

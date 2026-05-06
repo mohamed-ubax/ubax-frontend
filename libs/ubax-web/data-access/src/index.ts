@@ -30,6 +30,14 @@ export type {
 export * from './lib/models/role-access.model';
 export * from './lib/store/auth/auth.store';
 
+// ─── Team member helpers ──────────────────────────────────────────────────────
+export {
+  extractSubRolesFromTeamResponse,
+  readResolvedTeamMemberRoles,
+  resolveTeamMemberId,
+} from './lib/store/team/team-member.helpers';
+export type { TeamMemberSubRolesMap } from './lib/store/team/team-member.helpers';
+
 // ─── Stores avec logique métier (workflow, opérations domaine) ───────────────
 export { DemandesStore } from './lib/store/demandes/demandes.store';
 export type { Ticket } from './lib/store/demandes/demandes.store';

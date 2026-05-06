@@ -70,14 +70,7 @@ type ConfirmDialogAction = 'revoke-role' | 'deactivate-member' | null;
 
 const MEMBER_PAGE_SIZE = 6;
 
-const MEMBER_AVATAR_FALLBACKS = [
-  'https://www.figma.com/api/mcp/asset/304694cc-527f-42fb-88d3-be306d234913',
-  'https://www.figma.com/api/mcp/asset/2c53b55b-32b0-42ea-be86-1c95d73b26db',
-  'https://www.figma.com/api/mcp/asset/94ebfff1-2363-4fb7-8b75-2d8dfa9da864',
-  'https://www.figma.com/api/mcp/asset/97b99361-cfcd-4e46-b8db-98bfd1d64af5',
-  'https://www.figma.com/api/mcp/asset/a1913cfd-247f-45ee-88ce-03de08f1fa99',
-  'https://www.figma.com/api/mcp/asset/4112729c-48f0-41fa-91d8-16adbc668f3c',
-] as const;
+const MEMBER_AVATAR_FALLBACK = '/equipe/avatar-fallback.svg';
 
 function normalizeSearchText(value: string): string {
   return value.toLowerCase().normalize('NFD').replaceAll(/[̀-ͯ]/g, '');
@@ -223,28 +216,22 @@ export class EquipePageComponent {
   private readonly document = inject(DOCUMENT);
   readonly subRoleLabels = SUB_ROLE_LABELS as Record<string, string>;
 
-  readonly paginationArrowLeftSrc =
-    'https://www.figma.com/api/mcp/asset/934d8cf3-8a97-4ced-a530-7c8eef886fc2';
-  readonly paginationArrowRightSrc =
-    'https://www.figma.com/api/mcp/asset/30d686d3-8a8e-4a47-a42a-0036ce831eb6';
-  readonly promoBackdropSrc =
-    'https://www.figma.com/api/mcp/asset/b8eef614-f125-41d4-be91-c08a21e31aeb';
-  readonly promoImageSrc =
-    'https://www.figma.com/api/mcp/asset/8333bdb6-b124-4abb-af6c-2763f66389b0';
-  readonly roleSortIconSrc =
-    'https://www.figma.com/api/mcp/asset/7759e876-c630-4d2f-8ad7-2eeebb07e59d';
+  readonly paginationArrowLeftSrc  = '/equipe/pagination-arrow-left.webp';
+  readonly paginationArrowRightSrc = '/equipe/pagination-arrow-right.webp';
+  readonly promoBackdropSrc        = '/equipe/promo-backdrop.webp';
+  readonly promoImageSrc           = '/equipe/promo-image.webp';
+  readonly roleSortIconSrc         = '/equipe/role-sort-icon.webp';
   /** Illustration « no records » (frame Liste des membres — Figma node 1217:3865). */
-  readonly membersEmptyIllustrationSrc =
-    'https://www.figma.com/api/mcp/asset/f1a345aa-0603-4b2e-872f-0d9edc18c22e';
+  readonly membersEmptyIllustrationSrc = '/equipe/members-empty.webp';
   /** Calque vitré du bouton fermer drawer (Figma node 1207:4881 — ellipse sous le close). */
-  readonly drawerCloseGlassTextureSrc =
-    'https://www.figma.com/api/mcp/asset/c4ec08bc-4d4c-4369-abe5-0cc0f58f27d7';
+  readonly drawerCloseGlassTextureSrc  = '/equipe/drawer-close-texture.webp';
 
   readonly currentPage = signal(1);
   readonly isRoleMenuOpen = signal(false);
   readonly searchValue = signal('');
   readonly selectedRoleKey = signal<string | null>(null);
   private readonly loadedTeamScope = signal<UbaxScope | null>(null);
+  private readonly loadedForUserId = signal<string | null>(null);
 
   // Auto-assign drawer — PARTNER_ADMIN auto-assigns sub-roles to themselves
   readonly isAutoAssignDrawerOpen = signal(false);
@@ -358,7 +345,10 @@ export class EquipePageComponent {
   ];
 
   readonly resolvedTeamScope = computed<UbaxScope | null>(
-    () => this.authStore.scope() ?? this.agencyStore.teamScope(),
+    // authStore.scope() est la source de vérité — hydraté par loadSubRoles()
+    // après le login. agencyStore.teamScope() n'est utilisé qu'en fallback
+    // une fois que le store a déjà chargé (scope confirmé par l'API).
+    () => this.authStore.scope() ?? (this.agencyStore.entities().length > 0 ? this.agencyStore.teamScope() : null),
   );
 
   readonly roleOptions = computed<readonly RoleOption[]>(() => {
@@ -459,6 +449,10 @@ export class EquipePageComponent {
           ? (this.agencyStore.memberSubRolesError()[memberId] ?? null)
           : null;
 
+        const storedAvatar = memberId
+          ? (this.agencyStore.memberAvatars()[memberId] ?? null)
+          : null;
+
         return {
           id: memberId || `${index}`,
           memberId,
@@ -470,8 +464,7 @@ export class EquipePageComponent {
           roleKeys,
           rolesLoading,
           rolesError,
-          avatarSrc:
-            MEMBER_AVATAR_FALLBACKS[index % MEMBER_AVATAR_FALLBACKS.length],
+          avatarSrc: storedAvatar ?? MEMBER_AVATAR_FALLBACK,
         };
       },
     ),
@@ -546,6 +539,12 @@ export class EquipePageComponent {
     return pickPrimarySubRole(roles) ?? null;
   });
 
+  readonly selectedMemberAvatarSrc = computed(() => {
+    const memberId = this.selectedMemberId();
+    if (!memberId) return null;
+    return this.agencyStore.memberAvatars()[memberId] ?? null;
+  });
+
   constructor() {
     effect(() => {
       const user = this.authStore.user();
@@ -555,19 +554,30 @@ export class EquipePageComponent {
         user.mainRole === UbaxRole.PARTNER ||
         user.mainRole === UbaxRole.PARTNER_ADMIN;
 
+      // Détecter un changement d'utilisateur → reset complet du store
+      if (this.loadedForUserId() !== null && this.loadedForUserId() !== user.id) {
+        this.agencyStore.reset();
+        this.loadedTeamScope.set(null);
+        this.loadedForUserId.set(null);
+      }
+
       const resolvedScope = this.resolvedTeamScope();
 
+      // Pour PARTNER/PARTNER_ADMIN, attendre que le scope soit résolu
+      // (loadSubRoles() est asynchrone — scope arrive après le premier rendu)
       if (isPartnerRole && !resolvedScope) {
         return;
       }
 
       const scopeToLoad = resolvedScope ?? 'AGENCE';
 
-      if (this.loadedTeamScope() === scopeToLoad) {
+      // Ne recharger que si le scope a changé ou si c'est le premier chargement
+      if (this.loadedTeamScope() === scopeToLoad && this.loadedForUserId() === user.id) {
         return;
       }
 
       this.loadedTeamScope.set(scopeToLoad);
+      this.loadedForUserId.set(user.id);
       this.agencyStore.load({ scope: scopeToLoad });
     });
 
@@ -765,6 +775,8 @@ export class EquipePageComponent {
     this.successMessage.set(null);
     this.addMemberError.set(null);
     this.addMemberSubmitted.set(false);
+    this.selectedAvatarFile = null;
+    this.avatarPreview.set(null);
     this.isAddMemberDrawerOpen.set(true);
   }
 
@@ -774,6 +786,8 @@ export class EquipePageComponent {
     this.addMemberError.set(null);
     this.successMessage.set(null);
     this.addMemberPhoneDraft.set('');
+    this.selectedAvatarFile = null;
+    this.avatarPreview.set(null);
   }
 
   patchAddMemberField(
@@ -846,6 +860,7 @@ export class EquipePageComponent {
       email,
       phone: phone || undefined,
       subRoles: this.selectedSubRoles(),
+      avatarFile: this.selectedAvatarFile ?? undefined,
     });
   }
 

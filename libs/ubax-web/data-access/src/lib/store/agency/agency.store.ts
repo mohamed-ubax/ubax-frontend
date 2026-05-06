@@ -26,6 +26,7 @@ import {
   AssignSubRolesRequest,
   findAllByType,
   getByKeycloakId,
+  getByUserId,
   getSubRoles,
   getSubRoles1,
   getTeamMembers,
@@ -35,8 +36,12 @@ import {
   removeMember1,
   revokeSubRole,
   revokeSubRole1,
+  StorageUploadResponse,
+  upload,
+  UserResponse,
 } from '@ubax-workspace/shared-api-types';
 import {
+  catchError,
   exhaustMap,
   from,
   map,
@@ -44,6 +49,7 @@ import {
   Observable,
   of,
   pipe,
+  switchMap,
   tap,
 } from 'rxjs';
 import {
@@ -53,6 +59,7 @@ import {
   resolveTeamMemberId,
   teamMemberIdSelector,
   extractSubRolesFromTeamResponse,
+  extractAvatarUrlsFromTeamResponse,
   type TeamMemberSubRolesMap,
 } from '../team/team-member.helpers';
 
@@ -189,6 +196,7 @@ export const AgencyStore = signalStore(
     codelistRolesError: null as string | null,
     currentUserDbId: null as string | null,
     teamScope: null as UbaxScope | null,
+    memberAvatars: {} as Record<string, string>,
   }),
   withComputed(({ entities, filterRole, memberSubRoles, codelistRoles }) => ({
     membresActifs: computed(() => entities().filter(readTeamMemberActive)),
@@ -230,6 +238,27 @@ export const AgencyStore = signalStore(
           patchState(store, { filterRole: role });
         },
 
+        reset(): void {
+          patchState(
+            store,
+            setAllEntities<AdminUserResponse>([], {
+              selectId: teamMemberIdSelector,
+            }),
+            {
+              filterRole: null,
+              memberSubRoles: {},
+              memberSubRolesLoading: {},
+              memberSubRolesError: {},
+              codelistRoles: [],
+              codelistRolesLoading: false,
+              codelistRolesError: null,
+              currentUserDbId: null,
+              teamScope: null,
+              memberAvatars: {},
+            },
+          );
+        },
+
         load: rxMethod<{ scope?: UbaxScope }>(
           pipe(
             tap(() => patchState(store, { loading: true, error: null })),
@@ -242,36 +271,78 @@ export const AgencyStore = signalStore(
 
               return request.pipe(
                 mergeMap((response) => parseResponseBody(response.body)),
-                tapResponse({
-                  next: (body) => {
-                    const teamData =
-                      body &&
-                      typeof body === 'object' &&
-                      'data' in (body as Record<string, unknown>)
-                        ? (body as Record<string, unknown>)['data']
-                        : body;
-                    const members = mapTeamList(teamData);
-                    const subRoles = extractSubRolesFromTeamResponse(teamData);
+                switchMap((body) => {
+                  const teamData =
+                    body &&
+                    typeof body === 'object' &&
+                    'data' in (body as Record<string, unknown>)
+                      ? (body as Record<string, unknown>)['data']
+                      : body;
+                  const members = mapTeamList(teamData);
+                  const subRoles = extractSubRolesFromTeamResponse(teamData);
+                  const avatarsFromResponse = extractAvatarUrlsFromTeamResponse(teamData);
 
-                    patchState(store, {
-                      memberSubRoles: subRoles,
-                      teamScope: scope,
-                      loading: false,
-                      error: null,
-                    });
+                  patchState(store, {
+                    memberSubRoles: subRoles,
+                    memberAvatars: avatarsFromResponse,
+                    teamScope: scope,
+                    loading: false,
+                    error: null,
+                  });
 
-                    patchState(
-                      store,
-                      setAllEntities<AdminUserResponse>(members, {
-                        selectId: teamMemberIdSelector,
-                      }),
-                    );
-                  },
-                  error: (err: HttpErrorResponse) =>
-                    patchState(store, {
-                      loading: false,
-                      error: err.message,
+                  patchState(
+                    store,
+                    setAllEntities<AdminUserResponse>(members, {
+                      selectId: teamMemberIdSelector,
                     }),
+                  );
+
+                  // Charger les avatars en parallèle sans bloquer
+                  // Ne déclencher getByUserId que pour les membres dont l'avatarUrl
+                  // n'est PAS déjà présente dans la réponse équipe
+                  const membersNeedingAvatarFetch = members.filter((m) => {
+                    const key = resolveTeamMemberId(m);
+                    return !!(m.userId ?? m.keycloakId) && !avatarsFromResponse[key];
+                  });
+
+                  if (!membersNeedingAvatarFetch.length) {
+                    return of(null);
+                  }
+
+                  return from(membersNeedingAvatarFetch).pipe(
+                    mergeMap((member) => {
+                      // Utiliser userId backend en priorité pour l'appel API
+                      const apiUserId = member.userId ?? member.keycloakId ?? '';
+                      // Clé canonique identique à resolveTeamMemberId
+                      const storeKey = resolveTeamMemberId(member);
+                      return getByUserId(http, apiConfig.rootUrl, { userId: apiUserId }).pipe(
+                        map((res) => {
+                          const raw = res.body as Record<string, unknown> | null;
+                          const data =
+                            raw?.['data'] && typeof raw['data'] === 'object'
+                              ? (raw['data'] as UserResponse)
+                              : (raw as UserResponse | null);
+                          const avatarUrl = data?.avatarUrl ?? null;
+                          return avatarUrl ? { storeKey, avatarUrl } : null;
+                        }),
+                        catchError(() => of(null)),
+                        tap((result) => {
+                          if (result) {
+                            patchState(store, {
+                              memberAvatars: {
+                                ...store.memberAvatars(),
+                                [result.storeKey]: result.avatarUrl,
+                              },
+                            });
+                          }
+                        }),
+                      );
+                    }),
+                  );
+                }),
+                catchError((err: HttpErrorResponse) => {
+                  patchState(store, { loading: false, error: err.message });
+                  return of(null);
                 }),
               );
             }),
@@ -392,10 +463,11 @@ export const AgencyStore = signalStore(
           ),
         ),
 
-        inviterMembre: rxMethod<AddTeamMemberRequest>(
+        inviterMembre: rxMethod<AddTeamMemberRequest & { avatarFile?: File }>(
           pipe(
             tap(() => patchState(store, { saving: true, error: null })),
-            exhaustMap((body: AddTeamMemberRequest) => {
+            exhaustMap((params: AddTeamMemberRequest & { avatarFile?: File }) => {
+              const { avatarFile, ...body } = params;
               const scope = resolveScope();
               const request =
                 scope === 'HOTEL'
@@ -403,10 +475,42 @@ export const AgencyStore = signalStore(
                   : addMember1(http, apiConfig.rootUrl, { body });
 
               return request.pipe(
-                map((response) => response.body as AdminUserResponse),
+                mergeMap((response) => parseResponseBody(response.body)),
+                map((parsed) => {
+                  // La réponse est { data: AdminUserResponse, ... } (CustomResponse)
+                  const raw = parsed as Record<string, unknown> | null;
+                  const membre: AdminUserResponse =
+                    raw?.['data'] && typeof raw['data'] === 'object'
+                      ? (raw['data'] as AdminUserResponse)
+                      : (raw as AdminUserResponse) ?? {};
+                  return membre;
+                }),
+                switchMap((membre: AdminUserResponse) => {
+                  const memberId = resolveTeamMemberId(membre);
+
+                  if (!avatarFile || !memberId) {
+                    return of({ membre, avatarUrl: null });
+                  }
+
+                  return upload(http, apiConfig.rootUrl, {
+                    bucket: 'users-avatars',
+                    body: { file: avatarFile },
+                  }).pipe(
+                    map((res) => {
+                      const uploadBody = res.body as StorageUploadResponse | null;
+                      return { membre, avatarUrl: uploadBody?.fileUrl ?? null };
+                    }),
+                    catchError(() => of({ membre, avatarUrl: null })),
+                  );
+                }),
                 tapResponse({
-                  next: (membre: AdminUserResponse) => {
+                  next: ({ membre, avatarUrl }: { membre: AdminUserResponse; avatarUrl: string | null }) => {
                     const memberId = resolveTeamMemberId(membre);
+
+                    const nextAvatars =
+                      memberId && avatarUrl
+                        ? { ...store.memberAvatars(), [memberId]: avatarUrl }
+                        : store.memberAvatars();
 
                     // Add new member directly to entities and update sub-roles cache
                     patchState(
@@ -416,6 +520,7 @@ export const AgencyStore = signalStore(
                       }),
                       {
                         saving: false,
+                        memberAvatars: nextAvatars,
                         memberSubRoles: memberId
                           ? setMemberRoles(
                               store.memberSubRoles(),
@@ -626,6 +731,7 @@ export const AgencyStore = signalStore(
             ),
           ),
         ),
+
       };
     },
   ),

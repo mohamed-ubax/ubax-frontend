@@ -16,6 +16,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
+import { AgencyStore } from '@ubax-workspace/ubax-web-data-access';
 import {
   NavItemConfig,
   ROLE_BADGE_CONFIG,
@@ -48,6 +49,7 @@ function readFlexGap(element: HTMLElement): number {
 })
 export class TopbarComponent implements AfterViewInit {
   readonly authStore = inject(AuthStore);
+  private readonly agencyStore = inject(AgencyStore);
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
@@ -138,6 +140,7 @@ export class TopbarComponent implements AfterViewInit {
 
   protected logout(): void {
     this.isUserMenuOpen.set(false);
+    this.agencyStore.reset();
     this.authStore.logout();
   }
 

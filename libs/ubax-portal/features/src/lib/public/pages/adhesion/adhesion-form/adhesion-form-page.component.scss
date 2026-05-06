@@ -499,6 +499,10 @@ $c-error: #dc2626; // error state (WCAG accessible red)
   display: grid;
   gap: 16px;
 
+  &--two {
+    grid-template-columns: 1fr 1fr;
+  }
+
   &--three {
     grid-template-columns: 376px 388px 1fr;
   }
@@ -1108,6 +1112,10 @@ $c-error: #dc2626; // error state (WCAG accessible red)
 // ══ SUCCESS OVERLAY & MODAL ═══════════════════════════════════════════════════
 // ══ RESPONSIVE ════════════════════════════════════════════════════════════════
 @media (max-width: 1400px) {
+  .form-row--two {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .form-row--three {
     grid-template-columns: 1fr 1fr 1fr;
   }
@@ -1141,6 +1149,7 @@ $c-error: #dc2626; // error state (WCAG accessible red)
 }
 
 @media (max-width: 768px) {
+  .form-row--two,
   .form-row--three,
   .form-row--two-phone {
     grid-template-columns: 1fr;

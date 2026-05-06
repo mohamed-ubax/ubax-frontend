@@ -50,6 +50,9 @@
       "@ubax-workspace/ubax-web-data-access/role-access": [
         "libs/ubax-web/data-access/src/lib/models/role-access.model.ts"
       ],
+      "@ubax-workspace/ubax-web-data-access/team-member": [
+        "libs/ubax-web/data-access/src/lib/store/team/team-member.helpers.ts"
+      ],
       "@ubax-workspace/ubax-web-dashboard": [
         "libs/ubax-web/features/dashboard/src/index.ts"
       ],

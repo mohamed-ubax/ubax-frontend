@@ -42,7 +42,7 @@ export const authInterceptor: HttpInterceptorFn = (
   const authService = inject(AuthService);
   const token = authStore.token();
 
-  const authedReq = token ? withBearer(req, token) : req;
+  const authedReq = token && !isAuthSkipped(req.url) ? withBearer(req, token) : req;
 
   return next(authedReq).pipe(
     catchError((err: HttpErrorResponse) => {
