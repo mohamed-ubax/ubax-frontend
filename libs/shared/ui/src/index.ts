@@ -23,3 +23,4 @@ export * from './lib/detail-layout/detail-layout.component';
 export * from './lib/ubax-paginator/ubax-paginator.component';
 export * from './lib/date-range-picker/date-range-picker.component';
 export * from './lib/lazy-chart/lazy-chart.component';
+export * from './lib/view-state/view-state.types';
