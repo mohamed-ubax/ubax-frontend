@@ -12,7 +12,8 @@ export type ApplicationStatus = NonNullable<
 export type PartnerApplyRequest = {
   partnerType: string;
   companyName: string;
-  legalRepresentative: string;
+  legalRepFirstName: string;
+  legalRepLastName: string;
   phone: string;
   email: string;
   country: string;

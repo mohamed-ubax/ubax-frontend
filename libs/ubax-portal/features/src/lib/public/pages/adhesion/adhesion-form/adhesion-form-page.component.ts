@@ -107,7 +107,8 @@ export class AdhesionFormPageComponent {
   protected readonly form = this._fb.group({
     typePartenaire: ['', Validators.required],
     raisonSociale: ['', Validators.required],
-    representantLegal: ['', Validators.required],
+    prenomRepresentantLegal: ['', Validators.required],
+    nomRepresentantLegal: ['', Validators.required],
     telephone: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     pays: ['', Validators.required],
@@ -422,7 +423,8 @@ export class AdhesionFormPageComponent {
     const data: PartnerApplyRequest = {
       partnerType: v.typePartenaire ?? '',
       companyName: v.raisonSociale ?? '',
-      legalRepresentative: v.representantLegal ?? '',
+      legalRepFirstName: v.prenomRepresentantLegal ?? '',
+      legalRepLastName: v.nomRepresentantLegal ?? '',
       phone: `+${this.selectedCountry.dialCode}${v.telephone ?? ''}`,
       email: v.email ?? '',
       country: v.pays ?? '',
