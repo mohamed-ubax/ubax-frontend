@@ -14,6 +14,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  position: relative;
+  z-index: 10;
 }
 
 .agency-members-page__title {
