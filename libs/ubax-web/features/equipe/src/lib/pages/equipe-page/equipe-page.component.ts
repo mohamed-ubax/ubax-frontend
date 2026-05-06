@@ -45,6 +45,9 @@ import {
   UiFormInputComponent,
   UiPaginationComponent,
 } from '@ubax-workspace/shared-ui';
+import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
+import { EquipeSkeletonPromoComponent } from './equipe-skeleton-promo/equipe-skeleton-promo.component';
+import { EquipeSkeletonTableComponent } from './equipe-skeleton-table/equipe-skeleton-table.component';
 
 type AgencyMemberTableRow = {
   readonly id: string;
@@ -196,6 +199,8 @@ function readDefaultPhoneCountry(): CountryDialCode {
     UiDataTableEmptyDefDirective,
     UiFormInputComponent,
     UiPaginationComponent,
+    EquipeSkeletonPromoComponent,
+    EquipeSkeletonTableComponent,
   ],
   templateUrl: './equipe-page.component.html',
   styleUrl: './equipe-page.component.scss',
@@ -232,6 +237,25 @@ export class EquipePageComponent {
   readonly selectedRoleKey = signal<string | null>(null);
   private readonly loadedTeamScope = signal<UbaxScope | null>(null);
   private readonly loadedForUserId = signal<string | null>(null);
+
+  /**
+   * Devient true dès que le premier chargement se termine (succès ou erreur).
+   * Empêche tout affichage de contenu métier avant que les données soient prêtes.
+   */
+  private readonly hasLoaded = signal(false);
+
+  /**
+   * État d'affichage canonique — UN SEUL état à la fois.
+   * Le template ne doit jamais lire loading/error/isEmpty directement.
+   */
+  readonly viewState = computed<ViewState>(() =>
+    deriveViewState(
+      this.agencyStore.loading(),
+      this.agencyStore.error(),
+      this.agencyStore.isEmpty(),
+      this.hasLoaded(),
+    ),
+  );
 
   // Auto-assign drawer — PARTNER_ADMIN auto-assigns sub-roles to themselves
   readonly isAutoAssignDrawerOpen = signal(false);
@@ -546,6 +570,27 @@ export class EquipePageComponent {
   });
 
   constructor() {
+    // Marquer hasLoaded dès que le premier chargement se termine.
+    // On track la transition loading true→false pour couvrir tous les cas
+    // (succès avec données, succès vide, erreur).
+    // Edge case : si le store est déjà chargé (navigation retour), on marque
+    // immédiatement hasLoaded si des entités ou une erreur sont présentes.
+    let wasLoading = false;
+    effect(() => {
+      const loading = this.agencyStore.loading();
+      const hasEntities = this.agencyStore.entities().length > 0;
+      const hasError = this.agencyStore.error() !== null;
+
+      if (loading) {
+        wasLoading = true;
+      } else if (!this.hasLoaded()) {
+        // Transition loading→false OU store déjà peuplé (cache hit)
+        if (wasLoading || hasEntities || hasError) {
+          this.hasLoaded.set(true);
+        }
+      }
+    });
+
     effect(() => {
       const user = this.authStore.user();
       if (!user) return;
@@ -559,6 +604,7 @@ export class EquipePageComponent {
         this.agencyStore.reset();
         this.loadedTeamScope.set(null);
         this.loadedForUserId.set(null);
+        this.hasLoaded.set(false);
       }
 
       const resolvedScope = this.resolvedTeamScope();
@@ -686,8 +732,14 @@ export class EquipePageComponent {
     });
   }
 
-  updateSearch(event: Event): void {
-    const target = event.target;
+  /** Relance le chargement après une erreur. */
+  retryLoad(): void {
+    this.hasLoaded.set(false);
+    const scope = this.resolvedTeamScope() ?? 'AGENCE';
+    this.agencyStore.load({ scope });
+  }
+
+  updateSearch(event: Event): void {    const target = event.target;
 
     if (target instanceof HTMLInputElement) {
       this.searchValue.set(target.value);

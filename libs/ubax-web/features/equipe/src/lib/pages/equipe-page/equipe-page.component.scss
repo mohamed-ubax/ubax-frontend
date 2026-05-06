@@ -2258,3 +2258,58 @@
     justify-content: center;
   }
 }
+
+// ── ViewState : état error ──────────────────────────────────────────────────
+
+.agency-members-page__table-card--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agency-members-page__error-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.agency-members-page__error-icon {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.agency-members-page__error-title {
+  margin: 0;
+  color: var(--ubax-text-primary);
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.agency-members-page__error-hint {
+  margin: 0;
+  color: #4b5563;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.agency-members-page__action-button--retry {
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+// ── ViewState : toolbar skeleton (masquée pendant loading) ─────────────────
+
+.agency-members-page__toolbar--skeleton {
+  display: flex;
+  gap: 24px;
+  pointer-events: none;
+  opacity: 0;
+}

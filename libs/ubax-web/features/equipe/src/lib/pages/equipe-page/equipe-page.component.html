@@ -6,6 +6,8 @@
       class="agency-members-page__toolbar"
       aria-label="Actions de la liste des membres"
     >
+      <!-- Toolbar masquée pendant le chargement initial pour éviter tout flicker -->
+      @if (viewState() !== 'loading') {
       <label
         class="agency-members-page__pill agency-members-page__pill--search"
         aria-label="Rechercher un membre"
@@ -128,9 +130,82 @@
           <span>Ajouter un membre</span>
         </button>
       }
+      } <!-- end @if viewState !== loading -->
     </div>
   </header>
 
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAT LOADING — skeleton pleine page, aucun contenu métier visible
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'loading') {
+    <section
+      class="agency-members-page__content"
+      aria-label="Chargement en cours"
+      aria-busy="true"
+    >
+      <ubax-equipe-skeleton-promo />
+      <ubax-equipe-skeleton-table [rowCount]="6" />
+    </section>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAT ERROR — message d'erreur centré, layout identique au skeleton
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'error') {
+    <section class="agency-members-page__content" role="alert">
+      <aside class="agency-members-page__promo-card">
+        <div class="agency-members-page__promo-backdrop" aria-hidden="true">
+          <img [src]="promoBackdropSrc" alt="" />
+        </div>
+        <div class="agency-members-page__promo-overlay" aria-hidden="true"></div>
+        <div class="agency-members-page__promo-body">
+          <h2 class="agency-members-page__promo-title">
+            Centralisez et contrôlez votre personnel
+          </h2>
+          <img
+            class="agency-members-page__promo-image"
+            [src]="promoImageSrc"
+            alt=""
+          />
+        </div>
+      </aside>
+
+      <div class="agency-members-page__table-stage">
+        <section class="agency-members-page__table-card agency-members-page__table-card--error">
+          <div class="agency-members-page__error-view" role="status">
+            <svg
+              class="agency-members-page__error-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" stroke="#e7000b" stroke-width="1.5" />
+              <path d="M12 7v5M12 16h.01" stroke="#e7000b" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+            <p class="agency-members-page__error-title">
+              Impossible de charger les membres
+            </p>
+            <p class="agency-members-page__error-hint">
+              Une erreur est survenue. Veuillez réessayer.
+            </p>
+            <button
+              type="button"
+              class="agency-members-page__action-button agency-members-page__action-button--retry"
+              (click)="retryLoad()"
+            >
+              Réessayer
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTATS SUCCESS + EMPTY — même layout, seul le contenu de la table diffère
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'success' || viewState() === 'empty') {
   <section class="agency-members-page__content">
     <aside class="agency-members-page__promo-card">
       <div class="agency-members-page__promo-backdrop" aria-hidden="true">
@@ -251,6 +326,7 @@
       />
     </footer>
   </section>
+  } <!-- end @if viewState === success || empty -->
 </div>
 
 <!-- ── Auto-assignation drawer (PARTNER_ADMIN) ────────────────────────────── -->
