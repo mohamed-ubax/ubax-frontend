@@ -11,6 +11,7 @@ import {
   readUserIdCandidatesFromAuthToken,
   readStoredAuthToken,
   readStoredRefreshToken,
+  readKeycloakIdCandidatesFromAuthToken,
   redirectBrowserToPortalLogin,
   resolveUbaxWebRedirectTarget,
 } from './auth-session';
@@ -72,6 +73,7 @@ describe('auth-session helpers', () => {
       email: 'jane.doe@ubax.com',
       given_name: 'Jane',
       family_name: 'Doe',
+      picture: 'https://cdn.ubax.test/jane.webp',
       roles: ['UBAX_ADMIN'],
     });
 
@@ -80,7 +82,7 @@ describe('auth-session helpers', () => {
       nom: 'Doe',
       prenom: 'Jane',
       email: 'jane.doe@ubax.com',
-      avatar: undefined,
+      avatar: 'https://cdn.ubax.test/jane.webp',
       mainRole: UbaxRole.ADMIN,
       subRole: null,
       scope: null,
@@ -123,6 +125,7 @@ describe('auth-session helpers', () => {
       'user-42',
       'kc-123',
     ]);
+    expect(readKeycloakIdCandidatesFromAuthToken(token)).toEqual(['kc-123']);
     expect(deriveUserFromAuthToken(token)?.id).toBe('user-42');
   });
 

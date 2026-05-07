@@ -84,12 +84,9 @@ export class TopbarComponent implements AfterViewInit {
   protected readonly avatarSrc = computed(() => {
     const user = this.authStore.user();
     const avatar = user?.avatar ?? null;
-    console.log('[Topbar] avatarSrc computed - User:', user);
-    console.log('[Topbar] avatarSrc computed - Avatar:', avatar);
-    console.log('[Topbar] avatarSrc computed - Full user object:', JSON.stringify(user, null, 2));
     return avatar;
   });
-  
+
   protected readonly avatarLabel = computed(() => {
     const user = this.authStore.user();
     const initials = `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`;
@@ -103,14 +100,14 @@ export class TopbarComponent implements AfterViewInit {
     return ROLE_BADGE_CONFIG[user.mainRole]?.label ?? user.mainRole;
   });
 
-  protected readonly visibleItems = computed(() => 
-    topbarNavItemsForUser(this.authStore.user())
+  protected readonly visibleItems = computed(() =>
+    topbarNavItemsForUser(this.authStore.user()),
   );
 
-  protected readonly logoSrc = computed(() => 
+  protected readonly logoSrc = computed(() =>
     this.authStore.scope() === 'HOTEL'
       ? 'header/header-hotel-logo.webp'
-      : 'header/header-logo.webp'
+      : 'header/header-logo.webp',
   );
 
   ngAfterViewInit(): void {

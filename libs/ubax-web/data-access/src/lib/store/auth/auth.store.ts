@@ -13,11 +13,13 @@ import { EMPTY, of, pipe, switchMap, tap } from 'rxjs';
 import {
   AuthService,
   DEFAULT_UBAX_WEB_HOME_PATH,
+  type ResolvedUserProfile,
   UbaxRole,
   UbaxScope,
   UbaxSubRole,
   clearStoredAuthSession,
   deriveUserFromAuthToken,
+  readKeycloakIdCandidatesFromAuthToken,
   persistAuthToken,
   readUserIdCandidatesFromAuthToken,
   readStoredRefreshToken,
@@ -29,6 +31,18 @@ import {
   pickPrimarySubRole,
   resolveWebHomePath,
 } from '../../models/role-access.model';
+
+function mergeResolvedProfile(
+  currentUser: User,
+  profile: ResolvedUserProfile,
+): User {
+  return {
+    ...currentUser,
+    id: profile.userId ?? currentUser.id,
+    avatar: profile.avatarUrl ?? currentUser.avatar,
+    scope: profile.scope ?? currentUser.scope,
+  };
+}
 
 const initialToken = readStoredAuthToken();
 
@@ -211,7 +225,7 @@ export const AuthStore = signalStore(
     (store, authSvc = inject(AuthService), router = inject(Router)) => ({
       loadMe: rxMethod<void>(
         pipe(
-          tap(() => {
+          switchMap(() => {
             patchState(store, { loading: true, error: null });
 
             const derivedUser = deriveUserFromAuthToken(store.token());
@@ -219,17 +233,51 @@ export const AuthStore = signalStore(
             if (derivedUser) {
               patchState(store, {
                 user: derivedUser,
-                loading: false,
                 error: null,
               });
 
-              if (needsSubRoles(derivedUser.mainRole)) {
-                store.loadSubRoles();
-              }
+              const keycloakId =
+                readKeycloakIdCandidatesFromAuthToken(store.token())[0] ?? null;
 
-              maybeRedirectToResolvedHome(router, derivedUser);
+              return (
+                keycloakId
+                  ? authSvc.getMyProfile(keycloakId)
+                  : of({ userId: null, scope: null, avatarUrl: null })
+              ).pipe(
+                tapResponse({
+                  next: (profile) => {
+                    const latestUser = store.user() ?? derivedUser;
+                    const hydratedUser = mergeResolvedProfile(
+                      latestUser,
+                      profile,
+                    );
 
-              return;
+                    patchState(store, {
+                      user: hydratedUser,
+                      loading: false,
+                      error: null,
+                    });
+
+                    if (needsSubRoles(hydratedUser.mainRole)) {
+                      store.loadSubRoles();
+                    }
+
+                    maybeRedirectToResolvedHome(router, hydratedUser);
+                  },
+                  error: () => {
+                    patchState(store, {
+                      loading: false,
+                      error: null,
+                    });
+
+                    if (needsSubRoles(derivedUser.mainRole)) {
+                      store.loadSubRoles();
+                    }
+
+                    maybeRedirectToResolvedHome(router, derivedUser);
+                  },
+                }),
+              );
             }
 
             clearStoredAuthSession();
@@ -239,11 +287,12 @@ export const AuthStore = signalStore(
               loading: false,
               error: 'Session expirée',
             });
-            if (redirectBrowserToPortalLogin()) return;
+            if (redirectBrowserToPortalLogin()) return EMPTY;
 
             router.navigate(['/connexion'], {
               queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
             });
+            return EMPTY;
           }),
         ),
       ),

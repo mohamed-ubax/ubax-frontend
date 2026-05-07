@@ -158,7 +158,53 @@ describe('AuthService', () => {
     );
   });
 
-  it('getMySubRoles bascule sur hotel si la liste agence ne contient pas le user', async () => {
+  it('getMyProfile hydrate scope, userId et avatar depuis le profil backend', async () => {
+    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+      of({
+        body: {
+          data: {
+            userId: 'backend-42',
+            partnerType: 'HOTEL',
+            avatarUrl: 'https://cdn.ubax.test/member.webp',
+          },
+        },
+      }) as any,
+    );
+
+    const result = await firstValueFrom(service.getMyProfile(['kc-123']));
+
+    expect(result).toEqual({
+      userId: 'backend-42',
+      scope: 'HOTEL',
+      avatarUrl: 'https://cdn.ubax.test/member.webp',
+    });
+    expect(apiTypes.getByKeycloakId).toHaveBeenCalledWith(
+      expect.anything(),
+      'https://test.local',
+      { keycloakId: 'kc-123' },
+    );
+  });
+
+  it('getMyProfile retourne un profil vide si aucun keycloakId ne répond', async () => {
+    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+      throwError(() => new Error('not-found')) as any,
+    );
+
+    const result = await firstValueFrom(service.getMyProfile(['kc-missing']));
+
+    expect(result).toEqual({
+      userId: null,
+      scope: null,
+      avatarUrl: null,
+    });
+    expect(apiTypes.getByKeycloakId).toHaveBeenCalledWith(
+      expect.anything(),
+      'https://test.local',
+      { keycloakId: 'kc-missing' },
+    );
+  });
+
+  it('getMySubRoles utilise le fallback agence en absence de preferredScope', async () => {
     const hotelMemberList = [
       { keycloakId: 'kc-123', userId: 'hotel-7', email: 'a@ubax.com' },
     ];
@@ -174,7 +220,7 @@ describe('AuthService', () => {
     );
 
     expect(result).toEqual({
-      scope: 'HOTEL',
+      scope: 'AGENCE',
       subRoles: ['GERANT_HOTEL'],
     });
   });
