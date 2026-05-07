@@ -4817,6 +4817,51 @@
         ]
       }
     },
+    "/v1/storage/presign/read": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Générer une URL présignée GET (lecture document privé)",
+        "description": "🔑 **Authentifié** – Génère une URL GET temporaire pour accéder à un fichier dans un bucket privé.\n\nPasser le `fileUrl` tel qu'il est stocké en base de données. La durée de validité est définie automatiquement par le backend selon la sensibilité du bucket :\n\n| Bucket | TTL |\n|---|---|\n| `tenant-documents` | 180 s |\n| `property-documents` | 300 s |\n| `documents-generated` | 300 s |\n| `partner-documents` | 300 s |\n| `ticket-attachments` | 600 s |\n\n**Buckets publics** (`users-avatars`, `agencies-logos`, `properties-media`) : retourne une erreur — l'URL d'origine est déjà accessible directement.",
+        "operationId": "generateReadUrl",
+        "parameters": [
+          {
+            "name": "fileUrl",
+            "in": "query",
+            "description": "URL complète du fichier (telle que retournée lors de l'upload)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "http://localhost:9000/property-documents/propertyId/doc-uuid.pdf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "URL de lecture générée – `data` contient `readUrl`, `expiresInSeconds`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedReadUrlResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "fileUrl invalide ou bucket public"
+          },
+          "401": {
+            "description": "Token absent ou invalide"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/storage/presign/property-media": {
       "get": {
         "tags": [
@@ -6849,6 +6894,9 @@
           "lastName": {
             "type": "string"
           },
+          "avatarUrl": {
+            "type": "string"
+          },
           "roles": {
             "type": "array",
             "items": {
@@ -8825,6 +8873,24 @@
             "type": "string"
           },
           "publicUrl": {
+            "type": "string"
+          },
+          "objectName": {
+            "type": "string"
+          },
+          "bucket": {
+            "type": "string"
+          },
+          "expiresInSeconds": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PresignedReadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "readUrl": {
             "type": "string"
           },
           "objectName": {

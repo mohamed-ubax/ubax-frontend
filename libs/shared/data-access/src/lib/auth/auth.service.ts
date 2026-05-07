@@ -8,6 +8,7 @@ import {
   type LoginRequest,
   type LoginResponse,
   type LogoutRequest,
+  type UserResponse,
 } from '@ubax-workspace/shared-api-types';
 import {
   catchError,
@@ -30,6 +31,12 @@ export type { LoginRequest, LoginResponse };
 export type MySubRolesResponse = {
   scope: UbaxScope;
   subRoles: string[];
+};
+
+export type ResolvedUserProfile = {
+  userId: string | null;
+  scope: UbaxScope | null;
+  avatarUrl: string | null;
 };
 
 function extractStringArray(data: unknown): string[] {
@@ -111,6 +118,57 @@ function readScopeFromUserProfile(raw: unknown): UbaxScope | null {
   return null;
 }
 
+function readAvatarFromUserProfile(raw: unknown): string | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+
+  const payload = raw as Record<string, unknown>;
+  const data =
+    payload['data'] && typeof payload['data'] === 'object'
+      ? (payload['data'] as Record<string, unknown>)
+      : payload;
+
+  const candidates = [
+    data['avatarUrl'],
+    data['avatar_url'],
+    data['avatar'],
+    data['picture'],
+    data['profilePicture'],
+    data['profile_picture'],
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim().length > 0) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function mapResolvedUserProfile(raw: unknown): ResolvedUserProfile {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      userId: null,
+      scope: null,
+      avatarUrl: null,
+    };
+  }
+
+  const payload = raw as Record<string, unknown>;
+  const data =
+    payload['data'] && typeof payload['data'] === 'object'
+      ? (payload['data'] as Record<string, unknown>)
+      : payload;
+
+  return {
+    userId: typeof data['userId'] === 'string' ? data['userId'] : null,
+    scope: readScopeFromUserProfile(raw),
+    avatarUrl: readAvatarFromUserProfile(raw),
+  };
+}
+
 /**
  * Extrait la liste des membres d'une réponse d'équipe (gère les formats
  * { data: [...] }, { data: { content: [...] } }, ou directement un tableau).
@@ -145,33 +203,44 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
 
-  private resolvePreferredPartnerScope(
-    keycloakCandidates: readonly string[],
-  ): Observable<UbaxScope | null> {
-    const root = this.apiConfig.rootUrl;
-
-    const tryNext = (
-      remainingIds: readonly string[],
-    ): Observable<UbaxScope | null> => {
-      const [currentId, ...nextIds] = remainingIds;
-
-      if (!currentId) {
-        return of(null);
-      }
-
-      return getByKeycloakId(this.http, root, { keycloakId: currentId }).pipe(
-        map((response) => readScopeFromUserProfile(response.body)),
-        catchError(() => (nextIds.length ? tryNext(nextIds) : of(null))),
-      );
-    };
-
-    return tryNext(keycloakCandidates);
-  }
-
   login(payload: LoginRequest): Observable<LoginResponse> {
     return loginFn(this.http, this.apiConfig.rootUrl, { body: payload }).pipe(
       map((response) => response.body as LoginResponse),
     );
+  }
+
+  getMyProfile(
+    keycloakIds: readonly string[] | string,
+  ): Observable<ResolvedUserProfile> {
+    const root = this.apiConfig.rootUrl;
+    const normalizedKeycloakIds = normalizeUserIds(keycloakIds);
+
+    const tryNext = (
+      remainingKeycloakIds: readonly string[],
+    ): Observable<ResolvedUserProfile> => {
+      const [currentKeycloakId, ...nextKeycloakIds] = remainingKeycloakIds;
+
+      if (!currentKeycloakId) {
+        return of({ userId: null, scope: null, avatarUrl: null });
+      }
+
+      return getByKeycloakId(this.http, root, {
+        keycloakId: currentKeycloakId,
+      }).pipe(
+        map((response) =>
+          mapResolvedUserProfile(
+            response.body as UserResponse | { data?: UserResponse } | null,
+          ),
+        ),
+        catchError(() =>
+          nextKeycloakIds.length
+            ? tryNext(nextKeycloakIds)
+            : of({ userId: null, scope: null, avatarUrl: null }),
+        ),
+      );
+    };
+
+    return tryNext(normalizedKeycloakIds);
   }
 
   /**
@@ -268,9 +337,7 @@ export class AuthService {
       return runTeamResolution(preferredScope);
     }
 
-    return this.resolvePreferredPartnerScope(normalizedUserIds).pipe(
-      switchMap((resolvedScope) => runTeamResolution(resolvedScope)),
-    );
+    return runTeamResolution(null);
   }
 
   /**

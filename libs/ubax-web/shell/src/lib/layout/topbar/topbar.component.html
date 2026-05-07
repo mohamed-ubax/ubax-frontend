@@ -114,10 +114,15 @@
             <div class="user-menu__divider"></div>
 
             <div class="user-menu__group">
-              <button class="user-menu__item" type="button" role="menuitem">
+              <a
+                routerLink="/profil"
+                class="user-menu__item"
+                role="menuitem"
+                (click)="closeUserMenu()"
+              >
                 <i class="pi pi-user" aria-hidden="true"></i>
                 Mon profil
-              </button>
+              </a>
               <button class="user-menu__item" type="button" role="menuitem">
                 <i class="pi pi-cog" aria-hidden="true"></i>
                 Paramètres

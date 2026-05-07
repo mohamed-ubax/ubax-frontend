@@ -77,7 +77,7 @@
 }
 
 .recovery-card--email .recovery-form {
-  gap: 2.1rem;
+  gap: 1.5rem;
 }
 
 .recovery-card--otp .recovery-form {
@@ -442,6 +442,319 @@
   .recovery-btn.p-button:disabled {
     opacity: 0.58;
   }
+}
+
+// ─── Inline field hints & errors ─────────────────────────────────────────────
+
+.recovery-field-hint {
+  margin: 0.45rem 0 0 0.25rem;
+  color: #515151;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.recovery-field-error {
+  margin: 0;
+  color: #c0392b;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.recovery-server-error {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(170, 36, 25, 0.16);
+  border-radius: 0.875rem;
+  background: #fff7f5;
+  color: #4b0b08;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.recovery-resend-success {
+  margin: 0;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(39, 174, 96, 0.2);
+  border-radius: 0.875rem;
+  background: #f0faf4;
+  color: #1a6b3a;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+}
+
+// ─── Sent / success confirmation block ───────────────────────────────────────
+
+.recovery-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  animation: recovery-card-in 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.recovery-sent__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.recovery-sent__text {
+  margin: 0;
+  color: #1a3047;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.recovery-sent__hint {
+  margin: 0;
+  color: #787878;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 300;
+}
+
+// ─── Sent state — email confirmation card ─────────────────────────────────────
+
+.recovery-card--sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding-top: 2rem;
+  padding-bottom: 2.25rem;
+}
+
+.recovery-envelope {
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 1.5rem;
+  animation: recovery-envelope-in 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+@keyframes recovery-envelope-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.82); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+.recovery-sent-body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.recovery-sent-instructions {
+  margin: 0;
+  color: #515151;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 300;
+  line-height: 1.65;
+  text-align: center;
+}
+
+// ─── Resend row ───────────────────────────────────────────────────────────────
+
+.recovery-resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.875rem;
+}
+
+.recovery-resend-label {
+  color: #787878;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+// ─── Cooldown ring ────────────────────────────────────────────────────────────
+
+.recovery-cooldown {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recovery-cooldown__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.recovery-cooldown__track {
+  fill: none;
+  stroke: rgba(26, 48, 71, 0.1);
+  stroke-width: 3;
+}
+
+.recovery-cooldown__progress {
+  fill: none;
+  stroke: #1a3047;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 94.25;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.recovery-cooldown__count {
+  position: relative;
+  z-index: 1;
+  color: #1a3047;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+// ─── Ghost resend button ──────────────────────────────────────────────────────
+
+:host ::ng-deep {
+  .recovery-btn--ghost.p-button {
+    height: 2.5rem;
+    padding: 0 1.25rem;
+    border-radius: 9999px;
+    border: 1.5px solid rgba(26, 48, 71, 0.22);
+    background: transparent;
+    color: #1a3047;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    box-shadow: none;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background 160ms ease;
+
+    &:enabled:hover {
+      border-color: #f8961e;
+      color: #f8961e;
+      background: rgba(248, 150, 30, 0.05);
+    }
+
+    &:enabled:active {
+      background: rgba(248, 150, 30, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+// ─── Edit email link ──────────────────────────────────────────────────────────
+
+.recovery-edit-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #787878;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 160ms ease;
+
+  &:hover {
+    color: #1a3047;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(248, 150, 30, 0.5);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+}
+
+// ─── Back / navigation button ─────────────────────────────────────────────────
+
+.recovery-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  height: 3.6946rem;
+  padding: 0 1.5rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(26, 48, 71, 0.18);
+  background: transparent;
+  color: #1a3047;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+
+  &:hover {
+    border-color: #f8961e;
+    color: #f8961e;
+    background: rgba(248, 150, 30, 0.05);
+    box-shadow: 0 0 0 3px rgba(248, 150, 30, 0.1);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: #f8961e;
+    box-shadow: 0 0 0 3px rgba(248, 150, 30, 0.22);
+  }
+
+  &:active {
+    background: rgba(248, 150, 30, 0.1);
+  }
+}
+
+.recovery-back-btn__arrow {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  transition: transform 160ms ease;
+}
+
+.recovery-back-btn:hover .recovery-back-btn__arrow {
+  transform: translateX(-3px);
 }
 
 @media (max-width: 640px) {

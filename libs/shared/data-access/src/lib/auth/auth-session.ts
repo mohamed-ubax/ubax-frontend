@@ -299,6 +299,13 @@ function extractUserIdCandidates(payload: JwtPayload): string[] {
   ]);
 }
 
+function extractKeycloakIdCandidates(payload: JwtPayload): string[] {
+  return uniqueNonEmptyStrings([
+    readString(payload, ['keycloakId']),
+    readString(payload, ['sub']),
+  ]);
+}
+
 export function readUserIdCandidatesFromAuthToken(
   token: string | null | undefined,
 ): string[] {
@@ -313,6 +320,22 @@ export function readUserIdCandidatesFromAuthToken(
   }
 
   return extractUserIdCandidates(payload);
+}
+
+export function readKeycloakIdCandidatesFromAuthToken(
+  token: string | null | undefined,
+): string[] {
+  if (!token) {
+    return [];
+  }
+
+  const payload = decodeJwtPayload(token);
+
+  if (!payload) {
+    return [];
+  }
+
+  return extractKeycloakIdCandidates(payload);
 }
 
 export function deriveUserFromAuthToken(

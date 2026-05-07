@@ -69,6 +69,28 @@ describe('extractAvatarUrlsFromTeamResponse', () => {
     expect(result['user-1']).toBe('https://cdn.example.com/camel.jpg');
   });
 
+  it('should extract avatar values from alternate backend fields', () => {
+    const response = {
+      data: [
+        {
+          userId: 'user-1',
+          picture: 'https://cdn.example.com/picture.jpg',
+        },
+        {
+          userId: 'user-2',
+          avatar: 'https://cdn.example.com/avatar.jpg',
+        },
+      ],
+    };
+
+    const result = extractAvatarUrlsFromTeamResponse(response);
+
+    expect(result).toEqual({
+      'user-1': 'https://cdn.example.com/picture.jpg',
+      'user-2': 'https://cdn.example.com/avatar.jpg',
+    });
+  });
+
   it('should ignore members without userId nor keycloakId', () => {
     const response = {
       content: [

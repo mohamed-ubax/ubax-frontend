@@ -53,7 +53,10 @@
         </button>
 
         @if (isRoleMenuOpen()) {
-          <div class="agency-members-page__filter-menu">
+          <div
+            class="agency-members-page__filter-menu"
+            [class.is-closing]="isRoleMenuClosing()"
+          >
             <button
               type="button"
               class="agency-members-page__filter-option"

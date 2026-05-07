@@ -103,6 +103,36 @@ export class AdhesionFormPageComponent {
     { initialValue: [] },
   );
 
+  protected readonly selectedPays = signal('');
+
+  protected readonly filteredVillesList = computed(() => {
+    const cities = this.villesList();
+    const selectedCountryValue = this.selectedPays();
+
+    if (!selectedCountryValue) {
+      return cities;
+    }
+
+    const country = this.paysList().find(
+      (item) => (item.value ?? '') === selectedCountryValue,
+    );
+    const countryDescription = country?.description ?? '';
+
+    if (!countryDescription) {
+      return [];
+    }
+
+    const normalizedCountryDescription =
+      this._normalizeText(countryDescription);
+
+    return cities.filter((city) => {
+      const cityDescription = city.description ?? '';
+      return this._normalizeText(cityDescription).includes(
+        normalizedCountryDescription,
+      );
+    });
+  });
+
   // ── Reactive form ─────────────────────────────────────────────────────────
   protected readonly form = this._fb.group({
     typePartenaire: ['', Validators.required],
@@ -131,6 +161,8 @@ export class AdhesionFormPageComponent {
   });
 
   constructor() {
+    this.selectedPays.set(this.form.get('pays')?.value ?? '');
+
     this.form
       .get('typePartenaire')
       ?.valueChanges.pipe(takeUntilDestroyed(this._destroyRef))
@@ -138,6 +170,26 @@ export class AdhesionFormPageComponent {
         this.partnerType.set(type ?? '');
         this._updateLocationValidators(type ?? '');
         if (type !== 'AGENCE_IMMOBILIERE') this.contratBailFile.set(null);
+      });
+
+    this.form
+      .get('pays')
+      ?.valueChanges.pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((paysValue) => {
+        this.selectedPays.set(paysValue ?? '');
+
+        const selectedCityValue = this.form.get('ville')?.value;
+        if (!selectedCityValue) {
+          return;
+        }
+
+        const isSelectedCityStillAvailable = this.filteredVillesList().some(
+          (city) => city.value === selectedCityValue,
+        );
+
+        if (!isSelectedCityStillAvailable) {
+          this.form.get('ville')?.setValue('', { emitEvent: false });
+        }
       });
 
     afterNextRender(() => {
@@ -474,5 +526,13 @@ export class AdhesionFormPageComponent {
         return 'Le serveur est inaccessible. Réessayez dans un instant.';
     }
     return 'Une erreur est survenue. Réessayez dans un instant.';
+  }
+
+  private _normalizeText(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
   }
 }

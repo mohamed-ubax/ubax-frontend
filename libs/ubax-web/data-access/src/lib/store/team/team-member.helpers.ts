@@ -151,10 +151,20 @@ export const extractAvatarUrlsFromTeamResponse = (
     if (member && typeof member === 'object') {
       const memberObj = member as Record<string, unknown>;
       const memberId = resolveTeamMemberId(member as AdminUserResponse);
+      const avatarCandidates = [
+        memberObj['avatarUrl'],
+        memberObj['avatar_url'],
+        memberObj['avatar'],
+        memberObj['picture'],
+        memberObj['profilePicture'],
+        memberObj['profile_picture'],
+      ];
+
       const avatarUrl =
-        (memberObj['avatarUrl'] as string | null | undefined) ??
-        (memberObj['avatar_url'] as string | null | undefined) ??
-        null;
+        avatarCandidates.find(
+          (candidate): candidate is string =>
+            typeof candidate === 'string' && candidate.trim().length > 0,
+        ) ?? null;
 
       if (memberId && avatarUrl) {
         avatarMap[memberId] = avatarUrl;

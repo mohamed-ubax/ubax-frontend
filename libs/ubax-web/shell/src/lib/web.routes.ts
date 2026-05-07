@@ -103,6 +103,13 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: ROUTE_ROLE_ACCESS.hotel,
       },
+
+      // ── Profil ──────────────────────────────────────────────────────────────
+      {
+        path: 'profil',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-profil').then((m) => m.profilRoutes),
+      },
     ],
   },
 

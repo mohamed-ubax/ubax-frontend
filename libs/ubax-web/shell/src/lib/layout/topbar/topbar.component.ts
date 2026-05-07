@@ -7,6 +7,7 @@ import {
   HostListener,
   NgZone,
   PLATFORM_ID,
+  computed,
   inject,
   signal,
   viewChild,
@@ -79,33 +80,35 @@ export class TopbarComponent implements AfterViewInit {
     { initialValue: normalizeUrl(this.router.url) },
   );
 
-  protected roleLabel(): string {
+  // Computed signals pour garantir la réactivité
+  protected readonly avatarSrc = computed(() => {
+    const user = this.authStore.user();
+    const avatar = user?.avatar ?? null;
+    return avatar;
+  });
+
+  protected readonly avatarLabel = computed(() => {
+    const user = this.authStore.user();
+    const initials = `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`;
+    return initials || '?';
+  });
+
+  protected readonly roleLabel = computed(() => {
     const user = this.authStore.user();
     if (!user) return '';
     if (user.subRole) return SUB_ROLE_LABELS[user.subRole] ?? user.subRole;
     return ROLE_BADGE_CONFIG[user.mainRole]?.label ?? user.mainRole;
-  }
+  });
 
-  protected avatarSrc(): string | null {
-    return this.authStore.user()?.avatar ?? null;
-  }
+  protected readonly visibleItems = computed(() =>
+    topbarNavItemsForUser(this.authStore.user()),
+  );
 
-  protected avatarLabel(): string {
-    const user = this.authStore.user();
-    const initials = `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`;
-
-    return initials || '?';
-  }
-
-  protected visibleItems(): readonly NavItemConfig[] {
-    return topbarNavItemsForUser(this.authStore.user());
-  }
-
-  protected logoSrc(): string {
-    return this.authStore.scope() === 'HOTEL'
+  protected readonly logoSrc = computed(() =>
+    this.authStore.scope() === 'HOTEL'
       ? 'header/header-hotel-logo.webp'
-      : 'header/header-logo.webp';
-  }
+      : 'header/header-logo.webp',
+  );
 
   ngAfterViewInit(): void {
     this.observeCompactNavState();

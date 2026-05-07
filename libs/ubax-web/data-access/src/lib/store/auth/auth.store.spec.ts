@@ -76,6 +76,7 @@ describe('AuthStore', () => {
   let store: AuthStoreContract;
   let authService: {
     getMySubRoles: ReturnType<typeof vi.fn>;
+    getMyProfile: ReturnType<typeof vi.fn>;
     logout: ReturnType<typeof vi.fn>;
   };
   let router: {
@@ -102,6 +103,9 @@ describe('AuthStore', () => {
 
     authService = {
       getMySubRoles: vi.fn(),
+      getMyProfile: vi
+        .fn()
+        .mockReturnValue(of({ userId: null, scope: null, avatarUrl: null })),
       logout: vi.fn(),
     };
     router = {
@@ -154,6 +158,7 @@ describe('AuthStore', () => {
   it('rehydrates the current user from the JWT and loads sub-roles when required', () => {
     const token = createJwt({
       sub: 'partner-1',
+      userId: 'partner-db-1',
       email: 'awa@ubax.com',
       given_name: 'Awa',
       family_name: 'Diallo',
@@ -166,22 +171,30 @@ describe('AuthStore', () => {
         subRoles: [UbaxSubRole.COMMERCIAL],
       }),
     );
+    authService.getMyProfile.mockReturnValue(
+      of({
+        userId: 'partner-db-1',
+        scope: 'AGENCE',
+        avatarUrl: 'https://cdn.ubax.test/awa.webp',
+      }),
+    );
 
     store.setToken(token);
     store.loadMe();
 
+    expect(authService.getMyProfile).toHaveBeenCalledWith('partner-1');
     expect(authService.getMySubRoles).toHaveBeenCalledWith(
       UbaxRole.PARTNER,
-      ['partner-1'],
+      ['partner-db-1', 'partner-1'],
       'awa@ubax.com',
-      null,
+      'AGENCE',
     );
     expect(store.user()).toEqual({
-      id: 'partner-1',
+      id: 'partner-db-1',
       nom: 'Diallo',
       prenom: 'Awa',
       email: 'awa@ubax.com',
-      avatar: undefined,
+      avatar: 'https://cdn.ubax.test/awa.webp',
       mainRole: UbaxRole.PARTNER,
       subRole: UbaxSubRole.COMMERCIAL,
       scope: 'AGENCE',
@@ -258,6 +271,13 @@ describe('AuthStore', () => {
     authService.getMySubRoles.mockReturnValue(
       throwError(() => new Error('sub-roles unavailable')),
     );
+    authService.getMyProfile.mockReturnValue(
+      of({
+        userId: 'partner-2',
+        scope: 'AGENCE',
+        avatarUrl: 'https://cdn.ubax.test/moussa.webp',
+      }),
+    );
 
     store.setToken(token);
     store.loadMe();
@@ -267,10 +287,45 @@ describe('AuthStore', () => {
       nom: 'Ndiaye',
       prenom: 'Moussa',
       email: 'agency@ubax.com',
-      avatar: undefined,
+      avatar: 'https://cdn.ubax.test/moussa.webp',
       mainRole: UbaxRole.PARTNER,
       subRole: UbaxSubRole.DIRECTEUR_AGENCE,
       scope: 'AGENCE',
+    });
+  });
+
+  it('keeps the JWT user when backend profile lookup fails', () => {
+    const token = createJwt({
+      sub: 'partner-no-profile',
+      userId: 'partner-db-fallback',
+      email: 'fallback@ubax.com',
+      given_name: 'Fallback',
+      family_name: 'User',
+      roles: ['UBAX_PARTNER'],
+    });
+
+    authService.getMyProfile.mockReturnValue(
+      throwError(() => new Error('profile unavailable')),
+    );
+    authService.getMySubRoles.mockReturnValue(
+      of({
+        scope: 'HOTEL',
+        subRoles: [UbaxSubRole.GERANT_HOTEL],
+      }),
+    );
+
+    store.setToken(token);
+    store.loadMe();
+
+    expect(store.user()).toEqual({
+      id: 'partner-db-fallback',
+      nom: 'User',
+      prenom: 'Fallback',
+      email: 'fallback@ubax.com',
+      avatar: undefined,
+      mainRole: UbaxRole.PARTNER,
+      subRole: UbaxSubRole.GERANT_HOTEL,
+      scope: 'HOTEL',
     });
   });
 
