@@ -28,6 +28,7 @@ import {
   NotificationHandler,
 } from '@ubax-workspace/shared-data-access';
 import { BiensListSkeletonComponent } from './biens-list-skeleton/biens-list-skeleton.component';
+import { BiensCardsSkeletonComponent } from './biens-cards-skeleton/biens-cards-skeleton.component';
 
 type BienViewMode = 'grid' | 'list';
 type FilterDropdownKey = 'type' | 'category' | 'status';
@@ -218,7 +219,7 @@ function asPropertyStatus(value: string): PropertyMineStatus | undefined {
 @Component({
   selector: 'ubax-biens-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent, BiensListSkeletonComponent],
+  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent, BiensListSkeletonComponent, BiensCardsSkeletonComponent],
   templateUrl: './biens-list-page.component.html',
   styleUrl: './biens-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -251,10 +252,18 @@ export class BiensListPageComponent {
   private readonly hasLoaded = signal(false);
   readonly isLeavingSkeleton = signal(false);
   readonly contentEntering = signal(false);
+  /**
+   * true pendant un rechargement (filtre, pagination) une fois le premier
+   * chargement terminé. Seule la zone cards est remplacée par un skeleton ;
+   * le header, les summary cards et la toolbar restent visibles.
+   */
+  readonly isReloading = signal(false);
 
   readonly viewState = computed<ViewState>(() =>
     deriveViewState(
-      this.store.loading(),
+      // Pendant un rechargement partiel, on ne veut pas basculer en 'loading'
+      // → on masque le loading au niveau viewState, isReloading gère l'UI
+      this.store.loading() && !this.isReloading(),
       this.store.error(),
       this.store.entities().length === 0,
       this.hasLoaded(),
@@ -442,7 +451,7 @@ export class BiensListPageComponent {
   });
 
   protected readonly showEmptyState = computed(
-    () => !this.isLoading() && !this.hasVisibleCards(),
+    () => !this.isLoading() && !this.isReloading() && !this.hasVisibleCards(),
   );
 
   protected readonly visibleGridCards = this.filteredGridCards;
@@ -484,11 +493,23 @@ export class BiensListPageComponent {
         if (!hadEntitiesWhenLoadingStarted) {
           hadEntitiesWhenLoadingStarted = hasEntities;
         }
-        // Navigation retour : données déjà là → afficher immédiatement
-        if (hasEntities && !this.hasLoaded()) {
+
+        if (this.hasLoaded()) {
+          // Rechargement partiel (filtre / pagination) : skeleton cards uniquement
+          this.isReloading.set(true);
+        } else if (hasEntities) {
+          // Navigation retour avec cache : afficher immédiatement
           this.hasLoaded.set(true);
           this.triggerContentEnter();
         }
+        return;
+      }
+
+      // loading vient de passer à false ─────────────────────────────────
+
+      if (this.isReloading()) {
+        // Fin d'un rechargement partiel : retirer le skeleton cards
+        this.isReloading.set(false);
         return;
       }
 
@@ -496,7 +517,7 @@ export class BiensListPageComponent {
 
       if (wasLoading) {
         if (!hadEntitiesWhenLoadingStarted) {
-          // Premier chargement réseau : fade-out skeleton → fade-in contenu
+          // Premier chargement réseau : fade-out skeleton pleine page → fade-in contenu
           this.isLeavingSkeleton.set(true);
           setTimeout(() => {
             this.hasLoaded.set(true);
@@ -583,6 +604,7 @@ export class BiensListPageComponent {
 
   retryLoad(): void {
     this.hasLoaded.set(false);
+    this.isReloading.set(false);
     this.contentEntering.set(false);
     this.store.load?.(toObservable(this.loadParams).pipe(takeUntilDestroyed()));
   }

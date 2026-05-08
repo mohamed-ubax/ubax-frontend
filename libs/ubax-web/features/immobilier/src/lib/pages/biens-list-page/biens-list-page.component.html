@@ -1,6 +1,6 @@
 <section class="biens-page">
   <header class="biens-page__header">
-    <!-- TOOLBAR : skeleton pills pendant loading -->
+    <!-- TOOLBAR : skeleton pills uniquement au premier chargement -->
     @if (viewState() !== 'loading' && !isLeavingSkeleton()) {
       <h1 class="biens-page__title"
           [class.biens-page__title--entering]="contentEntering()">Mes biens</h1>
@@ -40,7 +40,7 @@
   </header>
 
   <!-- ═══════════════════════════════════════════════════════════════════════
-       ÉTAT LOADING — skeleton pleine page, aucun contenu métier visible
+       ÉTAT LOADING — skeleton pleine page uniquement au premier chargement
   ════════════════════════════════════════════════════════════════════════ -->
   @if (viewState() === 'loading' || isLeavingSkeleton()) {
     <section
@@ -87,7 +87,8 @@
   }
 
   <!-- ═══════════════════════════════════════════════════════════════════════
-       ÉTATS SUCCESS + EMPTY — même layout, la page gère l'état empty
+       ÉTATS SUCCESS + EMPTY — le contenu reste visible,
+       seul le biens-panel montre un skeleton pendant un rechargement
   ════════════════════════════════════════════════════════════════════════ -->
   @if (viewState() === 'success' || viewState() === 'empty') {
     <section
@@ -444,7 +445,14 @@
           </div>
         </div>
 
-        @if (showEmptyState()) {
+        @if (isReloading()) {
+          <!-- Skeleton partiel : uniquement la zone cards pendant un rechargement -->
+          <ubax-biens-cards-skeleton
+            [viewMode]="viewMode()"
+            [count]="pageSize()"
+            aria-busy="true"
+          />
+        } @else if (showEmptyState()) {
           <section class="biens-empty-state" aria-live="polite">
             <div class="biens-empty-state__art" aria-hidden="true">
               <span
