@@ -6,9 +6,24 @@
       <a class="action-button action-button--primary" routerLink="ajouter">
         <span class="action-button__label">Ajouter un bien</span>
         <span class="action-button__icon-shell" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path
+              d="M12 7v10M7 12h10"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
           </svg>
         </span>
       </a>
@@ -16,11 +31,18 @@
   </header>
 
   <section class="summary-strip" aria-label="Résumé des biens">
-    @for (summary of summaryCards; track summary.label) {
+    @for (summary of summaryCards(); track summary.label) {
       <article class="summary-card">
         <div class="summary-card__media" aria-hidden="true">
-          <span class="summary-card__orb" [attr.data-orb]="summary.orbKey"></span>
-          <span class="summary-card__icon-wrap" [attr.data-icon]="summary.iconKey" [attr.aria-label]="summary.iconAlt"></span>
+          <span
+            class="summary-card__orb"
+            [attr.data-orb]="summary.orbKey"
+          ></span>
+          <span
+            class="summary-card__icon-wrap"
+            [attr.data-icon]="summary.iconKey"
+            [attr.aria-label]="summary.iconAlt"
+          ></span>
         </div>
 
         <div class="summary-card__content">
@@ -31,9 +53,27 @@
 
             @if (summary.trend; as trend) {
               <p class="summary-card__trend">
-                <svg class="summary-card__trend-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M2 11L6.5 6.5L9.5 9.5L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M10 4h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg
+                  class="summary-card__trend-icon"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 11L6.5 6.5L9.5 9.5L14 4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10 4h4v4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
                 <span>{{ trend }}</span>
               </p>
@@ -60,27 +100,42 @@
             (click)="$event.stopPropagation(); toggleDropdown('type')"
           >
             <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
-            <svg class="filter-pill__chevron" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z" fill="currentColor"/>
+            <svg
+              class="filter-pill__chevron"
+              viewBox="0 0 15 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                fill="currentColor"
+              />
             </svg>
           </button>
 
           @if (openDropdown() === 'type') {
             <div class="filter-menu" aria-label="Options type de bien">
-              @for (option of typeOptions; track option.value) {
+              @for (option of typeOptions(); track option.value) {
                 <button
                   class="filter-menu__option"
                   [class.filter-menu__option--active]="
                     selectedType() === option.value
                   "
                   type="button"
-                  (click)="$event.stopPropagation(); selectTypeOption(option.value)"
+                  (click)="
+                    $event.stopPropagation(); selectTypeOption(option.value)
+                  "
                 >
                   <span class="filter-menu__option-main">
                     <span
                       class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
-                      [class.filter-menu__tone--accent]="option.tone === 'accent'"
+                      [class.filter-menu__tone--neutral]="
+                        option.tone === 'neutral'
+                      "
+                      [class.filter-menu__tone--accent]="
+                        option.tone === 'accent'
+                      "
                     ></span>
                     <span>{{ option.label }}</span>
                   </span>
@@ -105,29 +160,48 @@
             [attr.aria-expanded]="openDropdown() === 'category'"
             (click)="$event.stopPropagation(); toggleDropdown('category')"
           >
-            <span class="filter-pill__field">{{ selectedCategoryLabel() }}</span>
-            <svg class="filter-pill__chevron" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z" fill="currentColor"/>
+            <span class="filter-pill__field">{{
+              selectedCategoryLabel()
+            }}</span>
+            <svg
+              class="filter-pill__chevron"
+              viewBox="0 0 15 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                fill="currentColor"
+              />
             </svg>
           </button>
 
           @if (openDropdown() === 'category') {
             <div class="filter-menu" aria-label="Options catégorie">
-              @for (option of categoryOptions; track option.value) {
+              @for (option of categoryOptions(); track option.value) {
                 <button
                   class="filter-menu__option"
                   [class.filter-menu__option--active]="
                     selectedCategory() === option.value
                   "
                   type="button"
-                  (click)="$event.stopPropagation(); selectCategoryOption(option.value)"
+                  (click)="
+                    $event.stopPropagation(); selectCategoryOption(option.value)
+                  "
                 >
                   <span class="filter-menu__option-main">
                     <span
                       class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
-                      [class.filter-menu__tone--success]="option.tone === 'success'"
-                      [class.filter-menu__tone--warning]="option.tone === 'warning'"
+                      [class.filter-menu__tone--neutral]="
+                        option.tone === 'neutral'
+                      "
+                      [class.filter-menu__tone--success]="
+                        option.tone === 'success'
+                      "
+                      [class.filter-menu__tone--warning]="
+                        option.tone === 'warning'
+                      "
                     ></span>
                     <span>{{ option.label }}</span>
                   </span>
@@ -153,29 +227,48 @@
             (click)="$event.stopPropagation(); toggleDropdown('status')"
           >
             <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
-            <svg class="filter-pill__chevron" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z" fill="currentColor"/>
+            <svg
+              class="filter-pill__chevron"
+              viewBox="0 0 15 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                fill="currentColor"
+              />
             </svg>
           </button>
 
           @if (openDropdown() === 'status') {
             <div class="filter-menu" aria-label="Options statut">
-              @for (option of statusOptions; track option.value) {
+              @for (option of statusOptions(); track option.value) {
                 <button
                   class="filter-menu__option"
                   [class.filter-menu__option--active]="
                     selectedStatus() === option.value
                   "
                   type="button"
-                  (click)="$event.stopPropagation(); selectStatusOption(option.value)"
+                  (click)="
+                    $event.stopPropagation(); selectStatusOption(option.value)
+                  "
                 >
                   <span class="filter-menu__option-main">
                     <span
                       class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
-                      [class.filter-menu__tone--success]="option.tone === 'success'"
-                      [class.filter-menu__tone--accent]="option.tone === 'accent'"
-                      [class.filter-menu__tone--warning]="option.tone === 'warning'"
+                      [class.filter-menu__tone--neutral]="
+                        option.tone === 'neutral'
+                      "
+                      [class.filter-menu__tone--success]="
+                        option.tone === 'success'
+                      "
+                      [class.filter-menu__tone--accent]="
+                        option.tone === 'accent'
+                      "
+                      [class.filter-menu__tone--warning]="
+                        option.tone === 'warning'
+                      "
                     ></span>
                     <span>{{ option.label }}</span>
                   </span>
@@ -209,11 +302,49 @@
           [attr.aria-pressed]="viewMode() === 'grid'"
           (click)="setViewMode('grid')"
         >
-          <svg class="view-toggle__icon view-toggle__icon--grid" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="12" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="1" y="12" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="12" y="12" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <svg
+            class="view-toggle__icon view-toggle__icon--grid"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <rect
+              x="1"
+              y="1"
+              width="7"
+              height="7"
+              rx="1"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <rect
+              x="12"
+              y="1"
+              width="7"
+              height="7"
+              rx="1"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <rect
+              x="1"
+              y="12"
+              width="7"
+              height="7"
+              rx="1"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <rect
+              x="12"
+              y="12"
+              width="7"
+              height="7"
+              rx="1"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
           </svg>
         </button>
 
@@ -228,22 +359,110 @@
           [attr.aria-pressed]="viewMode() === 'list'"
           (click)="setViewMode('list')"
         >
-          <svg class="view-toggle__icon view-toggle__icon--list" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M7 4h12M7 10h12M7 16h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <circle cx="2.5" cy="4" r="1.5" fill="currentColor"/>
-            <circle cx="2.5" cy="10" r="1.5" fill="currentColor"/>
-            <circle cx="2.5" cy="16" r="1.5" fill="currentColor"/>
+          <svg
+            class="view-toggle__icon view-toggle__icon--list"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M7 4h12M7 10h12M7 16h12"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+            <circle cx="2.5" cy="4" r="1.5" fill="currentColor" />
+            <circle cx="2.5" cy="10" r="1.5" fill="currentColor" />
+            <circle cx="2.5" cy="16" r="1.5" fill="currentColor" />
           </svg>
         </button>
       </div>
     </div>
 
-    @if (viewMode() === 'grid') {
+    @if (showEmptyState()) {
+      <section class="biens-empty-state" aria-live="polite">
+        <div class="biens-empty-state__art" aria-hidden="true">
+          <span
+            class="biens-empty-state__orb biens-empty-state__orb--large"
+          ></span>
+          <span
+            class="biens-empty-state__orb biens-empty-state__orb--small"
+          ></span>
+          <span class="biens-empty-state__house">
+            <svg
+              viewBox="0 0 64 64"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 28L32 12L54 28V50C54 51.1046 53.1046 52 52 52H12C10.8954 52 10 51.1046 10 50V28Z"
+                stroke="currentColor"
+                stroke-width="2.5"
+              />
+              <path
+                d="M24 52V36C24 34.8954 24.8954 34 26 34H38C39.1046 34 40 34.8954 40 36V52"
+                stroke="currentColor"
+                stroke-width="2.5"
+              />
+              <path
+                d="M4 28L32 8L60 28"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
+        </div>
+
+        <h2 class="biens-empty-state__title">
+          Aucun bien à afficher pour l’instant
+        </h2>
+
+        @if (hasActiveFilters()) {
+          <p class="biens-empty-state__text">
+            Vos filtres ne correspondent à aucun bien sur cette page. Essayez de
+            réinitialiser les filtres.
+          </p>
+
+          <div class="biens-empty-state__actions">
+            <button
+              class="biens-empty-state__btn biens-empty-state__btn--ghost"
+              type="button"
+              (click)="resetFilters()"
+            >
+              Réinitialiser les filtres
+            </button>
+            <a
+              class="biens-empty-state__btn biens-empty-state__btn--primary"
+              routerLink="ajouter"
+            >
+              Ajouter un bien
+            </a>
+          </div>
+        } @else {
+          <p class="biens-empty-state__text">
+            Commencez par créer votre premier bien pour remplir votre
+            portefeuille.
+          </p>
+
+          <div class="biens-empty-state__actions">
+            <a
+              class="biens-empty-state__btn biens-empty-state__btn--primary"
+              routerLink="ajouter"
+            >
+              Ajouter mon premier bien
+            </a>
+          </div>
+        }
+      </section>
+    } @else if (viewMode() === 'grid') {
       <div class="biens-grid">
         @for (bien of visibleGridCards(); track bien.id; let index = $index) {
           <a
             class="bien-card"
             [routerLink]="[bien.id]"
+            [attr.title]="bien.rejectionReason"
             [style.--bien-enter-order]="index"
           >
             <img
@@ -254,24 +473,50 @@
               decoding="async"
             />
 
-            <span class="bien-card__badge">{{ bien.category }}</span>
+            <span class="bien-card__badge">{{
+              bien.boosted ? 'BOOST' : bien.category
+            }}</span>
 
             <div class="bien-card__panel">
               <div class="bien-card__heading">
                 <h2 class="bien-card__title">{{ bien.title }}</h2>
 
                 <span class="bien-card__arrow" aria-hidden="true">
-                  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M4 10h12M10 4l6 6-6 6"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                 </span>
               </div>
 
               <p class="bien-card__location">
                 <span class="bien-card__location-icon" aria-hidden="true">
-                  <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z" stroke="currentColor" stroke-width="1.5"/>
-                    <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.5"/>
+                  <svg
+                    viewBox="0 0 16 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    />
+                    <circle
+                      cx="8"
+                      cy="7"
+                      r="2"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    />
                   </svg>
                 </span>
                 <span>{{ bien.location }}</span>
@@ -305,6 +550,7 @@
           <a
             class="bien-list-card"
             [routerLink]="[bien.id]"
+            [attr.title]="bien.rejectionReason"
             [style.--bien-enter-order]="index"
           >
             <div class="bien-list-card__media">
@@ -316,7 +562,9 @@
                 decoding="async"
               />
 
-              <span class="bien-list-card__badge">{{ bien.category }}</span>
+              <span class="bien-list-card__badge">{{
+                bien.boosted ? 'BOOST' : bien.category
+              }}</span>
             </div>
 
             <div class="bien-list-card__content">
@@ -327,9 +575,23 @@
 
               <p class="bien-list-card__location">
                 <span class="bien-list-card__location-icon" aria-hidden="true">
-                  <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z" stroke="currentColor" stroke-width="1.5"/>
-                    <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.5"/>
+                  <svg
+                    viewBox="0 0 16 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    />
+                    <circle
+                      cx="8"
+                      cy="7"
+                      r="2"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    />
                   </svg>
                 </span>
                 <span>{{ bien.location }}</span>
@@ -354,8 +616,18 @@
                 </div>
 
                 <span class="bien-list-card__arrow" aria-hidden="true">
-                  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M4 10h12M10 4l6 6-6 6"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                 </span>
               </div>
