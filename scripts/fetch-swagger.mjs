@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 const swaggerUrl = new URL('http://173.249.7.89/api/api-docs');
 swaggerUrl.searchParams.set('_ts', Date.now().toString());
 
-const outputPath = '.swagger.json';
+const outputPath = 'swagger.json';
 const tempOutputPath = `${outputPath}.tmp`;
 
 const response = await fetch(swaggerUrl, {
