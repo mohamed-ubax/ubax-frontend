@@ -91,7 +91,9 @@ describe('authInterceptor', () => {
     const next = vi.fn().mockImplementation(() => {
       callCount++;
       return callCount === 1
-        ? throwError(() => new HttpErrorResponse({ status: 401, url: '/api/protected' }))
+        ? throwError(
+            () => new HttpErrorResponse({ status: 401, url: '/api/protected' }),
+          )
         : of(new HttpResponse({ status: 200, body: { ok: true } }));
     });
 
@@ -101,19 +103,57 @@ describe('authInterceptor', () => {
     expect(authStore.setToken).toHaveBeenCalledWith('new-access-token');
     expect(next).toHaveBeenCalledTimes(2);
     const retryReq: HttpRequest<unknown> = next.mock.calls[1]?.[0];
-    expect(retryReq.headers.get('Authorization')).toBe('Bearer new-access-token');
+    expect(retryReq.headers.get('Authorization')).toBe(
+      'Bearer new-access-token',
+    );
   });
 
-  it('appelle expireSession quand le refresh échoue', async () => {
+  it('accepte aussi un access token retourné via data.accessToken', async () => {
     authStore.token.mockReturnValue('expired-token');
     authService.refreshToken.mockReturnValue(
-      throwError(() => new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' })),
+      of({
+        data: { accessToken: 'new-access-token-from-data' },
+      } as LoginResponse),
     );
 
     const req = new HttpRequest('GET', '/api/protected');
-    const next = vi.fn().mockReturnValue(
-      throwError(() => new HttpErrorResponse({ status: 401, url: '/api/protected' })),
+    let callCount = 0;
+    const next = vi.fn().mockImplementation(() => {
+      callCount++;
+      return callCount === 1
+        ? throwError(
+            () => new HttpErrorResponse({ status: 401, url: '/api/protected' }),
+          )
+        : of(new HttpResponse({ status: 200, body: { ok: true } }));
+    });
+
+    await firstValueFrom(run(req, next));
+
+    expect(authStore.setToken).toHaveBeenCalledWith(
+      'new-access-token-from-data',
     );
+    const retryReq: HttpRequest<unknown> = next.mock.calls[1]?.[0];
+    expect(retryReq.headers.get('Authorization')).toBe(
+      'Bearer new-access-token-from-data',
+    );
+  });
+
+  it("propage l'erreur quand le refresh échoue (sans déconnexion forcée)", async () => {
+    authStore.token.mockReturnValue('expired-token');
+    authService.refreshToken.mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' }),
+      ),
+    );
+
+    const req = new HttpRequest('GET', '/api/protected');
+    const next = vi
+      .fn()
+      .mockReturnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 401, url: '/api/protected' }),
+        ),
+      );
 
     await expect(firstValueFrom(run(req, next))).rejects.toBeInstanceOf(
       HttpErrorResponse,
@@ -121,29 +161,118 @@ describe('authInterceptor', () => {
     expect(authStore.expireSession).toHaveBeenCalledTimes(1);
   });
 
+  it('ne force pas la déconnexion quand le refresh échoue sans 401/403', async () => {
+    authStore.token.mockReturnValue('expired-token');
+    authService.refreshToken.mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 500, url: '/api/auth/refresh' }),
+      ),
+    );
+
+    const req = new HttpRequest('GET', '/api/protected');
+    const next = vi
+      .fn()
+      .mockReturnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 401, url: '/api/protected' }),
+        ),
+      );
+
+    await expect(firstValueFrom(run(req, next))).rejects.toBeInstanceOf(
+      HttpErrorResponse,
+    );
+    expect(authStore.expireSession).not.toHaveBeenCalled();
+  });
+
   it("ne tente pas de refresh pour les endpoints d'authentification", async () => {
     authStore.token.mockReturnValue('token');
     const authReq = new HttpRequest('POST', '/api/auth/refresh');
-    const next = vi.fn().mockReturnValue(
-      throwError(() => new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' })),
-    );
+    const next = vi
+      .fn()
+      .mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' }),
+        ),
+      );
 
     await expect(firstValueFrom(run(authReq, next))).rejects.toBeInstanceOf(
       HttpErrorResponse,
     );
     expect(authService.refreshToken).not.toHaveBeenCalled();
-    expect(authStore.expireSession).not.toHaveBeenCalled();
   });
 
   it('propage les erreurs non-401 sans tenter de refresh', async () => {
     authStore.token.mockReturnValue('token');
     const req = new HttpRequest('GET', '/api/data');
-    const next = vi.fn().mockReturnValue(
-      throwError(() => new HttpErrorResponse({ status: 500, url: '/api/data' })),
-    );
+    const next = vi
+      .fn()
+      .mockReturnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 500, url: '/api/data' }),
+        ),
+      );
 
     const err = await firstValueFrom(run(req, next)).catch((e) => e);
     expect((err as HttpErrorResponse).status).toBe(500);
     expect(authService.refreshToken).not.toHaveBeenCalled();
+  });
+
+  it('tente un refresh sur les endpoints storage backend', async () => {
+    authStore.token.mockReturnValue('expired-token');
+    authService.refreshToken.mockReturnValue(
+      of(makeRefreshResponse('new-access-token')),
+    );
+
+    const req = new HttpRequest(
+      'GET',
+      '/api/v1/storage/presign/property-document',
+    );
+    let callCount = 0;
+    const next = vi.fn().mockImplementation(() => {
+      callCount++;
+      return callCount === 1
+        ? throwError(
+            () =>
+              new HttpErrorResponse({
+                status: 401,
+                url: '/api/v1/storage/presign/property-document',
+              }),
+          )
+        : of(new HttpResponse({ status: 200, body: { ok: true } }));
+    });
+
+    await firstValueFrom(run(req, next));
+
+    expect(authService.refreshToken).toHaveBeenCalledTimes(1);
+    expect(authStore.setToken).toHaveBeenCalledWith('new-access-token');
+    expect(next).toHaveBeenCalledTimes(2);
+  });
+
+  it("n'expire pas la session si le refresh échoue pendant l'association d'un document", async () => {
+    authStore.token.mockReturnValue('expired-token');
+    authService.refreshToken.mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' }),
+      ),
+    );
+
+    const req = new HttpRequest('POST', '/v1/properties/property-id/documents');
+    const next = vi.fn().mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            url: '/v1/properties/property-id/documents',
+          }),
+      ),
+    );
+
+    await expect(firstValueFrom(run(req, next))).rejects.toBeInstanceOf(
+      HttpErrorResponse,
+    );
+
+    expect(authService.refreshToken).toHaveBeenCalledTimes(1);
+    expect(authStore.expireSession).not.toHaveBeenCalled();
   });
 });

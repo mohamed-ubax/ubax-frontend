@@ -18,6 +18,36 @@ function isAuthSkipped(url: string): boolean {
   return AUTH_SKIP_PATHS.some((path) => url.includes(path));
 }
 
+function isPropertyDocumentLinkRequest(url: string): boolean {
+  return /\/v1\/properties\/[^/]+\/documents(?:\?|$)/.test(url);
+}
+
+function isBackendApiRequest(url: string): boolean {
+  if (
+    url.startsWith('/api') ||
+    url.startsWith('/v1/') ||
+    url.startsWith('/auth/')
+  ) {
+    return true;
+  }
+
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      const parsed = new URL(url);
+      return (
+        parsed.pathname === '/api' ||
+        parsed.pathname.startsWith('/api/') ||
+        parsed.pathname.startsWith('/v1/') ||
+        parsed.pathname.startsWith('/auth/')
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
+
 function withBearer(
   req: HttpRequest<unknown>,
   token: string,
@@ -34,6 +64,26 @@ function hasAccessToken(
   );
 }
 
+function readAccessToken(
+  response: LoginResponse & {
+    data?: { accessToken?: string | null; access_token?: string | null } | null;
+  },
+): string | null {
+  if (hasAccessToken(response)) {
+    return response.access_token;
+  }
+
+  const fromData = response.data?.accessToken ?? response.data?.access_token;
+  return typeof fromData === 'string' && fromData.length > 0 ? fromData : null;
+}
+
+function shouldExpireSessionOnRefreshError(error: unknown): boolean {
+  return (
+    error instanceof HttpErrorResponse &&
+    (error.status === 401 || error.status === 403)
+  );
+}
+
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
@@ -41,30 +91,39 @@ export const authInterceptor: HttpInterceptorFn = (
   const authStore = inject(AuthStore);
   const authService = inject(AuthService);
   const token = authStore.token();
+  const isBackendRequest = isBackendApiRequest(req.url);
 
-  const authedReq = token && !isAuthSkipped(req.url) ? withBearer(req, token) : req;
+  const authedReq =
+    token && isBackendRequest && !isAuthSkipped(req.url)
+      ? withBearer(req, token)
+      : req;
 
   return next(authedReq).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status !== 401 || isAuthSkipped(req.url)) {
+      if (err.status !== 401 || !isBackendRequest || isAuthSkipped(req.url)) {
         return throwError(() => err);
       }
 
       return authService.refreshToken().pipe(
-        switchMap((response) => {
-          if (!hasAccessToken(response)) {
+        catchError((refreshErr) => {
+          if (
+            shouldExpireSessionOnRefreshError(refreshErr) &&
+            !isPropertyDocumentLinkRequest(req.url)
+          ) {
             authStore.expireSession();
+          }
+          return throwError(() => refreshErr);
+        }),
+        switchMap((response) => {
+          const accessToken = readAccessToken(response);
+          if (!accessToken) {
             return throwError(
               () => new Error('Missing access token in refresh response'),
             );
           }
 
-          authStore.setToken(response.access_token);
-          return next(withBearer(req, response.access_token));
-        }),
-        catchError((refreshErr) => {
-          authStore.expireSession();
-          return throwError(() => refreshErr);
+          authStore.setToken(accessToken);
+          return next(withBearer(req, accessToken));
         }),
       );
     }),

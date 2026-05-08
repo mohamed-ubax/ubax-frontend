@@ -39,6 +39,8 @@ export type { PaymentStatusUpdateRequest } from './models/payment-status-update-
 export type { PhoneLoginRequest } from './models/phone-login-request';
 export type { PresignedReadUrlResponse } from './models/presigned-read-url-response';
 export type { PresignedUrlResponse } from './models/presigned-url-response';
+export type { PropertyAmenityRequest } from './models/property-amenity-request';
+export type { PropertyAmenityResponse } from './models/property-amenity-response';
 export type { PropertyBoostRequest } from './models/property-boost-request';
 export type { PropertyCreateRequest } from './models/property-create-request';
 export type { PropertyDetailResponse } from './models/property-detail-response';

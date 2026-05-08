@@ -6540,247 +6540,327 @@
   },
   "components": {
     "schemas": {
+      "PropertyAmenityRequest": {
+        "type": "object",
+        "description": "Commodité d'un bien — standard (code) ou personnalisée (customValue)",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Code d'une commodité standard issue de la liste PROPERTY_AMENITY. Null si commodité personnalisée.",
+            "example": "POOL"
+          },
+          "customValue": {
+            "type": "string",
+            "description": "Libellé d'une commodité non présente dans la liste standard. Null si code renseigné.",
+            "example": "Hammam"
+          },
+          "customDescription": {
+            "type": "string",
+            "description": "Description libre de la commodité personnalisée.",
+            "example": "Hammam traditionnel avec bain de vapeur"
+          }
+        }
+      },
       "PropertyUpdateRequest": {
         "type": "object",
+        "description": "Mise à jour partielle d'un bien. Seuls les champs non-null sont appliqués.",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "Titre accrocheur de l'annonce"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Description complète du bien"
           },
           "propertyType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type de bien (ex : APARTMENT, VILLA, HOTEL_ROOM…)"
           },
           "transactionType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type de transaction (SALE, RENT, RENT_FURNISHED, SHORT_STAY)"
           },
           "price": {
-            "type": "number"
+            "type": "number",
+            "description": "Prix de vente ou loyer mensuel en XOF"
           },
           "condition": {
-            "type": "string"
+            "type": "string",
+            "description": "État général du bien (NEW, GOOD, RENOVATE)"
           },
           "yearBuilt": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Année de construction"
           },
           "surfaceTotal": {
-            "type": "number"
+            "type": "number",
+            "description": "Surface totale du terrain (m²)"
           },
           "surfaceLiving": {
-            "type": "number"
+            "type": "number",
+            "description": "Surface habitable nette (m²)"
           },
           "rooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre total de pièces principales"
           },
           "bedrooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de chambres"
           },
           "bathrooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de salles de bain"
           },
           "balconies": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de balcons/terrasses"
           },
           "floor": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Étage du bien (0 = RDC)"
           },
           "totalFloors": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre total d'étages de l'immeuble"
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "Adresse complète"
           },
           "city": {
-            "type": "string"
+            "type": "string",
+            "description": "Ville du bien"
           },
           "district": {
-            "type": "string"
+            "type": "string",
+            "description": "Quartier ou commune"
           },
           "street": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom de la rue"
           },
           "latitude": {
-            "type": "number"
+            "type": "number",
+            "description": "Latitude GPS"
           },
           "longitude": {
-            "type": "number"
+            "type": "number",
+            "description": "Longitude GPS"
           },
-          "hasPool": {
-            "type": "boolean"
+          "amenities": {
+            "type": "array",
+            "description": "Remplace intégralement la liste des commodités. Null = aucune modification. Liste vide = suppression de toutes les commodités.",
+            "items": {
+              "$ref": "#/components/schemas/PropertyAmenityRequest"
+            }
           },
-          "hasGenerator": {
-            "type": "boolean"
+          "bedType": {
+            "type": "string",
+            "description": "Type de lit (hôtel)"
           },
-          "hasWaterTank": {
-            "type": "boolean"
+          "maxOccupancy": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Capacité maximale d'accueil (hôtel)"
           },
-          "hasAc": {
-            "type": "boolean"
+          "mealPlan": {
+            "type": "string",
+            "description": "Formule repas (hôtel)"
           },
-          "hasSecurity": {
-            "type": "boolean"
+          "paymentFrequency": {
+            "type": "string",
+            "description": "Fréquence de facturation (hôtel)"
+          }
+        }
+      },
+      "PropertyAmenityResponse": {
+        "type": "object",
+        "description": "Commodité associée à un bien immobilier",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifiant unique de la commodité"
           },
-          "hasParking": {
-            "type": "boolean"
+          "code": {
+            "type": "string",
+            "description": "Code commodité standard (null si personnalisée)",
+            "example": "POOL"
           },
-          "hasElevator": {
-            "type": "boolean"
+          "customValue": {
+            "type": "string",
+            "description": "Libellé personnalisé (null si commodité standard)",
+            "example": "Hammam"
           },
-          "hasGarden": {
-            "type": "boolean"
-          },
-          "furnished": {
-            "type": "boolean"
-          },
-          "acceptsPets": {
-            "type": "boolean"
-          },
-          "pmrAccessible": {
-            "type": "boolean"
+          "customDescription": {
+            "type": "string",
+            "description": "Description de la commodité personnalisée",
+            "example": "Hammam traditionnel avec bain de vapeur"
           }
         }
       },
       "PropertyResponse": {
         "type": "object",
+        "description": "Bien immobilier publié sur la plateforme UBAX",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Identifiant unique du bien"
           },
           "ownerId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Identifiant du propriétaire ou agent"
           },
           "ownerName": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom complet du propriétaire ou agent"
           },
           "agencyId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Identifiant de l'agence gestionnaire (null si particulier)"
           },
           "agencyName": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom de l'agence gestionnaire (null si particulier)"
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "Titre accrocheur de l'annonce"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Description complète du bien"
           },
           "propertyType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type de bien (APARTMENT, VILLA, HOUSE, LAND, OFFICE…)",
+            "example": "VILLA"
           },
           "transactionType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type de transaction (SALE, RENT, RENT_FURNISHED, SHORT_STAY)",
+            "example": "SALE"
           },
           "price": {
-            "type": "number"
+            "type": "number",
+            "description": "Prix de vente ou loyer mensuel en XOF",
+            "example": 150000000
           },
           "condition": {
-            "type": "string"
+            "type": "string",
+            "description": "État général du bien (NEW, GOOD, RENOVATE)",
+            "example": "GOOD"
           },
           "yearBuilt": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Année de construction",
+            "example": 2018
           },
           "surfaceTotal": {
-            "type": "number"
+            "type": "number",
+            "description": "Surface totale du terrain (m²)",
+            "example": 400
           },
           "surfaceLiving": {
-            "type": "number"
+            "type": "number",
+            "description": "Surface habitable nette (m²)",
+            "example": 280
           },
           "rooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre total de pièces principales",
+            "example": 6
           },
           "bedrooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de chambres",
+            "example": 4
           },
           "bathrooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de salles de bain",
+            "example": 3
           },
           "balconies": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de balcons/terrasses",
+            "example": 2
           },
           "floor": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Étage du bien (0 = RDC, null = villa/terrain)"
           },
           "totalFloors": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre total d'étages de l'immeuble"
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "Adresse complète du bien"
           },
           "city": {
-            "type": "string"
+            "type": "string",
+            "description": "Ville du bien",
+            "example": "Dakar"
           },
           "district": {
-            "type": "string"
+            "type": "string",
+            "description": "Quartier ou commune",
+            "example": "Almadies"
           },
           "street": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom de la rue",
+            "example": "Rue des Almadies"
           },
           "latitude": {
-            "type": "number"
+            "type": "number",
+            "description": "Latitude GPS",
+            "example": 14.7455
           },
           "longitude": {
-            "type": "number"
+            "type": "number",
+            "description": "Longitude GPS",
+            "example": -17.4892
           },
-          "hasPool": {
-            "type": "boolean"
-          },
-          "hasGenerator": {
-            "type": "boolean"
-          },
-          "hasWaterTank": {
-            "type": "boolean"
-          },
-          "hasAc": {
-            "type": "boolean"
-          },
-          "hasSecurity": {
-            "type": "boolean"
-          },
-          "hasParking": {
-            "type": "boolean"
-          },
-          "hasElevator": {
-            "type": "boolean"
-          },
-          "hasGarden": {
-            "type": "boolean"
-          },
-          "furnished": {
-            "type": "boolean"
-          },
-          "acceptsPets": {
-            "type": "boolean"
-          },
-          "pmrAccessible": {
-            "type": "boolean"
+          "amenities": {
+            "type": "array",
+            "description": "Commodités du bien (standard + personnalisées)",
+            "items": {
+              "$ref": "#/components/schemas/PropertyAmenityResponse"
+            }
           },
           "boosted": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Annonce boostée (mise en avant payante)"
           },
           "boostExpiresAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date d'expiration du boost"
           },
           "status": {
             "type": "string",
+            "description": "Statut de l'annonce dans son cycle de publication",
             "enum": [
               "DRAFT",
               "PENDING",
@@ -6792,19 +6872,40 @@
             ]
           },
           "rejectionReason": {
-            "type": "string"
+            "type": "string",
+            "description": "Motif de refus par le modérateur"
           },
           "publishedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date de publication de l'annonce"
+          },
+          "bedType": {
+            "type": "string",
+            "description": "Type de lit principal (hôtel) : SINGLE, DOUBLE, TWIN, KING, QUEEN, BUNK"
+          },
+          "maxOccupancy": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Capacité maximale d'accueil (hôtel)"
+          },
+          "mealPlan": {
+            "type": "string",
+            "description": "Formule repas (hôtel) : ROOM_ONLY, BREAKFAST, HALF_BOARD, FULL_BOARD, ALL_INCLUSIVE"
+          },
+          "paymentFrequency": {
+            "type": "string",
+            "description": "Fréquence de facturation (hôtel) : NIGHTLY, WEEKLY, MONTHLY"
           },
           "createdAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date de création"
           },
           "updatedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date de dernière modification"
           }
         }
       },
@@ -7141,118 +7242,153 @@
       },
       "PropertyCreateRequest": {
         "type": "object",
+        "description": "Requête de création d'un bien immobilier (statut DRAFT)",
         "properties": {
           "title": {
             "type": "string",
+            "description": "Titre accrocheur de l'annonce",
+            "example": "Villa 4 chambres aux Almadies",
             "minLength": 1
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Description complète du bien"
           },
           "propertyType": {
             "type": "string",
+            "description": "Type de bien (ex : APARTMENT, VILLA, HOTEL_ROOM…)",
+            "example": "VILLA",
             "minLength": 1
           },
           "transactionType": {
             "type": "string",
+            "description": "Type de transaction (SALE, RENT, RENT_FURNISHED, SHORT_STAY)",
+            "example": "SALE",
             "minLength": 1
           },
           "price": {
             "type": "number",
+            "description": "Prix de vente ou loyer mensuel en XOF",
+            "example": 150000000,
             "minimum": 0
           },
           "condition": {
-            "type": "string"
+            "type": "string",
+            "description": "État général du bien (NEW, GOOD, RENOVATE)",
+            "example": "GOOD"
           },
           "yearBuilt": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Année de construction",
+            "example": 2018
           },
           "surfaceTotal": {
-            "type": "number"
+            "type": "number",
+            "description": "Surface totale du terrain (m²)",
+            "example": 400
           },
           "surfaceLiving": {
-            "type": "number"
+            "type": "number",
+            "description": "Surface habitable nette (m²)",
+            "example": 280
           },
           "rooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre total de pièces principales",
+            "example": 6
           },
           "bedrooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de chambres",
+            "example": 4
           },
           "bathrooms": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de salles de bain",
+            "example": 3
           },
           "balconies": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre de balcons/terrasses",
+            "example": 2
           },
           "floor": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Étage du bien (0 = RDC, null = villa/terrain)",
+            "example": null
           },
           "totalFloors": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Nombre total d'étages de l'immeuble",
+            "example": null
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "Adresse complète",
+            "example": 12
           },
           "city": {
             "type": "string",
+            "description": "Ville du bien",
+            "example": "Dakar",
             "minLength": 1
           },
           "district": {
-            "type": "string"
+            "type": "string",
+            "description": "Quartier ou commune",
+            "example": "Almadies"
           },
           "street": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom de la rue",
+            "example": "Rue des Almadies"
           },
           "latitude": {
-            "type": "number"
+            "type": "number",
+            "description": "Latitude GPS",
+            "example": 14.7455
           },
           "longitude": {
-            "type": "number"
+            "type": "number",
+            "description": "Longitude GPS",
+            "example": -17.4892
           },
-          "hasPool": {
-            "type": "boolean"
-          },
-          "hasGenerator": {
-            "type": "boolean"
-          },
-          "hasWaterTank": {
-            "type": "boolean"
-          },
-          "hasAc": {
-            "type": "boolean"
-          },
-          "hasSecurity": {
-            "type": "boolean"
-          },
-          "hasParking": {
-            "type": "boolean"
-          },
-          "hasElevator": {
-            "type": "boolean"
-          },
-          "hasGarden": {
-            "type": "boolean"
-          },
-          "furnished": {
-            "type": "boolean"
-          },
-          "acceptsPets": {
-            "type": "boolean"
-          },
-          "pmrAccessible": {
-            "type": "boolean"
+          "amenities": {
+            "type": "array",
+            "description": "Liste des commodités. Chaque entrée est soit un code standard (ex: POOL, AC, PARKING) soit une commodité personnalisée (customValue + customDescription).",
+            "items": {
+              "$ref": "#/components/schemas/PropertyAmenityRequest"
+            }
           },
           "ownerId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "UUID du propriétaire réel du bien. Optionnel : si absent, l'appelant est le propriétaire."
+          },
+          "bedType": {
+            "type": "string",
+            "description": "Type de lit (hôtel) : SINGLE, DOUBLE, TWIN, KING, QUEEN, BUNK"
+          },
+          "maxOccupancy": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Capacité maximale d'accueil (hôtel)",
+            "example": 2
+          },
+          "mealPlan": {
+            "type": "string",
+            "description": "Formule repas (hôtel) : ROOM_ONLY, BREAKFAST, HALF_BOARD, FULL_BOARD, ALL_INCLUSIVE"
+          },
+          "paymentFrequency": {
+            "type": "string",
+            "description": "Fréquence de facturation (hôtel) : NIGHTLY, WEEKLY, MONTHLY"
           }
         },
         "required": [
@@ -7338,90 +7474,126 @@
       },
       "PropertyDocumentAddRequest": {
         "type": "object",
+        "description": "Requête d'ajout d'un document légal à un bien. Le fichier doit être préalablement uploadé dans MinIO via l'URL presignée.",
         "properties": {
           "docType": {
             "type": "string",
+            "description": "Type de document : TITRE_FONCIER | PERMIS_CONSTRUIRE | DIAGNOSTIC | CONTRAT_BAIL | AUTRE",
+            "example": "TITRE_FONCIER",
             "minLength": 1
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "Titre descriptif du document",
+            "example": "Titre foncier - Villa Sacré-Cœur 3"
           },
           "fileUrl": {
             "type": "string",
+            "description": "URL publique du fichier dans MinIO (retournée par l'endpoint presign)",
+            "example": "http://localhost:9000/property-documents/uuid/doc-uuid.pdf",
             "minLength": 1
           },
           "fileName": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom original du fichier",
+            "example": "titre-foncier.pdf"
           },
           "fileSize": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Taille du fichier en octets",
+            "example": 204800
           },
           "mimeType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type MIME du fichier",
+            "example": "application/pdf"
           },
           "visibleToPublic": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Rendre le document visible aux acheteurs/locataires potentiels",
+            "example": false
           }
         }
       },
       "PropertyDocumentResponse": {
         "type": "object",
+        "description": "Document légal associé à un bien immobilier",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Identifiant unique du document"
           },
           "propertyId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Identifiant du bien associé"
           },
           "verifiedById": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Identifiant du modérateur ayant vérifié le document"
           },
           "verifiedByName": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom du modérateur"
           },
           "docType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type de document : TITRE_FONCIER | PERMIS_CONSTRUIRE | DIAGNOSTIC | CONTRAT_BAIL | AUTRE",
+            "example": "TITRE_FONCIER"
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "Titre descriptif du document"
           },
           "fileUrl": {
-            "type": "string"
+            "type": "string",
+            "description": "URL publique du fichier dans MinIO",
+            "example": "http://localhost:9000/property-documents/uuid/doc-uuid.pdf"
           },
           "fileName": {
-            "type": "string"
+            "type": "string",
+            "description": "Nom original du fichier",
+            "example": "titre-foncier.pdf"
           },
           "fileSize": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Taille du fichier en octets"
           },
           "mimeType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type MIME",
+            "example": "application/pdf"
           },
           "visibleToPublic": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Document visible aux acheteurs/locataires potentiels"
           },
           "verified": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Document vérifié par un modérateur"
           },
           "verifiedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date de vérification"
           },
           "verificationNote": {
-            "type": "string"
+            "type": "string",
+            "description": "Note du modérateur"
           },
           "createdAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date de création"
           },
           "updatedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date de dernière modification"
           }
         }
       },

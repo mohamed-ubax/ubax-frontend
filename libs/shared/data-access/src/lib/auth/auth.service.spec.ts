@@ -281,6 +281,7 @@ describe('AuthService', () => {
 
     expect(http.post).toHaveBeenCalledWith('https://test.local/auth/refresh', {
       refreshToken: 'old-refresh',
+      refresh_token: 'old-refresh',
     });
     expect(globalThis.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBe(
       'new-access',
@@ -301,5 +302,29 @@ describe('AuthService', () => {
       'https://test.local/auth/refresh',
       {},
     );
+  });
+
+  it('refreshToken accepte une réponse data.accessToken/data.refreshToken', async () => {
+    persistAuthSession({
+      accessToken: 'old-access',
+      refreshToken: 'old-refresh',
+    });
+
+    http.post.mockReturnValue(
+      of({
+        data: { accessToken: 'new-access-2', refreshToken: 'new-refresh-2' },
+      }),
+    );
+
+    const response = await firstValueFrom(service.refreshToken());
+
+    expect(response.access_token).toBe('new-access-2');
+    expect(response.refresh_token).toBe('new-refresh-2');
+    expect(globalThis.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBe(
+      'new-access-2',
+    );
+    expect(
+      globalThis.localStorage.getItem(AUTH_REFRESH_TOKEN_STORAGE_KEY),
+    ).toBe('new-refresh-2');
   });
 });

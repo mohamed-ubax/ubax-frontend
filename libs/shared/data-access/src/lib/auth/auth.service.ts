@@ -39,6 +39,47 @@ export type ResolvedUserProfile = {
   avatarUrl: string | null;
 };
 
+type RefreshApiResponse = LoginResponse & {
+  data?: {
+    accessToken?: string | null;
+    access_token?: string | null;
+    refreshToken?: string | null;
+    refresh_token?: string | null;
+  } | null;
+};
+
+function pickFirstNonEmpty(
+  ...candidates: Array<string | null | undefined>
+): string | null {
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim().length > 0) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function resolveRefreshTokens(
+  response: RefreshApiResponse,
+  storedRefreshToken: string | null,
+): { accessToken: string | null; refreshToken: string | null } {
+  const accessToken = pickFirstNonEmpty(
+    response.access_token,
+    response.data?.accessToken,
+    response.data?.access_token,
+  );
+
+  const refreshToken = pickFirstNonEmpty(
+    response.refresh_token,
+    response.data?.refreshToken,
+    response.data?.refresh_token,
+    storedRefreshToken,
+  );
+
+  return { accessToken, refreshToken };
+}
+
 function extractStringArray(data: unknown): string[] {
   if (Array.isArray(data)) {
     // Handle array of strings directly
@@ -415,12 +456,30 @@ export class AuthService {
 
   refreshToken(): Observable<LoginResponse> {
     const storedRefreshToken = readStoredRefreshToken();
+
     return this.http
-      .post<LoginResponse>(
+      .post<RefreshApiResponse>(
         `${this.apiConfig.rootUrl}/auth/refresh`,
-        storedRefreshToken ? { refreshToken: storedRefreshToken } : {},
+        storedRefreshToken
+          ? {
+              refreshToken: storedRefreshToken,
+              refresh_token: storedRefreshToken,
+            }
+          : {},
       )
       .pipe(
+        map((response) => {
+          const { accessToken, refreshToken } = resolveRefreshTokens(
+            response,
+            storedRefreshToken,
+          );
+
+          return {
+            ...response,
+            access_token: accessToken ?? response.access_token,
+            refresh_token: refreshToken ?? response.refresh_token,
+          } as LoginResponse;
+        }),
         tap((response) => {
           if (response.access_token) {
             persistAuthSession({
