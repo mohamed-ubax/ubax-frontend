@@ -219,7 +219,13 @@ function asPropertyStatus(value: string): PropertyMineStatus | undefined {
 @Component({
   selector: 'ubax-biens-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent, BiensListSkeletonComponent, BiensCardsSkeletonComponent],
+  imports: [
+    RouterLink,
+    UbaxMorphTabsDirective,
+    UbaxPaginatorComponent,
+    BiensListSkeletonComponent,
+    BiensCardsSkeletonComponent,
+  ],
   templateUrl: './biens-list-page.component.html',
   styleUrl: './biens-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -247,6 +253,8 @@ export class BiensListPageComponent {
 
   private readonly archivePendingId = signal<string | null>(null);
   private readonly archivePendingTitle = signal('');
+  private readonly submitPendingId = signal<string | null>(null);
+  private readonly submitPendingTitle = signal('');
 
   // ── ViewState pattern ────────────────────────────────────────────────────
   private readonly hasLoaded = signal(false);
@@ -575,6 +583,40 @@ export class BiensListPageComponent {
       this.archivePendingTitle.set('');
     });
 
+    effect(() => {
+      const submittedId = this.store.lastSubmittedPropertyId();
+      const pendingId = this.submitPendingId();
+
+      if (!submittedId || submittedId !== pendingId) {
+        return;
+      }
+
+      const pendingTitle = this.submitPendingTitle();
+      this.notifications?.success(
+        `Le bien "${pendingTitle}" a été soumis à la modération.`,
+      );
+      this.store.loadOverview();
+      this.store.clearSubmitFeedback();
+      this.submitPendingId.set(null);
+      this.submitPendingTitle.set('');
+    });
+
+    effect(() => {
+      const submitError = this.store.submitError();
+      const pendingId = this.submitPendingId();
+
+      if (!submitError || !pendingId) {
+        return;
+      }
+
+      this.notifications?.error(
+        'Impossible de soumettre ce bien pour le moment. Veuillez réessayer.',
+      );
+      this.store.clearSubmitFeedback();
+      this.submitPendingId.set(null);
+      this.submitPendingTitle.set('');
+    });
+
     effect((onCleanup) => {
       const hasArchiveOverlay = this.archiveDialogTarget() !== null;
       this.document.body.classList.toggle(
@@ -691,6 +733,31 @@ export class BiensListPageComponent {
 
   protected canArchive(statusRaw: PropertyMineStatus, id: string): boolean {
     return statusRaw !== 'ARCHIVED' && !this.isArchiving(id);
+  }
+
+  protected soumettreProperty(card: {
+    id: string;
+    title: string;
+    statusRaw: PropertyMineStatus;
+  }): void {
+    if (!this.canSubmit(card.statusRaw, card.id)) {
+      return;
+    }
+
+    this.submitPendingId.set(card.id);
+    this.submitPendingTitle.set(card.title);
+    this.store.soumettreProperty({ id: card.id });
+  }
+
+  protected isSubmitting(id: string): boolean {
+    return this.store.submittingPropertyIds().includes(id);
+  }
+
+  protected canSubmit(statusRaw: PropertyMineStatus, id: string): boolean {
+    return (
+      (statusRaw === 'DRAFT' || statusRaw === 'REJECTED') &&
+      !this.isSubmitting(id)
+    );
   }
 
   @HostListener('document:click', ['$event'])

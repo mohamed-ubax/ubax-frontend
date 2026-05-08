@@ -20,7 +20,6 @@ import {
   PresignedUrlResponse,
   PropertyResponse,
   setCover,
-  StorageUploadResponse,
   submit,
   uploadMedia,
 } from '@ubax-workspace/shared-api-types';
@@ -149,49 +148,6 @@ function requestPresignedPropertyDocumentUpload(
       params,
     })
     .pipe(map((body) => extractEntity<PresignedUrlResponse>(body)));
-}
-
-function resolveFolderFromObjectName(objectName?: string): string | undefined {
-  if (!objectName) return undefined;
-
-  const lastSlash = objectName.lastIndexOf('/');
-  return lastSlash > 0 ? objectName.slice(0, lastSlash) : undefined;
-}
-
-type UploadedDocumentAsset = {
-  fileUrl: string;
-  fileName: string;
-  fileSize: number;
-  mimeType: string;
-};
-
-function uploadDocumentViaBackend(
-  http: HttpClient,
-  rootUrl: string,
-  file: File,
-  presign: ReadyPresignedUpload,
-) {
-  const formData = new FormData();
-  formData.append('file', file, file.name);
-
-  const folder = resolveFolderFromObjectName(presign.objectName);
-
-  return http
-    .post<unknown>(`${rootUrl}/v1/storage/upload`, formData, {
-      params: {
-        bucket: presign.bucket ?? 'property-documents',
-        ...(folder ? { folder } : {}),
-      },
-    })
-    .pipe(
-      map((body) => extractEntity<StorageUploadResponse>(body)),
-      map((response) => ({
-        fileUrl: response?.fileUrl ?? presign.publicUrl,
-        fileName: response?.fileName ?? file.name,
-        fileSize: response?.fileSize ?? file.size,
-        mimeType: response?.mimeType ?? file.type,
-      })),
-    );
 }
 
 export const BienCreationStore = signalStore(
@@ -484,32 +440,31 @@ export const BienCreationStore = signalStore(
                   return EMPTY;
                 }
 
-                return uploadDocumentViaBackend(
-                  http,
-                  apiConfig.rootUrl,
-                  file,
-                  presign,
-                ).pipe(
-                  tap(() =>
-                    patchState(store, {
-                      documentUploadStage: 'registering',
-                    }),
-                  ),
-                  switchMap((uploadedAsset) =>
-                    addDocument(http, apiConfig.rootUrl, {
-                      id: propertyId,
-                      body: {
-                        docType,
-                        title,
-                        fileName: uploadedAsset.fileName,
-                        fileSize: uploadedAsset.fileSize,
-                        fileUrl: uploadedAsset.fileUrl,
-                        mimeType: uploadedAsset.mimeType,
-                      },
-                    }),
-                  ),
-                  map((r) => extractEntity<PropertyDocumentResponse>(r.body)),
-                );
+                return http
+                  .put(presign.uploadUrl, file, {
+                    headers: { 'Content-Type': file.type },
+                  })
+                  .pipe(
+                    tap(() =>
+                      patchState(store, {
+                        documentUploadStage: 'registering',
+                      }),
+                    ),
+                    switchMap(() =>
+                      addDocument(http, apiConfig.rootUrl, {
+                        id: propertyId,
+                        body: {
+                          docType,
+                          title,
+                          fileName: file.name,
+                          fileSize: file.size,
+                          fileUrl: presign.publicUrl,
+                          mimeType: file.type,
+                        },
+                      }),
+                    ),
+                    map((r) => extractEntity<PropertyDocumentResponse>(r.body)),
+                  );
               }),
               tapResponse({
                 next: (doc: PropertyDocumentResponse | null) => {

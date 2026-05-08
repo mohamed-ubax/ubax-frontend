@@ -15,6 +15,7 @@ import {
   ListMine$Params,
   Pageable,
   PropertyResponse,
+  submit,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, forkJoin, map, pipe, switchMap, tap } from 'rxjs';
 
@@ -39,6 +40,9 @@ type MesBiensState = {
   archivingPropertyIds: string[];
   lastArchivedPropertyId: string | null;
   archiveError: string | null;
+  submittingPropertyIds: string[];
+  lastSubmittedPropertyId: string | null;
+  submitError: string | null;
 };
 
 const initialState: MesBiensState = {
@@ -58,6 +62,9 @@ const initialState: MesBiensState = {
   archivingPropertyIds: [],
   lastArchivedPropertyId: null,
   archiveError: null,
+  submittingPropertyIds: [],
+  lastSubmittedPropertyId: null,
+  submitError: null,
 };
 
 function extractList<T>(body: unknown): T[] {
@@ -177,10 +184,21 @@ function withoutArchivingId(state: MesBiensState, id: string): string[] {
   return state.archivingPropertyIds.filter((itemId) => itemId !== id);
 }
 
+function withoutSubmittingId(state: MesBiensState, id: string): string[] {
+  return state.submittingPropertyIds.filter((itemId) => itemId !== id);
+}
+
 function markArchived(entity: PropertyResponse): PropertyResponse {
   return {
     ...entity,
     status: 'ARCHIVED' as PropertyResponse['status'],
+  };
+}
+
+function markPending(entity: PropertyResponse): PropertyResponse {
+  return {
+    ...entity,
+    status: 'PENDING' as PropertyResponse['status'],
   };
 }
 
@@ -196,6 +214,15 @@ function nextEntitiesAfterArchive(
   }
 
   return entities.filter((entity) => selectPropertyId(entity) !== id);
+}
+
+function nextEntitiesAfterSubmit(
+  entities: readonly PropertyResponse[],
+  id: string,
+): PropertyResponse[] {
+  return entities.map((entity) =>
+    selectPropertyId(entity) === id ? markPending(entity) : entity,
+  );
 }
 
 function pageRequest(page: number, size: number): Pageable {
@@ -373,10 +400,60 @@ export const MesBiensStore = signalStore(
         ),
       ),
 
+      soumettreProperty: rxMethod<{ id: string }>(
+        pipe(
+          tap(({ id }) =>
+            patchState(store, (state) => ({
+              submittingPropertyIds: state.submittingPropertyIds.includes(id)
+                ? state.submittingPropertyIds
+                : [...state.submittingPropertyIds, id],
+              submitError: null,
+              lastSubmittedPropertyId: null,
+            })),
+          ),
+          exhaustMap(({ id }) =>
+            submit(http, apiConfig.rootUrl, { id }).pipe(
+              tapResponse({
+                next: () => {
+                  const nextEntities = nextEntitiesAfterSubmit(
+                    store.entities(),
+                    id,
+                  );
+
+                  patchState(
+                    store,
+                    setAllEntities(nextEntities, {
+                      selectId: selectPropertyId,
+                    }),
+                    (state) => ({
+                      submittingPropertyIds: withoutSubmittingId(state, id),
+                      lastSubmittedPropertyId: id,
+                      submitError: null,
+                    }),
+                  );
+                },
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, (state) => ({
+                    submittingPropertyIds: withoutSubmittingId(state, id),
+                    submitError: err.message,
+                  })),
+              }),
+            ),
+          ),
+        ),
+      ),
+
       clearArchiveFeedback(): void {
         patchState(store, {
           lastArchivedPropertyId: null,
           archiveError: null,
+        });
+      },
+
+      clearSubmitFeedback(): void {
+        patchState(store, {
+          lastSubmittedPropertyId: null,
+          submitError: null,
         });
       },
     }),
