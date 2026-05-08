@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,6 +20,10 @@ import {
   UbaxMorphTabsDirective,
   UbaxPaginatorComponent,
 } from '@ubax-workspace/shared-ui';
+import {
+  NOTIFICATION_HANDLER,
+  NotificationHandler,
+} from '@ubax-workspace/shared-data-access';
 
 type BienViewMode = 'grid' | 'list';
 type FilterDropdownKey = 'type' | 'category' | 'status';
@@ -49,6 +54,7 @@ type GridBienCard = {
   readonly avatar: string;
   readonly type: string;
   readonly category: string;
+  readonly statusRaw: PropertyMineStatus;
   readonly status: string;
   readonly boosted: boolean;
   readonly rejectionReason: string | null;
@@ -65,6 +71,7 @@ type ListBienCard = {
   readonly avatar: string;
   readonly type: string;
   readonly category: string;
+  readonly statusRaw: PropertyMineStatus;
   readonly status: string;
   readonly boosted: boolean;
   readonly rejectionReason: string | null;
@@ -214,6 +221,10 @@ function asPropertyStatus(value: string): PropertyMineStatus | undefined {
 })
 export class BiensListPageComponent {
   private readonly store = inject(MesBiensStore);
+  private readonly document = inject(DOCUMENT);
+  private readonly notifications = inject(NOTIFICATION_HANDLER, {
+    optional: true,
+  }) as NotificationHandler | null;
 
   protected readonly viewMode = signal<BienViewMode>('grid');
   protected readonly currentPage = signal(1);
@@ -221,6 +232,14 @@ export class BiensListPageComponent {
   protected readonly selectedType = signal('all');
   protected readonly selectedCategory = signal('all');
   protected readonly selectedStatus = signal('all');
+  protected readonly archiveDialogTarget = signal<{
+    id: string;
+    title: string;
+    statusRaw: PropertyMineStatus;
+  } | null>(null);
+
+  private readonly archivePendingId = signal<string | null>(null);
+  private readonly archivePendingTitle = signal('');
 
   protected readonly pageSize = computed(() =>
     this.viewMode() === 'grid' ? 12 : 8,
@@ -409,6 +428,10 @@ export class BiensListPageComponent {
 
   protected readonly visibleListCards = this.filteredListCards;
 
+  protected readonly archiveDialogTitle = computed(
+    () => this.archiveDialogTarget()?.title ?? 'ce bien',
+  );
+
   constructor() {
     this.store.loadCodeLists();
     this.store.loadOverview();
@@ -439,6 +462,53 @@ export class BiensListPageComponent {
       if (page > totalPages) {
         untracked(() => this.currentPage.set(totalPages));
       }
+    });
+
+    effect(() => {
+      const archivedId = this.store.lastArchivedPropertyId();
+      const pendingId = this.archivePendingId();
+
+      if (!archivedId || archivedId !== pendingId) {
+        return;
+      }
+
+      const pendingTitle = this.archivePendingTitle();
+      this.notifications?.success(`Le bien "${pendingTitle}" a été archivé.`);
+      this.store.loadOverview();
+      this.store.clearArchiveFeedback();
+      this.archivePendingId.set(null);
+      this.archivePendingTitle.set('');
+      this.archiveDialogTarget.set(null);
+    });
+
+    effect(() => {
+      const archiveError = this.store.archiveError();
+      const pendingId = this.archivePendingId();
+
+      if (!archiveError || !pendingId) {
+        return;
+      }
+
+      this.notifications?.error(
+        "Impossible d'archiver ce bien pour le moment. Veuillez réessayer.",
+      );
+      this.store.clearArchiveFeedback();
+      this.archivePendingId.set(null);
+      this.archivePendingTitle.set('');
+    });
+
+    effect((onCleanup) => {
+      const hasArchiveOverlay = this.archiveDialogTarget() !== null;
+      this.document.body.classList.toggle(
+        'ubax-overlay-open',
+        hasArchiveOverlay,
+      );
+
+      onCleanup(() => {
+        if (hasArchiveOverlay) {
+          this.document.body.classList.remove('ubax-overlay-open');
+        }
+      });
     });
   }
 
@@ -482,6 +552,45 @@ export class BiensListPageComponent {
     this.openDropdown.set(null);
   }
 
+  protected openArchiveDialog(card: {
+    id: string;
+    title: string;
+    statusRaw: PropertyMineStatus;
+  }): void {
+    if (card.statusRaw === 'ARCHIVED' || this.isArchiving(card.id)) {
+      return;
+    }
+
+    this.archiveDialogTarget.set(card);
+  }
+
+  protected closeArchiveDialog(): void {
+    if (this.archivePendingId()) {
+      return;
+    }
+
+    this.archiveDialogTarget.set(null);
+  }
+
+  protected confirmArchive(): void {
+    const target = this.archiveDialogTarget();
+    if (!target || this.isArchiving(target.id)) {
+      return;
+    }
+
+    this.archivePendingId.set(target.id);
+    this.archivePendingTitle.set(target.title);
+    this.store.archiveProperty({ id: target.id });
+  }
+
+  protected isArchiving(id: string): boolean {
+    return this.store.archivingPropertyIds().includes(id);
+  }
+
+  protected canArchive(statusRaw: PropertyMineStatus, id: string): boolean {
+    return statusRaw !== 'ARCHIVED' && !this.isArchiving(id);
+  }
+
   @HostListener('document:click', ['$event'])
   handleDocumentClick(event: MouseEvent): void {
     const target = event.target;
@@ -507,7 +616,7 @@ export class BiensListPageComponent {
     property: PropertyResponse,
     index: number,
   ): GridBienCard & ListBienCard {
-    const status = property.status ?? 'DRAFT';
+    const status = (property.status ?? 'DRAFT') as PropertyMineStatus;
     const transactionValue = property.transactionType ?? '';
     const transactionLabel =
       TRANSACTION_LABEL_MAP[transactionValue] ||
@@ -524,6 +633,7 @@ export class BiensListPageComponent {
       avatar: AVATAR_POOL[index % AVATAR_POOL.length],
       type: property.propertyType || 'N/A',
       category: transactionLabel,
+      statusRaw: status,
       status: STATUS_LABEL_MAP[status] ?? status,
       boosted: Boolean(property.boosted),
       rejectionReason: property.rejectionReason?.trim() || null,

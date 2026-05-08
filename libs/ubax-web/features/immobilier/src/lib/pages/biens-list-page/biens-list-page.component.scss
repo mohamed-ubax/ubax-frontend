@@ -605,6 +605,51 @@
   gap: 16px;
 }
 
+.bien-card__actions,
+.bien-list-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.archive-chip {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ubax-navy) 24%, transparent);
+  background: rgb(255 255 255 / 0.92);
+  color: var(--ubax-navy);
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: var(--ubax-accent);
+    color: var(--ubax-accent);
+    background: #fff;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    border-color: color-mix(in srgb, var(--ubax-navy) 12%, transparent);
+    color: color-mix(in srgb, var(--ubax-navy) 42%, #fff);
+    background: color-mix(in srgb, var(--ubax-page-bg) 92%, #fff);
+  }
+}
+
+.archive-chip--compact {
+  height: 32px;
+  padding-inline: 12px;
+}
+
 .bien-card__title,
 .bien-list-card__title,
 .bien-card__location,
@@ -968,6 +1013,92 @@
   margin-top: 48px;
 }
 
+.archive-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ubax-z-overlay, 2147483647);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(3 14 27 / 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.archive-modal {
+  width: min(540px, calc(100vw - 32px));
+  border: 0;
+  border-radius: 24px;
+  padding: 30px 30px 24px;
+  background: var(--ubax-surface);
+  box-shadow: 0 20px 50px rgb(3 14 27 / 0.26);
+
+  h3 {
+    margin: 0;
+    color: var(--ubax-navy);
+    font-family: 'Lexend', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 12px 0 0;
+    color: #415364;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.5;
+
+    strong {
+      color: var(--ubax-text-primary);
+      font-weight: 600;
+    }
+  }
+}
+
+.archive-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.archive-modal__btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 0;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.archive-modal__btn--cancel {
+  border: 1px solid color-mix(in srgb, var(--ubax-navy) 26%, transparent);
+  background: #fff;
+  color: var(--ubax-navy);
+}
+
+.archive-modal__btn--confirm {
+  background: var(--ubax-accent);
+  color: #fff;
+}
+
 /* ─── Animations ─────────────────────────────────────────────────── */
 
 @keyframes bienGridEnter {
@@ -1081,6 +1212,22 @@
 
   .biens-empty-state__text {
     font-size: 14px;
+  }
+
+  .archive-modal {
+    padding: 22px 18px 18px;
+
+    h3 {
+      font-size: 20px;
+    }
+  }
+
+  .archive-modal__actions {
+    flex-direction: column;
+  }
+
+  .archive-modal__btn {
+    width: 100%;
   }
 }
 

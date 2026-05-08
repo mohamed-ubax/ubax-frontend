@@ -474,28 +474,53 @@
             />
 
             <span class="bien-card__badge">{{
-              bien.boosted ? 'BOOST' : bien.category
+              bien.boosted
+                ? 'BOOST'
+                : bien.statusRaw === 'ARCHIVED'
+                  ? 'ARCHIVÉ'
+                  : bien.category
             }}</span>
 
             <div class="bien-card__panel">
               <div class="bien-card__heading">
                 <h2 class="bien-card__title">{{ bien.title }}</h2>
 
-                <span class="bien-card__arrow" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                <div class="bien-card__actions">
+                  <button
+                    class="archive-chip"
+                    type="button"
+                    [disabled]="!canArchive(bien.statusRaw, bien.id)"
+                    (click)="
+                      $event.preventDefault();
+                      $event.stopPropagation();
+                      openArchiveDialog(bien)
+                    "
                   >
-                    <path
-                      d="M4 10h12M10 4l6 6-6 6"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
+                    @if (isArchiving(bien.id)) {
+                      Archivage...
+                    } @else if (bien.statusRaw === 'ARCHIVED') {
+                      Archivé
+                    } @else {
+                      Archiver
+                    }
+                  </button>
+
+                  <span class="bien-card__arrow" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M4 10h12M10 4l6 6-6 6"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </div>
               </div>
 
               <p class="bien-card__location">
@@ -563,7 +588,11 @@
               />
 
               <span class="bien-list-card__badge">{{
-                bien.boosted ? 'BOOST' : bien.category
+                bien.boosted
+                  ? 'BOOST'
+                  : bien.statusRaw === 'ARCHIVED'
+                    ? 'ARCHIVÉ'
+                    : bien.category
               }}</span>
             </div>
 
@@ -615,25 +644,86 @@
                   </div>
                 </div>
 
-                <span class="bien-list-card__arrow" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                <div class="bien-list-card__actions">
+                  <button
+                    class="archive-chip archive-chip--compact"
+                    type="button"
+                    [disabled]="!canArchive(bien.statusRaw, bien.id)"
+                    (click)="
+                      $event.preventDefault();
+                      $event.stopPropagation();
+                      openArchiveDialog(bien)
+                    "
                   >
-                    <path
-                      d="M4 10h12M10 4l6 6-6 6"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
+                    @if (isArchiving(bien.id)) {
+                      Archivage...
+                    } @else if (bien.statusRaw === 'ARCHIVED') {
+                      Archivé
+                    } @else {
+                      Archiver
+                    }
+                  </button>
+
+                  <span class="bien-list-card__arrow" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M4 10h12M10 4l6 6-6 6"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </div>
               </div>
             </div>
           </a>
         }
+      </div>
+    }
+
+    @if (archiveDialogTarget(); as archiveTarget) {
+      <div class="archive-modal-overlay" (click)="closeArchiveDialog()">
+        <dialog
+          class="archive-modal"
+          open
+          aria-labelledby="archive-modal-title"
+          (click)="$event.stopPropagation()"
+        >
+          <h3 id="archive-modal-title">Archiver ce bien ?</h3>
+          <p>
+            Vous allez archiver <strong>{{ archiveDialogTitle() }}</strong
+            >. Cette action retire le bien de votre liste active.
+          </p>
+
+          <div class="archive-modal__actions">
+            <button
+              class="archive-modal__btn archive-modal__btn--cancel"
+              type="button"
+              [disabled]="isArchiving(archiveTarget.id)"
+              (click)="closeArchiveDialog()"
+            >
+              Annuler
+            </button>
+            <button
+              class="archive-modal__btn archive-modal__btn--confirm"
+              type="button"
+              [disabled]="isArchiving(archiveTarget.id)"
+              (click)="confirmArchive()"
+            >
+              @if (isArchiving(archiveTarget.id)) {
+                Archivage...
+              } @else {
+                Confirmer l'archivage
+              }
+            </button>
+          </div>
+        </dialog>
       </div>
     }
 

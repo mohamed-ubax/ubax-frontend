@@ -9,9 +9,26 @@
     </div>
 
     <div class="bien-detail-page__actions">
-      <button class="secondary-action" type="button">
+      <span class="status-pill" [class.status-pill--archived]="propertyStatus() === 'Archivé'">
+        {{ propertyStatus() }}
+      </span>
+
+      <button
+        class="secondary-action"
+        type="button"
+        [disabled]="archiveDisabled()"
+        (click)="openArchiveConfirm()"
+      >
         <i class="pi pi-box" aria-hidden="true"></i>
-        <span>Archiver ce bien</span>
+        <span>
+          @if (archivePending()) {
+            Archivage...
+          } @else if (propertyStatus() === 'Archivé') {
+            Déjà archivé
+          } @else {
+            Archiver ce bien
+          }
+        </span>
       </button>
 
       <button class="secondary-action" type="button">
@@ -134,7 +151,7 @@
             <img
               class="gallery-section__image"
               [src]="activeImage()"
-              alt="Appartement Haut Standing"
+              [alt]="propertyTitle()"
             />
 
             <button
@@ -174,7 +191,7 @@
           <div class="overview-section__intro">
             <div>
               <span class="lease-badge">12 mois</span>
-              <h2>Appartement Haut Standing</h2>
+              <h2>{{ propertyTitle() }}</h2>
               <p class="overview-section__location">
                 <i class="pi pi-map-marker" aria-hidden="true"></i>
                 Abidjan, Cocody
@@ -256,11 +273,11 @@
             <div class="location-panel__card">
               <img
                 src="shared/rooms/room-photo-01.webp"
-                alt="Appartement Haut Standing"
+                [alt]="propertyTitle()"
               />
 
               <div>
-                <p>Appartement Haut Standing</p>
+                <p>{{ propertyTitle() }}</p>
                 <span>
                   <i class="pi pi-map-marker" aria-hidden="true"></i>
                   Abidjan, Cocody
@@ -280,7 +297,7 @@
             <img
               class="video-panel__cover"
               src="biens/detail/property-side-01.webp"
-              alt="Vidéo de l’appartement Haut Standing"
+              [alt]="'Vidéo de ' + propertyTitle()"
             />
 
             <div class="video-panel__overlay">
@@ -289,7 +306,7 @@
               </button>
 
               <div>
-                <p>Vidéo de l’appartement Haut Standing</p>
+                <p>Vidéo de {{ propertyTitle() }}</p>
                 <span>10 : 15</span>
               </div>
             </div>
@@ -339,4 +356,43 @@
       </article>
     </div>
   </div>
+
+  @if (archiveConfirmOpen()) {
+    <div class="archive-confirm-overlay" (click)="closeArchiveConfirm()">
+      <dialog
+        class="archive-confirm"
+        open
+        aria-labelledby="archive-confirm-title"
+        (click)="$event.stopPropagation()"
+      >
+        <h3 id="archive-confirm-title">Confirmer l'archivage</h3>
+        <p>
+          Voulez-vous archiver <strong>{{ propertyTitle() }}</strong> ?
+          L'annonce sortira de la liste active.
+        </p>
+        <div class="archive-confirm__actions">
+          <button
+            class="archive-confirm__btn archive-confirm__btn--cancel"
+            type="button"
+            [disabled]="archivePending()"
+            (click)="closeArchiveConfirm()"
+          >
+            Annuler
+          </button>
+          <button
+            class="archive-confirm__btn archive-confirm__btn--confirm"
+            type="button"
+            [disabled]="archivePending()"
+            (click)="confirmArchive()"
+          >
+            @if (archivePending()) {
+              Archivage...
+            } @else {
+              Confirmer
+            }
+          </button>
+        </div>
+      </dialog>
+    </div>
+  }
 </section>

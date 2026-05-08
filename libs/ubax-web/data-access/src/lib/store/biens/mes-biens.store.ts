@@ -2,10 +2,13 @@ import { inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
+  archive,
   ApiConfiguration,
+  getById,
   findAllByType,
   LaCodeListDto,
   listMine,
@@ -33,6 +36,9 @@ type MesBiensState = {
   overview: BiensOverview;
   overviewLoading: boolean;
   overviewError: string | null;
+  archivingPropertyIds: string[];
+  lastArchivedPropertyId: string | null;
+  archiveError: string | null;
 };
 
 const initialState: MesBiensState = {
@@ -49,6 +55,9 @@ const initialState: MesBiensState = {
   },
   overviewLoading: false,
   overviewError: null,
+  archivingPropertyIds: [],
+  lastArchivedPropertyId: null,
+  archiveError: null,
 };
 
 function extractList<T>(body: unknown): T[] {
@@ -130,6 +139,19 @@ function extractTotalElements(body: unknown): number {
   return 0;
 }
 
+function extractFirstItem<T>(body: unknown): T | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const record = body as Record<string, unknown>;
+  if (record['data'] && typeof record['data'] === 'object') {
+    return record['data'] as T;
+  }
+
+  return record as T;
+}
+
 function normalizeProperty(
   property: PropertyResponse,
   index: number,
@@ -142,6 +164,38 @@ function normalizeProperty(
     ...property,
     id: `property-${index + 1}`,
   };
+}
+
+function selectPropertyId(property: PropertyResponse): string {
+  return (
+    property.id ??
+    `${property.title ?? 'property'}-${property.createdAt ?? 'unknown'}`
+  );
+}
+
+function withoutArchivingId(state: MesBiensState, id: string): string[] {
+  return state.archivingPropertyIds.filter((itemId) => itemId !== id);
+}
+
+function markArchived(entity: PropertyResponse): PropertyResponse {
+  return {
+    ...entity,
+    status: 'ARCHIVED' as PropertyResponse['status'],
+  };
+}
+
+function nextEntitiesAfterArchive(
+  entities: readonly PropertyResponse[],
+  id: string,
+  preserveInList?: boolean,
+): PropertyResponse[] {
+  if (preserveInList) {
+    return entities.map((entity) =>
+      selectPropertyId(entity) === id ? markArchived(entity) : entity,
+    );
+  }
+
+  return entities.filter((entity) => selectPropertyId(entity) !== id);
 }
 
 function pageRequest(page: number, size: number): Pageable {
@@ -165,15 +219,26 @@ function countByStatus(
 
 export const MesBiensStore = signalStore(
   { providedIn: 'root' },
-  withApiResource<PropertyResponse, typeof listMine>({
+  withApiResource<
+    PropertyResponse,
+    typeof listMine,
+    typeof getById,
+    undefined,
+    undefined,
+    typeof archive
+  >({
     list: listMine,
-    idSelector: (property) =>
-      property.id ??
-      `${property.title ?? 'property'}-${property.createdAt ?? 'unknown'}`,
+    getById: getById,
+    delete: archive,
+    idSelector: selectPropertyId,
     mapList: (raw: unknown) =>
       extractList<PropertyResponse>(raw).map((property, index) =>
         normalizeProperty(property, index),
       ),
+    mapGetById: (raw: unknown) => {
+      const property = extractFirstItem<PropertyResponse>(raw);
+      return normalizeProperty(property ?? ({} as PropertyResponse), 0);
+    },
   }),
   withState(initialState),
   withMethods(
@@ -260,6 +325,60 @@ export const MesBiensStore = signalStore(
           ),
         ),
       ),
+
+      archiveProperty: rxMethod<{
+        id: string;
+        preserveInList?: boolean;
+      }>(
+        pipe(
+          tap(({ id }) =>
+            patchState(store, (state) => ({
+              archivingPropertyIds: state.archivingPropertyIds.includes(id)
+                ? state.archivingPropertyIds
+                : [...state.archivingPropertyIds, id],
+              archiveError: null,
+              lastArchivedPropertyId: null,
+            })),
+          ),
+          exhaustMap(({ id, preserveInList }) =>
+            archive(http, apiConfig.rootUrl, { id }).pipe(
+              tapResponse({
+                next: () => {
+                  const nextEntities = nextEntitiesAfterArchive(
+                    store.entities(),
+                    id,
+                    preserveInList,
+                  );
+
+                  patchState(
+                    store,
+                    setAllEntities(nextEntities, {
+                      selectId: selectPropertyId,
+                    }),
+                    (state) => ({
+                      archivingPropertyIds: withoutArchivingId(state, id),
+                      lastArchivedPropertyId: id,
+                      archiveError: null,
+                    }),
+                  );
+                },
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, (state) => ({
+                    archivingPropertyIds: withoutArchivingId(state, id),
+                    archiveError: err.message,
+                  })),
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      clearArchiveFeedback(): void {
+        patchState(store, {
+          lastArchivedPropertyId: null,
+          archiveError: null,
+        });
+      },
     }),
   ),
 );
