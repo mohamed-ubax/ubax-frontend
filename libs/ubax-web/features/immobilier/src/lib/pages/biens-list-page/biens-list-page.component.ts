@@ -9,6 +9,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MesBiensStore } from '@ubax-workspace/ubax-web-data-access';
 import {
@@ -19,11 +20,14 @@ import {
 import {
   UbaxMorphTabsDirective,
   UbaxPaginatorComponent,
+  deriveViewState,
+  type ViewState,
 } from '@ubax-workspace/shared-ui';
 import {
   NOTIFICATION_HANDLER,
   NotificationHandler,
 } from '@ubax-workspace/shared-data-access';
+import { BiensListSkeletonComponent } from './biens-list-skeleton/biens-list-skeleton.component';
 
 type BienViewMode = 'grid' | 'list';
 type FilterDropdownKey = 'type' | 'category' | 'status';
@@ -214,7 +218,7 @@ function asPropertyStatus(value: string): PropertyMineStatus | undefined {
 @Component({
   selector: 'ubax-biens-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent],
+  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent, BiensListSkeletonComponent],
   templateUrl: './biens-list-page.component.html',
   styleUrl: './biens-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -240,6 +244,21 @@ export class BiensListPageComponent {
 
   private readonly archivePendingId = signal<string | null>(null);
   private readonly archivePendingTitle = signal('');
+
+  // ── ViewState pattern ────────────────────────────────────────────────────
+  private readonly hasLoaded = signal(false);
+  readonly isLeavingSkeleton = signal(false);
+  readonly contentEntering = signal(false);
+
+  readonly viewState = computed<ViewState>(() =>
+    deriveViewState(
+      this.store.loading(),
+      this.store.error(),
+      this.store.entities().length === 0,
+      this.hasLoaded(),
+    ),
+  );
+  // ────────────────────────────────────────────────────────────────────────
 
   protected readonly pageSize = computed(() =>
     this.viewMode() === 'grid' ? 12 : 8,
@@ -432,28 +451,64 @@ export class BiensListPageComponent {
     () => this.archiveDialogTarget()?.title ?? 'ce bien',
   );
 
+  private readonly loadParams = computed<ListMine$Params>(() => {
+    const page = this.currentPage();
+    const size = this.pageSize();
+    const sel = this.selectedStatus();
+    const status = sel === 'all' ? undefined : asPropertyStatus(sel);
+    return {
+      pageable: { page: Math.max(0, page - 1), size, sort: ['createdAt,desc'] },
+      ...(status === undefined ? {} : { status }),
+    };
+  });
+
   constructor() {
     this.store.loadCodeLists();
     this.store.loadOverview();
 
-    effect(() => {
-      const page = this.currentPage();
-      const size = this.pageSize();
-      const selectedStatus = this.selectedStatus();
-      const status =
-        selectedStatus === 'all' ? undefined : asPropertyStatus(selectedStatus);
+    this.store.load?.(toObservable(this.loadParams).pipe(takeUntilDestroyed()));
 
-      untracked(() => {
-        this.store.load?.({
-          pageable: {
-            page: Math.max(0, page - 1),
-            size,
-            sort: ['createdAt,desc'],
-          },
-          ...(status ? { status } : {}),
-        });
-      });
+    // ── ViewState effect ─────────────────────────────────────────────────
+    let wasLoading = false;
+    let hadEntitiesWhenLoadingStarted = false;
+
+    effect(() => {
+      const loading = this.store.loading();
+      const hasEntities = this.store.entities().length > 0;
+      const hasError = this.store.error() !== null;
+
+      if (loading) {
+        wasLoading = true;
+        if (!hadEntitiesWhenLoadingStarted) {
+          hadEntitiesWhenLoadingStarted = hasEntities;
+        }
+        // Navigation retour : données déjà là → afficher immédiatement
+        if (hasEntities && !this.hasLoaded()) {
+          this.hasLoaded.set(true);
+          this.triggerContentEnter();
+        }
+        return;
+      }
+
+      if (this.hasLoaded()) return;
+
+      if (wasLoading) {
+        if (!hadEntitiesWhenLoadingStarted) {
+          // Premier chargement réseau : fade-out skeleton → fade-in contenu
+          this.isLeavingSkeleton.set(true);
+          setTimeout(() => {
+            this.hasLoaded.set(true);
+            this.isLeavingSkeleton.set(false);
+            this.triggerContentEnter();
+          }, 320);
+        }
+      } else if (hasEntities || hasError) {
+        // Cache hit immédiat
+        this.hasLoaded.set(true);
+        this.triggerContentEnter();
+      }
     });
+    // ────────────────────────────────────────────────────────────────────
 
     effect(() => {
       const totalPages = this.totalPages();
@@ -510,6 +565,21 @@ export class BiensListPageComponent {
         }
       });
     });
+  }
+
+  private triggerContentEnter(): void {
+    this.contentEntering.set(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.contentEntering.set(true);
+      });
+    });
+  }
+
+  retryLoad(): void {
+    this.hasLoaded.set(false);
+    this.contentEntering.set(false);
+    this.store.load?.(toObservable(this.loadParams).pipe(takeUntilDestroyed()));
   }
 
   protected setViewMode(mode: BienViewMode): void {

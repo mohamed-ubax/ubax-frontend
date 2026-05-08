@@ -1,737 +1,804 @@
 <section class="biens-page">
   <header class="biens-page__header">
-    <h1 class="biens-page__title">Mes biens</h1>
+    <!-- TOOLBAR : skeleton pills pendant loading -->
+    @if (viewState() !== 'loading' && !isLeavingSkeleton()) {
+      <h1 class="biens-page__title"
+          [class.biens-page__title--entering]="contentEntering()">Mes biens</h1>
 
-    <div class="biens-page__actions">
-      <a class="action-button action-button--primary" routerLink="ajouter">
-        <span class="action-button__label">Ajouter un bien</span>
-        <span class="action-button__icon-shell" aria-hidden="true">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <path
-              d="M12 7v10M7 12h10"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
-          </svg>
-        </span>
-      </a>
-    </div>
+      <div class="biens-page__actions"
+           [class.biens-page__actions--entering]="contentEntering()">
+        <a class="action-button action-button--primary" routerLink="ajouter">
+          <span class="action-button__label">Ajouter un bien</span>
+          <span class="action-button__icon-shell" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M12 7v10M7 12h10"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
+        </a>
+      </div>
+    } @else {
+      <!-- Skeleton header -->
+      <div class="biens-page__sk-title" aria-hidden="true"></div>
+      <div class="biens-page__sk-action" aria-hidden="true"></div>
+    }
   </header>
 
-  <section class="summary-strip" aria-label="Résumé des biens">
-    @for (summary of summaryCards(); track summary.label) {
-      <article class="summary-card">
-        <div class="summary-card__media" aria-hidden="true">
-          <span
-            class="summary-card__orb"
-            [attr.data-orb]="summary.orbKey"
-          ></span>
-          <span
-            class="summary-card__icon-wrap"
-            [attr.data-icon]="summary.iconKey"
-            [attr.aria-label]="summary.iconAlt"
-          ></span>
-        </div>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAT LOADING — skeleton pleine page, aucun contenu métier visible
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'loading' || isLeavingSkeleton()) {
+    <section
+      class="biens-page__content"
+      [class.is-leaving]="isLeavingSkeleton()"
+      aria-label="Chargement en cours"
+      aria-busy="true"
+    >
+      <ubax-biens-list-skeleton />
+    </section>
+  }
 
-        <div class="summary-card__content">
-          <p class="summary-card__label">{{ summary.label }}</p>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAT ERROR
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'error') {
+    <section
+      class="biens-page__content"
+      [class.biens-page__content--entering]="contentEntering()"
+      role="alert"
+    >
+      <div class="biens-error-state">
+        <svg
+          class="biens-error-state__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" stroke="#e7000b" stroke-width="1.5" />
+          <path d="M12 7v5M12 16h.01" stroke="#e7000b" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+        <p class="biens-error-state__title">Impossible de charger vos biens</p>
+        <p class="biens-error-state__hint">Une erreur est survenue. Veuillez réessayer.</p>
+        <button
+          class="biens-error-state__retry"
+          type="button"
+          (click)="retryLoad()"
+        >
+          Réessayer
+        </button>
+      </div>
+    </section>
+  }
 
-          <div class="summary-card__metrics">
-            <p class="summary-card__value">{{ summary.value }}</p>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTATS SUCCESS + EMPTY — même layout, la page gère l'état empty
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'success' || viewState() === 'empty') {
+    <section
+      class="biens-page__content"
+      [class.biens-page__content--entering]="contentEntering()"
+    >
+      <section class="summary-strip" aria-label="Résumé des biens">
+        @for (summary of summaryCards(); track summary.label) {
+          <article class="summary-card">
+            <div class="summary-card__media" aria-hidden="true">
+              <span
+                class="summary-card__orb"
+                [attr.data-orb]="summary.orbKey"
+              ></span>
+              <span
+                class="summary-card__icon-wrap"
+                [attr.data-icon]="summary.iconKey"
+                [attr.aria-label]="summary.iconAlt"
+              ></span>
+            </div>
 
-            @if (summary.trend; as trend) {
-              <p class="summary-card__trend">
+            <div class="summary-card__content">
+              <p class="summary-card__label">{{ summary.label }}</p>
+
+              <div class="summary-card__metrics">
+                <p class="summary-card__value">{{ summary.value }}</p>
+
+                @if (summary.trend; as trend) {
+                  <p class="summary-card__trend">
+                    <svg
+                      class="summary-card__trend-icon"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M2 11L6.5 6.5L9.5 9.5L14 4"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M10 4h4v4"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>{{ trend }}</span>
+                  </p>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </section>
+
+      <section class="biens-panel">
+        <div class="biens-toolbar">
+          <div class="biens-toolbar__filters">
+            <div
+              class="filter-dropdown"
+              [class.filter-dropdown--open]="openDropdown() === 'type'"
+            >
+              <button
+                class="filter-pill"
+                [class.filter-pill--open]="openDropdown() === 'type'"
+                type="button"
+                aria-label="Filtrer par type de bien"
+                [attr.aria-expanded]="openDropdown() === 'type'"
+                (click)="$event.stopPropagation(); toggleDropdown('type')"
+              >
+                <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
                 <svg
-                  class="summary-card__trend-icon"
-                  viewBox="0 0 16 16"
+                  class="filter-pill__chevron"
+                  viewBox="0 0 15 8"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                   aria-hidden="true"
                 >
                   <path
-                    d="M2 11L6.5 6.5L9.5 9.5L14 4"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M10 4h4v4"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                    fill="currentColor"
                   />
                 </svg>
-                <span>{{ trend }}</span>
+              </button>
+
+              @if (openDropdown() === 'type') {
+                <div class="filter-menu" aria-label="Options type de bien">
+                  @for (option of typeOptions(); track option.value) {
+                    <button
+                      class="filter-menu__option"
+                      [class.filter-menu__option--active]="
+                        selectedType() === option.value
+                      "
+                      type="button"
+                      (click)="
+                        $event.stopPropagation(); selectTypeOption(option.value)
+                      "
+                    >
+                      <span class="filter-menu__option-main">
+                        <span
+                          class="filter-menu__tone"
+                          [class.filter-menu__tone--neutral]="
+                            option.tone === 'neutral'
+                          "
+                          [class.filter-menu__tone--accent]="
+                            option.tone === 'accent'
+                          "
+                        ></span>
+                        <span>{{ option.label }}</span>
+                      </span>
+                      @if (selectedType() === option.value) {
+                        <span class="filter-menu__check" aria-hidden="true"></span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <div
+              class="filter-dropdown filter-dropdown--category"
+              [class.filter-dropdown--open]="openDropdown() === 'category'"
+            >
+              <button
+                class="filter-pill"
+                [class.filter-pill--open]="openDropdown() === 'category'"
+                type="button"
+                aria-label="Filtrer par catégorie"
+                [attr.aria-expanded]="openDropdown() === 'category'"
+                (click)="$event.stopPropagation(); toggleDropdown('category')"
+              >
+                <span class="filter-pill__field">{{
+                  selectedCategoryLabel()
+                }}</span>
+                <svg
+                  class="filter-pill__chevron"
+                  viewBox="0 0 15 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+
+              @if (openDropdown() === 'category') {
+                <div class="filter-menu" aria-label="Options catégorie">
+                  @for (option of categoryOptions(); track option.value) {
+                    <button
+                      class="filter-menu__option"
+                      [class.filter-menu__option--active]="
+                        selectedCategory() === option.value
+                      "
+                      type="button"
+                      (click)="
+                        $event.stopPropagation(); selectCategoryOption(option.value)
+                      "
+                    >
+                      <span class="filter-menu__option-main">
+                        <span
+                          class="filter-menu__tone"
+                          [class.filter-menu__tone--neutral]="
+                            option.tone === 'neutral'
+                          "
+                          [class.filter-menu__tone--success]="
+                            option.tone === 'success'
+                          "
+                          [class.filter-menu__tone--warning]="
+                            option.tone === 'warning'
+                          "
+                        ></span>
+                        <span>{{ option.label }}</span>
+                      </span>
+                      @if (selectedCategory() === option.value) {
+                        <span class="filter-menu__check" aria-hidden="true"></span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <div
+              class="filter-dropdown filter-dropdown--status"
+              [class.filter-dropdown--open]="openDropdown() === 'status'"
+            >
+              <button
+                class="filter-pill"
+                [class.filter-pill--open]="openDropdown() === 'status'"
+                type="button"
+                aria-label="Filtrer par statut"
+                [attr.aria-expanded]="openDropdown() === 'status'"
+                (click)="$event.stopPropagation(); toggleDropdown('status')"
+              >
+                <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
+                <svg
+                  class="filter-pill__chevron"
+                  viewBox="0 0 15 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+
+              @if (openDropdown() === 'status') {
+                <div class="filter-menu" aria-label="Options statut">
+                  @for (option of statusOptions(); track option.value) {
+                    <button
+                      class="filter-menu__option"
+                      [class.filter-menu__option--active]="
+                        selectedStatus() === option.value
+                      "
+                      type="button"
+                      (click)="
+                        $event.stopPropagation(); selectStatusOption(option.value)
+                      "
+                    >
+                      <span class="filter-menu__option-main">
+                        <span
+                          class="filter-menu__tone"
+                          [class.filter-menu__tone--neutral]="
+                            option.tone === 'neutral'
+                          "
+                          [class.filter-menu__tone--success]="
+                            option.tone === 'success'
+                          "
+                          [class.filter-menu__tone--accent]="
+                            option.tone === 'accent'
+                          "
+                          [class.filter-menu__tone--warning]="
+                            option.tone === 'warning'
+                          "
+                        ></span>
+                        <span>{{ option.label }}</span>
+                      </span>
+                      @if (selectedStatus() === option.value) {
+                        <span class="filter-menu__check" aria-hidden="true"></span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <button class="filter-action" type="button">Filtrer</button>
+          </div>
+
+          <div
+            class="biens-toolbar__toggle"
+            role="tablist"
+            aria-label="Mode d'affichage des biens"
+            ubaxMorphTabs
+            ubaxMorphTabsItemSelector=".view-toggle"
+          >
+            <button
+              class="view-toggle"
+              [class.is-active]="viewMode() === 'grid'"
+              [class.view-toggle--active]="viewMode() === 'grid'"
+              type="button"
+              role="tab"
+              aria-label="Vue grille"
+              [attr.aria-selected]="viewMode() === 'grid'"
+              [attr.aria-pressed]="viewMode() === 'grid'"
+              (click)="setViewMode('grid')"
+            >
+              <svg
+                class="view-toggle__icon view-toggle__icon--grid"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <rect
+                  x="1"
+                  y="1"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <rect
+                  x="12"
+                  y="1"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <rect
+                  x="1"
+                  y="12"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <rect
+                  x="12"
+                  y="12"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+              </svg>
+            </button>
+
+            <button
+              class="view-toggle"
+              [class.is-active]="viewMode() === 'list'"
+              [class.view-toggle--active]="viewMode() === 'list'"
+              type="button"
+              role="tab"
+              aria-label="Vue liste"
+              [attr.aria-selected]="viewMode() === 'list'"
+              [attr.aria-pressed]="viewMode() === 'list'"
+              (click)="setViewMode('list')"
+            >
+              <svg
+                class="view-toggle__icon view-toggle__icon--list"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M7 4h12M7 10h12M7 16h12"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+                <circle cx="2.5" cy="4" r="1.5" fill="currentColor" />
+                <circle cx="2.5" cy="10" r="1.5" fill="currentColor" />
+                <circle cx="2.5" cy="16" r="1.5" fill="currentColor" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        @if (showEmptyState()) {
+          <section class="biens-empty-state" aria-live="polite">
+            <div class="biens-empty-state__art" aria-hidden="true">
+              <span
+                class="biens-empty-state__orb biens-empty-state__orb--large"
+              ></span>
+              <span
+                class="biens-empty-state__orb biens-empty-state__orb--small"
+              ></span>
+              <span class="biens-empty-state__house">
+                <svg
+                  viewBox="0 0 64 64"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 28L32 12L54 28V50C54 51.1046 53.1046 52 52 52H12C10.8954 52 10 51.1046 10 50V28Z"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  />
+                  <path
+                    d="M24 52V36C24 34.8954 24.8954 34 26 34H38C39.1046 34 40 34.8954 40 36V52"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  />
+                  <path
+                    d="M4 28L32 8L60 28"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </span>
+            </div>
+
+            <h2 class="biens-empty-state__title">
+              Aucun bien à afficher pour l'instant
+            </h2>
+
+            @if (hasActiveFilters()) {
+              <p class="biens-empty-state__text">
+                Vos filtres ne correspondent à aucun bien sur cette page. Essayez de
+                réinitialiser les filtres.
               </p>
+
+              <div class="biens-empty-state__actions">
+                <button
+                  class="biens-empty-state__btn biens-empty-state__btn--ghost"
+                  type="button"
+                  (click)="resetFilters()"
+                >
+                  Réinitialiser les filtres
+                </button>
+                <a
+                  class="biens-empty-state__btn biens-empty-state__btn--primary"
+                  routerLink="ajouter"
+                >
+                  Ajouter un bien
+                </a>
+              </div>
+            } @else {
+              <p class="biens-empty-state__text">
+                Commencez par créer votre premier bien pour remplir votre
+                portefeuille.
+              </p>
+
+              <div class="biens-empty-state__actions">
+                <a
+                  class="biens-empty-state__btn biens-empty-state__btn--primary"
+                  routerLink="ajouter"
+                >
+                  Ajouter mon premier bien
+                </a>
+              </div>
+            }
+          </section>
+        } @else if (viewMode() === 'grid') {
+          <div class="biens-grid">
+            @for (bien of visibleGridCards(); track bien.id; let index = $index) {
+              <a
+                class="bien-card"
+                [routerLink]="[bien.id]"
+                [attr.title]="bien.rejectionReason"
+                [style.--bien-enter-order]="index"
+              >
+                <img
+                  class="bien-card__image"
+                  [src]="bien.image"
+                  [alt]="bien.title"
+                  [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+                  decoding="async"
+                />
+
+                <span class="bien-card__badge">{{
+                  bien.boosted
+                    ? 'BOOST'
+                    : bien.statusRaw === 'ARCHIVED'
+                      ? 'ARCHIVÉ'
+                      : bien.category
+                }}</span>
+
+                <div class="bien-card__panel">
+                  <div class="bien-card__heading">
+                    <h2 class="bien-card__title">{{ bien.title }}</h2>
+
+                    <div class="bien-card__actions">
+                      <button
+                        class="archive-chip"
+                        type="button"
+                        [disabled]="!canArchive(bien.statusRaw, bien.id)"
+                        (click)="
+                          $event.preventDefault();
+                          $event.stopPropagation();
+                          openArchiveDialog(bien)
+                        "
+                      >
+                        @if (isArchiving(bien.id)) {
+                          Archivage...
+                        } @else if (bien.statusRaw === 'ARCHIVED') {
+                          Archivé
+                        } @else {
+                          Archiver
+                        }
+                      </button>
+
+                      <span class="bien-card__arrow" aria-hidden="true">
+                        <svg
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M4 10h12M10 4l6 6-6 6"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+
+                  <p class="bien-card__location">
+                    <span class="bien-card__location-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 16 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                        <circle
+                          cx="8"
+                          cy="7"
+                          r="2"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                    </span>
+                    <span>{{ bien.location }}</span>
+                  </p>
+
+                  <div class="bien-card__bottom">
+                    <div class="bien-card__tenant">
+                      <img
+                        class="bien-card__avatar"
+                        [src]="bien.avatar"
+                        [alt]="bien.tenant"
+                        loading="lazy"
+                        decoding="async"
+                      />
+
+                      <div class="bien-card__tenant-copy">
+                        <p class="bien-card__tenant-name">{{ bien.tenant }}</p>
+                        <p class="bien-card__tenant-role">{{ bien.tenantRole }}</p>
+                      </div>
+                    </div>
+
+                    <p class="bien-card__price">{{ bien.price }}</p>
+                  </div>
+                </div>
+              </a>
             }
           </div>
-        </div>
-      </article>
-    }
-  </section>
-
-  <section class="biens-panel">
-    <div class="biens-toolbar">
-      <div class="biens-toolbar__filters">
-        <div
-          class="filter-dropdown"
-          [class.filter-dropdown--open]="openDropdown() === 'type'"
-        >
-          <button
-            class="filter-pill"
-            [class.filter-pill--open]="openDropdown() === 'type'"
-            type="button"
-            aria-label="Filtrer par type de bien"
-            [attr.aria-expanded]="openDropdown() === 'type'"
-            (click)="$event.stopPropagation(); toggleDropdown('type')"
-          >
-            <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
-            <svg
-              class="filter-pill__chevron"
-              viewBox="0 0 15 8"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-
-          @if (openDropdown() === 'type') {
-            <div class="filter-menu" aria-label="Options type de bien">
-              @for (option of typeOptions(); track option.value) {
-                <button
-                  class="filter-menu__option"
-                  [class.filter-menu__option--active]="
-                    selectedType() === option.value
-                  "
-                  type="button"
-                  (click)="
-                    $event.stopPropagation(); selectTypeOption(option.value)
-                  "
-                >
-                  <span class="filter-menu__option-main">
-                    <span
-                      class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="
-                        option.tone === 'neutral'
-                      "
-                      [class.filter-menu__tone--accent]="
-                        option.tone === 'accent'
-                      "
-                    ></span>
-                    <span>{{ option.label }}</span>
-                  </span>
-                  @if (selectedType() === option.value) {
-                    <span class="filter-menu__check" aria-hidden="true"></span>
-                  }
-                </button>
-              }
-            </div>
-          }
-        </div>
-
-        <div
-          class="filter-dropdown filter-dropdown--category"
-          [class.filter-dropdown--open]="openDropdown() === 'category'"
-        >
-          <button
-            class="filter-pill"
-            [class.filter-pill--open]="openDropdown() === 'category'"
-            type="button"
-            aria-label="Filtrer par catégorie"
-            [attr.aria-expanded]="openDropdown() === 'category'"
-            (click)="$event.stopPropagation(); toggleDropdown('category')"
-          >
-            <span class="filter-pill__field">{{
-              selectedCategoryLabel()
-            }}</span>
-            <svg
-              class="filter-pill__chevron"
-              viewBox="0 0 15 8"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-
-          @if (openDropdown() === 'category') {
-            <div class="filter-menu" aria-label="Options catégorie">
-              @for (option of categoryOptions(); track option.value) {
-                <button
-                  class="filter-menu__option"
-                  [class.filter-menu__option--active]="
-                    selectedCategory() === option.value
-                  "
-                  type="button"
-                  (click)="
-                    $event.stopPropagation(); selectCategoryOption(option.value)
-                  "
-                >
-                  <span class="filter-menu__option-main">
-                    <span
-                      class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="
-                        option.tone === 'neutral'
-                      "
-                      [class.filter-menu__tone--success]="
-                        option.tone === 'success'
-                      "
-                      [class.filter-menu__tone--warning]="
-                        option.tone === 'warning'
-                      "
-                    ></span>
-                    <span>{{ option.label }}</span>
-                  </span>
-                  @if (selectedCategory() === option.value) {
-                    <span class="filter-menu__check" aria-hidden="true"></span>
-                  }
-                </button>
-              }
-            </div>
-          }
-        </div>
-
-        <div
-          class="filter-dropdown filter-dropdown--status"
-          [class.filter-dropdown--open]="openDropdown() === 'status'"
-        >
-          <button
-            class="filter-pill"
-            [class.filter-pill--open]="openDropdown() === 'status'"
-            type="button"
-            aria-label="Filtrer par statut"
-            [attr.aria-expanded]="openDropdown() === 'status'"
-            (click)="$event.stopPropagation(); toggleDropdown('status')"
-          >
-            <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
-            <svg
-              class="filter-pill__chevron"
-              viewBox="0 0 15 8"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-
-          @if (openDropdown() === 'status') {
-            <div class="filter-menu" aria-label="Options statut">
-              @for (option of statusOptions(); track option.value) {
-                <button
-                  class="filter-menu__option"
-                  [class.filter-menu__option--active]="
-                    selectedStatus() === option.value
-                  "
-                  type="button"
-                  (click)="
-                    $event.stopPropagation(); selectStatusOption(option.value)
-                  "
-                >
-                  <span class="filter-menu__option-main">
-                    <span
-                      class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="
-                        option.tone === 'neutral'
-                      "
-                      [class.filter-menu__tone--success]="
-                        option.tone === 'success'
-                      "
-                      [class.filter-menu__tone--accent]="
-                        option.tone === 'accent'
-                      "
-                      [class.filter-menu__tone--warning]="
-                        option.tone === 'warning'
-                      "
-                    ></span>
-                    <span>{{ option.label }}</span>
-                  </span>
-                  @if (selectedStatus() === option.value) {
-                    <span class="filter-menu__check" aria-hidden="true"></span>
-                  }
-                </button>
-              }
-            </div>
-          }
-        </div>
-
-        <button class="filter-action" type="button">Filtrer</button>
-      </div>
-
-      <div
-        class="biens-toolbar__toggle"
-        role="tablist"
-        aria-label="Mode d'affichage des biens"
-        ubaxMorphTabs
-        ubaxMorphTabsItemSelector=".view-toggle"
-      >
-        <button
-          class="view-toggle"
-          [class.is-active]="viewMode() === 'grid'"
-          [class.view-toggle--active]="viewMode() === 'grid'"
-          type="button"
-          role="tab"
-          aria-label="Vue grille"
-          [attr.aria-selected]="viewMode() === 'grid'"
-          [attr.aria-pressed]="viewMode() === 'grid'"
-          (click)="setViewMode('grid')"
-        >
-          <svg
-            class="view-toggle__icon view-toggle__icon--grid"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <rect
-              x="1"
-              y="1"
-              width="7"
-              height="7"
-              rx="1"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <rect
-              x="12"
-              y="1"
-              width="7"
-              height="7"
-              rx="1"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <rect
-              x="1"
-              y="12"
-              width="7"
-              height="7"
-              rx="1"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <rect
-              x="12"
-              y="12"
-              width="7"
-              height="7"
-              rx="1"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-          </svg>
-        </button>
-
-        <button
-          class="view-toggle"
-          [class.is-active]="viewMode() === 'list'"
-          [class.view-toggle--active]="viewMode() === 'list'"
-          type="button"
-          role="tab"
-          aria-label="Vue liste"
-          [attr.aria-selected]="viewMode() === 'list'"
-          [attr.aria-pressed]="viewMode() === 'list'"
-          (click)="setViewMode('list')"
-        >
-          <svg
-            class="view-toggle__icon view-toggle__icon--list"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M7 4h12M7 10h12M7 16h12"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
-            <circle cx="2.5" cy="4" r="1.5" fill="currentColor" />
-            <circle cx="2.5" cy="10" r="1.5" fill="currentColor" />
-            <circle cx="2.5" cy="16" r="1.5" fill="currentColor" />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    @if (showEmptyState()) {
-      <section class="biens-empty-state" aria-live="polite">
-        <div class="biens-empty-state__art" aria-hidden="true">
-          <span
-            class="biens-empty-state__orb biens-empty-state__orb--large"
-          ></span>
-          <span
-            class="biens-empty-state__orb biens-empty-state__orb--small"
-          ></span>
-          <span class="biens-empty-state__house">
-            <svg
-              viewBox="0 0 64 64"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M10 28L32 12L54 28V50C54 51.1046 53.1046 52 52 52H12C10.8954 52 10 51.1046 10 50V28Z"
-                stroke="currentColor"
-                stroke-width="2.5"
-              />
-              <path
-                d="M24 52V36C24 34.8954 24.8954 34 26 34H38C39.1046 34 40 34.8954 40 36V52"
-                stroke="currentColor"
-                stroke-width="2.5"
-              />
-              <path
-                d="M4 28L32 8L60 28"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-              />
-            </svg>
-          </span>
-        </div>
-
-        <h2 class="biens-empty-state__title">
-          Aucun bien à afficher pour l’instant
-        </h2>
-
-        @if (hasActiveFilters()) {
-          <p class="biens-empty-state__text">
-            Vos filtres ne correspondent à aucun bien sur cette page. Essayez de
-            réinitialiser les filtres.
-          </p>
-
-          <div class="biens-empty-state__actions">
-            <button
-              class="biens-empty-state__btn biens-empty-state__btn--ghost"
-              type="button"
-              (click)="resetFilters()"
-            >
-              Réinitialiser les filtres
-            </button>
-            <a
-              class="biens-empty-state__btn biens-empty-state__btn--primary"
-              routerLink="ajouter"
-            >
-              Ajouter un bien
-            </a>
-          </div>
         } @else {
-          <p class="biens-empty-state__text">
-            Commencez par créer votre premier bien pour remplir votre
-            portefeuille.
-          </p>
+          <div class="biens-list">
+            @for (bien of visibleListCards(); track bien.id; let index = $index) {
+              <a
+                class="bien-list-card"
+                [routerLink]="[bien.id]"
+                [attr.title]="bien.rejectionReason"
+                [style.--bien-enter-order]="index"
+              >
+                <div class="bien-list-card__media">
+                  <img
+                    class="bien-list-card__image"
+                    [src]="bien.image"
+                    [alt]="bien.title"
+                    [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+                    decoding="async"
+                  />
 
-          <div class="biens-empty-state__actions">
-            <a
-              class="biens-empty-state__btn biens-empty-state__btn--primary"
-              routerLink="ajouter"
-            >
-              Ajouter mon premier bien
-            </a>
+                  <span class="bien-list-card__badge">{{
+                    bien.boosted
+                      ? 'BOOST'
+                      : bien.statusRaw === 'ARCHIVED'
+                        ? 'ARCHIVÉ'
+                        : bien.category
+                  }}</span>
+                </div>
+
+                <div class="bien-list-card__content">
+                  <div class="bien-list-card__top">
+                    <h2 class="bien-list-card__title">{{ bien.title }}</h2>
+                    <p class="bien-list-card__price">{{ bien.price }}</p>
+                  </div>
+
+                  <p class="bien-list-card__location">
+                    <span class="bien-list-card__location-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 16 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                        <circle
+                          cx="8"
+                          cy="7"
+                          r="2"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                    </span>
+                    <span>{{ bien.location }}</span>
+                  </p>
+
+                  <div class="bien-list-card__bottom">
+                    <div class="bien-list-card__tenant">
+                      <img
+                        class="bien-list-card__avatar"
+                        [src]="bien.avatar"
+                        [alt]="bien.tenant"
+                        loading="lazy"
+                        decoding="async"
+                      />
+
+                      <div class="bien-list-card__tenant-copy">
+                        <p class="bien-list-card__tenant-name">{{ bien.tenant }}</p>
+                        <p class="bien-list-card__tenant-role">
+                          {{ bien.tenantRole }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="bien-list-card__actions">
+                      <button
+                        class="archive-chip archive-chip--compact"
+                        type="button"
+                        [disabled]="!canArchive(bien.statusRaw, bien.id)"
+                        (click)="
+                          $event.preventDefault();
+                          $event.stopPropagation();
+                          openArchiveDialog(bien)
+                        "
+                      >
+                        @if (isArchiving(bien.id)) {
+                          Archivage...
+                        } @else if (bien.statusRaw === 'ARCHIVED') {
+                          Archivé
+                        } @else {
+                          Archiver
+                        }
+                      </button>
+
+                      <span class="bien-list-card__arrow" aria-hidden="true">
+                        <svg
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M4 10h12M10 4l6 6-6 6"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            }
           </div>
         }
+
+        @if (archiveDialogTarget(); as archiveTarget) {
+          <div class="archive-modal-overlay" (click)="closeArchiveDialog()">
+            <dialog
+              class="archive-modal"
+              open
+              aria-labelledby="archive-modal-title"
+              (click)="$event.stopPropagation()"
+            >
+              <h3 id="archive-modal-title">Archiver ce bien ?</h3>
+              <p>
+                Vous allez archiver <strong>{{ archiveDialogTitle() }}</strong
+                >. Cette action retire le bien de votre liste active.
+              </p>
+
+              <div class="archive-modal__actions">
+                <button
+                  class="archive-modal__btn archive-modal__btn--cancel"
+                  type="button"
+                  [disabled]="isArchiving(archiveTarget.id)"
+                  (click)="closeArchiveDialog()"
+                >
+                  Annuler
+                </button>
+                <button
+                  class="archive-modal__btn archive-modal__btn--confirm"
+                  type="button"
+                  [disabled]="isArchiving(archiveTarget.id)"
+                  (click)="confirmArchive()"
+                >
+                  @if (isArchiving(archiveTarget.id)) {
+                    Archivage...
+                  } @else {
+                    Confirmer l'archivage
+                  }
+                </button>
+              </div>
+            </dialog>
+          </div>
+        }
+
+        <div class="biens-pagination">
+          <ubax-paginator
+            [currentPage]="currentPage()"
+            (currentPageChange)="currentPage.set($event)"
+            [totalPages]="totalPages()"
+          />
+        </div>
       </section>
-    } @else if (viewMode() === 'grid') {
-      <div class="biens-grid">
-        @for (bien of visibleGridCards(); track bien.id; let index = $index) {
-          <a
-            class="bien-card"
-            [routerLink]="[bien.id]"
-            [attr.title]="bien.rejectionReason"
-            [style.--bien-enter-order]="index"
-          >
-            <img
-              class="bien-card__image"
-              [src]="bien.image"
-              [alt]="bien.title"
-              [attr.loading]="index === 0 ? 'eager' : 'lazy'"
-              decoding="async"
-            />
-
-            <span class="bien-card__badge">{{
-              bien.boosted
-                ? 'BOOST'
-                : bien.statusRaw === 'ARCHIVED'
-                  ? 'ARCHIVÉ'
-                  : bien.category
-            }}</span>
-
-            <div class="bien-card__panel">
-              <div class="bien-card__heading">
-                <h2 class="bien-card__title">{{ bien.title }}</h2>
-
-                <div class="bien-card__actions">
-                  <button
-                    class="archive-chip"
-                    type="button"
-                    [disabled]="!canArchive(bien.statusRaw, bien.id)"
-                    (click)="
-                      $event.preventDefault();
-                      $event.stopPropagation();
-                      openArchiveDialog(bien)
-                    "
-                  >
-                    @if (isArchiving(bien.id)) {
-                      Archivage...
-                    } @else if (bien.statusRaw === 'ARCHIVED') {
-                      Archivé
-                    } @else {
-                      Archiver
-                    }
-                  </button>
-
-                  <span class="bien-card__arrow" aria-hidden="true">
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M4 10h12M10 4l6 6-6 6"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-
-              <p class="bien-card__location">
-                <span class="bien-card__location-icon" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 16 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                    />
-                    <circle
-                      cx="8"
-                      cy="7"
-                      r="2"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                    />
-                  </svg>
-                </span>
-                <span>{{ bien.location }}</span>
-              </p>
-
-              <div class="bien-card__bottom">
-                <div class="bien-card__tenant">
-                  <img
-                    class="bien-card__avatar"
-                    [src]="bien.avatar"
-                    [alt]="bien.tenant"
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-                  <div class="bien-card__tenant-copy">
-                    <p class="bien-card__tenant-name">{{ bien.tenant }}</p>
-                    <p class="bien-card__tenant-role">{{ bien.tenantRole }}</p>
-                  </div>
-                </div>
-
-                <p class="bien-card__price">{{ bien.price }}</p>
-              </div>
-            </div>
-          </a>
-        }
-      </div>
-    } @else {
-      <div class="biens-list">
-        @for (bien of visibleListCards(); track bien.id; let index = $index) {
-          <a
-            class="bien-list-card"
-            [routerLink]="[bien.id]"
-            [attr.title]="bien.rejectionReason"
-            [style.--bien-enter-order]="index"
-          >
-            <div class="bien-list-card__media">
-              <img
-                class="bien-list-card__image"
-                [src]="bien.image"
-                [alt]="bien.title"
-                [attr.loading]="index === 0 ? 'eager' : 'lazy'"
-                decoding="async"
-              />
-
-              <span class="bien-list-card__badge">{{
-                bien.boosted
-                  ? 'BOOST'
-                  : bien.statusRaw === 'ARCHIVED'
-                    ? 'ARCHIVÉ'
-                    : bien.category
-              }}</span>
-            </div>
-
-            <div class="bien-list-card__content">
-              <div class="bien-list-card__top">
-                <h2 class="bien-list-card__title">{{ bien.title }}</h2>
-                <p class="bien-list-card__price">{{ bien.price }}</p>
-              </div>
-
-              <p class="bien-list-card__location">
-                <span class="bien-list-card__location-icon" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 16 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                    />
-                    <circle
-                      cx="8"
-                      cy="7"
-                      r="2"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                    />
-                  </svg>
-                </span>
-                <span>{{ bien.location }}</span>
-              </p>
-
-              <div class="bien-list-card__bottom">
-                <div class="bien-list-card__tenant">
-                  <img
-                    class="bien-list-card__avatar"
-                    [src]="bien.avatar"
-                    [alt]="bien.tenant"
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-                  <div class="bien-list-card__tenant-copy">
-                    <p class="bien-list-card__tenant-name">{{ bien.tenant }}</p>
-                    <p class="bien-list-card__tenant-role">
-                      {{ bien.tenantRole }}
-                    </p>
-                  </div>
-                </div>
-
-                <div class="bien-list-card__actions">
-                  <button
-                    class="archive-chip archive-chip--compact"
-                    type="button"
-                    [disabled]="!canArchive(bien.statusRaw, bien.id)"
-                    (click)="
-                      $event.preventDefault();
-                      $event.stopPropagation();
-                      openArchiveDialog(bien)
-                    "
-                  >
-                    @if (isArchiving(bien.id)) {
-                      Archivage...
-                    } @else if (bien.statusRaw === 'ARCHIVED') {
-                      Archivé
-                    } @else {
-                      Archiver
-                    }
-                  </button>
-
-                  <span class="bien-list-card__arrow" aria-hidden="true">
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M4 10h12M10 4l6 6-6 6"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </a>
-        }
-      </div>
-    }
-
-    @if (archiveDialogTarget(); as archiveTarget) {
-      <div class="archive-modal-overlay" (click)="closeArchiveDialog()">
-        <dialog
-          class="archive-modal"
-          open
-          aria-labelledby="archive-modal-title"
-          (click)="$event.stopPropagation()"
-        >
-          <h3 id="archive-modal-title">Archiver ce bien ?</h3>
-          <p>
-            Vous allez archiver <strong>{{ archiveDialogTitle() }}</strong
-            >. Cette action retire le bien de votre liste active.
-          </p>
-
-          <div class="archive-modal__actions">
-            <button
-              class="archive-modal__btn archive-modal__btn--cancel"
-              type="button"
-              [disabled]="isArchiving(archiveTarget.id)"
-              (click)="closeArchiveDialog()"
-            >
-              Annuler
-            </button>
-            <button
-              class="archive-modal__btn archive-modal__btn--confirm"
-              type="button"
-              [disabled]="isArchiving(archiveTarget.id)"
-              (click)="confirmArchive()"
-            >
-              @if (isArchiving(archiveTarget.id)) {
-                Archivage...
-              } @else {
-                Confirmer l'archivage
-              }
-            </button>
-          </div>
-        </dialog>
-      </div>
-    }
-
-    <div class="biens-pagination">
-      <ubax-paginator
-        [(currentPage)]="currentPage"
-        [totalPages]="totalPages()"
-      />
-    </div>
-  </section>
+    </section>
+  }
 </section>

@@ -1099,6 +1099,134 @@
   color: #fff;
 }
 
+/* ─── ViewState — transitions anti-flicker ───────────────────────── */
+
+/* État initial invisible (avant triggerContentEnter) */
+.biens-page__content {
+  opacity: 0;
+}
+
+/* Skeleton sortant */
+.biens-page__content.is-leaving {
+  opacity: 1;
+  animation: biens-page-fade-out 320ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+/* Contenu entrant */
+.biens-page__content--entering {
+  animation: biens-page-fade-in 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Header entrant */
+.biens-page__title {
+  opacity: 0;
+}
+
+.biens-page__title--entering {
+  animation: biens-page-toolbar-in 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.biens-page__actions {
+  opacity: 0;
+}
+
+.biens-page__actions--entering {
+  animation: biens-page-toolbar-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards;
+}
+
+/* Skeleton header pills */
+.biens-page__sk-title {
+  height: 40px;
+  width: 220px;
+  border-radius: 8px;
+  background: var(--ubax-border-card, #e8edf2);
+  animation: biens-sk-pulse 1.6s ease-in-out infinite;
+}
+
+.biens-page__sk-action {
+  height: 64px;
+  width: 274px;
+  border-radius: 33.5px;
+  background: var(--ubax-border-card, #e8edf2);
+  animation: biens-sk-pulse 1.6s ease-in-out infinite;
+  animation-delay: 80ms;
+}
+
+@keyframes biens-sk-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* Error state */
+.biens-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  gap: 12px;
+  text-align: center;
+}
+
+.biens-error-state__icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 4px;
+}
+
+.biens-error-state__title {
+  margin: 0;
+  color: var(--ubax-text-primary);
+  font-family: 'Lexend', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.biens-error-state__hint {
+  margin: 0;
+  color: #4a5a68;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.biens-error-state__retry {
+  margin-top: 8px;
+  min-height: 46px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--ubax-radius-pill);
+  background: var(--ubax-navy);
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--ubax-navy) 85%, #fff);
+  }
+}
+
+@keyframes biens-page-fade-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.985); }
+}
+
+@keyframes biens-page-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes biens-page-toolbar-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── Animations ─────────────────────────────────────────────────── */
 
 @keyframes bienGridEnter {
@@ -1299,5 +1427,24 @@
   .bien-card__image,
   .bien-list-card__image {
     animation: none !important;
+  }
+
+  .biens-page__content,
+  .biens-page__title,
+  .biens-page__actions {
+    opacity: 1;
+  }
+
+  .biens-page__content.is-leaving,
+  .biens-page__content--entering,
+  .biens-page__title--entering,
+  .biens-page__actions--entering {
+    animation: none;
+    opacity: 1;
+  }
+
+  .biens-page__sk-title,
+  .biens-page__sk-action {
+    animation: none;
   }
 }
