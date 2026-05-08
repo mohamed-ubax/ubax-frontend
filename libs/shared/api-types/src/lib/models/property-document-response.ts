@@ -13,7 +13,7 @@ export interface PropertyDocumentResponse {
   createdAt?: string;
 
   /**
-   * Type de document : TITRE_FONCIER | PERMIS_CONSTRUIRE | DIAGNOSTIC | CONTRAT_BAIL | AUTRE
+   * Type de document — valeurs depuis GET /v1/code-list/type/PROPERTY_DOCUMENT_TYPE : TITLE_DEED | BUILDING_PERMIT | DIAGNOSTIC | CADASTRAL_PLAN | INSURANCE | CONFORMITY_CERTIFICATE | OTHER
    */
   docType?: string;
 

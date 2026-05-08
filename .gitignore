@@ -55,5 +55,6 @@ instructions.md
 # Generated files
 .kiro
 Jira.md
+mcp.json
 swagger.json
 ubax-postman.json

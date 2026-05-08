@@ -46,6 +46,7 @@ export * from './lib/store/hotel/hotel.store'; // inviterMembre, assignerSousRol
 export * from './lib/store/agency/agency.store'; // inviterMembre agence, sous-rôles
 export { BienCreationStore } from './lib/store/biens/bien-creation.store';
 export type { BienCreationState } from './lib/store/biens/bien-creation.store';
+export { MesBiensStore } from './lib/store/biens/mes-biens.store';
 
 // ─── Configs API prêtes à l'emploi avec createApiStore ───────────────────────
 // Usage : const BiensStore = createApiStore(biensApiConfig);
