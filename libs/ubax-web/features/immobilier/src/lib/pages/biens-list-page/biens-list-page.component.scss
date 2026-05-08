@@ -1022,6 +1022,11 @@
   justify-content: center;
   background: rgb(3 14 27 / 0.48);
   backdrop-filter: blur(3px);
+  animation: archive-overlay-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  &.is-closing {
+    animation: archive-overlay-out 220ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
 }
 
 .archive-modal {
@@ -1031,6 +1036,11 @@
   padding: 30px 30px 24px;
   background: var(--ubax-surface);
   box-shadow: 0 20px 50px rgb(3 14 27 / 0.26);
+  animation: archive-modal-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  &.is-closing {
+    animation: archive-modal-out 220ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
 
   h3 {
     margin: 0;
@@ -1277,6 +1287,40 @@
   }
 }
 
+/* ─── Modal animations ───────────────────────────────────────────── */
+
+@keyframes archive-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes archive-overlay-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes archive-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes archive-modal-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 1600px) {
@@ -1446,5 +1490,10 @@
   .biens-page__sk-title,
   .biens-page__sk-action {
     animation: none;
+  }
+
+  .archive-modal-overlay,
+  .archive-modal {
+    animation: none !important;
   }
 }

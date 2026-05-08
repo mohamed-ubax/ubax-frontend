@@ -241,6 +241,8 @@ export class BiensListPageComponent {
     title: string;
     statusRaw: PropertyMineStatus;
   } | null>(null);
+  /** true pendant les ~220 ms de l'animation de fermeture */
+  protected readonly archiveDialogClosing = signal(false);
 
   private readonly archivePendingId = signal<string | null>(null);
   private readonly archivePendingTitle = signal('');
@@ -558,10 +560,13 @@ export class BiensListPageComponent {
         'ubax-overlay-open',
         hasArchiveOverlay,
       );
+      // Bloquer le scroll de la page quand le modal est ouvert
+      this.document.body.style.overflow = hasArchiveOverlay ? 'hidden' : '';
 
       onCleanup(() => {
         if (hasArchiveOverlay) {
           this.document.body.classList.remove('ubax-overlay-open');
+          this.document.body.style.overflow = '';
         }
       });
     });
@@ -639,7 +644,12 @@ export class BiensListPageComponent {
       return;
     }
 
-    this.archiveDialogTarget.set(null);
+    // Déclencher l'animation de sortie, puis vider le target
+    this.archiveDialogClosing.set(true);
+    setTimeout(() => {
+      this.archiveDialogTarget.set(null);
+      this.archiveDialogClosing.set(false);
+    }, 220);
   }
 
   protected confirmArchive(): void {
@@ -672,6 +682,10 @@ export class BiensListPageComponent {
 
   @HostListener('document:keydown.escape')
   handleEscapeKey(): void {
+    if (this.archiveDialogTarget() !== null) {
+      this.closeArchiveDialog();
+      return;
+    }
     this.openDropdown.set(null);
   }
 
