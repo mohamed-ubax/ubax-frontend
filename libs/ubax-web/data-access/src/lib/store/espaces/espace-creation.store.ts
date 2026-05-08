@@ -4,13 +4,16 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
+  addDocument,
   addMedia,
   ApiConfiguration,
   create2,
+  deleteDocument,
   deleteMedia,
   findAllByType,
   LaCodeListDto,
   presignPropertyMedia,
+  PropertyDocumentResponse,
   PropertyCreateRequest,
   PropertyMediaResponse,
   PropertyResponse,
@@ -25,7 +28,19 @@ export type EspaceCreationState = {
   propertyId: string | null;
   property: PropertyResponse | null;
   medias: PropertyMediaResponse[];
+  documents: PropertyDocumentResponse[];
+  codeListPropertyTypes: LaCodeListDto[];
+  codeListBedTypes: LaCodeListDto[];
+  codeListMealPlans: LaCodeListDto[];
+  codeListPaymentFrequencies: LaCodeListDto[];
+  codeListTransactionTypes: LaCodeListDto[];
+  codeListPropertyConditions: LaCodeListDto[];
+  codeListAmenities: LaCodeListDto[];
   codeListCities: LaCodeListDto[];
+  codeListDocumentTypes: LaCodeListDto[];
+  lastPresignedDocument: PresignedUrlResponse | null;
+  documentUploadStage: 'idle' | 'presigning' | 'uploading' | 'registering';
+  codeListsLoading: boolean;
   saving: boolean;
   error: string | null;
   mediaUploadProgress: Record<string, number>;
@@ -35,7 +50,19 @@ const initialState: EspaceCreationState = {
   propertyId: null,
   property: null,
   medias: [],
+  documents: [],
+  codeListPropertyTypes: [],
+  codeListBedTypes: [],
+  codeListMealPlans: [],
+  codeListPaymentFrequencies: [],
+  codeListTransactionTypes: [],
+  codeListPropertyConditions: [],
+  codeListAmenities: [],
   codeListCities: [],
+  codeListDocumentTypes: [],
+  lastPresignedDocument: null,
+  documentUploadStage: 'idle',
+  codeListsLoading: false,
   saving: false,
   error: null,
   mediaUploadProgress: {},
@@ -63,7 +90,8 @@ function extractHttpErrorMessage(err: HttpErrorResponse): string {
     const message = obj['message'];
     const detail = obj['detail'];
     const error = obj['error'];
-    if (typeof message === 'string' && message.trim().length > 0) return message;
+    if (typeof message === 'string' && message.trim().length > 0)
+      return message;
     if (typeof detail === 'string' && detail.trim().length > 0) return detail;
     if (typeof error === 'string' && error.trim().length > 0) return error;
   }
@@ -73,7 +101,8 @@ function extractHttpErrorMessage(err: HttpErrorResponse): string {
 function extractProperty(body: unknown): PropertyResponse {
   if (body && typeof body === 'object') {
     const obj = body as { data?: unknown };
-    if (obj.data && typeof obj.data === 'object') return obj.data as PropertyResponse;
+    if (obj.data && typeof obj.data === 'object')
+      return obj.data as PropertyResponse;
     return body as PropertyResponse;
   }
   return {} as PropertyResponse;
@@ -100,6 +129,35 @@ function hasValidPresignedUpload(
     typeof payload?.publicUrl === 'string' &&
     payload.publicUrl.length > 0
   );
+}
+
+function requestPresignedPropertyDocumentUpload(
+  http: HttpClient,
+  rootUrl: string,
+  params: { propertyId: string; fileName: string; contentType: string },
+) {
+  return http
+    .get<unknown>(`${rootUrl}/v1/storage/presign/property-document`, {
+      params,
+    })
+    .pipe(map((body) => extractEntity<PresignedUrlResponse>(body)));
+}
+
+function markCoverMedia(
+  medias: PropertyMediaResponse[],
+  mediaId: string,
+): PropertyMediaResponse[] {
+  return medias.map((media) => ({
+    ...media,
+    cover: media.id === mediaId,
+  }));
+}
+
+function removeMediaById(
+  medias: PropertyMediaResponse[],
+  mediaId: string,
+): PropertyMediaResponse[] {
+  return medias.filter((media) => media.id !== mediaId);
 }
 
 /**
@@ -129,7 +187,78 @@ export const EspaceCreationStore = signalStore(
       },
 
       /**
-       * Charge les villes depuis GET /v1/code-list/type/CITY
+       * Charge les référentiels nécessaires à la création d'un espace.
+       */
+      chargerReferentiels: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { error: null, codeListsLoading: true })),
+          exhaustMap(() =>
+            forkJoin({
+              propertyTypes: findAllByType(http, apiConfig.rootUrl, {
+                type: 'PROPERTY_TYPE',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              bedTypes: findAllByType(http, apiConfig.rootUrl, {
+                type: 'BED_TYPE',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              mealPlans: findAllByType(http, apiConfig.rootUrl, {
+                type: 'MEAL_PLAN',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              paymentFrequencies: findAllByType(http, apiConfig.rootUrl, {
+                type: 'PAYMENT_FREQUENCY',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              transactionTypes: findAllByType(http, apiConfig.rootUrl, {
+                type: 'TRANSACTION_TYPE',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              propertyConditions: findAllByType(http, apiConfig.rootUrl, {
+                type: 'PROPERTY_CONDITION',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              amenities: findAllByType(http, apiConfig.rootUrl, {
+                type: 'PROPERTY_AMENITY',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              cities: findAllByType(http, apiConfig.rootUrl, {
+                type: 'CITY',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              documentTypes: findAllByType(http, apiConfig.rootUrl, {
+                type: 'PROPERTY_DOCUMENT_TYPE',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+            }).pipe(
+              tapResponse({
+                next: ({
+                  propertyTypes,
+                  bedTypes,
+                  mealPlans,
+                  paymentFrequencies,
+                  transactionTypes,
+                  propertyConditions,
+                  amenities,
+                  cities,
+                  documentTypes,
+                }) =>
+                  patchState(store, {
+                    codeListPropertyTypes: propertyTypes,
+                    codeListBedTypes: bedTypes,
+                    codeListMealPlans: mealPlans,
+                    codeListPaymentFrequencies: paymentFrequencies,
+                    codeListTransactionTypes: transactionTypes,
+                    codeListPropertyConditions: propertyConditions,
+                    codeListAmenities: amenities,
+                    codeListCities: cities,
+                    codeListDocumentTypes: documentTypes,
+                    codeListsLoading: false,
+                  }),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, {
+                    codeListsLoading: false,
+                    error: extractHttpErrorMessage(err),
+                  }),
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      /**
+       * Alias conservé pour compatibilité avec les composants existants.
        */
       chargerVilles: rxMethod<void>(
         pipe(
@@ -140,7 +269,7 @@ export const EspaceCreationStore = signalStore(
               tapResponse({
                 next: (cities) => patchState(store, { codeListCities: cities }),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { error: err.message }),
+                  patchState(store, { error: extractHttpErrorMessage(err) }),
               }),
             ),
           ),
@@ -157,10 +286,7 @@ export const EspaceCreationStore = signalStore(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap((body) =>
             create2(http, apiConfig.rootUrl, {
-              body: {
-                ...body,
-                transactionType: 'RENT_FURNISHED',
-              },
+              body,
             }).pipe(
               map((r) => extractProperty(r.body)),
               tapResponse({
@@ -249,7 +375,8 @@ export const EspaceCreationStore = signalStore(
                 if (!hasValidPresignedUpload(presign)) {
                   patchState(store, {
                     saving: false,
-                    error: "Impossible d'obtenir une URL d'upload média valide.",
+                    error:
+                      "Impossible d'obtenir une URL d'upload média valide.",
                   });
                   return EMPTY;
                 }
@@ -314,10 +441,7 @@ export const EspaceCreationStore = signalStore(
               tapResponse({
                 next: () =>
                   patchState(store, (s) => ({
-                    medias: s.medias.map((m) => ({
-                      ...m,
-                      cover: m.id === mediaId,
-                    })),
+                    medias: markCoverMedia(s.medias, mediaId),
                     saving: false,
                   })),
                 error: (err: HttpErrorResponse) =>
@@ -345,7 +469,137 @@ export const EspaceCreationStore = signalStore(
               tapResponse({
                 next: () =>
                   patchState(store, (s) => ({
-                    medias: s.medias.filter((m) => m.id !== mediaId),
+                    medias: removeMediaById(s.medias, mediaId),
+                    saving: false,
+                  })),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { saving: false, error: err.message }),
+              }),
+            );
+          }),
+        ),
+      ),
+
+      /**
+       * Upload d'un document légal via URL présignée.
+       * Étapes: presign -> upload storage -> rattachement du document.
+       */
+      uploaderDocument: rxMethod<{
+        file: File;
+        docType: string;
+        title: string;
+      }>(
+        pipe(
+          tap(() =>
+            patchState(store, {
+              saving: true,
+              error: null,
+              documentUploadStage: 'presigning',
+            }),
+          ),
+          exhaustMap(({ file, docType, title }) => {
+            const propertyId = store.propertyId();
+            if (!propertyId) return EMPTY;
+
+            return requestPresignedPropertyDocumentUpload(
+              http,
+              apiConfig.rootUrl,
+              {
+                propertyId,
+                fileName: file.name,
+                contentType: file.type,
+              },
+            ).pipe(
+              tap((presign) =>
+                patchState(store, {
+                  lastPresignedDocument: presign ?? null,
+                  documentUploadStage: presign ? 'uploading' : 'idle',
+                }),
+              ),
+              switchMap((presign) => {
+                if (!hasValidPresignedUpload(presign)) {
+                  patchState(store, {
+                    saving: false,
+                    documentUploadStage: 'idle',
+                    error:
+                      "Impossible d'obtenir une URL présignée valide pour le document.",
+                  });
+                  return EMPTY;
+                }
+
+                return http
+                  .put(presign.uploadUrl, file, {
+                    headers: { 'Content-Type': file.type },
+                  })
+                  .pipe(
+                    tap(() =>
+                      patchState(store, {
+                        documentUploadStage: 'registering',
+                      }),
+                    ),
+                    switchMap(() =>
+                      addDocument(http, apiConfig.rootUrl, {
+                        id: propertyId,
+                        body: {
+                          docType,
+                          title,
+                          fileName: file.name,
+                          fileSize: file.size,
+                          fileUrl: presign.publicUrl,
+                          mimeType: file.type,
+                        },
+                      }),
+                    ),
+                    map((r) => extractEntity<PropertyDocumentResponse>(r.body)),
+                  );
+              }),
+              tapResponse({
+                next: (doc: PropertyDocumentResponse | null) => {
+                  if (!doc) {
+                    patchState(store, {
+                      saving: false,
+                      documentUploadStage: 'idle',
+                      error: 'Réponse document invalide après upload.',
+                    });
+                    return;
+                  }
+
+                  patchState(store, {
+                    documents: [...store.documents(), doc],
+                    documentUploadStage: 'idle',
+                    saving: false,
+                  });
+                },
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, {
+                    saving: false,
+                    documentUploadStage: 'idle',
+                    error: extractHttpErrorMessage(err),
+                  }),
+              }),
+            );
+          }),
+        ),
+      ),
+
+      /**
+       * Supprime un document légal déjà rattaché au bien.
+       */
+      supprimerDocument: rxMethod<string>(
+        pipe(
+          tap(() => patchState(store, { saving: true, error: null })),
+          exhaustMap((documentId) => {
+            const propertyId = store.propertyId();
+            if (!propertyId) return EMPTY;
+
+            return deleteDocument(http, apiConfig.rootUrl, {
+              id: propertyId,
+              docId: documentId,
+            }).pipe(
+              tapResponse({
+                next: () =>
+                  patchState(store, (s) => ({
+                    documents: s.documents.filter((d) => d.id !== documentId),
                     saving: false,
                   })),
                 error: (err: HttpErrorResponse) =>

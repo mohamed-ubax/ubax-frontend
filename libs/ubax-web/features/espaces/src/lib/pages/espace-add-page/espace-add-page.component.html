@@ -14,8 +14,19 @@
       >
         <span class="stepper__bubble">
           @if (isCompletedStep($index)) {
-            <svg viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M1 5l4 4L13 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              viewBox="0 0 14 10"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M1 5l4 4L13 1"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           } @else {
             {{ $index + 1 }}
@@ -24,7 +35,10 @@
         <span class="stepper__label">{{ step.label }}</span>
       </button>
       @if ($index < steps.length - 1) {
-        <span class="stepper__connector" [class.stepper__connector--done]="isCompletedStep($index)"></span>
+        <span
+          class="stepper__connector"
+          [class.stepper__connector--done]="isCompletedStep($index)"
+        ></span>
       }
     }
   </div>
@@ -32,17 +46,44 @@
   <!-- ── Error banner ─────────────────────────────────────────────────────── -->
   @if (error()) {
     <div class="form-error-banner" role="alert">
-      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-        <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M10 6v5M10 13.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <svg
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        width="18"
+        height="18"
+      >
+        <circle
+          cx="10"
+          cy="10"
+          r="9"
+          stroke="currentColor"
+          stroke-width="1.5"
+        />
+        <path
+          d="M10 6v5M10 13.5h.01"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
       </svg>
-      <span>{{ error() }}</span>
+      <span class="form-error-banner__text">{{ error() }}</span>
+      @if (isSessionError()) {
+        <button
+          class="form-error-banner__action"
+          type="button"
+          (click)="expireAndRedirect()"
+        >
+          Se reconnecter
+        </button>
+      }
     </div>
   }
 
   <!-- ── Type cards (always visible) ─────────────────────────────────────── -->
   <div class="type-cards">
-    @for (option of propertyTypeOptions; track option.value) {
+    @for (option of propertyTypeOptions(); track option.value) {
       <button
         class="type-card"
         [class.type-card--active]="selectedPropertyType === option.value"
@@ -54,7 +95,13 @@
           <span class="type-card__icon-wrap" aria-hidden="true">
             <img [src]="option.icon" alt="" />
           </span>
-          <span class="type-card__check" [class.type-card__check--active]="selectedPropertyType === option.value" aria-hidden="true">
+          <span
+            class="type-card__check"
+            [class.type-card__check--active]="
+              selectedPropertyType === option.value
+            "
+            aria-hidden="true"
+          >
             @if (selectedPropertyType === option.value) {
               <img src="space-add/icons/check.svg" alt="" />
             }
@@ -70,7 +117,6 @@
 
   <div class="page-layout">
     <div class="main-column">
-
       <!-- ════════════════════════════════════════════════════════════════════
            STEP 0 — Identité
       ═══════════════════════════════════════════════════════════════════════ -->
@@ -88,11 +134,11 @@
 
           <div class="section-card__body">
             <div class="identity-grid">
-
               <!-- Titre -->
               <div class="field-box field-box--full">
                 <label class="field-box__label" for="esp-title">
-                  Titre de l'espace <span class="field-req" aria-hidden="true">*</span>
+                  Titre de l'espace
+                  <span class="field-req" aria-hidden="true">*</span>
                 </label>
                 <div class="field-box__control">
                   <input
@@ -103,54 +149,83 @@
                     placeholder="Ex : Suite Présidentielle vue mer"
                   />
                 </div>
-                @if (formStep1.title().invalid() && formStep1.title().touched()) {
+                @if (
+                  formStep1.title().invalid() && formStep1.title().touched()
+                ) {
                   <p class="field-error">Titre requis</p>
                 }
               </div>
 
               <!-- Type de transaction -->
               <div class="field-box">
-                <p class="field-box__label">Type de transaction <span class="field-req" aria-hidden="true">*</span></p>
-                <div class="transaction-chips">
-                  @for (opt of transactionTypeOptions; track opt.value) {
-                    <button
-                      class="transaction-chip"
-                      [class.transaction-chip--active]="_step1().transactionType === opt.value"
-                      type="button"
-                      (click)="_step1.update(s => ({ ...s, transactionType: opt.value }))"
-                    >
-                      {{ opt.label }}
-                    </button>
-                  }
-                </div>
+                <label class="field-box__label" for="esp-transaction">
+                  Type de transaction
+                  <span class="field-req" aria-hidden="true">*</span>
+                </label>
+                <p-select
+                  id="esp-transaction"
+                  class="espace-select"
+                  styleClass="espace-select"
+                  panelStyleClass="espace-select__panel"
+                  [options]="transactionTypeOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [showClear]="false"
+                  [ngModel]="_step1().transactionType"
+                  (ngModelChange)="_step1.update(s => ({ ...s, transactionType: $event }))"
+                  [ngModelOptions]="{ standalone: true }"
+                  appendTo="body"
+                  placeholder="Sélectionner un type"
+                ></p-select>
               </div>
 
               <!-- État -->
               <div class="field-box">
-                <p class="field-box__label">État de l'espace</p>
-                <div class="condition-chips">
-                  @for (opt of conditionOptions; track opt.value) {
-                    <button
-                      class="condition-chip"
-                      [class.condition-chip--active]="_step1().condition === opt.value"
-                      type="button"
-                      (click)="_step1.update(s => ({ ...s, condition: opt.value }))"
-                    >
-                      {{ opt.label }}
-                    </button>
-                  }
-                </div>
+                <label class="field-box__label" for="esp-condition"
+                  >État de l'espace</label
+                >
+                <p-select
+                  id="esp-condition"
+                  class="espace-select"
+                  styleClass="espace-select"
+                  panelStyleClass="espace-select__panel"
+                  [options]="conditionOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [showClear]="false"
+                  [ngModel]="_step1().condition"
+                  (ngModelChange)="_step1.update(s => ({ ...s, condition: $event }))"
+                  [ngModelOptions]="{ standalone: true }"
+                  appendTo="body"
+                  placeholder="Sélectionner un état"
+                ></p-select>
               </div>
-
             </div>
           </div>
         </section>
 
         <div class="step-nav">
-          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="proceedStep1()">
+          <button
+            class="step-nav__btn step-nav__btn--next"
+            type="button"
+            (click)="proceedStep1()"
+          >
             Suivant
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M4 10h12M10 4l6 6-6 6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -172,7 +247,6 @@
           </header>
 
           <div class="section-card__body">
-
             <!-- Étage -->
             <div class="field-box field-box--full">
               <p class="field-box__label">Étage</p>
@@ -180,129 +254,217 @@
                 @for (floor of floorOptions; track floor) {
                   <button
                     class="floor-selector__chip"
-                    [class.floor-selector__chip--active]="selectedFloor === floor"
+                    [class.floor-selector__chip--active]="
+                      selectedFloor === floor
+                    "
                     type="button"
                     (click)="selectFloor(floor)"
-                  >{{ floor }}</button>
+                  >
+                    {{ floor }}
+                  </button>
                 }
               </div>
             </div>
 
             <div class="capacity-grid capacity-grid--room">
-
               <!-- Pièces -->
               <div class="field-box">
                 <label class="field-box__label" for="esp-rooms">Pièces</label>
                 <div class="field-box__control">
-                  <input id="esp-rooms" class="field-box__input" type="number"
-                    [formField]="formStep2.rooms" />
+                  <input
+                    id="esp-rooms"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.rooms"
+                  />
                 </div>
               </div>
 
               <!-- Chambres -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-bedrooms">Chambres</label>
+                <label class="field-box__label" for="esp-bedrooms"
+                  >Chambres</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-bedrooms" class="field-box__input" type="number"
-                    [formField]="formStep2.bedrooms" />
+                  <input
+                    id="esp-bedrooms"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.bedrooms"
+                  />
                 </div>
               </div>
 
               <!-- Salles de bain -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-bathrooms">Salles de bain</label>
+                <label class="field-box__label" for="esp-bathrooms"
+                  >Salles de bain</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-bathrooms" class="field-box__input" type="number"
-                    [formField]="formStep2.bathrooms" />
+                  <input
+                    id="esp-bathrooms"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.bathrooms"
+                  />
                 </div>
               </div>
 
               <!-- Balcons -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-balconies">Balcons</label>
+                <label class="field-box__label" for="esp-balconies"
+                  >Balcons</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-balconies" class="field-box__input" type="number"
-                    [formField]="formStep2.balconies" />
+                  <input
+                    id="esp-balconies"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.balconies"
+                  />
                 </div>
               </div>
 
               <!-- Surface habitable -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-surface-living">Surface habitable</label>
+                <label class="field-box__label" for="esp-surface-living"
+                  >Surface habitable</label
+                >
                 <div class="field-box__control field-box__control--unit">
-                  <input id="esp-surface-living" class="field-box__input" type="number"
-                    [formField]="formStep2.surfaceLiving" />
+                  <input
+                    id="esp-surface-living"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.surfaceLiving"
+                  />
                   <span class="field-box__unit">m²</span>
                 </div>
               </div>
 
               <!-- Surface totale -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-surface-total">Surface totale</label>
+                <label class="field-box__label" for="esp-surface-total"
+                  >Surface totale</label
+                >
                 <div class="field-box__control field-box__control--unit">
-                  <input id="esp-surface-total" class="field-box__input" type="number"
-                    [formField]="formStep2.surfaceTotal" />
+                  <input
+                    id="esp-surface-total"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.surfaceTotal"
+                  />
                   <span class="field-box__unit">m²</span>
                 </div>
               </div>
 
               <!-- Capacité max -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-occupancy">Capacité max (personnes)</label>
+                <label class="field-box__label" for="esp-occupancy"
+                  >Capacité max (personnes)</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-occupancy" class="field-box__input" type="number"
-                    [formField]="formStep2.maxOccupancy" />
+                  <input
+                    id="esp-occupancy"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.maxOccupancy"
+                  />
                 </div>
-                @if (formStep2.maxOccupancy().invalid() && formStep2.maxOccupancy().touched()) {
+                @if (
+                  formStep2.maxOccupancy().invalid() &&
+                  formStep2.maxOccupancy().touched()
+                ) {
                   <p class="field-error">Capacité invalide (min 1)</p>
                 }
               </div>
 
               <!-- Nb étages total -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-total-floors">Nb d'étages total</label>
+                <label class="field-box__label" for="esp-total-floors"
+                  >Nb d'étages total</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-total-floors" class="field-box__input" type="number"
-                    [formField]="formStep2.totalFloors" />
+                  <input
+                    id="esp-total-floors"
+                    class="field-box__input"
+                    type="number"
+                    [formField]="formStep2.totalFloors"
+                  />
                 </div>
               </div>
-
             </div>
 
             <!-- Type de lit (chambre / suite uniquement) -->
             @if (isRoomOrSuite) {
-              <div class="bed-options">
-                <p class="field-box__label">Type de lit</p>
-                <div class="bed-options__list">
-                  @for (opt of bedTypeOptions; track opt.value) {
-                    <button
-                      class="bed-options__item"
-                      [class.bed-options__item--active]="selectedBedType === opt.value"
-                      type="button"
-                      (click)="selectBedType(opt.value)"
-                    >
-                      <span>{{ opt.label }}</span>
-                      <span class="bed-options__marker"></span>
-                    </button>
-                  }
-                </div>
+              <div class="field-box field-box--full">
+                <label class="field-box__label" for="esp-bed-type"
+                  >Type de lit</label
+                >
+                <p-select
+                  id="esp-bed-type"
+                  class="espace-select"
+                  styleClass="espace-select"
+                  panelStyleClass="espace-select__panel"
+                  [options]="bedTypeOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [showClear]="false"
+                  [ngModel]="selectedBedType"
+                  (ngModelChange)="selectBedType($event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  appendTo="body"
+                  placeholder="Sélectionner un type de lit"
+                ></p-select>
               </div>
             }
-
           </div>
         </section>
 
         <div class="step-nav">
-          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="step-nav__btn step-nav__btn--prev"
+            type="button"
+            (click)="previousStep()"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M16 10H4M10 16l-6-6 6-6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             Précédent
           </button>
-          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="proceedStep2()">
+          <button
+            class="step-nav__btn step-nav__btn--next"
+            type="button"
+            (click)="proceedStep2()"
+          >
             Suivant
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M4 10h12M10 4l6 6-6 6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -325,21 +487,45 @@
 
           <div class="section-card__body">
             <div class="identity-grid">
-
               <!-- Ville -->
               <div class="field-box">
                 <label class="field-box__label" for="esp-city">
                   Ville <span class="field-req" aria-hidden="true">*</span>
                 </label>
-                <div class="field-box__control field-box__control--select">
-                  <select id="esp-city" class="field-box__input" [formField]="formStep3.city">
-                    <option value="">Sélectionner une ville</option>
-                    @for (city of cities(); track city.id) {
-                      <option [value]="getCityValue(city)">{{ getCityLabel(city) }}</option>
-                    }
-                  </select>
-                  <img class="field-box__select-icon" src="space-add/icons/select.svg" alt="" />
-                </div>
+                <p-select
+                  id="esp-city"
+                  class="espace-select"
+                  styleClass="espace-select"
+                  panelStyleClass="espace-select__panel"
+                  [options]="cities()"
+                  optionLabel="description"
+                  optionValue="value"
+                  [filter]="true"
+                  filterBy="description,value"
+                  filterPlaceholder="Rechercher une ville..."
+                  [showClear]="false"
+                  [ngModel]="_step3().city"
+                  (ngModelChange)="_step3.update(s => ({ ...s, city: $event }))"
+                  [ngModelOptions]="{ standalone: true }"
+                  appendTo="body"
+                  placeholder="Sélectionner une ville"
+                >
+                  <ng-template #selectedItem let-city>
+                    <span class="espace-select__selected">
+                      {{ getCityLabel(city) }}
+                    </span>
+                  </ng-template>
+                  <ng-template #item let-city>
+                    <div class="espace-select__option">
+                      <span class="espace-select__option-title">
+                        {{ getCityLabel(city) }}
+                      </span>
+                      <span class="espace-select__option-meta">
+                        {{ getCityValue(city) }}
+                      </span>
+                    </div>
+                  </ng-template>
+                </p-select>
                 @if (formStep3.city().invalid() && formStep3.city().touched()) {
                   <p class="field-error">La ville est requise</p>
                 }
@@ -347,19 +533,33 @@
 
               <!-- Quartier -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-district">Quartier / Commune</label>
+                <label class="field-box__label" for="esp-district"
+                  >Quartier / Commune</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-district" class="field-box__input" type="text"
-                    [formField]="formStep3.district" placeholder="Ex : Corniche Ouest" />
+                  <input
+                    id="esp-district"
+                    class="field-box__input"
+                    type="text"
+                    [formField]="formStep3.district"
+                    placeholder="Ex : Corniche Ouest"
+                  />
                 </div>
               </div>
 
               <!-- Adresse -->
               <div class="field-box field-box--full">
-                <label class="field-box__label" for="esp-address">Adresse complète</label>
+                <label class="field-box__label" for="esp-address"
+                  >Adresse complète</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-address" class="field-box__input" type="text"
-                    [formField]="formStep3.address" placeholder="Ex : Route de la Corniche Ouest, Dakar" />
+                  <input
+                    id="esp-address"
+                    class="field-box__input"
+                    type="text"
+                    [formField]="formStep3.address"
+                    placeholder="Ex : Route de la Corniche Ouest, Dakar"
+                  />
                 </div>
               </div>
 
@@ -367,44 +567,97 @@
               <div class="field-box">
                 <label class="field-box__label" for="esp-street">Rue</label>
                 <div class="field-box__control">
-                  <input id="esp-street" class="field-box__input" type="text"
-                    [formField]="formStep3.street" />
+                  <input
+                    id="esp-street"
+                    class="field-box__input"
+                    type="text"
+                    [formField]="formStep3.street"
+                  />
                 </div>
               </div>
 
               <!-- Latitude -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-lat">Latitude GPS</label>
+                <label class="field-box__label" for="esp-lat"
+                  >Latitude GPS</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-lat" class="field-box__input" type="number" step="0.0001"
-                    [formField]="formStep3.latitude" placeholder="Ex : 14.6937" />
+                  <input
+                    id="esp-lat"
+                    class="field-box__input"
+                    type="number"
+                    step="0.0001"
+                    [formField]="formStep3.latitude"
+                    placeholder="Ex : 14.6937"
+                  />
                 </div>
               </div>
 
               <!-- Longitude -->
               <div class="field-box">
-                <label class="field-box__label" for="esp-lng">Longitude GPS</label>
+                <label class="field-box__label" for="esp-lng"
+                  >Longitude GPS</label
+                >
                 <div class="field-box__control">
-                  <input id="esp-lng" class="field-box__input" type="number" step="0.0001"
-                    [formField]="formStep3.longitude" placeholder="Ex : -17.4441" />
+                  <input
+                    id="esp-lng"
+                    class="field-box__input"
+                    type="number"
+                    step="0.0001"
+                    [formField]="formStep3.longitude"
+                    placeholder="Ex : -17.4441"
+                  />
                 </div>
               </div>
-
             </div>
           </div>
         </section>
 
         <div class="step-nav">
-          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="step-nav__btn step-nav__btn--prev"
+            type="button"
+            (click)="previousStep()"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M16 10H4M10 16l-6-6 6-6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             Précédent
           </button>
-          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="proceedStep3()">
+          <button
+            class="step-nav__btn step-nav__btn--next"
+            type="button"
+            (click)="proceedStep3()"
+          >
             Suivant
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M4 10h12M10 4l6 6-6 6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -414,11 +667,12 @@
            STEP 3 — Équipements & Prix
       ═══════════════════════════════════════════════════════════════════════ -->
       @if (activeStep() === 3) {
-
         <!-- Équipements -->
         <section class="section-card section-card--equipments">
           <header class="section-card__header">
-            <span class="section-card__icon section-card__icon--sparkle" aria-hidden="true">✨</span>
+            <span class="section-card__icon" aria-hidden="true">
+              <img src="space-add/icons/file-document.svg" alt="" />
+            </span>
             <div class="section-card__heading">
               <h2>Équipements &amp; Services</h2>
               <p>Sélectionner les équipements disponibles dans cet espace</p>
@@ -428,7 +682,7 @@
           <div class="section-card__body section-card__body--equipments">
             <p class="section-body__label">Équipements</p>
             <div class="equipment-grid">
-              @for (item of equipmentItems; track item.id) {
+              @for (item of equipmentItems(); track item.id) {
                 <button
                   class="equipment-card"
                   [class.equipment-card--active]="isAmenitySelected(item.code)"
@@ -440,9 +694,13 @@
                     <img [src]="item.icon" alt="" />
                     <span>{{ item.label }}</span>
                   </span>
-                  <span class="equipment-card__action"
-                    [class.equipment-card__action--active]="isAmenitySelected(item.code)"
-                    aria-hidden="true">
+                  <span
+                    class="equipment-card__action"
+                    [class.equipment-card__action--active]="
+                      isAmenitySelected(item.code)
+                    "
+                    aria-hidden="true"
+                  >
                   </span>
                 </button>
               }
@@ -463,15 +721,18 @@
           </header>
 
           <div class="section-card__body section-card__body--pricing">
-
             <!-- Tarif par nuit -->
             <div class="pricing-row">
               <label class="pricing-row__label" for="esp-price">
                 Tarif (XOF) <span class="field-req" aria-hidden="true">*</span>
               </label>
               <div class="pricing-row__control">
-                <input id="esp-price" class="pricing-row__input" type="number"
-                  [formField]="formStep4.price" />
+                <input
+                  id="esp-price"
+                  class="pricing-row__input"
+                  type="number"
+                  [formField]="formStep4.price"
+                />
                 <span class="pricing-row__unit">XOF</span>
               </div>
             </div>
@@ -481,58 +742,115 @@
 
             <!-- Fréquence de facturation -->
             <div class="pricing-row pricing-row--last">
-              <p class="pricing-row__label">Fréquence</p>
-              <div class="freq-chips">
-                @for (opt of paymentFrequencyOptions; track opt.value) {
-                  <button
-                    class="freq-chip"
-                    [class.freq-chip--active]="_step4().paymentFrequency === opt.value"
-                    type="button"
-                    (click)="_step4.update(s => ({ ...s, paymentFrequency: opt.value }))"
-                  >{{ opt.label }}</button>
-                }
-              </div>
+              <label class="pricing-row__label" for="esp-payment-frequency"
+                >Fréquence</label
+              >
+              <p-select
+                id="esp-payment-frequency"
+                class="espace-select espace-select--compact"
+                styleClass="espace-select espace-select--compact"
+                panelStyleClass="espace-select__panel"
+                [options]="paymentFrequencyOptions()"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="false"
+                [ngModel]="_step4().paymentFrequency"
+                (ngModelChange)="_step4.update(s => ({ ...s, paymentFrequency: $event }))"
+                [ngModelOptions]="{ standalone: true }"
+                appendTo="body"
+                placeholder="Sélectionner une fréquence"
+              ></p-select>
             </div>
 
             <!-- Formule repas -->
             <div class="pricing-row pricing-row--last">
-              <p class="pricing-row__label">Formule repas</p>
-              <div class="freq-chips">
-                @for (opt of mealPlanOptions; track opt.value) {
-                  <button
-                    class="freq-chip"
-                    [class.freq-chip--active]="_step4().mealPlan === opt.value"
-                    type="button"
-                    (click)="_step4.update(s => ({ ...s, mealPlan: opt.value }))"
-                  >{{ opt.label }}</button>
-                }
-              </div>
+              <label class="pricing-row__label" for="esp-meal-plan"
+                >Formule repas</label
+              >
+              <p-select
+                id="esp-meal-plan"
+                class="espace-select espace-select--compact"
+                styleClass="espace-select espace-select--compact"
+                panelStyleClass="espace-select__panel"
+                [options]="mealPlanOptions()"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="false"
+                [ngModel]="_step4().mealPlan"
+                (ngModelChange)="_step4.update(s => ({ ...s, mealPlan: $event }))"
+                [ngModelOptions]="{ standalone: true }"
+                appendTo="body"
+                placeholder="Sélectionner une formule"
+              ></p-select>
             </div>
 
             <!-- Description -->
             <div class="notes-block">
-              <label class="notes-block__label" for="esp-description">Description &amp; notes</label>
-              <textarea id="esp-description" class="notes-block__textarea" rows="4"
+              <label class="notes-block__label" for="esp-description"
+                >Description &amp; notes</label
+              >
+              <textarea
+                id="esp-description"
+                class="notes-block__textarea"
+                rows="4"
                 [formField]="formStep4.description"
-                placeholder="Description visible par les clients…"></textarea>
+                placeholder="Description visible par les clients…"
+              ></textarea>
             </div>
-
           </div>
         </section>
 
         <div class="step-nav">
-          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="step-nav__btn step-nav__btn--prev"
+            type="button"
+            (click)="previousStep()"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M16 10H4M10 16l-6-6 6-6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             Précédent
           </button>
-          <button class="step-nav__btn step-nav__btn--next" type="button"
-            [disabled]="saving()" (click)="proceedStep4()">
-            @if (saving()) { Création en cours… } @else { Créer le brouillon }
+          <button
+            class="step-nav__btn step-nav__btn--next"
+            type="button"
+            [disabled]="saving()"
+            (click)="proceedStep4()"
+          >
+            @if (saving()) {
+              Création en cours…
+            } @else {
+              Créer le brouillon
+            }
             @if (!saving()) {
-              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-                <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                width="18"
+                height="18"
+              >
+                <path
+                  d="M4 10h12M10 4l6 6-6 6"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             }
           </button>
@@ -555,24 +873,51 @@
           </header>
 
           <div class="section-card__body section-card__body--gallery">
-
             <!-- Cover warn -->
             @if (coverWarnVisible()) {
               <div class="cover-warn" role="alert">
-                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
-                  <path d="M10 2L18 17H2L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                  <path d="M10 8v4M10 13.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  width="16"
+                  height="16"
+                >
+                  <path
+                    d="M10 2L18 17H2L10 2z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10 8v4M10 13.5h.01"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
                 </svg>
-                <span>La photo de couverture a été supprimée. Définissez-en une nouvelle.</span>
-                <button type="button" class="cover-warn__close" (click)="dismissCoverWarn()" aria-label="Fermer">✕</button>
+                <span
+                  >La photo de couverture a été supprimée. Définissez-en une
+                  nouvelle.</span
+                >
+                <button
+                  type="button"
+                  class="cover-warn__close"
+                  (click)="dismissCoverWarn()"
+                  aria-label="Fermer"
+                >
+                  ✕
+                </button>
               </div>
             }
 
             <!-- Photo count hint -->
             @if (!hasMinPhotos()) {
-              <p class="media-hint" role="status">
-                {{ photoCount() }}/3 photos — ajoutez au minimum 3 photos pour cet espace.
-              </p>
+              <output class="media-hint">
+                {{ photoCount() }}/3 photos — ajoutez au minimum 3 photos pour
+                cet espace.
+              </output>
             }
 
             <!-- Drop zone -->
@@ -582,22 +927,58 @@
               (dragover)="onDragOver($event)"
               (dragleave)="onDragLeave()"
               (drop)="onDrop($event)"
-              role="button"
-              tabindex="0"
               aria-label="Zone de dépôt de fichiers"
             >
-              <svg class="drop-zone__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="4" y="10" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2"/>
-                <circle cx="16" cy="20" r="4" stroke="currentColor" stroke-width="2"/>
-                <path d="M4 34l10-10 8 8 6-6 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M32 4v12M26 10l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg
+                class="drop-zone__icon"
+                viewBox="0 0 48 48"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <rect
+                  x="4"
+                  y="10"
+                  width="40"
+                  height="30"
+                  rx="4"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <circle
+                  cx="16"
+                  cy="20"
+                  r="4"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <path
+                  d="M4 34l10-10 8 8 6-6 16 14"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M32 4v12M26 10l6-6 6 6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
               <p class="drop-zone__text">Glissez-déposez vos photos ici</p>
               <p class="drop-zone__or">ou</p>
               <label class="drop-zone__browse">
                 Parcourir les fichiers
-                <input type="file" [accept]="acceptedMedia" multiple class="drop-zone__input"
-                  (change)="onMediaFilesSelected($event)" aria-label="Sélectionner des fichiers" />
+                <input
+                  type="file"
+                  [accept]="acceptedMedia"
+                  multiple
+                  class="drop-zone__input"
+                  (change)="onMediaFilesSelected($event)"
+                  aria-label="Sélectionner des fichiers"
+                />
               </label>
             </div>
 
@@ -605,31 +986,89 @@
             @if (medias().length > 0) {
               <div class="gallery-grid">
                 @for (media of medias(); track media.id) {
-                  <figure class="gallery-grid__item" [class.gallery-grid__item--cover]="media.cover">
-                    <img [src]="media.fileUrl" [alt]="media.mediaType ?? 'Média'" loading="lazy" decoding="async" />
+                  <figure
+                    class="gallery-grid__item"
+                    [class.gallery-grid__item--cover]="media.cover"
+                  >
+                    <div class="gallery-grid__thumb">
+                      <img
+                        class="gallery-grid__img"
+                        [src]="media.fileUrl"
+                        [alt]="media.mediaType ?? 'Média'"
+                        loading="lazy"
+                        decoding="async"
+                      />
 
-                    @if (media.cover) {
-                      <span class="gallery-grid__cover-badge" aria-label="Photo de couverture">
-                        <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="12" height="12">
-                          <path d="M8 1l1.8 3.6L14 5.6l-3 2.9.7 4.1L8 10.5l-3.7 2.1.7-4.1-3-2.9 4.2-.6L8 1z"/>
-                        </svg>
-                        Couverture
-                      </span>
-                    }
+                      @if (media.cover) {
+                        <span
+                          class="gallery-grid__cover-badge"
+                          aria-label="Photo de couverture"
+                        >
+                          <svg
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true"
+                            width="12"
+                            height="12"
+                          >
+                            <path
+                              d="M8 1l1.8 3.6L14 5.6l-3 2.9.7 4.1L8 10.5l-3.7 2.1.7-4.1-3-2.9 4.2-.6L8 1z"
+                            />
+                          </svg>
+                          Couverture
+                        </span>
+                      }
+                    </div>
 
                     <figcaption class="gallery-grid__actions">
                       @if (!media.cover) {
-                        <button class="gallery-grid__btn gallery-grid__btn--cover" type="button"
-                          (click)="setCover(media.id!)" title="Définir comme couverture" aria-label="Définir comme couverture">
-                          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14">
-                            <path d="M8 1l1.8 3.6L14 5.6l-3 2.9.7 4.1L8 10.5l-3.7 2.1.7-4.1-3-2.9 4.2-.6L8 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                        <button
+                          class="gallery-grid__btn gallery-grid__btn--cover"
+                          type="button"
+                          (click)="setCover(media.id!)"
+                          title="Définir comme couverture"
+                          aria-label="Définir comme couverture"
+                        >
+                          <svg
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true"
+                            width="14"
+                            height="14"
+                          >
+                            <path
+                              d="M8 1l1.8 3.6L14 5.6l-3 2.9.7 4.1L8 10.5l-3.7 2.1.7-4.1-3-2.9 4.2-.6L8 1z"
+                              stroke="currentColor"
+                              stroke-width="1.2"
+                              stroke-linejoin="round"
+                            />
                           </svg>
                         </button>
                       }
-                      <button class="gallery-grid__btn gallery-grid__btn--delete" type="button"
-                        (click)="requestDeleteMedia(media.id!)" title="Supprimer" aria-label="Supprimer ce média">
-                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14">
-                          <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <button
+                        class="gallery-grid__btn gallery-grid__btn--delete"
+                        type="button"
+                        (click)="requestDeleteMedia(media.id!)"
+                        title="Supprimer"
+                        aria-label="Supprimer ce média"
+                      >
+                        <svg
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                          width="14"
+                          height="14"
+                        >
+                          <path
+                            d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10"
+                            stroke="currentColor"
+                            stroke-width="1.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
                         </svg>
                       </button>
                     </figcaption>
@@ -637,21 +1076,54 @@
                 }
               </div>
             }
-
           </div>
         </section>
 
         <div class="step-nav">
-          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="step-nav__btn step-nav__btn--prev"
+            type="button"
+            (click)="previousStep()"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M16 10H4M10 16l-6-6 6-6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             Précédent
           </button>
-          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="nextStep()">
+          <button
+            class="step-nav__btn step-nav__btn--next"
+            type="button"
+            (click)="nextStep()"
+          >
             Suivant
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M4 10h12M10 4l6 6-6 6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -673,93 +1145,303 @@
           </header>
 
           <div class="section-card__body">
+            <section class="finalization-docs" aria-label="Documents legaux">
+              <h3 class="finalization-docs__title">Documents legaux</h3>
+              <p class="finalization-docs__hint">
+                Ajoutez les documents officiels de l espace (max 20 Mo,
+                PDF/JPG/PNG/WEBP).
+              </p>
+
+              <div class="finalization-docs__upload-row">
+                <div class="field-box">
+                  <label class="field-box__label" for="esp-doc-type">
+                    Type de document
+                  </label>
+                  <p-select
+                    id="esp-doc-type"
+                    class="espace-select espace-select--compact"
+                    styleClass="espace-select espace-select--compact"
+                    panelStyleClass="espace-select__panel"
+                    [options]="docTypeOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    [showClear]="false"
+                    [ngModel]="selectedDocType()"
+                    (ngModelChange)="onDocTypeChange($event)"
+                    [ngModelOptions]="{ standalone: true }"
+                    appendTo="body"
+                    placeholder="Selectionner un type"
+                  ></p-select>
+                </div>
+
+                <div class="field-box">
+                  <label class="field-box__label" for="esp-doc-title">
+                    Libelle du document
+                  </label>
+                  <div class="field-box__control">
+                    <input
+                      id="esp-doc-title"
+                      class="field-box__input"
+                      type="text"
+                      [ngModel]="docTitle()"
+                      (ngModelChange)="docTitle.set($event ?? '')"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="Ex : Titre foncier principal"
+                    />
+                  </div>
+                </div>
+
+                <label
+                  class="doc-upload-btn"
+                  [class.doc-upload-btn--disabled]="
+                    documentUploadStage() !== 'idle'
+                  "
+                >
+                  <input
+                    type="file"
+                    [accept]="acceptedDocs"
+                    [disabled]="documentUploadStage() !== 'idle'"
+                    (change)="onDocFileSelected($event)"
+                  />
+                  Ajouter un document
+                </label>
+              </div>
+
+              @if (docFileError()) {
+                <p class="field-error">{{ docFileError() }}</p>
+              }
+
+              @if (documentUploadTimeline().length > 0) {
+                <ol
+                  class="doc-timeline"
+                  aria-label="Progression upload document"
+                >
+                  @for (step of documentUploadTimeline(); track step.key) {
+                    <li
+                      class="doc-timeline__item"
+                      [attr.data-status]="step.status"
+                    >
+                      <span class="doc-timeline__dot" aria-hidden="true"></span>
+                      <div>
+                        <strong>{{ step.label }}</strong>
+                        <p>{{ step.description }}</p>
+                      </div>
+                    </li>
+                  }
+                </ol>
+              }
+
+              @if (documents().length > 0) {
+                <div class="doc-table-wrap">
+                  <table class="doc-table">
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>Titre</th>
+                        <th>Taille</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        doc of documents();
+                        track trackDocument($index, doc)
+                      ) {
+                        <tr>
+                          <td>{{ docTypeLabel(doc.docType) }}</td>
+                          <td>{{ doc.title || doc.fileName || '—' }}</td>
+                          <td>{{ formatBytes(doc.fileSize) || '—' }}</td>
+                          <td>
+                            <div class="doc-actions">
+                              <button
+                                type="button"
+                                class="doc-actions__btn"
+                                [disabled]="
+                                  !doc.fileUrl || documentOpeningId() === doc.id
+                                "
+                                (click)="
+                                  doc.fileUrl &&
+                                    openDocument(doc.fileUrl, doc.id)
+                                "
+                              >
+                                @if (documentOpeningId() === doc.id) {
+                                  Ouverture...
+                                } @else {
+                                  Ouvrir
+                                }
+                              </button>
+                              <button
+                                type="button"
+                                class="doc-actions__btn doc-actions__btn--danger"
+                                [disabled]="!doc.id"
+                                (click)="doc.id && requestDeleteDoc(doc.id)"
+                              >
+                                Supprimer
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <p class="doc-empty">
+                  Aucun document legal ajoute pour le moment.
+                </p>
+              }
+            </section>
+
             <div class="finalization-summary">
               <div class="finalization-summary__row">
                 <span class="finalization-summary__label">Espace</span>
-                <span class="finalization-summary__value">{{ previewTitle() || '—' }}</span>
+                <span class="finalization-summary__value">{{
+                  previewTitle() || '—'
+                }}</span>
               </div>
               <div class="finalization-summary__row">
                 <span class="finalization-summary__label">Type</span>
-                <span class="finalization-summary__value">{{ previewType() }}</span>
+                <span class="finalization-summary__value">{{
+                  previewType()
+                }}</span>
               </div>
               <div class="finalization-summary__row">
                 <span class="finalization-summary__label">Tarif</span>
-                <span class="finalization-summary__value">{{ previewPrice() | number:'1.0-0' }} XOF</span>
+                <span class="finalization-summary__value"
+                  >{{ previewPrice() | number: '1.0-0' }} XOF</span
+                >
               </div>
               <div class="finalization-summary__row">
                 <span class="finalization-summary__label">Ville</span>
-                <span class="finalization-summary__value">{{ previewCity() || '—' }}</span>
+                <span class="finalization-summary__value">{{
+                  previewCity() || '—'
+                }}</span>
               </div>
               <div class="finalization-summary__row">
                 <span class="finalization-summary__label">Photos</span>
-                <span class="finalization-summary__value"
-                  [class.finalization-summary__value--warn]="!hasMinPhotos()">
+                <span
+                  class="finalization-summary__value"
+                  [class.finalization-summary__value--warn]="!hasMinPhotos()"
+                >
                   {{ photoCount() }} photo(s)
-                  @if (!hasMinPhotos()) { <span> · Recommandé : 3 minimum</span> }
+                  @if (!hasMinPhotos()) {
+                    <span> · Recommandé : 3 minimum</span>
+                  }
                 </span>
               </div>
               <div class="finalization-summary__row">
                 <span class="finalization-summary__label">Statut</span>
-                <span class="finalization-summary__value finalization-summary__value--draft">Brouillon</span>
+                <span
+                  class="finalization-summary__value finalization-summary__value--draft"
+                  >Brouillon</span
+                >
+              </div>
+              <div class="finalization-summary__row">
+                <span class="finalization-summary__label">Documents</span>
+                <span class="finalization-summary__value"
+                  >{{ documents().length }} document(s)</span
+                >
               </div>
             </div>
           </div>
         </section>
 
         <div class="save-action">
-          <button class="save-action__button save-action__button--ghost" type="button"
-            [disabled]="saving()" (click)="sauvegarderBrouillon()">
+          <button
+            class="save-action__button save-action__button--ghost"
+            type="button"
+            [disabled]="saving()"
+            (click)="sauvegarderBrouillon()"
+          >
             Enregistrer en brouillon
           </button>
-          <button class="save-action__button" type="button"
-            [disabled]="saving()" (click)="soumettre()">
-            @if (saving()) { Soumission… } @else { Soumettre à la modération }
+          <button
+            class="save-action__button"
+            type="button"
+            [disabled]="saving()"
+            (click)="soumettre()"
+          >
+            @if (saving()) {
+              Soumission…
+            } @else {
+              Soumettre à la modération
+            }
           </button>
         </div>
 
         <div class="step-nav step-nav--final">
-          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
-              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="step-nav__btn step-nav__btn--prev"
+            type="button"
+            (click)="previousStep()"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              width="18"
+              height="18"
+            >
+              <path
+                d="M16 10H4M10 16l-6-6 6-6"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             Précédent
           </button>
         </div>
       }
-
-    </div><!-- /main-column -->
+    </div>
+    <!-- /main-column -->
 
     <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
     <aside class="side-column">
-
       <!-- Preview card -->
       <section class="preview-card">
         <div class="preview-card__media">
           @if (medias().length > 0 && medias()[0].fileUrl) {
-            <img class="preview-card__hero-image"
+            <img
+              class="preview-card__hero-image"
               [src]="medias().find(m => m.cover)?.fileUrl ?? medias()[0].fileUrl"
-              alt="Aperçu de l'espace" decoding="async" />
+              alt="Aperçu de l'espace"
+              decoding="async"
+            />
           } @else {
-            <img class="preview-card__hero-image"
+            <img
+              class="preview-card__hero-image"
               src="space-add/images/preview-room.webp"
-              alt="Aperçu de l'espace" decoding="async" />
+              alt="Aperçu de l'espace"
+              decoding="async"
+            />
           }
           <div class="preview-card__overlay" aria-hidden="true">
-            <img class="preview-card__overlay-icon"
-              [src]="selectedPropertyType === 'CONFERENCE_ROOM' ? 'space-add/icons/conference-room.svg' : 'space-add/icons/bed-double.svg'"
-              alt="" />
+            <img
+              class="preview-card__overlay-icon"
+              [src]="
+                selectedPropertyType === 'CONFERENCE_ROOM'
+                  ? 'space-add/icons/conference-room.svg'
+                  : 'space-add/icons/bed-double.svg'
+              "
+              alt=""
+            />
           </div>
           <span class="preview-card__badge">{{ previewType() }}</span>
         </div>
 
         <div class="preview-card__body">
-          <h2 class="preview-card__title">{{ previewTitle() || "Nom de l'espace" }}</h2>
+          <h2 class="preview-card__title">
+            {{ previewTitle() || "Nom de l'espace" }}
+          </h2>
           <p class="preview-card__subtitle">Étage {{ previewFloor() }}</p>
 
           <dl class="preview-card__stats">
             <div class="preview-card__stat">
               <dt>Tarif / nuit</dt>
-              <dd>{{ previewPrice() | number:'1.0-0' }} XOF</dd>
+              <dd>{{ previewPrice() | number: '1.0-0' }} XOF</dd>
             </div>
             <div class="preview-card__stat">
               <dt>Ville</dt>
@@ -789,37 +1471,92 @@
           </div>
         </div>
         <div class="status-card__body">
-          @for (opt of transactionTypeOptions; track opt.value) {
-            <button
-              class="status-card__option"
-              [class.status-card__option--active]="_step1().transactionType === opt.value"
-              type="button"
-              (click)="_step1.update(s => ({ ...s, transactionType: opt.value }))"
-            >{{ opt.label }}</button>
-          }
+          <p-select
+            class="espace-select espace-select--compact"
+            styleClass="espace-select espace-select--compact"
+            panelStyleClass="espace-select__panel"
+            [options]="transactionTypeOptions()"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="false"
+            [ngModel]="_step1().transactionType"
+            (ngModelChange)="_step1.update(s => ({ ...s, transactionType: $event }))"
+            [ngModelOptions]="{ standalone: true }"
+            appendTo="body"
+            placeholder="Sélectionner un type"
+          ></p-select>
         </div>
       </section>
-
     </aside>
-  </div><!-- /page-layout -->
-
-</div><!-- /espace-add-page -->
+  </div>
+  <!-- /page-layout -->
+</div>
+<!-- /espace-add-page -->
 
 <!-- ── Delete media confirmation dialog ─────────────────────────────────── -->
 @if (mediaDeleteTarget()) {
-  <div class="delete-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title"
-    (click)="cancelDeleteMedia()">
+  <dialog
+    class="delete-overlay"
+    aria-modal="true"
+    aria-labelledby="delete-dialog-title"
+    open
+    (click)="cancelDeleteMedia()"
+  >
     <div class="delete-modal" (click)="$event.stopPropagation()">
       <h3 id="delete-dialog-title">Supprimer ce média ?</h3>
-      <p>Cette action est irréversible. Le fichier sera supprimé du stockage.</p>
+      <p>
+        Cette action est irréversible. Le fichier sera supprimé du stockage.
+      </p>
       <div class="delete-modal__actions">
-        <button class="delete-modal__btn delete-modal__btn--cancel" type="button" (click)="cancelDeleteMedia()">
+        <button
+          class="delete-modal__btn delete-modal__btn--cancel"
+          type="button"
+          (click)="cancelDeleteMedia()"
+        >
           Annuler
         </button>
-        <button class="delete-modal__btn delete-modal__btn--confirm" type="button" (click)="confirmDeleteMedia()">
+        <button
+          class="delete-modal__btn delete-modal__btn--confirm"
+          type="button"
+          (click)="confirmDeleteMedia()"
+        >
           Supprimer
         </button>
       </div>
     </div>
-  </div>
+  </dialog>
+}
+
+@if (docDeleteTarget()) {
+  <dialog
+    class="delete-overlay"
+    aria-modal="true"
+    aria-labelledby="delete-doc-dialog-title"
+    open
+    (click)="cancelDeleteDoc()"
+  >
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <h3 id="delete-doc-dialog-title">Supprimer ce document ?</h3>
+      <p>
+        Cette action est irreversible. Le document legal sera supprime du
+        dossier de l espace.
+      </p>
+      <div class="delete-modal__actions">
+        <button
+          class="delete-modal__btn delete-modal__btn--cancel"
+          type="button"
+          (click)="cancelDeleteDoc()"
+        >
+          Annuler
+        </button>
+        <button
+          class="delete-modal__btn delete-modal__btn--confirm"
+          type="button"
+          (click)="confirmDeleteDoc()"
+        >
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </dialog>
 }

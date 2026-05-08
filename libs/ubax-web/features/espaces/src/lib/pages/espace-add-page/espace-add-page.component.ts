@@ -7,7 +7,9 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   form,
@@ -23,12 +25,16 @@ import {
 } from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
-  findAllByType,
+  generateReadUrl,
   LaCodeListDto,
   PropertyAmenityRequest,
+  PropertyDocumentResponse,
 } from '@ubax-workspace/shared-api-types';
-import { HttpClient } from '@angular/common/http';
-import { EspaceCreationStore } from '@ubax-workspace/ubax-web-data-access';
+import {
+  AuthStore,
+  EspaceCreationStore,
+} from '@ubax-workspace/ubax-web-data-access';
+import { SelectModule } from 'primeng/select';
 import { firstValueFrom } from 'rxjs';
 
 // ── Wizard steps ──────────────────────────────────────────────────────────────
@@ -41,84 +47,74 @@ const WIZARD_STEPS = [
   { label: 'Finalisation' },
 ] as const;
 
-// ── Hotel property types ──────────────────────────────────────────────────────
-type HotelPropertyType = 'HOTEL_ROOM' | 'SUITE' | 'CONFERENCE_ROOM' | 'APARTMENT';
-
 type PropertyTypeOption = {
-  readonly value: HotelPropertyType;
+  readonly value: string;
   readonly label: string;
   readonly icon: string;
   readonly description: string;
 };
 
-const PROPERTY_TYPE_OPTIONS: readonly PropertyTypeOption[] = [
-  {
-    value: 'HOTEL_ROOM',
-    label: 'Chambre',
+type SelectOption = {
+  readonly value: string;
+  readonly label: string;
+};
+
+type UploadTimelineStep = {
+  key: 'presigning' | 'uploading' | 'registering';
+  label: string;
+  description: string;
+  status: 'done' | 'active' | 'pending';
+};
+
+const DEFAULT_DOC_TYPE_LABELS: Readonly<Record<string, string>> = {
+  TITLE_DEED: 'Titre foncier',
+  BUILDING_PERMIT: 'Permis de construire',
+  DIAGNOSTIC: 'Diagnostic',
+  CADASTRAL_PLAN: 'Plan cadastral',
+  INSURANCE: 'Assurance',
+  CONFORMITY_CERTIFICATE: 'Certificat de conformite',
+  OTHER: 'Autre',
+};
+
+const PROPERTY_TYPE_META: Readonly<
+  Record<string, { icon: string; description: string }>
+> = {
+  HOTEL_ROOM: {
     icon: 'space-add/icons/bed-double.svg',
     description: 'Standard, Deluxe, Suite Junior, Familiale',
   },
-  {
-    value: 'SUITE',
-    label: 'Suite',
+  ROOM: {
+    icon: 'space-add/icons/bed-double.svg',
+    description: 'Standard, Deluxe, Suite Junior, Familiale',
+  },
+  SUITE: {
     icon: 'space-add/icons/bed-double.svg',
     description: 'Suite Junior, Suite Présidentielle',
   },
-  {
-    value: 'CONFERENCE_ROOM',
-    label: 'Salle de conférence',
+  CONFERENCE_ROOM: {
     icon: 'space-add/icons/conference-room.svg',
     description: 'Réunion, Séminaire, Événement professionnel',
   },
-  {
-    value: 'APARTMENT',
-    label: 'Appartement',
+  APARTMENT: {
     icon: 'space-add/icons/bed-double.svg',
     description: 'Appartement meublé court séjour',
   },
-];
-
-// ── Bed types ─────────────────────────────────────────────────────────────────
-const BED_TYPE_OPTIONS = [
-  { value: 'SINGLE', label: 'Lit simple' },
-  { value: 'DOUBLE', label: 'Lit double' },
-  { value: 'TWIN', label: 'Lits jumeaux' },
-  { value: 'KING', label: 'King size' },
-  { value: 'QUEEN', label: 'Queen size' },
-  { value: 'BUNK', label: 'Lits superposés' },
-] as const;
-
-// ── Meal plans ────────────────────────────────────────────────────────────────
-const MEAL_PLAN_OPTIONS = [
-  { value: 'ROOM_ONLY', label: 'Chambre seule' },
-  { value: 'BREAKFAST', label: 'Petit-déjeuner inclus' },
-  { value: 'HALF_BOARD', label: 'Demi-pension' },
-  { value: 'FULL_BOARD', label: 'Pension complète' },
-  { value: 'ALL_INCLUSIVE', label: 'Tout inclus' },
-] as const;
-
-// ── Payment frequencies ───────────────────────────────────────────────────────
-const PAYMENT_FREQUENCY_OPTIONS = [
-  { value: 'NIGHTLY', label: 'Par nuit' },
-  { value: 'WEEKLY', label: 'Par semaine' },
-  { value: 'MONTHLY', label: 'Par mois' },
-] as const;
-
-// ── Transaction types ─────────────────────────────────────────────────────────
-const TRANSACTION_TYPE_OPTIONS = [
-  { value: 'SHORT_STAY', label: 'Court séjour' },
-  { value: 'RENT_FURNISHED', label: 'Location meublée' },
-] as const;
-
-// ── Condition options ─────────────────────────────────────────────────────────
-const CONDITION_OPTIONS = [
-  { value: 'NEW', label: 'Neuf' },
-  { value: 'GOOD', label: 'Bon état' },
-  { value: 'RENOVATED', label: 'Rénové' },
-] as const;
+};
 
 // ── Floor options ─────────────────────────────────────────────────────────────
-const FLOOR_OPTIONS = ['RDC', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
+const FLOOR_OPTIONS = [
+  'RDC',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10+',
+];
 
 // ── Equipment items (mapped to amenity codes) ─────────────────────────────────
 type EquipmentItem = {
@@ -128,26 +124,27 @@ type EquipmentItem = {
   readonly code: string;
 };
 
-const EQUIPMENT_ITEMS: readonly EquipmentItem[] = [
-  { id: 'ac', label: 'Climatisation', icon: 'space-add/icons/mode-cool.svg', code: 'AC' },
-  { id: 'wifi', label: 'WIFI Haut débit', icon: 'space-add/icons/mode-cool.svg', code: 'WIFI' },
-  { id: 'tv', label: 'Smart TV', icon: 'space-add/icons/mode-cool.svg', code: 'TV' },
-  { id: 'pool', label: 'Piscine', icon: 'space-add/icons/mode-cool.svg', code: 'POOL' },
-  { id: 'parking', label: 'Parking', icon: 'space-add/icons/mode-cool.svg', code: 'PARKING' },
-  { id: 'generator', label: 'Groupe électrogène', icon: 'space-add/icons/mode-cool.svg', code: 'GENERATOR' },
-  { id: 'security', label: 'Sécurité 24h/24', icon: 'space-add/icons/mode-cool.svg', code: 'SECURITY' },
-  { id: 'elevator', label: 'Ascenseur', icon: 'space-add/icons/mode-cool.svg', code: 'ELEVATOR' },
-  { id: 'garden', label: 'Jardin', icon: 'space-add/icons/mode-cool.svg', code: 'GARDEN' },
-  { id: 'furnished', label: 'Meublé', icon: 'space-add/icons/mode-cool.svg', code: 'FURNISHED' },
-  { id: 'pets', label: 'Animaux acceptés', icon: 'space-add/icons/mode-cool.svg', code: 'PETS_ALLOWED' },
-  { id: 'pmr', label: 'Accès PMR', icon: 'space-add/icons/mode-cool.svg', code: 'PMR' },
-];
+const DEFAULT_AMENITY_ICON = 'space-add/icons/mode-cool.svg';
+const AMENITY_ICON_BY_CODE: Readonly<Record<string, string>> = {
+  AC: 'space-add/icons/mode-cool.svg',
+  WIFI: 'space-add/icons/mode-cool.svg',
+  TV: 'space-add/icons/mode-cool.svg',
+  POOL: 'space-add/icons/mode-cool.svg',
+  PARKING: 'space-add/icons/mode-cool.svg',
+  GENERATOR: 'space-add/icons/mode-cool.svg',
+  SECURITY: 'space-add/icons/mode-cool.svg',
+  ELEVATOR: 'space-add/icons/mode-cool.svg',
+  GARDEN: 'space-add/icons/mode-cool.svg',
+  FURNISHED: 'space-add/icons/mode-cool.svg',
+  PETS_ALLOWED: 'space-add/icons/mode-cool.svg',
+  PMR: 'space-add/icons/mode-cool.svg',
+};
 
 // ── Form step interfaces ──────────────────────────────────────────────────────
 
 interface EspaceStep1 {
   title: string;
-  propertyType: HotelPropertyType;
+  propertyType: string;
   transactionType: string;
   condition: string;
 }
@@ -182,14 +179,26 @@ interface EspaceStep4 {
   amenities: string[];
 }
 
-const ACCEPTED_MEDIA = 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/mpeg';
+const ACCEPTED_MEDIA =
+  'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/mpeg';
+const ACCEPTED_DOCS = 'application/pdf,image/jpeg,image/png,image/webp';
 const MAX_IMAGE_MB = 10;
 const MAX_VIDEO_MB = 100;
+const MAX_DOC_SIZE_MB = 20;
+
+function resolveTimelineStatus(
+  activeIndex: number,
+  stepIndex: number,
+): UploadTimelineStep['status'] {
+  if (activeIndex > stepIndex) return 'done';
+  if (activeIndex === stepIndex) return 'active';
+  return 'pending';
+}
 
 @Component({
   selector: 'ubax-espace-add-page',
   standalone: true,
-  imports: [FormField, DecimalPipe],
+  imports: [FormField, DecimalPipe, FormsModule, SelectModule],
   providers: [EspaceCreationStore],
   templateUrl: './espace-add-page.component.html',
   styleUrl: './espace-add-page.component.scss',
@@ -198,6 +207,7 @@ const MAX_VIDEO_MB = 100;
 export class EspaceAddPageComponent implements OnInit {
   private readonly store = inject(EspaceCreationStore);
   private readonly router = inject(Router);
+  private readonly authStore = inject(AuthStore);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
@@ -208,25 +218,162 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly saving = this.store.saving;
   protected readonly error = this.store.error;
   protected readonly medias = this.store.medias;
+  protected readonly documents = this.store.documents;
   protected readonly propertyId = this.store.propertyId;
+  protected readonly propertyTypes = this.store.codeListPropertyTypes;
+  protected readonly bedTypesCodeList = this.store.codeListBedTypes;
+  protected readonly mealPlansCodeList = this.store.codeListMealPlans;
+  protected readonly paymentFrequenciesCodeList =
+    this.store.codeListPaymentFrequencies;
+  protected readonly transactionTypesCodeList =
+    this.store.codeListTransactionTypes;
+  protected readonly propertyConditionsCodeList =
+    this.store.codeListPropertyConditions;
+  protected readonly amenitiesCodeList = this.store.codeListAmenities;
   protected readonly cities = this.store.codeListCities;
+  protected readonly documentTypesCodeList = this.store.codeListDocumentTypes;
+  protected readonly documentUploadStage = this.store.documentUploadStage;
+
+  /** true si l'erreur est liée à une session expirée / token invalide */
+  protected readonly isSessionError = computed(() => {
+    const msg = this.error() ?? '';
+    return (
+      msg.includes('401') ||
+      /session expir/i.test(msg) ||
+      /unauthorized/i.test(msg) ||
+      /non autoris/i.test(msg) ||
+      /token/i.test(msg)
+    );
+  });
+
+  protected expireAndRedirect(): void {
+    this.authStore.expireSession();
+  }
+
+  private readonly toSelectOptions = (
+    items: readonly LaCodeListDto[],
+  ): SelectOption[] =>
+    items
+      .map((item) => ({
+        value: this.getCodeListValue(item),
+        label: this.getCodeListLabel(item),
+      }))
+      .filter((item) => item.value.length > 0);
+
+  protected readonly propertyTypeOptions = computed<PropertyTypeOption[]>(() =>
+    this.propertyTypes()
+      .map((item) => {
+        const value = this.getCodeListValue(item);
+        if (!value) return null;
+        const meta = PROPERTY_TYPE_META[value];
+        return {
+          value,
+          label: this.getCodeListLabel(item),
+          icon: meta?.icon ?? 'space-add/icons/bed-double.svg',
+          description:
+            meta?.description ?? 'Type d espace disponible a la reservation',
+        };
+      })
+      .filter((item): item is PropertyTypeOption => item !== null),
+  );
+
+  protected readonly bedTypeOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.bedTypesCodeList()),
+  );
+
+  protected readonly mealPlanOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.mealPlansCodeList()),
+  );
+
+  protected readonly paymentFrequencyOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.paymentFrequenciesCodeList()),
+  );
+
+  protected readonly docTypeOptions = computed<SelectOption[]>(() =>
+    this.documentTypesCodeList().map((item) => {
+      const value = this.getCodeListValue(item);
+      const label = this.getCodeListLabel(item);
+      return {
+        value,
+        label: label || DEFAULT_DOC_TYPE_LABELS[value] || value,
+      };
+    }),
+  );
+
+  protected readonly documentUploadTimeline = computed<UploadTimelineStep[]>(
+    () => {
+      const stage = this.documentUploadStage();
+
+      if (stage === 'idle') return [];
+
+      const activeIndex =
+        {
+          presigning: 0,
+          uploading: 1,
+          registering: 2,
+        }[stage] ?? 0;
+
+      return [
+        {
+          key: 'presigning',
+          label: 'Generation URL signee',
+          description: 'Preparation de l URL presignee pour le document',
+          status: resolveTimelineStatus(activeIndex, 0),
+        },
+        {
+          key: 'uploading',
+          label: 'Upload document',
+          description: 'Envoi du document vers le stockage',
+          status: resolveTimelineStatus(activeIndex, 1),
+        },
+        {
+          key: 'registering',
+          label: 'Rattachement legal',
+          description: 'Association du document a l espace',
+          status: resolveTimelineStatus(activeIndex, 2),
+        },
+      ];
+    },
+  );
+
+  protected readonly transactionTypeOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.transactionTypesCodeList()),
+  );
+
+  protected readonly conditionOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.propertyConditionsCodeList()),
+  );
+
+  protected readonly equipmentItems = computed<EquipmentItem[]>(() =>
+    this.amenitiesCodeList()
+      .map((item) => {
+        const code = this.getCodeListValue(item);
+        if (!code) return null;
+        return {
+          id: code,
+          label: this.getCodeListLabel(item),
+          icon: AMENITY_ICON_BY_CODE[code] ?? DEFAULT_AMENITY_ICON,
+          code,
+        };
+      })
+      .filter((item): item is EquipmentItem => item !== null),
+  );
 
   // ── Static options ────────────────────────────────────────────────────────
   protected readonly steps = WIZARD_STEPS;
-  protected readonly propertyTypeOptions = PROPERTY_TYPE_OPTIONS;
-  protected readonly bedTypeOptions = BED_TYPE_OPTIONS;
-  protected readonly mealPlanOptions = MEAL_PLAN_OPTIONS;
-  protected readonly paymentFrequencyOptions = PAYMENT_FREQUENCY_OPTIONS;
-  protected readonly transactionTypeOptions = TRANSACTION_TYPE_OPTIONS;
-  protected readonly conditionOptions = CONDITION_OPTIONS;
   protected readonly floorOptions = FLOOR_OPTIONS;
-  protected readonly equipmentItems = EQUIPMENT_ITEMS;
   protected readonly acceptedMedia = ACCEPTED_MEDIA;
+  protected readonly acceptedDocs = ACCEPTED_DOCS;
 
   // ── UI state ──────────────────────────────────────────────────────────────
   protected readonly activeStep = signal(0);
   protected readonly isDragOver = signal(false);
   protected readonly mediaDeleteTarget = signal<string | null>(null);
+  protected readonly docDeleteTarget = signal<string | null>(null);
+  protected readonly selectedDocType = signal('');
+  protected readonly docTitle = signal('');
+  protected readonly docFileError = signal<string | null>(null);
+  protected readonly documentOpeningId = signal<string | null>(null);
   protected readonly coverWarnVisible = signal(false);
   private readonly step4Pending = signal(false);
 
@@ -248,15 +395,17 @@ export class EspaceAddPageComponent implements OnInit {
   // Step 1 — Identité
   protected readonly _step1 = signal<EspaceStep1>({
     title: '',
-    propertyType: 'HOTEL_ROOM',
-    transactionType: 'SHORT_STAY',
-    condition: 'NEW',
+    propertyType: '',
+    transactionType: '',
+    condition: '',
   });
 
   protected readonly formStep1 = form(this._step1, (p) => {
     required(p.title, { message: "Le titre de l'espace est requis" });
     required(p.propertyType, { message: "Le type d'espace est requis" });
-    required(p.transactionType, { message: 'Le type de transaction est requis' });
+    required(p.transactionType, {
+      message: 'Le type de transaction est requis',
+    });
   });
 
   // Step 2 — Capacité & Surfaces
@@ -269,7 +418,7 @@ export class EspaceAddPageComponent implements OnInit {
     surfaceLiving: null,
     floor: 'RDC',
     totalFloors: null,
-    bedType: 'DOUBLE',
+    bedType: '',
     maxOccupancy: 2,
   });
 
@@ -305,8 +454,8 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly _step4 = signal<EspaceStep4>({
     price: 0,
     description: '',
-    mealPlan: 'ROOM_ONLY',
-    paymentFrequency: 'NIGHTLY',
+    mealPlan: '',
+    paymentFrequency: '',
     amenities: ['AC', 'SECURITY', 'PARKING'],
   });
 
@@ -318,7 +467,10 @@ export class EspaceAddPageComponent implements OnInit {
   // ── Computed form values for preview ─────────────────────────────────────
   protected readonly previewTitle = computed(() => this._step1().title);
   protected readonly previewType = computed(
-    () => PROPERTY_TYPE_OPTIONS.find((o) => o.value === this._step1().propertyType)?.label ?? '—',
+    () =>
+      this.propertyTypeOptions().find(
+        (o) => o.value === this._step1().propertyType,
+      )?.label ?? '—',
   );
   protected readonly previewPrice = computed(() => this._step4().price);
   protected readonly previewCity = computed(() => this._step3().city);
@@ -333,9 +485,88 @@ export class EspaceAddPageComponent implements OnInit {
       }
     });
 
+    effect(() => {
+      const first = this.propertyTypeOptions()[0]?.value;
+      const current = this._step1().propertyType;
+      if (first && !current) {
+        this._step1.update((s) => ({ ...s, propertyType: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.transactionTypeOptions()[0]?.value;
+      const current = this._step1().transactionType;
+      if (first && !current) {
+        this._step1.update((s) => ({ ...s, transactionType: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.conditionOptions()[0]?.value;
+      const current = this._step1().condition;
+      if (first && !current) {
+        this._step1.update((s) => ({ ...s, condition: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.bedTypeOptions()[0]?.value;
+      const current = this._step2().bedType;
+      if (first && !current) {
+        this._step2.update((s) => ({ ...s, bedType: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.mealPlanOptions()[0]?.value;
+      const current = this._step4().mealPlan;
+      if (first && !current) {
+        this._step4.update((s) => ({ ...s, mealPlan: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.paymentFrequencyOptions()[0]?.value;
+      const current = this._step4().paymentFrequency;
+      if (first && !current) {
+        this._step4.update((s) => ({ ...s, paymentFrequency: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.docTypeOptions()[0]?.value;
+      if (first && !this.selectedDocType()) {
+        this.selectedDocType.set(first);
+      }
+    });
+
+    effect(() => {
+      const available = new Set(this.equipmentItems().map((item) => item.code));
+      if (available.size === 0) return;
+      const selected = this._step4().amenities;
+      const filtered = selected.filter((code) => available.has(code));
+
+      if (filtered.length !== selected.length) {
+        this._step4.update((s) => ({ ...s, amenities: filtered }));
+      }
+
+      if (filtered.length === 0) {
+        const fallback = this.equipmentItems()
+          .slice(0, 3)
+          .map((item) => item.code);
+        if (fallback.length > 0) {
+          this._step4.update((s) => ({ ...s, amenities: fallback }));
+        }
+      }
+    });
+
     // Navigate to detail once brouillon is created and step4 was pending
     effect(() => {
-      if (this.step4Pending() && this.store.propertyId() && !this.store.saving()) {
+      if (
+        this.step4Pending() &&
+        this.store.propertyId() &&
+        !this.store.saving()
+      ) {
         this.step4Pending.set(false);
         this.notifications?.success('Brouillon créé avec succès.');
         this.nextStep();
@@ -353,7 +584,7 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.store.chargerVilles();
+    this.store.chargerReferentiels();
   }
 
   // ── Wizard navigation ─────────────────────────────────────────────────────
@@ -374,17 +605,17 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   // ── Step 1 — type card selection ──────────────────────────────────────────
-  protected selectPropertyType(value: HotelPropertyType): void {
+  protected selectPropertyType(value: string): void {
     this._step1.update((s) => ({ ...s, propertyType: value }));
   }
 
-  protected get selectedPropertyType(): HotelPropertyType {
+  protected get selectedPropertyType(): string {
     return this._step1().propertyType;
   }
 
   protected get isRoomOrSuite(): boolean {
     const t = this._step1().propertyType;
-    return t === 'HOTEL_ROOM' || t === 'SUITE';
+    return t === 'HOTEL_ROOM' || t === 'ROOM' || t === 'SUITE';
   }
 
   // ── Step 2 — floor chip selection ────────────────────────────────────────
@@ -462,10 +693,13 @@ export class EspaceAddPageComponent implements OnInit {
         const s3 = this._step3();
         const s4 = this._step4();
 
-        const amenities: PropertyAmenityRequest[] = s4.amenities.map((code) => ({ code }));
+        const amenities: PropertyAmenityRequest[] = s4.amenities.map(
+          (code) => ({ code }),
+        );
 
         // Resolve floor: 'RDC' → 0, else parse int
-        const floorNum = s2.floor === 'RDC' ? 0 : parseInt(s2.floor, 10) || null;
+        const floorNum =
+          s2.floor === 'RDC' ? 0 : Number.parseInt(s2.floor, 10) || null;
 
         this.store.creerEspace({
           title: s1.title,
@@ -528,16 +762,19 @@ export class EspaceAddPageComponent implements OnInit {
   private uploadFiles(files: File[]): void {
     const propertyId = this.store.propertyId();
     if (!propertyId) {
-      this.notifications?.error("Créez d'abord l'espace avant d'ajouter des médias.");
+      this.notifications?.error(
+        "Créez d'abord l'espace avant d'ajouter des médias.",
+      );
       return;
     }
     files.forEach((file) => {
       if (!this.validateFile(file)) return;
-      const mediaType = file.type.startsWith('video/')
-        ? 'VIDEO'
-        : this._step1().propertyType === 'CONFERENCE_ROOM'
-          ? 'PLAN'
-          : 'PHOTO';
+      let mediaType: 'PHOTO' | 'VIDEO' | 'PLAN' = 'PHOTO';
+      if (file.type.startsWith('video/')) {
+        mediaType = 'VIDEO';
+      } else if (this._step1().propertyType === 'CONFERENCE_ROOM') {
+        mediaType = 'PLAN';
+      }
       this.store.uploaderMediaDirect({ file, mediaType, cover: false });
     });
   }
@@ -551,7 +788,9 @@ export class EspaceAddPageComponent implements OnInit {
     }
     const maxMB = isVideo ? MAX_VIDEO_MB : MAX_IMAGE_MB;
     if (file.size > maxMB * 1024 * 1024) {
-      this.notifications?.error(`Fichier trop volumineux : ${file.name} (max ${maxMB} Mo)`);
+      this.notifications?.error(
+        `Fichier trop volumineux : ${file.name} (max ${maxMB} Mo)`,
+      );
       return false;
     }
     return true;
@@ -582,6 +821,83 @@ export class EspaceAddPageComponent implements OnInit {
     this.coverWarnVisible.set(false);
   }
 
+  // ── Document handlers ───────────────────────────────────────────────────
+  protected onDocTypeChange(value: string): void {
+    this.selectedDocType.set(value ?? '');
+  }
+
+  protected onDocFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    if (file.size > MAX_DOC_SIZE_MB * 1024 * 1024) {
+      this.docFileError.set(
+        `Fichier trop volumineux (max ${MAX_DOC_SIZE_MB} Mo).`,
+      );
+      input.value = '';
+      return;
+    }
+
+    const propertyId = this.propertyId();
+    if (!propertyId) {
+      this.docFileError.set(
+        "Creez d'abord l'espace avant d'ajouter des documents.",
+      );
+      input.value = '';
+      return;
+    }
+
+    const docType = this.selectedDocType();
+    if (!docType) {
+      this.docFileError.set('Selectionnez un type de document.');
+      input.value = '';
+      return;
+    }
+
+    this.docFileError.set(null);
+    this.store.uploaderDocument({
+      file,
+      docType,
+      title: this.docTitle().trim() || file.name,
+    });
+    input.value = '';
+    this.docTitle.set('');
+  }
+
+  protected async openDocument(fileUrl: string, docId?: string): Promise<void> {
+    if (docId) this.documentOpeningId.set(docId);
+
+    try {
+      const response = await firstValueFrom(
+        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+      );
+      const readUrl = response.body?.readUrl;
+      window.open(readUrl ?? fileUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      if (docId) this.documentOpeningId.set(null);
+    }
+  }
+
+  protected requestDeleteDoc(docId: string): void {
+    this.docDeleteTarget.set(docId);
+  }
+
+  protected cancelDeleteDoc(): void {
+    this.docDeleteTarget.set(null);
+  }
+
+  protected confirmDeleteDoc(): void {
+    const docId = this.docDeleteTarget();
+    if (!docId) return;
+
+    this.store.supprimerDocument(docId);
+    this.docDeleteTarget.set(null);
+  }
+
   // ── Final actions ─────────────────────────────────────────────────────────
   protected sauvegarderBrouillon(): void {
     this.store.reset();
@@ -594,18 +910,49 @@ export class EspaceAddPageComponent implements OnInit {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   protected getCityLabel(city: LaCodeListDto): string {
-    return city.value ?? city.description ?? '';
+    return this.getCodeListLabel(city);
   }
 
   protected getCityValue(city: LaCodeListDto): string {
-    return city.value ?? '';
+    return this.getCodeListValue(city);
   }
 
   protected getMealPlanLabel(value: string): string {
-    return MEAL_PLAN_OPTIONS.find((o) => o.value === value)?.label ?? value;
+    return (
+      this.mealPlanOptions().find((o) => o.value === value)?.label ?? value
+    );
   }
 
   protected getTransactionLabel(value: string): string {
-    return TRANSACTION_TYPE_OPTIONS.find((o) => o.value === value)?.label ?? value;
+    return (
+      this.transactionTypeOptions().find((o) => o.value === value)?.label ??
+      value
+    );
+  }
+
+  protected getCodeListLabel(item: LaCodeListDto): string {
+    return item.description ?? item.value ?? '';
+  }
+
+  protected getCodeListValue(item: LaCodeListDto): string {
+    return item.value ?? '';
+  }
+
+  protected docTypeLabel(value?: string): string {
+    if (!value) return '—';
+    return (
+      this.docTypeOptions().find((item) => item.value === value)?.label ?? value
+    );
+  }
+
+  protected formatBytes(bytes?: number): string {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
+  protected trackDocument(_: number, doc: PropertyDocumentResponse): string {
+    return doc.id ?? doc.fileUrl ?? doc.title ?? `${_}`;
   }
 }
