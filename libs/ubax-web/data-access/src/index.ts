@@ -44,6 +44,8 @@ export type { Ticket } from './lib/store/demandes/demandes.store';
 export * from './lib/store/location/location.store'; // qualifier, rejeter
 export * from './lib/store/hotel/hotel.store'; // inviterMembre, assignerSousRoles
 export * from './lib/store/agency/agency.store'; // inviterMembre agence, sous-rôles
+export { BienCreationStore } from './lib/store/biens/bien-creation.store';
+export type { BienCreationState } from './lib/store/biens/bien-creation.store';
 
 // ─── Configs API prêtes à l'emploi avec createApiStore ───────────────────────
 // Usage : const BiensStore = createApiStore(biensApiConfig);

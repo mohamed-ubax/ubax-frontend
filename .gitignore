@@ -53,5 +53,7 @@ instructions.md
 .env*.local
 
 # Generated files
-.swagger.json
 .kiro
+Jira.md
+swagger.json
+ubax-postman.json

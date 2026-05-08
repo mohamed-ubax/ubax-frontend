@@ -1,9 +1,10 @@
-<section class="bien-add-page">
+﻿<section class="bien-add-page">
   <header class="bien-add-page__header">
     <h1>Ajouter un bien</h1>
   </header>
 
-  <ol class="journey-stepper" aria-label="Progression de l’ajout du bien">
+  <!-- ═══ Stepper ═══════════════════════════════════════════════════════════ -->
+  <ol class="journey-stepper" aria-label="Progression de l'ajout du bien">
     @for (step of steps; track step.label; let index = $index) {
       <li class="journey-stepper__segment">
         <div
@@ -14,7 +15,6 @@
           <span class="journey-stepper__circle">{{ index + 1 }}</span>
           <span class="journey-stepper__label">{{ step.label }}</span>
         </div>
-
         @if (index < steps.length - 1) {
           <span
             class="journey-stepper__line"
@@ -26,244 +26,668 @@
     }
   </ol>
 
-  @switch (activeStep()) {
-    @case (0) {
-      <section class="intro-layout">
-        <div class="intro-layout__media">
-          <section class="photo-stage" aria-labelledby="photo-stage-title">
-            <h2 id="photo-stage-title">Importer les photos</h2>
+  <!-- ═══ Erreur globale ═══════════════════════════════════════════════════ -->
+  @if (error()) {
+    @if (isSessionError()) {
+      <div class="alert alert--error alert--session" role="alert">
+        <i class="pi pi-lock" aria-hidden="true"></i>
+        <span
+          >Session expirée ou non autorisée. Veuillez vous reconnecter pour
+          continuer.</span
+        >
+        <button
+          type="button"
+          class="btn-reconnect"
+          (click)="expireAndRedirect()"
+        >
+          Se reconnecter
+        </button>
+      </div>
+    } @else {
+      <div class="alert alert--error" role="alert">
+        <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+        <span>{{ error() }}</span>
+      </div>
+    }
+  }
 
-            <div class="photo-stage__frame">
-              <img
-                class="photo-stage__hero"
-                src="biens/add/step1-main.webp"
-                alt="Vue principale du bien"
-                width="438"
-                height="505"
-              />
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAPE 1 — Informations générales
+       ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeStep() === 0) {
+    <form class="form-layout">
+      <article class="surface-card editor-sheet">
+        <h2>Informations générales</h2>
 
-              <div class="photo-stage__thumbs">
-                @for (
-                  media of stepOneMedia;
-                  track media.src;
-                  let index = $index
-                ) {
-                  <div
-                    class="photo-stage__thumb"
-                    [class.is-vertical]="index === 1"
-                  >
-                    <img
-                      [src]="media.src"
-                      [alt]="media.alt"
-                      width="187"
-                      height="117"
-                    />
-                  </div>
-                }
-
-                <button class="upload-tile" type="button">
-                  <span class="upload-tile__icon">
-                    <i class="pi pi-plus" aria-hidden="true"></i>
-                  </span>
-                  <span>Cliquez pour importer</span>
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <article class="surface-card video-stage">
-            <h2>Importer Vidéos 360</h2>
-
-            <button class="video-stage__action" type="button">
-              <i class="pi pi-video" aria-hidden="true"></i>
-              <span>Importer vidéo</span>
-            </button>
-          </article>
+        <div class="field-block field-block--wide">
+          <label class="field-label" for="title"
+            >Titre du bien <span class="req">*</span></label
+          >
+          <input
+            id="title"
+            class="field-input"
+            [class.is-invalid]="
+              formStep1.title().invalid() && formStep1.title().touched()
+            "
+            type="text"
+            [formField]="formStep1.title"
+            placeholder="Ex : Appartement 3 pièces – Cocody Riviera"
+          />
+          @if (formStep1.title().invalid() && formStep1.title().touched()) {
+            <span class="field-error">Titre requis (max 200 caractères)</span>
+          }
         </div>
 
-        <article class="surface-card editor-sheet editor-sheet--intro">
-          <h2>Informations du bien</h2>
-
+        <div class="field-grid field-grid--trio">
           <div class="field-block">
-            <p class="field-block__label">Titre du bien</p>
-            <div class="field-shell field-shell--wide">
-              <span>{{ title }}</span>
-            </div>
-          </div>
-
-          <div class="field-grid field-grid--duo">
-            <div class="field-block">
-              <p class="field-block__label">Catégories</p>
-              <div class="field-shell">
-                <span>{{ category }}</span>
-                <i class="pi pi-angle-down" aria-hidden="true"></i>
-              </div>
-            </div>
-
-            <div class="field-block">
-              <p class="field-block__label">Type d’annonce</p>
-              <div class="field-shell">
-                <span>{{ listingType }}</span>
-                <i class="pi pi-angle-down" aria-hidden="true"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="counter-grid">
-            @for (counter of counters; track counter.label) {
-              <div class="field-block">
-                <p class="field-block__label">{{ counter.label }}</p>
-                <div class="counter-shell">
-                  <button type="button" aria-label="Diminuer">
-                    <i class="pi pi-minus" aria-hidden="true"></i>
-                  </button>
-                  <span>{{ counter.value }}</span>
-                  <button type="button" aria-label="Augmenter">
-                    <i class="pi pi-plus" aria-hidden="true"></i>
-                  </button>
-                </div>
-              </div>
+            <label class="field-label" for="propertyType"
+              >Type de bien <span class="req">*</span></label
+            >
+            <select
+              id="propertyType"
+              class="field-input field-select"
+              [class.is-invalid]="
+                formStep1.propertyType().invalid() &&
+                formStep1.propertyType().touched()
+              "
+              [formField]="formStep1.propertyType"
+            >
+              <option value="">Sélectionner…</option>
+              @for (pt of propertyTypes(); track pt.id) {
+                <option [value]="pt.value">
+                  {{ pt.description ?? pt.value }}
+                </option>
+              }
+            </select>
+            @if (
+              formStep1.propertyType().invalid() &&
+              formStep1.propertyType().touched()
+            ) {
+              <span class="field-error">Champ requis</span>
             }
           </div>
 
-          <div class="field-grid field-grid--owner">
-            <div class="field-block">
-              <p class="field-block__label">Sélectionner le propriétaire</p>
-              <div class="field-shell">
-                <span>{{ owner }}</span>
-                <i class="pi pi-angle-down" aria-hidden="true"></i>
-              </div>
-            </div>
-
-            <div class="field-block">
-              <p class="field-block__label">Téléphone du du propriétaire</p>
-              <div class="field-shell field-shell--phone">
-                <i class="pi pi-phone" aria-hidden="true"></i>
-                <span>{{ ownerPhone }}</span>
-              </div>
-            </div>
-
-            <div class="field-block">
-              <p class="field-block__label">ID Ubax</p>
-              <div class="field-shell">
-                <span>{{ ubaxId }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="editor-sheet__footer editor-sheet__footer--end">
-            <button class="primary-action" type="button" (click)="nextStep()">
-              Suivant
-            </button>
-          </div>
-        </article>
-      </section>
-    }
-
-    @case (1) {
-      <section class="pricing-layout">
-        <aside class="pricing-layout__aside">
-          <section
-            class="surface-card pricing-block"
-            aria-labelledby="pricing-title"
-          >
-            <h2 id="pricing-title">Prix</h2>
-
-            <div class="price-shell">{{ price }}</div>
-
-            <div class="selection-list selection-list--inline">
-              @for (mode of pricingModes; track mode) {
-                <button
-                  type="button"
-                  class="selection-list__item"
-                  [class.is-selected]="selectedPricingMode() === mode"
-                  [attr.aria-pressed]="selectedPricingMode() === mode"
-                  (click)="selectPricingMode(mode)"
-                >
-                  <span class="selection-list__dot"></span>
-                  <span>{{ mode }}</span>
-                </button>
+          <div class="field-block">
+            <label class="field-label" for="transactionType"
+              >Type d'annonce <span class="req">*</span></label
+            >
+            <select
+              id="transactionType"
+              class="field-input field-select"
+              [class.is-invalid]="
+                formStep1.transactionType().invalid() &&
+                formStep1.transactionType().touched()
+              "
+              [formField]="formStep1.transactionType"
+            >
+              <option value="">Sélectionner…</option>
+              @for (tt of transactionTypes(); track tt.id) {
+                <option [value]="tt.value">
+                  {{ tt.description ?? tt.value }}
+                </option>
               }
-            </div>
-          </section>
-        </aside>
+            </select>
+            @if (
+              formStep1.transactionType().invalid() &&
+              formStep1.transactionType().touched()
+            ) {
+              <span class="field-error">Champ requis</span>
+            }
+          </div>
 
-        <article class="surface-card editor-sheet editor-sheet--pricing">
-          <section class="editor-section">
-            <h2>Description</h2>
-            <div class="description-shell">
-              {{ description }}
-            </div>
-          </section>
+          <div class="field-block">
+            <label class="field-label" for="condition">État</label>
+            <select
+              id="condition"
+              class="field-input field-select"
+              [formField]="formStep1.condition"
+            >
+              <option value="">Sélectionner…</option>
+              <option value="NEW">Neuf</option>
+              <option value="GOOD">Bon état</option>
+              <option value="RENOVATE">À rénover</option>
+            </select>
+          </div>
+        </div>
 
-          <section class="editor-section">
-            <h2>Commodités</h2>
+        <div class="field-grid field-grid--duo">
+          <div class="field-block">
+            <label class="field-label" for="yearBuilt"
+              >Année de construction</label
+            >
+            <input
+              id="yearBuilt"
+              class="field-input"
+              [class.is-invalid]="
+                formStep1.yearBuilt().invalid() &&
+                formStep1.yearBuilt().touched()
+              "
+              type="number"
+              [formField]="formStep1.yearBuilt"
+              placeholder="Ex : 2010"
+            />
+            @if (
+              formStep1.yearBuilt().invalid() && formStep1.yearBuilt().touched()
+            ) {
+              <span class="field-error">Année invalide</span>
+            }
+          </div>
 
-            <div class="selection-grid">
-              @for (commodity of commodities; track commodity.label) {
-                <div
-                  class="selection-grid__item"
-                  [class.is-selected]="commodity.selected"
+          <div class="field-block">
+            <label class="field-label" for="ownerId"
+              >Propriétaire (bailleur)
+              <span class="optional-hint">optionnel</span></label
+            >
+            <select
+              id="ownerId"
+              class="field-input field-select"
+              [formField]="formStep1.ownerId"
+            >
+              <option value="">Sélectionner le propriétaire…</option>
+              @for (b of bailleurs(); track b.id) {
+                <option [value]="b.id">
+                  {{ b.firstName }} {{ b.lastName }}
+                </option>
+              }
+            </select>
+            <p class="field-hint">
+              Si non renseigné, vous serez enregistré comme propriétaire.
+            </p>
+          </div>
+        </div>
+
+        <div class="editor-sheet__footer editor-sheet__footer--end">
+          <button class="primary-action" type="button" (click)="proceedStep1()">
+            Suivant
+          </button>
+        </div>
+      </article>
+    </form>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAPE 2 — Surfaces & pièces
+       ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeStep() === 1) {
+    <form class="form-layout">
+      <article class="surface-card editor-sheet">
+        <h2>Surfaces & pièces</h2>
+
+        <div class="field-grid field-grid--quad">
+          <div class="field-block">
+            <label class="field-label" for="rooms">Nombre de pièces</label>
+            <input
+              id="rooms"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.rooms"
+              placeholder="Ex : 4"
+            />
+          </div>
+          <div class="field-block">
+            <label class="field-label" for="bedrooms">Chambres</label>
+            <input
+              id="bedrooms"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.bedrooms"
+              placeholder="Ex : 3"
+            />
+          </div>
+          <div class="field-block">
+            <label class="field-label" for="bathrooms">Salles de bain</label>
+            <input
+              id="bathrooms"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.bathrooms"
+              placeholder="Ex : 2"
+            />
+          </div>
+          <div class="field-block">
+            <label class="field-label" for="balconies">Balcons</label>
+            <input
+              id="balconies"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.balconies"
+              placeholder="Ex : 1"
+            />
+          </div>
+        </div>
+
+        <div class="field-grid field-grid--duo">
+          <div class="field-block">
+            <label class="field-label" for="surfaceTotal"
+              >Surface totale (m²)</label
+            >
+            <input
+              id="surfaceTotal"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.surfaceTotal"
+              step="0.01"
+              placeholder="Ex : 150"
+            />
+          </div>
+          <div class="field-block">
+            <label class="field-label" for="surfaceLiving"
+              >Surface habitable (m²)</label
+            >
+            <input
+              id="surfaceLiving"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.surfaceLiving"
+              step="0.01"
+              placeholder="Ex : 120"
+            />
+          </div>
+        </div>
+
+        <div class="field-grid field-grid--duo">
+          <div class="field-block">
+            <label class="field-label" for="floor">Étage</label>
+            <input
+              id="floor"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.floor"
+              placeholder="Ex : 3 (0 = RDC)"
+            />
+          </div>
+          <div class="field-block">
+            <label class="field-label" for="totalFloors"
+              >Nombre d'étages total</label
+            >
+            <input
+              id="totalFloors"
+              class="field-input"
+              type="number"
+              [formField]="formStep2.totalFloors"
+              placeholder="Ex : 5"
+            />
+          </div>
+        </div>
+
+        <div class="editor-sheet__footer editor-sheet__footer--split">
+          <button
+            class="circle-action"
+            type="button"
+            (click)="previousStep()"
+            aria-label="Étape précédente"
+          >
+            <i class="pi pi-arrow-left" aria-hidden="true"></i>
+          </button>
+          <button class="primary-action" type="button" (click)="proceedStep2()">
+            Suivant
+          </button>
+        </div>
+      </article>
+    </form>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAPE 3 — Localisation
+       ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeStep() === 2) {
+    <form class="form-layout">
+      <article class="surface-card editor-sheet">
+        <h2>Localisation</h2>
+
+        <div class="field-grid field-grid--trio">
+          <div class="field-block">
+            <label class="field-label" for="city"
+              >Ville <span class="req">*</span></label
+            >
+            <select
+              id="city"
+              class="field-input field-select"
+              [class.is-invalid]="
+                formStep3.city().invalid() && formStep3.city().touched()
+              "
+              [formField]="formStep3.city"
+            >
+              <option value="">Sélectionner…</option>
+              @for (c of cities(); track c.id) {
+                <option [value]="c.value">
+                  {{ c.description ?? c.value }}
+                </option>
+              }
+            </select>
+            @if (formStep3.city().invalid() && formStep3.city().touched()) {
+              <span class="field-error">Ville requise</span>
+            }
+          </div>
+
+          <div class="field-block">
+            <label class="field-label" for="district">Quartier</label>
+            <input
+              id="district"
+              class="field-input"
+              type="text"
+              [formField]="formStep3.district"
+              placeholder="Ex : Cocody Riviera"
+            />
+          </div>
+
+          <div class="field-block">
+            <label class="field-label" for="street">Rue</label>
+            <input
+              id="street"
+              class="field-input"
+              type="text"
+              [formField]="formStep3.street"
+              placeholder="Ex : Rue des Jardins"
+            />
+          </div>
+        </div>
+
+        <div class="field-block field-block--wide">
+          <label class="field-label" for="address">Adresse complète</label>
+          <input
+            id="address"
+            class="field-input"
+            type="text"
+            [formField]="formStep3.address"
+            placeholder="Ex : Résidence Prestige, Bât. A, App. 12"
+          />
+        </div>
+
+        <div class="field-grid field-grid--duo">
+          <div class="field-block">
+            <label class="field-label" for="latitude">Latitude</label>
+            <input
+              id="latitude"
+              class="field-input"
+              [class.is-invalid]="
+                formStep3.latitude().invalid() && formStep3.latitude().touched()
+              "
+              type="number"
+              [formField]="formStep3.latitude"
+              step="0.000001"
+              placeholder="Ex : 5.3567"
+            />
+            @if (
+              formStep3.latitude().invalid() && formStep3.latitude().touched()
+            ) {
+              <span class="field-error">Valeur entre -90 et 90</span>
+            }
+          </div>
+          <div class="field-block">
+            <label class="field-label" for="longitude">Longitude</label>
+            <input
+              id="longitude"
+              class="field-input"
+              [class.is-invalid]="
+                formStep3.longitude().invalid() &&
+                formStep3.longitude().touched()
+              "
+              type="number"
+              [formField]="formStep3.longitude"
+              step="0.000001"
+              placeholder="Ex : -3.9902"
+            />
+            @if (
+              formStep3.longitude().invalid() && formStep3.longitude().touched()
+            ) {
+              <span class="field-error">Valeur entre -180 et 180</span>
+            }
+          </div>
+        </div>
+
+        <div class="editor-sheet__footer editor-sheet__footer--split">
+          <button
+            class="circle-action"
+            type="button"
+            (click)="previousStep()"
+            aria-label="Étape précédente"
+          >
+            <i class="pi pi-arrow-left" aria-hidden="true"></i>
+          </button>
+          <button class="primary-action" type="button" (click)="proceedStep3()">
+            Suivant
+          </button>
+        </div>
+      </article>
+    </form>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAPE 4 — Équipements & Prix
+       ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeStep() === 3) {
+    <form class="form-layout">
+      <article class="surface-card editor-sheet">
+        <h2>Équipements & Prix</h2>
+
+        <section class="editor-section">
+          <h3>Prix</h3>
+          <div class="field-block">
+            <label class="field-label" for="price"
+              >Prix (FCFA) <span class="req">*</span></label
+            >
+            <input
+              id="price"
+              class="field-input"
+              [class.is-invalid]="
+                formStep4.price().invalid() && formStep4.price().touched()
+              "
+              type="number"
+              [formField]="formStep4.price"
+              placeholder="Ex : 450000"
+            />
+            @if (formStep4.price().invalid() && formStep4.price().touched()) {
+              <span class="field-error">Prix requis (≥ 0)</span>
+            }
+          </div>
+        </section>
+
+        <section class="editor-section">
+          <h3>Équipements & commodités</h3>
+          <div class="commodity-grid">
+            @for (amenity of amenityOptions(); track amenity.code) {
+              <label class="commodity-item">
+                <input
+                  type="checkbox"
+                  [checked]="isAmenitySelected(amenity.code)"
+                  (change)="toggleAmenity(amenity.code)"
+                />
+                <span class="commodity-item__label">
+                  <i class="pi {{ amenity.icon }}" aria-hidden="true"></i>
+                  {{ amenity.label }}
+                </span>
+              </label>
+            }
+          </div>
+        </section>
+
+        <section class="editor-section">
+          <h3>Description</h3>
+          <textarea
+            class="field-input field-textarea"
+            [formField]="formStep4.description"
+            rows="5"
+            placeholder="Décrivez le bien, ses atouts, son cadre de vie…"
+          ></textarea>
+        </section>
+
+        <div class="editor-sheet__footer editor-sheet__footer--split">
+          <button
+            class="circle-action"
+            type="button"
+            (click)="previousStep()"
+            aria-label="Étape précédente"
+          >
+            <i class="pi pi-arrow-left" aria-hidden="true"></i>
+          </button>
+          <button
+            class="primary-action"
+            type="button"
+            (click)="proceedStep4()"
+            [disabled]="saving()"
+          >
+            @if (saving()) {
+              <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+              Création en cours…
+            } @else {
+              Créer le brouillon &amp; Continuer
+            }
+          </button>
+        </div>
+      </article>
+    </form>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAPE 5 — Médias
+       ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeStep() === 4) {
+    <section class="media-layout">
+      <header class="media-layout__header">
+        <h2>Photos &amp; Vidéos</h2>
+        <p class="media-layout__hint">
+          Ajoutez des photos et vidéos du bien. Vous choisissez vous-même la
+          photo de couverture.
+        </p>
+      </header>
+
+      <!-- Cover deleted warning -->
+      @if (coverWarnVisible()) {
+        <div class="alert alert--warning" role="alert">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+          <span
+            >Le média de couverture a été supprimé. Veuillez en définir un
+            nouveau.</span
+          >
+          <button
+            class="alert__close"
+            type="button"
+            (click)="dismissCoverWarn()"
+            aria-label="Fermer"
+          >
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        </div>
+      }
+
+      <!-- Drop zone -->
+      @if (canManageMedia()) {
+        <div
+          class="drop-zone"
+          [class.is-over]="isDragOver()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+        >
+          <input
+            id="media-file-input"
+            type="file"
+            [accept]="acceptedMedia"
+            multiple
+            class="drop-zone__input"
+            (change)="onMediaFilesSelected($event)"
+          />
+          <label for="media-file-input" class="drop-zone__label">
+            <i class="pi pi-upload" aria-hidden="true"></i>
+            <span
+              >Glissez vos fichiers ici ou
+              <strong>cliquez pour importer</strong></span
+            >
+            <small>JPEG, PNG, WEBP, MP4, MOV</small>
+          </label>
+        </div>
+      }
+
+      <!-- Saving indicator -->
+      @if (saving()) {
+        <div class="media-saving">
+          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Upload en
+          cours…
+        </div>
+      }
+
+      <!-- Media grid -->
+      @if (medias().length > 0) {
+        <div class="media-grid">
+          @for (media of medias(); track media.id) {
+            <div class="media-card" [class.is-cover]="media.cover">
+              @if (media.cover) {
+                <span
+                  class="media-card__cover-badge"
+                  title="Photo de couverture"
                 >
-                  <span class="selection-grid__dot"></span>
-                  <span>{{ commodity.label }}</span>
+                  <i class="pi pi-star-fill" aria-hidden="true"></i>
+                </span>
+              }
+              <div class="media-card__preview">
+                @if (media.mimeType?.startsWith('video/')) {
+                  <div class="media-card__video-placeholder">
+                    <i class="pi pi-video" aria-hidden="true"></i>
+                    <span>Vidéo</span>
+                    @if (media.fileUrl) {
+                      <button
+                        class="btn-icon btn-icon--accent"
+                        type="button"
+                        title="Prévisualiser la vidéo"
+                        (click)="openDocument(media.fileUrl)"
+                      >
+                        <i class="pi pi-eye" aria-hidden="true"></i>
+                      </button>
+                    }
+                  </div>
+                } @else {
+                  <img
+                    [src]="media.fileUrl"
+                    [alt]="media.fileName ?? 'Média'"
+                    width="160"
+                    height="110"
+                  />
+                }
+              </div>
+              <div class="media-card__meta">
+                <span class="media-card__type">{{ media.mediaType }}</span>
+                <span class="media-card__size">{{
+                  formatBytes(media.fileSize)
+                }}</span>
+              </div>
+              <p class="media-card__filename">
+                {{ media.fileName ?? 'Fichier média' }}
+              </p>
+              @if (canManageMedia()) {
+                <div class="media-card__actions">
+                  @if (media.mimeType?.startsWith('image/')) {
+                    <label
+                      class="cover-control"
+                      [class.is-disabled]="saving() || !media.id"
+                    >
+                      <input
+                        type="radio"
+                        name="cover-media"
+                        [checked]="!!media.cover"
+                        (change)="media.id && setCover(media.id)"
+                        [disabled]="saving() || !media.id"
+                      />
+                      <span>Photo de couverture</span>
+                    </label>
+                  }
+                  <button
+                    class="btn-icon btn-icon--danger"
+                    type="button"
+                    title="Supprimer"
+                    (click)="media.id && requestDeleteMedia(media.id)"
+                    [disabled]="saving() || !media.id"
+                  >
+                    <i class="pi pi-trash" aria-hidden="true"></i>
+                  </button>
                 </div>
               }
             </div>
-          </section>
-
-          <section class="editor-section">
-            <h2>Adresse</h2>
-
-            <div class="address-grid">
-              <div class="field-shell field-shell--compact">
-                <span>Pays</span>
-                <i class="pi pi-angle-down" aria-hidden="true"></i>
-              </div>
-              <div class="field-shell field-shell--compact">
-                <span>Région</span>
-                <i class="pi pi-angle-down" aria-hidden="true"></i>
-              </div>
-              <div class="field-shell field-shell--compact">
-                <span>Ville</span>
-                <i class="pi pi-angle-down" aria-hidden="true"></i>
-              </div>
-              <div class="field-shell field-shell--compact">
-                <span>Quartier</span>
-              </div>
-              <div class="field-shell field-shell--compact address-grid__wide">
-                <span>Saisir l’emplacement exact</span>
-              </div>
-            </div>
-          </section>
-
-          <section class="editor-section">
-            <h2>Map</h2>
-
-            <div class="coordinates-row">
-              <div
-                class="field-shell field-shell--compact field-shell--coordinate"
-              >
-                <span>Latitude</span>
-              </div>
-              <div
-                class="field-shell field-shell--compact field-shell--coordinate"
-              >
-                <span>Longitude</span>
-              </div>
-            </div>
-
-            <div class="map-stage">
-              <img
-                src="biens/detail/location-map.webp"
-                alt="Carte de localisation"
-                width="1051"
-                height="329"
-              />
-            </div>
-          </section>
-        </article>
-      </section>
+          }
+        </div>
+      } @else {
+        <p class="media-empty">Aucun média ajouté pour le moment.</p>
+      }
 
       <div class="page-actions page-actions--split">
         <button
@@ -278,76 +702,342 @@
           Suivant
         </button>
       </div>
+    </section>
+
+    <!-- Modal confirm delete media -->
+    @if (mediaDeleteTarget()) {
+      <div class="modal-overlay">
+        <dialog class="modal" open aria-labelledby="modal-delete-media-title">
+          <h3 id="modal-delete-media-title">Supprimer ce média ?</h3>
+          <p>Cette action est irréversible.</p>
+          <div class="modal__actions">
+            <button
+              class="btn-secondary"
+              type="button"
+              (click)="cancelDeleteMedia()"
+            >
+              Annuler
+            </button>
+            <button
+              class="btn-danger"
+              type="button"
+              (click)="confirmDeleteMedia()"
+            >
+              Supprimer
+            </button>
+          </div>
+        </dialog>
+      </div>
     }
+  }
 
-    @case (2) {
-      <section class="summary-layout">
-        <div class="summary-stage">
-          <img
-            class="summary-stage__background"
-            src="biens/add/step3-background.webp"
-            alt=""
-            aria-hidden="true"
-            width="1111"
-            height="532"
-          />
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAPE 6 — Finalisation (Documents + Récapitulatif)
+       ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeStep() === 5) {
+    <section class="finalization-layout">
+      <!-- Documents section — visible for DIRECTEUR_AGENCE only -->
+      @if (canManageDocs()) {
+        <article class="surface-card editor-sheet">
+          <h2>Documents légaux</h2>
+          <p class="section-hint">
+            Ajoutez les documents officiels liés à ce bien (max {{ 20 }} Mo par
+            fichier, formats : PDF, JPEG, PNG, WEBP).
+          </p>
 
-          <div class="summary-stage__content">
-            <div class="summary-stage__media">
-              <div class="summary-stage__visual">
-                <img
-                  src="biens/add/step3-main.webp"
-                  alt="Aperçu final du bien"
-                  width="491"
-                  height="366"
-                />
-              </div>
+          <div class="doc-upload-row">
+            <div class="field-block">
+              <label class="field-label" for="doc-type">Type de document</label>
+              <select
+                id="doc-type"
+                class="field-input field-select"
+                [value]="selectedDocType()"
+                (change)="selectedDocType.set($any($event.target).value)"
+              >
+                @for (dt of docTypes(); track dt.value) {
+                  <option [value]="dt.value">{{ dt.label }}</option>
+                }
+              </select>
+            </div>
 
-              <div class="summary-gallery">
-                @for (media of stepThreeMedia; track media.src) {
-                  <div class="summary-gallery__item">
+            <div class="field-block">
+              <label class="field-label" for="doc-title"
+                >Libellé du document</label
+              >
+              <input
+                id="doc-title"
+                class="field-input"
+                type="text"
+                placeholder="Ex : Titre foncier parcelle 42"
+                [value]="docTitle()"
+                (input)="docTitle.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="field-block field-block--upload-btn">
+              <label class="field-label" for="doc-file-input">&nbsp;</label>
+              <label
+                for="doc-file-input"
+                class="upload-btn"
+                [class.is-disabled]="documentUploadStage() !== 'idle'"
+              >
+                <i class="pi pi-paperclip" aria-hidden="true"></i>
+                Choisir un fichier
+              </label>
+              <input
+                id="doc-file-input"
+                type="file"
+                [accept]="acceptedDocs"
+                class="sr-only"
+                (change)="onDocFileSelected($event)"
+                [disabled]="documentUploadStage() !== 'idle'"
+              />
+            </div>
+          </div>
+
+          @if (documentUploadTimeline().length) {
+            <div class="upload-process" aria-live="polite">
+              @for (step of documentUploadTimeline(); track step.key) {
+                <div
+                  class="upload-process__step"
+                  [class.is-done]="step.status === 'done'"
+                  [class.is-active]="step.status === 'active'"
+                >
+                  <div class="upload-process__marker">
+                    @if (step.status === 'done') {
+                      <i class="pi pi-check" aria-hidden="true"></i>
+                    } @else if (step.status === 'active') {
+                      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                    } @else {
+                      <span></span>
+                    }
+                  </div>
+                  <div class="upload-process__content">
+                    <strong>{{ step.label }}</strong>
+                    <span>{{ step.description }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          @if (docFileError()) {
+            <p class="field-error">{{ docFileError() }}</p>
+          }
+          @if (saving() && documentUploadStage() === 'idle') {
+            <div class="media-saving">
+              <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Upload en
+              cours…
+            </div>
+          }
+
+          <!-- Document list -->
+          @if (documents().length > 0) {
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Libellé</th>
+                  <th>Statut</th>
+                  <th>Taille</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (doc of documents(); track doc.id) {
+                  <tr>
+                    <td>
+                      <span class="doc-type-badge">{{
+                        docTypeLabel(doc.docType ?? '')
+                      }}</span>
+                    </td>
+                    <td>{{ doc.title ?? doc.fileName }}</td>
+                    <td>
+                      @if (doc.verified) {
+                        <span class="status-badge status-badge--success"
+                          >Vérifié</span
+                        >
+                      } @else {
+                        <span class="status-badge status-badge--pending"
+                          >En attente</span
+                        >
+                      }
+                    </td>
+                    <td>{{ formatBytes(doc.fileSize) }}</td>
+                    <td class="doc-actions">
+                      @if (doc.fileUrl) {
+                        <button
+                          class="btn-icon btn-icon--accent"
+                          type="button"
+                          title="Consulter"
+                          [disabled]="documentOpeningId() === doc.id"
+                          (click)="openDocument(doc.fileUrl!, doc.id)"
+                        >
+                          @if (documentOpeningId() === doc.id) {
+                            <i
+                              class="pi pi-spin pi-spinner"
+                              aria-hidden="true"
+                            ></i>
+                          } @else {
+                            <i class="pi pi-eye" aria-hidden="true"></i>
+                          }
+                        </button>
+                      }
+                      <button
+                        class="btn-icon btn-icon--danger"
+                        type="button"
+                        title="Supprimer"
+                        (click)="doc.id && requestDeleteDoc(doc.id)"
+                        [disabled]="saving() || !doc.id"
+                      >
+                        <i class="pi pi-trash" aria-hidden="true"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="doc-empty">Aucun document ajouté pour le moment.</p>
+          }
+        </article>
+      }
+
+      <!-- Récapitulatif -->
+      <article class="surface-card editor-sheet summary-card">
+        <h2>Récapitulatif du bien</h2>
+
+        <div class="summary-layout-inner">
+          @if (medias().length > 0) {
+            <div class="summary-gallery">
+              @for (media of medias(); track media.id; let first = $first) {
+                @if (!media.mimeType?.startsWith('video/')) {
+                  <div
+                    class="summary-gallery__item"
+                    [class.summary-gallery__item--hero]="first"
+                  >
                     <img
-                      [src]="media.src"
-                      [alt]="media.alt"
-                      width="159"
-                      height="114"
+                      [src]="media.fileUrl"
+                      [alt]="media.fileName ?? 'Vue du bien'"
                     />
                   </div>
                 }
-              </div>
+              }
             </div>
+          }
 
-            <div class="summary-stage__copy">
-              <h2>Récapitulatif du bien</h2>
-              <h3>{{ title }}</h3>
-
-              <ul class="summary-list">
-                @for (item of summaryItems; track item.text) {
-                  <li>
-                    <i class="pi pi-angle-right" aria-hidden="true"></i>
-                    <span>{{ item.text }}</span>
-                  </li>
-                }
-              </ul>
-            </div>
-          </div>
-
-          <div
-            class="page-actions page-actions--publish summary-stage__actions"
-          >
-            <button
-              class="circle-action"
-              type="button"
-              (click)="previousStep()"
-              aria-label="Étape précédente"
-            >
-              <i class="pi pi-arrow-left" aria-hidden="true"></i>
-            </button>
-            <button class="draft-action" type="button">Brouillon</button>
-            <button class="primary-action" type="button">Publier</button>
-          </div>
+          <ul class="summary-list">
+            <li>
+              <i class="pi pi-home" aria-hidden="true"></i>
+              <span
+                ><strong>Titre :</strong>
+                {{ property()?.title ?? formStep1.title().value() }}</span
+              >
+            </li>
+            <li>
+              <i class="pi pi-tag" aria-hidden="true"></i>
+              <span
+                ><strong>Type :</strong> {{ property()?.propertyType }} ·
+                {{ property()?.transactionType }}</span
+              >
+            </li>
+            <li>
+              <i class="pi pi-wallet" aria-hidden="true"></i>
+              <span
+                ><strong>Prix :</strong>
+                {{ property()?.price | number }} FCFA</span
+              >
+            </li>
+            <li>
+              <i class="pi pi-map-marker" aria-hidden="true"></i>
+              <span
+                ><strong>Localisation :</strong> {{ property()?.city
+                }}{{
+                  property()?.district ? ', ' + property()?.district : ''
+                }}</span
+              >
+            </li>
+            <li>
+              <i class="pi pi-images" aria-hidden="true"></i>
+              <span
+                ><strong>Médias :</strong>
+                {{ medias().length }} fichier(s)</span
+              >
+            </li>
+            <li>
+              <i class="pi pi-file" aria-hidden="true"></i>
+              <span
+                ><strong>Documents :</strong>
+                {{ documents().length }} document(s)</span
+              >
+            </li>
+          </ul>
         </div>
-      </section>
+
+        <div class="page-actions page-actions--publish">
+          <button
+            class="circle-action"
+            type="button"
+            (click)="previousStep()"
+            aria-label="Étape précédente"
+          >
+            <i class="pi pi-arrow-left" aria-hidden="true"></i>
+          </button>
+          <button
+            class="draft-action"
+            type="button"
+            (click)="sauvegarderBrouillon()"
+            [disabled]="saving()"
+          >
+            Garder en brouillon
+          </button>
+          @if (
+            property()?.status === 'DRAFT' ||
+            property()?.status === 'REJECTED' ||
+            !property()?.status
+          ) {
+            <button
+              class="primary-action"
+              type="button"
+              (click)="soumettre()"
+              [disabled]="saving()"
+            >
+              @if (saving()) {
+                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                Soumission…
+              } @else {
+                Soumettre pour validation
+              }
+            </button>
+          }
+        </div>
+      </article>
+    </section>
+
+    <!-- Modal confirm delete doc -->
+    @if (docDeleteTarget()) {
+      <div class="modal-overlay">
+        <dialog class="modal" open aria-labelledby="modal-delete-doc-title">
+          <h3 id="modal-delete-doc-title">Supprimer ce document ?</h3>
+          <p>Cette action est irréversible.</p>
+          <div class="modal__actions">
+            <button
+              class="btn-secondary"
+              type="button"
+              (click)="cancelDeleteDoc()"
+            >
+              Annuler
+            </button>
+            <button
+              class="btn-danger"
+              type="button"
+              (click)="confirmDeleteDoc()"
+            >
+              Supprimer
+            </button>
+          </div>
+        </dialog>
+      </div>
     }
   }
 </section>
