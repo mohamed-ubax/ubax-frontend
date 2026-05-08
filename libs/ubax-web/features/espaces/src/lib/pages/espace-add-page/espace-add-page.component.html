@@ -1,32 +1,67 @@
 <div class="espace-add-page">
   <h1 class="espace-add-page__title">Nouvel espace</h1>
 
+  <!-- ── Stepper ──────────────────────────────────────────────────────────── -->
+  <div class="stepper">
+    @for (step of steps; track $index) {
+      <button
+        class="stepper__item"
+        [class.stepper__item--active]="activeStep() === $index"
+        [class.stepper__item--done]="isCompletedStep($index)"
+        [class.stepper__item--reached]="isReachedStep($index)"
+        type="button"
+        (click)="isReachedStep($index) && activeStep.set($index)"
+      >
+        <span class="stepper__bubble">
+          @if (isCompletedStep($index)) {
+            <svg viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M1 5l4 4L13 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          } @else {
+            {{ $index + 1 }}
+          }
+        </span>
+        <span class="stepper__label">{{ step.label }}</span>
+      </button>
+      @if ($index < steps.length - 1) {
+        <span class="stepper__connector" [class.stepper__connector--done]="isCompletedStep($index)"></span>
+      }
+    }
+  </div>
+
+  <!-- ── Error banner ─────────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="form-error-banner" role="alert">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+        <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M10 6v5M10 13.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- ── Type cards (always visible) ─────────────────────────────────────── -->
   <div class="type-cards">
-    @for (option of typeCards; track option.value) {
+    @for (option of propertyTypeOptions; track option.value) {
       <button
         class="type-card"
-        [class.type-card--active]="espaceType() === option.value"
+        [class.type-card--active]="selectedPropertyType === option.value"
         type="button"
-        (click)="setEspaceType(option.value)"
+        (click)="selectPropertyType(option.value)"
+        [attr.aria-pressed]="selectedPropertyType === option.value"
       >
         <span class="type-card__head">
           <span class="type-card__icon-wrap" aria-hidden="true">
             <img [src]="option.icon" alt="" />
           </span>
-
-          <span
-            class="type-card__check"
-            [class.type-card__check--active]="espaceType() === option.value"
-            aria-hidden="true"
-          >
-            @if (espaceType() === option.value) {
+          <span class="type-card__check" [class.type-card__check--active]="selectedPropertyType === option.value" aria-hidden="true">
+            @if (selectedPropertyType === option.value) {
               <img src="space-add/icons/check.svg" alt="" />
             }
           </span>
         </span>
-
         <span class="type-card__content">
-          <span class="type-card__title">{{ option.title }}</span>
+          <span class="type-card__title">{{ option.label }}</span>
           <span class="type-card__description">{{ option.description }}</span>
         </span>
       </button>
@@ -35,478 +70,756 @@
 
   <div class="page-layout">
     <div class="main-column">
-      <section class="section-card section-card--identity">
-        <header class="section-card__header">
-          <span class="section-card__icon" aria-hidden="true">
-            <img src="space-add/icons/file-document.svg" alt="" />
-          </span>
 
-          <div class="section-card__heading">
-            <h2>Identité de l'espace</h2>
-            <p>Nom, numéro, localisation</p>
-          </div>
-        </header>
-
-        <div class="section-card__body section-card__body--identity">
-          <div class="identity-grid">
-            <div class="field-box">
-              <label class="field-box__label" for="espace-code"
-                >Numéro / Code</label
-              >
-              <div class="field-box__control">
-                <input
-                  id="espace-code"
-                  class="field-box__input"
-                  type="text"
-                  [value]="draft.code"
-                  (input)="updateDraftField('code', $any($event.target).value)"
-                />
-              </div>
+      <!-- ════════════════════════════════════════════════════════════════════
+           STEP 0 — Identité
+      ═══════════════════════════════════════════════════════════════════════ -->
+      @if (activeStep() === 0) {
+        <section class="section-card">
+          <header class="section-card__header">
+            <span class="section-card__icon" aria-hidden="true">
+              <img src="space-add/icons/file-document.svg" alt="" />
+            </span>
+            <div class="section-card__heading">
+              <h2>Identité de l'espace</h2>
+              <p>Titre, type de transaction et état général</p>
             </div>
+          </header>
 
-            <div class="field-box">
-              <label class="field-box__label" for="espace-name"
-                >Nom de l'espace</label
-              >
-              <div class="field-box__control">
-                <input
-                  id="espace-name"
-                  class="field-box__input"
-                  type="text"
-                  [value]="draft.name"
-                  (input)="updateDraftField('name', $any($event.target).value)"
-                />
+          <div class="section-card__body">
+            <div class="identity-grid">
+
+              <!-- Titre -->
+              <div class="field-box field-box--full">
+                <label class="field-box__label" for="esp-title">
+                  Titre de l'espace <span class="field-req" aria-hidden="true">*</span>
+                </label>
+                <div class="field-box__control">
+                  <input
+                    id="esp-title"
+                    class="field-box__input"
+                    type="text"
+                    [formField]="formStep1.title"
+                    placeholder="Ex : Suite Présidentielle vue mer"
+                  />
+                </div>
+                @if (formStep1.title().invalid() && formStep1.title().touched()) {
+                  <p class="field-error">Titre requis</p>
+                }
               </div>
-            </div>
 
-            <div class="field-box field-box--full field-box--types">
-              <p class="field-box__label">{{ currentTypeFieldLabel }}</p>
-
-              <div class="type-manager">
-                <div class="type-manager__hint">{{ draft.typeHint }}</div>
-
-                <div class="type-manager__list">
-                  @for (item of draft.typeItems; track item.id) {
-                    <div class="type-manager__row">
-                      <span class="type-manager__item">{{ item.label }}</span>
-
-                      <div class="type-manager__actions">
-                        <button
-                          class="type-manager__icon-btn"
-                          type="button"
-                          aria-label="Modifier le type"
-                        >
-                          <img src="space-add/icons/edit.svg" alt="" />
-                        </button>
-                        <button
-                          class="type-manager__icon-btn"
-                          type="button"
-                          aria-label="Supprimer le type"
-                        >
-                          <img src="space-add/icons/delete.svg" alt="" />
-                        </button>
-                      </div>
-                    </div>
+              <!-- Type de transaction -->
+              <div class="field-box">
+                <p class="field-box__label">Type de transaction <span class="field-req" aria-hidden="true">*</span></p>
+                <div class="transaction-chips">
+                  @for (opt of transactionTypeOptions; track opt.value) {
+                    <button
+                      class="transaction-chip"
+                      [class.transaction-chip--active]="_step1().transactionType === opt.value"
+                      type="button"
+                      (click)="_step1.update(s => ({ ...s, transactionType: opt.value }))"
+                    >
+                      {{ opt.label }}
+                    </button>
                   }
                 </div>
-
-                <button class="type-manager__add" type="button">
-                  <img src="space-add/icons/add.svg" alt="" />
-                  <span>Ajouter un type</span>
-                </button>
               </div>
+
+              <!-- État -->
+              <div class="field-box">
+                <p class="field-box__label">État de l'espace</p>
+                <div class="condition-chips">
+                  @for (opt of conditionOptions; track opt.value) {
+                    <button
+                      class="condition-chip"
+                      [class.condition-chip--active]="_step1().condition === opt.value"
+                      type="button"
+                      (click)="_step1.update(s => ({ ...s, condition: opt.value }))"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+
             </div>
+          </div>
+        </section>
 
+        <div class="step-nav">
+          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="proceedStep1()">
+            Suivant
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════
+           STEP 1 — Capacité & Surfaces
+      ═══════════════════════════════════════════════════════════════════════ -->
+      @if (activeStep() === 1) {
+        <section class="section-card">
+          <header class="section-card__header">
+            <span class="section-card__icon" aria-hidden="true">
+              <img src="space-add/icons/file-document.svg" alt="" />
+            </span>
+            <div class="section-card__heading">
+              <h2>Capacité &amp; Surfaces</h2>
+              <p>Dimensions, occupation et type de lit</p>
+            </div>
+          </header>
+
+          <div class="section-card__body">
+
+            <!-- Étage -->
             <div class="field-box field-box--full">
-              <p class="field-box__label">Etage</p>
-
+              <p class="field-box__label">Étage</p>
               <div class="floor-selector">
                 @for (floor of floorOptions; track floor) {
                   <button
                     class="floor-selector__chip"
-                    [class.floor-selector__chip--active]="
-                      draft.selectedFloor === floor
-                    "
+                    [class.floor-selector__chip--active]="selectedFloor === floor"
                     type="button"
                     (click)="selectFloor(floor)"
-                  >
-                    {{ floor }}
-                  </button>
+                  >{{ floor }}</button>
                 }
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section
-        class="section-card"
-        [class.section-card--capacity-room]="isRoom"
-        [class.section-card--capacity-hall]="!isRoom"
-      >
-        <header class="section-card__header">
-          <span class="section-card__icon" aria-hidden="true">
-            <img src="space-add/icons/file-document.svg" alt="" />
-          </span>
-
-          <div class="section-card__heading">
-            <h2>Identité Capacité &amp; Superficie de l'espace</h2>
-            <p>Dimensions et occupation</p>
-          </div>
-        </header>
-
-        <div class="section-card__body section-card__body--capacity">
-          @if (isRoom) {
             <div class="capacity-grid capacity-grid--room">
+
+              <!-- Pièces -->
               <div class="field-box">
-                <label class="field-box__label" for="room-adults"
-                  >Capacité adultes</label
-                >
+                <label class="field-box__label" for="esp-rooms">Pièces</label>
                 <div class="field-box__control">
-                  <input
-                    id="room-adults"
-                    class="field-box__input"
-                    type="text"
-                    [value]="roomDraft.adults"
-                    (input)="
-                      updateRoomField('adults', $any($event.target).value)
-                    "
-                  />
+                  <input id="esp-rooms" class="field-box__input" type="number"
+                    [formField]="formStep2.rooms" />
                 </div>
               </div>
 
-              <div class="field-box field-box--select">
-                <label class="field-box__label" for="room-children"
-                  >Lits enfants</label
-                >
-                <div class="field-box__control field-box__control--select">
-                  <input
-                    id="room-children"
-                    class="field-box__input"
-                    type="text"
-                    [value]="roomDraft.children"
-                    (input)="
-                      updateRoomField('children', $any($event.target).value)
-                    "
-                  />
-                  <img
-                    class="field-box__select-icon"
-                    src="space-add/icons/select.svg"
-                    alt=""
-                  />
+              <!-- Chambres -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-bedrooms">Chambres</label>
+                <div class="field-box__control">
+                  <input id="esp-bedrooms" class="field-box__input" type="number"
+                    [formField]="formStep2.bedrooms" />
                 </div>
               </div>
 
-              <div class="field-box field-box--unit">
-                <label class="field-box__label" for="room-area"
-                  >Superficie</label
-                >
+              <!-- Salles de bain -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-bathrooms">Salles de bain</label>
+                <div class="field-box__control">
+                  <input id="esp-bathrooms" class="field-box__input" type="number"
+                    [formField]="formStep2.bathrooms" />
+                </div>
+              </div>
+
+              <!-- Balcons -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-balconies">Balcons</label>
+                <div class="field-box__control">
+                  <input id="esp-balconies" class="field-box__input" type="number"
+                    [formField]="formStep2.balconies" />
+                </div>
+              </div>
+
+              <!-- Surface habitable -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-surface-living">Surface habitable</label>
                 <div class="field-box__control field-box__control--unit">
-                  <input
-                    id="room-area"
-                    class="field-box__input"
-                    type="text"
-                    [value]="roomDraft.area"
-                    (input)="updateRoomField('area', $any($event.target).value)"
-                  />
-                  <span class="field-box__unit">m2</span>
+                  <input id="esp-surface-living" class="field-box__input" type="number"
+                    [formField]="formStep2.surfaceLiving" />
+                  <span class="field-box__unit">m²</span>
                 </div>
               </div>
+
+              <!-- Surface totale -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-surface-total">Surface totale</label>
+                <div class="field-box__control field-box__control--unit">
+                  <input id="esp-surface-total" class="field-box__input" type="number"
+                    [formField]="formStep2.surfaceTotal" />
+                  <span class="field-box__unit">m²</span>
+                </div>
+              </div>
+
+              <!-- Capacité max -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-occupancy">Capacité max (personnes)</label>
+                <div class="field-box__control">
+                  <input id="esp-occupancy" class="field-box__input" type="number"
+                    [formField]="formStep2.maxOccupancy" />
+                </div>
+                @if (formStep2.maxOccupancy().invalid() && formStep2.maxOccupancy().touched()) {
+                  <p class="field-error">Capacité invalide (min 1)</p>
+                }
+              </div>
+
+              <!-- Nb étages total -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-total-floors">Nb d'étages total</label>
+                <div class="field-box__control">
+                  <input id="esp-total-floors" class="field-box__input" type="number"
+                    [formField]="formStep2.totalFloors" />
+                </div>
+              </div>
+
             </div>
 
-            <div class="bed-options">
-              <p class="field-box__label">Type de lit</p>
+            <!-- Type de lit (chambre / suite uniquement) -->
+            @if (isRoomOrSuite) {
+              <div class="bed-options">
+                <p class="field-box__label">Type de lit</p>
+                <div class="bed-options__list">
+                  @for (opt of bedTypeOptions; track opt.value) {
+                    <button
+                      class="bed-options__item"
+                      [class.bed-options__item--active]="selectedBedType === opt.value"
+                      type="button"
+                      (click)="selectBedType(opt.value)"
+                    >
+                      <span>{{ opt.label }}</span>
+                      <span class="bed-options__marker"></span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
 
-              <div class="bed-options__list">
-                @for (option of roomDraft.bedOptions; track option) {
+          </div>
+        </section>
+
+        <div class="step-nav">
+          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Précédent
+          </button>
+          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="proceedStep2()">
+            Suivant
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════
+           STEP 2 — Localisation
+      ═══════════════════════════════════════════════════════════════════════ -->
+      @if (activeStep() === 2) {
+        <section class="section-card">
+          <header class="section-card__header">
+            <span class="section-card__icon" aria-hidden="true">
+              <img src="space-add/icons/file-document.svg" alt="" />
+            </span>
+            <div class="section-card__heading">
+              <h2>Localisation</h2>
+              <p>Ville, quartier et coordonnées GPS</p>
+            </div>
+          </header>
+
+          <div class="section-card__body">
+            <div class="identity-grid">
+
+              <!-- Ville -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-city">
+                  Ville <span class="field-req" aria-hidden="true">*</span>
+                </label>
+                <div class="field-box__control field-box__control--select">
+                  <select id="esp-city" class="field-box__input" [formField]="formStep3.city">
+                    <option value="">Sélectionner une ville</option>
+                    @for (city of cities(); track city.id) {
+                      <option [value]="getCityValue(city)">{{ getCityLabel(city) }}</option>
+                    }
+                  </select>
+                  <img class="field-box__select-icon" src="space-add/icons/select.svg" alt="" />
+                </div>
+                @if (formStep3.city().invalid() && formStep3.city().touched()) {
+                  <p class="field-error">La ville est requise</p>
+                }
+              </div>
+
+              <!-- Quartier -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-district">Quartier / Commune</label>
+                <div class="field-box__control">
+                  <input id="esp-district" class="field-box__input" type="text"
+                    [formField]="formStep3.district" placeholder="Ex : Corniche Ouest" />
+                </div>
+              </div>
+
+              <!-- Adresse -->
+              <div class="field-box field-box--full">
+                <label class="field-box__label" for="esp-address">Adresse complète</label>
+                <div class="field-box__control">
+                  <input id="esp-address" class="field-box__input" type="text"
+                    [formField]="formStep3.address" placeholder="Ex : Route de la Corniche Ouest, Dakar" />
+                </div>
+              </div>
+
+              <!-- Rue -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-street">Rue</label>
+                <div class="field-box__control">
+                  <input id="esp-street" class="field-box__input" type="text"
+                    [formField]="formStep3.street" />
+                </div>
+              </div>
+
+              <!-- Latitude -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-lat">Latitude GPS</label>
+                <div class="field-box__control">
+                  <input id="esp-lat" class="field-box__input" type="number" step="0.0001"
+                    [formField]="formStep3.latitude" placeholder="Ex : 14.6937" />
+                </div>
+              </div>
+
+              <!-- Longitude -->
+              <div class="field-box">
+                <label class="field-box__label" for="esp-lng">Longitude GPS</label>
+                <div class="field-box__control">
+                  <input id="esp-lng" class="field-box__input" type="number" step="0.0001"
+                    [formField]="formStep3.longitude" placeholder="Ex : -17.4441" />
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <div class="step-nav">
+          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Précédent
+          </button>
+          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="proceedStep3()">
+            Suivant
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════
+           STEP 3 — Équipements & Prix
+      ═══════════════════════════════════════════════════════════════════════ -->
+      @if (activeStep() === 3) {
+
+        <!-- Équipements -->
+        <section class="section-card section-card--equipments">
+          <header class="section-card__header">
+            <span class="section-card__icon section-card__icon--sparkle" aria-hidden="true">✨</span>
+            <div class="section-card__heading">
+              <h2>Équipements &amp; Services</h2>
+              <p>Sélectionner les équipements disponibles dans cet espace</p>
+            </div>
+          </header>
+
+          <div class="section-card__body section-card__body--equipments">
+            <p class="section-body__label">Équipements</p>
+            <div class="equipment-grid">
+              @for (item of equipmentItems; track item.id) {
+                <button
+                  class="equipment-card"
+                  [class.equipment-card--active]="isAmenitySelected(item.code)"
+                  [attr.aria-pressed]="isAmenitySelected(item.code)"
+                  type="button"
+                  (click)="toggleAmenity(item.code)"
+                >
+                  <span class="equipment-card__left">
+                    <img [src]="item.icon" alt="" />
+                    <span>{{ item.label }}</span>
+                  </span>
+                  <span class="equipment-card__action"
+                    [class.equipment-card__action--active]="isAmenitySelected(item.code)"
+                    aria-hidden="true">
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Tarification -->
+        <section class="section-card section-card--pricing">
+          <header class="section-card__header">
+            <span class="section-card__icon" aria-hidden="true">
+              <img src="space-add/icons/file-document.svg" alt="" />
+            </span>
+            <div class="section-card__heading">
+              <h2>Tarification &amp; Formules</h2>
+              <p>Prix par nuit, formule repas et fréquence de facturation</p>
+            </div>
+          </header>
+
+          <div class="section-card__body section-card__body--pricing">
+
+            <!-- Tarif par nuit -->
+            <div class="pricing-row">
+              <label class="pricing-row__label" for="esp-price">
+                Tarif (XOF) <span class="field-req" aria-hidden="true">*</span>
+              </label>
+              <div class="pricing-row__control">
+                <input id="esp-price" class="pricing-row__input" type="number"
+                  [formField]="formStep4.price" />
+                <span class="pricing-row__unit">XOF</span>
+              </div>
+            </div>
+            @if (formStep4.price().invalid() && formStep4.price().touched()) {
+              <p class="field-error field-error--pricing">Tarif requis (≥ 0)</p>
+            }
+
+            <!-- Fréquence de facturation -->
+            <div class="pricing-row pricing-row--last">
+              <p class="pricing-row__label">Fréquence</p>
+              <div class="freq-chips">
+                @for (opt of paymentFrequencyOptions; track opt.value) {
                   <button
-                    class="bed-options__item"
-                    [class.bed-options__item--active]="
-                      roomDraft.bedType === option
-                    "
+                    class="freq-chip"
+                    [class.freq-chip--active]="_step4().paymentFrequency === opt.value"
                     type="button"
-                    (click)="selectBedType(option)"
-                  >
-                    <span>{{ option }}</span>
-                    <span class="bed-options__marker"></span>
-                  </button>
+                    (click)="_step4.update(s => ({ ...s, paymentFrequency: opt.value }))"
+                  >{{ opt.label }}</button>
                 }
               </div>
             </div>
-          } @else {
-            <div class="capacity-grid capacity-grid--hall">
-              <div class="field-box field-box--select">
-                <label class="field-box__label" for="hall-people"
-                  >Capacité personne</label
-                >
-                <div class="field-box__control field-box__control--select">
-                  <input
-                    id="hall-people"
-                    class="field-box__input"
-                    type="text"
-                    [value]="hallDraft.people"
-                    (input)="
-                      updateHallField('people', $any($event.target).value)
-                    "
-                  />
-                  <img
-                    class="field-box__select-icon"
-                    src="space-add/icons/select.svg"
-                    alt=""
-                  />
-                </div>
-              </div>
 
-              <div class="field-box field-box--unit">
-                <label class="field-box__label" for="hall-area"
-                  >Superficie</label
-                >
-                <div class="field-box__control field-box__control--unit">
-                  <input
-                    id="hall-area"
-                    class="field-box__input"
-                    type="text"
-                    [value]="hallDraft.area"
-                    (input)="updateHallField('area', $any($event.target).value)"
-                  />
-                  <span class="field-box__unit">m2</span>
-                </div>
+            <!-- Formule repas -->
+            <div class="pricing-row pricing-row--last">
+              <p class="pricing-row__label">Formule repas</p>
+              <div class="freq-chips">
+                @for (opt of mealPlanOptions; track opt.value) {
+                  <button
+                    class="freq-chip"
+                    [class.freq-chip--active]="_step4().mealPlan === opt.value"
+                    type="button"
+                    (click)="_step4.update(s => ({ ...s, mealPlan: opt.value }))"
+                  >{{ opt.label }}</button>
+                }
               </div>
             </div>
-          }
-        </div>
-      </section>
 
-      <section class="section-card section-card--equipments">
-        <header class="section-card__header">
-          <span
-            class="section-card__icon section-card__icon--sparkle"
-            aria-hidden="true"
-            >✨</span
-          >
+            <!-- Description -->
+            <div class="notes-block">
+              <label class="notes-block__label" for="esp-description">Description &amp; notes</label>
+              <textarea id="esp-description" class="notes-block__textarea" rows="4"
+                [formField]="formStep4.description"
+                placeholder="Description visible par les clients…"></textarea>
+            </div>
 
-          <div class="section-card__heading">
-            <h2>Équipements &amp; Services</h2>
-            <p>Sélectionner les équipements disponibles</p>
           </div>
-        </header>
+        </section>
 
-        <div class="section-card__body section-card__body--equipments">
-          <p class="section-body__label">Équipements</p>
-
-          <div class="equipment-grid">
-            @for (item of equipmentItems; track item.id) {
-              <button
-                class="equipment-card"
-                [class.equipment-card--active]="isEquipmentSelected(item.id)"
-                [attr.aria-pressed]="isEquipmentSelected(item.id)"
-                type="button"
-                (click)="toggleEquipment(item.id)"
-              >
-                <span class="equipment-card__left">
-                  <img src="space-add/icons/mode-cool.svg" alt="" />
-                  <span>{{ item.label }}</span>
-                </span>
-                <span
-                  class="equipment-card__action"
-                  [class.equipment-card__action--active]="
-                    isEquipmentSelected(item.id)
-                  "
-                  aria-hidden="true"
-                >
-                </span>
-              </button>
+        <div class="step-nav">
+          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Précédent
+          </button>
+          <button class="step-nav__btn step-nav__btn--next" type="button"
+            [disabled]="saving()" (click)="proceedStep4()">
+            @if (saving()) { Création en cours… } @else { Créer le brouillon }
+            @if (!saving()) {
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+                <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             }
-          </div>
+          </button>
         </div>
-      </section>
+      }
 
-      <section class="section-card section-card--pricing">
-        <header class="section-card__header">
-          <span class="section-card__icon" aria-hidden="true">
-            <img src="space-add/icons/file-document.svg" alt="" />
-          </span>
-
-          <div class="section-card__heading">
-            <h2>Tarification</h2>
-            <p>Prix selon les saisons et conditions</p>
-          </div>
-        </header>
-
-        <div class="section-card__body section-card__body--pricing">
-          <div class="pricing-row">
-            <label class="pricing-row__label" for="price-standard"
-              >Tarif standard (nuit)</label
-            >
-            <div class="pricing-row__control">
-              <input
-                id="price-standard"
-                class="pricing-row__input"
-                type="text"
-                [value]="draft.standardRate"
-                (input)="
-                  updateDraftField('standardRate', $any($event.target).value)
-                "
-              />
-              <span class="pricing-row__unit">FCFA</span>
+      <!-- ════════════════════════════════════════════════════════════════════
+           STEP 4 — Médias
+      ═══════════════════════════════════════════════════════════════════════ -->
+      @if (activeStep() === 4) {
+        <section class="section-card section-card--gallery">
+          <header class="section-card__header">
+            <span class="section-card__icon" aria-hidden="true">
+              <img src="space-add/icons/file-document.svg" alt="" />
+            </span>
+            <div class="section-card__heading">
+              <h2>Galerie photo &amp; médias</h2>
+              <p>Min. 3 photos · JPEG, PNG, WEBP (10 Mo) · MP4 (100 Mo)</p>
             </div>
-          </div>
+          </header>
 
-          <div class="pricing-row">
-            <label class="pricing-row__label" for="price-weekend"
-              >Tarif week-end (nuit)</label
-            >
-            <div class="pricing-row__control">
-              <input
-                id="price-weekend"
-                class="pricing-row__input"
-                type="text"
-                [value]="draft.weekendRate"
-                (input)="
-                  updateDraftField('weekendRate', $any($event.target).value)
-                "
-              />
-              <span class="pricing-row__unit">FCFA</span>
-            </div>
-          </div>
+          <div class="section-card__body section-card__body--gallery">
 
-          <div class="pricing-row pricing-row--last">
-            <label class="pricing-row__label" for="price-longstay"
-              >Tarif long séjour (nuit)</label
-            >
-            <div class="pricing-row__control">
-              <input
-                id="price-longstay"
-                class="pricing-row__input"
-                type="text"
-                [value]="draft.longStayRate"
-                (input)="
-                  updateDraftField('longStayRate', $any($event.target).value)
-                "
-              />
-              <span class="pricing-row__unit">FCFA</span>
-            </div>
-          </div>
-
-          <div class="notes-block">
-            <label class="notes-block__label" for="price-notes"
-              >Description &amp; notes internes</label
-            >
-            <textarea
-              id="price-notes"
-              class="notes-block__textarea"
-              rows="4"
-              [value]="draft.notes"
-              (input)="updateDraftField('notes', $any($event.target).value)"
-            ></textarea>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-card section-card--gallery">
-        <header class="section-card__header">
-          <span class="section-card__icon" aria-hidden="true">
-            <img src="space-add/icons/file-document.svg" alt="" />
-          </span>
-
-          <div class="section-card__heading">
-            <h2>Galerie photo</h2>
-            <p>Ajouter jusqu'à 8 photos (JPG, PNG — max 5 Mo)</p>
-          </div>
-        </header>
-
-        <div class="section-card__body section-card__body--gallery">
-          <div class="gallery-grid">
-            @for (image of draft.gallery; track image) {
-              <figure class="gallery-grid__item">
-                <img
-                  [src]="image"
-                  alt="Vue de l'espace"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </figure>
+            <!-- Cover warn -->
+            @if (coverWarnVisible()) {
+              <div class="cover-warn" role="alert">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+                  <path d="M10 2L18 17H2L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  <path d="M10 8v4M10 13.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>La photo de couverture a été supprimée. Définissez-en une nouvelle.</span>
+                <button type="button" class="cover-warn__close" (click)="dismissCoverWarn()" aria-label="Fermer">✕</button>
+              </div>
             }
+
+            <!-- Photo count hint -->
+            @if (!hasMinPhotos()) {
+              <p class="media-hint" role="status">
+                {{ photoCount() }}/3 photos — ajoutez au minimum 3 photos pour cet espace.
+              </p>
+            }
+
+            <!-- Drop zone -->
+            <div
+              class="drop-zone"
+              [class.drop-zone--active]="isDragOver()"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave()"
+              (drop)="onDrop($event)"
+              role="button"
+              tabindex="0"
+              aria-label="Zone de dépôt de fichiers"
+            >
+              <svg class="drop-zone__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="4" y="10" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2"/>
+                <circle cx="16" cy="20" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M4 34l10-10 8 8 6-6 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M32 4v12M26 10l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p class="drop-zone__text">Glissez-déposez vos photos ici</p>
+              <p class="drop-zone__or">ou</p>
+              <label class="drop-zone__browse">
+                Parcourir les fichiers
+                <input type="file" [accept]="acceptedMedia" multiple class="drop-zone__input"
+                  (change)="onMediaFilesSelected($event)" aria-label="Sélectionner des fichiers" />
+              </label>
+            </div>
+
+            <!-- Gallery grid -->
+            @if (medias().length > 0) {
+              <div class="gallery-grid">
+                @for (media of medias(); track media.id) {
+                  <figure class="gallery-grid__item" [class.gallery-grid__item--cover]="media.cover">
+                    <img [src]="media.fileUrl" [alt]="media.mediaType ?? 'Média'" loading="lazy" decoding="async" />
+
+                    @if (media.cover) {
+                      <span class="gallery-grid__cover-badge" aria-label="Photo de couverture">
+                        <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="12" height="12">
+                          <path d="M8 1l1.8 3.6L14 5.6l-3 2.9.7 4.1L8 10.5l-3.7 2.1.7-4.1-3-2.9 4.2-.6L8 1z"/>
+                        </svg>
+                        Couverture
+                      </span>
+                    }
+
+                    <figcaption class="gallery-grid__actions">
+                      @if (!media.cover) {
+                        <button class="gallery-grid__btn gallery-grid__btn--cover" type="button"
+                          (click)="setCover(media.id!)" title="Définir comme couverture" aria-label="Définir comme couverture">
+                          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14">
+                            <path d="M8 1l1.8 3.6L14 5.6l-3 2.9.7 4.1L8 10.5l-3.7 2.1.7-4.1-3-2.9 4.2-.6L8 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                          </svg>
+                        </button>
+                      }
+                      <button class="gallery-grid__btn gallery-grid__btn--delete" type="button"
+                        (click)="requestDeleteMedia(media.id!)" title="Supprimer" aria-label="Supprimer ce média">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14">
+                          <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                    </figcaption>
+                  </figure>
+                }
+              </div>
+            }
+
           </div>
+        </section>
+
+        <div class="step-nav">
+          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Précédent
+          </button>
+          <button class="step-nav__btn step-nav__btn--next" type="button" (click)="nextStep()">
+            Suivant
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
-      </section>
+      }
 
-      <div class="save-action">
-        <button class="save-action__button" type="button">
-          Enregistrer l’espace
-        </button>
-      </div>
-    </div>
+      <!-- ════════════════════════════════════════════════════════════════════
+           STEP 5 — Finalisation
+      ═══════════════════════════════════════════════════════════════════════ -->
+      @if (activeStep() === 5) {
+        <section class="section-card">
+          <header class="section-card__header">
+            <span class="section-card__icon" aria-hidden="true">
+              <img src="space-add/icons/file-document.svg" alt="" />
+            </span>
+            <div class="section-card__heading">
+              <h2>Finalisation</h2>
+              <p>Enregistrez en brouillon ou soumettez à la modération</p>
+            </div>
+          </header>
 
+          <div class="section-card__body">
+            <div class="finalization-summary">
+              <div class="finalization-summary__row">
+                <span class="finalization-summary__label">Espace</span>
+                <span class="finalization-summary__value">{{ previewTitle() || '—' }}</span>
+              </div>
+              <div class="finalization-summary__row">
+                <span class="finalization-summary__label">Type</span>
+                <span class="finalization-summary__value">{{ previewType() }}</span>
+              </div>
+              <div class="finalization-summary__row">
+                <span class="finalization-summary__label">Tarif</span>
+                <span class="finalization-summary__value">{{ previewPrice() | number:'1.0-0' }} XOF</span>
+              </div>
+              <div class="finalization-summary__row">
+                <span class="finalization-summary__label">Ville</span>
+                <span class="finalization-summary__value">{{ previewCity() || '—' }}</span>
+              </div>
+              <div class="finalization-summary__row">
+                <span class="finalization-summary__label">Photos</span>
+                <span class="finalization-summary__value"
+                  [class.finalization-summary__value--warn]="!hasMinPhotos()">
+                  {{ photoCount() }} photo(s)
+                  @if (!hasMinPhotos()) { <span> · Recommandé : 3 minimum</span> }
+                </span>
+              </div>
+              <div class="finalization-summary__row">
+                <span class="finalization-summary__label">Statut</span>
+                <span class="finalization-summary__value finalization-summary__value--draft">Brouillon</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="save-action">
+          <button class="save-action__button save-action__button--ghost" type="button"
+            [disabled]="saving()" (click)="sauvegarderBrouillon()">
+            Enregistrer en brouillon
+          </button>
+          <button class="save-action__button" type="button"
+            [disabled]="saving()" (click)="soumettre()">
+            @if (saving()) { Soumission… } @else { Soumettre à la modération }
+          </button>
+        </div>
+
+        <div class="step-nav step-nav--final">
+          <button class="step-nav__btn step-nav__btn--prev" type="button" (click)="previousStep()">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="18" height="18">
+              <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Précédent
+          </button>
+        </div>
+      }
+
+    </div><!-- /main-column -->
+
+    <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
     <aside class="side-column">
+
+      <!-- Preview card -->
       <section class="preview-card">
         <div class="preview-card__media">
-          <img
-            class="preview-card__hero-image"
-            [src]="draft.heroImage"
-            alt="Aperçu de l'espace"
-            decoding="async"
-          />
+          @if (medias().length > 0 && medias()[0].fileUrl) {
+            <img class="preview-card__hero-image"
+              [src]="medias().find(m => m.cover)?.fileUrl ?? medias()[0].fileUrl"
+              alt="Aperçu de l'espace" decoding="async" />
+          } @else {
+            <img class="preview-card__hero-image"
+              src="space-add/images/preview-room.webp"
+              alt="Aperçu de l'espace" decoding="async" />
+          }
           <div class="preview-card__overlay" aria-hidden="true">
-            <img
-              class="preview-card__overlay-icon"
-              [src]="currentPreviewOverlayIcon"
-              alt=""
-            />
+            <img class="preview-card__overlay-icon"
+              [src]="selectedPropertyType === 'CONFERENCE_ROOM' ? 'space-add/icons/conference-room.svg' : 'space-add/icons/bed-double.svg'"
+              alt="" />
           </div>
-          <span class="preview-card__badge">{{ draft.previewTag }}</span>
+          <span class="preview-card__badge">{{ previewType() }}</span>
         </div>
 
         <div class="preview-card__body">
-          <h2 class="preview-card__title">{{ draft.name }}</h2>
-          <p class="preview-card__subtitle">{{ currentPreviewSubtitle }}</p>
+          <h2 class="preview-card__title">{{ previewTitle() || "Nom de l'espace" }}</h2>
+          <p class="preview-card__subtitle">Étage {{ previewFloor() }}</p>
 
           <dl class="preview-card__stats">
             <div class="preview-card__stat">
-              <dt>Superficie</dt>
-              <dd>{{ draft.area }}m2</dd>
-            </div>
-            <div class="preview-card__stat">
-              <dt>Capacité</dt>
-              <dd>{{ draft.previewCapacity }}</dd>
-            </div>
-            <div class="preview-card__stat">
               <dt>Tarif / nuit</dt>
-              <dd>{{ draft.previewRate }}</dd>
+              <dd>{{ previewPrice() | number:'1.0-0' }} XOF</dd>
             </div>
             <div class="preview-card__stat">
-              <dt>Equipements</dt>
-              <dd>{{ draft.previewEquipments }}</dd>
+              <dt>Ville</dt>
+              <dd>{{ previewCity() || '—' }}</dd>
+            </div>
+            <div class="preview-card__stat">
+              <dt>Photos</dt>
+              <dd>{{ photoCount() }}</dd>
+            </div>
+            <div class="preview-card__stat">
+              <dt>Statut</dt>
+              <dd>{{ isCreated() ? 'Brouillon' : 'Non créé' }}</dd>
             </div>
           </dl>
         </div>
       </section>
 
+      <!-- Status card -->
       <section class="status-card">
         <div class="status-card__header">
           <span class="status-card__switch" aria-hidden="true">
             <span class="status-card__switch-dot"></span>
           </span>
-
           <div class="status-card__heading">
-            <h2>Statut initial</h2>
-            <p>Disponibilité à la création</p>
+            <h2>Transaction</h2>
+            <p>Type de séjour proposé</p>
           </div>
         </div>
-
         <div class="status-card__body">
-          @for (status of initialStatusOptions; track status) {
+          @for (opt of transactionTypeOptions; track opt.value) {
             <button
               class="status-card__option"
-              [class.status-card__option--active]="initialStatus() === status"
+              [class.status-card__option--active]="_step1().transactionType === opt.value"
               type="button"
-              (click)="selectInitialStatus(status)"
-            >
-              {{ status }}
-            </button>
+              (click)="_step1.update(s => ({ ...s, transactionType: opt.value }))"
+            >{{ opt.label }}</button>
           }
         </div>
       </section>
+
     </aside>
+  </div><!-- /page-layout -->
+
+</div><!-- /espace-add-page -->
+
+<!-- ── Delete media confirmation dialog ─────────────────────────────────── -->
+@if (mediaDeleteTarget()) {
+  <div class="delete-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title"
+    (click)="cancelDeleteMedia()">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <h3 id="delete-dialog-title">Supprimer ce média ?</h3>
+      <p>Cette action est irréversible. Le fichier sera supprimé du stockage.</p>
+      <div class="delete-modal__actions">
+        <button class="delete-modal__btn delete-modal__btn--cancel" type="button" (click)="cancelDeleteMedia()">
+          Annuler
+        </button>
+        <button class="delete-modal__btn delete-modal__btn--confirm" type="button" (click)="confirmDeleteMedia()">
+          Supprimer
+        </button>
+      </div>
+    </div>
   </div>
-</div>
+}

@@ -1,408 +1,546 @@
-<div class="rooms-page">
-  <h1 class="rooms-page__title">Mes chambres</h1>
+<section class="espaces-page">
+  <header class="espaces-page__header">
+    <!-- TOOLBAR : skeleton pills uniquement au premier chargement -->
+    @if (viewState() !== 'loading' && !isLeavingSkeleton()) {
+      <h1 class="espaces-page__title"
+          [class.espaces-page__title--entering]="contentEntering()">Mes espaces</h1>
 
-  <section class="summary-strip" aria-label="Résumé des espaces">
-    @for (summary of summaryCards; track summary.label) {
-      <article
-        class="summary-card"
-        [class.summary-card--all]="summary.theme === 'all'"
-        [class.summary-card--reserved]="summary.theme === 'reserved'"
-        [class.summary-card--online]="summary.theme === 'online'"
-        [class.summary-card--occupied]="summary.theme === 'occupied'"
-        [class.summary-card--revenue]="summary.theme === 'revenue'"
-      >
-        <div class="summary-card__icon-wrap">
-          <img
-            class="summary-card__icon"
-            [src]="summary.icon"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
-
-        <div class="summary-card__content">
-          <p class="summary-card__label">{{ summary.label }}</p>
-          <p class="summary-card__value">{{ summary.value }}</p>
-        </div>
-      </article>
+      <div class="espaces-page__actions"
+           [class.espaces-page__actions--entering]="contentEntering()">
+        <a class="action-button action-button--primary" routerLink="ajouter">
+          <span class="action-button__label">Ajouter un espace</span>
+          <span class="action-button__icon-shell" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+              <path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </span>
+        </a>
+      </div>
+    } @else {
+      <div class="espaces-page__sk-title" aria-hidden="true"></div>
+      <div class="espaces-page__sk-action" aria-hidden="true"></div>
     }
-  </section>
+  </header>
 
-  <section class="rooms-panel">
-    <div class="rooms-toolbar">
-      <div class="rooms-toolbar__filters">
-        <div
-          class="filter-dropdown"
-          [class.filter-dropdown--open]="openDropdown() === 'type'"
-        >
-          <button
-            class="filter-pill"
-            [class.filter-pill--open]="openDropdown() === 'type'"
-            type="button"
-            aria-label="Filtrer par type d’espace"
-            [attr.aria-expanded]="openDropdown() === 'type'"
-            (click)="$event.stopPropagation(); toggleDropdown('type')"
-          >
-            <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
-
-            <img
-              class="filter-pill__chevron"
-              src="rooms/icons/chevron-down.svg"
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-
-          @if (openDropdown() === 'type') {
-            <div class="filter-menu" aria-label="Options type d’espace">
-              @for (option of typeOptions; track option.value) {
-                <button
-                  class="filter-menu__option"
-                  [class.filter-menu__option--active]="
-                    selectedType() === option.value
-                  "
-                  type="button"
-                  (click)="
-                    $event.stopPropagation(); selectTypeOption(option.value)
-                  "
-                >
-                  <span class="filter-menu__option-main">
-                    <span
-                      class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="
-                        option.tone === 'neutral'
-                      "
-                      [class.filter-menu__tone--accent]="
-                        option.tone === 'accent'
-                      "
-                    ></span>
-                    <span>{{ option.label }}</span>
-                  </span>
-
-                  @if (selectedType() === option.value) {
-                    <span class="filter-menu__check" aria-hidden="true"></span>
-                  }
-                </button>
-              }
-            </div>
-          }
-        </div>
-
-        <div
-          class="filter-dropdown filter-dropdown--status"
-          [class.filter-dropdown--open]="openDropdown() === 'status'"
-        >
-          <button
-            class="filter-pill filter-pill--status"
-            [class.filter-pill--open]="openDropdown() === 'status'"
-            type="button"
-            aria-label="Filtrer par statut"
-            [attr.aria-expanded]="openDropdown() === 'status'"
-            (click)="$event.stopPropagation(); toggleDropdown('status')"
-          >
-            <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
-
-            <img
-              class="filter-pill__chevron"
-              src="rooms/icons/chevron-down.svg"
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-
-          @if (openDropdown() === 'status') {
-            <div class="filter-menu" aria-label="Options statut">
-              @for (option of statusOptions; track option.value) {
-                <button
-                  class="filter-menu__option"
-                  [class.filter-menu__option--active]="
-                    selectedStatus() === option.value
-                  "
-                  type="button"
-                  (click)="
-                    $event.stopPropagation(); selectStatusOption(option.value)
-                  "
-                >
-                  <span class="filter-menu__option-main">
-                    <span
-                      class="filter-menu__tone"
-                      [class.filter-menu__tone--neutral]="
-                        option.tone === 'neutral'
-                      "
-                      [class.filter-menu__tone--success]="
-                        option.tone === 'success'
-                      "
-                      [class.filter-menu__tone--warning]="
-                        option.tone === 'warning'
-                      "
-                    ></span>
-                    <span>{{ option.label }}</span>
-                  </span>
-
-                  @if (selectedStatus() === option.value) {
-                    <span class="filter-menu__check" aria-hidden="true"></span>
-                  }
-                </button>
-              }
-            </div>
-          }
-        </div>
-
-        <button class="filter-action" type="button">Filtrer</button>
-      </div>
-
-      <div class="rooms-toolbar__actions">
-        <div
-          class="view-toggle-group"
-          role="tablist"
-          aria-label="Mode d'affichage des espaces"
-          ubaxMorphTabs
-          ubaxMorphTabsItemSelector=".view-toggle"
-        >
-          <button
-            class="view-toggle"
-            [class.is-active]="viewMode() === 'grid'"
-            [class.view-toggle--active]="viewMode() === 'grid'"
-            type="button"
-            role="tab"
-            aria-label="Vue grille"
-            [attr.aria-selected]="viewMode() === 'grid'"
-            [attr.aria-pressed]="viewMode() === 'grid'"
-            (click)="setViewMode('grid')"
-          >
-            <img
-              class="view-toggle__icon view-toggle__icon--grid"
-              src="rooms/icons/view-grid.svg"
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-
-          <button
-            class="view-toggle"
-            type="button"
-            role="tab"
-            aria-label="Vue liste"
-            [class.is-active]="viewMode() === 'list'"
-            [class.view-toggle--active]="viewMode() === 'list'"
-            [attr.aria-selected]="viewMode() === 'list'"
-            [attr.aria-pressed]="viewMode() === 'list'"
-            (click)="setViewMode('list')"
-          >
-            <img
-              class="view-toggle__icon view-toggle__icon--list"
-              src="rooms/icons/view-list.svg"
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-        </div>
-
-        <a class="add-space-button" routerLink="ajouter">Ajouter une espace</a>
-      </div>
-    </div>
-
-    <div
-      class="rooms-grid"
-      [class.rooms-grid--list]="viewMode() === 'list'"
-      [attr.data-view-mode]="viewMode()"
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAT LOADING — skeleton pleine page uniquement au premier chargement
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'loading' || isLeavingSkeleton()) {
+    <section
+      class="espaces-page__content"
+      [class.is-leaving]="isLeavingSkeleton()"
+      aria-label="Chargement en cours"
+      aria-busy="true"
     >
-      @for (space of visibleSpaces(); track space.id; let index = $index) {
-        @if (viewMode() === 'grid') {
-          <a
-            class="room-card"
-            data-ubax-motion-skip
-            [routerLink]="[space.id]"
-            [style.--room-enter-order]="index"
+      <ubax-espaces-list-skeleton />
+    </section>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTAT ERROR
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'error') {
+    <section
+      class="espaces-page__content"
+      [class.espaces-page__content--entering]="contentEntering()"
+      role="alert"
+    >
+      <div class="espaces-error-state">
+        <svg class="espaces-error-state__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="#e7000b" stroke-width="1.5" />
+          <path d="M12 7v5M12 16h.01" stroke="#e7000b" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+        <p class="espaces-error-state__title">Impossible de charger vos espaces</p>
+        <p class="espaces-error-state__hint">Une erreur est survenue. Veuillez réessayer.</p>
+        <button class="espaces-error-state__retry" type="button" (click)="retryLoad()">
+          Réessayer
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       ÉTATS SUCCESS + EMPTY
+  ════════════════════════════════════════════════════════════════════════ -->
+  @if (viewState() === 'success' || viewState() === 'empty') {
+    <section
+      class="espaces-page__content"
+      [class.espaces-page__content--entering]="contentEntering()"
+    >
+      <!-- Summary strip -->
+      <section class="summary-strip" aria-label="Résumé des espaces">
+        <article class="summary-card summary-card--all">
+          <div class="summary-card__icon-wrap">
+            <img class="summary-card__icon" src="rooms/icons/stat-all.svg" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="summary-card__content">
+            <p class="summary-card__label">Tous les espaces</p>
+            <p class="summary-card__value">{{ totalEspaces() }}</p>
+          </div>
+        </article>
+
+        <article class="summary-card summary-card--online">
+          <div class="summary-card__icon-wrap">
+            <img class="summary-card__icon" src="rooms/icons/stat-online.svg" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="summary-card__content">
+            <p class="summary-card__label">Publiés</p>
+            <p class="summary-card__value">{{ publishedCount() }}</p>
+          </div>
+        </article>
+
+        <article class="summary-card summary-card--reserved">
+          <div class="summary-card__icon-wrap">
+            <img class="summary-card__icon" src="rooms/icons/stat-reserved.svg" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="summary-card__content">
+            <p class="summary-card__label">En attente</p>
+            <p class="summary-card__value">{{ pendingCount() }}</p>
+          </div>
+        </article>
+
+        <article class="summary-card summary-card--occupied">
+          <div class="summary-card__icon-wrap">
+            <img class="summary-card__icon" src="rooms/icons/stat-occupied.svg" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="summary-card__content">
+            <p class="summary-card__label">Brouillons</p>
+            <p class="summary-card__value">{{ draftCount() }}</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="espaces-panel">
+        <div class="espaces-toolbar">
+          <div class="espaces-toolbar__filters">
+            <!-- Type filter -->
+            <div class="filter-dropdown" [class.filter-dropdown--open]="openDropdown() === 'type'">
+              <button
+                class="filter-pill"
+                [class.filter-pill--open]="openDropdown() === 'type'"
+                type="button"
+                aria-label="Filtrer par type d'espace"
+                [attr.aria-expanded]="openDropdown() === 'type'"
+                (click)="$event.stopPropagation(); toggleDropdown('type')"
+              >
+                <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
+                <svg class="filter-pill__chevron" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z" fill="currentColor" />
+                </svg>
+              </button>
+
+              @if (openDropdown() === 'type') {
+                <div class="filter-menu" aria-label="Options type d'espace">
+                  @for (option of typeOptions; track option.value) {
+                    <button
+                      class="filter-menu__option"
+                      [class.filter-menu__option--active]="selectedType() === option.value"
+                      type="button"
+                      (click)="$event.stopPropagation(); selectTypeOption(option.value)"
+                    >
+                      <span class="filter-menu__option-main">
+                        <span
+                          class="filter-menu__tone"
+                          [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
+                          [class.filter-menu__tone--accent]="option.tone === 'accent'"
+                        ></span>
+                        <span>{{ option.label }}</span>
+                      </span>
+                      @if (selectedType() === option.value) {
+                        <span class="filter-menu__check" aria-hidden="true"></span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Status filter -->
+            <div class="filter-dropdown filter-dropdown--status" [class.filter-dropdown--open]="openDropdown() === 'status'">
+              <button
+                class="filter-pill"
+                [class.filter-pill--open]="openDropdown() === 'status'"
+                type="button"
+                aria-label="Filtrer par statut"
+                [attr.aria-expanded]="openDropdown() === 'status'"
+                (click)="$event.stopPropagation(); toggleDropdown('status')"
+              >
+                <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
+                <svg class="filter-pill__chevron" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z" fill="currentColor" />
+                </svg>
+              </button>
+
+              @if (openDropdown() === 'status') {
+                <div class="filter-menu" aria-label="Options statut">
+                  @for (option of statusOptions; track option.value) {
+                    <button
+                      class="filter-menu__option"
+                      [class.filter-menu__option--active]="selectedStatus() === option.value"
+                      type="button"
+                      (click)="$event.stopPropagation(); selectStatusOption(option.value)"
+                    >
+                      <span class="filter-menu__option-main">
+                        <span
+                          class="filter-menu__tone"
+                          [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
+                          [class.filter-menu__tone--success]="option.tone === 'success'"
+                          [class.filter-menu__tone--warning]="option.tone === 'warning'"
+                          [class.filter-menu__tone--accent]="option.tone === 'accent'"
+                        ></span>
+                        <span>{{ option.label }}</span>
+                      </span>
+                      @if (selectedStatus() === option.value) {
+                        <span class="filter-menu__check" aria-hidden="true"></span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <button class="filter-action" type="button" (click)="resetFilters()">Filtrer</button>
+          </div>
+
+          <div
+            class="espaces-toolbar__toggle"
+            role="tablist"
+            aria-label="Mode d'affichage des espaces"
+            ubaxMorphTabs
+            ubaxMorphTabsItemSelector=".view-toggle"
           >
-            <img
-              class="room-card__image"
-              [src]="space.image"
-              [alt]="space.title"
-              [attr.loading]="index === 0 ? 'eager' : 'lazy'"
-              decoding="async"
-            />
-
-            <span class="room-card__type">{{ space.typeLabel }}</span>
-
-            <span
-              class="room-card__status"
-              [class.room-card__status--reserved]="space.status === 'Réservé'"
+            <button
+              class="view-toggle"
+              [class.is-active]="viewMode() === 'grid'"
+              [class.view-toggle--active]="viewMode() === 'grid'"
+              type="button"
+              role="tab"
+              aria-label="Vue grille"
+              [attr.aria-selected]="viewMode() === 'grid'"
+              (click)="setViewMode('grid')"
             >
-              {{ space.status }}
-            </span>
+              <svg class="view-toggle__icon view-toggle__icon--grid" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
+                <rect x="12" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
+                <rect x="1" y="12" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
+                <rect x="12" y="12" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+            </button>
 
-            <div class="room-card__details">
-              <div class="room-card__heading">
-                <h2 class="room-card__title">{{ space.title }}</h2>
+            <button
+              class="view-toggle"
+              [class.is-active]="viewMode() === 'list'"
+              [class.view-toggle--active]="viewMode() === 'list'"
+              type="button"
+              role="tab"
+              aria-label="Vue liste"
+              [attr.aria-selected]="viewMode() === 'list'"
+              (click)="setViewMode('list')"
+            >
+              <svg class="view-toggle__icon view-toggle__icon--list" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M7 4h12M7 10h12M7 16h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <circle cx="2.5" cy="4" r="1.5" fill="currentColor" />
+                <circle cx="2.5" cy="10" r="1.5" fill="currentColor" />
+                <circle cx="2.5" cy="16" r="1.5" fill="currentColor" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
-                <span class="room-card__arrow" aria-hidden="true">
-                  <img
-                    class="room-card__arrow-icon"
-                    src="rooms/icons/card-arrow.svg"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-              </div>
-
-              <p class="room-card__location">
-                <img
-                  src="hotel-dashboard/icons/location-icon.svg"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span>{{ space.location }}</span>
-              </p>
-
-              <div class="room-card__bottom-row">
-                <div class="room-card__owner">
-                  <img
-                    class="room-card__avatar"
-                    [src]="space.avatar"
-                    [alt]="space.owner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-                  <div class="room-card__owner-meta">
-                    <p class="room-card__owner-name">{{ space.owner }}</p>
-                    <p class="room-card__owner-role">{{ space.ownerRole }}</p>
-                  </div>
-                </div>
-
-                <div class="room-card__price-block">
-                  <div class="room-card__rating" aria-label="Note 4.1 sur 5">
-                    @for (star of stars; track $index) {
-                      <img
-                        src="rooms/icons/star.svg"
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    }
-                    <span>{{ space.rating }}</span>
-                  </div>
-
-                  <p class="room-card__price">
-                    <span>{{ space.priceValue }}</span>
-                    <small>{{ space.priceUnit }}</small>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </a>
-        } @else {
-          <a
-            class="room-list-card"
-            data-ubax-motion-skip
-            [routerLink]="[space.id]"
-            [style.--room-enter-order]="index"
-          >
-            <div class="room-list-card__media">
-              <img
-                class="room-list-card__image"
-                [src]="space.image"
-                [alt]="space.title"
-                [attr.loading]="index === 0 ? 'eager' : 'lazy'"
-                decoding="async"
-              />
-
-              <span class="room-list-card__type">{{ space.typeLabel }}</span>
+        <!-- Skeleton partiel pendant rechargement -->
+        @if (isReloading()) {
+          <ubax-espaces-cards-skeleton
+            [viewMode]="viewMode()"
+            [count]="pageSize()"
+            aria-busy="true"
+          />
+        } @else if (showEmptyState()) {
+          <section class="espaces-empty-state" aria-live="polite">
+            <div class="espaces-empty-state__art" aria-hidden="true">
+              <span class="espaces-empty-state__orb espaces-empty-state__orb--large"></span>
+              <span class="espaces-empty-state__orb espaces-empty-state__orb--small"></span>
+              <span class="espaces-empty-state__icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="8" y="20" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2.5" />
+                  <path d="M8 32h48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  <path d="M24 20V14a8 8 0 0116 0v6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                </svg>
+              </span>
             </div>
 
-            <div class="room-list-card__content">
-              <div class="room-list-card__top-row">
-                <h2 class="room-list-card__title">{{ space.title }}</h2>
+            <h2 class="espaces-empty-state__title">Aucun espace à afficher</h2>
 
-                <span
-                  class="room-list-card__status"
-                  [class.room-list-card__status--reserved]="
-                    space.status === 'Réservé'
-                  "
-                >
-                  {{ space.status }}
-                </span>
-
-                <p class="room-list-card__price">
-                  <span>{{ space.priceValue }}</span>
-                  <small>{{ space.priceUnit }}</small>
-                </p>
-              </div>
-
-              <p class="room-list-card__location">
-                <img
-                  src="hotel-dashboard/icons/location-icon.svg"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span>{{ space.location }}</span>
+            @if (hasActiveFilters()) {
+              <p class="espaces-empty-state__text">
+                Vos filtres ne correspondent à aucun espace. Essayez de réinitialiser les filtres.
               </p>
+              <div class="espaces-empty-state__actions">
+                <button class="espaces-empty-state__btn espaces-empty-state__btn--ghost" type="button" (click)="resetFilters()">
+                  Réinitialiser les filtres
+                </button>
+                <a class="espaces-empty-state__btn espaces-empty-state__btn--primary" routerLink="ajouter">
+                  Ajouter un espace
+                </a>
+              </div>
+            } @else {
+              <p class="espaces-empty-state__text">
+                Commencez par créer votre premier espace pour le publier sur UBAX.
+              </p>
+              <div class="espaces-empty-state__actions">
+                <a class="espaces-empty-state__btn espaces-empty-state__btn--primary" routerLink="ajouter">
+                  Ajouter mon premier espace
+                </a>
+              </div>
+            }
+          </section>
+        } @else if (viewMode() === 'grid') {
+          <div class="espaces-grid">
+            @for (card of visibleCards(); track card.id; let index = $index) {
+              <div class="espace-card" [style.--espace-enter-order]="index">
+                <!-- Rejection reason banner -->
+                @if (card.statusRaw === 'REJECTED' && card.rejectionReason) {
+                  <div class="espace-card__rejection" role="alert" [title]="card.rejectionReason">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14">
+                      <path d="M8 1L15 14H1L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                      <path d="M8 6v4M8 11.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>{{ card.rejectionReason }}</span>
+                  </div>
+                }
 
-              <div class="room-list-card__bottom-row">
-                <div class="room-list-card__owner">
+                <a [routerLink]="[card.id]" class="espace-card__link">
                   <img
-                    class="room-list-card__avatar"
-                    [src]="space.avatar"
-                    [alt]="space.owner"
-                    loading="lazy"
+                    class="espace-card__image"
+                    src="shared/rooms/room-photo-01.webp"
+                    [alt]="card.title"
+                    [attr.loading]="index === 0 ? 'eager' : 'lazy'"
                     decoding="async"
                   />
 
-                  <div class="room-list-card__owner-meta">
-                    <p class="room-list-card__owner-name">{{ space.owner }}</p>
-                    <p class="room-list-card__owner-role">
-                      {{ space.ownerRole }}
-                    </p>
-                  </div>
-                </div>
+                  <span class="espace-card__type-badge">{{ card.typeLabel }}</span>
 
-                <div class="room-list-card__side">
-                  <div
-                    class="room-list-card__rating"
-                    aria-label="Note 4.1 sur 5"
+                  <span
+                    class="espace-card__status-badge"
+                    [class.espace-card__status-badge--draft]="card.statusRaw === 'DRAFT'"
+                    [class.espace-card__status-badge--pending]="card.statusRaw === 'PENDING'"
+                    [class.espace-card__status-badge--published]="card.statusRaw === 'PUBLISHED'"
+                    [class.espace-card__status-badge--rejected]="card.statusRaw === 'REJECTED'"
+                    [class.espace-card__status-badge--archived]="card.statusRaw === 'ARCHIVED'"
                   >
-                    @for (star of stars; track $index) {
-                      <img
-                        src="rooms/icons/star.svg"
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    }
-                    <span>{{ space.rating }}</span>
-                  </div>
+                    @if (card.boosted) { <span aria-label="Boosté">⚡</span> }
+                    {{ card.statusLabel }}
+                  </span>
 
-                  <span class="room-list-card__arrow" aria-hidden="true">
+                  <div class="espace-card__panel">
+                    <div class="espace-card__heading">
+                      <h2 class="espace-card__title">{{ card.title }}</h2>
+                      <div class="espace-card__actions">
+                        <button
+                          class="archive-chip"
+                          type="button"
+                          [disabled]="!canArchive(card.statusRaw, card.id)"
+                          (click)="$event.preventDefault(); $event.stopPropagation(); openArchiveDialog(card)"
+                        >
+                          @if (isArchiving(card.id)) { Archivage... }
+                          @else if (card.statusRaw === 'ARCHIVED') { Archivé }
+                          @else { Archiver }
+                        </button>
+
+                        @if (card.canSubmit) {
+                          <button
+                            class="submit-chip"
+                            type="button"
+                            [disabled]="isSubmitting(card.id)"
+                            (click)="$event.preventDefault(); $event.stopPropagation(); openSubmitDialog(card)"
+                          >
+                            {{ isSubmitting(card.id) ? 'Soumission…' : 'Soumettre' }}
+                          </button>
+                        }
+
+                        <span class="espace-card__arrow" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+
+                    <p class="espace-card__location">
+                      <span class="espace-card__location-icon" aria-hidden="true">
+                        <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z" stroke="currentColor" stroke-width="1.5" />
+                          <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                      </span>
+                      <span>{{ card.city }}</span>
+                    </p>
+
+                    <p class="espace-card__price">{{ card.price }} <small>FCFA/nuit</small></p>
+                  </div>
+                </a>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="espaces-list">
+            @for (card of visibleCards(); track card.id; let index = $index) {
+              <div class="espace-list-card" [style.--espace-enter-order]="index">
+                <a [routerLink]="[card.id]" class="espace-list-card__link">
+                  <div class="espace-list-card__media">
                     <img
-                      class="room-list-card__arrow-icon"
-                      src="rooms/icons/card-arrow.svg"
-                      alt=""
-                      loading="lazy"
+                      class="espace-list-card__image"
+                      src="shared/rooms/room-photo-01.webp"
+                      [alt]="card.title"
+                      [attr.loading]="index === 0 ? 'eager' : 'lazy'"
                       decoding="async"
                     />
-                  </span>
-                </div>
-              </div>
-            </div>
-          </a>
-        }
-      }
-    </div>
+                    <span class="espace-list-card__type-badge">{{ card.typeLabel }}</span>
+                  </div>
 
-    <div class="pagination-wrapper">
-      <ubax-paginator
-        [(currentPage)]="activePage"
-        [totalPages]="totalPages()"
-      />
+                  <div class="espace-list-card__content">
+                    <div class="espace-list-card__top">
+                      <h2 class="espace-list-card__title">{{ card.title }}</h2>
+                      <p class="espace-list-card__price">{{ card.price }} <small>FCFA/nuit</small></p>
+                    </div>
+
+                    <p class="espace-list-card__location">
+                      <span class="espace-list-card__location-icon" aria-hidden="true">
+                        <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z" stroke="currentColor" stroke-width="1.5" />
+                          <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                      </span>
+                      <span>{{ card.city }}</span>
+                    </p>
+
+                    @if (card.statusRaw === 'REJECTED' && card.rejectionReason) {
+                      <p class="espace-list-card__rejection" role="alert">
+                        ⚠ {{ card.rejectionReason }}
+                      </p>
+                    }
+
+                    <div class="espace-list-card__bottom">
+                      <span
+                        class="espace-list-card__status"
+                        [class.espace-list-card__status--draft]="card.statusRaw === 'DRAFT'"
+                        [class.espace-list-card__status--pending]="card.statusRaw === 'PENDING'"
+                        [class.espace-list-card__status--published]="card.statusRaw === 'PUBLISHED'"
+                        [class.espace-list-card__status--rejected]="card.statusRaw === 'REJECTED'"
+                        [class.espace-list-card__status--archived]="card.statusRaw === 'ARCHIVED'"
+                      >
+                        @if (card.boosted) { <span aria-label="Boosté">⚡</span> }
+                        {{ card.statusLabel }}
+                      </span>
+
+                      <div class="espace-list-card__actions">
+                        <button
+                          class="archive-chip archive-chip--compact"
+                          type="button"
+                          [disabled]="!canArchive(card.statusRaw, card.id)"
+                          (click)="$event.preventDefault(); $event.stopPropagation(); openArchiveDialog(card)"
+                        >
+                          @if (isArchiving(card.id)) { Archivage... }
+                          @else if (card.statusRaw === 'ARCHIVED') { Archivé }
+                          @else { Archiver }
+                        </button>
+
+                        @if (card.canSubmit) {
+                          <button
+                            class="submit-chip submit-chip--compact"
+                            type="button"
+                            [disabled]="isSubmitting(card.id)"
+                            (click)="$event.preventDefault(); $event.stopPropagation(); openSubmitDialog(card)"
+                          >
+                            {{ isSubmitting(card.id) ? 'Soumission…' : 'Soumettre' }}
+                          </button>
+                        }
+
+                        <span class="espace-list-card__arrow" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="espaces-pagination">
+          <ubax-paginator
+            [currentPage]="currentPage()"
+            (currentPageChange)="currentPage.set($event)"
+            [totalPages]="totalPages()"
+          />
+        </div>
+      </section>
+    </section>
+  }
+</section>
+
+<!-- ── Modal d'archivage ─────────────────────────────────────────────────── -->
+@if (archiveDialogTarget()) {
+  <div
+    class="archive-modal-overlay"
+    [class.is-closing]="archiveDialogClosing()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="archive-dialog-title"
+    (click)="closeArchiveDialog()"
+  >
+    <div class="archive-modal" [class.is-closing]="archiveDialogClosing()" (click)="$event.stopPropagation()">
+      <h3 id="archive-dialog-title">Archiver cet espace ?</h3>
+      <p>
+        L'espace <strong>{{ archiveDialogTitle() }}</strong> sera archivé et ne sera plus visible dans le catalogue public.
+      </p>
+      <div class="archive-modal__actions">
+        <button class="archive-modal__btn archive-modal__btn--cancel" type="button" (click)="closeArchiveDialog()">
+          Annuler
+        </button>
+        <button
+          class="archive-modal__btn archive-modal__btn--confirm"
+          type="button"
+          [disabled]="isArchiving(archiveDialogTarget()!.id)"
+          (click)="confirmArchive()"
+        >
+          @if (isArchiving(archiveDialogTarget()!.id)) { Archivage… } @else { Confirmer }
+        </button>
+      </div>
     </div>
-  </section>
-</div>
+  </div>
+}
+
+<!-- ── Modal de soumission ───────────────────────────────────────────────── -->
+@if (submitDialogTarget()) {
+  <div
+    class="archive-modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="submit-dialog-title"
+    (click)="closeSubmitDialog()"
+  >
+    <div class="archive-modal" (click)="$event.stopPropagation()">
+      <h3 id="submit-dialog-title">Soumettre à la modération ?</h3>
+      <p>
+        L'espace sera soumis pour examen par un administrateur UBAX. Vous ne pourrez plus le modifier jusqu'à la décision.
+      </p>
+      <div class="archive-modal__actions">
+        <button class="archive-modal__btn archive-modal__btn--cancel" type="button" (click)="closeSubmitDialog()">
+          Annuler
+        </button>
+        <button
+          class="archive-modal__btn archive-modal__btn--confirm"
+          type="button"
+          [disabled]="isSubmitting(submitDialogTarget()!.id)"
+          (click)="confirmSubmit()"
+        >
+          @if (isSubmitting(submitDialogTarget()!.id)) { Soumission… } @else { Soumettre }
+        </button>
+      </div>
+    </div>
+  </div>
+}
