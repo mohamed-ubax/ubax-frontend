@@ -1095,14 +1095,6 @@
 }
 
 .archive-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--ubax-z-overlay, 2147483647);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(3 14 27 / 0.48);
-  backdrop-filter: blur(3px);
   animation: archive-overlay-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
 
   &.is-closing {

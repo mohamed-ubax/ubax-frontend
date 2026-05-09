@@ -2,17 +2,38 @@
   <header class="espaces-page__header">
     <!-- TOOLBAR : skeleton pills uniquement au premier chargement -->
     @if (viewState() !== 'loading' && !isLeavingSkeleton()) {
-      <h1 class="espaces-page__title"
-          [class.espaces-page__title--entering]="contentEntering()">Mes espaces</h1>
+      <h1
+        class="espaces-page__title"
+        [class.espaces-page__title--entering]="contentEntering()"
+      >
+        Mes espaces
+      </h1>
 
-      <div class="espaces-page__actions"
-           [class.espaces-page__actions--entering]="contentEntering()">
+      <div
+        class="espaces-page__actions"
+        [class.espaces-page__actions--entering]="contentEntering()"
+      >
         <a class="action-button action-button--primary" routerLink="ajouter">
           <span class="action-button__label">Ajouter un espace</span>
           <span class="action-button__icon-shell" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
-              <path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M12 7v10M7 12h10"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
             </svg>
           </span>
         </a>
@@ -47,13 +68,32 @@
       role="alert"
     >
       <div class="espaces-error-state">
-        <svg class="espaces-error-state__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg
+          class="espaces-error-state__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
           <circle cx="12" cy="12" r="10" stroke="#e7000b" stroke-width="1.5" />
-          <path d="M12 7v5M12 16h.01" stroke="#e7000b" stroke-width="1.5" stroke-linecap="round" />
+          <path
+            d="M12 7v5M12 16h.01"
+            stroke="#e7000b"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
         </svg>
-        <p class="espaces-error-state__title">Impossible de charger vos espaces</p>
-        <p class="espaces-error-state__hint">Une erreur est survenue. Veuillez réessayer.</p>
-        <button class="espaces-error-state__retry" type="button" (click)="retryLoad()">
+        <p class="espaces-error-state__title">
+          Impossible de charger vos espaces
+        </p>
+        <p class="espaces-error-state__hint">
+          Une erreur est survenue. Veuillez réessayer.
+        </p>
+        <button
+          class="espaces-error-state__retry"
+          type="button"
+          (click)="retryLoad()"
+        >
           Réessayer
         </button>
       </div>
@@ -72,7 +112,13 @@
       <section class="summary-strip" aria-label="Résumé des espaces">
         <article class="summary-card summary-card--all">
           <div class="summary-card__icon-wrap">
-            <img class="summary-card__icon" src="rooms/icons/stat-all.svg" alt="" loading="lazy" decoding="async" />
+            <img
+              class="summary-card__icon"
+              src="rooms/icons/stat-all.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <div class="summary-card__content">
             <p class="summary-card__label">Tous les espaces</p>
@@ -82,7 +128,13 @@
 
         <article class="summary-card summary-card--online">
           <div class="summary-card__icon-wrap">
-            <img class="summary-card__icon" src="rooms/icons/stat-online.svg" alt="" loading="lazy" decoding="async" />
+            <img
+              class="summary-card__icon"
+              src="rooms/icons/stat-online.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <div class="summary-card__content">
             <p class="summary-card__label">Publiés</p>
@@ -92,7 +144,13 @@
 
         <article class="summary-card summary-card--reserved">
           <div class="summary-card__icon-wrap">
-            <img class="summary-card__icon" src="rooms/icons/stat-reserved.svg" alt="" loading="lazy" decoding="async" />
+            <img
+              class="summary-card__icon"
+              src="rooms/icons/stat-reserved.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <div class="summary-card__content">
             <p class="summary-card__label">En attente</p>
@@ -102,7 +160,13 @@
 
         <article class="summary-card summary-card--occupied">
           <div class="summary-card__icon-wrap">
-            <img class="summary-card__icon" src="rooms/icons/stat-occupied.svg" alt="" loading="lazy" decoding="async" />
+            <img
+              class="summary-card__icon"
+              src="rooms/icons/stat-occupied.svg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <div class="summary-card__content">
             <p class="summary-card__label">Brouillons</p>
@@ -115,7 +179,10 @@
         <div class="espaces-toolbar">
           <div class="espaces-toolbar__filters">
             <!-- Type filter -->
-            <div class="filter-dropdown" [class.filter-dropdown--open]="openDropdown() === 'type'">
+            <div
+              class="filter-dropdown"
+              [class.filter-dropdown--open]="openDropdown() === 'type'"
+            >
               <button
                 class="filter-pill"
                 [class.filter-pill--open]="openDropdown() === 'type'"
@@ -124,9 +191,20 @@
                 [attr.aria-expanded]="openDropdown() === 'type'"
                 (click)="$event.stopPropagation(); toggleDropdown('type')"
               >
-                <span class="filter-pill__field">{{ selectedTypeLabel() }}</span>
-                <svg class="filter-pill__chevron" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z" fill="currentColor" />
+                <span class="filter-pill__field">{{
+                  selectedTypeLabel()
+                }}</span>
+                <svg
+                  class="filter-pill__chevron"
+                  viewBox="0 0 15 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                    fill="currentColor"
+                  />
                 </svg>
               </button>
 
@@ -135,20 +213,31 @@
                   @for (option of typeOptions; track option.value) {
                     <button
                       class="filter-menu__option"
-                      [class.filter-menu__option--active]="selectedType() === option.value"
+                      [class.filter-menu__option--active]="
+                        selectedType() === option.value
+                      "
                       type="button"
-                      (click)="$event.stopPropagation(); selectTypeOption(option.value)"
+                      (click)="
+                        $event.stopPropagation(); selectTypeOption(option.value)
+                      "
                     >
                       <span class="filter-menu__option-main">
                         <span
                           class="filter-menu__tone"
-                          [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
-                          [class.filter-menu__tone--accent]="option.tone === 'accent'"
+                          [class.filter-menu__tone--neutral]="
+                            option.tone === 'neutral'
+                          "
+                          [class.filter-menu__tone--accent]="
+                            option.tone === 'accent'
+                          "
                         ></span>
                         <span>{{ option.label }}</span>
                       </span>
                       @if (selectedType() === option.value) {
-                        <span class="filter-menu__check" aria-hidden="true"></span>
+                        <span
+                          class="filter-menu__check"
+                          aria-hidden="true"
+                        ></span>
                       }
                     </button>
                   }
@@ -157,7 +246,10 @@
             </div>
 
             <!-- Status filter -->
-            <div class="filter-dropdown filter-dropdown--status" [class.filter-dropdown--open]="openDropdown() === 'status'">
+            <div
+              class="filter-dropdown filter-dropdown--status"
+              [class.filter-dropdown--open]="openDropdown() === 'status'"
+            >
               <button
                 class="filter-pill"
                 [class.filter-pill--open]="openDropdown() === 'status'"
@@ -166,9 +258,20 @@
                 [attr.aria-expanded]="openDropdown() === 'status'"
                 (click)="$event.stopPropagation(); toggleDropdown('status')"
               >
-                <span class="filter-pill__field">{{ selectedStatusLabel() }}</span>
-                <svg class="filter-pill__chevron" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z" fill="currentColor" />
+                <span class="filter-pill__field">{{
+                  selectedStatusLabel()
+                }}</span>
+                <svg
+                  class="filter-pill__chevron"
+                  viewBox="0 0 15 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7.5 8L15 1.24183L13.6242 0L7.5 5.51984L1.37779 0L0 1.24183L7.5 8Z"
+                    fill="currentColor"
+                  />
                 </svg>
               </button>
 
@@ -177,22 +280,38 @@
                   @for (option of statusOptions; track option.value) {
                     <button
                       class="filter-menu__option"
-                      [class.filter-menu__option--active]="selectedStatus() === option.value"
+                      [class.filter-menu__option--active]="
+                        selectedStatus() === option.value
+                      "
                       type="button"
-                      (click)="$event.stopPropagation(); selectStatusOption(option.value)"
+                      (click)="
+                        $event.stopPropagation();
+                        selectStatusOption(option.value)
+                      "
                     >
                       <span class="filter-menu__option-main">
                         <span
                           class="filter-menu__tone"
-                          [class.filter-menu__tone--neutral]="option.tone === 'neutral'"
-                          [class.filter-menu__tone--success]="option.tone === 'success'"
-                          [class.filter-menu__tone--warning]="option.tone === 'warning'"
-                          [class.filter-menu__tone--accent]="option.tone === 'accent'"
+                          [class.filter-menu__tone--neutral]="
+                            option.tone === 'neutral'
+                          "
+                          [class.filter-menu__tone--success]="
+                            option.tone === 'success'
+                          "
+                          [class.filter-menu__tone--warning]="
+                            option.tone === 'warning'
+                          "
+                          [class.filter-menu__tone--accent]="
+                            option.tone === 'accent'
+                          "
                         ></span>
                         <span>{{ option.label }}</span>
                       </span>
                       @if (selectedStatus() === option.value) {
-                        <span class="filter-menu__check" aria-hidden="true"></span>
+                        <span
+                          class="filter-menu__check"
+                          aria-hidden="true"
+                        ></span>
                       }
                     </button>
                   }
@@ -200,7 +319,13 @@
               }
             </div>
 
-            <button class="filter-action" type="button" (click)="resetFilters()">Filtrer</button>
+            <button
+              class="filter-action"
+              type="button"
+              (click)="resetFilters()"
+            >
+              Filtrer
+            </button>
           </div>
 
           <div
@@ -220,11 +345,49 @@
               [attr.aria-selected]="viewMode() === 'grid'"
               (click)="setViewMode('grid')"
             >
-              <svg class="view-toggle__icon view-toggle__icon--grid" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
-                <rect x="12" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
-                <rect x="1" y="12" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
-                <rect x="12" y="12" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5" />
+              <svg
+                class="view-toggle__icon view-toggle__icon--grid"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <rect
+                  x="1"
+                  y="1"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <rect
+                  x="12"
+                  y="1"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <rect
+                  x="1"
+                  y="12"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <rect
+                  x="12"
+                  y="12"
+                  width="7"
+                  height="7"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
               </svg>
             </button>
 
@@ -238,8 +401,19 @@
               [attr.aria-selected]="viewMode() === 'list'"
               (click)="setViewMode('list')"
             >
-              <svg class="view-toggle__icon view-toggle__icon--list" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M7 4h12M7 10h12M7 16h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <svg
+                class="view-toggle__icon view-toggle__icon--list"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M7 4h12M7 10h12M7 16h12"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
                 <circle cx="2.5" cy="4" r="1.5" fill="currentColor" />
                 <circle cx="2.5" cy="10" r="1.5" fill="currentColor" />
                 <circle cx="2.5" cy="16" r="1.5" fill="currentColor" />
@@ -258,13 +432,39 @@
         } @else if (showEmptyState()) {
           <section class="espaces-empty-state" aria-live="polite">
             <div class="espaces-empty-state__art" aria-hidden="true">
-              <span class="espaces-empty-state__orb espaces-empty-state__orb--large"></span>
-              <span class="espaces-empty-state__orb espaces-empty-state__orb--small"></span>
+              <span
+                class="espaces-empty-state__orb espaces-empty-state__orb--large"
+              ></span>
+              <span
+                class="espaces-empty-state__orb espaces-empty-state__orb--small"
+              ></span>
               <span class="espaces-empty-state__icon">
-                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="8" y="20" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2.5" />
-                  <path d="M8 32h48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-                  <path d="M24 20V14a8 8 0 0116 0v6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                <svg
+                  viewBox="0 0 64 64"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="8"
+                    y="20"
+                    width="48"
+                    height="36"
+                    rx="4"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  />
+                  <path
+                    d="M8 32h48"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M24 20V14a8 8 0 0116 0v6"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
                 </svg>
               </span>
             </div>
@@ -273,22 +473,34 @@
 
             @if (hasActiveFilters()) {
               <p class="espaces-empty-state__text">
-                Vos filtres ne correspondent à aucun espace. Essayez de réinitialiser les filtres.
+                Vos filtres ne correspondent à aucun espace. Essayez de
+                réinitialiser les filtres.
               </p>
               <div class="espaces-empty-state__actions">
-                <button class="espaces-empty-state__btn espaces-empty-state__btn--ghost" type="button" (click)="resetFilters()">
+                <button
+                  class="espaces-empty-state__btn espaces-empty-state__btn--ghost"
+                  type="button"
+                  (click)="resetFilters()"
+                >
                   Réinitialiser les filtres
                 </button>
-                <a class="espaces-empty-state__btn espaces-empty-state__btn--primary" routerLink="ajouter">
+                <a
+                  class="espaces-empty-state__btn espaces-empty-state__btn--primary"
+                  routerLink="ajouter"
+                >
                   Ajouter un espace
                 </a>
               </div>
             } @else {
               <p class="espaces-empty-state__text">
-                Commencez par créer votre premier espace pour le publier sur UBAX.
+                Commencez par créer votre premier espace pour le publier sur
+                UBAX.
               </p>
               <div class="espaces-empty-state__actions">
-                <a class="espaces-empty-state__btn espaces-empty-state__btn--primary" routerLink="ajouter">
+                <a
+                  class="espaces-empty-state__btn espaces-empty-state__btn--primary"
+                  routerLink="ajouter"
+                >
                   Ajouter mon premier espace
                 </a>
               </div>
@@ -300,10 +512,31 @@
               <div class="espace-card" [style.--espace-enter-order]="index">
                 <!-- Rejection reason banner -->
                 @if (card.statusRaw === 'REJECTED' && card.rejectionReason) {
-                  <div class="espace-card__rejection" role="alert" [title]="card.rejectionReason">
-                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14">
-                      <path d="M8 1L15 14H1L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                      <path d="M8 6v4M8 11.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <div
+                    class="espace-card__rejection"
+                    role="alert"
+                    [title]="card.rejectionReason"
+                  >
+                    <svg
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                      width="14"
+                      height="14"
+                    >
+                      <path
+                        d="M8 1L15 14H1L8 1z"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M8 6v4M8 11.5h.01"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                      />
                     </svg>
                     <span>{{ card.rejectionReason }}</span>
                   </div>
@@ -318,17 +551,31 @@
                     decoding="async"
                   />
 
-                  <span class="espace-card__type-badge">{{ card.typeLabel }}</span>
+                  <span class="espace-card__type-badge">{{
+                    card.typeLabel
+                  }}</span>
 
                   <span
                     class="espace-card__status-badge"
-                    [class.espace-card__status-badge--draft]="card.statusRaw === 'DRAFT'"
-                    [class.espace-card__status-badge--pending]="card.statusRaw === 'PENDING'"
-                    [class.espace-card__status-badge--published]="card.statusRaw === 'PUBLISHED'"
-                    [class.espace-card__status-badge--rejected]="card.statusRaw === 'REJECTED'"
-                    [class.espace-card__status-badge--archived]="card.statusRaw === 'ARCHIVED'"
+                    [class.espace-card__status-badge--draft]="
+                      card.statusRaw === 'DRAFT'
+                    "
+                    [class.espace-card__status-badge--pending]="
+                      card.statusRaw === 'PENDING'
+                    "
+                    [class.espace-card__status-badge--published]="
+                      card.statusRaw === 'PUBLISHED'
+                    "
+                    [class.espace-card__status-badge--rejected]="
+                      card.statusRaw === 'REJECTED'
+                    "
+                    [class.espace-card__status-badge--archived]="
+                      card.statusRaw === 'ARCHIVED'
+                    "
                   >
-                    @if (card.boosted) { <span aria-label="Boosté">⚡</span> }
+                    @if (card.boosted) {
+                      <span aria-label="Boosté">⚡</span>
+                    }
                     {{ card.statusLabel }}
                   </span>
 
@@ -340,11 +587,19 @@
                           class="archive-chip"
                           type="button"
                           [disabled]="!canArchive(card.statusRaw, card.id)"
-                          (click)="$event.preventDefault(); $event.stopPropagation(); openArchiveDialog(card)"
+                          (click)="
+                            $event.preventDefault();
+                            $event.stopPropagation();
+                            openArchiveDialog(card)
+                          "
                         >
-                          @if (isArchiving(card.id)) { Archivage... }
-                          @else if (card.statusRaw === 'ARCHIVED') { Archivé }
-                          @else { Archiver }
+                          @if (isArchiving(card.id)) {
+                            Archivage...
+                          } @else if (card.statusRaw === 'ARCHIVED') {
+                            Archivé
+                          } @else {
+                            Archiver
+                          }
                         </button>
 
                         @if (card.canSubmit) {
@@ -352,31 +607,68 @@
                             class="submit-chip"
                             type="button"
                             [disabled]="isSubmitting(card.id)"
-                            (click)="$event.preventDefault(); $event.stopPropagation(); openSubmitDialog(card)"
+                            (click)="
+                              $event.preventDefault();
+                              $event.stopPropagation();
+                              openSubmitDialog(card)
+                            "
                           >
-                            {{ isSubmitting(card.id) ? 'Soumission…' : 'Soumettre' }}
+                            {{
+                              isSubmitting(card.id)
+                                ? 'Soumission…'
+                                : 'Soumettre'
+                            }}
                           </button>
                         }
 
                         <span class="espace-card__arrow" aria-hidden="true">
-                          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                          <svg
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M4 10h12M10 4l6 6-6 6"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
                           </svg>
                         </span>
                       </div>
                     </div>
 
                     <p class="espace-card__location">
-                      <span class="espace-card__location-icon" aria-hidden="true">
-                        <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z" stroke="currentColor" stroke-width="1.5" />
-                          <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.5" />
+                      <span
+                        class="espace-card__location-icon"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 16 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                          />
+                          <circle
+                            cx="8"
+                            cy="7"
+                            r="2"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                          />
                         </svg>
                       </span>
                       <span>{{ card.city }}</span>
                     </p>
 
-                    <p class="espace-card__price">{{ card.price }} <small>FCFA/nuit</small></p>
+                    <p class="espace-card__price">
+                      {{ card.price }} <small>FCFA/nuit</small>
+                    </p>
                   </div>
                 </a>
               </div>
@@ -385,7 +677,10 @@
         } @else {
           <div class="espaces-list">
             @for (card of visibleCards(); track card.id; let index = $index) {
-              <div class="espace-list-card" [style.--espace-enter-order]="index">
+              <div
+                class="espace-list-card"
+                [style.--espace-enter-order]="index"
+              >
                 <a [routerLink]="[card.id]" class="espace-list-card__link">
                   <div class="espace-list-card__media">
                     <img
@@ -395,26 +690,49 @@
                       [attr.loading]="index === 0 ? 'eager' : 'lazy'"
                       decoding="async"
                     />
-                    <span class="espace-list-card__type-badge">{{ card.typeLabel }}</span>
+                    <span class="espace-list-card__type-badge">{{
+                      card.typeLabel
+                    }}</span>
                   </div>
 
                   <div class="espace-list-card__content">
                     <div class="espace-list-card__top">
                       <h2 class="espace-list-card__title">{{ card.title }}</h2>
-                      <p class="espace-list-card__price">{{ card.price }} <small>FCFA/nuit</small></p>
+                      <p class="espace-list-card__price">
+                        {{ card.price }} <small>FCFA/nuit</small>
+                      </p>
                     </div>
 
                     <p class="espace-list-card__location">
-                      <span class="espace-list-card__location-icon" aria-hidden="true">
-                        <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z" stroke="currentColor" stroke-width="1.5" />
-                          <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.5" />
+                      <span
+                        class="espace-list-card__location-icon"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 16 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M8 1C4.686 1 2 3.686 2 7c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6z"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                          />
+                          <circle
+                            cx="8"
+                            cy="7"
+                            r="2"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                          />
                         </svg>
                       </span>
                       <span>{{ card.city }}</span>
                     </p>
 
-                    @if (card.statusRaw === 'REJECTED' && card.rejectionReason) {
+                    @if (
+                      card.statusRaw === 'REJECTED' && card.rejectionReason
+                    ) {
                       <p class="espace-list-card__rejection" role="alert">
                         ⚠ {{ card.rejectionReason }}
                       </p>
@@ -423,13 +741,25 @@
                     <div class="espace-list-card__bottom">
                       <span
                         class="espace-list-card__status"
-                        [class.espace-list-card__status--draft]="card.statusRaw === 'DRAFT'"
-                        [class.espace-list-card__status--pending]="card.statusRaw === 'PENDING'"
-                        [class.espace-list-card__status--published]="card.statusRaw === 'PUBLISHED'"
-                        [class.espace-list-card__status--rejected]="card.statusRaw === 'REJECTED'"
-                        [class.espace-list-card__status--archived]="card.statusRaw === 'ARCHIVED'"
+                        [class.espace-list-card__status--draft]="
+                          card.statusRaw === 'DRAFT'
+                        "
+                        [class.espace-list-card__status--pending]="
+                          card.statusRaw === 'PENDING'
+                        "
+                        [class.espace-list-card__status--published]="
+                          card.statusRaw === 'PUBLISHED'
+                        "
+                        [class.espace-list-card__status--rejected]="
+                          card.statusRaw === 'REJECTED'
+                        "
+                        [class.espace-list-card__status--archived]="
+                          card.statusRaw === 'ARCHIVED'
+                        "
                       >
-                        @if (card.boosted) { <span aria-label="Boosté">⚡</span> }
+                        @if (card.boosted) {
+                          <span aria-label="Boosté">⚡</span>
+                        }
                         {{ card.statusLabel }}
                       </span>
 
@@ -438,11 +768,19 @@
                           class="archive-chip archive-chip--compact"
                           type="button"
                           [disabled]="!canArchive(card.statusRaw, card.id)"
-                          (click)="$event.preventDefault(); $event.stopPropagation(); openArchiveDialog(card)"
+                          (click)="
+                            $event.preventDefault();
+                            $event.stopPropagation();
+                            openArchiveDialog(card)
+                          "
                         >
-                          @if (isArchiving(card.id)) { Archivage... }
-                          @else if (card.statusRaw === 'ARCHIVED') { Archivé }
-                          @else { Archiver }
+                          @if (isArchiving(card.id)) {
+                            Archivage...
+                          } @else if (card.statusRaw === 'ARCHIVED') {
+                            Archivé
+                          } @else {
+                            Archiver
+                          }
                         </button>
 
                         @if (card.canSubmit) {
@@ -450,15 +788,36 @@
                             class="submit-chip submit-chip--compact"
                             type="button"
                             [disabled]="isSubmitting(card.id)"
-                            (click)="$event.preventDefault(); $event.stopPropagation(); openSubmitDialog(card)"
+                            (click)="
+                              $event.preventDefault();
+                              $event.stopPropagation();
+                              openSubmitDialog(card)
+                            "
                           >
-                            {{ isSubmitting(card.id) ? 'Soumission…' : 'Soumettre' }}
+                            {{
+                              isSubmitting(card.id)
+                                ? 'Soumission…'
+                                : 'Soumettre'
+                            }}
                           </button>
                         }
 
-                        <span class="espace-list-card__arrow" aria-hidden="true">
-                          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <span
+                          class="espace-list-card__arrow"
+                          aria-hidden="true"
+                        >
+                          <svg
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M4 10h12M10 4l6 6-6 6"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
                           </svg>
                         </span>
                       </div>
@@ -485,20 +844,29 @@
 <!-- ── Modal d'archivage ─────────────────────────────────────────────────── -->
 @if (archiveDialogTarget()) {
   <div
-    class="archive-modal-overlay"
+    class="archive-modal-overlay ubax-modal-overlay"
     [class.is-closing]="archiveDialogClosing()"
     role="dialog"
     aria-modal="true"
     aria-labelledby="archive-dialog-title"
     (click)="closeArchiveDialog()"
   >
-    <div class="archive-modal" [class.is-closing]="archiveDialogClosing()" (click)="$event.stopPropagation()">
+    <div
+      class="archive-modal"
+      [class.is-closing]="archiveDialogClosing()"
+      (click)="$event.stopPropagation()"
+    >
       <h3 id="archive-dialog-title">Archiver cet espace ?</h3>
       <p>
-        L'espace <strong>{{ archiveDialogTitle() }}</strong> sera archivé et ne sera plus visible dans le catalogue public.
+        L'espace <strong>{{ archiveDialogTitle() }}</strong> sera archivé et ne
+        sera plus visible dans le catalogue public.
       </p>
       <div class="archive-modal__actions">
-        <button class="archive-modal__btn archive-modal__btn--cancel" type="button" (click)="closeArchiveDialog()">
+        <button
+          class="archive-modal__btn archive-modal__btn--cancel"
+          type="button"
+          (click)="closeArchiveDialog()"
+        >
           Annuler
         </button>
         <button
@@ -507,7 +875,11 @@
           [disabled]="isArchiving(archiveDialogTarget()!.id)"
           (click)="confirmArchive()"
         >
-          @if (isArchiving(archiveDialogTarget()!.id)) { Archivage… } @else { Confirmer }
+          @if (isArchiving(archiveDialogTarget()!.id)) {
+            Archivage…
+          } @else {
+            Confirmer
+          }
         </button>
       </div>
     </div>
@@ -517,7 +889,7 @@
 <!-- ── Modal de soumission ───────────────────────────────────────────────── -->
 @if (submitDialogTarget()) {
   <div
-    class="archive-modal-overlay"
+    class="archive-modal-overlay ubax-modal-overlay"
     role="dialog"
     aria-modal="true"
     aria-labelledby="submit-dialog-title"
@@ -526,10 +898,15 @@
     <div class="archive-modal" (click)="$event.stopPropagation()">
       <h3 id="submit-dialog-title">Soumettre à la modération ?</h3>
       <p>
-        L'espace sera soumis pour examen par un administrateur UBAX. Vous ne pourrez plus le modifier jusqu'à la décision.
+        L'espace sera soumis pour examen par un administrateur UBAX. Vous ne
+        pourrez plus le modifier jusqu'à la décision.
       </p>
       <div class="archive-modal__actions">
-        <button class="archive-modal__btn archive-modal__btn--cancel" type="button" (click)="closeSubmitDialog()">
+        <button
+          class="archive-modal__btn archive-modal__btn--cancel"
+          type="button"
+          (click)="closeSubmitDialog()"
+        >
           Annuler
         </button>
         <button
@@ -538,7 +915,11 @@
           [disabled]="isSubmitting(submitDialogTarget()!.id)"
           (click)="confirmSubmit()"
         >
-          @if (isSubmitting(submitDialogTarget()!.id)) { Soumission… } @else { Soumettre }
+          @if (isSubmitting(submitDialogTarget()!.id)) {
+            Soumission…
+          } @else {
+            Soumettre
+          }
         </button>
       </div>
     </div>

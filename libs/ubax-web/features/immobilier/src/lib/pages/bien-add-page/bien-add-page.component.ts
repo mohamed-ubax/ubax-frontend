@@ -9,7 +9,7 @@
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, DOCUMENT } from '@angular/common';
 import {
   form,
   submit,
@@ -149,6 +149,7 @@ export class BienAddPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
+  private readonly document = inject(DOCUMENT);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
@@ -399,6 +400,12 @@ export class BienAddPageComponent implements OnInit {
         this.notifications?.success('Brouillon créé avec succès.');
         this.nextStep();
       }
+    });
+
+    // Lower topbar when any confirmation modal is open.
+    effect(() => {
+      const isOpen = !!(this.mediaDeleteTarget() || this.docDeleteTarget());
+      this.document.body.classList.toggle('ubax-overlay-open', isOpen);
     });
   }
 
