@@ -1,5 +1,7 @@
 import {
+  APP_INITIALIZER,
   ApplicationConfig,
+  inject,
   LOCALE_ID,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
@@ -23,6 +25,7 @@ import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
 import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
 import { NotificationService } from '@ubax-workspace/ubax-admin-shell/notification-service';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { MessageService } from 'primeng/api';
 import { environment } from '../environments/environment';
 
@@ -96,6 +99,14 @@ export const appConfig: ApplicationConfig = {
       useValue: { rootUrl: environment.apiRootUrl },
     },
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => {
+        const authStore = inject(AuthStore);
+        return () => authStore.loadMe();
+      },
+      multi: true,
+    },
     MessageService,
     { provide: NOTIFICATION_HANDLER, useExisting: NotificationService },
     providePrimeNG({

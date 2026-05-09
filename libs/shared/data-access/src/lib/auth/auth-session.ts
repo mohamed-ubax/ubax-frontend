@@ -3,6 +3,7 @@ import { UbaxRole, UbaxScope, UbaxSubRole, User } from './user.model';
 export const AUTH_TOKEN_STORAGE_KEY = 'ubax_token';
 export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'ubax_refresh_token';
 export const DEFAULT_UBAX_WEB_HOME_PATH = '/app/tableau-de-bord';
+export const DEFAULT_UBAX_ADMIN_HOME_PATH = '/admin/tableau-de-bord';
 
 export type StoredAuthSession = {
   accessToken: string;
@@ -413,16 +414,34 @@ export function clearStoredAuthSession(): void {
   clearStoredRefreshToken();
 }
 
+/**
+ * Valide un candidat redirect côté client. Autorise /app/* et /admin/* pour couvrir
+ * ubax-web et ubax-admin servis depuis le même origin.
+ */
+export function resolveRedirectTarget(
+  candidate: string | null | undefined,
+  defaultPath: string,
+): string {
+  if (!candidate || !candidate.startsWith('/') || candidate.startsWith('//')) {
+    return defaultPath;
+  }
+
+  if (
+    candidate === '/app' ||
+    candidate.startsWith('/app/') ||
+    candidate === '/admin' ||
+    candidate.startsWith('/admin/')
+  ) {
+    return candidate;
+  }
+
+  return defaultPath;
+}
+
 export function resolveUbaxWebRedirectTarget(
   candidate: string | null | undefined,
 ): string {
-  if (!candidate || !candidate.startsWith('/') || candidate.startsWith('//')) {
-    return DEFAULT_UBAX_WEB_HOME_PATH;
-  }
-
-  return candidate === '/app' || candidate.startsWith('/app/')
-    ? candidate
-    : DEFAULT_UBAX_WEB_HOME_PATH;
+  return resolveRedirectTarget(candidate, DEFAULT_UBAX_WEB_HOME_PATH);
 }
 
 export function currentBrowserPath(): string {
@@ -431,11 +450,29 @@ export function currentBrowserPath(): string {
   }
 
   const { pathname, search, hash } = globalThis.location;
-  return resolveUbaxWebRedirectTarget(`${pathname}${search}${hash}`);
+  return resolveRedirectTarget(
+    `${pathname}${search}${hash}`,
+    DEFAULT_UBAX_WEB_HOME_PATH,
+  );
+}
+
+export function currentAdminBrowserPath(): string {
+  if (typeof globalThis === 'undefined' || !('location' in globalThis)) {
+    return DEFAULT_UBAX_ADMIN_HOME_PATH;
+  }
+
+  const { pathname, search, hash } = globalThis.location;
+  return resolveRedirectTarget(
+    `${pathname}${search}${hash}`,
+    DEFAULT_UBAX_ADMIN_HOME_PATH,
+  );
 }
 
 export function buildPortalLoginUrl(returnTo?: string): string {
-  const redirect = resolveUbaxWebRedirectTarget(returnTo);
+  const redirect = resolveRedirectTarget(
+    returnTo,
+    DEFAULT_UBAX_WEB_HOME_PATH,
+  );
   return `/connexion?redirect=${encodeURIComponent(redirect)}`;
 }
 
