@@ -1,0 +1,155 @@
+// ============================================================
+// UBAX Design System — Responsive Design Tokens (CSS Custom Properties)
+// Extracted from Figma: BACK-OFFICE-UBAX
+// Strategy: mobile-first + fluid scaling for the back-office
+// ============================================================
+
+@use 'breakpoints' as bp;
+
+// ── Base tokens (mobile-first) ────────────────────────────────
+:root {
+  // --- Colors ---
+  --color-brand-navy:        #1a3047;
+  --color-brand-orange:      #e87d1e;
+  --color-brand-blue:        #2b7fff;
+  --color-brand-teal:        #009966;
+
+  --color-success:           #34c759;
+  --color-success-bg:        #e1ffe9;
+  --color-warning:           #e87d1e;
+  --color-warning-bg:        #ffeddd;
+  --color-danger:            #e7000b;
+  --color-danger-bg:         #ffdbdd;
+  --color-info:              #2b7fff;
+  --color-info-bg:           #e8f0ff;
+
+  --color-neutral-50:        #f8faff;
+  --color-neutral-100:       #f7f7f7;
+  --color-neutral-200:       #ecf2f7;
+  --color-neutral-300:       #e1e4ed;
+  --color-neutral-400:       #c9c9c9;
+  --color-neutral-500:       #979797;
+  --color-neutral-600:       #6e6e6e;
+  --color-neutral-700:       #444;
+  --color-neutral-800:       #292929;
+  --color-neutral-900:       #1c1c1c;
+  --color-neutral-950:       #222;
+
+  --color-surface-page:      var(--color-neutral-200);
+  --color-surface-card:      #ffffff;
+  --color-surface-sidebar:   var(--color-brand-navy);
+  --color-surface-header:    #ffffff;
+
+  // --- Typography ---
+  --font-family-primary:     'Lexend', system-ui, -apple-system, sans-serif;
+  --font-family-secondary:   'Inter', system-ui, -apple-system, sans-serif;
+
+  // Mobile sizes
+  --text-xs:    8px;
+  --text-sm:    10px;
+  --text-base:  12px;
+  --text-md:    13px;
+  --text-lg:    14px;
+  --text-xl:    15px;
+  --text-2xl:   16px;
+  --text-3xl:   18px;
+  --text-4xl:   20px;
+  --text-5xl:   22px;
+
+  // --- Spacing (mobile) ---
+  --space-1:   4px;
+  --space-2:   6px;
+  --space-3:   10px;
+  --space-4:   14px;
+  --space-5:   18px;
+  --space-6:   20px;
+  --space-8:   28px;
+  --space-10:  36px;
+  --space-12:  44px;
+
+  // --- Fluid spacing ---
+  --space-fluid-1:  clamp(4px, 1vw, 8px);
+  --space-fluid-2:  clamp(8px, 1.5vw, 16px);
+  --space-fluid-3:  clamp(12px, 2vw, 24px);
+  --space-fluid-4:  clamp(16px, 2.5vw, 32px);
+
+  // --- Fluid typography ---
+  --text-fluid-base:  clamp(12px, 1.2vw, 14px);
+  --text-fluid-md:    clamp(13px, 1.4vw, 15px);
+  --text-fluid-lg:    clamp(14px, 1.6vw, 16px);
+  --text-fluid-xl:    clamp(16px, 2vw, 20px);
+  --text-fluid-2xl:   clamp(18px, 2.5vw, 24px);
+
+  // --- Border radius ---
+  --radius-xs:   2px;
+  --radius-sm:   5px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   10px;
+  --radius-2xl:  12px;
+  --radius-3xl:  16px;
+  --radius-full: 9999px;
+
+  // --- Shadows ---
+  --shadow-01: 0 1px 4px 0 rgba(25, 33, 61, 0.08);
+  --shadow-02: 0 2px 8px 0 rgba(25, 33, 61, 0.10);
+  --shadow-03: 0 4px 16px 0 rgba(25, 33, 61, 0.12);
+  --shadow-04: 0 8px 32px 0 rgba(25, 33, 61, 0.16);
+
+  // --- Layout ---
+  --sidebar-width:      260px;
+  --header-height:      64px;
+  --content-padding:    var(--space-4);
+
+  // --- Z-index ---
+  --z-sidebar:   50;
+  --z-header:    100;
+  --z-dropdown:  200;
+  --z-modal:     300;
+  --z-toast:     400;
+  --z-overlay:   2147483647;
+
+  // --- Transitions ---
+  --transition-fast:   150ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-base:   250ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow:   400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+// ── Tablet (768px+) ───────────────────────────────────────────
+@media (min-width: 768px) {
+  :root {
+    --text-3xl:   20px;
+    --text-4xl:   22px;
+    --text-5xl:   24px;
+
+    --space-1:   4px;
+    --space-2:   8px;
+    --space-3:   12px;
+    --space-4:   16px;
+    --space-5:   20px;
+    --space-6:   24px;
+    --space-8:   32px;
+    --space-10:  40px;
+    --space-12:  48px;
+
+    --sidebar-width:    280px;
+    --header-height:    72px;
+    --content-padding:  var(--space-6);
+  }
+}
+
+// ── Desktop (1024px+) — matches Figma canvas ─────────────────
+@media (min-width: 1024px) {
+  :root {
+    --sidebar-width:    314px;
+    --header-height:    81px;
+    --content-padding:  var(--space-8);
+  }
+}
+
+// ── Wide (1440px+) ────────────────────────────────────────────
+@media (min-width: 1440px) {
+  :root {
+    --content-padding:  var(--space-10);
+  }
+}

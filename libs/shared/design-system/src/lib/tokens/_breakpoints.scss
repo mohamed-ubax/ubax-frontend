@@ -1,0 +1,34 @@
+// ============================================================
+// UBAX Design System — Breakpoints
+// The back-office is primarily a desktop app (1440px canvas in Figma)
+// but we support responsive degradation down to tablet.
+// ============================================================
+
+$breakpoints: (
+  'mobile':  320px,
+  'tablet':  768px,
+  'desktop': 1024px,
+  'wide':    1440px,
+  'ultra':   1920px,
+);
+
+// ── Mixin helpers ─────────────────────────────────────────────
+@mixin respond-to($bp) {
+  $value: map-get($breakpoints, $bp);
+  @if $value {
+    @media (min-width: #{$value}) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$bp}";
+  }
+}
+
+@mixin respond-below($bp) {
+  $value: map-get($breakpoints, $bp);
+  @if $value {
+    @media (max-width: calc(#{$value} - 1px)) {
+      @content;
+    }
+  }
+}

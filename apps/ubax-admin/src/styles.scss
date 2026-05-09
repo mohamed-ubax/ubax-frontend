@@ -1,21 +1,69 @@
+@use '../../../libs/shared/design-system/src/lib/styles/index';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @import 'primeicons/primeicons.css';
 
-/* ── PrimeNG component token overrides (Ubax Design) ──────────────────────── */
+/* ── PrimeNG component token overrides (Ubax Design — Figma BACK-OFFICE-UBAX) */
 :root {
-  --p-button-border-radius: 8px;
-  --p-inputtext-border-radius: 8px;
-  --p-select-border-radius: 8px;
-  --p-datepicker-border-radius: 8px;
-  --p-card-border-radius: 12px;
-  --p-card-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.08);
+  /* Buttons */
+  --p-button-border-radius: 5px;
+  --p-button-font-size: 14px;
+  --p-button-font-weight: 500;
+
+  /* Inputs */
+  --p-inputtext-border-radius: 6px;
+  --p-inputtext-border-color: #e1e4ed;
+  --p-inputtext-focus-border-color: #2b7fff;
+  --p-inputtext-shadow: 0 1px 4px 0 rgba(25, 33, 61, 0.08);
+  --p-inputtext-font-size: 13px;
+
+  /* Select */
+  --p-select-border-radius: 6px;
+  --p-select-border-color: #e1e4ed;
+
+  /* DatePicker */
+  --p-datepicker-border-radius: 6px;
+
+  /* Card */
+  --p-card-border-radius: 10px;
+  --p-card-shadow: 0 1px 4px 0 rgba(25, 33, 61, 0.08);
+  --p-card-body-padding: 24px;
+
+  /* Dialog */
   --p-dialog-border-radius: 16px;
-  --p-badge-border-radius: 6px;
+  --p-dialog-header-padding: 24px 24px 16px;
+  --p-dialog-content-padding: 0 24px 24px;
+  --p-dialog-footer-padding: 16px 24px 24px;
+
+  /* Badge / Tag */
+  --p-badge-border-radius: 2px;
+  --p-badge-font-size: 12px;
+  --p-tag-border-radius: 2px;
+
+  /* Paginator */
+  --p-paginator-nav-button-border-radius: 6px;
+  --p-paginator-nav-button-width: 36px;
+  --p-paginator-nav-button-height: 36px;
+
+  /* Toast */
+  --p-toast-border-radius: 10px;
+  --p-toast-shadow: 0 4px 16px 0 rgba(25, 33, 61, 0.12);
+
+  /* Skeleton */
+  --p-skeleton-border-radius: 6px;
+
+  /* ProgressBar */
+  --p-progressbar-border-radius: 9999px;
+  --p-progressbar-height: 10px;
+
+  /* Motion */
   --ubax-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ubax-motion-ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Z-index */
   --ubax-z-topbar: 100;
   --ubax-z-overlay: 2147483647;
 }

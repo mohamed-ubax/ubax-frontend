@@ -18,7 +18,7 @@ import {
   create,
   CreateTicketRequest,
   CustomResponse,
-  getById1,
+  getById2,
   list,
   List$Params,
   updateStatus,
@@ -63,7 +63,7 @@ export const DemandesStore = signalStore(
   { providedIn: 'root' },
   withApiResource({
     list,
-    getById: getById1,
+    getById: getById2,
     buildGetByIdParams: (id) => ({ ticketId: id }),
     mapGetById: (raw, requestedId) => {
       if (raw && typeof raw === 'object') {

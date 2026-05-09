@@ -1,0 +1,141 @@
+// ============================================================
+// UBAX Design System — Layout helpers
+// Shell structure: sidebar + header + content
+// ============================================================
+
+@use '../tokens/colors' as c;
+@use '../tokens/spacing' as s;
+@use '../tokens/shadows' as sh;
+
+// ── App shell ─────────────────────────────────────────────────
+.ubax-shell {
+  display:    flex;
+  height:     100dvh;
+  overflow:   hidden;
+  background: c.$color-surface-page;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────
+.ubax-sidebar {
+  flex-shrink:  0;
+  width:        var(--sidebar-width, 314px);
+  height:       100%;
+  overflow-y:   auto;
+  overflow-x:   hidden;
+  background:   c.$color-surface-sidebar;
+  z-index:      var(--z-sidebar, 50);
+  transition:   width 250ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  // Collapsed state
+  &--collapsed {
+    width: 72px;
+  }
+
+  // Scrollbar styling
+  &::-webkit-scrollbar        { width: 4px; }
+  &::-webkit-scrollbar-track  { background: transparent; }
+  &::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.15); border-radius: 2px; }
+}
+
+// ── Main area (header + content) ──────────────────────────────
+.ubax-main {
+  flex:       1;
+  display:    flex;
+  flex-direction: column;
+  overflow:   hidden;
+  min-width:  0;
+}
+
+// ── Top header ────────────────────────────────────────────────
+.ubax-header {
+  flex-shrink:  0;
+  height:       var(--header-height, 81px);
+  background:   c.$color-surface-header;
+  border-bottom: 1px solid c.$color-neutral-300;
+  display:      flex;
+  align-items:  center;
+  justify-content: space-between;
+  padding:      0 s.$space-8;
+  z-index:      var(--z-header, 100);
+  position:     sticky;
+  top:          0;
+}
+
+// ── Page content ──────────────────────────────────────────────
+.ubax-content {
+  flex:       1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding:    var(--content-padding, 32px);
+
+  // Scrollbar styling
+  &::-webkit-scrollbar        { width: 6px; }
+  &::-webkit-scrollbar-track  { background: transparent; }
+  &::-webkit-scrollbar-thumb  {
+    background:    c.$color-neutral-300;
+    border-radius: 3px;
+
+    &:hover { background: c.$color-neutral-400; }
+  }
+}
+
+// ── Page section ──────────────────────────────────────────────
+.ubax-page {
+  display:        flex;
+  flex-direction: column;
+  gap:            s.$space-6;
+  max-width:      1600px;
+  width:          100%;
+}
+
+// ── KPI grid (4 cards per row on desktop) ─────────────────────
+.ubax-kpi-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:                   s.$space-4;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ── Two-column layout (chart + sidebar widget) ────────────────
+.ubax-two-col {
+  display: grid;
+  gap:     s.$space-4;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 300px;
+  }
+
+  @media (min-width: 1440px) {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+// ── Three-column layout ───────────────────────────────────────
+.ubax-three-col {
+  display: grid;
+  gap:     s.$space-4;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// ── Property card grid ────────────────────────────────────────
+.ubax-card-grid {
+  display:               grid;
+  gap:                   s.$space-4;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+
+  @media (min-width: 1440px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
