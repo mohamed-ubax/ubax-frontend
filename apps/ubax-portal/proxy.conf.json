@@ -6,7 +6,7 @@
     "logLevel": "info"
   },
   "/admin": {
-    "target": "http://localhost:4202",
+    "target": "http://localhost:4002",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"

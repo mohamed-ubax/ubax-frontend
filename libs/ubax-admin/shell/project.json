@@ -1,0 +1,19 @@
+{
+ "name": "ubax-admin-shell",
+ "sourceRoot": "libs/ubax-admin/shell/src",
+ "prefix": "ubax-admin",
+ "projectType": "library",
+ "tags": [
+  "scope:admin",
+  "type:shell"
+ ],
+ "targets": {
+  "lint": {
+   "executor": "@nx/eslint:lint"
+  },
+  "test": {
+   "executor": "@angular/build:unit-test",
+   "options": {}
+  }
+ }
+}

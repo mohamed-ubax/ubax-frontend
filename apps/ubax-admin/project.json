@@ -1,0 +1,103 @@
+{
+ "name": "ubax-admin",
+ "projectType": "application",
+ "prefix": "ubax-admin",
+ "sourceRoot": "apps/ubax-admin/src",
+ "tags": [
+  "scope:admin",
+  "type:app"
+ ],
+ "targets": {
+  "build": {
+   "executor": "@angular/build:application",
+   "outputs": [
+    "{options.outputPath}"
+   ],
+   "options": {
+    "outputPath": "dist/apps/ubax-admin",
+    "browser": "apps/ubax-admin/src/main.ts",
+    "tsConfig": "apps/ubax-admin/tsconfig.app.json",
+    "inlineStyleLanguage": "scss",
+    "baseHref": "/admin/",
+    "assets": [
+     {
+      "glob": "**/*",
+      "input": "apps/ubax-admin/public"
+     }
+    ],
+    "styles": [
+     "apps/ubax-admin/src/styles.scss"
+    ]
+   },
+   "configurations": {
+    "production": {
+     "fileReplacements": [
+      {
+       "replace": "apps/ubax-admin/src/environments/environment.ts",
+       "with": "apps/ubax-admin/src/environments/environment.prod.ts"
+      }
+     ],
+     "budgets": [
+      {
+       "type": "initial",
+       "maximumWarning": "500kb",
+       "maximumError": "1mb"
+      }
+     ],
+     "outputHashing": "all"
+    },
+    "staging": {
+     "fileReplacements": [
+      {
+       "replace": "apps/ubax-admin/src/environments/environment.ts",
+       "with": "apps/ubax-admin/src/environments/environment.prod.ts"
+      }
+     ],
+     "optimization": false,
+     "extractLicenses": false,
+     "sourceMap": false,
+     "outputHashing": "all"
+    },
+    "development": {
+     "optimization": false,
+     "extractLicenses": false,
+     "sourceMap": true
+    }
+   },
+   "defaultConfiguration": "production"
+  },
+  "serve": {
+   "continuous": true,
+   "executor": "@angular/build:dev-server",
+   "options": {
+    "port": 4002
+   },
+   "configurations": {
+    "production": {
+     "buildTarget": "ubax-admin:build:production"
+    },
+    "development": {
+     "buildTarget": "ubax-admin:build:development"
+    }
+   },
+   "defaultConfiguration": "development"
+  },
+  "lint": {
+   "executor": "@nx/eslint:lint"
+  },
+  "test": {
+   "executor": "@angular/build:unit-test",
+   "options": {}
+  },
+  "serve-static": {
+   "continuous": true,
+   "executor": "@nx/web:file-server",
+   "options": {
+    "buildTarget": "ubax-admin:build",
+    "port": 4002,
+    "staticFilePath": "dist/apps/ubax-admin/browser",
+    "spa": true
+   }
+  }
+ }
+}

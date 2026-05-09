@@ -82,6 +82,18 @@
       ],
       "@ubax-workspace/ubax-web-profil": [
         "libs/ubax-web/features/profil/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell": [
+        "libs/ubax-admin/shell/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell/admin-routes": [
+        "libs/ubax-admin/shell/src/lib/admin.routes.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell/interceptors": [
+        "libs/ubax-admin/shell/src/lib/interceptors/auth.interceptor.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell/notification-service": [
+        "libs/ubax-admin/shell/src/lib/services/notification.service.ts"
       ]
     }
   },
