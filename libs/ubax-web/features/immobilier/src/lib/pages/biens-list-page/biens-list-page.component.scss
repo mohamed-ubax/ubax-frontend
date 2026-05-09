@@ -645,9 +645,90 @@
   }
 }
 
+.submit-chip {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ubax-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--ubax-accent) 10%, #fff);
+  color: color-mix(in srgb, var(--ubax-accent) 85%, #0b1633);
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: var(--ubax-accent);
+    color: #fff;
+    background: var(--ubax-accent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    border-color: color-mix(in srgb, var(--ubax-accent) 20%, transparent);
+    color: color-mix(in srgb, var(--ubax-accent) 45%, #fff);
+    background: color-mix(in srgb, var(--ubax-page-bg) 92%, #fff);
+  }
+}
+
+.action-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ubax-navy) 24%, transparent);
+  background: rgb(255 255 255 / 0.92);
+  color: var(--ubax-navy);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: var(--ubax-accent);
+    color: var(--ubax-accent);
+    background: #fff;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    border-color: color-mix(in srgb, var(--ubax-navy) 12%, transparent);
+    color: color-mix(in srgb, var(--ubax-navy) 42%, #fff);
+    background: color-mix(in srgb, var(--ubax-page-bg) 92%, #fff);
+  }
+}
+
 .archive-chip--compact {
   height: 32px;
   padding-inline: 12px;
+}
+
+.submit-chip--compact {
+  height: 32px;
+  padding-inline: 12px;
+}
+
+.action-icon-btn--compact {
+  width: 32px;
+  height: 32px;
 }
 
 .bien-card__title,
@@ -1014,14 +1095,6 @@
 }
 
 .archive-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--ubax-z-overlay, 2147483647);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(3 14 27 / 0.48);
-  backdrop-filter: blur(3px);
   animation: archive-overlay-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
 
   &.is-closing {
@@ -1142,7 +1215,8 @@
 }
 
 .biens-page__actions--entering {
-  animation: biens-page-toolbar-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards;
+  animation: biens-page-toolbar-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 60ms
+    forwards;
 }
 
 /* Skeleton header pills */
@@ -1164,8 +1238,13 @@
 }
 
 @keyframes biens-sk-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.45; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
 }
 
 /* Error state */
@@ -1223,18 +1302,36 @@
 }
 
 @keyframes biens-page-fade-out {
-  from { opacity: 1; transform: scale(1); }
-  to   { opacity: 0; transform: scale(0.985); }
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
 }
 
 @keyframes biens-page-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes biens-page-toolbar-in {
-  from { opacity: 0; transform: translateY(-5px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─── Animations ─────────────────────────────────────────────────── */
@@ -1290,13 +1387,21 @@
 /* ─── Modal animations ───────────────────────────────────────────── */
 
 @keyframes archive-overlay-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes archive-overlay-out {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes archive-modal-in {

@@ -48,6 +48,17 @@ export { BienCreationStore } from './lib/store/biens/bien-creation.store';
 export type { BienCreationState } from './lib/store/biens/bien-creation.store';
 export { MesBiensStore } from './lib/store/biens/mes-biens.store';
 
+// ─── Espaces hôteliers ────────────────────────────────────────────────────────
+export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
+export type { EspaceStatus, HotelPropertyType } from './lib/store/espaces/mes-espaces.store';
+export {
+  HOTEL_PROPERTY_TYPES,
+  HOTEL_PROPERTY_TYPE_LABELS,
+  ESPACE_STATUS_LABELS,
+} from './lib/store/espaces/mes-espaces.store';
+export { EspaceCreationStore } from './lib/store/espaces/espace-creation.store';
+export type { EspaceCreationState } from './lib/store/espaces/espace-creation.store';
+
 // ─── Configs API prêtes à l'emploi avec createApiStore ───────────────────────
 // Usage : const BiensStore = createApiStore(biensApiConfig);
 //         @Component({ providers: [BiensStore] }) class MyComponent { store = inject(BiensStore) }

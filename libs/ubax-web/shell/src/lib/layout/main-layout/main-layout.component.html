@@ -1,4 +1,12 @@
-<p-toast position="top-right" />
+<p-toast
+  position="top-right"
+  styleClass="ubax-toast-shell"
+  [baseZIndex]="1300"
+  [showTransformOptions]="'translate3d(0, -14px, 0) scale(0.98)'"
+  [hideTransformOptions]="'translate3d(0, -18px, 0) scale(0.96)'"
+  [showTransitionOptions]="'420ms var(--ubax-motion-ease)'"
+  [hideTransitionOptions]="'260ms cubic-bezier(0.4, 0, 1, 1)'"
+/>
 <ubax-topbar />
 <ubax-dev-role-switcher />
 

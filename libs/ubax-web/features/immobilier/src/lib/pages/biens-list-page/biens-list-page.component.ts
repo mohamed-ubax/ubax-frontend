@@ -3,6 +3,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
+  OnDestroy,
+  Renderer2,
   computed,
   effect,
   inject,
@@ -56,7 +58,7 @@ type GridBienCard = {
   readonly tenantRole: string;
   readonly price: string;
   readonly image: string;
-  readonly avatar: string;
+  readonly avatar: string | null;
   readonly type: string;
   readonly category: string;
   readonly statusRaw: PropertyMineStatus;
@@ -73,7 +75,7 @@ type ListBienCard = {
   readonly tenantRole: string;
   readonly price: string;
   readonly image: string;
-  readonly avatar: string;
+  readonly avatar: string | null;
   readonly type: string;
   readonly category: string;
   readonly statusRaw: PropertyMineStatus;
@@ -116,16 +118,6 @@ const IMAGE_POOL = [
   'biens/list/list-property-02.webp',
   'biens/list/list-property-06.webp',
   'biens/list/list-property-07.webp',
-];
-
-const AVATAR_POOL = [
-  'hotel-dashboard/properties/tenant-aicha.webp',
-  'hotel-dashboard/properties/tenant-armand.webp',
-  'hotel-dashboard/properties/tenant-kevin.webp',
-  'biens/list/grid-tenant-04.webp',
-  'biens/list/grid-tenant-05.webp',
-  'biens/list/grid-tenant-06.webp',
-  'biens/list/list-tenant-01.webp',
 ];
 
 const STATUS_LABEL_MAP: Record<PropertyMineStatus, string> = {
@@ -219,12 +211,18 @@ function asPropertyStatus(value: string): PropertyMineStatus | undefined {
 @Component({
   selector: 'ubax-biens-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxMorphTabsDirective, UbaxPaginatorComponent, BiensListSkeletonComponent, BiensCardsSkeletonComponent],
+  imports: [
+    RouterLink,
+    UbaxMorphTabsDirective,
+    UbaxPaginatorComponent,
+    BiensListSkeletonComponent,
+    BiensCardsSkeletonComponent,
+  ],
   templateUrl: './biens-list-page.component.html',
   styleUrl: './biens-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BiensListPageComponent {
+export class BiensListPageComponent implements OnDestroy {
   private readonly store = inject(MesBiensStore);
   private readonly document = inject(DOCUMENT);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
@@ -245,8 +243,21 @@ export class BiensListPageComponent {
   /** true pendant les ~220 ms de l'animation de fermeture */
   protected readonly archiveDialogClosing = signal(false);
 
+  protected readonly submitDialogTarget = signal<{
+    id: string;
+    title: string;
+    statusRaw: PropertyMineStatus;
+  } | null>(null);
+  protected readonly submitDialogClosing = signal(false);
+
+  private readonly renderer = inject(Renderer2);
+  private archiveOverlayElement: HTMLElement | null = null;
+  private submitOverlayElement: HTMLElement | null = null;
+
   private readonly archivePendingId = signal<string | null>(null);
   private readonly archivePendingTitle = signal('');
+  private readonly submitPendingId = signal<string | null>(null);
+  private readonly submitPendingTitle = signal('');
 
   // ── ViewState pattern ────────────────────────────────────────────────────
   private readonly hasLoaded = signal(false);
@@ -429,7 +440,31 @@ export class BiensListPageComponent {
   );
 
   protected readonly totalPages = computed(() => {
-    return Math.max(1, this.store.pagination()?.totalPages ?? 1);
+    const pagination = this.store.pagination();
+    if (!pagination) return 1;
+
+    const fromApi = Number(pagination.totalPages);
+    if (Number.isFinite(fromApi) && fromApi > 0) {
+      return Math.max(1, Math.floor(fromApi));
+    }
+
+    const totalElements = Number(pagination.totalElements ?? 0);
+    const pageSize = Number(pagination.pageSize ?? this.pageSize());
+
+    if (Number.isFinite(totalElements) && totalElements > 0 && pageSize > 0) {
+      return Math.max(1, Math.ceil(totalElements / pageSize));
+    }
+
+    // Fallback: if we received a full page of items, assume more pages may exist
+    const currentItems = this.store.entities();
+    if (currentItems && currentItems.length >= pageSize && pageSize > 0) {
+      return Math.max(
+        2,
+        Math.ceil((totalElements || currentItems.length) / pageSize),
+      );
+    }
+
+    return 1;
   });
 
   protected readonly isLoading = computed(() => this.store.loading());
@@ -575,21 +610,73 @@ export class BiensListPageComponent {
       this.archivePendingTitle.set('');
     });
 
-    effect((onCleanup) => {
-      const hasArchiveOverlay = this.archiveDialogTarget() !== null;
-      this.document.body.classList.toggle(
-        'ubax-overlay-open',
-        hasArchiveOverlay,
+    effect(() => {
+      const submittedId = this.store.lastSubmittedPropertyId();
+      const pendingId = this.submitPendingId();
+
+      if (!submittedId || submittedId !== pendingId) {
+        return;
+      }
+
+      const pendingTitle = this.submitPendingTitle();
+      this.notifications?.success(
+        `Le bien "${pendingTitle}" a été soumis à la modération.`,
       );
-      // Bloquer le scroll de la page quand le modal est ouvert
-      this.document.body.style.overflow = hasArchiveOverlay ? 'hidden' : '';
+      this.store.loadOverview();
+      this.store.clearSubmitFeedback();
+      this.submitPendingId.set(null);
+      this.submitPendingTitle.set('');
+    });
+
+    effect(() => {
+      const submitError = this.store.submitError();
+      const pendingId = this.submitPendingId();
+
+      if (!submitError || !pendingId) {
+        return;
+      }
+
+      this.notifications?.error(
+        'Impossible de soumettre ce bien pour le moment. Veuillez réessayer.',
+      );
+      this.store.clearSubmitFeedback();
+      this.submitPendingId.set(null);
+      this.submitPendingTitle.set('');
+    });
+
+    effect((onCleanup) => {
+      const hasOverlay =
+        this.archiveDialogTarget() !== null ||
+        this.submitDialogTarget() !== null;
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+      this.document.body.style.overflow = hasOverlay ? 'hidden' : '';
 
       onCleanup(() => {
-        if (hasArchiveOverlay) {
+        if (hasOverlay) {
           this.document.body.classList.remove('ubax-overlay-open');
           this.document.body.style.overflow = '';
         }
       });
+    });
+
+    // ── Archive Overlay Portal Effect ────────────────────────────────────
+    effect(() => {
+      const target = this.archiveDialogTarget();
+      if (target && !this.archiveOverlayElement) {
+        this.createArchiveOverlayPortal();
+      } else if (!target && this.archiveOverlayElement) {
+        this.destroyArchiveOverlayPortal();
+      }
+    });
+
+    // ── Submit Overlay Portal Effect ─────────────────────────────────────
+    effect(() => {
+      const target = this.submitDialogTarget();
+      if (target && !this.submitOverlayElement) {
+        this.createSubmitOverlayPortal();
+      } else if (!target && this.submitOverlayElement) {
+        this.destroySubmitOverlayPortal();
+      }
     });
   }
 
@@ -600,6 +687,192 @@ export class BiensListPageComponent {
         this.contentEntering.set(true);
       });
     });
+  }
+
+  private createArchiveOverlayPortal(): void {
+    const target = this.archiveDialogTarget();
+    if (!target) return;
+
+    this.archiveOverlayElement = this.renderer.createElement('div');
+    this.renderer.addClass(this.archiveOverlayElement, 'ubax-modal-overlay');
+    this.renderer.addClass(
+      this.archiveOverlayElement,
+      'archive-modal-overlay-portal',
+    );
+    this.renderer.setStyle(this.archiveOverlayElement, 'display', 'flex');
+    this.renderer.listen(this.archiveOverlayElement, 'click', () =>
+      this.closeArchiveDialog(),
+    );
+
+    const dialogElement = this.renderer.createElement('dialog');
+    this.renderer.addClass(dialogElement, 'archive-modal');
+    this.renderer.setAttribute(dialogElement, 'open', 'true');
+    this.renderer.setAttribute(
+      dialogElement,
+      'aria-labelledby',
+      'archive-modal-title',
+    );
+    this.renderer.listen(dialogElement, 'click', (e) => e.stopPropagation());
+
+    const titleElement = this.renderer.createElement('h3');
+    this.renderer.setAttribute(titleElement, 'id', 'archive-modal-title');
+    this.renderer.setProperty(
+      titleElement,
+      'textContent',
+      'Archiver ce bien ?',
+    );
+    this.renderer.appendChild(dialogElement, titleElement);
+
+    const descriptionElement = this.renderer.createElement('p');
+    const descriptionText = `Vous allez archiver "${target.title}". Cette action retire le bien de votre liste active.`;
+    this.renderer.setProperty(
+      descriptionElement,
+      'textContent',
+      descriptionText,
+    );
+    this.renderer.appendChild(dialogElement, descriptionElement);
+
+    const actionsElement = this.renderer.createElement('div');
+    this.renderer.addClass(actionsElement, 'archive-modal__actions');
+
+    const cancelButton = this.renderer.createElement('button');
+    this.renderer.addClass(cancelButton, 'archive-modal__btn');
+    this.renderer.addClass(cancelButton, 'archive-modal__btn--cancel');
+    this.renderer.setAttribute(cancelButton, 'type', 'button');
+    this.renderer.setProperty(cancelButton, 'textContent', 'Annuler');
+    this.renderer.setProperty(
+      cancelButton,
+      'disabled',
+      this.isArchiving(target.id),
+    );
+    this.renderer.listen(cancelButton, 'click', () =>
+      this.closeArchiveDialog(),
+    );
+    this.renderer.appendChild(actionsElement, cancelButton);
+
+    const confirmButton = this.renderer.createElement('button');
+    this.renderer.addClass(confirmButton, 'archive-modal__btn');
+    this.renderer.addClass(confirmButton, 'archive-modal__btn--confirm');
+    this.renderer.setAttribute(confirmButton, 'type', 'button');
+    this.renderer.setProperty(
+      confirmButton,
+      'textContent',
+      this.isArchiving(target.id) ? 'Archivage...' : "Confirmer l'archivage",
+    );
+    this.renderer.setProperty(
+      confirmButton,
+      'disabled',
+      this.isArchiving(target.id),
+    );
+    this.renderer.listen(confirmButton, 'click', () => this.confirmArchive());
+    this.renderer.appendChild(actionsElement, confirmButton);
+
+    this.renderer.appendChild(dialogElement, actionsElement);
+    this.renderer.appendChild(this.archiveOverlayElement, dialogElement);
+    this.renderer.appendChild(document.body, this.archiveOverlayElement);
+    this.renderer.addClass(document.body, 'ubax-overlay-open');
+  }
+
+  private destroyArchiveOverlayPortal(): void {
+    if (this.archiveOverlayElement) {
+      this.renderer.removeClass(document.body, 'ubax-overlay-open');
+      this.renderer.removeChild(document.body, this.archiveOverlayElement);
+      this.archiveOverlayElement = null;
+    }
+  }
+
+  private createSubmitOverlayPortal(): void {
+    const target = this.submitDialogTarget();
+    if (!target) return;
+
+    this.submitOverlayElement = this.renderer.createElement('div');
+    this.renderer.addClass(this.submitOverlayElement, 'ubax-modal-overlay');
+    this.renderer.addClass(
+      this.submitOverlayElement,
+      'archive-modal-overlay-portal',
+    );
+    this.renderer.setStyle(this.submitOverlayElement, 'display', 'flex');
+    this.renderer.listen(this.submitOverlayElement, 'click', () =>
+      this.closeSubmitDialog(),
+    );
+
+    const dialogElement = this.renderer.createElement('dialog');
+    this.renderer.addClass(dialogElement, 'archive-modal');
+    this.renderer.setAttribute(dialogElement, 'open', 'true');
+    this.renderer.setAttribute(
+      dialogElement,
+      'aria-labelledby',
+      'submit-modal-title',
+    );
+    this.renderer.listen(dialogElement, 'click', (e) => e.stopPropagation());
+
+    const titleElement = this.renderer.createElement('h3');
+    this.renderer.setAttribute(titleElement, 'id', 'submit-modal-title');
+    this.renderer.setProperty(
+      titleElement,
+      'textContent',
+      'Soumettre à la modération ?',
+    );
+    this.renderer.appendChild(dialogElement, titleElement);
+
+    const descriptionElement = this.renderer.createElement('p');
+    this.renderer.setProperty(
+      descriptionElement,
+      'textContent',
+      `Vous allez soumettre "${target.title}" à la modération. Votre bien sera examiné avant publication.`,
+    );
+    this.renderer.appendChild(dialogElement, descriptionElement);
+
+    const actionsElement = this.renderer.createElement('div');
+    this.renderer.addClass(actionsElement, 'archive-modal__actions');
+
+    const cancelButton = this.renderer.createElement('button');
+    this.renderer.addClass(cancelButton, 'archive-modal__btn');
+    this.renderer.addClass(cancelButton, 'archive-modal__btn--cancel');
+    this.renderer.setAttribute(cancelButton, 'type', 'button');
+    this.renderer.setProperty(cancelButton, 'textContent', 'Annuler');
+    this.renderer.setProperty(
+      cancelButton,
+      'disabled',
+      this.isSubmitting(target.id),
+    );
+    this.renderer.listen(cancelButton, 'click', () => this.closeSubmitDialog());
+    this.renderer.appendChild(actionsElement, cancelButton);
+
+    const confirmButton = this.renderer.createElement('button');
+    this.renderer.addClass(confirmButton, 'archive-modal__btn');
+    this.renderer.addClass(confirmButton, 'archive-modal__btn--confirm');
+    this.renderer.setAttribute(confirmButton, 'type', 'button');
+    this.renderer.setProperty(
+      confirmButton,
+      'textContent',
+      this.isSubmitting(target.id)
+        ? 'Soumission...'
+        : 'Confirmer la soumission',
+    );
+    this.renderer.setProperty(
+      confirmButton,
+      'disabled',
+      this.isSubmitting(target.id),
+    );
+    this.renderer.listen(confirmButton, 'click', () => this.confirmSubmit());
+    this.renderer.appendChild(actionsElement, confirmButton);
+
+    this.renderer.appendChild(dialogElement, actionsElement);
+    this.renderer.appendChild(this.submitOverlayElement, dialogElement);
+    this.renderer.appendChild(document.body, this.submitOverlayElement);
+  }
+
+  private destroySubmitOverlayPortal(): void {
+    if (this.submitOverlayElement) {
+      this.renderer.removeChild(document.body, this.submitOverlayElement);
+      this.submitOverlayElement = null;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroyArchiveOverlayPortal();
+    this.destroySubmitOverlayPortal();
   }
 
   retryLoad(): void {
@@ -666,8 +939,13 @@ export class BiensListPageComponent {
       return;
     }
 
-    // Déclencher l'animation de sortie, puis vider le target
     this.archiveDialogClosing.set(true);
+    if (this.archiveOverlayElement) {
+      this.renderer.addClass(this.archiveOverlayElement, 'is-closing');
+      const dialogEl =
+        this.archiveOverlayElement.querySelector<HTMLElement>('dialog');
+      if (dialogEl) this.renderer.addClass(dialogEl, 'is-closing');
+    }
     setTimeout(() => {
       this.archiveDialogTarget.set(null);
       this.archiveDialogClosing.set(false);
@@ -691,6 +969,60 @@ export class BiensListPageComponent {
 
   protected canArchive(statusRaw: PropertyMineStatus, id: string): boolean {
     return statusRaw !== 'ARCHIVED' && !this.isArchiving(id);
+  }
+
+  protected soumettreProperty(card: {
+    id: string;
+    title: string;
+    statusRaw: PropertyMineStatus;
+  }): void {
+    if (!this.canSubmit(card.statusRaw, card.id)) {
+      return;
+    }
+
+    this.submitDialogTarget.set(card);
+  }
+
+  protected closeSubmitDialog(): void {
+    if (this.submitPendingId()) {
+      return;
+    }
+
+    this.submitDialogClosing.set(true);
+    if (this.submitOverlayElement) {
+      this.renderer.addClass(this.submitOverlayElement, 'is-closing');
+      const dialogEl =
+        this.submitOverlayElement.querySelector<HTMLElement>('dialog');
+      if (dialogEl) this.renderer.addClass(dialogEl, 'is-closing');
+    }
+    setTimeout(() => {
+      this.submitDialogTarget.set(null);
+      this.submitDialogClosing.set(false);
+    }, 220);
+  }
+
+  protected confirmSubmit(): void {
+    const target = this.submitDialogTarget();
+    if (!target || this.isSubmitting(target.id)) {
+      return;
+    }
+
+    this.submitPendingId.set(target.id);
+    this.submitPendingTitle.set(target.title);
+    this.store.soumettreProperty({ id: target.id });
+    this.submitDialogTarget.set(null);
+    this.submitDialogClosing.set(false);
+  }
+
+  protected isSubmitting(id: string): boolean {
+    return this.store.submittingPropertyIds().includes(id);
+  }
+
+  protected canSubmit(statusRaw: PropertyMineStatus, id: string): boolean {
+    return (
+      (statusRaw === 'DRAFT' || statusRaw === 'REJECTED') &&
+      !this.isSubmitting(id)
+    );
   }
 
   @HostListener('document:click', ['$event'])
@@ -736,7 +1068,7 @@ export class BiensListPageComponent {
       tenantRole: 'Propriétaire',
       price: formatPrice(property.price),
       image: IMAGE_POOL[index % IMAGE_POOL.length],
-      avatar: AVATAR_POOL[index % AVATAR_POOL.length],
+      avatar: null,
       type: property.propertyType || 'N/A',
       category: transactionLabel,
       statusRaw: status,

@@ -1,20 +1,47 @@
 import { inject, Injectable } from '@angular/core';
-import { MessageService } from 'primeng/api';
+import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { NotificationHandler } from '@ubax-workspace/shared-data-access';
+
+type ToastSeverity = NonNullable<ToastMessageOptions['severity']>;
+
+const TOAST_SUMMARY: Record<ToastSeverity, string> = {
+  success: 'Operation reussie',
+  info: 'Information',
+  warn: 'Attention',
+  error: 'Action impossible',
+  secondary: 'Notification',
+  contrast: 'Notification',
+};
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService implements NotificationHandler {
   private readonly ms = inject(MessageService);
 
+  private push(severity: ToastSeverity, detail: string, life: number): void {
+    const normalizedDetail =
+      detail?.trim() || 'Une notification est disponible.';
+
+    this.ms.add({
+      severity,
+      summary: TOAST_SUMMARY[severity],
+      detail: normalizedDetail,
+      life,
+      closable: true,
+      styleClass: `ubax-toast-message ubax-toast-message--${severity}`,
+      contentStyleClass: 'ubax-toast-content',
+      closeIcon: 'pi-times',
+    });
+  }
+
   success(message: string): void {
-    this.ms.add({ severity: 'success', detail: message, life: 4000 });
+    this.push('success', message, 4200);
   }
 
   error(message: string): void {
-    this.ms.add({ severity: 'error', detail: message, life: 6000 });
+    this.push('error', message, 6200);
   }
 
   info(message: string): void {
-    this.ms.add({ severity: 'info', detail: message, life: 4000 });
+    this.push('info', message, 4200);
   }
 }

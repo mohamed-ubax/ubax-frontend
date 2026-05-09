@@ -20,36 +20,51 @@ describe('NotificationService', () => {
     service = injector.get(NotificationService);
   });
 
-  it('affiche un toast success avec life 4000', () => {
+  it('affiche un toast success avec style et animation renforces', () => {
     service.success('Opération réussie');
 
     expect(messageService.add).toHaveBeenCalledOnce();
     expect(messageService.add).toHaveBeenCalledWith({
       severity: 'success',
+      summary: 'Operation reussie',
       detail: 'Opération réussie',
-      life: 4000,
+      life: 4200,
+      closable: true,
+      styleClass: 'ubax-toast-message ubax-toast-message--success',
+      contentStyleClass: 'ubax-toast-content',
+      closeIcon: 'pi-times',
     });
   });
 
-  it('affiche un toast error avec life 6000', () => {
+  it('affiche un toast error avec style et animation renforces', () => {
     service.error('Une erreur est survenue');
 
     expect(messageService.add).toHaveBeenCalledOnce();
     expect(messageService.add).toHaveBeenCalledWith({
       severity: 'error',
+      summary: 'Action impossible',
       detail: 'Une erreur est survenue',
-      life: 6000,
+      life: 6200,
+      closable: true,
+      styleClass: 'ubax-toast-message ubax-toast-message--error',
+      contentStyleClass: 'ubax-toast-content',
+      closeIcon: 'pi-times',
     });
   });
 
-  it('affiche un toast info avec life 4000', () => {
+  it('affiche un toast info avec style et animation renforces', () => {
     service.info('Traitement en cours');
 
     expect(messageService.add).toHaveBeenCalledOnce();
     expect(messageService.add).toHaveBeenCalledWith({
       severity: 'info',
+      summary: 'Information',
       detail: 'Traitement en cours',
-      life: 4000,
+      life: 4200,
+      closable: true,
+      styleClass: 'ubax-toast-message ubax-toast-message--info',
+      contentStyleClass: 'ubax-toast-content',
+      closeIcon: 'pi-times',
     });
   });
 

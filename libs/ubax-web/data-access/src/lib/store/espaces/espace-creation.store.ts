@@ -7,57 +7,65 @@ import {
   addDocument,
   addMedia,
   ApiConfiguration,
-  BailleurApplicationResponse,
   create2,
   deleteDocument,
   deleteMedia,
   findAllByType,
   LaCodeListDto,
-  listByAgency,
-  PropertyCreateRequest,
+  presignPropertyMedia,
   PropertyDocumentResponse,
+  PropertyCreateRequest,
   PropertyMediaResponse,
-  PresignedUrlResponse,
   PropertyResponse,
+  PresignedUrlResponse,
   setCover,
   submit,
   uploadMedia,
 } from '@ubax-workspace/shared-api-types';
-import { storageApiConfig } from '../../api-configs/storage.config';
 import { EMPTY, exhaustMap, forkJoin, map, pipe, switchMap, tap } from 'rxjs';
 
-export type BienCreationState = {
+export type EspaceCreationState = {
   propertyId: string | null;
   property: PropertyResponse | null;
   medias: PropertyMediaResponse[];
   documents: PropertyDocumentResponse[];
-  bailleurs: BailleurApplicationResponse[];
   codeListPropertyTypes: LaCodeListDto[];
+  codeListBedTypes: LaCodeListDto[];
+  codeListMealPlans: LaCodeListDto[];
+  codeListPaymentFrequencies: LaCodeListDto[];
   codeListTransactionTypes: LaCodeListDto[];
-  codeListCities: LaCodeListDto[];
+  codeListPropertyConditions: LaCodeListDto[];
   codeListAmenities: LaCodeListDto[];
+  codeListCities: LaCodeListDto[];
   codeListDocumentTypes: LaCodeListDto[];
   lastPresignedDocument: PresignedUrlResponse | null;
   documentUploadStage: 'idle' | 'presigning' | 'uploading' | 'registering';
+  codeListsLoading: boolean;
   saving: boolean;
   error: string | null;
+  mediaUploadProgress: Record<string, number>;
 };
 
-const initialState: BienCreationState = {
+const initialState: EspaceCreationState = {
   propertyId: null,
   property: null,
   medias: [],
   documents: [],
-  bailleurs: [],
   codeListPropertyTypes: [],
+  codeListBedTypes: [],
+  codeListMealPlans: [],
+  codeListPaymentFrequencies: [],
   codeListTransactionTypes: [],
-  codeListCities: [],
+  codeListPropertyConditions: [],
   codeListAmenities: [],
+  codeListCities: [],
   codeListDocumentTypes: [],
   lastPresignedDocument: null,
   documentUploadStage: 'idle',
+  codeListsLoading: false,
   saving: false,
   error: null,
+  mediaUploadProgress: {},
 };
 
 function extractList<T>(body: unknown): T[] {
@@ -76,49 +84,34 @@ function extractList<T>(body: unknown): T[] {
 
 function extractHttpErrorMessage(err: HttpErrorResponse): string {
   const raw = err.error as unknown;
-
-  if (typeof raw === 'string' && raw.trim().length > 0) {
-    return raw;
-  }
-
+  if (typeof raw === 'string' && raw.trim().length > 0) return raw;
   if (raw && typeof raw === 'object') {
     const obj = raw as Record<string, unknown>;
     const message = obj['message'];
     const detail = obj['detail'];
     const error = obj['error'];
-
-    if (typeof message === 'string' && message.trim().length > 0) {
+    if (typeof message === 'string' && message.trim().length > 0)
       return message;
-    }
-    if (typeof detail === 'string' && detail.trim().length > 0) {
-      return detail;
-    }
-    if (typeof error === 'string' && error.trim().length > 0) {
-      return error;
-    }
+    if (typeof detail === 'string' && detail.trim().length > 0) return detail;
+    if (typeof error === 'string' && error.trim().length > 0) return error;
   }
-
   return err.message;
 }
 
 function extractProperty(body: unknown): PropertyResponse {
   if (body && typeof body === 'object') {
     const obj = body as { data?: unknown };
-    if (obj.data && typeof obj.data === 'object') {
+    if (obj.data && typeof obj.data === 'object')
       return obj.data as PropertyResponse;
-    }
     return body as PropertyResponse;
   }
-
   return {} as PropertyResponse;
 }
 
 function extractEntity<T>(body: unknown): T | null {
   if (!body || typeof body !== 'object') return null;
-
   const obj = body as { data?: unknown };
   const source = obj.data ?? body;
-
   return source && typeof source === 'object' ? (source as T) : null;
 }
 
@@ -150,7 +143,38 @@ function requestPresignedPropertyDocumentUpload(
     .pipe(map((body) => extractEntity<PresignedUrlResponse>(body)));
 }
 
-export const BienCreationStore = signalStore(
+function markCoverMedia(
+  medias: PropertyMediaResponse[],
+  mediaId: string,
+): PropertyMediaResponse[] {
+  return medias.map((media) => ({
+    ...media,
+    cover: media.id === mediaId,
+  }));
+}
+
+function removeMediaById(
+  medias: PropertyMediaResponse[],
+  mediaId: string,
+): PropertyMediaResponse[] {
+  return medias.filter((media) => media.id !== mediaId);
+}
+
+/**
+ * EspaceCreationStore — gestion de la création d'un espace hôtelier.
+ *
+ * Couvre les tâches :
+ *   SCRUM-194 (FE-704) — Créer un espace : POST /v1/properties
+ *   SCRUM-197 (FE-707) — Uploader des médias : POST /v1/properties/{id}/media/upload
+ *   SCRUM-198 (FE-708) — Définir la couverture : PATCH /v1/properties/{id}/media/{mediaId}/cover
+ *   SCRUM-199 (FE-709) — Supprimer un média : DELETE /v1/properties/{id}/media/{mediaId}
+ *
+ * Contraintes hôtelières :
+ *   - transactionType toujours RENT_FURNISHED (pré-sélectionné, non modifiable)
+ *   - propertyType limité à ROOM | SUITE | CONFERENCE_ROOM | APARTMENT
+ *   - price = tarif par nuit en XOF
+ */
+export const EspaceCreationStore = signalStore(
   withState(initialState),
   withMethods(
     (
@@ -162,62 +186,108 @@ export const BienCreationStore = signalStore(
         patchState(store, initialState);
       },
 
+      /**
+       * Charge les référentiels nécessaires à la création d'un espace.
+       */
       chargerReferentiels: rxMethod<void>(
         pipe(
-          tap(() => patchState(store, { error: null })),
+          tap(() => patchState(store, { error: null, codeListsLoading: true })),
           exhaustMap(() =>
             forkJoin({
               propertyTypes: findAllByType(http, apiConfig.rootUrl, {
                 type: 'PROPERTY_TYPE',
               }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              bedTypes: findAllByType(http, apiConfig.rootUrl, {
+                type: 'BED_TYPE',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              mealPlans: findAllByType(http, apiConfig.rootUrl, {
+                type: 'MEAL_PLAN',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              paymentFrequencies: findAllByType(http, apiConfig.rootUrl, {
+                type: 'PAYMENT_FREQUENCY',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
               transactionTypes: findAllByType(http, apiConfig.rootUrl, {
                 type: 'TRANSACTION_TYPE',
               }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
-              cities: findAllByType(http, apiConfig.rootUrl, {
-                type: 'CITY',
+              propertyConditions: findAllByType(http, apiConfig.rootUrl, {
+                type: 'PROPERTY_CONDITION',
               }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
               amenities: findAllByType(http, apiConfig.rootUrl, {
                 type: 'PROPERTY_AMENITY',
               }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
+              cities: findAllByType(http, apiConfig.rootUrl, {
+                type: 'CITY',
+              }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
               documentTypes: findAllByType(http, apiConfig.rootUrl, {
                 type: 'PROPERTY_DOCUMENT_TYPE',
               }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
-              bailleurs: listByAgency(http, apiConfig.rootUrl, {
-                size: 200,
-              }).pipe(
-                map((r) => extractList<BailleurApplicationResponse>(r.body)),
-              ),
             }).pipe(
               tapResponse({
                 next: ({
                   propertyTypes,
+                  bedTypes,
+                  mealPlans,
+                  paymentFrequencies,
                   transactionTypes,
-                  cities,
+                  propertyConditions,
                   amenities,
+                  cities,
                   documentTypes,
-                  bailleurs,
                 }) =>
                   patchState(store, {
                     codeListPropertyTypes: propertyTypes,
+                    codeListBedTypes: bedTypes,
+                    codeListMealPlans: mealPlans,
+                    codeListPaymentFrequencies: paymentFrequencies,
                     codeListTransactionTypes: transactionTypes,
-                    codeListCities: cities,
+                    codeListPropertyConditions: propertyConditions,
                     codeListAmenities: amenities,
+                    codeListCities: cities,
                     codeListDocumentTypes: documentTypes,
-                    bailleurs,
+                    codeListsLoading: false,
                   }),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { error: err.message }),
+                  patchState(store, {
+                    codeListsLoading: false,
+                    error: extractHttpErrorMessage(err),
+                  }),
               }),
             ),
           ),
         ),
       ),
 
-      creerBrouillon: rxMethod<PropertyCreateRequest>(
+      /**
+       * Alias conservé pour compatibilité avec les composants existants.
+       */
+      chargerVilles: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { error: null })),
+          exhaustMap(() =>
+            findAllByType(http, apiConfig.rootUrl, { type: 'CITY' }).pipe(
+              map((r) => extractList<LaCodeListDto>(r.body)),
+              tapResponse({
+                next: (cities) => patchState(store, { codeListCities: cities }),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { error: extractHttpErrorMessage(err) }),
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      /**
+       * Crée un espace en statut DRAFT.
+       * Endpoint : POST /v1/properties
+       * transactionType est forcé à RENT_FURNISHED.
+       */
+      creerEspace: rxMethod<PropertyCreateRequest>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap((body) =>
-            create2(http, apiConfig.rootUrl, { body }).pipe(
+            create2(http, apiConfig.rootUrl, {
+              body,
+            }).pipe(
               map((r) => extractProperty(r.body)),
               tapResponse({
                 next: (property: PropertyResponse) =>
@@ -237,6 +307,11 @@ export const BienCreationStore = signalStore(
         ),
       ),
 
+      /**
+       * Upload direct multipart d'un média.
+       * Endpoint : POST /v1/properties/{id}/media/upload
+       * Recommandé pour fichiers ≤ 50 Mo.
+       */
       uploaderMediaDirect: rxMethod<{
         file: File;
         mediaType: 'PHOTO' | 'VIDEO' | 'PLAN';
@@ -263,7 +338,6 @@ export const BienCreationStore = signalStore(
                     });
                     return;
                   }
-
                   patchState(store, (s) => ({
                     medias: [...s.medias, media],
                     saving: false,
@@ -277,6 +351,12 @@ export const BienCreationStore = signalStore(
         ),
       ),
 
+      /**
+       * Upload via presigned URL (recommandé web / fichiers volumineux).
+       * Étape 1 : GET /v1/storage/presign/property-media
+       * Étape 2 : PUT {uploadUrl}
+       * Étape 3 : POST /v1/properties/{id}/media
+       */
       uploaderMediaPresign: rxMethod<{
         file: File;
         mediaType: 'PHOTO' | 'VIDEO' | 'PLAN';
@@ -286,67 +366,68 @@ export const BienCreationStore = signalStore(
           exhaustMap(({ file, mediaType }) => {
             const propertyId = store.propertyId();
             if (!propertyId) return EMPTY;
-            return storageApiConfig
-              .presignPropertyMedia(http, apiConfig.rootUrl, {
-                propertyId,
-                contentType: file.type,
-              })
-              .pipe(
-                map((r) => extractEntity<PresignedUrlResponse>(r.body)),
-                switchMap((presign) => {
-                  if (!hasValidPresignedUpload(presign)) {
+            return presignPropertyMedia(http, apiConfig.rootUrl, {
+              propertyId,
+              contentType: file.type,
+            }).pipe(
+              map((r) => extractEntity<PresignedUrlResponse>(r.body)),
+              switchMap((presign) => {
+                if (!hasValidPresignedUpload(presign)) {
+                  patchState(store, {
+                    saving: false,
+                    error:
+                      "Impossible d'obtenir une URL d'upload média valide.",
+                  });
+                  return EMPTY;
+                }
+                return http
+                  .put(presign.uploadUrl, file, {
+                    headers: { 'Content-Type': file.type },
+                  })
+                  .pipe(
+                    switchMap(() =>
+                      addMedia(http, apiConfig.rootUrl, {
+                        id: propertyId,
+                        body: {
+                          cover: false,
+                          fileName: file.name,
+                          fileSize: file.size,
+                          fileUrl: presign.publicUrl,
+                          mediaType,
+                          mimeType: file.type,
+                        },
+                      }),
+                    ),
+                    map((r) => extractEntity<PropertyMediaResponse>(r.body)),
+                  );
+              }),
+              tapResponse({
+                next: (media: PropertyMediaResponse | null) => {
+                  if (!media) {
                     patchState(store, {
                       saving: false,
-                      error:
-                        "Impossible d'obtenir une URL d'upload média valide.",
+                      error: "Réponse média invalide après l'upload.",
                     });
-                    return EMPTY;
+                    return;
                   }
-
-                  return http
-                    .put(presign.uploadUrl, file, {
-                      headers: { 'Content-Type': file.type },
-                    })
-                    .pipe(
-                      switchMap(() =>
-                        addMedia(http, apiConfig.rootUrl, {
-                          id: propertyId,
-                          body: {
-                            cover: false,
-                            fileName: file.name,
-                            fileSize: file.size,
-                            fileUrl: presign.publicUrl,
-                            mediaType,
-                            mimeType: file.type,
-                          },
-                        }),
-                      ),
-                      map((r) => extractEntity<PropertyMediaResponse>(r.body)),
-                    );
-                }),
-                tapResponse({
-                  next: (media: PropertyMediaResponse | null) => {
-                    if (!media) {
-                      patchState(store, {
-                        saving: false,
-                        error: "Réponse média invalide après l'upload.",
-                      });
-                      return;
-                    }
-
-                    patchState(store, (s) => ({
-                      medias: [...s.medias, media],
-                      saving: false,
-                    }));
-                  },
-                  error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: err.message }),
-                }),
-              );
+                  patchState(store, (s) => ({
+                    medias: [...s.medias, media],
+                    saving: false,
+                  }));
+                },
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, { saving: false, error: err.message }),
+              }),
+            );
           }),
         ),
       ),
 
+      /**
+       * Définit un média comme photo de couverture.
+       * Endpoint : PATCH /v1/properties/{propertyId}/media/{mediaId}/cover
+       * L'ancienne couverture est automatiquement désactivée côté backend.
+       */
       definirCouverture: rxMethod<string>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
@@ -360,10 +441,7 @@ export const BienCreationStore = signalStore(
               tapResponse({
                 next: () =>
                   patchState(store, (s) => ({
-                    medias: s.medias.map((m) => ({
-                      ...m,
-                      cover: m.id === mediaId,
-                    })),
+                    medias: markCoverMedia(s.medias, mediaId),
                     saving: false,
                   })),
                 error: (err: HttpErrorResponse) =>
@@ -374,6 +452,10 @@ export const BienCreationStore = signalStore(
         ),
       ),
 
+      /**
+       * Supprime un média (fichier MinIO + entrée DB).
+       * Endpoint : DELETE /v1/properties/{propertyId}/media/{mediaId}
+       */
       supprimerMedia: rxMethod<string>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
@@ -387,7 +469,7 @@ export const BienCreationStore = signalStore(
               tapResponse({
                 next: () =>
                   patchState(store, (s) => ({
-                    medias: s.medias.filter((m) => m.id !== mediaId),
+                    medias: removeMediaById(s.medias, mediaId),
                     saving: false,
                   })),
                 error: (err: HttpErrorResponse) =>
@@ -398,6 +480,10 @@ export const BienCreationStore = signalStore(
         ),
       ),
 
+      /**
+       * Upload d'un document légal via URL présignée.
+       * Étapes: presign -> upload storage -> rattachement du document.
+       */
       uploaderDocument: rxMethod<{
         file: File;
         docType: string;
@@ -414,6 +500,7 @@ export const BienCreationStore = signalStore(
           exhaustMap(({ file, docType, title }) => {
             const propertyId = store.propertyId();
             if (!propertyId) return EMPTY;
+
             return requestPresignedPropertyDocumentUpload(
               http,
               apiConfig.rootUrl,
@@ -495,12 +582,16 @@ export const BienCreationStore = signalStore(
         ),
       ),
 
+      /**
+       * Supprime un document légal déjà rattaché au bien.
+       */
       supprimerDocument: rxMethod<string>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap((documentId) => {
             const propertyId = store.propertyId();
             if (!propertyId) return EMPTY;
+
             return deleteDocument(http, apiConfig.rootUrl, {
               id: propertyId,
               docId: documentId,
@@ -519,6 +610,10 @@ export const BienCreationStore = signalStore(
         ),
       ),
 
+      /**
+       * Soumet l'espace à la modération (DRAFT → PENDING).
+       * Endpoint : POST /v1/properties/{id}/submit
+       */
       soumettre: rxMethod<void>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),

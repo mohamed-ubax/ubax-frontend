@@ -1,274 +1,958 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import {
+  form,
+  submit,
+  required,
+  min,
+  max,
+  FormField,
+} from '@angular/forms/signals';
+import {
+  NOTIFICATION_HANDLER,
+  type NotificationHandler,
+} from '@ubax-workspace/shared-data-access';
+import {
+  ApiConfiguration,
+  generateReadUrl,
+  LaCodeListDto,
+  PropertyAmenityRequest,
+  PropertyDocumentResponse,
+} from '@ubax-workspace/shared-api-types';
+import {
+  AuthStore,
+  EspaceCreationStore,
+} from '@ubax-workspace/ubax-web-data-access';
+import { SelectModule } from 'primeng/select';
+import { firstValueFrom } from 'rxjs';
 
-type EspaceType = 'chambre' | 'salle';
-type InitialStatus = 'Disponible' | 'Occupé' | 'Maintenance';
-type EditableDraftField =
-  | 'code'
-  | 'name'
-  | 'standardRate'
-  | 'weekendRate'
-  | 'longStayRate'
-  | 'notes';
+// ── Wizard steps ──────────────────────────────────────────────────────────────
+const WIZARD_STEPS = [
+  { label: 'Identité' },
+  { label: 'Capacité' },
+  { label: 'Localisation' },
+  { label: 'Équipements & Prix' },
+  { label: 'Médias' },
+  { label: 'Finalisation' },
+] as const;
 
-type TypeCardOption = {
-  readonly value: EspaceType;
-  readonly title: string;
+type PropertyTypeOption = {
+  readonly value: string;
+  readonly label: string;
+  readonly icon: string;
   readonly description: string;
-  readonly icon: string;};
+};
 
-type TypeItem = {
-  readonly id: string;
-  readonly label: string;};
+type SelectOption = {
+  readonly value: string;
+  readonly label: string;
+};
 
+type UploadTimelineStep = {
+  key: 'presigning' | 'uploading' | 'registering';
+  label: string;
+  description: string;
+  status: 'done' | 'active' | 'pending';
+};
+
+const DEFAULT_DOC_TYPE_LABELS: Readonly<Record<string, string>> = {
+  TITLE_DEED: 'Titre foncier',
+  BUILDING_PERMIT: 'Permis de construire',
+  DIAGNOSTIC: 'Diagnostic',
+  CADASTRAL_PLAN: 'Plan cadastral',
+  INSURANCE: 'Assurance',
+  CONFORMITY_CERTIFICATE: 'Certificat de conformite',
+  OTHER: 'Autre',
+};
+
+const PROPERTY_TYPE_META: Readonly<
+  Record<string, { icon: string; description: string }>
+> = {
+  HOTEL_ROOM: {
+    icon: 'space-add/icons/bed-double.svg',
+    description: 'Standard, Deluxe, Suite Junior, Familiale',
+  },
+  ROOM: {
+    icon: 'space-add/icons/bed-double.svg',
+    description: 'Standard, Deluxe, Suite Junior, Familiale',
+  },
+  SUITE: {
+    icon: 'space-add/icons/bed-double.svg',
+    description: 'Suite Junior, Suite Présidentielle',
+  },
+  CONFERENCE_ROOM: {
+    icon: 'space-add/icons/conference-room.svg',
+    description: 'Réunion, Séminaire, Événement professionnel',
+  },
+  APARTMENT: {
+    icon: 'space-add/icons/bed-double.svg',
+    description: 'Appartement meublé court séjour',
+  },
+};
+
+// ── Floor options ─────────────────────────────────────────────────────────────
+const FLOOR_OPTIONS = [
+  'RDC',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10+',
+];
+
+// ── Equipment items (mapped to amenity codes) ─────────────────────────────────
 type EquipmentItem = {
   readonly id: string;
   readonly label: string;
-  readonly icon: string;};
+  readonly icon: string;
+  readonly code: string;
+};
 
-type BaseDraft = {
-  code: string;
-  name: string;
-  typeHint: string;
-  typeItems: readonly TypeItem[];
-  selectedFloor: string;
-  previewTag: string;
-  previewRate: string;
-  previewCapacity: string;
-  previewEquipments: string;
-  heroImage: string;
-  gallery: readonly string[];
-  standardRate: string;
-  weekendRate: string;
-  longStayRate: string;
-  notes: string;};
+const DEFAULT_AMENITY_ICON = 'space-add/icons/mode-cool.svg';
+const AMENITY_ICON_BY_CODE: Readonly<Record<string, string>> = {
+  AC: 'space-add/icons/mode-cool.svg',
+  WIFI: 'space-add/icons/mode-cool.svg',
+  TV: 'space-add/icons/mode-cool.svg',
+  POOL: 'space-add/icons/mode-cool.svg',
+  PARKING: 'space-add/icons/mode-cool.svg',
+  GENERATOR: 'space-add/icons/mode-cool.svg',
+  SECURITY: 'space-add/icons/mode-cool.svg',
+  ELEVATOR: 'space-add/icons/mode-cool.svg',
+  GARDEN: 'space-add/icons/mode-cool.svg',
+  FURNISHED: 'space-add/icons/mode-cool.svg',
+  PETS_ALLOWED: 'space-add/icons/mode-cool.svg',
+  PMR: 'space-add/icons/mode-cool.svg',
+};
 
-type RoomDraft = BaseDraft & {
-  adults: string;
-  children: string;
-  area: string;
+// ── Form step interfaces ──────────────────────────────────────────────────────
+
+interface EspaceStep1 {
+  title: string;
+  propertyType: string;
+  transactionType: string;
+  condition: string;
+}
+
+interface EspaceStep2 {
+  rooms: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  balconies: number | null;
+  surfaceTotal: number | null;
+  surfaceLiving: number | null;
+  floor: string;
+  totalFloors: number | null;
   bedType: string;
-  bedOptions: readonly string[];};
+  maxOccupancy: number | null;
+}
 
-type HallDraft = BaseDraft & {
-  people: string;
-  area: string;};
+interface EspaceStep3 {
+  city: string;
+  district: string;
+  address: string;
+  street: string;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+interface EspaceStep4 {
+  price: number;
+  description: string;
+  mealPlan: string;
+  paymentFrequency: string;
+  amenities: string[];
+}
+
+const ACCEPTED_MEDIA =
+  'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/mpeg';
+const ACCEPTED_DOCS = 'application/pdf,image/jpeg,image/png,image/webp';
+const MAX_IMAGE_MB = 10;
+const MAX_VIDEO_MB = 100;
+const MAX_DOC_SIZE_MB = 20;
+
+function resolveTimelineStatus(
+  activeIndex: number,
+  stepIndex: number,
+): UploadTimelineStep['status'] {
+  if (activeIndex > stepIndex) return 'done';
+  if (activeIndex === stepIndex) return 'active';
+  return 'pending';
+}
 
 @Component({
   selector: 'ubax-espace-add-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormField, DecimalPipe, FormsModule, SelectModule],
+  providers: [EspaceCreationStore],
   templateUrl: './espace-add-page.component.html',
   styleUrl: './espace-add-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EspaceAddPageComponent {
-  readonly espaceType = signal<EspaceType>('chambre');
-  readonly initialStatus = signal<InitialStatus>('Disponible');
+export class EspaceAddPageComponent implements OnInit {
+  private readonly store = inject(EspaceCreationStore);
+  private readonly router = inject(Router);
+  private readonly authStore = inject(AuthStore);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
+  private readonly notifications = inject(NOTIFICATION_HANDLER, {
+    optional: true,
+  }) as NotificationHandler | null;
 
-  readonly typeCards: readonly TypeCardOption[] = [
-    {
-      value: 'chambre',
-      title: 'Chambre',
-      description: 'Suite , Standard , Deluxe , Familiale',
-      icon: 'space-add/icons/bed-double.svg',
-    },
-    {
-      value: 'salle',
-      title: 'Salle',
-      description: 'Espace de réunion , Séminaire ou évènement profésionnelle',
-      icon: 'space-add/icons/conference-room.svg',
-    },
-  ];
+  // ── Store proxies ─────────────────────────────────────────────────────────
+  protected readonly saving = this.store.saving;
+  protected readonly error = this.store.error;
+  protected readonly medias = this.store.medias;
+  protected readonly documents = this.store.documents;
+  protected readonly propertyId = this.store.propertyId;
+  protected readonly propertyTypes = this.store.codeListPropertyTypes;
+  protected readonly bedTypesCodeList = this.store.codeListBedTypes;
+  protected readonly mealPlansCodeList = this.store.codeListMealPlans;
+  protected readonly paymentFrequenciesCodeList =
+    this.store.codeListPaymentFrequencies;
+  protected readonly transactionTypesCodeList =
+    this.store.codeListTransactionTypes;
+  protected readonly propertyConditionsCodeList =
+    this.store.codeListPropertyConditions;
+  protected readonly amenitiesCodeList = this.store.codeListAmenities;
+  protected readonly cities = this.store.codeListCities;
+  protected readonly documentTypesCodeList = this.store.codeListDocumentTypes;
+  protected readonly documentUploadStage = this.store.documentUploadStage;
 
-  readonly floorOptions = ['RDC', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  readonly initialStatusOptions: readonly InitialStatus[] = [
-    'Disponible',
-    'Occupé',
-    'Maintenance',
-  ];
+  /** true si l'erreur est liée à une session expirée / token invalide */
+  protected readonly isSessionError = computed(() => {
+    const msg = this.error() ?? '';
+    return (
+      msg.includes('401') ||
+      /session expir/i.test(msg) ||
+      /unauthorized/i.test(msg) ||
+      /non autoris/i.test(msg) ||
+      /token/i.test(msg)
+    );
+  });
 
-  readonly equipmentItems: readonly EquipmentItem[] = [
-    {
-      id: 'clim-1',
-      label: 'Climatisation',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    {
-      id: 'wifi',
-      label: 'WIFI Haut débit',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    { id: 'tv', label: 'Smart TV', icon: 'space-add/icons/mode-cool.svg' },
-    {
-      id: 'baignoire',
-      label: 'Baignoire',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    {
-      id: 'douche',
-      label: 'Douche à l’italienne',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    {
-      id: 'cafe',
-      label: 'Machine à café',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    {
-      id: 'mini-bar',
-      label: 'Mini Bar',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    {
-      id: 'coffre',
-      label: 'Coffre fort',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    { id: 'balcon', label: 'Balcon', icon: 'space-add/icons/mode-cool.svg' },
-    {
-      id: 'clim-2',
-      label: 'Climatisation',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    {
-      id: 'clim-3',
-      label: 'Climatisation',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-    {
-      id: 'clim-4',
-      label: 'Climatisation',
-      icon: 'space-add/icons/mode-cool.svg',
-    },
-  ];
-  readonly selectedEquipmentIds = signal<string[]>(
-    this.equipmentItems.map((item) => item.id),
+  protected expireAndRedirect(): void {
+    this.authStore.expireSession();
+  }
+
+  private readonly toSelectOptions = (
+    items: readonly LaCodeListDto[],
+  ): SelectOption[] =>
+    items
+      .map((item) => ({
+        value: this.getCodeListValue(item),
+        label: this.getCodeListLabel(item),
+      }))
+      .filter((item) => item.value.length > 0);
+
+  protected readonly propertyTypeOptions = computed<PropertyTypeOption[]>(() =>
+    this.propertyTypes()
+      .map((item) => {
+        const value = this.getCodeListValue(item);
+        if (!value) return null;
+        const meta = PROPERTY_TYPE_META[value];
+        return {
+          value,
+          label: this.getCodeListLabel(item),
+          icon: meta?.icon ?? 'space-add/icons/bed-double.svg',
+          description:
+            meta?.description ?? 'Type d espace disponible a la reservation',
+        };
+      })
+      .filter((item): item is PropertyTypeOption => item !== null),
   );
 
-  readonly roomDraft: RoomDraft = {
-    code: '# 101',
-    name: 'Chambre Savane',
-    typeHint: 'Ajouter modifier ou supprimer les types de chambre',
-    typeItems: [
-      { id: 'standard', label: 'Chambre standard' },
-      { id: 'deluxe', label: 'Chambre Deluxe' },
-      { id: 'junior', label: 'Suite Junior' },
-      { id: 'presidential', label: 'Suite Présidentielle' },
-    ],
-    selectedFloor: '4',
-    adults: '3',
-    children: '1',
-    area: '40',
-    bedType: 'King size',
-    bedOptions: ['King size', 'Queen size', 'Lit Simple'],
-    previewTag: 'Chambre',
-    previewRate: '65000 FCFA',
-    previewCapacity: '3',
-    previewEquipments: '3 sélectionnés',
-    heroImage: 'space-add/images/preview-room.webp',
-    gallery: [
-      'shared/rooms/room-photo-03.webp',
-      'shared/rooms/room-photo-05.webp',
-      'shared/rooms/room-photo-02.webp',
-      'shared/rooms/room-photo-04.webp',
-    ],
-    standardRate: '75 000',
-    weekendRate: '75 000',
-    longStayRate: '75 000',
-    notes: 'Description visible par les clients',
-  };
+  protected readonly bedTypeOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.bedTypesCodeList()),
+  );
 
-  readonly hallDraft: HallDraft = {
-    code: '# 101',
-    name: 'Espace de réunion',
-    typeHint: 'Ajouter modifier ou supprimer les types de Salon',
-    typeItems: [
-      { id: 'meeting', label: 'Espace de réunion' },
-      { id: 'seminar', label: 'Salle de séminaire' },
-      { id: 'event', label: 'Salle d’événement' },
-      { id: 'party', label: 'Salle de fête' },
-    ],
-    selectedFloor: '4',
-    people: '56',
-    area: '40',
-    previewTag: 'Salle',
-    previewRate: '65000 FCFA',
-    previewCapacity: '3',
-    previewEquipments: '3 sélectionnés',
-    heroImage: 'space-add/images/preview-room.webp',
-    gallery: [
-      'shared/rooms/room-photo-03.webp',
-      'shared/rooms/room-photo-05.webp',
-      'shared/rooms/room-photo-02.webp',
-      'shared/rooms/room-photo-04.webp',
-    ],
-    standardRate: '75 000',
-    weekendRate: '75 000',
-    longStayRate: '75 000',
-    notes: 'Description visible par les clients',
-  };
+  protected readonly mealPlanOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.mealPlansCodeList()),
+  );
 
-  get isRoom(): boolean {
-    return this.espaceType() === 'chambre';
+  protected readonly paymentFrequencyOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.paymentFrequenciesCodeList()),
+  );
+
+  protected readonly docTypeOptions = computed<SelectOption[]>(() =>
+    this.documentTypesCodeList().map((item) => {
+      const value = this.getCodeListValue(item);
+      const label = this.getCodeListLabel(item);
+      return {
+        value,
+        label: label || DEFAULT_DOC_TYPE_LABELS[value] || value,
+      };
+    }),
+  );
+
+  protected readonly documentUploadTimeline = computed<UploadTimelineStep[]>(
+    () => {
+      const stage = this.documentUploadStage();
+
+      if (stage === 'idle') return [];
+
+      const activeIndex =
+        {
+          presigning: 0,
+          uploading: 1,
+          registering: 2,
+        }[stage] ?? 0;
+
+      return [
+        {
+          key: 'presigning',
+          label: 'Generation URL signee',
+          description: 'Preparation de l URL presignee pour le document',
+          status: resolveTimelineStatus(activeIndex, 0),
+        },
+        {
+          key: 'uploading',
+          label: 'Upload document',
+          description: 'Envoi du document vers le stockage',
+          status: resolveTimelineStatus(activeIndex, 1),
+        },
+        {
+          key: 'registering',
+          label: 'Rattachement legal',
+          description: 'Association du document a l espace',
+          status: resolveTimelineStatus(activeIndex, 2),
+        },
+      ];
+    },
+  );
+
+  protected readonly transactionTypeOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.transactionTypesCodeList()),
+  );
+
+  protected readonly conditionOptions = computed<SelectOption[]>(() =>
+    this.toSelectOptions(this.propertyConditionsCodeList()),
+  );
+
+  protected readonly equipmentItems = computed<EquipmentItem[]>(() =>
+    this.amenitiesCodeList()
+      .map((item) => {
+        const code = this.getCodeListValue(item);
+        if (!code) return null;
+        return {
+          id: code,
+          label: this.getCodeListLabel(item),
+          icon: AMENITY_ICON_BY_CODE[code] ?? DEFAULT_AMENITY_ICON,
+          code,
+        };
+      })
+      .filter((item): item is EquipmentItem => item !== null),
+  );
+
+  // ── Static options ────────────────────────────────────────────────────────
+  protected readonly steps = WIZARD_STEPS;
+  protected readonly floorOptions = FLOOR_OPTIONS;
+  protected readonly acceptedMedia = ACCEPTED_MEDIA;
+  protected readonly acceptedDocs = ACCEPTED_DOCS;
+
+  // ── UI state ──────────────────────────────────────────────────────────────
+  protected readonly activeStep = signal(0);
+  protected readonly isDragOver = signal(false);
+  protected readonly mediaDeleteTarget = signal<string | null>(null);
+  protected readonly docDeleteTarget = signal<string | null>(null);
+  protected readonly selectedDocType = signal('');
+  protected readonly docTitle = signal('');
+  protected readonly docFileError = signal<string | null>(null);
+  protected readonly documentOpeningId = signal<string | null>(null);
+  protected readonly coverWarnVisible = signal(false);
+  private readonly step4Pending = signal(false);
+
+  // ── Computed ──────────────────────────────────────────────────────────────
+  protected readonly isCreated = computed(() => !!this.store.propertyId());
+
+  protected readonly coverMediaId = computed(
+    () => this.medias().find((m) => m.cover)?.id ?? null,
+  );
+
+  protected readonly photoCount = computed(
+    () => this.medias().filter((m) => m.mediaType === 'PHOTO').length,
+  );
+
+  protected readonly hasMinPhotos = computed(() => this.photoCount() >= 3);
+
+  // ── Signal Forms ──────────────────────────────────────────────────────────
+
+  // Step 1 — Identité
+  protected readonly _step1 = signal<EspaceStep1>({
+    title: '',
+    propertyType: '',
+    transactionType: '',
+    condition: '',
+  });
+
+  protected readonly formStep1 = form(this._step1, (p) => {
+    required(p.title, { message: "Le titre de l'espace est requis" });
+    required(p.propertyType, { message: "Le type d'espace est requis" });
+    required(p.transactionType, {
+      message: 'Le type de transaction est requis',
+    });
+  });
+
+  // Step 2 — Capacité & Surfaces
+  protected readonly _step2 = signal<EspaceStep2>({
+    rooms: 1,
+    bedrooms: 1,
+    bathrooms: 1,
+    balconies: null,
+    surfaceTotal: null,
+    surfaceLiving: null,
+    floor: 'RDC',
+    totalFloors: null,
+    bedType: '',
+    maxOccupancy: 2,
+  });
+
+  protected readonly formStep2 = form(this._step2, (p) => {
+    min(p.rooms, 0);
+    min(p.bedrooms, 0);
+    min(p.bathrooms, 0);
+    min(p.surfaceLiving, 0);
+    min(p.surfaceTotal, 0);
+    min(p.maxOccupancy, 1);
+    max(p.maxOccupancy, 100);
+  });
+
+  // Step 3 — Localisation
+  protected readonly _step3 = signal<EspaceStep3>({
+    city: '',
+    district: '',
+    address: '',
+    street: '',
+    latitude: null,
+    longitude: null,
+  });
+
+  protected readonly formStep3 = form(this._step3, (p) => {
+    required(p.city, { message: 'La ville est requise' });
+    min(p.latitude, -90, { message: 'Latitude entre -90 et 90' });
+    max(p.latitude, 90, { message: 'Latitude entre -90 et 90' });
+    min(p.longitude, -180, { message: 'Longitude entre -180 et 180' });
+    max(p.longitude, 180, { message: 'Longitude entre -180 et 180' });
+  });
+
+  // Step 4 — Équipements & Prix
+  protected readonly _step4 = signal<EspaceStep4>({
+    price: 0,
+    description: '',
+    mealPlan: '',
+    paymentFrequency: '',
+    amenities: ['AC', 'SECURITY', 'PARKING'],
+  });
+
+  protected readonly formStep4 = form(this._step4, (p) => {
+    required(p.price, { message: 'Le tarif est requis' });
+    min(p.price, 0, { message: 'Le tarif doit être positif ou nul' });
+  });
+
+  // ── Computed form values for preview ─────────────────────────────────────
+  protected readonly previewTitle = computed(() => this._step1().title);
+  protected readonly previewType = computed(
+    () =>
+      this.propertyTypeOptions().find(
+        (o) => o.value === this._step1().propertyType,
+      )?.label ?? '—',
+  );
+  protected readonly previewPrice = computed(() => this._step4().price);
+  protected readonly previewCity = computed(() => this._step3().city);
+  protected readonly previewFloor = computed(() => this._step2().floor);
+
+  constructor() {
+    // Auto-select first city once code lists load
+    effect(() => {
+      const firstCity = this.cities()[0]?.value ?? '';
+      if (firstCity && !this._step3().city) {
+        this._step3.update((s) => ({ ...s, city: firstCity }));
+      }
+    });
+
+    effect(() => {
+      const first = this.propertyTypeOptions()[0]?.value;
+      const current = this._step1().propertyType;
+      if (first && !current) {
+        this._step1.update((s) => ({ ...s, propertyType: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.transactionTypeOptions()[0]?.value;
+      const current = this._step1().transactionType;
+      if (first && !current) {
+        this._step1.update((s) => ({ ...s, transactionType: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.conditionOptions()[0]?.value;
+      const current = this._step1().condition;
+      if (first && !current) {
+        this._step1.update((s) => ({ ...s, condition: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.bedTypeOptions()[0]?.value;
+      const current = this._step2().bedType;
+      if (first && !current) {
+        this._step2.update((s) => ({ ...s, bedType: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.mealPlanOptions()[0]?.value;
+      const current = this._step4().mealPlan;
+      if (first && !current) {
+        this._step4.update((s) => ({ ...s, mealPlan: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.paymentFrequencyOptions()[0]?.value;
+      const current = this._step4().paymentFrequency;
+      if (first && !current) {
+        this._step4.update((s) => ({ ...s, paymentFrequency: first }));
+      }
+    });
+
+    effect(() => {
+      const first = this.docTypeOptions()[0]?.value;
+      if (first && !this.selectedDocType()) {
+        this.selectedDocType.set(first);
+      }
+    });
+
+    effect(() => {
+      const available = new Set(this.equipmentItems().map((item) => item.code));
+      if (available.size === 0) return;
+      const selected = this._step4().amenities;
+      const filtered = selected.filter((code) => available.has(code));
+
+      if (filtered.length !== selected.length) {
+        this._step4.update((s) => ({ ...s, amenities: filtered }));
+      }
+
+      if (filtered.length === 0) {
+        const fallback = this.equipmentItems()
+          .slice(0, 3)
+          .map((item) => item.code);
+        if (fallback.length > 0) {
+          this._step4.update((s) => ({ ...s, amenities: fallback }));
+        }
+      }
+    });
+
+    // Navigate to detail once brouillon is created and step4 was pending
+    effect(() => {
+      if (
+        this.step4Pending() &&
+        this.store.propertyId() &&
+        !this.store.saving()
+      ) {
+        this.step4Pending.set(false);
+        this.notifications?.success('Brouillon créé avec succès.');
+        this.nextStep();
+      }
+    });
+
+    // Navigate to list once submitted (status → PENDING)
+    effect(() => {
+      const prop = this.store.property();
+      if (prop?.id && prop.status === 'PENDING') {
+        this.store.reset();
+        this.router.navigate(['/hotel/espaces']);
+      }
+    });
   }
 
-  get draft(): RoomDraft | HallDraft {
-    return this.isRoom ? this.roomDraft : this.hallDraft;
+  ngOnInit(): void {
+    this.store.chargerReferentiels();
   }
 
-  get currentTypeFieldLabel(): string {
-    return this.isRoom ? 'Type de chambre' : 'Type de Salle';
+  // ── Wizard navigation ─────────────────────────────────────────────────────
+  protected isReachedStep(index: number): boolean {
+    return index <= this.activeStep();
   }
 
-  get currentPreviewSubtitle(): string {
-    return `${this.draft.previewTag} · Étage ${this.draft.selectedFloor}`;
+  protected isCompletedStep(index: number): boolean {
+    return index < this.activeStep();
   }
 
-  get currentPreviewOverlayIcon(): string {
-    return this.isRoom
-      ? 'space-add/icons/bed-double.svg'
-      : 'space-add/icons/conference-room.svg';
+  protected nextStep(): void {
+    this.activeStep.update((s) => Math.min(s + 1, this.steps.length - 1));
   }
 
-  setEspaceType(type: EspaceType): void {
-    this.espaceType.set(type);
+  protected previousStep(): void {
+    this.activeStep.update((s) => Math.max(s - 1, 0));
   }
 
-  updateDraftField(field: EditableDraftField, value: string): void {
-    const draft = this.draft;
-    draft[field] = value;
+  // ── Step 1 — type card selection ──────────────────────────────────────────
+  protected selectPropertyType(value: string): void {
+    this._step1.update((s) => ({ ...s, propertyType: value }));
   }
 
-  updateRoomField(field: 'adults' | 'children' | 'area', value: string): void {
-    this.roomDraft[field] = value;
+  protected get selectedPropertyType(): string {
+    return this._step1().propertyType;
   }
 
-  updateHallField(field: 'people' | 'area', value: string): void {
-    this.hallDraft[field] = value;
+  protected get isRoomOrSuite(): boolean {
+    const t = this._step1().propertyType;
+    return t === 'HOTEL_ROOM' || t === 'ROOM' || t === 'SUITE';
   }
 
-  selectFloor(floor: string): void {
-    this.draft.selectedFloor = floor;
+  // ── Step 2 — floor chip selection ────────────────────────────────────────
+  protected selectFloor(floor: string): void {
+    this._step2.update((s) => ({ ...s, floor }));
   }
 
-  selectBedType(option: string): void {
-    this.roomDraft.bedType = option;
+  protected get selectedFloor(): string {
+    return this._step2().floor;
   }
 
-  isEquipmentSelected(equipmentId: string): boolean {
-    return this.selectedEquipmentIds().includes(equipmentId);
+  // ── Step 2 — bed type selection ───────────────────────────────────────────
+  protected selectBedType(value: string): void {
+    this._step2.update((s) => ({ ...s, bedType: value }));
   }
 
-  toggleEquipment(equipmentId: string): void {
-    this.selectedEquipmentIds.update((selectedIds) =>
-      selectedIds.includes(equipmentId)
-        ? selectedIds.filter((id) => id !== equipmentId)
-        : [...selectedIds, equipmentId],
+  protected get selectedBedType(): string {
+    return this._step2().bedType;
+  }
+
+  // ── Step 4 — amenity toggle ───────────────────────────────────────────────
+  protected isAmenitySelected(code: string): boolean {
+    return this._step4().amenities.includes(code);
+  }
+
+  protected toggleAmenity(code: string): void {
+    this._step4.update((s) => {
+      const already = s.amenities.includes(code);
+      return {
+        ...s,
+        amenities: already
+          ? s.amenities.filter((c) => c !== code)
+          : [...s.amenities, code],
+      };
+    });
+  }
+
+  // ── Step proceeds ─────────────────────────────────────────────────────────
+  protected proceedStep1(): void {
+    submit(this.formStep1, {
+      action: async () => {
+        this.nextStep();
+        return null;
+      },
+    });
+  }
+
+  protected proceedStep2(): void {
+    submit(this.formStep2, {
+      action: async () => {
+        this.nextStep();
+        return null;
+      },
+    });
+  }
+
+  protected proceedStep3(): void {
+    submit(this.formStep3, {
+      action: async () => {
+        this.nextStep();
+        return null;
+      },
+    });
+  }
+
+  /**
+   * Validates step 4, then triggers brouillon creation.
+   * Navigation to step 5 (médias) happens reactively once the store confirms.
+   */
+  protected proceedStep4(): void {
+    submit(this.formStep4, {
+      action: async () => {
+        const s1 = this._step1();
+        const s2 = this._step2();
+        const s3 = this._step3();
+        const s4 = this._step4();
+
+        const amenities: PropertyAmenityRequest[] = s4.amenities.map(
+          (code) => ({ code }),
+        );
+
+        // Resolve floor: 'RDC' → 0, else parse int
+        const floorNum =
+          s2.floor === 'RDC' ? 0 : Number.parseInt(s2.floor, 10) || null;
+
+        this.store.creerEspace({
+          title: s1.title,
+          description: s4.description || undefined,
+          propertyType: s1.propertyType,
+          transactionType: s1.transactionType,
+          condition: s1.condition,
+          price: s4.price,
+          surfaceTotal: s2.surfaceTotal ?? undefined,
+          surfaceLiving: s2.surfaceLiving ?? undefined,
+          rooms: s2.rooms ?? undefined,
+          bedrooms: s2.bedrooms ?? undefined,
+          bathrooms: s2.bathrooms ?? undefined,
+          balconies: s2.balconies ?? undefined,
+          floor: floorNum ?? undefined,
+          totalFloors: s2.totalFloors ?? undefined,
+          bedType: s2.bedType || undefined,
+          maxOccupancy: s2.maxOccupancy ?? undefined,
+          mealPlan: s4.mealPlan || undefined,
+          paymentFrequency: s4.paymentFrequency || undefined,
+          city: s3.city,
+          district: s3.district || undefined,
+          address: s3.address || undefined,
+          street: s3.street || undefined,
+          latitude: s3.latitude ?? undefined,
+          longitude: s3.longitude ?? undefined,
+          amenities: amenities.length > 0 ? amenities : undefined,
+        });
+
+        this.step4Pending.set(true);
+        return null;
+      },
+    });
+  }
+
+  // ── Media handlers ────────────────────────────────────────────────────────
+  protected onMediaFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+    this.uploadFiles(Array.from(input.files));
+    input.value = '';
+  }
+
+  protected onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver.set(true);
+  }
+
+  protected onDragLeave(): void {
+    this.isDragOver.set(false);
+  }
+
+  protected onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver.set(false);
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    this.uploadFiles(files);
+  }
+
+  private uploadFiles(files: File[]): void {
+    const propertyId = this.store.propertyId();
+    if (!propertyId) {
+      this.notifications?.error(
+        "Créez d'abord l'espace avant d'ajouter des médias.",
+      );
+      return;
+    }
+    files.forEach((file) => {
+      if (!this.validateFile(file)) return;
+      let mediaType: 'PHOTO' | 'VIDEO' | 'PLAN' = 'PHOTO';
+      if (file.type.startsWith('video/')) {
+        mediaType = 'VIDEO';
+      } else if (this._step1().propertyType === 'CONFERENCE_ROOM') {
+        mediaType = 'PLAN';
+      }
+      this.store.uploaderMediaDirect({ file, mediaType, cover: false });
+    });
+  }
+
+  private validateFile(file: File): boolean {
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    if (!isImage && !isVideo) {
+      this.notifications?.error(`Format non supporté : ${file.name}`);
+      return false;
+    }
+    const maxMB = isVideo ? MAX_VIDEO_MB : MAX_IMAGE_MB;
+    if (file.size > maxMB * 1024 * 1024) {
+      this.notifications?.error(
+        `Fichier trop volumineux : ${file.name} (max ${maxMB} Mo)`,
+      );
+      return false;
+    }
+    return true;
+  }
+
+  protected setCover(mediaId: string): void {
+    this.store.definirCouverture(mediaId);
+  }
+
+  protected requestDeleteMedia(mediaId: string): void {
+    this.mediaDeleteTarget.set(mediaId);
+  }
+
+  protected cancelDeleteMedia(): void {
+    this.mediaDeleteTarget.set(null);
+  }
+
+  protected confirmDeleteMedia(): void {
+    const mediaId = this.mediaDeleteTarget();
+    if (!mediaId) return;
+    const wasCover = this.coverMediaId() === mediaId;
+    this.store.supprimerMedia(mediaId);
+    this.mediaDeleteTarget.set(null);
+    if (wasCover) this.coverWarnVisible.set(true);
+  }
+
+  protected dismissCoverWarn(): void {
+    this.coverWarnVisible.set(false);
+  }
+
+  // ── Document handlers ───────────────────────────────────────────────────
+  protected onDocTypeChange(value: string): void {
+    this.selectedDocType.set(value ?? '');
+  }
+
+  protected onDocFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    if (file.size > MAX_DOC_SIZE_MB * 1024 * 1024) {
+      this.docFileError.set(
+        `Fichier trop volumineux (max ${MAX_DOC_SIZE_MB} Mo).`,
+      );
+      input.value = '';
+      return;
+    }
+
+    const propertyId = this.propertyId();
+    if (!propertyId) {
+      this.docFileError.set(
+        "Creez d'abord l'espace avant d'ajouter des documents.",
+      );
+      input.value = '';
+      return;
+    }
+
+    const docType = this.selectedDocType();
+    if (!docType) {
+      this.docFileError.set('Selectionnez un type de document.');
+      input.value = '';
+      return;
+    }
+
+    this.docFileError.set(null);
+    this.store.uploaderDocument({
+      file,
+      docType,
+      title: this.docTitle().trim() || file.name,
+    });
+    input.value = '';
+    this.docTitle.set('');
+  }
+
+  protected async openDocument(fileUrl: string, docId?: string): Promise<void> {
+    if (docId) this.documentOpeningId.set(docId);
+
+    try {
+      const response = await firstValueFrom(
+        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+      );
+      const readUrl = response.body?.readUrl;
+      window.open(readUrl ?? fileUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      if (docId) this.documentOpeningId.set(null);
+    }
+  }
+
+  protected requestDeleteDoc(docId: string): void {
+    this.docDeleteTarget.set(docId);
+  }
+
+  protected cancelDeleteDoc(): void {
+    this.docDeleteTarget.set(null);
+  }
+
+  protected confirmDeleteDoc(): void {
+    const docId = this.docDeleteTarget();
+    if (!docId) return;
+
+    this.store.supprimerDocument(docId);
+    this.docDeleteTarget.set(null);
+  }
+
+  // ── Final actions ─────────────────────────────────────────────────────────
+  protected sauvegarderBrouillon(): void {
+    this.store.reset();
+    this.router.navigate(['/hotel/espaces']);
+  }
+
+  protected soumettre(): void {
+    this.store.soumettre();
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  protected getCityLabel(city: LaCodeListDto): string {
+    return this.getCodeListLabel(city);
+  }
+
+  protected getCityValue(city: LaCodeListDto): string {
+    return this.getCodeListValue(city);
+  }
+
+  protected getMealPlanLabel(value: string): string {
+    return (
+      this.mealPlanOptions().find((o) => o.value === value)?.label ?? value
     );
   }
 
-  selectInitialStatus(status: InitialStatus): void {
-    this.initialStatus.set(status);
+  protected getTransactionLabel(value: string): string {
+    return (
+      this.transactionTypeOptions().find((o) => o.value === value)?.label ??
+      value
+    );
+  }
+
+  protected getCodeListLabel(item: LaCodeListDto): string {
+    return item.description ?? item.value ?? '';
+  }
+
+  protected getCodeListValue(item: LaCodeListDto): string {
+    return item.value ?? '';
+  }
+
+  protected docTypeLabel(value?: string): string {
+    if (!value) return '—';
+    return (
+      this.docTypeOptions().find((item) => item.value === value)?.label ?? value
+    );
+  }
+
+  protected formatBytes(bytes?: number): string {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
+  protected trackDocument(_: number, doc: PropertyDocumentResponse): string {
+    return doc.id ?? doc.fileUrl ?? doc.title ?? `${_}`;
   }
 }

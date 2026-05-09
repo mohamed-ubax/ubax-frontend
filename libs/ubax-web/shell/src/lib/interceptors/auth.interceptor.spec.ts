@@ -275,4 +275,31 @@ describe('authInterceptor', () => {
     expect(authService.refreshToken).toHaveBeenCalledTimes(1);
     expect(authStore.expireSession).not.toHaveBeenCalled();
   });
+
+  it("n'expire pas la session si le refresh échoue sur une requête de création d'espace", async () => {
+    authStore.token.mockReturnValue('expired-token');
+    authService.refreshToken.mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' }),
+      ),
+    );
+
+    const req = new HttpRequest('POST', '/v1/properties');
+    const next = vi.fn().mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            url: '/v1/properties',
+          }),
+      ),
+    );
+
+    await expect(firstValueFrom(run(req, next))).rejects.toBeInstanceOf(
+      HttpErrorResponse,
+    );
+
+    expect(authService.refreshToken).toHaveBeenCalledTimes(1);
+    expect(authStore.expireSession).not.toHaveBeenCalled();
+  });
 });

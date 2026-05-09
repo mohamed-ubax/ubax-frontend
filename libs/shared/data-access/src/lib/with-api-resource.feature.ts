@@ -78,32 +78,105 @@ function defaultMapList<T>(raw: unknown): T[] {
     if (Array.isArray(r['content'])) return r['content'] as T[];
     if (Array.isArray(r['data'])) return r['data'] as T[];
     if (r['data'] && typeof r['data'] === 'object') {
-      const nested = (r['data'] as Record<string, unknown>)['content'];
-      if (Array.isArray(nested)) return nested as T[];
+      const dataObj = r['data'] as Record<string, unknown>;
+      if (Array.isArray(dataObj['content'])) return dataObj['content'] as T[];
+      if (Array.isArray(dataObj['results'])) return dataObj['results'] as T[];
     }
   }
   return [];
 }
 
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function firstNumericValue(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): number | null {
+  for (const key of keys) {
+    const value = toFiniteNumber(source[key]);
+    if (value !== null) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function inferCollectionSize(
+  source: Record<string, unknown>,
+  key: string,
+): number | null {
+  return Array.isArray(source[key]) ? source[key].length : null;
+}
+
 function defaultMapPagination(raw: unknown): PaginationMeta | null {
   if (!raw || typeof raw !== 'object') return null;
-  const r = raw as Record<string, unknown>;
 
-  // Spring Boot Page : { totalElements, totalPages, number, size }
-  const src =
-    typeof r['totalElements'] === 'number'
-      ? r
-      : r['data'] && typeof r['data'] === 'object'
-        ? (r['data'] as Record<string, unknown>)
-        : null;
+  const record = raw as Record<string, unknown>;
+  const dataRecord =
+    record['data'] && typeof record['data'] === 'object'
+      ? (record['data'] as Record<string, unknown>)
+      : null;
+  const paginationRecord =
+    dataRecord?.['pagination'] && typeof dataRecord['pagination'] === 'object'
+      ? (dataRecord['pagination'] as Record<string, unknown>)
+      : null;
+  const source = paginationRecord ?? dataRecord ?? record;
 
-  if (!src || typeof src['totalElements'] !== 'number') return null;
+  const pageSize =
+    firstNumericValue(source, ['size', 'pageSize', 'limit', 'perPage']) ??
+    inferCollectionSize(source, 'content') ??
+    inferCollectionSize(source, 'items') ??
+    (dataRecord ? inferCollectionSize(dataRecord, 'content') : null) ??
+    (dataRecord ? inferCollectionSize(dataRecord, 'items') : null) ??
+    20;
+
+  const totalPagesRaw = firstNumericValue(source, [
+    'totalPages',
+    'pages',
+    'pageCount',
+    'total-pages',
+  ]);
+  const totalElementsRaw = firstNumericValue(source, [
+    'totalElements',
+    'total',
+    'count',
+    'total-items',
+  ]);
+
+  if (totalElementsRaw === null && totalPagesRaw === null) {
+    return null;
+  }
+
+  let totalPages = totalPagesRaw;
+  if (totalPages === null || totalPages <= 0) {
+    if (totalElementsRaw !== null && pageSize > 0) {
+      totalPages = Math.max(1, Math.ceil(totalElementsRaw / pageSize));
+    } else {
+      totalPages = 1;
+    }
+  }
+
+  const totalElements = totalElementsRaw ?? totalPages * pageSize;
+  const currentPage =
+    firstNumericValue(source, ['number', 'page', 'pageIndex']) ?? 0;
 
   return {
-    totalElements: src['totalElements'] as number,
-    totalPages: (src['totalPages'] as number) ?? 1,
-    currentPage: (src['number'] as number) ?? 0,
-    pageSize: (src['size'] as number) ?? 20,
+    totalElements,
+    totalPages,
+    currentPage,
+    pageSize,
   };
 }
 
@@ -130,8 +203,7 @@ export function withApiResource<
     ((raw: ApiFnResponse<NonNullable<TListFn>>) => defaultMapList<TItem>(raw));
   const mapPagination =
     config.mapPagination ??
-    ((raw: ApiFnResponse<NonNullable<TListFn>>) =>
-      defaultMapPagination(raw));
+    ((raw: ApiFnResponse<NonNullable<TListFn>>) => defaultMapPagination(raw));
   const mapGetById =
     config.mapGetById ??
     ((raw: ApiFnResponse<NonNullable<TGetByIdFn>>) =>
@@ -228,7 +300,9 @@ export function withApiResource<
                 switchMap((params: ApiFnParams<NonNullable<TListFn>>) =>
                   listRequest(http, rootUrl(), params).pipe(
                     map((r) => {
-                      const body = r.body as ApiFnResponse<NonNullable<TListFn>>;
+                      const body = r.body as ApiFnResponse<
+                        NonNullable<TListFn>
+                      >;
                       return {
                         items: mapList(body),
                         pagination: mapPagination(body),
@@ -236,11 +310,10 @@ export function withApiResource<
                     }),
                     tapResponse({
                       next: ({ items, pagination }) =>
-                        patchState(
-                          store,
-                          setAllEntities(items, entityOpts),
-                          { loading: false, pagination },
-                        ),
+                        patchState(store, setAllEntities(items, entityOpts), {
+                          loading: false,
+                          pagination,
+                        }),
                       error: (err: HttpErrorResponse) => {
                         const msg = err.message ?? API_ERROR_MESSAGES.load;
                         notif?.error(msg);

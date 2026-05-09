@@ -22,6 +22,10 @@ function isPropertyDocumentLinkRequest(url: string): boolean {
   return /\/v1\/properties\/[^/]+\/documents(?:\?|$)/.test(url);
 }
 
+function isPropertyWorkflowRequest(url: string): boolean {
+  return /(?:\/api)?\/v1\/properties(?:\/|$|\?)/.test(url);
+}
+
 function isBackendApiRequest(url: string): boolean {
   if (
     url.startsWith('/api') ||
@@ -108,7 +112,8 @@ export const authInterceptor: HttpInterceptorFn = (
         catchError((refreshErr) => {
           if (
             shouldExpireSessionOnRefreshError(refreshErr) &&
-            !isPropertyDocumentLinkRequest(req.url)
+            !isPropertyDocumentLinkRequest(req.url) &&
+            !isPropertyWorkflowRequest(req.url)
           ) {
             authStore.expireSession();
           }
