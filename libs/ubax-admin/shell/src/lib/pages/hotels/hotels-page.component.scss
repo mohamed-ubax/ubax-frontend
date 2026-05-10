@@ -1,0 +1,202 @@
+@use 'sass:color';
+
+$navy:    #1a3047;
+$surface: #ffffff;
+$border:  #e1e4ed;
+$text:    #1c1c1c;
+$muted:   #6b7280;
+
+:host { display: block; }
+
+.partners-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 100%;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.75), transparent 32%),
+    linear-gradient(180deg, rgba(236,242,247,.92), rgba(236,242,247,1));
+}
+
+.partners-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.partners-page__eyebrow {
+  margin: 0 0 .35rem;
+  color: $muted;
+  font-size: .8125rem;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.partners-page__title-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.partners-page__title {
+  margin: 0;
+  color: $text;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.partners-page__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: .35rem .8rem;
+  background: rgba(26,48,71,.08);
+  color: $navy;
+  font-size: .8125rem;
+  font-weight: 600;
+}
+
+.partners-page__subtitle {
+  max-width: 48rem;
+  margin: .6rem 0 0;
+  color: $muted;
+  font-size: .9375rem;
+  line-height: 1.5;
+}
+
+.partners-toolbar {
+  :deep(input.p-inputtext) {
+    height: 2.85rem;
+    border-radius: .75rem;
+    font-size: .9375rem;
+  }
+  :deep(.p-select) {
+    min-width: 10rem;
+    border-radius: .75rem;
+  }
+}
+
+:deep(.partners-table) {
+  .p-datatable-header-cell, th {
+    background: $navy;
+    color: #fff;
+    font-size: .9375rem;
+    font-weight: 600;
+    border: none;
+    padding: 1rem 1.25rem;
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr {
+    border-bottom: 1px solid $border;
+    &:last-child { border-bottom: none; }
+    > td {
+      padding: .95rem 1.25rem;
+      vertical-align: middle;
+      color: $text;
+      font-size: .9375rem;
+    }
+    &:hover { background: rgba(236,242,247,.65); }
+  }
+}
+
+.partners-table__actions-head { text-align: center; }
+.partners-table__actions { text-align: center; }
+.partners-table__cell { color: $text; }
+.partners-table__cell--muted { color: $muted; }
+.partners-table__stars { color: #f59e0b; font-size: 1rem; letter-spacing: .05em; }
+
+.partners-user-cell {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+
+.partners-user-cell__logo {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.partners-user-cell__avatar {
+  flex-shrink: 0;
+  :deep(.p-avatar) {
+    width: 2.45rem;
+    height: 2.45rem;
+    background: $navy;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
+  }
+}
+
+.partners-user-cell__meta { min-width: 0; }
+
+.partners-user-cell__name {
+  margin: 0;
+  color: $text;
+  font-size: .9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.partners-user-cell__sub {
+  margin: .2rem 0 0;
+  color: $muted;
+  font-size: .8125rem;
+}
+
+.partners-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.partners-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid $border;
+  border-radius: 999px;
+  background: #f8faff;
+  color: $navy;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+
+  &:hover {
+    border-color: $navy;
+    background: $navy;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  &--warn {
+    color: #d97706;
+    &:hover { border-color: #d97706; background: #d97706; color: #fff; }
+  }
+
+  &--success {
+    color: #16a34a;
+    &:hover { border-color: #16a34a; background: #16a34a; color: #fff; }
+  }
+}
+
+@media (max-width: 60rem) {
+  .partners-page { padding: 1.25rem; }
+}
+
+@media (max-width: 40rem) {
+  .partners-page__title { font-size: 1.6rem; }
+}

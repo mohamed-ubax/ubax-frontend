@@ -1,0 +1,480 @@
+<div class="admin-page">
+  <div class="admin-page__header">
+    <div class="admin-page__title-block">
+      <p class="admin-page__eyebrow">Back-office UBAX</p>
+      <div class="admin-page__title-row">
+        <h1 class="admin-page__title">Administrateurs</h1>
+        <span class="admin-page__count">{{ adminCount() }} comptes</span>
+      </div>
+      <p class="admin-page__subtitle">
+        Gérez les comptes internes, leurs rôles Keycloak et les sous-rôles
+        fonctionnels UBAX.
+      </p>
+    </div>
+  </div>
+
+  <ubax-section-card class="admin-table-card" bodyClass="p-0">
+    <ubax-search-filter-bar
+      class="admin-toolbar"
+      placeholder="Rechercher"
+      [filters]="searchFilters"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    >
+      @if (isSuperAdmin()) {
+        <div actions>
+          <p-button
+            label="Ajouter un admin"
+            icon="pi pi-plus"
+            (onClick)="openCreate()"
+            class="admin-add-btn"
+          />
+        </div>
+      }
+    </ubax-search-filter-bar>
+
+    <p-table
+      [value]="visibleAdmins()"
+      [loading]="loading()"
+      [paginator]="visibleAdmins().length > 10"
+      [rows]="10"
+      styleClass="admin-table"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nom complet</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Rôle</th>
+          <th class="admin-table__actions-head">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-admin>
+        <tr>
+          <td>
+            <div class="admin-user-cell">
+              <p-avatar
+                [label]="initials(admin)"
+                [image]="admin.avatarUrl"
+                shape="circle"
+                size="normal"
+                class="admin-user-cell__avatar"
+              />
+              <div class="admin-user-cell__meta">
+                <p class="admin-user-cell__name">{{ fullName(admin) }}</p>
+                <p class="admin-user-cell__role">{{ roleLabel(admin) }}</p>
+              </div>
+            </div>
+          </td>
+
+          <td class="admin-table__cell">{{ admin.email ?? '—' }}</td>
+          <td class="admin-table__cell">{{ admin.phone ?? '—' }}</td>
+          <td>
+            @if (primaryRole(admin) === 'SUPER_ADMIN') {
+              <ubax-status-badge variant="danger">Super Admin</ubax-status-badge>
+            } @else if (primaryRole(admin) === 'ADMIN') {
+              <ubax-status-badge variant="info">Admin</ubax-status-badge>
+            } @else {
+              <ubax-status-badge variant="neutral">—</ubax-status-badge>
+            }
+          </td>
+
+          <td class="admin-table__actions">
+            <div class="admin-actions">
+              <button
+                type="button"
+                class="admin-action-btn"
+                title="Voir les détails"
+                (click)="openDetails(admin)"
+              >
+                <i class="pi pi-eye"></i>
+              </button>
+
+              @if (canMutate(admin)) {
+                <button
+                  type="button"
+                  class="admin-action-btn"
+                  title="Modifier le rôle"
+                  (click)="openEdit(admin)"
+                >
+                  <i class="pi pi-pencil"></i>
+                </button>
+
+                <button
+                  type="button"
+                  class="admin-action-btn admin-action-btn--danger"
+                  title="Supprimer"
+                  (click)="openDelete(admin)"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="admin-table__empty">
+            Aucun administrateur trouvé.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ubax-section-card>
+</div>
+
+<p-dialog
+  [visible]="showForm()"
+  (visibleChange)="showForm.set($event)"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: '44rem', maxWidth: 'calc(100vw - 2rem)' }"
+  styleClass="admin-dialog admin-dialog--form"
+>
+  <ng-template pTemplate="header">
+    <div class="admin-dialog__hero admin-dialog__hero--form">
+      <button
+        type="button"
+        class="admin-dialog__close"
+        aria-label="Fermer"
+        (click)="closeForm()"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+
+      <div class="admin-dialog__hero-copy">
+        <p class="admin-dialog__eyebrow">Administrateurs</p>
+        <h2>{{ formTitle() }}</h2>
+        <p>{{ formSubtitle() }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <form class="admin-form" (ngSubmit)="submitForm()">
+    <div class="admin-form__avatar">
+      <div class="admin-form__avatar-circle">
+        <i class="pi pi-user"></i>
+      </div>
+    </div>
+
+    <div class="admin-form__grid">
+      <div class="admin-form__field">
+        <label for="admin-first-name">Prénom</label>
+        <input
+          id="admin-first-name"
+          pInputText
+          type="text"
+          [ngModel]="memberForm().firstName"
+          (ngModelChange)="updateForm({ firstName: $event })"
+          name="firstName"
+          placeholder="Saisir le prénom"
+          [readonly]="isEditingForm"
+        />
+      </div>
+
+      <div class="admin-form__field">
+        <label for="admin-last-name">Nom</label>
+        <input
+          id="admin-last-name"
+          pInputText
+          type="text"
+          [ngModel]="memberForm().lastName"
+          (ngModelChange)="updateForm({ lastName: $event })"
+          name="lastName"
+          placeholder="Saisir le nom"
+          [readonly]="isEditingForm"
+        />
+      </div>
+
+      <div class="admin-form__field">
+        <label for="admin-email">Email</label>
+        <input
+          id="admin-email"
+          pInputText
+          type="email"
+          [ngModel]="memberForm().email"
+          (ngModelChange)="updateForm({ email: $event })"
+          name="email"
+          placeholder="email@ubax.com"
+          [readonly]="isEditingForm"
+        />
+      </div>
+
+      <div class="admin-form__field">
+        <label for="admin-phone">Téléphone</label>
+        <input
+          id="admin-phone"
+          pInputText
+          type="tel"
+          [ngModel]="memberForm().phone"
+          (ngModelChange)="updateForm({ phone: $event })"
+          name="phone"
+          placeholder="+225 07 00 00 00 00"
+          [readonly]="isEditingForm"
+        />
+      </div>
+
+      <div class="admin-form__field admin-form__field--full">
+        <label for="admin-role">Rôle</label>
+        <p-select
+          id="admin-role"
+          [options]="roleOptions"
+          [ngModel]="memberForm().role"
+          (ngModelChange)="updateForm({ role: $event })"
+          name="role"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Sélectionner un rôle"
+          [style]="{ width: '100%' }"
+        />
+      </div>
+    </div>
+
+    @if (isEditingForm) {
+      <p class="admin-form__hint">
+        Modifiez le rôle principal ci-dessus. Les sous-rôles se gèrent indépendamment dans la section dédiée.
+      </p>
+
+      <section class="admin-form__subroles">
+        <h3 class="admin-form__subroles-title">Sous-rôles internes</h3>
+
+        @if (editSubRolesLoading()) {
+          <div class="admin-form__subroles-loading">
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>Chargement des sous-rôles...</span>
+          </div>
+        } @else {
+          @if (editAdminSubRoles().length > 0) {
+            <div class="admin-details__chips">
+              @for (role of editAdminSubRoles(); track role) {
+                <span class="admin-subrole-chip">
+                  <span>{{ subRoleLabel(role) }}</span>
+                  @if (isSuperAdmin() && !isSelf(selectedAdmin()!)) {
+                    <button
+                      type="button"
+                      class="admin-subrole-chip__remove"
+                      aria-label="Révoquer le sous-rôle"
+                      (click)="promptRevokeSubRole(role)"
+                    >
+                      <i class="pi pi-times"></i>
+                    </button>
+                  }
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="admin-details__empty">Aucun sous-rôle attribué.</p>
+          }
+
+          @if (isSuperAdmin() && selectedAdmin() && !isSelf(selectedAdmin()!)) {
+            @if (availableSubRoleOptions().length > 0) {
+              <div class="admin-form__field admin-form__field--full admin-form__subroles-assign">
+                <label for="admin-subroles-edit">Assigner des sous-rôles</label>
+                <div class="admin-form__subroles-assign-row">
+                  <p-multiselect
+                    id="admin-subroles-edit"
+                    [options]="availableSubRoleOptions()"
+                    [ngModel]="newSubRolesToAssign()"
+                    (ngModelChange)="newSubRolesToAssign.set($event)"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Sélectionner des sous-rôles à ajouter"
+                    display="chip"
+                    [style]="{ width: '100%' }"
+                  />
+                  <p-button
+                    label="Assigner"
+                    icon="pi pi-check"
+                    [loading]="subRolesAssigning()"
+                    [disabled]="newSubRolesToAssign().length === 0"
+                    (onClick)="assignNewSubRoles()"
+                    class="admin-subroles-assign-btn"
+                  />
+                </div>
+              </div>
+            } @else {
+              <p class="admin-form__hint admin-form__hint--muted">
+                Tous les sous-rôles disponibles ont déjà été attribués.
+              </p>
+            }
+          }
+        }
+      </section>
+    }
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="admin-dialog__footer">
+      <p-button label="Fermer" severity="secondary" (onClick)="closeForm()" />
+      @if (isEditingForm) {
+        <p-button
+          label="Mettre à jour le rôle"
+          icon="pi pi-shield"
+          [loading]="formLoading()"
+          (onClick)="submitForm()"
+        />
+      } @else {
+        <p-button
+          label="Créer"
+          icon="pi pi-check"
+          [loading]="formLoading()"
+          (onClick)="submitForm()"
+        />
+      }
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [visible]="showDetails()"
+  (visibleChange)="showDetails.set($event)"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: '54rem', maxWidth: 'calc(100vw - 2rem)' }"
+  [contentStyle]="{ overflow: 'visible' }"
+  styleClass="admin-dialog admin-dialog--details"
+>
+  <ng-template pTemplate="header">
+    <div class="admin-dialog__hero admin-dialog__hero--details">
+      <button
+        type="button"
+        class="admin-dialog__close"
+        aria-label="Fermer"
+        (click)="closeDetails()"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+
+      <div class="admin-dialog__hero-copy">
+        <p class="admin-dialog__eyebrow">Administrateur</p>
+        <h2>Détails du compte</h2>
+        <p>{{ selectedAdminRoleLabel() }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  @if (selectedAdmin(); as admin) {
+    <div class="admin-details">
+      <div class="admin-details__identity">
+        <p-avatar
+          [label]="initials(admin)"
+          [image]="admin.avatarUrl"
+          shape="circle"
+          size="large"
+          class="admin-details__avatar"
+        />
+
+        <div class="admin-details__identity-copy">
+          <p class="admin-details__name">{{ fullName(admin) }}</p>
+          <p class="admin-details__meta">Compte interne UBAX</p>
+          <p-tag
+            [value]="roleLabel(admin)"
+            [severity]="roleSeverity(admin)"
+            class="admin-role-tag"
+          />
+        </div>
+      </div>
+
+      @if (detailsLoading()) {
+        <div class="admin-details__loading">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Chargement des sous-rôles...</span>
+        </div>
+      } @else {
+        <ubax-detail-info-block
+          [items]="selectedAdminItems()"
+          [columns]="2"
+          [bordered]="true"
+        />
+
+        <section class="admin-details__section">
+          <div class="admin-details__section-header">
+            <div>
+              <h3>Sous-rôles internes</h3>
+              <p>
+                {{ selectedSubRoles().length }} sous-rôle(s) attribué(s) à ce
+                compte.
+              </p>
+            </div>
+          </div>
+
+          <div class="admin-details__chips">
+            @for (role of selectedSubRoles(); track role) {
+              <span class="admin-subrole-chip">
+                <span>{{ subRoleLabel(role) }}</span>
+              </span>
+            }
+          </div>
+
+          @if (!selectedSubRoles().length) {
+            <p class="admin-details__empty">Aucun sous-rôle attribué.</p>
+          }
+        </section>
+      }
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="admin-dialog__footer">
+      <p-button
+        label="Fermer"
+        severity="secondary"
+        (onClick)="closeDetails()"
+      />
+      @if (isSuperAdmin() && selectedAdmin() && !isSelf(selectedAdmin()!)) {
+        <p-button
+          label="Modifier"
+          (onClick)="openEditFromDetails()"
+        />
+      }
+    </div>
+  </ng-template>
+</p-dialog>
+
+<ubax-confirm-dialog
+  [visible]="showDeleteConfirm()"
+  (visibleChange)="showDeleteConfirm.set($event)"
+  title="Supprimer l'administrateur"
+  icon="pi pi-trash"
+  [message]="
+    selectedAdmin()
+      ? 'Êtes-vous sûr de vouloir supprimer ' +
+        fullName(selectedAdmin()!) +
+        ' ? Cette action est irréversible.'
+      : 'Cette action est irréversible.'
+  "
+  confirmLabel="Supprimer"
+  confirmSeverity="danger"
+  [loading]="formLoading()"
+  (confirmed)="confirmDelete()"
+/>
+
+<ubax-confirm-dialog
+  [visible]="showRevokeConfirm()"
+  (visibleChange)="showRevokeConfirm.set($event)"
+  title="Révoquer un sous-rôle"
+  icon="pi pi-shield"
+  [message]="
+    selectedAdmin()
+      ? 'Révoquer le sous-rôle ' +
+        subRoleLabel(pendingRevokeRole() ?? '') +
+        ' de ' +
+        fullName(selectedAdmin()!) +
+        ' ?'
+      : 'Confirmez la suppression de l\'accès interne sélectionné.'
+  "
+  confirmLabel="Révoquer"
+  confirmSeverity="warn"
+  [loading]="formLoading()"
+  (confirmed)="confirmRevokeSubRole()"
+/>

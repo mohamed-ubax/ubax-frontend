@@ -34,7 +34,7 @@ import type { ChartSeries } from '../line-chart/line-chart.component';
                         class="w-full rounded-t-md"
                         [style.height.%]="barHeight(item.data[index])"
                         [style.backgroundColor]="item.color"
-                        [title]="item.label + ': ' + (item.data[index] ?? 0)"
+                        [title]="item.label + ': ' + item.data[index]"
                       ></div>
                     </div>
                   }

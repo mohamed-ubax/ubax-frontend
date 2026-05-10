@@ -1,0 +1,208 @@
+.candidatures-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  &__eyebrow {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-brand-orange);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.25rem;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-brand-navy);
+    margin: 0;
+  }
+
+  &__count {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-neutral-500);
+    background: var(--color-neutral-200);
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: var(--color-neutral-500);
+    margin: 0.25rem 0 0;
+  }
+
+  &__counters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
+
+// Compteurs de statut
+.status-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-neutral-300);
+  min-width: 100px;
+  gap: 0.25rem;
+
+  &__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: var(--color-neutral-500);
+    white-space: nowrap;
+  }
+
+  &--pending .status-counter__value { color: var(--color-warning); }
+  &--review .status-counter__value { color: var(--color-brand-blue); }
+  &--incomplete .status-counter__value { color: var(--color-warning); }
+  &--approved .status-counter__value { color: var(--color-success); }
+  &--rejected .status-counter__value { color: var(--color-danger); }
+}
+
+// Toolbar
+.candidatures-toolbar {
+  display: block;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+// Table
+:host ::ng-deep .candidatures-table {
+  .p-datatable-thead > tr > th {
+    background: var(--color-neutral-200);
+    color: var(--color-brand-navy);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-neutral-300);
+  }
+
+  .p-datatable-tbody > tr > td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--color-neutral-300);
+    font-size: 0.8125rem;
+  }
+
+  .p-datatable-tbody > tr:hover {
+    background: var(--color-neutral-200);
+  }
+}
+
+// Cellule utilisateur
+.candidatures-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  &__logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-brand-navy);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: var(--color-brand-navy);
+    margin: 0;
+    font-size: 0.8125rem;
+  }
+
+  &__sub {
+    color: var(--color-neutral-500);
+    margin: 0;
+    font-size: 0.75rem;
+  }
+}
+
+.candidatures-table {
+  &__cell {
+    color: var(--color-brand-navy);
+
+    &--muted {
+      color: var(--color-neutral-500);
+    }
+  }
+
+  &__actions-head {
+    text-align: center;
+  }
+
+  &__actions {
+    text-align: center;
+  }
+}
+
+// Boutons d'action
+.candidatures-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.candidatures-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-neutral-300);
+  background: transparent;
+  color: var(--color-brand-navy);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--color-brand-navy);
+    color: white;
+    border-color: var(--color-brand-navy);
+  }
+
+  i {
+    font-size: 0.875rem;
+  }
+}

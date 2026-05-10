@@ -1,0 +1,106 @@
+<div class="membres-page">
+
+  <!-- Fil d'Ariane -->
+  <ubax-breadcrumb-nav [items]="breadcrumbs" />
+
+  <!-- En-tête -->
+  <div class="membres-page__header">
+    <div class="membres-page__title-block">
+      <p class="membres-page__eyebrow">Back-office UBAX</p>
+      <div class="membres-page__title-row">
+        <h1 class="membres-page__title">Membres de l'agence</h1>
+        <span class="membres-page__count">{{ memberCount() }} membre(s)</span>
+      </div>
+      <p class="membres-page__subtitle">
+        Vue en lecture seule — la gestion de l'équipe est assurée par le Directeur d'agence.
+      </p>
+    </div>
+  </div>
+
+  <!-- Carte principale -->
+  <ubax-section-card bodyClass="p-0">
+    <!-- Barre de recherche -->
+    <ubax-search-filter-bar
+      class="membres-toolbar"
+      placeholder="Rechercher un membre..."
+      (searchChange)="onSearchChange($event)"
+    />
+
+    <!-- Table -->
+    <p-table
+      [value]="filteredMembers()"
+      [loading]="loading()"
+      [paginator]="filteredMembers().length > 15"
+      [rows]="15"
+      styleClass="membres-table"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Membre</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Rôles</th>
+          <th>Sous-rôles</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-member>
+        <tr>
+          <!-- Membre -->
+          <td>
+            <div class="membres-user-cell">
+              <p-avatar
+                [label]="initials(member)"
+                shape="circle"
+                size="normal"
+                class="membres-user-cell__avatar"
+              />
+              <div class="membres-user-cell__meta">
+                <p class="membres-user-cell__name">{{ fullName(member) }}</p>
+              </div>
+            </div>
+          </td>
+
+          <!-- Email -->
+          <td class="membres-table__cell">{{ member.email ?? '—' }}</td>
+
+          <!-- Téléphone -->
+          <td class="membres-table__cell membres-table__cell--muted">
+            {{ member.phone ?? '—' }}
+          </td>
+
+          <!-- Rôles -->
+          <td>
+            <div class="membres-roles">
+              @for (role of (member.roles ?? []); track role) {
+                <p-tag [value]="role" severity="info" class="membres-role-tag" />
+              }
+              @if (!member.roles?.length) {
+                <span class="membres-table__cell--muted">—</span>
+              }
+            </div>
+          </td>
+
+          <!-- Sous-rôles -->
+          <td class="membres-table__cell membres-table__cell--muted">
+            {{ subRoleLabels(member) }}
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5">
+            <ubax-empty-state
+              icon="pi pi-users"
+              title="Aucun membre trouvé"
+              [description]="searchQuery() ? 'Aucun membre ne correspond à votre recherche.' : 'Cette agence n\'a pas encore de membres.'"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ubax-section-card>
+
+</div>

@@ -14,20 +14,11 @@ export interface NavItem {
   icon?:      string;
   exact?:     boolean;
   badge?:     string | number;
+  disabled?:  boolean;
   expandable?: boolean;
   children?:  NavItem[];
 }
 
-/**
- * UbaxSidebar — Main navigation sidebar
- * Matches the Figma sidebar: #1a3047 background, 314px wide,
- * orange active state, Lexend font.
- *
- * Usage:
- * ```html
- * <ubax-sidebar [navGroups]="navGroups" logoSrc="/assets/logo.svg" />
- * ```
- */
 @Component({
   selector: 'ubax-sidebar',
   standalone: true,
@@ -40,12 +31,12 @@ export interface NavItem {
       aria-label="Navigation principale"
     >
       <!-- Logo -->
-      <div class="flex items-center justify-center px-5 py-6 flex-shrink-0">
+      <div class="flex items-center px-5 py-6 flex-shrink-0">
         @if (logoSrc()) {
           <img
             [src]="logoSrc()"
             [alt]="logoAlt()"
-            class="h-14 w-auto object-contain"
+            class="h-10 w-auto object-contain"
           />
         }
         <ng-content select="[logo]" />
@@ -67,12 +58,13 @@ export interface NavItem {
               [exact]="item.exact ?? false"
               [expandable]="item.expandable ?? false"
               [badge]="item.badge"
+              [disabled]="item.disabled ?? false"
             />
           }
         }
       </nav>
 
-      <!-- Footer slot (settings, user) -->
+      <!-- Footer slot (logout, settings…) -->
       <div class="flex-shrink-0 border-t border-white/10 py-4">
         <ng-content select="[footer]" />
       </div>

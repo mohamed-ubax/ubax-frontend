@@ -1,0 +1,207 @@
+// ── Variables (aligned with design system tokens) ──────────────────────────
+$navy:    #1a3047;
+$orange:  #e87d1e;
+$surface: #ffffff;
+$border:  #e1e4ed;
+$text:    #1c1c1c;
+$muted:   #6b7280;
+
+:host {
+  display: block;
+}
+
+// ── Page wrapper ────────────────────────────────────────────────────────────
+
+.membres-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 100%;
+  padding: 2rem;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 255, 255, 0.75),
+      transparent 32%
+    ),
+    linear-gradient(180deg, rgba(236, 242, 247, 0.92), rgba(236, 242, 247, 1));
+}
+
+// ── Page header ─────────────────────────────────────────────────────────────
+
+.membres-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.membres-page__title-block {
+  min-width: 0;
+}
+
+.membres-page__eyebrow {
+  margin: 0 0 0.35rem;
+  color: $muted;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.membres-page__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.membres-page__title {
+  margin: 0;
+  color: $text;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.membres-page__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  background: rgba(26, 48, 71, 0.08);
+  color: $navy;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.membres-page__subtitle {
+  max-width: 48rem;
+  margin: 0.6rem 0 0;
+  color: $muted;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+// ── Toolbar ─────────────────────────────────────────────────────────────────
+
+.membres-toolbar {
+  :deep(input.p-inputtext) {
+    height: 2.85rem;
+    border-radius: 0.75rem;
+    font-size: 0.9375rem;
+  }
+}
+
+// ── Table ───────────────────────────────────────────────────────────────────
+
+:deep(.membres-table) {
+  .p-datatable-header-cell,
+  th {
+    background: $navy;
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: none;
+    padding: 1rem 1.25rem;
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr {
+    border-bottom: 1px solid $border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    > td {
+      padding: 0.95rem 1.25rem;
+      vertical-align: middle;
+      color: $text;
+      font-size: 0.9375rem;
+    }
+
+    &:hover {
+      background: rgba(236, 242, 247, 0.65);
+    }
+  }
+
+  .p-datatable-loading-overlay {
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.membres-table__cell {
+  color: $text;
+}
+
+.membres-table__cell--muted {
+  color: $muted;
+}
+
+// ── User cell ───────────────────────────────────────────────────────────────
+
+.membres-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.membres-user-cell__avatar {
+  flex-shrink: 0;
+
+  :deep(.p-avatar) {
+    width: 2.45rem;
+    height: 2.45rem;
+    background: $navy;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+
+.membres-user-cell__meta {
+  min-width: 0;
+}
+
+.membres-user-cell__name {
+  margin: 0;
+  color: $text;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+// ── Roles ───────────────────────────────────────────────────────────────────
+
+.membres-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.membres-role-tag {
+  :deep(.p-tag) {
+    border-radius: 999px;
+    padding-inline: 0.7rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+}
+
+// ── Responsive ──────────────────────────────────────────────────────────────
+
+@media (max-width: 60rem) {
+  .membres-page {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .membres-page__title {
+    font-size: 1.6rem;
+  }
+}

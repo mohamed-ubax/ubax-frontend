@@ -1,0 +1,410 @@
+<div class="candidature-detail">
+
+  <!-- Fil d'Ariane -->
+  <nav class="candidature-detail__breadcrumb">
+    <a routerLink="/candidatures" class="candidature-detail__breadcrumb-link">
+      <i class="pi pi-arrow-left"></i>
+      Retour aux candidatures
+    </a>
+  </nav>
+
+  @if (loading()) {
+    <ubax-empty-state
+      icon="pi pi-spin pi-spinner"
+      title="Chargement..."
+      description="Récupération des données de la candidature."
+    />
+  } @else if (!application()) {
+    <ubax-empty-state
+      icon="pi pi-exclamation-triangle"
+      title="Candidature introuvable"
+      description="Cette candidature n'existe pas ou a été supprimée."
+    />
+  } @else {
+    <!-- En-tête de la candidature -->
+    <div class="candidature-detail__header">
+      <div class="candidature-detail__company-info">
+        @if (application()?.logoUrl) {
+          <img
+            [src]="application()?.logoUrl"
+            [alt]="application()?.companyName"
+            class="candidature-detail__logo"
+          />
+        } @else {
+          <div class="candidature-detail__logo-placeholder">
+            {{ (application()?.companyName ?? 'PA').slice(0, 2).toUpperCase() }}
+          </div>
+        }
+        <div>
+          <h1 class="candidature-detail__company-name">
+            {{ application()?.companyName ?? '—' }}
+          </h1>
+          <p class="candidature-detail__company-type">
+            {{ getPartnerTypeLabel(application()?.partnerType) }}
+          </p>
+        </div>
+        <ubax-status-badge [variant]="getStatusBadge(application()?.status)" class="candidature-detail__status-badge">
+          {{ getStatusLabel(application()?.status) }}
+        </ubax-status-badge>
+      </div>
+
+      <!-- Boutons d'action -->
+      @if (isActionable()) {
+        <div class="candidature-detail__actions">
+          @if (availableActions().canTakeCharge) {
+            <button
+              type="button"
+              class="candidature-btn candidature-btn--secondary"
+              [disabled]="saving()"
+              (click)="takeCharge()"
+            >
+              <i class="pi pi-eye"></i>
+              Prendre en charge
+            </button>
+          }
+          @if (availableActions().canIncomplete) {
+            <button
+              type="button"
+              class="candidature-btn candidature-btn--warning"
+              [disabled]="saving()"
+              (click)="openModal('incomplete')"
+            >
+              <i class="pi pi-question-circle"></i>
+              Demander des compléments
+            </button>
+          }
+          @if (availableActions().canReject) {
+            <button
+              type="button"
+              class="candidature-btn candidature-btn--danger"
+              [disabled]="saving()"
+              (click)="openModal('reject')"
+            >
+              <i class="pi pi-times-circle"></i>
+              Rejeter
+            </button>
+          }
+          @if (availableActions().canApprove) {
+            <button
+              type="button"
+              class="candidature-btn candidature-btn--success"
+              [disabled]="saving()"
+              (click)="openModal('approve')"
+            >
+              <i class="pi pi-check-circle"></i>
+              Approuver
+            </button>
+          }
+        </div>
+      }
+
+      @if (isTerminal()) {
+        <div class="candidature-detail__terminal-info">
+          @if (application()?.status === 'APPROVED') {
+            <div class="candidature-terminal candidature-terminal--approved">
+              <i class="pi pi-check-circle"></i>
+              <div>
+                <p class="candidature-terminal__title">Candidature approuvée</p>
+                <p class="candidature-terminal__sub">
+                  Un compte partenaire a été créé automatiquement.
+                  Approuvé par {{ application()?.reviewedByName ?? '—' }}
+                  le {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
+                </p>
+              </div>
+            </div>
+          }
+          @if (application()?.status === 'REJECTED') {
+            <div class="candidature-terminal candidature-terminal--rejected">
+              <i class="pi pi-times-circle"></i>
+              <div>
+                <p class="candidature-terminal__title">Candidature rejetée</p>
+                <p class="candidature-terminal__sub">
+                  Rejeté par {{ application()?.reviewedByName ?? '—' }}
+                  le {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
+                </p>
+                @if (application()?.rejectionReason) {
+                  <p class="candidature-terminal__reason">
+                    Motif : {{ application()?.rejectionReason }}
+                  </p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="candidature-detail__body">
+      <!-- Colonne principale -->
+      <div class="candidature-detail__main">
+
+        <!-- Informations partenaires -->
+        <ubax-section-card title="Informations partenaires">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-item__label">Type de partenaire</span>
+              <span class="info-item__value">{{ getPartnerTypeLabel(application()?.partnerType) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Raison sociale</span>
+              <span class="info-item__value">{{ application()?.companyName ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Représentant légal</span>
+              <span class="info-item__value">{{ legalRepName() }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Numéro de téléphone</span>
+              <span class="info-item__value">{{ application()?.phone ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Email</span>
+              <span class="info-item__value">{{ application()?.email ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Statut juridique</span>
+              <span class="info-item__value">{{ application()?.legalStatus ?? '—' }}</span>
+            </div>
+            <div class="info-item info-item--full">
+              <span class="info-item__label">Numéro RCCM ou équivalent</span>
+              <span class="info-item__value">{{ application()?.registrationNumber ?? '—' }}</span>
+            </div>
+          </div>
+        </ubax-section-card>
+
+        <!-- Localisation -->
+        <ubax-section-card title="Localisation">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-item__label">Pays</span>
+              <span class="info-item__value">{{ application()?.country ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Ville</span>
+              <span class="info-item__value">{{ application()?.city ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Adresse postale</span>
+              <span class="info-item__value">{{ application()?.postalAddress ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Quartier / Zone</span>
+              <span class="info-item__value">{{ application()?.zone ?? '—' }}</span>
+            </div>
+          </div>
+        </ubax-section-card>
+
+        <!-- Présentation -->
+        @if (application()?.description) {
+          <ubax-section-card title="Présentation">
+            <p class="candidature-detail__description">{{ application()?.description }}</p>
+          </ubax-section-card>
+        }
+
+      </div>
+
+      <!-- Colonne latérale -->
+      <div class="candidature-detail__side">
+
+        <!-- Documents -->
+        <ubax-section-card title="Documents">
+          @if (documents().length === 0) {
+            <p class="text-sm text-neutral-500 py-2">Aucun document joint.</p>
+          } @else {
+            <ubax-document-list
+              [documents]="documents()"
+              [downloadable]="false"
+              (viewClick)="openDocument($event)"
+            />
+          }
+        </ubax-section-card>
+
+        <!-- Historique des statuts -->
+        <ubax-section-card title="Historique des statuts">
+          <div class="status-timeline">
+            @for (entry of sortedHistory(); track entry.id) {
+              <div class="timeline-entry">
+                <div class="timeline-entry__dot"></div>
+                <div class="timeline-entry__content">
+                  <div class="timeline-entry__header">
+                    <ubax-status-badge [variant]="getHistoryStatusBadge(entry)" class="timeline-entry__badge">
+                      {{ getHistoryStatusLabel(entry) }}
+                    </ubax-status-badge>
+                    <span class="timeline-entry__date">
+                      {{ entry.changedAt | date: 'dd/MM/yyyy HH:mm' }}
+                    </span>
+                  </div>
+                  @if (entry.changedByName) {
+                    <p class="timeline-entry__author">Par {{ entry.changedByName }}</p>
+                  }
+                  @if (entry.comment) {
+                    <p class="timeline-entry__comment">{{ entry.comment }}</p>
+                  }
+                </div>
+              </div>
+            }
+            @if (sortedHistory().length === 0) {
+              <p class="status-timeline__empty">Aucun historique disponible.</p>
+            }
+          </div>
+        </ubax-section-card>
+
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- Modal : Motif du rejet -->
+<p-dialog
+  [visible]="activeModal() === 'reject'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Motif du rejet"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '560px' }"
+  styleClass="candidature-modal"
+>
+  <form [formGroup]="commentForm" class="candidature-modal__form">
+    <p class="candidature-modal__description">
+      Veuillez saisir le motif du rejet. Ce message sera visible par le candidat.
+    </p>
+    <div class="candidature-modal__field">
+      <label class="candidature-modal__label" for="reject-comment">Motif du rejet *</label>
+      <textarea
+        pTextarea
+        id="reject-comment"
+        formControlName="comment"
+        rows="5"
+        placeholder="Saisir le motif du rejet..."
+        class="candidature-modal__textarea"
+        [class.ng-invalid]="commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched"
+      ></textarea>
+      @if (commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched) {
+        <span class="candidature-modal__error">Le motif est obligatoire.</span>
+      }
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="candidature-modal__footer">
+      <button type="button" class="candidature-btn candidature-btn--ghost" (click)="closeModal()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="candidature-btn candidature-btn--danger"
+        [disabled]="saving()"
+        (click)="submitReject()"
+      >
+        {{ saving() ? 'Envoi...' : 'Confirmer le rejet' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal : Demande de compléments -->
+<p-dialog
+  [visible]="activeModal() === 'incomplete'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Demande de compléments"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '560px' }"
+  styleClass="candidature-modal"
+>
+  <form [formGroup]="commentForm" class="candidature-modal__form">
+    <p class="candidature-modal__description">
+      Précisez les informations ou documents manquants. Le candidat devra resoumettre sa candidature.
+    </p>
+    <div class="candidature-modal__field">
+      <label class="candidature-modal__label" for="incomplete-comment">Message au candidat *</label>
+      <textarea
+        pTextarea
+        id="incomplete-comment"
+        formControlName="comment"
+        rows="5"
+        placeholder="Indiquer les compléments requis..."
+        class="candidature-modal__textarea"
+        [class.ng-invalid]="commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched"
+      ></textarea>
+      @if (commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched) {
+        <span class="candidature-modal__error">Le message est obligatoire.</span>
+      }
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="candidature-modal__footer">
+      <button type="button" class="candidature-btn candidature-btn--ghost" (click)="closeModal()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="candidature-btn candidature-btn--warning"
+        [disabled]="saving()"
+        (click)="submitIncomplete()"
+      >
+        {{ saving() ? 'Envoi...' : 'Envoyer la demande' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal : Confirmation d'approbation -->
+<p-dialog
+  [visible]="activeModal() === 'approve'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Approuver la candidature"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '560px' }"
+  styleClass="candidature-modal"
+>
+  <div class="candidature-modal__approve-content">
+    <div class="candidature-modal__approve-icon">
+      <i class="pi pi-check-circle"></i>
+    </div>
+    <p class="candidature-modal__approve-title">
+      Félicitations ! L'agence sera maintenant active.
+    </p>
+    <p class="candidature-modal__approve-desc">
+      L'agence a été validée et peut désormais accéder à la plateforme UBAX.
+      Elle peut commencer à publier des biens, gérer ses clients et recevoir des réservations.
+    </p>
+
+    <!-- Récapitulatif -->
+    <div class="candidature-modal__summary">
+      <div class="summary-row">
+        <div class="summary-col">
+          <span class="summary-col__label">Type de partenaire</span>
+          <span class="summary-col__value">{{ getPartnerTypeLabel(application()?.partnerType) }}</span>
+        </div>
+        <div class="summary-col">
+          <span class="summary-col__label">Raison sociale</span>
+          <span class="summary-col__value">{{ application()?.companyName ?? '—' }}</span>
+        </div>
+        <div class="summary-col">
+          <span class="summary-col__label">Représentant légal</span>
+          <span class="summary-col__value">{{ legalRepName() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="candidature-modal__footer">
+      <button type="button" class="candidature-btn candidature-btn--ghost" (click)="closeModal()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="candidature-btn candidature-btn--success"
+        [disabled]="saving()"
+        (click)="submitApprove()"
+      >
+        {{ saving() ? 'Approbation...' : 'Confirmer l\'approbation' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

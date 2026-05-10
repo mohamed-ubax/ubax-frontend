@@ -1,0 +1,148 @@
+<div class="candidatures-page">
+
+  <!-- En-tête -->
+  <div class="candidatures-page__header">
+    <div class="candidatures-page__title-block">
+      <p class="candidatures-page__eyebrow">Back-office UBAX</p>
+      <div class="candidatures-page__title-row">
+        <h1 class="candidatures-page__title">Demandes partenaires</h1>
+        <span class="candidatures-page__count">{{ totalCount() }} candidature(s)</span>
+      </div>
+      <p class="candidatures-page__subtitle">
+        Gérez les candidatures des agences et hôtels souhaitant rejoindre la plateforme UBAX.
+      </p>
+    </div>
+  </div>
+
+  <!-- Compteurs par statut -->
+  <div class="candidatures-page__counters">
+    <div class="status-counter status-counter--pending">
+      <span class="status-counter__value">{{ statusCounts().PENDING }}</span>
+      <span class="status-counter__label">En attente</span>
+    </div>
+    <div class="status-counter status-counter--review">
+      <span class="status-counter__value">{{ statusCounts().UNDER_REVIEW }}</span>
+      <span class="status-counter__label">En examen</span>
+    </div>
+    <div class="status-counter status-counter--incomplete">
+      <span class="status-counter__value">{{ statusCounts().INCOMPLETE }}</span>
+      <span class="status-counter__label">Incomplet</span>
+    </div>
+    <div class="status-counter status-counter--approved">
+      <span class="status-counter__value">{{ statusCounts().APPROVED }}</span>
+      <span class="status-counter__label">Approuvé</span>
+    </div>
+    <div class="status-counter status-counter--rejected">
+      <span class="status-counter__value">{{ statusCounts().REJECTED }}</span>
+      <span class="status-counter__label">Rejeté</span>
+    </div>
+  </div>
+
+  <!-- Carte principale -->
+  <ubax-section-card bodyClass="p-0">
+    <ubax-search-filter-bar
+      class="candidatures-toolbar"
+      placeholder="Rechercher une candidature..."
+      [filters]="searchFilters"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    <p-table
+      [value]="filteredApplications()"
+      [loading]="loading()"
+      [paginator]="filteredApplications().length > 15"
+      [rows]="15"
+      styleClass="candidatures-table"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Entreprise</th>
+          <th>Type</th>
+          <th>Représentant légal</th>
+          <th>Email</th>
+          <th>Ville</th>
+          <th>Statut</th>
+          <th>Date soumission</th>
+          <th class="candidatures-table__actions-head">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-app>
+        <tr class="candidatures-table__row" (click)="viewDetail(app)" style="cursor: pointer;">
+          <!-- Entreprise -->
+          <td>
+            <div class="candidatures-user-cell">
+              @if (app.logoUrl) {
+                <img
+                  [src]="app.logoUrl"
+                  [alt]="app.companyName"
+                  class="candidatures-user-cell__logo"
+                />
+              } @else {
+                <div class="candidatures-user-cell__avatar">
+                  {{ (app.companyName ?? 'PA').slice(0, 2).toUpperCase() }}
+                </div>
+              }
+              <div class="candidatures-user-cell__meta">
+                <p class="candidatures-user-cell__name">{{ app.companyName ?? '—' }}</p>
+                <p class="candidatures-user-cell__sub">{{ app.registrationNumber ?? '' }}</p>
+              </div>
+            </div>
+          </td>
+
+          <!-- Type -->
+          <td>
+            <ubax-status-badge [variant]="getPartnerTypeBadge(app.partnerType)">
+              {{ getPartnerTypeLabel(app.partnerType) }}
+            </ubax-status-badge>
+          </td>
+
+          <td class="candidatures-table__cell">{{ legalRepName(app) }}</td>
+          <td class="candidatures-table__cell candidatures-table__cell--muted">{{ app.email ?? '—' }}</td>
+          <td class="candidatures-table__cell candidatures-table__cell--muted">{{ app.city ?? '—' }}</td>
+
+          <!-- Statut -->
+          <td>
+            <ubax-status-badge [variant]="getStatusBadge(app.status)">
+              {{ getStatusLabel(app.status) }}
+            </ubax-status-badge>
+          </td>
+
+          <!-- Date -->
+          <td class="candidatures-table__cell candidatures-table__cell--muted">
+            {{ app.submittedAt | date: 'dd/MM/yyyy' }}
+          </td>
+
+          <!-- Actions -->
+          <td class="candidatures-table__actions" (click)="$event.stopPropagation()">
+            <div class="candidatures-actions">
+              <button
+                type="button"
+                class="candidatures-action-btn"
+                title="Voir le détail"
+                (click)="viewDetail(app)"
+              >
+                <i class="pi pi-eye"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8">
+            <ubax-empty-state
+              icon="pi pi-inbox"
+              title="Aucune candidature trouvée"
+              [description]="searchQuery() ? 'Aucune candidature ne correspond à votre recherche.' : 'Aucune candidature partenaire enregistrée.'"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ubax-section-card>
+
+</div>

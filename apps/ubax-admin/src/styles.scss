@@ -166,6 +166,14 @@ body {
   will-change: auto;
 }
 
+/* Fallback: keep DS surfaces visible when no runtime motion orchestrator is active. */
+.ubax-shell [data-ubax-motion],
+.ubax-page [data-ubax-motion] {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
 body
   :where(
     div,

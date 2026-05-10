@@ -1,0 +1,160 @@
+<div class="partners-page">
+
+  <!-- En-tête -->
+  <div class="partners-page__header">
+    <div class="partners-page__title-block">
+      <p class="partners-page__eyebrow">Back-office UBAX</p>
+      <div class="partners-page__title-row">
+        <h1 class="partners-page__title">Hôtels</h1>
+        <span class="partners-page__count">{{ hotelCount() }} hôtel(s)</span>
+      </div>
+      <p class="partners-page__subtitle">
+        Gérez les hôtels partenaires, leur statut et consultez leurs équipes.
+      </p>
+    </div>
+  </div>
+
+  <!-- Carte principale -->
+  <ubax-section-card bodyClass="p-0">
+    <ubax-search-filter-bar
+      class="partners-toolbar"
+      placeholder="Rechercher un hôtel..."
+      [filters]="searchFilters"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    <p-table
+      [value]="filteredHotels()"
+      [loading]="loading()"
+      [paginator]="filteredHotels().length > 15"
+      [rows]="15"
+      styleClass="partners-table"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Hôtel</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Ville</th>
+          <th>Étoiles</th>
+          <th>Chambres</th>
+          <th>Abonnement</th>
+          <th>Statut</th>
+          <th class="partners-table__actions-head">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-hotel>
+        <tr>
+          <!-- Hôtel -->
+          <td>
+            <div class="partners-user-cell">
+              @if (hotel.logoUrl) {
+                <img
+                  [src]="hotel.logoUrl"
+                  [alt]="hotel.name"
+                  class="partners-user-cell__logo"
+                />
+              } @else {
+                <p-avatar
+                  [label]="initials(hotel)"
+                  shape="circle"
+                  size="normal"
+                  class="partners-user-cell__avatar"
+                />
+              }
+              <div class="partners-user-cell__meta">
+                <p class="partners-user-cell__name">{{ hotel.name ?? '—' }}</p>
+                <p class="partners-user-cell__sub">{{ hotel.city ?? '—' }}</p>
+              </div>
+            </div>
+          </td>
+
+          <td class="partners-table__cell">{{ hotel.email ?? '—' }}</td>
+          <td class="partners-table__cell partners-table__cell--muted">{{ hotel.phone ?? '—' }}</td>
+          <td class="partners-table__cell partners-table__cell--muted">{{ hotel.city ?? '—' }}</td>
+
+          <!-- Étoiles -->
+          <td class="partners-table__cell partners-table__stars">
+            {{ stars(hotel) }}
+          </td>
+
+          <!-- Chambres -->
+          <td class="partners-table__cell partners-table__cell--muted">
+            {{ hotel.totalRooms ?? '—' }}
+          </td>
+
+          <!-- Abonnement -->
+          <td>
+            @if (hotel.subscriptionActive) {
+              <ubax-status-badge variant="active">{{ hotel.subscriptionPlan ?? 'Actif' }}</ubax-status-badge>
+            } @else {
+              <ubax-status-badge variant="neutral">Inactif</ubax-status-badge>
+            }
+          </td>
+
+          <!-- Statut -->
+          <td>
+            @if (hotel.active) {
+              <ubax-status-badge variant="active">Actif</ubax-status-badge>
+            } @else {
+              <ubax-status-badge variant="suspended">Suspendu</ubax-status-badge>
+            }
+          </td>
+
+          <!-- Actions -->
+          <td class="partners-table__actions">
+            <div class="partners-actions">
+              <button
+                type="button"
+                class="partners-action-btn"
+                title="Voir les membres"
+                (click)="viewMembers(hotel)"
+              >
+                <i class="pi pi-users"></i>
+              </button>
+
+              @if (isSuperAdmin()) {
+                <button
+                  type="button"
+                  [class]="hotel.active ? 'partners-action-btn partners-action-btn--warn' : 'partners-action-btn partners-action-btn--success'"
+                  [title]="hotel.active ? 'Suspendre' : 'Activer'"
+                  (click)="promptToggle(hotel)"
+                >
+                  <i [class]="hotel.active ? 'pi pi-ban' : 'pi pi-check-circle'"></i>
+                </button>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9">
+            <ubax-empty-state
+              icon="pi pi-building"
+              title="Aucun hôtel trouvé"
+              [description]="searchQuery() ? 'Aucun hôtel ne correspond à votre recherche.' : 'Aucun hôtel partenaire enregistré.'"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ubax-section-card>
+
+</div>
+
+<ubax-confirm-dialog
+  [visible]="showConfirm()"
+  (visibleChange)="showConfirm.set($event)"
+  [title]="confirmTitle"
+  icon="pi pi-exclamation-triangle"
+  [message]="confirmMessage"
+  [confirmLabel]="confirmLabel"
+  [confirmSeverity]="confirmSeverity"
+  [loading]="actionLoading()"
+  (confirmed)="confirmToggle()"
+/>

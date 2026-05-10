@@ -80,7 +80,7 @@ interface DonutSegment extends DonutSlice {
         </div>
 
         <div class="grid gap-3 sm:grid-cols-2">
-          @for (slice of slices(); track slice.label) {
+          @for (slice of segments(); track slice.label) {
             <div class="rounded-xl border border-neutral-300 p-4">
               <div class="flex items-center justify-between gap-3">
                 <div class="flex min-w-0 items-center gap-2">

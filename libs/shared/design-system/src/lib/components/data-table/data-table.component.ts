@@ -1,16 +1,21 @@
-import { Component, input, output, contentChildren, TemplateRef } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  contentChildren,
+  TemplateRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
-import { PaginatorModule } from 'primeng/paginator';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { SkeletonModule } from 'primeng/skeleton';
-import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 
 export interface TableColumn {
-  field:      string;
-  header:     string;
-  sortable?:  boolean;
-  width?:     string;
-  align?:     'left' | 'center' | 'right';
+  field: string;
+  header: string;
+  sortable?: boolean;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 /**
@@ -41,13 +46,7 @@ export interface TableColumn {
 @Component({
   selector: 'ubax-data-table',
   standalone: true,
-  imports: [
-    CommonModule,
-    TableModule,
-    PaginatorModule,
-    SkeletonModule,
-    StatusBadgeComponent,
-  ],
+  imports: [CommonModule, TableModule, PaginatorModule, SkeletonModule],
   template: `
     <div class="bg-surface-card rounded-xl shadow-card overflow-hidden">
       <!-- Optional table header slot (title + actions) -->
@@ -83,7 +82,9 @@ export interface TableColumn {
             }
             <!-- Actions column -->
             @if (hasActions()) {
-              <th class="px-4 py-3 text-xl font-medium text-neutral-950 text-right">
+              <th
+                class="px-4 py-3 text-xl font-medium text-neutral-950 text-right"
+              >
                 Actions
               </th>
             }
@@ -113,7 +114,11 @@ export interface TableColumn {
                   <ng-container
                     *ngTemplateOutlet="
                       getCellTemplate(col.field);
-                      context: { $implicit: row, row: row, value: row[col.field] }
+                      context: {
+                        $implicit: row,
+                        row: row,
+                        value: row[col.field],
+                      }
                     "
                   />
                   <!-- Fallback: plain value -->
@@ -126,7 +131,10 @@ export interface TableColumn {
               @if (hasActions()) {
                 <td class="px-4 py-3 text-right">
                   <ng-container
-                    *ngTemplateOutlet="actionsTemplate; context: { $implicit: row }"
+                    *ngTemplateOutlet="
+                      actionsTemplate;
+                      context: { $implicit: row }
+                    "
                   />
                 </td>
               }
@@ -151,7 +159,9 @@ export interface TableColumn {
 
       <!-- Paginator -->
       @if (paginated() && totalRecords() > 0) {
-        <div class="border-t border-neutral-300 px-6 py-3 flex items-center justify-between">
+        <div
+          class="border-t border-neutral-300 px-6 py-3 flex items-center justify-between"
+        >
           <p class="text-base text-neutral-500">
             Affichage {{ firstRecord() }} à {{ lastRecord() }} sur
             <strong class="text-neutral-900">{{ totalRecords() }}</strong>
@@ -170,20 +180,20 @@ export interface TableColumn {
   `,
 })
 export class DataTableComponent {
-  readonly columns           = input.required<TableColumn[]>();
-  readonly data              = input<unknown[]>([]);
-  readonly loading           = input<boolean>(false);
-  readonly paginated         = input<boolean>(true);
-  readonly totalRecords      = input<number>(0);
-  readonly rows              = input<number>(10);
-  readonly first             = input<number>(0);
+  readonly columns = input.required<TableColumn[]>();
+  readonly data = input<unknown[]>([]);
+  readonly loading = input<boolean>(false);
+  readonly paginated = input<boolean>(true);
+  readonly totalRecords = input<number>(0);
+  readonly rows = input<number>(10);
+  readonly first = input<number>(0);
   readonly rowsPerPageOptions = input<number[]>([10, 25, 50]);
-  readonly scrollable        = input<boolean>(false);
-  readonly scrollHeight      = input<string>('400px');
-  readonly minWidth          = input<string>('50rem');
-  readonly hasActions        = input<boolean>(false);
+  readonly scrollable = input<boolean>(false);
+  readonly scrollHeight = input<string>('400px');
+  readonly minWidth = input<string>('50rem');
+  readonly hasActions = input<boolean>(false);
 
-  readonly pageChange = output<{ first: number; rows: number; page: number }>();
+  readonly pageChange = output<PaginatorState>();
 
   /** @internal skeleton rows for loading state */
   readonly skeletonRows = Array(8).fill({});
@@ -198,7 +208,7 @@ export class DataTableComponent {
     return null;
   }
 
-  onPageChange(event: { first: number; rows: number; page: number }): void {
+  onPageChange(event: PaginatorState): void {
     this.pageChange.emit(event);
   }
 
