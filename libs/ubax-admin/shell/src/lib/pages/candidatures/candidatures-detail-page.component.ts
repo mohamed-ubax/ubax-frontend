@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -91,6 +92,8 @@ export class CandidaturesDetailPageComponent {
     { initialValue: '' },
   );
 
+  private readonly sanitizer = inject(DomSanitizer);
+
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly application = signal<PartnerApplicationResponse | null>(
@@ -99,6 +102,13 @@ export class CandidaturesDetailPageComponent {
   protected readonly activeModal = signal<ModalType>(null);
   /** Tracks which document key is currently generating its presigned URL. */
   protected readonly documentOpeningId = signal<string | null>(null);
+  protected readonly previewItem = signal<DocumentItem | null>(null);
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly previewFullscreen = signal(false);
+  protected readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
 
   protected readonly commentForm = this.fb.group({
     comment: ['', Validators.required],
@@ -311,16 +321,26 @@ export class CandidaturesDetailPageComponent {
       const response = await firstValueFrom(
         generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
       );
-      console.log(response);
-
       const readUrl = (response.body as { data: PresignedReadUrlResponse })?.data?.readUrl;
-      window.open(readUrl ?? fileUrl, '_blank', 'noopener,noreferrer');
+      this.previewItem.set(item);
+      this.previewUrl.set(readUrl ?? fileUrl);
     } catch {
-      // Fallback: open the raw URL if presigning fails (e.g. public bucket)
-      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+      // Fallback: preview with the raw URL if presigning fails
+      this.previewItem.set(item);
+      this.previewUrl.set(fileUrl);
     } finally {
       this.documentOpeningId.set(null);
     }
+  }
+
+  protected closePreview(): void {
+    this.previewItem.set(null);
+    this.previewUrl.set(null);
+    this.previewFullscreen.set(false);
+  }
+
+  protected togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((v) => !v);
   }
 
   protected getHistoryStatusLabel(entry: ApplicationStatusLogResponse): string {

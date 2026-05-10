@@ -255,6 +255,59 @@
 
 </div>
 
+<!-- Overlay : Prévisualisation de document -->
+@if (previewItem()) {
+  <div class="doc-preview-backdrop" (click)="closePreview()"></div>
+  <div class="doc-preview" [class.doc-preview--fullscreen]="previewFullscreen()">
+    <header class="doc-preview__header">
+      <div class="doc-preview__title">
+        <i class="pi" [class.pi-file-pdf]="previewItem()?.type !== 'Image'" [class.pi-image]="previewItem()?.type === 'Image'"></i>
+        <span>{{ previewItem()?.name }}</span>
+        @if (previewItem()?.type) {
+          <span class="doc-preview__type-badge">{{ previewItem()?.type }}</span>
+        }
+      </div>
+      <div class="doc-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="doc-preview__action-btn"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="doc-preview__action-btn"
+          (click)="togglePreviewFullscreen()"
+          [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+        >
+          <i class="pi" [class.pi-window-maximize]="!previewFullscreen()" [class.pi-window-minimize]="previewFullscreen()"></i>
+        </button>
+        <button type="button" class="doc-preview__action-btn doc-preview__action-btn--close" (click)="closePreview()" title="Fermer">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+    <div class="doc-preview__body">
+      @if (previewItem()?.type === 'Image') {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewItem()?.name"
+          class="doc-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="doc-preview__iframe"
+          title="Prévisualisation du document"
+        ></iframe>
+      }
+    </div>
+  </div>
+}
+
 <!-- Modal : Motif du rejet -->
 <p-dialog
   [visible]="activeModal() === 'reject'"
