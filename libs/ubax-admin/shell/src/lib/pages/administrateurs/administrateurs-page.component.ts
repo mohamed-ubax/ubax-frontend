@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
+  ElementRef,
+  HostListener,
   inject,
   OnInit,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -19,8 +21,6 @@ import {
 } from '@ubax-workspace/shared-design-system';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
-import { MultiSelect } from 'primeng/multiselect';
-import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import {
   AdminUsersService,
@@ -57,8 +57,6 @@ const EMPTY_FORM: AdminMemberForm = {
   standalone: true,
   imports: [
     FormsModule,
-    MultiSelect,
-    SelectModule,
     TableModule,
     SearchFilterBarComponent,
     SectionCardComponent,
@@ -121,6 +119,73 @@ export class AdministrateursPageComponent implements OnInit {
 
   protected readonly detailsNewSubRolesToAssign = signal<string[]>([]);
   protected readonly detailsSubRolesAssigning = signal(false);
+
+  // ── Custom dropdown state ──────────────────────────────────────────────────
+  /** Role picker (create/edit form) */
+  protected readonly roleMenuOpen = signal(false);
+  /** Sub-role picker (edit form) */
+  protected readonly subRoleMenuOpen = signal(false);
+  /** Sub-role picker (details panel) */
+  protected readonly detailsSubRoleMenuOpen = signal(false);
+
+  @ViewChild('roleDropdownRoot')    private roleDropdownRoot?: ElementRef<HTMLElement>;
+  @ViewChild('subRoleDropdownRoot') private subRoleDropdownRoot?: ElementRef<HTMLElement>;
+  @ViewChild('detailsSubRoleDropdownRoot') private detailsSubRoleDropdownRoot?: ElementRef<HTMLElement>;
+
+  @HostListener('document:click', ['$event.target'])
+  onDocumentClick(target: EventTarget | null): void {
+    if (!(target instanceof Node)) return;
+    if (this.roleMenuOpen()) {
+      const root = this.roleDropdownRoot?.nativeElement;
+      if (!root || !root.contains(target)) this.roleMenuOpen.set(false);
+    }
+    if (this.subRoleMenuOpen()) {
+      const root = this.subRoleDropdownRoot?.nativeElement;
+      if (!root || !root.contains(target)) this.subRoleMenuOpen.set(false);
+    }
+    if (this.detailsSubRoleMenuOpen()) {
+      const root = this.detailsSubRoleDropdownRoot?.nativeElement;
+      if (!root || !root.contains(target)) this.detailsSubRoleMenuOpen.set(false);
+    }
+  }
+
+  protected toggleRoleMenu(e: Event): void { e.stopPropagation(); this.roleMenuOpen.update(v => !v); }
+  protected toggleSubRoleMenu(e: Event): void { e.stopPropagation(); this.subRoleMenuOpen.update(v => !v); }
+  protected toggleDetailsSubRoleMenu(e: Event): void { e.stopPropagation(); this.detailsSubRoleMenuOpen.update(v => !v); }
+
+  protected selectRole(value: AdminRole): void {
+    this.updateForm({ role: value });
+    this.roleMenuOpen.set(false);
+  }
+
+  protected toggleSubRoleOption(value: string): void {
+    this.newSubRolesToAssign.update(current =>
+      current.includes(value) ? current.filter(r => r !== value) : [...current, value]
+    );
+  }
+
+  protected toggleDetailsSubRoleOption(value: string): void {
+    this.detailsNewSubRolesToAssign.update(current =>
+      current.includes(value) ? current.filter(r => r !== value) : [...current, value]
+    );
+  }
+
+  protected roleSummary = computed(() => {
+    const role = this.memberForm().role;
+    return ROLE_OPTIONS.find(r => r.value === role)?.label ?? 'Sélectionner un rôle';
+  });
+
+  protected subRoleSummary = computed(() => {
+    const selected = this.newSubRolesToAssign();
+    if (!selected.length) return 'Sélectionner des sous-rôles à ajouter';
+    return selected.map(v => this.subRoleLabel(v)).join(', ');
+  });
+
+  protected detailsSubRoleSummary = computed(() => {
+    const selected = this.detailsNewSubRolesToAssign();
+    if (!selected.length) return 'Sélectionner des sous-rôles à ajouter';
+    return selected.map(v => this.subRoleLabel(v)).join(', ');
+  });
 
   protected readonly memberForm = signal<AdminMemberForm>({ ...EMPTY_FORM });
 
@@ -521,11 +586,14 @@ export class AdministrateursPageComponent implements OnInit {
     this.editAdminSubRoles.set([]);
     this.newSubRolesToAssign.set([]);
     this.pendingRevokeRole.set(null);
+    this.roleMenuOpen.set(false);
+    this.subRoleMenuOpen.set(false);
   }
 
   protected closeDetails(): void {
     this.showDetails.set(false);
     this.detailsNewSubRolesToAssign.set([]);
+    this.detailsSubRoleMenuOpen.set(false);
   }
 
   protected closeDeleteConfirm(): void {

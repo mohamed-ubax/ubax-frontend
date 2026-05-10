@@ -224,18 +224,45 @@
               </div>
             </div>
 
-            <div class="admin-drawer__field admin-drawer__field--full">
+            <div
+              #roleDropdownRoot
+              class="admin-drawer__field admin-drawer__field--full admin-dropdown-root"
+            >
               <span class="admin-drawer__field-label">Rôle principal</span>
-              <p-select
-                [options]="roleOptions"
-                [ngModel]="memberForm().role"
-                (ngModelChange)="updateForm({ role: $event })"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Sélectionner un rôle"
-                appendTo="body"
-                styleClass="admin-drawer__select"
-              />
+              <div class="admin-dropdown">
+                <button
+                  type="button"
+                  class="admin-dropdown__trigger"
+                  [class.admin-dropdown__trigger--open]="roleMenuOpen()"
+                  [attr.aria-expanded]="roleMenuOpen()"
+                  aria-haspopup="listbox"
+                  (click)="toggleRoleMenu($event)"
+                >
+                  <span class="admin-dropdown__label">{{ roleSummary() }}</span>
+                  <i class="pi pi-angle-down" aria-hidden="true"></i>
+                </button>
+                @if (roleMenuOpen()) {
+                  <ul class="admin-dropdown__panel" role="listbox">
+                    @for (opt of roleOptions; track opt.value) {
+                      <li role="option" [attr.aria-selected]="memberForm().role === opt.value">
+                        <button
+                          type="button"
+                          class="admin-dropdown__option"
+                          [class.is-selected]="memberForm().role === opt.value"
+                          (click)="selectRole(opt.value)"
+                        >
+                          <span class="admin-dropdown__check" aria-hidden="true">
+                            @if (memberForm().role === opt.value) {
+                              <i class="pi pi-check"></i>
+                            }
+                          </span>
+                          <span>{{ opt.label }}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
             </div>
           </div>
 
@@ -278,18 +305,44 @@
                 <!-- Assigner -->
                 @if (isSuperAdmin() && selectedAdmin() && !isSelf(selectedAdmin()!) && availableSubRoleOptions().length > 0) {
                   <div class="admin-drawer__assign-box">
-                    <div class="admin-drawer__assign-row">
-                      <p-multiselect
-                        [options]="availableSubRoleOptions()"
-                        [ngModel]="newSubRolesToAssign()"
-                        (ngModelChange)="newSubRolesToAssign.set($event)"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Sélectionner des sous-rôles à ajouter"
-                        display="chip"
-                        appendTo="body"
-                        styleClass="admin-drawer__multiselect"
-                      />
+                    <div
+                      #subRoleDropdownRoot
+                      class="admin-dropdown-root admin-drawer__assign-row"
+                    >
+                      <div class="admin-dropdown admin-dropdown--flex">
+                        <button
+                          type="button"
+                          class="admin-dropdown__trigger"
+                          [class.admin-dropdown__trigger--open]="subRoleMenuOpen()"
+                          [attr.aria-expanded]="subRoleMenuOpen()"
+                          aria-haspopup="listbox"
+                          (click)="toggleSubRoleMenu($event)"
+                        >
+                          <span class="admin-dropdown__label">{{ subRoleSummary() }}</span>
+                          <i class="pi pi-angle-down" aria-hidden="true"></i>
+                        </button>
+                        @if (subRoleMenuOpen()) {
+                          <ul class="admin-dropdown__panel" role="listbox" aria-multiselectable="true">
+                            @for (opt of availableSubRoleOptions(); track opt.value) {
+                              <li role="option" [attr.aria-selected]="newSubRolesToAssign().includes(opt.value)">
+                                <button
+                                  type="button"
+                                  class="admin-dropdown__option"
+                                  [class.is-selected]="newSubRolesToAssign().includes(opt.value)"
+                                  (click)="toggleSubRoleOption(opt.value); $event.stopPropagation()"
+                                >
+                                  <span class="admin-dropdown__check" aria-hidden="true">
+                                    @if (newSubRolesToAssign().includes(opt.value)) {
+                                      <i class="pi pi-check"></i>
+                                    }
+                                  </span>
+                                  <span>{{ opt.label }}</span>
+                                </button>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </div>
                       <button
                         type="button"
                         class="admin-drawer__assign-btn"
@@ -299,6 +352,18 @@
                         @if (subRolesAssigning()) { Assignation… } @else { Assigner }
                       </button>
                     </div>
+                    @if (newSubRolesToAssign().length > 0) {
+                      <div class="admin-drawer__chips admin-drawer__chips--pending">
+                        @for (role of newSubRolesToAssign(); track role) {
+                          <span class="admin-drawer__chip admin-drawer__chip--pending">
+                            <span class="admin-drawer__chip-label">{{ subRoleLabel(role) }}</span>
+                            <button type="button" class="admin-drawer__chip-remove" (click)="toggleSubRoleOption(role)">
+                              <span class="admin-drawer__chip-minus" aria-hidden="true"></span>
+                            </button>
+                          </span>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               }
@@ -450,18 +515,44 @@
                 <!-- Assigner depuis les détails -->
                 @if (isSuperAdmin() && !isSelf(selectedAdmin()!) && detailsAvailableSubRoleOptions().length > 0) {
                   <div class="admin-drawer__assign-box">
-                    <div class="admin-drawer__assign-row">
-                      <p-multiselect
-                        [options]="detailsAvailableSubRoleOptions()"
-                        [ngModel]="detailsNewSubRolesToAssign()"
-                        (ngModelChange)="detailsNewSubRolesToAssign.set($event)"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Sélectionner des sous-rôles à ajouter"
-                        display="chip"
-                        appendTo="body"
-                        styleClass="admin-drawer__multiselect"
-                      />
+                    <div
+                      #detailsSubRoleDropdownRoot
+                      class="admin-dropdown-root admin-drawer__assign-row"
+                    >
+                      <div class="admin-dropdown admin-dropdown--flex">
+                        <button
+                          type="button"
+                          class="admin-dropdown__trigger"
+                          [class.admin-dropdown__trigger--open]="detailsSubRoleMenuOpen()"
+                          [attr.aria-expanded]="detailsSubRoleMenuOpen()"
+                          aria-haspopup="listbox"
+                          (click)="toggleDetailsSubRoleMenu($event)"
+                        >
+                          <span class="admin-dropdown__label">{{ detailsSubRoleSummary() }}</span>
+                          <i class="pi pi-angle-down" aria-hidden="true"></i>
+                        </button>
+                        @if (detailsSubRoleMenuOpen()) {
+                          <ul class="admin-dropdown__panel" role="listbox" aria-multiselectable="true">
+                            @for (opt of detailsAvailableSubRoleOptions(); track opt.value) {
+                              <li role="option" [attr.aria-selected]="detailsNewSubRolesToAssign().includes(opt.value)">
+                                <button
+                                  type="button"
+                                  class="admin-dropdown__option"
+                                  [class.is-selected]="detailsNewSubRolesToAssign().includes(opt.value)"
+                                  (click)="toggleDetailsSubRoleOption(opt.value); $event.stopPropagation()"
+                                >
+                                  <span class="admin-dropdown__check" aria-hidden="true">
+                                    @if (detailsNewSubRolesToAssign().includes(opt.value)) {
+                                      <i class="pi pi-check"></i>
+                                    }
+                                  </span>
+                                  <span>{{ opt.label }}</span>
+                                </button>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </div>
                       <button
                         type="button"
                         class="admin-drawer__assign-btn"
@@ -471,6 +562,18 @@
                         @if (detailsSubRolesAssigning()) { Assignation… } @else { Assigner }
                       </button>
                     </div>
+                    @if (detailsNewSubRolesToAssign().length > 0) {
+                      <div class="admin-drawer__chips admin-drawer__chips--pending">
+                        @for (role of detailsNewSubRolesToAssign(); track role) {
+                          <span class="admin-drawer__chip admin-drawer__chip--pending">
+                            <span class="admin-drawer__chip-label">{{ subRoleLabel(role) }}</span>
+                            <button type="button" class="admin-drawer__chip-remove" (click)="toggleDetailsSubRoleOption(role)">
+                              <span class="admin-drawer__chip-minus" aria-hidden="true"></span>
+                            </button>
+                          </span>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               </section>
