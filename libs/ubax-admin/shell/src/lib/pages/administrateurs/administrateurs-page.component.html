@@ -23,12 +23,12 @@
     >
       @if (isSuperAdmin()) {
         <div actions>
-          <p-button
-            label="Ajouter un admin"
-            icon="pi pi-plus"
-            (onClick)="openCreate()"
-            class="admin-add-btn"
-          />
+          <button type="button" class="admin-add-btn" (click)="openCreate()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+            Ajouter un admin
+          </button>
         </div>
       }
     </ubax-search-filter-bar>
@@ -55,20 +55,15 @@
         <tr>
           <td>
             <div class="admin-user-cell">
-              <p-avatar
-                [label]="initials(admin)"
-                [image]="admin.avatarUrl"
-                shape="circle"
-                size="normal"
-                class="admin-user-cell__avatar"
-              />
+              <div class="admin-user-cell__avatar-circle">
+                {{ initials(admin) }}
+              </div>
               <div class="admin-user-cell__meta">
                 <p class="admin-user-cell__name">{{ fullName(admin) }}</p>
                 <p class="admin-user-cell__role">{{ roleLabel(admin) }}</p>
               </div>
             </div>
           </td>
-
           <td class="admin-table__cell">{{ admin.email ?? '—' }}</td>
           <td class="admin-table__cell">{{ admin.phone ?? '—' }}</td>
           <td>
@@ -80,35 +75,28 @@
               <ubax-status-badge variant="neutral">—</ubax-status-badge>
             }
           </td>
-
           <td class="admin-table__actions">
             <div class="admin-actions">
-              <button
-                type="button"
-                class="admin-action-btn"
-                title="Voir les détails"
-                (click)="openDetails(admin)"
-              >
-                <i class="pi pi-eye"></i>
+              <button type="button" class="admin-action-btn" title="Voir les détails" (click)="openDetails(admin)">
+                <svg width="14" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5z" stroke="currentColor" stroke-width="1.8"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
               </button>
-
               @if (canMutate(admin)) {
-                <button
-                  type="button"
-                  class="admin-action-btn"
-                  title="Modifier le rôle"
-                  (click)="openEdit(admin)"
-                >
-                  <i class="pi pi-pencil"></i>
+                <button type="button" class="admin-action-btn" title="Modifier" (click)="openEdit(admin)">
+                  <svg width="15" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
                 </button>
-
-                <button
-                  type="button"
-                  class="admin-action-btn admin-action-btn--danger"
-                  title="Supprimer"
-                  (click)="openDelete(admin)"
-                >
-                  <i class="pi pi-trash"></i>
+                <button type="button" class="admin-action-btn admin-action-btn--danger" title="Supprimer" (click)="openDelete(admin)">
+                  <svg width="17" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
                 </button>
               }
             </div>
@@ -127,320 +115,386 @@
   </ubax-section-card>
 </div>
 
-<p-dialog
-  [visible]="showForm()"
-  (visibleChange)="showForm.set($event)"
-  [modal]="true"
-  [closable]="false"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [style]="{ width: '44rem', maxWidth: 'calc(100vw - 2rem)' }"
-  styleClass="admin-dialog admin-dialog--form"
->
-  <ng-template pTemplate="header">
-    <div class="admin-dialog__hero admin-dialog__hero--form">
-      <button
-        type="button"
-        class="admin-dialog__close"
-        aria-label="Fermer"
-        (click)="closeForm()"
+<!-- ═══════════════════════════════════════════════════════════
+     DRAWER — CRÉER / MODIFIER
+═══════════════════════════════════════════════════════════ -->
+@if (showForm()) {
+  <div class="admin-drawer-portal">
+    <div class="admin-overlay admin-overlay--drawer" (click)="closeForm()">
+      <aside
+        class="admin-drawer"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="formTitle()"
+        (click)="$event.stopPropagation()"
       >
-        <i class="pi pi-times"></i>
-      </button>
-
-      <div class="admin-dialog__hero-copy">
-        <p class="admin-dialog__eyebrow">Administrateurs</p>
-        <h2>{{ formTitle() }}</h2>
-        <p>{{ formSubtitle() }}</p>
-      </div>
-    </div>
-  </ng-template>
-
-  <form class="admin-form" (ngSubmit)="submitForm()">
-    <div class="admin-form__avatar">
-      <div class="admin-form__avatar-circle">
-        <i class="pi pi-user"></i>
-      </div>
-    </div>
-
-    <div class="admin-form__grid">
-      <div class="admin-form__field">
-        <label for="admin-first-name">Prénom</label>
-        <input
-          id="admin-first-name"
-          pInputText
-          type="text"
-          [ngModel]="memberForm().firstName"
-          (ngModelChange)="updateForm({ firstName: $event })"
-          name="firstName"
-          placeholder="Saisir le prénom"
-          [readonly]="isEditingForm"
-        />
-      </div>
-
-      <div class="admin-form__field">
-        <label for="admin-last-name">Nom</label>
-        <input
-          id="admin-last-name"
-          pInputText
-          type="text"
-          [ngModel]="memberForm().lastName"
-          (ngModelChange)="updateForm({ lastName: $event })"
-          name="lastName"
-          placeholder="Saisir le nom"
-          [readonly]="isEditingForm"
-        />
-      </div>
-
-      <div class="admin-form__field">
-        <label for="admin-email">Email</label>
-        <input
-          id="admin-email"
-          pInputText
-          type="email"
-          [ngModel]="memberForm().email"
-          (ngModelChange)="updateForm({ email: $event })"
-          name="email"
-          placeholder="email@ubax.com"
-          [readonly]="isEditingForm"
-        />
-      </div>
-
-      <div class="admin-form__field">
-        <label for="admin-phone">Téléphone</label>
-        <input
-          id="admin-phone"
-          pInputText
-          type="tel"
-          [ngModel]="memberForm().phone"
-          (ngModelChange)="updateForm({ phone: $event })"
-          name="phone"
-          placeholder="+225 07 00 00 00 00"
-          [readonly]="isEditingForm"
-        />
-      </div>
-
-      <div class="admin-form__field admin-form__field--full">
-        <label for="admin-role">Rôle</label>
-        <p-select
-          id="admin-role"
-          [options]="roleOptions"
-          [ngModel]="memberForm().role"
-          (ngModelChange)="updateForm({ role: $event })"
-          name="role"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Sélectionner un rôle"
-          [style]="{ width: '100%' }"
-        />
-      </div>
-    </div>
-
-    @if (isEditingForm) {
-      <p class="admin-form__hint">
-        Modifiez le rôle principal ci-dessus. Les sous-rôles se gèrent indépendamment dans la section dédiée.
-      </p>
-
-      <section class="admin-form__subroles">
-        <h3 class="admin-form__subroles-title">Sous-rôles internes</h3>
-
-        @if (editSubRolesLoading()) {
-          <div class="admin-form__subroles-loading">
-            <i class="pi pi-spin pi-spinner"></i>
-            <span>Chargement des sous-rôles...</span>
+        <!-- Dark header -->
+        <header class="admin-drawer__header">
+          <div class="admin-drawer__header-overlay" aria-hidden="true"></div>
+          <div class="admin-drawer__header-content">
+            <div class="admin-drawer__header-text">
+              <p class="admin-drawer__eyebrow">Administrateurs</p>
+              <h2 class="admin-drawer__title">{{ formTitle() }}</h2>
+            </div>
+            <button type="button" class="admin-drawer__close" aria-label="Fermer" (click)="closeForm()">
+              <svg class="admin-drawer__close-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
           </div>
-        } @else {
-          @if (editAdminSubRoles().length > 0) {
-            <div class="admin-details__chips">
-              @for (role of editAdminSubRoles(); track role) {
-                <span class="admin-subrole-chip">
-                  <span>{{ subRoleLabel(role) }}</span>
-                  @if (isSuperAdmin() && !isSelf(selectedAdmin()!)) {
-                    <button
-                      type="button"
-                      class="admin-subrole-chip__remove"
-                      aria-label="Révoquer le sous-rôle"
-                      (click)="promptRevokeSubRole(role)"
-                    >
-                      <i class="pi pi-times"></i>
-                    </button>
-                  }
-                </span>
+        </header>
+
+        <!-- Avatar zone -->
+        <div class="admin-drawer__avatar-zone">
+          <div class="admin-drawer__avatar-circle">
+            @if (isEditingForm && selectedAdmin(); as admin) {
+              {{ initials(admin) }}
+            } @else {
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" stroke="#1a3047" stroke-width="1.8"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#1a3047" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            }
+          </div>
+          @if (isEditingForm && selectedAdmin(); as admin) {
+            <div class="admin-drawer__avatar-meta">
+              <p class="admin-drawer__avatar-name">{{ fullName(admin) }}</p>
+              <p class="admin-drawer__avatar-email">{{ admin.email }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Scrollable body -->
+        <div class="admin-drawer__body">
+          <!-- Fields grid -->
+          <div class="admin-drawer__field-grid">
+            <div class="admin-drawer__field">
+              <span class="admin-drawer__field-label">Prénom</span>
+              <div class="admin-drawer__input-wrap" [class.admin-drawer__input-wrap--readonly]="isEditingForm">
+                <input
+                  type="text"
+                  class="admin-drawer__input"
+                  [ngModel]="memberForm().firstName"
+                  (ngModelChange)="updateForm({ firstName: $event })"
+                  placeholder="Saisir le prénom"
+                  [readonly]="isEditingForm"
+                />
+              </div>
+            </div>
+
+            <div class="admin-drawer__field">
+              <span class="admin-drawer__field-label">Nom</span>
+              <div class="admin-drawer__input-wrap" [class.admin-drawer__input-wrap--readonly]="isEditingForm">
+                <input
+                  type="text"
+                  class="admin-drawer__input"
+                  [ngModel]="memberForm().lastName"
+                  (ngModelChange)="updateForm({ lastName: $event })"
+                  placeholder="Saisir le nom"
+                  [readonly]="isEditingForm"
+                />
+              </div>
+            </div>
+
+            <div class="admin-drawer__field">
+              <span class="admin-drawer__field-label">Email</span>
+              <div class="admin-drawer__input-wrap" [class.admin-drawer__input-wrap--readonly]="isEditingForm">
+                <input
+                  type="email"
+                  class="admin-drawer__input"
+                  [ngModel]="memberForm().email"
+                  (ngModelChange)="updateForm({ email: $event })"
+                  placeholder="email@ubax.com"
+                  [readonly]="isEditingForm"
+                />
+              </div>
+            </div>
+
+            <div class="admin-drawer__field">
+              <span class="admin-drawer__field-label">Téléphone</span>
+              <div class="admin-drawer__input-wrap" [class.admin-drawer__input-wrap--readonly]="isEditingForm">
+                <input
+                  type="tel"
+                  class="admin-drawer__input"
+                  [ngModel]="memberForm().phone"
+                  (ngModelChange)="updateForm({ phone: $event })"
+                  placeholder="+225 07 00 00 00 00"
+                  [readonly]="isEditingForm"
+                />
+              </div>
+            </div>
+
+            <div class="admin-drawer__field admin-drawer__field--full">
+              <span class="admin-drawer__field-label">Rôle principal</span>
+              <p-select
+                [options]="roleOptions"
+                [ngModel]="memberForm().role"
+                (ngModelChange)="updateForm({ role: $event })"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Sélectionner un rôle"
+                appendTo="body"
+                styleClass="admin-drawer__select"
+              />
+            </div>
+          </div>
+
+          <!-- Sous-rôles (edit mode only) -->
+          @if (isEditingForm) {
+            <div class="admin-drawer__subroles-section">
+              <div class="admin-drawer__subroles-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" stroke="#1a3047" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+                <span class="admin-drawer__subroles-title">Sous-rôles internes</span>
+              </div>
+
+              @if (editSubRolesLoading()) {
+                <p class="admin-drawer__state-text">Chargement des sous-rôles…</p>
+              } @else {
+                <!-- Chips assignés -->
+                @if (editAdminSubRoles().length > 0) {
+                  <div class="admin-drawer__chips">
+                    @for (role of editAdminSubRoles(); track role) {
+                      <span class="admin-drawer__chip">
+                        <span class="admin-drawer__chip-label">{{ subRoleLabel(role) }}</span>
+                        @if (isSuperAdmin() && selectedAdmin() && !isSelf(selectedAdmin()!)) {
+                          <button
+                            type="button"
+                            class="admin-drawer__chip-remove"
+                            [title]="'Révoquer ' + subRoleLabel(role)"
+                            (click)="promptRevokeSubRole(role)"
+                          >
+                            <span class="admin-drawer__chip-minus" aria-hidden="true"></span>
+                          </button>
+                        }
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  <p class="admin-drawer__state-text">Aucun sous-rôle attribué à ce compte.</p>
+                }
+
+                <!-- Assigner -->
+                @if (isSuperAdmin() && selectedAdmin() && !isSelf(selectedAdmin()!) && availableSubRoleOptions().length > 0) {
+                  <div class="admin-drawer__assign-box">
+                    <div class="admin-drawer__assign-row">
+                      <p-multiselect
+                        [options]="availableSubRoleOptions()"
+                        [ngModel]="newSubRolesToAssign()"
+                        (ngModelChange)="newSubRolesToAssign.set($event)"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Sélectionner des sous-rôles à ajouter"
+                        display="chip"
+                        appendTo="body"
+                        styleClass="admin-drawer__multiselect"
+                      />
+                      <button
+                        type="button"
+                        class="admin-drawer__assign-btn"
+                        [disabled]="newSubRolesToAssign().length === 0 || subRolesAssigning()"
+                        (click)="assignNewSubRoles()"
+                      >
+                        @if (subRolesAssigning()) { Assignation… } @else { Assigner }
+                      </button>
+                    </div>
+                  </div>
+                }
               }
             </div>
+          }
+        </div>
+
+        <!-- Footer -->
+        <footer class="admin-drawer__footer">
+          <button type="button" class="admin-drawer__cancel-btn" (click)="closeForm()">Annuler</button>
+          @if (isEditingForm) {
+            <button
+              type="button"
+              class="admin-drawer__save-btn"
+              [disabled]="formLoading()"
+              (click)="submitForm()"
+            >
+              {{ formLoading() ? 'Mise à jour…' : 'Mettre à jour le rôle' }}
+            </button>
           } @else {
-            <p class="admin-details__empty">Aucun sous-rôle attribué.</p>
+            <button
+              type="button"
+              class="admin-drawer__save-btn"
+              [disabled]="formLoading()"
+              (click)="submitForm()"
+            >
+              {{ formLoading() ? 'Création…' : 'Créer l\'administrateur' }}
+            </button>
           }
-
-          @if (isSuperAdmin() && selectedAdmin() && !isSelf(selectedAdmin()!)) {
-            @if (availableSubRoleOptions().length > 0) {
-              <div class="admin-form__field admin-form__field--full admin-form__subroles-assign">
-                <label for="admin-subroles-edit">Assigner des sous-rôles</label>
-                <div class="admin-form__subroles-assign-row">
-                  <p-multiselect
-                    id="admin-subroles-edit"
-                    [options]="availableSubRoleOptions()"
-                    [ngModel]="newSubRolesToAssign()"
-                    (ngModelChange)="newSubRolesToAssign.set($event)"
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Sélectionner des sous-rôles à ajouter"
-                    display="chip"
-                    [style]="{ width: '100%' }"
-                  />
-                  <p-button
-                    label="Assigner"
-                    icon="pi pi-check"
-                    [loading]="subRolesAssigning()"
-                    [disabled]="newSubRolesToAssign().length === 0"
-                    (onClick)="assignNewSubRoles()"
-                    class="admin-subroles-assign-btn"
-                  />
-                </div>
-              </div>
-            } @else {
-              <p class="admin-form__hint admin-form__hint--muted">
-                Tous les sous-rôles disponibles ont déjà été attribués.
-              </p>
-            }
-          }
-        }
-      </section>
-    }
-  </form>
-
-  <ng-template pTemplate="footer">
-    <div class="admin-dialog__footer">
-      <p-button label="Fermer" severity="secondary" (onClick)="closeForm()" />
-      @if (isEditingForm) {
-        <p-button
-          label="Mettre à jour le rôle"
-          icon="pi pi-shield"
-          [loading]="formLoading()"
-          (onClick)="submitForm()"
-        />
-      } @else {
-        <p-button
-          label="Créer"
-          icon="pi pi-check"
-          [loading]="formLoading()"
-          (onClick)="submitForm()"
-        />
-      }
+        </footer>
+      </aside>
     </div>
-  </ng-template>
-</p-dialog>
+  </div>
+}
 
-<p-dialog
-  [visible]="showDetails()"
-  (visibleChange)="showDetails.set($event)"
-  [modal]="true"
-  [closable]="false"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [style]="{ width: '54rem', maxWidth: 'calc(100vw - 2rem)' }"
-  [contentStyle]="{ overflow: 'visible' }"
-  styleClass="admin-dialog admin-dialog--details"
->
-  <ng-template pTemplate="header">
-    <div class="admin-dialog__hero admin-dialog__hero--details">
-      <button
-        type="button"
-        class="admin-dialog__close"
-        aria-label="Fermer"
-        (click)="closeDetails()"
+<!-- ═══════════════════════════════════════════════════════════
+     DRAWER — DÉTAILS
+═══════════════════════════════════════════════════════════ -->
+@if (showDetails()) {
+  <div class="admin-drawer-portal">
+    <div class="admin-overlay admin-overlay--drawer" (click)="closeDetails()">
+      <aside
+        class="admin-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Détails de l'administrateur"
+        (click)="$event.stopPropagation()"
       >
-        <i class="pi pi-times"></i>
-      </button>
+        @if (selectedAdmin(); as admin) {
+          <!-- Dark header -->
+          <header class="admin-drawer__header">
+            <div class="admin-drawer__header-overlay" aria-hidden="true"></div>
+            <div class="admin-drawer__header-content">
+              <div class="admin-drawer__header-text">
+                <p class="admin-drawer__eyebrow">Administrateur</p>
+                <h2 class="admin-drawer__title">Détails du compte</h2>
+              </div>
+              <button type="button" class="admin-drawer__close" aria-label="Fermer" (click)="closeDetails()">
+                <svg class="admin-drawer__close-icon" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </header>
 
-      <div class="admin-dialog__hero-copy">
-        <p class="admin-dialog__eyebrow">Administrateur</p>
-        <h2>Détails du compte</h2>
-        <p>{{ selectedAdminRoleLabel() }}</p>
-      </div>
-    </div>
-  </ng-template>
-
-  @if (selectedAdmin(); as admin) {
-    <div class="admin-details">
-      <div class="admin-details__identity">
-        <p-avatar
-          [label]="initials(admin)"
-          [image]="admin.avatarUrl"
-          shape="circle"
-          size="large"
-          class="admin-details__avatar"
-        />
-
-        <div class="admin-details__identity-copy">
-          <p class="admin-details__name">{{ fullName(admin) }}</p>
-          <p class="admin-details__meta">Compte interne UBAX</p>
-          <p-tag
-            [value]="roleLabel(admin)"
-            [severity]="roleSeverity(admin)"
-            class="admin-role-tag"
-          />
-        </div>
-      </div>
-
-      @if (detailsLoading()) {
-        <div class="admin-details__loading">
-          <i class="pi pi-spin pi-spinner"></i>
-          <span>Chargement des sous-rôles...</span>
-        </div>
-      } @else {
-        <ubax-detail-info-block
-          [items]="selectedAdminItems()"
-          [columns]="2"
-          [bordered]="true"
-        />
-
-        <section class="admin-details__section">
-          <div class="admin-details__section-header">
-            <div>
-              <h3>Sous-rôles internes</h3>
-              <p>
-                {{ selectedSubRoles().length }} sous-rôle(s) attribué(s) à ce
-                compte.
-              </p>
+          <!-- Avatar zone -->
+          <div class="admin-drawer__avatar-zone">
+            <div class="admin-drawer__avatar-circle admin-drawer__avatar-circle--filled">
+              {{ initials(admin) }}
+            </div>
+            <div class="admin-drawer__avatar-meta">
+              <p class="admin-drawer__avatar-name">{{ fullName(admin) }}</p>
+              <p class="admin-drawer__avatar-email">{{ admin.email }}</p>
             </div>
           </div>
 
-          <div class="admin-details__chips">
-            @for (role of selectedSubRoles(); track role) {
-              <span class="admin-subrole-chip">
-                <span>{{ subRoleLabel(role) }}</span>
-              </span>
+          <!-- Scrollable body -->
+          <div class="admin-drawer__body">
+            @if (detailsLoading()) {
+              <p class="admin-drawer__state-text admin-drawer__state-text--center">Chargement des informations…</p>
+            } @else {
+              <!-- Info card -->
+              <section class="admin-drawer__details-section">
+                <h3 class="admin-drawer__section-title">Informations générales</h3>
+                <div class="admin-drawer__details-card">
+                  <div class="admin-drawer__details-grid">
+                    <div class="admin-drawer__details-field">
+                      <span class="admin-drawer__details-label">Prénom</span>
+                      <span class="admin-drawer__details-value">{{ admin.firstName ?? '—' }}</span>
+                    </div>
+                    <div class="admin-drawer__details-field">
+                      <span class="admin-drawer__details-label">Nom</span>
+                      <span class="admin-drawer__details-value">{{ admin.lastName ?? '—' }}</span>
+                    </div>
+                    <div class="admin-drawer__details-field">
+                      <span class="admin-drawer__details-label">Email</span>
+                      <span class="admin-drawer__details-value">{{ admin.email ?? '—' }}</span>
+                    </div>
+                    <div class="admin-drawer__details-field">
+                      <span class="admin-drawer__details-label">Téléphone</span>
+                      <span class="admin-drawer__details-value">{{ admin.phone ?? '—' }}</span>
+                    </div>
+                    <div class="admin-drawer__details-field">
+                      <span class="admin-drawer__details-label">Rôle principal</span>
+                      <span class="admin-drawer__details-value">{{ roleLabel(admin) }}</span>
+                    </div>
+                    <div class="admin-drawer__details-field">
+                      <span class="admin-drawer__details-label">Keycloak ID</span>
+                      <span class="admin-drawer__details-value admin-drawer__details-value--mono">{{ admin.keycloakId ?? '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Sous-rôles -->
+              <section class="admin-drawer__details-section">
+                <div class="admin-drawer__subroles-header">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" stroke="#1a3047" stroke-width="1.8" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="admin-drawer__subroles-title">Sous-rôles internes</span>
+                  @if (selectedSubRoles().length > 0) {
+                    <span class="admin-drawer__subroles-count">{{ selectedSubRoles().length }}</span>
+                  }
+                </div>
+
+                @if (selectedSubRoles().length > 0) {
+                  <div class="admin-drawer__chips">
+                    @for (role of selectedSubRoles(); track role) {
+                      <span class="admin-drawer__chip">
+                        <span class="admin-drawer__chip-label">{{ subRoleLabel(role) }}</span>
+                        @if (isSuperAdmin() && !isSelf(selectedAdmin()!)) {
+                          <button
+                            type="button"
+                            class="admin-drawer__chip-remove"
+                            [title]="'Révoquer ' + subRoleLabel(role)"
+                            (click)="promptRevokeSubRole(role)"
+                          >
+                            <span class="admin-drawer__chip-minus" aria-hidden="true"></span>
+                          </button>
+                        }
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  <p class="admin-drawer__state-text">Aucun sous-rôle attribué à ce compte.</p>
+                }
+
+                <!-- Assigner depuis les détails -->
+                @if (isSuperAdmin() && !isSelf(selectedAdmin()!) && detailsAvailableSubRoleOptions().length > 0) {
+                  <div class="admin-drawer__assign-box">
+                    <div class="admin-drawer__assign-row">
+                      <p-multiselect
+                        [options]="detailsAvailableSubRoleOptions()"
+                        [ngModel]="detailsNewSubRolesToAssign()"
+                        (ngModelChange)="detailsNewSubRolesToAssign.set($event)"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Sélectionner des sous-rôles à ajouter"
+                        display="chip"
+                        appendTo="body"
+                        styleClass="admin-drawer__multiselect"
+                      />
+                      <button
+                        type="button"
+                        class="admin-drawer__assign-btn"
+                        [disabled]="detailsNewSubRolesToAssign().length === 0 || detailsSubRolesAssigning()"
+                        (click)="assignDetailsSubRoles()"
+                      >
+                        @if (detailsSubRolesAssigning()) { Assignation… } @else { Assigner }
+                      </button>
+                    </div>
+                  </div>
+                }
+              </section>
             }
           </div>
 
-          @if (!selectedSubRoles().length) {
-            <p class="admin-details__empty">Aucun sous-rôle attribué.</p>
-          }
-        </section>
-      }
+          <!-- Footer -->
+          <footer class="admin-drawer__footer">
+            <button type="button" class="admin-drawer__cancel-btn" (click)="closeDetails()">Fermer</button>
+            @if (isSuperAdmin() && !isSelf(selectedAdmin()!)) {
+              <button type="button" class="admin-drawer__save-btn" (click)="openEditFromDetails()">
+                Modifier le rôle
+              </button>
+            }
+          </footer>
+        }
+      </aside>
     </div>
-  }
+  </div>
+}
 
-  <ng-template pTemplate="footer">
-    <div class="admin-dialog__footer">
-      <p-button
-        label="Fermer"
-        severity="secondary"
-        (onClick)="closeDetails()"
-      />
-      @if (isSuperAdmin() && selectedAdmin() && !isSelf(selectedAdmin()!)) {
-        <p-button
-          label="Modifier"
-          (onClick)="openEditFromDetails()"
-        />
-      }
-    </div>
-  </ng-template>
-</p-dialog>
-
+<!-- ═══════════════════════════════════════════════════════════
+     CONFIRM — SUPPRIMER
+═══════════════════════════════════════════════════════════ -->
 <ubax-confirm-dialog
   [visible]="showDeleteConfirm()"
   (visibleChange)="showDeleteConfirm.set($event)"
@@ -459,6 +513,9 @@
   (confirmed)="confirmDelete()"
 />
 
+<!-- ═══════════════════════════════════════════════════════════
+     CONFIRM — RÉVOQUER SOUS-RÔLE
+═══════════════════════════════════════════════════════════ -->
 <ubax-confirm-dialog
   [visible]="showRevokeConfirm()"
   (visibleChange)="showRevokeConfirm.set($event)"
@@ -466,9 +523,9 @@
   icon="pi pi-shield"
   [message]="
     selectedAdmin()
-      ? 'Révoquer le sous-rôle ' +
+      ? 'Révoquer le sous-rôle « ' +
         subRoleLabel(pendingRevokeRole() ?? '') +
-        ' de ' +
+        ' » de ' +
         fullName(selectedAdmin()!) +
         ' ?'
       : 'Confirmez la suppression de l\'accès interne sélectionné.'

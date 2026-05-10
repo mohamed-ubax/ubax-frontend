@@ -12,23 +12,16 @@ import { firstValueFrom } from 'rxjs';
 import type { AdminUserResponse } from '@ubax-workspace/shared-api-types';
 import {
   ConfirmDialogComponent,
-  DetailInfoBlockComponent,
   SearchFilterBarComponent,
   SectionCardComponent,
   StatusBadgeComponent,
   type FilterOption,
-  type InfoItem,
 } from '@ubax-workspace/shared-design-system';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
-import { AvatarModule } from 'primeng/avatar';
-import { Button } from 'primeng/button';
-import { Dialog } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelect } from 'primeng/multiselect';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
-import { Tag } from 'primeng/tag';
 import {
   AdminUsersService,
   getPrimaryAdminRole,
@@ -64,17 +57,11 @@ const EMPTY_FORM: AdminMemberForm = {
   standalone: true,
   imports: [
     FormsModule,
-    Button,
-    Dialog,
-    InputTextModule,
-    SelectModule,
-    Tag,
     MultiSelect,
+    SelectModule,
     TableModule,
-    AvatarModule,
     SearchFilterBarComponent,
     SectionCardComponent,
-    DetailInfoBlockComponent,
     ConfirmDialogComponent,
     StatusBadgeComponent,
   ],
@@ -123,6 +110,17 @@ export class AdministrateursPageComponent implements OnInit {
       (role) => !assigned.includes(role.value),
     ).map((role) => ({ label: role.label, value: role.value }));
   });
+
+  /** Options disponibles pour le panneau détails (basé sur selectedSubRoles). */
+  protected readonly detailsAvailableSubRoleOptions = computed(() => {
+    const assigned = this.selectedSubRoles();
+    return INTERNAL_SUB_ROLES.filter(
+      (role) => !assigned.includes(role.value),
+    ).map((role) => ({ label: role.label, value: role.value }));
+  });
+
+  protected readonly detailsNewSubRolesToAssign = signal<string[]>([]);
+  protected readonly detailsSubRolesAssigning = signal(false);
 
   protected readonly memberForm = signal<AdminMemberForm>({ ...EMPTY_FORM });
 
@@ -227,28 +225,6 @@ export class AdministrateursPageComponent implements OnInit {
     return admin ? this.roleLabel(admin) : '—';
   });
 
-  protected selectedAdminItems = computed<InfoItem[]>(() => {
-    const admin = this.selectedAdmin();
-    if (!admin) return [];
-
-    return [
-      { label: 'Prénom', value: admin.firstName ?? '—', icon: 'pi pi-user' },
-      { label: 'Nom', value: admin.lastName ?? '—', icon: 'pi pi-id-card' },
-      { label: 'Email', value: admin.email ?? '—', icon: 'pi pi-envelope' },
-      { label: 'Téléphone', value: admin.phone ?? '—', icon: 'pi pi-phone' },
-      {
-        label: 'Rôle principal',
-        value: this.roleLabel(admin),
-        icon: 'pi pi-shield',
-      },
-      {
-        label: 'Keycloak ID',
-        value: admin.keycloakId ?? '—',
-        icon: 'pi pi-key',
-      },
-    ];
-  });
-
   protected onSearchChange(value: string): void {
     this.searchQuery.set(value);
   }
@@ -307,7 +283,10 @@ export class AdministrateursPageComponent implements OnInit {
     this.editSubRolesLoading.set(true);
     try {
       const subRoles = await firstValueFrom(this.svc.getSubRoles(admin.userId));
-      this.editAdminSubRoles.set(subRoles.map((sr) => sr.role));
+      const roles = subRoles.map((sr) => sr.role);
+      this.editAdminSubRoles.set(roles);
+      // Keep details panel in sync too
+      this.selectedSubRoles.set(roles);
     } catch {
       this.notif.error('Impossible de charger les sous-rôles.');
     } finally {
@@ -346,17 +325,54 @@ export class AdministrateursPageComponent implements OnInit {
     if (!admin?.userId || !toAdd.length) return;
 
     this.subRolesAssigning.set(true);
+    // Optimistic update: chips appear immediately without waiting for the reload
+    this.editAdminSubRoles.update((current) => [
+      ...new Set([...current, ...toAdd]),
+    ]);
+    this.newSubRolesToAssign.set([]);
     try {
-      const subRoles = await firstValueFrom(
-        this.svc.assignSubRoles(admin.userId, toAdd),
-      );
-      this.editAdminSubRoles.set(subRoles.map((sr) => sr.role));
-      this.newSubRolesToAssign.set([]);
+      await firstValueFrom(this.svc.assignSubRoles(admin.userId, toAdd));
+      // Reload to sync with real server state (may override optimistic if API returns differently)
+      await this.loadEditSubRoles(admin);
       this.notif.success('Sous-rôle(s) assigné(s) avec succès.');
     } catch {
+      // Rollback: remove the optimistically added roles
+      this.editAdminSubRoles.update((current) =>
+        current.filter((r) => !toAdd.includes(r)),
+      );
+      this.newSubRolesToAssign.set(toAdd);
       this.notif.error("L'assignation des sous-rôles a échoué.");
     } finally {
       this.subRolesAssigning.set(false);
+    }
+  }
+
+  /** Assigne des sous-rôles depuis le panneau de détails. */
+  protected async assignDetailsSubRoles(): Promise<void> {
+    const admin = this.selectedAdmin();
+    const toAdd = this.detailsNewSubRolesToAssign();
+    if (!admin?.userId || !toAdd.length) return;
+
+    this.detailsSubRolesAssigning.set(true);
+    // Optimistic update
+    this.selectedSubRoles.update((current) => [...new Set([...current, ...toAdd])]);
+    this.editAdminSubRoles.update((current) => [...new Set([...current, ...toAdd])]);
+    this.detailsNewSubRolesToAssign.set([]);
+    try {
+      await firstValueFrom(this.svc.assignSubRoles(admin.userId, toAdd));
+      const fresh = await firstValueFrom(this.svc.getSubRoles(admin.userId));
+      const freshRoles = fresh.map((sr) => sr.role);
+      this.selectedSubRoles.set(freshRoles);
+      this.editAdminSubRoles.set(freshRoles);
+      this.notif.success('Sous-rôle(s) assigné(s) avec succès.');
+    } catch {
+      // Rollback
+      this.selectedSubRoles.update((current) => current.filter((r) => !toAdd.includes(r)));
+      this.editAdminSubRoles.update((current) => current.filter((r) => !toAdd.includes(r)));
+      this.detailsNewSubRolesToAssign.set(toAdd);
+      this.notif.error("L'assignation des sous-rôles a échoué.");
+    } finally {
+      this.detailsSubRolesAssigning.set(false);
     }
   }
 
@@ -404,6 +420,7 @@ export class AdministrateursPageComponent implements OnInit {
   protected async openDetails(admin: AdminUserResponse): Promise<void> {
     this.selectedAdmin.set(admin);
     this.selectedSubRoles.set([]);
+    this.editAdminSubRoles.set([]);
     this.pendingRevokeRole.set(null);
     this.detailsLoading.set(true);
     this.showDetails.set(true);
@@ -412,7 +429,9 @@ export class AdministrateursPageComponent implements OnInit {
       const subRoles = await firstValueFrom(
         this.svc.getSubRoles(admin.userId ?? ''),
       );
-      this.selectedSubRoles.set(subRoles.map((subRole) => subRole.role));
+      const roles = subRoles.map((subRole) => subRole.role);
+      this.selectedSubRoles.set(roles);
+      this.editAdminSubRoles.set(roles);
     } catch {
       this.notif.error('Impossible de charger les sous-rôles.');
     } finally {
@@ -449,21 +468,26 @@ export class AdministrateursPageComponent implements OnInit {
     if (!admin?.userId || !role) return;
 
     this.formLoading.set(true);
+    // Optimistic removal from both panels
+    this.editAdminSubRoles.update((roles) => roles.filter((r) => r !== role));
+    this.selectedSubRoles.update((roles) => roles.filter((r) => r !== role));
+    this.newSubRolesToAssign.update((roles) => roles.filter((r) => r !== role));
     try {
-      const subRoles = await firstValueFrom(
-        this.svc.revokeSubRole(admin.userId, role),
-      );
-      const updatedRoles = subRoles.map((subRole) => subRole.role);
-      this.selectedSubRoles.set(updatedRoles);
-      this.editAdminSubRoles.set(updatedRoles);
-      // Remove from newSubRolesToAssign if it was pending
-      this.newSubRolesToAssign.update((roles) =>
-        roles.filter((r) => r !== role),
-      );
+      await firstValueFrom(this.svc.revokeSubRole(admin.userId, role));
+      // Reload from API to guarantee displayed state matches the server
+      const fresh = await firstValueFrom(this.svc.getSubRoles(admin.userId));
+      const freshRoles = fresh.map((sr) => sr.role);
+      this.editAdminSubRoles.set(freshRoles);
+      this.selectedSubRoles.set(freshRoles);
       this.notif.success('Sous-rôle révoqué.');
       this.showRevokeConfirm.set(false);
       this.pendingRevokeRole.set(null);
     } catch {
+      // Rollback optimistic removal
+      const restored = await firstValueFrom(this.svc.getSubRoles(admin.userId)).catch(() => []);
+      const restoredRoles = restored.map((sr) => sr.role);
+      this.editAdminSubRoles.set(restoredRoles);
+      this.selectedSubRoles.set(restoredRoles);
       this.notif.error('La révocation a échoué.');
     } finally {
       this.formLoading.set(false);
@@ -501,6 +525,7 @@ export class AdministrateursPageComponent implements OnInit {
 
   protected closeDetails(): void {
     this.showDetails.set(false);
+    this.detailsNewSubRolesToAssign.set([]);
   }
 
   protected closeDeleteConfirm(): void {

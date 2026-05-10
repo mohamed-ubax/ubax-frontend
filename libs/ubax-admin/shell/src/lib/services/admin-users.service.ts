@@ -14,7 +14,7 @@ import {
   revokeSubRole2,
 } from '@ubax-workspace/shared-api-types';
 import { HttpClient } from '@angular/common/http';
-import { from, map, Observable } from 'rxjs';
+import { from, map, Observable, of, switchMap } from 'rxjs';
 
 export type AdminRole = 'ADMIN' | 'SUPER_ADMIN';
 
@@ -290,7 +290,18 @@ export class AdminUsersService {
   getSubRoles(userId: string): Observable<AdminSubRole[]> {
     return from(
       this.api.invoke(getSubRoles2, { userId, scope: 'UBAX_INTERNAL' }),
-    ).pipe(map(normalizeAdminSubRoles));
+    ).pipe(
+      // getSubRoles2 uses responseType:'blob' — parse the Blob as JSON first
+      switchMap((raw) => {
+        if (raw instanceof Blob) {
+          return from(raw.text()).pipe(map((text) => {
+            try { return normalizeAdminSubRoles(JSON.parse(text)); }
+            catch { return []; }
+          }));
+        }
+        return of(normalizeAdminSubRoles(raw));
+      }),
+    );
   }
 
   assignSubRoles(userId: string, roles: string[]): Observable<AdminSubRole[]> {
@@ -299,13 +310,33 @@ export class AdminUsersService {
         userId,
         body: { roles, scope: 'UBAX_INTERNAL' },
       }),
-    ).pipe(map(normalizeAdminSubRoles));
+    ).pipe(
+      switchMap((raw) => {
+        if (raw instanceof Blob) {
+          return from(raw.text()).pipe(map((text) => {
+            try { return normalizeAdminSubRoles(JSON.parse(text)); }
+            catch { return []; }
+          }));
+        }
+        return of(normalizeAdminSubRoles(raw));
+      }),
+    );
   }
 
   revokeSubRole(userId: string, role: string): Observable<AdminSubRole[]> {
     return from(
       this.api.invoke(revokeSubRole2, { userId, role, scope: 'UBAX_INTERNAL' }),
-    ).pipe(map(normalizeAdminSubRoles));
+    ).pipe(
+      switchMap((raw) => {
+        if (raw instanceof Blob) {
+          return from(raw.text()).pipe(map((text) => {
+            try { return normalizeAdminSubRoles(JSON.parse(text)); }
+            catch { return []; }
+          }));
+        }
+        return of(normalizeAdminSubRoles(raw));
+      }),
+    );
   }
 
   getAgencyMembers(agencyId: string): Observable<MemberResponse[]> {
