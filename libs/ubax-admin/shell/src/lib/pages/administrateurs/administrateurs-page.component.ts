@@ -14,14 +14,17 @@ import { firstValueFrom } from 'rxjs';
 import type { AdminUserResponse } from '@ubax-workspace/shared-api-types';
 import {
   ConfirmDialogComponent,
-  SearchFilterBarComponent,
-  SectionCardComponent,
   StatusBadgeComponent,
-  type FilterOption,
 } from '@ubax-workspace/shared-design-system';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
-import { TableModule } from 'primeng/table';
+import {
+  UiDataTableCellDefDirective,
+  UiDataTableColumn,
+  UiDataTableComponent,
+  UiDataTableEmptyDefDirective,
+  UiPaginationComponent,
+} from '@ubax-workspace/shared-ui';
 import {
   AdminUsersService,
   getPrimaryAdminRole,
@@ -38,6 +41,8 @@ interface AdminMemberForm {
 }
 
 type FormMode = 'create' | 'edit';
+
+const PAGE_SIZE = 8;
 
 const ROLE_OPTIONS: { label: string; value: AdminRole }[] = [
   { label: 'Admin', value: 'ADMIN' },
@@ -57,9 +62,10 @@ const EMPTY_FORM: AdminMemberForm = {
   standalone: true,
   imports: [
     FormsModule,
-    TableModule,
-    SearchFilterBarComponent,
-    SectionCardComponent,
+    UiDataTableComponent,
+    UiDataTableCellDefDirective,
+    UiDataTableEmptyDefDirective,
+    UiPaginationComponent,
     ConfirmDialogComponent,
     StatusBadgeComponent,
   ],
@@ -135,6 +141,10 @@ export class AdministrateursPageComponent implements OnInit {
   @HostListener('document:click', ['$event.target'])
   onDocumentClick(target: EventTarget | null): void {
     if (!(target instanceof Node)) return;
+    if (this.filterMenuOpen()) {
+      const root = this.filterMenuRoot?.nativeElement;
+      if (!root || !root.contains(target)) this.closeFilterMenu();
+    }
     if (this.roleMenuOpen()) {
       const root = this.roleDropdownRoot?.nativeElement;
       if (!root || !root.contains(target)) this.roleMenuOpen.set(false);
@@ -158,6 +168,41 @@ export class AdministrateursPageComponent implements OnInit {
     this.roleMenuOpen.set(false);
   }
 
+  // ── Filter menu (toolbar) ──────────────────────────────────────────────────
+  protected toggleFilterMenu(e: Event): void {
+    e.stopPropagation();
+    if (this.filterMenuOpen()) {
+      this.closeFilterMenu();
+    } else {
+      this.filterMenuOpen.set(true);
+      this.filterMenuClosing.set(false);
+    }
+  }
+
+  protected closeFilterMenu(): void {
+    this.filterMenuClosing.set(true);
+    setTimeout(() => {
+      this.filterMenuOpen.set(false);
+      this.filterMenuClosing.set(false);
+    }, 140);
+  }
+
+  protected selectFilterRole(role: AdminRole | null): void {
+    this.filterRole.set(role);
+    this.currentPage.set(1);
+    this.closeFilterMenu();
+  }
+
+  protected get selectedFilterLabel(): string {
+    const role = this.filterRole();
+    if (role === 'SUPER_ADMIN') return 'Super Admin';
+    if (role === 'ADMIN') return 'Admin';
+    return 'Tous les rôles';
+  }
+
+  protected onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
   protected toggleSubRoleOption(value: string): void {
     this.newSubRolesToAssign.update(current =>
       current.includes(value) ? current.filter(r => r !== value) : [...current, value]
@@ -187,26 +232,13 @@ export class AdministrateursPageComponent implements OnInit {
     return selected.map(v => this.subRoleLabel(v)).join(', ');
   });
 
-  protected readonly memberForm = signal<AdminMemberForm>({ ...EMPTY_FORM });
-
-  protected readonly roleOptions = ROLE_OPTIONS;
-  protected readonly filterRoleOptions = [
-    { label: 'Tous les rôles', value: null },
-    ...ROLE_OPTIONS,
-  ];
-  protected readonly searchFilters: {
-    label: string;
-    options: FilterOption[];
-  }[] = [
-    {
-      label: 'Tous les rôles',
-      options: this.filterRoleOptions,
-    },
-  ];
   protected readonly subRoleOptions = INTERNAL_SUB_ROLES.map((role) => ({
     label: role.label,
     value: role.value,
   }));
+
+  protected readonly memberForm = signal<AdminMemberForm>({ ...EMPTY_FORM });
+  protected readonly roleOptions = ROLE_OPTIONS;
 
   protected readonly visibleAdmins = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -228,6 +260,33 @@ export class AdministrateursPageComponent implements OnInit {
   });
 
   protected readonly adminCount = computed(() => this.visibleAdmins().length);
+
+  // ── Table columns ──────────────────────────────────────────────────────────
+  protected readonly tableColumns: readonly UiDataTableColumn<AdminUserResponse>[] = [
+    { key: 'name',    header: 'Nom complet',  width: '30%' },
+    { key: 'email',   header: 'Email',        width: '28%' },
+    { key: 'phone',   header: 'Téléphone',    width: '18%' },
+    { key: 'role',    header: 'Rôle',         width: '14%' },
+    { key: 'actions', header: '',             width: '10%', align: 'end' },
+  ];
+
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  protected readonly currentPage = signal(1);
+
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.visibleAdmins().length / PAGE_SIZE)),
+  );
+
+  protected readonly pagedRows = computed(() => {
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return this.visibleAdmins().slice(start, start + PAGE_SIZE);
+  });
+
+  // ── Filter menu ────────────────────────────────────────────────────────────
+  protected readonly filterMenuOpen = signal(false);
+  protected readonly filterMenuClosing = signal(false);
+
+  @ViewChild('filterMenuRoot') private filterMenuRoot?: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
     void this.loadAdmins();
@@ -292,11 +351,7 @@ export class AdministrateursPageComponent implements OnInit {
 
   protected onSearchChange(value: string): void {
     this.searchQuery.set(value);
-  }
-
-  protected onFilterChange(event: { filter: string; value: unknown }): void {
-    if (event.filter !== 'Tous les rôles') return;
-    this.filterRole.set((event.value as AdminRole | null) ?? null);
+    this.currentPage.set(1);
   }
 
   protected selectedAdminSubRoleTags = computed(() =>

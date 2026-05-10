@@ -1,118 +1,198 @@
 <div class="admin-page">
-  <div class="admin-page__header">
-    <div class="admin-page__title-block">
-      <p class="admin-page__eyebrow">Back-office UBAX</p>
-      <div class="admin-page__title-row">
-        <h1 class="admin-page__title">Administrateurs</h1>
-        <span class="admin-page__count">{{ adminCount() }} comptes</span>
-      </div>
-      <p class="admin-page__subtitle">
-        Gérez les comptes internes, leurs rôles Keycloak et les sous-rôles
-        fonctionnels UBAX.
-      </p>
-    </div>
-  </div>
 
-  <ubax-section-card class="admin-table-card" bodyClass="p-0">
-    <ubax-search-filter-bar
-      class="admin-toolbar"
-      placeholder="Rechercher"
-      [filters]="searchFilters"
-      (searchChange)="onSearchChange($event)"
-      (filterChange)="onFilterChange($event)"
-    >
-      @if (isSuperAdmin()) {
-        <div actions>
-          <button type="button" class="admin-add-btn" (click)="openCreate()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="admin-page__header">
+    <h1 class="admin-page__title">Administrateurs</h1>
+
+    <div class="admin-page__toolbar">
+      <!-- Search pill -->
+      <label class="admin-pill admin-pill--search" aria-label="Rechercher un administrateur">
+        <input
+          type="search"
+          placeholder="Rechercher"
+          [value]="searchQuery()"
+          (input)="onSearchChange(($event.target)!['value'])"
+        />
+        <span class="admin-pill__icon" aria-hidden="true">
+          <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.09 16.09L19.75 19.75M18.59 9.66a8.93 8.93 0 1 1-17.84 0 8.93 8.93 0 0 1 17.84 0Z"
+              fill="none" stroke="#1c1c1c" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+          </svg>
+        </span>
+      </label>
+
+      <!-- Filter pill -->
+      <div #filterMenuRoot class="admin-filter">
+        <button
+          type="button"
+          class="admin-pill admin-pill--filter"
+          [class.is-open]="filterMenuOpen()"
+          (click)="toggleFilterMenu($event)"
+        >
+          <span>{{ selectedFilterLabel }}</span>
+          <span class="admin-pill__chevron" aria-hidden="true">
+            <svg viewBox="0 0 15 8" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.5 8L15 1.24 13.62 0 7.5 5.52 1.38 0 0 1.24 7.5 8Z" fill="#1c1c1c"/>
             </svg>
-            Ajouter un admin
-          </button>
-        </div>
-      }
-    </ubax-search-filter-bar>
+          </span>
+        </button>
 
-    <p-table
-      [value]="visibleAdmins()"
-      [loading]="loading()"
-      [paginator]="visibleAdmins().length > 10"
-      [rows]="10"
-      styleClass="admin-table"
-      responsiveLayout="scroll"
-    >
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Nom complet</th>
-          <th>Email</th>
-          <th>Téléphone</th>
-          <th>Rôle</th>
-          <th class="admin-table__actions-head">Actions</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-admin>
-        <tr>
-          <td>
-            <div class="admin-user-cell">
-              <div class="admin-user-cell__avatar-circle">
-                {{ initials(admin) }}
-              </div>
-              <div class="admin-user-cell__meta">
-                <p class="admin-user-cell__name">{{ fullName(admin) }}</p>
-                <p class="admin-user-cell__role">{{ roleLabel(admin) }}</p>
-              </div>
-            </div>
-          </td>
-          <td class="admin-table__cell">{{ admin.email ?? '—' }}</td>
-          <td class="admin-table__cell">{{ admin.phone ?? '—' }}</td>
-          <td>
-            @if (primaryRole(admin) === 'SUPER_ADMIN') {
-              <ubax-status-badge variant="danger">Super Admin</ubax-status-badge>
-            } @else if (primaryRole(admin) === 'ADMIN') {
-              <ubax-status-badge variant="info">Admin</ubax-status-badge>
-            } @else {
-              <ubax-status-badge variant="neutral">—</ubax-status-badge>
-            }
-          </td>
-          <td class="admin-table__actions">
-            <div class="admin-actions">
-              <button type="button" class="admin-action-btn" title="Voir les détails" (click)="openDetails(admin)">
-                <svg width="14" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5z" stroke="currentColor" stroke-width="1.8"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
-                </svg>
+        @if (filterMenuOpen()) {
+          <div class="admin-filter__menu" [class.is-closing]="filterMenuClosing()">
+            <button type="button" class="admin-filter__option" [class.is-active]="filterRole() === null" (click)="selectFilterRole(null)">
+              Tous les rôles
+            </button>
+            @for (opt of roleOptions; track opt.value) {
+              <button type="button" class="admin-filter__option" [class.is-active]="filterRole() === opt.value" (click)="selectFilterRole(opt.value)">
+                {{ opt.label }}
               </button>
-              @if (canMutate(admin)) {
-                <button type="button" class="admin-action-btn" title="Modifier" (click)="openEdit(admin)">
-                  <svg width="15" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  </svg>
-                </button>
-                <button type="button" class="admin-action-btn admin-action-btn--danger" title="Supprimer" (click)="openDelete(admin)">
-                  <svg width="17" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  </svg>
-                </button>
-              }
-            </div>
-          </td>
-        </tr>
-      </ng-template>
+            }
+          </div>
+        }
+      </div>
 
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="5" class="admin-table__empty">
-            Aucun administrateur trouvé.
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </ubax-section-card>
+      <!-- Add button -->
+      @if (isSuperAdmin()) {
+        <button type="button" class="admin-action-button" (click)="openCreate()">
+          <span class="admin-action-button__icon" aria-hidden="true">
+            <svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13 24.375C6.73 24.375 1.625 19.27 1.625 13S6.73 1.625 13 1.625 24.375 6.73 24.375 13 19.27 24.375 13 24.375Zm0-21.125C7.62 3.25 3.25 7.62 3.25 13S7.62 22.75 13 22.75 22.75 18.38 22.75 13 18.38 3.25 13 3.25Z" fill="#fff"/>
+              <path d="M13 18.688a.813.813 0 0 1-.813-.813V8.125a.813.813 0 0 1 1.626 0v9.75a.813.813 0 0 1-.813.813Z" fill="#fff"/>
+              <path d="M17.875 13.813H8.125a.813.813 0 0 1 0-1.626h9.75a.813.813 0 0 1 0 1.626Z" fill="#fff"/>
+            </svg>
+          </span>
+          <span>Ajouter un admin</span>
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- ── Content grid ────────────────────────────────────────────────────── -->
+  <section class="admin-content">
+
+    <!-- Promo card -->
+    <aside class="admin-promo-card" aria-hidden="true">
+      <div class="admin-promo-card__overlay"></div>
+      <div class="admin-promo-card__body">
+        <h2 class="admin-promo-card__title">
+          Gérez les accès internes UBAX
+        </h2>
+        <div class="admin-promo-card__stat-block">
+          <p class="admin-promo-card__stat-number">{{ adminCount() }}</p>
+          <p class="admin-promo-card__stat-label">administrateur{{ adminCount() > 1 ? 's' : '' }}</p>
+        </div>
+        <div class="admin-promo-card__roles">
+          <span class="admin-promo-card__role-pill admin-promo-card__role-pill--super">Super Admin</span>
+          <span class="admin-promo-card__role-pill admin-promo-card__role-pill--admin">Admin</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Table stage -->
+    <div class="admin-table-stage">
+      <section class="admin-table-card">
+        @if (loading()) {
+          <div class="admin-table-card__loading" aria-busy="true">
+            <div class="admin-sk-row" aria-hidden="true"></div>
+            <div class="admin-sk-row" aria-hidden="true"></div>
+            <div class="admin-sk-row" aria-hidden="true"></div>
+            <div class="admin-sk-row" aria-hidden="true"></div>
+            <div class="admin-sk-row" aria-hidden="true"></div>
+          </div>
+        } @else {
+          <div class="admin-table-scroll">
+            <ubax-ui-data-table
+              class="admin-table"
+              [columns]="tableColumns"
+              [rows]="pagedRows()"
+              rowIdKey="userId"
+            >
+              <ng-template ubaxDataTableEmpty>
+                <div class="admin-empty-state" role="status">
+                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" stroke="#94a3b8" stroke-width="1.5"/>
+                    <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  <p class="admin-empty-state__caption">Aucun administrateur trouvé.</p>
+                </div>
+              </ng-template>
+
+              <!-- Nom complet -->
+              <ng-template ubaxDataTableCell="name" let-row>
+                <div class="admin-member-cell">
+                  <div class="admin-member-cell__avatar">{{ initials(row) }}</div>
+                  <div class="admin-member-cell__meta">
+                    <span class="admin-member-cell__name">{{ fullName(row) }}</span>
+                    <span class="admin-member-cell__sub">{{ row.email }}</span>
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Email -->
+              <ng-template ubaxDataTableCell="email" let-row>
+                <span class="admin-cell-muted">{{ row.email ?? '—' }}</span>
+              </ng-template>
+
+              <!-- Téléphone -->
+              <ng-template ubaxDataTableCell="phone" let-row>
+                <span class="admin-cell-muted">{{ row.phone ?? '—' }}</span>
+              </ng-template>
+
+              <!-- Rôle -->
+              <ng-template ubaxDataTableCell="role" let-row>
+                @if (primaryRole(row) === 'SUPER_ADMIN') {
+                  <ubax-status-badge variant="danger">Super Admin</ubax-status-badge>
+                } @else if (primaryRole(row) === 'ADMIN') {
+                  <ubax-status-badge variant="info">Admin</ubax-status-badge>
+                } @else {
+                  <ubax-status-badge variant="neutral">—</ubax-status-badge>
+                }
+              </ng-template>
+
+              <!-- Actions -->
+              <ng-template ubaxDataTableCell="actions" let-row>
+                <div class="admin-row-actions">
+                  <button type="button" class="admin-row-action" aria-label="Voir les détails" (click)="openDetails(row)">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8"/>
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                    </svg>
+                  </button>
+                  @if (canMutate(row)) {
+                    <button type="button" class="admin-row-action" aria-label="Modifier" (click)="openEdit(row)">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      </svg>
+                    </button>
+                    <button type="button" class="admin-row-action admin-row-action--danger" aria-label="Supprimer" (click)="openDelete(row)">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      </svg>
+                    </button>
+                  }
+                </div>
+              </ng-template>
+            </ubax-ui-data-table>
+          </div>
+        }
+      </section>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <footer class="admin-pagination-shell">
+          <ubax-ui-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            variant="members"
+            (pageChange)="onPageChange($event)"
+          />
+        </footer>
+      }
+    </div>
+  </section>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
