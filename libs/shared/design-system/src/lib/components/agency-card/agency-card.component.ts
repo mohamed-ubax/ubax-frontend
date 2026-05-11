@@ -16,11 +16,6 @@ const STATUS_CLASSES: Record<AgencyCardData['status'], string> = {
   suspended: 'bg-danger-bg text-danger',
 };
 
-const STATUS_LABELS: Record<AgencyCardData['status'], string> = {
-  active: 'Active',
-  pending: 'En attente',
-  suspended: 'Suspendue',
-};
 
 @Component({
   selector: 'ubax-agency-card',

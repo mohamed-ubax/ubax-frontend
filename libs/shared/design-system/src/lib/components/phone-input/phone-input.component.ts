@@ -128,7 +128,9 @@ export class PhoneInputComponent implements ControlValueAccessor {
 
   readonly localNumber = model<string>('');
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange: (value: string) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
 
   writeValue(value: string | null): void {

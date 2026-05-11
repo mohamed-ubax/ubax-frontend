@@ -2,7 +2,6 @@ import {
   Component,
   input,
   output,
-  contentChildren,
   TemplateRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -199,7 +198,8 @@ export class DataTableComponent {
   readonly skeletonRows = Array(8).fill({});
 
   /** @internal cell templates map — override in subclass or via DI */
-  getCellTemplate(_field: string): TemplateRef<unknown> | null {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getCellTemplate(_: string): TemplateRef<unknown> | null {
     return null;
   }
 

@@ -70,7 +70,9 @@ export class CategoryRatingComponent implements ControlValueAccessor {
 
   readonly normalizedValue = computed(() => this.value() ?? 0);
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange: (value: number | null) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
 
   writeValue(value: number | null): void {

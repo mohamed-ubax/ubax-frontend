@@ -163,7 +163,9 @@ export class FileUploadComponent implements ControlValueAccessor {
 
   readonly hasSelection = computed(() => this.selectedFiles().length > 0);
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange: (value: FileUploadValue) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
 
   writeValue(value: FileUploadValue): void {

@@ -1,4 +1,4 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface StepperStep {

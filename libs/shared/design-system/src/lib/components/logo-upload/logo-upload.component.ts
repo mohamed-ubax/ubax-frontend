@@ -119,7 +119,9 @@ export class LogoUploadComponent implements ControlValueAccessor, OnDestroy {
     () => this.localPreviewUrl() ?? this.previewUrl(),
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange: (value: File | null) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
   private objectUrl: string | null = null;
 
