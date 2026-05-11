@@ -8,7 +8,7 @@
   signal,
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe, DOCUMENT } from '@angular/common';
 import {
   form,
@@ -27,11 +27,14 @@ import {
 import {
   ApiConfiguration,
   generateReadUrl,
+  getById,
+  PropertyDetailResponse,
   PropertyAmenityRequest,
 } from '@ubax-workspace/shared-api-types';
 import {
   AuthStore,
   BienCreationStore,
+  BienEditStore,
 } from '@ubax-workspace/ubax-web-data-access';
 import { firstValueFrom } from 'rxjs';
 
@@ -138,15 +141,17 @@ interface BienStep4 {
   selector: 'ubax-bien-add-page',
   standalone: true,
   imports: [FormField, DecimalPipe],
-  providers: [BienCreationStore],
+  providers: [BienCreationStore, BienEditStore],
   templateUrl: './bien-add-page.component.html',
   styleUrl: './bien-add-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BienAddPageComponent implements OnInit {
   private readonly store = inject(BienCreationStore);
+  private readonly editStore = inject(BienEditStore);
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
   private readonly document = inject(DOCUMENT);
@@ -256,11 +261,11 @@ export class BienAddPageComponent implements OnInit {
 
   // ── Signal Forms – step 1 (Informations générales) ──────────────────────
   private readonly _step1 = signal<BienStep1>({
-    title: 'Villa familiale avec jardin privatif',
+    title: '',
     propertyType: '',
     transactionType: '',
-    condition: 'GOOD',
-    yearBuilt: 2014,
+    condition: '',
+    yearBuilt: null,
     ownerId: '',
   });
   protected readonly formStep1 = form(this._step1, (p) => {
@@ -274,14 +279,14 @@ export class BienAddPageComponent implements OnInit {
 
   // ── Signal Forms – step 2 (Surfaces & pièces) ────────────────────────────
   private readonly _step2 = signal<BienStep2>({
-    rooms: 6,
-    bedrooms: 4,
-    bathrooms: 2,
-    balconies: 2,
-    surfaceTotal: 280,
-    surfaceLiving: 210,
-    floor: 0,
-    totalFloors: 2,
+    rooms: null,
+    bedrooms: null,
+    bathrooms: null,
+    balconies: null,
+    surfaceTotal: null,
+    surfaceLiving: null,
+    floor: null,
+    totalFloors: null,
   });
   protected readonly formStep2 = form(this._step2, (p) => {
     min(p.rooms, 0);
@@ -296,11 +301,11 @@ export class BienAddPageComponent implements OnInit {
   // ── Signal Forms – step 3 (Localisation) ─────────────────────────────────
   private readonly _step3 = signal<BienStep3>({
     city: '',
-    district: 'Riviera 3',
-    street: 'Boulevard Latrille',
-    address: 'Lot 48, îlot 7, Riviera 3',
-    latitude: 5.3568,
-    longitude: -3.9669,
+    district: '',
+    street: '',
+    address: '',
+    latitude: null,
+    longitude: null,
   });
   protected readonly formStep3 = form(this._step3, (p) => {
     required(p.city, { message: 'La ville est requise' });
@@ -312,10 +317,9 @@ export class BienAddPageComponent implements OnInit {
 
   // ── Signal Forms – step 4 (Équipements & Prix) ───────────────────────────
   private readonly _step4 = signal<BienStep4>({
-    price: 950000,
-    description:
-      'Villa spacieuse en zone résidentielle calme, avec grand séjour, jardin arboré et stationnement intérieur sécurisé.',
-    amenities: ['AC', 'SECURITY', 'PARKING', 'GARDEN', 'WATER_TANK'],
+    price: 0,
+    description: '',
+    amenities: [],
   });
   protected readonly formStep4 = form(this._step4, (p) => {
     required(p.price, { message: 'Le prix est requis' });
@@ -348,44 +352,26 @@ export class BienAddPageComponent implements OnInit {
 
   /** Becomes true once proceedStep4 triggers creerBrouillon, resets on navigation. */
   private readonly step4Pending = signal(false);
+  private readonly editPending = signal(false);
+
+  protected readonly editPropertyId = computed(
+    () => this.route.snapshot.paramMap.get('id') ?? '',
+  );
+  protected readonly isEditMode = computed(
+    () => this.editPropertyId().length > 0,
+  );
 
   protected readonly coverMediaId = computed(
     () => this.medias().find((m) => m.cover)?.id ?? null,
   );
 
   constructor() {
-    // Once referentials are loaded, auto-select first valid options for test runs.
-    effect(() => {
-      const firstPropertyType = this.propertyTypes()[0]?.value ?? '';
-      const firstTransactionType = this.transactionTypes()[0]?.value ?? '';
-      const firstCity = this.cities()[0]?.value ?? '';
-
-      this._step1.update((s) => ({
-        ...s,
-        propertyType: s.propertyType || firstPropertyType,
-        transactionType: s.transactionType || firstTransactionType,
-      }));
-      this._step3.update((s) => ({
-        ...s,
-        city: s.city || firstCity,
-      }));
-
-      const availableDocTypes = this.docTypes();
-      const firstDocType = availableDocTypes[0]?.value ?? '';
-      if (
-        firstDocType &&
-        !availableDocTypes.some((dt) => dt.value === this.selectedDocType())
-      ) {
-        this.selectedDocType.set(firstDocType);
-      }
-    });
-
     // Redirect to detail page once the bien transitions to PENDING status.
     effect(() => {
       const prop = this.property();
       if (prop?.id && prop.status === 'PENDING') {
         this.store.reset();
-        this.router.navigate(['/immobilier', prop.id]);
+        this.router.navigate(['/biens', prop.id]);
       }
     });
 
@@ -402,6 +388,30 @@ export class BienAddPageComponent implements OnInit {
       }
     });
 
+    effect(() => {
+      if (
+        !this.isEditMode() ||
+        !this.editPending() ||
+        this.editStore.saving()
+      ) {
+        return;
+      }
+
+      const error = this.editStore.error();
+      if (error) {
+        this.editPending.set(false);
+        this.notifications?.error('La modification du bien a échoué.');
+        return;
+      }
+
+      const id = this.editPropertyId();
+      this.editPending.set(false);
+      if (id) {
+        this.notifications?.success('Bien modifié avec succès.');
+        this.router.navigate(['/biens', id]);
+      }
+    });
+
     // Lower topbar when any confirmation modal is open.
     effect(() => {
       const isOpen = !!(this.mediaDeleteTarget() || this.docDeleteTarget());
@@ -411,6 +421,10 @@ export class BienAddPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.chargerReferentiels();
+    const id = this.editPropertyId();
+    if (id) {
+      void this.prefillFromProperty(id);
+    }
   }
 
   protected isReachedStep(index: number): boolean {
@@ -475,7 +489,7 @@ export class BienAddPageComponent implements OnInit {
           (code) => ({ code }),
         );
 
-        this.store.creerBrouillon({
+        const payload = {
           title: s1.title || undefined,
           propertyType: s1.propertyType || undefined,
           transactionType: s1.transactionType || undefined,
@@ -499,6 +513,22 @@ export class BienAddPageComponent implements OnInit {
           price: s4.price ?? 0,
           description: s4.description || undefined,
           amenities: amenities.length > 0 ? amenities : undefined,
+        };
+
+        if (this.isEditMode()) {
+          const id = this.editPropertyId();
+          if (!id) {
+            this.notifications?.error('Identifiant du bien introuvable.');
+            return null;
+          }
+
+          this.editStore.updateProperty({ id, ...payload });
+          this.editPending.set(true);
+          return null;
+        }
+
+        this.store.creerBrouillon({
+          ...payload,
         });
 
         this.step4Pending.set(true);
@@ -626,7 +656,7 @@ export class BienAddPageComponent implements OnInit {
 
   protected sauvegarderBrouillon(): void {
     this.store.reset();
-    this.router.navigate(['/immobilier']);
+    this.router.navigate(['/biens']);
   }
 
   protected soumettre(): void {
@@ -644,5 +674,85 @@ export class BienAddPageComponent implements OnInit {
     if (bytes < 1024) return `${bytes} o`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
+  private async prefillFromProperty(id: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        getById(this.http, this.apiConfig.rootUrl, { id }),
+      );
+      const detail = this.extractDetailFromResponse(response.body);
+      const property = detail?.property;
+
+      if (!property) {
+        return;
+      }
+
+      this._step1.update((state) => ({
+        ...state,
+        title: property.title ?? state.title,
+        propertyType: property.propertyType ?? state.propertyType,
+        transactionType: property.transactionType ?? state.transactionType,
+        condition: property.condition ?? state.condition,
+        yearBuilt: property.yearBuilt ?? state.yearBuilt,
+        ownerId: property.ownerId ?? state.ownerId,
+      }));
+
+      this._step2.update((state) => ({
+        ...state,
+        rooms: property.rooms ?? state.rooms,
+        bedrooms: property.bedrooms ?? state.bedrooms,
+        bathrooms: property.bathrooms ?? state.bathrooms,
+        balconies: property.balconies ?? state.balconies,
+        surfaceTotal: property.surfaceTotal ?? state.surfaceTotal,
+        surfaceLiving: property.surfaceLiving ?? state.surfaceLiving,
+        floor: property.floor ?? state.floor,
+        totalFloors: property.totalFloors ?? state.totalFloors,
+      }));
+
+      this._step3.update((state) => ({
+        ...state,
+        city: property.city ?? state.city,
+        district: property.district ?? state.district,
+        street: property.street ?? state.street,
+        address: property.address ?? state.address,
+        latitude: property.latitude ?? state.latitude,
+        longitude: property.longitude ?? state.longitude,
+      }));
+
+      this._step4.update((state) => ({
+        ...state,
+        price: property.price ?? state.price,
+        description: property.description ?? state.description,
+        amenities:
+          property.amenities
+            ?.map((item) => item.code ?? '')
+            .filter((code) => code.length > 0) ?? state.amenities,
+      }));
+    } catch {
+      this.notifications?.error(
+        'Impossible de préremplir le formulaire de modification.',
+      );
+    }
+  }
+
+  private extractDetailFromResponse(
+    body: unknown,
+  ): PropertyDetailResponse | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as PropertyDetailResponse;
+    if (direct.property || direct.media || direct.documents) {
+      return direct;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      return wrapped.data as PropertyDetailResponse;
+    }
+
+    return null;
   }
 }

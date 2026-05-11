@@ -10,7 +10,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   form,
   submit,
@@ -26,13 +26,16 @@ import {
 import {
   ApiConfiguration,
   generateReadUrl,
+  getById,
   LaCodeListDto,
+  PropertyDetailResponse,
   PropertyAmenityRequest,
   PropertyDocumentResponse,
 } from '@ubax-workspace/shared-api-types';
 import {
   AuthStore,
   EspaceCreationStore,
+  EspaceEditStore,
 } from '@ubax-workspace/ubax-web-data-access';
 import { SelectModule } from 'primeng/select';
 import { firstValueFrom } from 'rxjs';
@@ -199,14 +202,16 @@ function resolveTimelineStatus(
   selector: 'ubax-espace-add-page',
   standalone: true,
   imports: [FormField, DecimalPipe, FormsModule, SelectModule],
-  providers: [EspaceCreationStore],
+  providers: [EspaceCreationStore, EspaceEditStore],
   templateUrl: './espace-add-page.component.html',
   styleUrl: './espace-add-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EspaceAddPageComponent implements OnInit {
   private readonly store = inject(EspaceCreationStore);
+  private readonly editStore = inject(EspaceEditStore);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly authStore = inject(AuthStore);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
@@ -376,6 +381,14 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly documentOpeningId = signal<string | null>(null);
   protected readonly coverWarnVisible = signal(false);
   private readonly step4Pending = signal(false);
+  private readonly editPending = signal(false);
+
+  protected readonly editPropertyId = computed(
+    () => this.route.snapshot.paramMap.get('id') ?? '',
+  );
+  protected readonly isEditMode = computed(
+    () => this.editPropertyId().length > 0,
+  );
 
   // ── Computed ──────────────────────────────────────────────────────────────
   protected readonly isCreated = computed(() => !!this.store.propertyId());
@@ -410,16 +423,16 @@ export class EspaceAddPageComponent implements OnInit {
 
   // Step 2 — Capacité & Surfaces
   protected readonly _step2 = signal<EspaceStep2>({
-    rooms: 1,
-    bedrooms: 1,
-    bathrooms: 1,
+    rooms: null,
+    bedrooms: null,
+    bathrooms: null,
     balconies: null,
     surfaceTotal: null,
     surfaceLiving: null,
-    floor: 'RDC',
+    floor: '',
     totalFloors: null,
     bedType: '',
-    maxOccupancy: 2,
+    maxOccupancy: null,
   });
 
   protected readonly formStep2 = form(this._step2, (p) => {
@@ -456,7 +469,7 @@ export class EspaceAddPageComponent implements OnInit {
     description: '',
     mealPlan: '',
     paymentFrequency: '',
-    amenities: ['AC', 'SECURITY', 'PARKING'],
+    amenities: [],
   });
 
   protected readonly formStep4 = form(this._step4, (p) => {
@@ -477,69 +490,6 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly previewFloor = computed(() => this._step2().floor);
 
   constructor() {
-    // Auto-select first city once code lists load
-    effect(() => {
-      const firstCity = this.cities()[0]?.value ?? '';
-      if (firstCity && !this._step3().city) {
-        this._step3.update((s) => ({ ...s, city: firstCity }));
-      }
-    });
-
-    effect(() => {
-      const first = this.propertyTypeOptions()[0]?.value;
-      const current = this._step1().propertyType;
-      if (first && !current) {
-        this._step1.update((s) => ({ ...s, propertyType: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.transactionTypeOptions()[0]?.value;
-      const current = this._step1().transactionType;
-      if (first && !current) {
-        this._step1.update((s) => ({ ...s, transactionType: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.conditionOptions()[0]?.value;
-      const current = this._step1().condition;
-      if (first && !current) {
-        this._step1.update((s) => ({ ...s, condition: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.bedTypeOptions()[0]?.value;
-      const current = this._step2().bedType;
-      if (first && !current) {
-        this._step2.update((s) => ({ ...s, bedType: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.mealPlanOptions()[0]?.value;
-      const current = this._step4().mealPlan;
-      if (first && !current) {
-        this._step4.update((s) => ({ ...s, mealPlan: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.paymentFrequencyOptions()[0]?.value;
-      const current = this._step4().paymentFrequency;
-      if (first && !current) {
-        this._step4.update((s) => ({ ...s, paymentFrequency: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.docTypeOptions()[0]?.value;
-      if (first && !this.selectedDocType()) {
-        this.selectedDocType.set(first);
-      }
-    });
-
     effect(() => {
       const available = new Set(this.equipmentItems().map((item) => item.code));
       if (available.size === 0) return;
@@ -548,15 +498,6 @@ export class EspaceAddPageComponent implements OnInit {
 
       if (filtered.length !== selected.length) {
         this._step4.update((s) => ({ ...s, amenities: filtered }));
-      }
-
-      if (filtered.length === 0) {
-        const fallback = this.equipmentItems()
-          .slice(0, 3)
-          .map((item) => item.code);
-        if (fallback.length > 0) {
-          this._step4.update((s) => ({ ...s, amenities: fallback }));
-        }
       }
     });
 
@@ -573,6 +514,30 @@ export class EspaceAddPageComponent implements OnInit {
       }
     });
 
+    effect(() => {
+      if (
+        !this.isEditMode() ||
+        !this.editPending() ||
+        this.editStore.saving()
+      ) {
+        return;
+      }
+
+      const error = this.editStore.error();
+      if (error) {
+        this.editPending.set(false);
+        this.notifications?.error("La modification de l'espace a échoué.");
+        return;
+      }
+
+      const id = this.editPropertyId();
+      this.editPending.set(false);
+      if (id) {
+        this.notifications?.success('Espace modifié avec succès.');
+        this.router.navigate(['/hotel/espaces', id]);
+      }
+    });
+
     // Navigate to list once submitted (status → PENDING)
     effect(() => {
       const prop = this.store.property();
@@ -585,6 +550,10 @@ export class EspaceAddPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.chargerReferentiels();
+    const id = this.editPropertyId();
+    if (id) {
+      void this.prefillFromProperty(id);
+    }
   }
 
   // ── Wizard navigation ─────────────────────────────────────────────────────
@@ -701,7 +670,7 @@ export class EspaceAddPageComponent implements OnInit {
         const floorNum =
           s2.floor === 'RDC' ? 0 : Number.parseInt(s2.floor, 10) || null;
 
-        this.store.creerEspace({
+        const payload = {
           title: s1.title,
           description: s4.description || undefined,
           propertyType: s1.propertyType,
@@ -727,6 +696,22 @@ export class EspaceAddPageComponent implements OnInit {
           latitude: s3.latitude ?? undefined,
           longitude: s3.longitude ?? undefined,
           amenities: amenities.length > 0 ? amenities : undefined,
+        };
+
+        if (this.isEditMode()) {
+          const id = this.editPropertyId();
+          if (!id) {
+            this.notifications?.error("Identifiant de l'espace introuvable.");
+            return null;
+          }
+
+          this.editStore.updateEspace({ id, ...payload });
+          this.editPending.set(true);
+          return null;
+        }
+
+        this.store.creerEspace({
+          ...payload,
         });
 
         this.step4Pending.set(true);
@@ -954,5 +939,92 @@ export class EspaceAddPageComponent implements OnInit {
 
   protected trackDocument(_: number, doc: PropertyDocumentResponse): string {
     return doc.id ?? doc.fileUrl ?? doc.title ?? `${_}`;
+  }
+
+  private async prefillFromProperty(id: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        getById(this.http, this.apiConfig.rootUrl, { id }),
+      );
+      const detail = this.extractDetailFromResponse(response.body);
+      const property = detail?.property;
+
+      if (!property) {
+        return;
+      }
+
+      this._step1.update((state) => ({
+        ...state,
+        title: property.title ?? state.title,
+        propertyType: property.propertyType ?? state.propertyType,
+        transactionType: property.transactionType ?? state.transactionType,
+        condition: property.condition ?? state.condition,
+      }));
+
+      this._step2.update((state) => ({
+        ...state,
+        rooms: property.rooms ?? state.rooms,
+        bedrooms: property.bedrooms ?? state.bedrooms,
+        bathrooms: property.bathrooms ?? state.bathrooms,
+        balconies: property.balconies ?? state.balconies,
+        surfaceTotal: property.surfaceTotal ?? state.surfaceTotal,
+        surfaceLiving: property.surfaceLiving ?? state.surfaceLiving,
+        floor:
+          typeof property.floor === 'number'
+            ? property.floor === 0
+              ? 'RDC'
+              : `${property.floor}`
+            : state.floor,
+        totalFloors: property.totalFloors ?? state.totalFloors,
+        bedType: property.bedType ?? state.bedType,
+        maxOccupancy: property.maxOccupancy ?? state.maxOccupancy,
+      }));
+
+      this._step3.update((state) => ({
+        ...state,
+        city: property.city ?? state.city,
+        district: property.district ?? state.district,
+        address: property.address ?? state.address,
+        street: property.street ?? state.street,
+        latitude: property.latitude ?? state.latitude,
+        longitude: property.longitude ?? state.longitude,
+      }));
+
+      this._step4.update((state) => ({
+        ...state,
+        price: property.price ?? state.price,
+        description: property.description ?? state.description,
+        mealPlan: property.mealPlan ?? state.mealPlan,
+        paymentFrequency: property.paymentFrequency ?? state.paymentFrequency,
+        amenities:
+          property.amenities
+            ?.map((item) => item.code ?? '')
+            .filter((code) => code.length > 0) ?? state.amenities,
+      }));
+    } catch {
+      this.notifications?.error(
+        "Impossible de préremplir l'espace à modifier.",
+      );
+    }
+  }
+
+  private extractDetailFromResponse(
+    body: unknown,
+  ): PropertyDetailResponse | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as PropertyDetailResponse;
+    if (direct.property || direct.media || direct.documents) {
+      return direct;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      return wrapped.data as PropertyDetailResponse;
+    }
+
+    return null;
   }
 }

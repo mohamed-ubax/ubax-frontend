@@ -1,0 +1,352 @@
+<section class="espace-edit-page">
+  <header class="espace-edit-page__header">
+    <div class="espace-edit-page__heading">
+      <a
+        class="espace-back-button"
+        routerLink="/hotel/espaces"
+        aria-label="Retour"
+      >
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      </a>
+      <h1 class="espace-edit-page__title">Modifier un espace</h1>
+    </div>
+  </header>
+
+  <div class="espace-edit-page__container">
+    <!-- ── Error state ─────────────────────────────────────────────────────── -->
+    @if (isSessionError()) {
+      <div class="error-banner">
+        <p>{{ error() }}</p>
+        <button type="button" (click)="expireAndRedirect()">
+          Se reconnecter
+        </button>
+      </div>
+    } @else if (hasError()) {
+      <div class="error-banner">
+        <p>{{ error() }}</p>
+      </div>
+    }
+
+    <!-- ── Loading state ───────────────────────────────────────────────────── -->
+    @if (loading()) {
+      <div class="loading-state">
+        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+        <p>Chargement de l'espace...</p>
+      </div>
+    }
+
+    <!-- ── Main form ───────────────────────────────────────────────────────── -->
+    @if (!loading() && espace()) {
+      <div class="espace-edit-page__wizard">
+        <!-- ── Wizard stepper ─────────────────────────────────────────────── -->
+        <div class="journey-stepper">
+          @for (step of wizardSteps; track $index) {
+            <button
+              type="button"
+              class="journey-stepper__step"
+              [class.journey-stepper__step--active]="activeStep() === $index"
+              [class.journey-stepper__step--completed]="activeStep() > $index"
+              (click)="activeStep.set($index)"
+              [disabled]="!isReachedStep($index)"
+            >
+              <span class="journey-stepper__number">{{ $index + 1 }}</span>
+              <span class="journey-stepper__label">{{ step.label }}</span>
+            </button>
+          }
+        </div>
+
+        <!-- ── Step 1: Identité ──────────────────────────────────────────── -->
+        @if (activeStep() === 0) {
+          <div class="form-step">
+            <h2>Identité de l'espace</h2>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="title">Titre de l'espace *</label>
+                <input
+                  id="title"
+                  type="text"
+                  [formControl]="step1Controls.title"
+                  placeholder="ex: Chambre Deluxe, Salle de conférence"
+                />
+                @if (formStep1.get('title')?.hasError('required')) {
+                  <span class="error-message">Ce champ est obligatoire</span>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="propertyType">Type d'espace *</label>
+                <select
+                  id="propertyType"
+                  [formControl]="step1Controls.propertyType"
+                >
+                  <option value="">Sélectionnez un type</option>
+                  @for (type of propertyTypeOptions(); track type.value) {
+                    <option [value]="type.value">{{ type.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="condition">État de l'espace</label>
+                <select id="condition" [formControl]="step1Controls.condition">
+                  <option value="">Sélectionnez un état</option>
+                  @for (cond of conditionOptions(); track cond.value) {
+                    <option [value]="cond.value">{{ cond.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="previousStep()"
+                [disabled]="activeStep() === 0"
+              >
+                Précédent
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="proceedStep1()"
+                [disabled]="!formStep1.valid"
+              >
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Step 2: Capacité ──────────────────────────────────────────── -->
+        @if (activeStep() === 1) {
+          <div class="form-step">
+            <h2>Capacité de l'espace</h2>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="bedrooms">Chambres</label>
+                <input
+                  id="bedrooms"
+                  type="number"
+                  min="0"
+                  [formControl]="step2Controls.bedrooms"
+                  placeholder="0"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="bathrooms">Salles de bain</label>
+                <input
+                  id="bathrooms"
+                  type="number"
+                  min="0"
+                  [formControl]="step2Controls.bathrooms"
+                  placeholder="0"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="maxOccupancy">Capacité max (personnes)</label>
+                <input
+                  id="maxOccupancy"
+                  type="number"
+                  min="1"
+                  [formControl]="step2Controls.maxOccupancy"
+                  placeholder="ex: 2, 4"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="bedType">Type de lit</label>
+                <select id="bedType" [formControl]="step2Controls.bedType">
+                  <option value="">Sélectionnez un type</option>
+                  @for (type of bedTypeOptions(); track type.value) {
+                    <option [value]="type.value">{{ type.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="surfaceTotal">Surface totale (m²)</label>
+                <input
+                  id="surfaceTotal"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  [formControl]="step2Controls.surfaceTotal"
+                  placeholder="ex: 25.5"
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="previousStep()"
+              >
+                Précédent
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="proceedStep2()"
+                [disabled]="!formStep2.valid"
+              >
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Step 3: Localisation ──────────────────────────────────────── -->
+        @if (activeStep() === 2) {
+          <div class="form-step">
+            <h2>Localisation</h2>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="city">Ville</label>
+                <select id="city" [formControl]="step3Controls.city">
+                  <option value="">Sélectionnez une ville</option>
+                  @for (city of cityOptions(); track city.value) {
+                    <option [value]="city.value">{{ city.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="district">Quartier / Arrondissement</label>
+                <input
+                  id="district"
+                  type="text"
+                  [formControl]="step3Controls.district"
+                  placeholder="ex: Abidjan-Cocody"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="address">Adresse complète</label>
+                <input
+                  id="address"
+                  type="text"
+                  [formControl]="step3Controls.address"
+                  placeholder="ex: Rue de la Paix, N° 123"
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="previousStep()"
+              >
+                Précédent
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="proceedStep3()"
+                [disabled]="!formStep3.valid"
+              >
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Step 4: Équipements & Prix ───────────────────────────────── -->
+        @if (activeStep() === 3) {
+          <div class="form-step">
+            <h2>Équipements & Tarification</h2>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="price">Prix par nuit (FCFA) *</label>
+                <input
+                  id="price"
+                  type="number"
+                  step="100"
+                  min="0"
+                  [formControl]="step4Controls.price"
+                  placeholder="ex: 50000"
+                />
+                @if (formStep4.get('price')?.hasError('required')) {
+                  <span class="error-message">Ce champ est obligatoire</span>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="mealPlan">Plan de repas</label>
+                <select id="mealPlan" [formControl]="step4Controls.mealPlan">
+                  <option value="">Sélectionnez un plan</option>
+                  @for (plan of mealPlanOptions(); track plan.value) {
+                    <option [value]="plan.value">{{ plan.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="paymentFrequency">Fréquence de paiement</label>
+                <select
+                  id="paymentFrequency"
+                  [formControl]="step4Controls.paymentFrequency"
+                >
+                  <option value="">Sélectionnez une fréquence</option>
+                  @for (freq of paymentFrequencyOptions(); track freq.value) {
+                    <option [value]="freq.value">{{ freq.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field full-width">
+                <label for="description">Description</label>
+                <textarea
+                  id="description"
+                  [formControl]="step4Controls.description"
+                  placeholder="Description détaillée de l'espace..."
+                  rows="4"
+                ></textarea>
+              </div>
+
+              <div class="form-field full-width">
+                <label for="amenities">Équipements</label>
+                <select
+                  id="amenities"
+                  multiple
+                  [formControl]="step4Controls.amenities"
+                >
+                  @for (amenity of amenityOptions(); track amenity.value) {
+                    <option [value]="amenity.value">{{ amenity.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="previousStep()"
+              >
+                Précédent
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="proceedStep4()"
+                [disabled]="!formStep4.valid || saving()"
+              >
+                @if (saving()) {
+                  <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                  Enregistrement...
+                } @else {
+                  Enregistrer les modifications
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

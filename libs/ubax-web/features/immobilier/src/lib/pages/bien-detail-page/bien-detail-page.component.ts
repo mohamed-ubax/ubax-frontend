@@ -7,7 +7,17 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
+import { firstValueFrom } from 'rxjs';
+import {
+  ApiConfiguration,
+  generateReadUrl,
+  getById,
+  PropertyDetailResponse,
+} from '@ubax-workspace/shared-api-types';
+import { deriveViewState, ViewState } from '@ubax-workspace/shared-ui';
 import { MesBiensStore } from '@ubax-workspace/ubax-web-data-access';
 import {
   NOTIFICATION_HANDLER,
@@ -15,7 +25,9 @@ import {
 } from '@ubax-workspace/shared-data-access';
 
 type BienDocument = {
+  readonly id: string;
   readonly name: string;
+  readonly fileUrl: string;
 };
 
 type BienMetric = {
@@ -30,61 +42,50 @@ type BienComment = {
   readonly review: string;
 };
 
-const GALLERY_IMAGES = [
-  'shared/rooms/room-photo-01.webp',
-  'biens/detail/property-side-01.webp',
-  'biens/detail/property-side-02.webp',
-  'biens/detail/property-side-03.webp',
-] as const;
+const STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Brouillon',
+  PENDING: 'En attente',
+  PUBLISHED: 'Publie',
+  RESERVED: 'Reserve',
+  SOLD: 'Vendu',
+  ARCHIVED: 'Archive',
+  REJECTED: 'Rejete',
+};
 
-const PROPERTY_METRICS: readonly BienMetric[] = [
-  { label: 'Chambres', value: '2' },
-  { label: 'Salles de bains', value: '1' },
-  { label: 'Salon', value: '1' },
-  { label: 'Cuisine', value: '1' },
-  { label: 'Surface', value: '200 m²' },
-] as const;
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  APARTMENT: 'Appartement',
+  VILLA: 'Villa',
+  HOUSE: 'Maison',
+  LAND: 'Terrain',
+  OFFICE: 'Bureau',
+  HOTEL_ROOM: 'Chambre hotel',
+};
 
-const PROPERTY_DOCUMENTS: readonly BienDocument[] = [
-  { name: 'Facture' },
-  { name: 'État des lieux d’entrée' },
-  { name: 'CNI ivoirienne' },
-] as const;
+const TRANSACTION_TYPE_LABELS: Record<string, string> = {
+  SALE: 'Vente',
+  RENT: 'Location',
+  RENT_FURNISHED: 'Location meublee',
+  SHORT_STAY: 'Court sejour',
+};
 
-const AMENITY_COLUMNS = [
-  ['Climatisation', 'Placards intégrés', 'Cuisine équipée', 'Balcon'],
-  [
-    'Gardiennage 24h/24',
-    'Caméras de surveillance',
-    'Interphone',
-    'Réservoir d’eau',
-  ],
-  ['Groupe électrogène', 'Ascenseur', 'Parking privé', 'Balcon'],
-] as const;
+const CONDITION_LABELS: Record<string, string> = {
+  NEW: 'Neuf',
+  GOOD: 'Bon etat',
+  RENOVATE: 'A renover',
+};
 
-const PROPERTY_COMMENTS: readonly BienComment[] = [
-  {
-    author: 'Aïcha Kouadio',
-    avatar: 'biens/detail/comment-user-01.webp',
-    rating: 4,
-    review:
-      'Appartement très propre et bien situé. La résidence est calme et sécurisée. Je recommande vivement, surtout pour les familles.',
-  },
-  {
-    author: 'Jean-Claude N’Guessan',
-    avatar: 'biens/detail/comment-user-02.webp',
-    rating: 5,
-    review:
-      'Appartement conforme aux photos. Très spacieux et confortable. Le propriétaire est sérieux et réactif.',
-  },
-  {
-    author: 'Mariam Koné',
-    avatar: 'biens/detail/comment-user-03.webp',
-    rating: 4,
-    review:
-      'J’ai adoré le balcon et la cuisine moderne. Le quartier est pratique avec tout à proximité. Je me sens en sécurité ici.',
-  },
-] as const;
+const AMENITY_LABELS: Record<string, string> = {
+  AC: 'Climatisation',
+  SECURITY: 'Securite',
+  PARKING: 'Parking prive',
+  GARDEN: 'Jardin',
+  WATER_TANK: "Reservoir d'eau",
+  WIFI: 'Wi-Fi',
+  ELEVATOR: 'Ascenseur',
+  GENERATOR: 'Groupe electrogene',
+  POOL: 'Piscine',
+  FURNISHED: 'Meuble',
+};
 
 @Component({
   selector: 'ubax-bien-detail-page',
@@ -98,47 +99,255 @@ export class BienDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly store = inject(MesBiensStore);
   private readonly document = inject(DOCUMENT);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
 
-  protected readonly documents = PROPERTY_DOCUMENTS;
-  protected readonly metrics = PROPERTY_METRICS;
-  protected readonly amenityColumns = AMENITY_COLUMNS;
-  protected readonly comments = PROPERTY_COMMENTS;
+  private readonly propertyDetail = signal<PropertyDetailResponse | null>(null);
+  private readonly loadingDetail = signal(false);
+  private readonly detailError = signal<string | null>(null);
+  private readonly hasLoadedDetail = signal(false);
+
+  protected readonly comments: readonly BienComment[] = [];
   protected readonly ratingStars = [1, 2, 3, 4, 5] as const;
-  protected readonly galleryImages = GALLERY_IMAGES;
   protected readonly activeImageIndex = signal(0);
   protected readonly archiveConfirmOpen = signal(false);
   protected readonly archivePending = signal(false);
   protected readonly propertyArchived = signal(false);
+  protected readonly propertyId = signal<string | null>(null);
+  protected readonly documentOpeningId = signal<string | null>(null);
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly previewName = signal<string>('Document');
+  protected readonly previewFullscreen = signal(false);
+  protected readonly previewIsImage = signal(false);
 
-  private readonly propertyId = signal<string | null>(null);
+  protected readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
 
-  protected readonly activeImage = computed(
-    () => this.galleryImages[this.activeImageIndex()],
+  protected readonly property = computed(
+    () => this.propertyDetail()?.property ?? null,
   );
+
+  protected readonly viewState = computed<ViewState>(() =>
+    deriveViewState(
+      this.loadingDetail(),
+      this.detailError(),
+      !this.property(),
+      this.hasLoadedDetail(),
+    ),
+  );
+
+  protected readonly detailErrorMessage = computed(
+    () =>
+      this.detailError() ??
+      'Impossible de charger les details complets de ce bien.',
+  );
+
+  protected readonly statusCode = computed(
+    () => this.property()?.status ?? 'DRAFT',
+  );
+
+  protected readonly propertyStatus = computed(() => {
+    if (this.propertyArchived()) {
+      return STATUS_LABELS['ARCHIVED'];
+    }
+    return STATUS_LABELS[this.statusCode()] ?? this.statusCode();
+  });
+
+  protected readonly statusClass = computed(() => {
+    const code = this.statusCode();
+    if (this.propertyArchived() || code === 'ARCHIVED') return 'archived';
+    if (code === 'PENDING') return 'pending';
+    if (code === 'REJECTED') return 'rejected';
+    return 'active';
+  });
+
+  protected readonly galleryImages = computed(() => {
+    const media = this.propertyDetail()?.media ?? [];
+    const photos = [...media]
+      .filter((item) => (item.mediaType ?? 'PHOTO') !== 'VIDEO')
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((item) => item.fileUrl ?? '')
+      .filter((url) => url.length > 0);
+
+    return photos;
+  });
+
+  protected readonly videos = computed(() =>
+    (this.propertyDetail()?.media ?? []).filter(
+      (item) => item.mediaType === 'VIDEO' && !!item.fileUrl,
+    ),
+  );
+
+  protected readonly hasGallery = computed(
+    () => this.galleryImages().length > 0,
+  );
+  protected readonly hasVideos = computed(() => this.videos().length > 0);
+
+  protected readonly documents = computed<readonly BienDocument[]>(() => {
+    const docs = this.propertyDetail()?.documents ?? [];
+    return docs.map((doc, index) => ({
+      id: doc.id ?? `doc-${index}`,
+      name: doc.title?.trim() || doc.fileName?.trim() || 'Document',
+      fileUrl: doc.fileUrl ?? '',
+    }));
+  });
+
+  protected readonly hasDocuments = computed(() => this.documents().length > 0);
+
+  protected readonly activeImage = computed(() => {
+    const images = this.galleryImages();
+    if (images.length === 0) {
+      return 'shared/rooms/room-photo-01.webp';
+    }
+    const index = Math.min(this.activeImageIndex(), images.length - 1);
+    return images[index] ?? images[0];
+  });
 
   protected readonly propertyTitle = computed(
+    () => this.property()?.title?.trim() || 'Bien immobilier',
+  );
+
+  protected readonly propertyTypeLabel = computed(() => {
+    const code = this.property()?.propertyType ?? '';
+    return PROPERTY_TYPE_LABELS[code] ?? this.normalizeCodeLabel(code);
+  });
+
+  protected readonly transactionLabel = computed(() => {
+    const code = this.property()?.transactionType ?? '';
+    return TRANSACTION_TYPE_LABELS[code] ?? this.normalizeCodeLabel(code);
+  });
+
+  protected readonly conditionLabel = computed(() => {
+    const code = this.property()?.condition ?? '';
+    return CONDITION_LABELS[code] ?? this.normalizeCodeLabel(code);
+  });
+
+  protected readonly locationLabel = computed(() => {
+    const city = this.normalizeCodeLabel(this.property()?.city ?? '');
+    const district = (this.property()?.district ?? '').trim();
+    return [city, district].filter((x) => x.length > 0).join(', ') || '-';
+  });
+
+  protected readonly fullAddress = computed(() => {
+    const street = (this.property()?.street ?? '').trim();
+    const address = (this.property()?.address ?? '').trim();
+    return [street, address].filter((x) => x.length > 0).join(', ') || '-';
+  });
+
+  protected readonly priceLabel = computed(() => {
+    const amount = this.property()?.price;
+    if (typeof amount !== 'number') {
+      return '-';
+    }
+    return `${amount.toLocaleString('fr-FR')} FCFA`;
+  });
+
+  protected readonly ownerName = computed(
+    () => this.property()?.ownerName?.trim() || 'Proprietaire non renseigne',
+  );
+
+  protected readonly ownerPhone = computed(() => '-');
+
+  protected readonly ownerProfileLink = computed(() => {
+    const ownerId = this.property()?.ownerId;
+    return ownerId ? ['/biens/bailleurs', ownerId] : ['/biens'];
+  });
+
+  protected readonly metrics = computed<readonly BienMetric[]>(() => {
+    const current = this.property();
+    return [
+      { label: 'Pieces', value: this.formatNumber(current?.rooms) },
+      { label: 'Chambres', value: this.formatNumber(current?.bedrooms) },
+      {
+        label: 'Salles de bains',
+        value: this.formatNumber(current?.bathrooms),
+      },
+      { label: 'Balcons', value: this.formatNumber(current?.balconies) },
+      {
+        label: 'Surface',
+        value:
+          typeof current?.surfaceTotal === 'number'
+            ? `${current.surfaceTotal} m²`
+            : '-',
+      },
+    ];
+  });
+
+  protected readonly descriptionParagraphs = computed(() => {
+    const raw = this.property()?.description?.trim() ?? '';
+    if (!raw) {
+      return ['Aucune description disponible pour ce bien.'];
+    }
+    return raw
+      .split(/\n+/)
+      .map((chunk) => chunk.trim())
+      .filter((chunk) => chunk.length > 0);
+  });
+
+  protected readonly amenityColumns = computed(() => {
+    const source = this.property()?.amenities ?? [];
+    const labels = source
+      .map(
+        (item) => item.customValue || item.customDescription || item.code || '',
+      )
+      .map((item) => item.trim())
+      .map((item) => AMENITY_LABELS[item] ?? this.normalizeCodeLabel(item))
+      .filter((item) => item.length > 0);
+
+    if (labels.length === 0) {
+      return [['Aucune commodite specifiee']];
+    }
+
+    const columnCount = 3;
+    const columns: string[][] = Array.from({ length: columnCount }, () => []);
+    labels.forEach((label, index) => {
+      columns[index % columnCount]?.push(label);
+    });
+    return columns.filter((column) => column.length > 0);
+  });
+
+  protected readonly archiveDisabled = computed(() => {
+    const code = this.statusCode();
+    return this.archivePending() || code === 'ARCHIVED' || code === 'PENDING';
+  });
+
+  protected readonly showTenantInfo = computed(() => false);
+
+  protected readonly latitude = computed(
+    () => this.property()?.latitude ?? null,
+  );
+  protected readonly longitude = computed(
+    () => this.property()?.longitude ?? null,
+  );
+  protected readonly hasCoordinates = computed(
     () =>
-      this.store.selectedItem()?.title?.trim() || 'Appartement Haut Standing',
+      typeof this.latitude() === 'number' &&
+      typeof this.longitude() === 'number',
   );
 
-  protected readonly propertyStatus = computed(() =>
-    this.propertyArchived() || this.store.selectedItem()?.status === 'ARCHIVED'
-      ? 'Archivé'
-      : 'Actif',
-  );
-
-  protected readonly archiveDisabled = computed(
-    () => this.archivePending() || this.propertyStatus() === 'Archivé',
-  );
+  protected readonly mapSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const lat = this.latitude();
+    const lng = this.longitude();
+    if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+    const d = 0.012;
+    const url =
+      `https://www.openstreetmap.org/export/embed.html` +
+      `?bbox=${lng - d},${lat - d},${lng + d},${lat + d}` +
+      `&layer=mapnik&marker=${lat},${lng}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
 
   constructor() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.propertyId.set(id);
-      this.store.loadOne?.(id);
+      void this.loadPropertyDetail(id);
     }
 
     effect(() => {
@@ -153,9 +362,10 @@ export class BienDetailPageComponent {
       this.archivePending.set(false);
       this.archiveConfirmOpen.set(false);
       this.notifications?.success(
-        `Le bien "${this.propertyTitle()}" est maintenant archivé.`,
+        `Le bien "${this.propertyTitle()}" est maintenant archive.`,
       );
       this.store.clearArchiveFeedback();
+      void this.loadPropertyDetail(id);
     });
 
     effect(() => {
@@ -173,13 +383,12 @@ export class BienDetailPageComponent {
 
     effect((onCleanup) => {
       const hasArchiveOverlay = this.archiveConfirmOpen();
-      this.document.body.classList.toggle(
-        'ubax-overlay-open',
-        hasArchiveOverlay,
-      );
+      const hasDocPreviewOverlay = !!this.previewUrl();
+      const hasOverlay = hasArchiveOverlay || hasDocPreviewOverlay;
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
 
       onCleanup(() => {
-        if (hasArchiveOverlay) {
+        if (hasOverlay) {
           this.document.body.classList.remove('ubax-overlay-open');
         }
       });
@@ -191,14 +400,18 @@ export class BienDetailPageComponent {
   }
 
   protected previousImage(): void {
+    const images = this.galleryImages();
+    if (images.length <= 1) return;
     this.activeImageIndex.update((current) =>
-      current === 0 ? this.galleryImages.length - 1 : current - 1,
+      current === 0 ? images.length - 1 : current - 1,
     );
   }
 
   protected nextImage(): void {
+    const images = this.galleryImages();
+    if (images.length <= 1) return;
     this.activeImageIndex.update((current) =>
-      current === this.galleryImages.length - 1 ? 0 : current + 1,
+      current === images.length - 1 ? 0 : current + 1,
     );
   }
 
@@ -220,7 +433,7 @@ export class BienDetailPageComponent {
 
   protected confirmArchive(): void {
     const id = this.propertyId();
-    if (!id || this.archivePending() || this.propertyStatus() === 'Archivé') {
+    if (!id || this.archivePending() || this.statusCode() === 'ARCHIVED') {
       return;
     }
 
@@ -229,5 +442,171 @@ export class BienDetailPageComponent {
       id,
       preserveInList: true,
     });
+  }
+
+  protected async openDocument(
+    fileUrl: string,
+    fileName?: string,
+    docId?: string,
+  ): Promise<void> {
+    if (!fileUrl) return;
+
+    if (docId) {
+      this.documentOpeningId.set(docId);
+    }
+
+    try {
+      const response = await firstValueFrom(
+        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+      );
+      const resolvedUrl =
+        this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(resolvedUrl, fileName));
+      this.previewUrl.set(resolvedUrl);
+    } catch {
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
+    } finally {
+      if (docId) {
+        this.documentOpeningId.set(null);
+      }
+    }
+  }
+
+  protected closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewName.set('Document');
+    this.previewIsImage.set(false);
+    this.previewFullscreen.set(false);
+  }
+
+  protected togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((value) => !value);
+  }
+
+  protected async downloadDocument(
+    fileUrl: string,
+    fileName: string,
+    docId?: string,
+  ): Promise<void> {
+    if (!fileUrl) return;
+
+    if (docId) {
+      this.documentOpeningId.set(docId);
+    }
+
+    let resolvedUrl = fileUrl;
+
+    try {
+      const response = await firstValueFrom(
+        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+      );
+      resolvedUrl = this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+    } catch {
+      resolvedUrl = fileUrl;
+    }
+
+    const link = document.createElement('a');
+    link.href = resolvedUrl;
+    link.download = fileName || 'document';
+    link.rel = 'noopener';
+    link.target = '_blank';
+    link.click();
+
+    if (docId) {
+      this.documentOpeningId.set(null);
+    }
+  }
+
+  protected retryLoad(): void {
+    const id = this.propertyId();
+    if (!id) {
+      return;
+    }
+
+    void this.loadPropertyDetail(id);
+  }
+
+  private async loadPropertyDetail(id: string): Promise<void> {
+    try {
+      this.loadingDetail.set(true);
+      this.detailError.set(null);
+      const response = await firstValueFrom(
+        getById(this.http, this.apiConfig.rootUrl, { id }),
+      );
+      this.propertyDetail.set(this.extractDetailFromResponse(response.body));
+      this.hasLoadedDetail.set(true);
+      this.activeImageIndex.set(0);
+    } catch {
+      this.propertyDetail.set(null);
+      this.hasLoadedDetail.set(true);
+      this.detailError.set(
+        'Impossible de charger les details complets de ce bien.',
+      );
+      this.notifications?.error(this.detailErrorMessage());
+    } finally {
+      this.loadingDetail.set(false);
+    }
+  }
+
+  private extractDetailFromResponse(
+    body: unknown,
+  ): PropertyDetailResponse | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as PropertyDetailResponse;
+    if (direct.property || direct.media || direct.documents) {
+      return direct;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      return wrapped.data as PropertyDetailResponse;
+    }
+
+    return null;
+  }
+
+  private normalizeCodeLabel(raw: string): string {
+    return raw
+      .toLowerCase()
+      .split('_')
+      .filter((part) => part.length > 0)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  private extractReadUrlFromResponse(body: unknown): string | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as { readUrl?: unknown };
+    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) {
+      return direct.readUrl;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      const nested = wrapped.data as { readUrl?: unknown };
+      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) {
+        return nested.readUrl;
+      }
+    }
+
+    return null;
+  }
+
+  private isPreviewImage(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/.test(target);
+  }
+
+  private formatNumber(value: number | undefined): string {
+    return typeof value === 'number' ? `${value}` : '-';
   }
 }

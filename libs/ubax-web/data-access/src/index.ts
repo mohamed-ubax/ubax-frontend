@@ -47,10 +47,14 @@ export * from './lib/store/agency/agency.store'; // inviterMembre agence, sous-r
 export { BienCreationStore } from './lib/store/biens/bien-creation.store';
 export type { BienCreationState } from './lib/store/biens/bien-creation.store';
 export { MesBiensStore } from './lib/store/biens/mes-biens.store';
+export { BienEditStore } from './lib/store/biens/bien-edit.store';
 
 // ─── Espaces hôteliers ────────────────────────────────────────────────────────
 export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
-export type { EspaceStatus, HotelPropertyType } from './lib/store/espaces/mes-espaces.store';
+export type {
+  EspaceStatus,
+  HotelPropertyType,
+} from './lib/store/espaces/mes-espaces.store';
 export {
   HOTEL_PROPERTY_TYPES,
   HOTEL_PROPERTY_TYPE_LABELS,
@@ -58,6 +62,7 @@ export {
 } from './lib/store/espaces/mes-espaces.store';
 export { EspaceCreationStore } from './lib/store/espaces/espace-creation.store';
 export type { EspaceCreationState } from './lib/store/espaces/espace-creation.store';
+export { EspaceEditStore } from './lib/store/espaces/espace-edit.store';
 
 // ─── Configs API prêtes à l'emploi avec createApiStore ───────────────────────
 // Usage : const BiensStore = createApiStore(biensApiConfig);

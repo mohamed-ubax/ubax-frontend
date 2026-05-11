@@ -23,6 +23,13 @@ export const hotelRoutes: Route[] = [
       ),
   },
   {
+    path: 'espaces/:id/modifier',
+    loadComponent: () =>
+      import('@ubax-workspace/ubax-web-espaces').then(
+        (m) => m.EspaceAddPageComponent,
+      ),
+  },
+  {
     path: 'espaces/:id',
     loadComponent: () =>
       import('@ubax-workspace/ubax-web-espaces').then(

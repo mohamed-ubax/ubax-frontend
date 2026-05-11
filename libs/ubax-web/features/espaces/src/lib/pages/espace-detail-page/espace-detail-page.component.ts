@@ -2,18 +2,33 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DOCUMENT } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
+import {
+  ApiConfiguration,
+  generateReadUrl,
+  getById,
+  PropertyDetailResponse,
+} from '@ubax-workspace/shared-api-types';
+import { firstValueFrom } from 'rxjs';
+import { deriveViewState, ViewState } from '@ubax-workspace/shared-ui';
+import {
+  NOTIFICATION_HANDLER,
+  type NotificationHandler,
+} from '@ubax-workspace/shared-data-access';
 
 type GuestProfile = {
   readonly clientId: string;
   readonly name: string;
   readonly code: string;
-  readonly avatar: string;};
+  readonly avatar: string;
+};
 
 type ReservationDetail = {
   readonly title: string;
@@ -22,12 +37,14 @@ type ReservationDetail = {
   readonly bookingDate: string;
   readonly bookingTime: string;
   readonly stayDuration: string;
-  readonly facilities: readonly string[];};
+  readonly facilities: readonly string[];
+};
 
 type GalleryPhoto = {
   readonly src: string;
   readonly alt: string;
-  readonly previewCount?: number;};
+  readonly previewCount?: number;
+};
 
 type HistoryRow = {
   readonly id: number;
@@ -36,304 +53,15 @@ type HistoryRow = {
   readonly property: string;
   readonly duration: string;
   readonly period: string;
-  readonly status: 'Confirmé';
-  readonly avatar: string;};
-
-type SpaceDetailData = {
-  readonly guest: GuestProfile;
-  readonly reservation: ReservationDetail;
-  readonly totalGalleryCount: number;
-  readonly galleryPhotos: readonly GalleryPhoto[];
-  readonly historyRows: readonly HistoryRow[];};
-
-const DEFAULT_DETAIL_ID = '1';
-
-function createHistoryRows(
-  rows: ReadonlyArray<Omit<HistoryRow, 'id'>>,
-): readonly HistoryRow[] {
-  return rows.map((row, index) => ({
-    id: index + 1,
-    ...row,
-  }));
-}
-
-const SPACE_DETAILS: Record<string, SpaceDetailData> = {
-  '1': {
-    guest: {
-      clientId: '1',
-      name: 'Landry Bamba',
-      code: '#G-001234125',
-      avatar: 'shared/people/profile-01.webp',
-    },
-    reservation: {
-      title: 'Chambre Queen A-2345 - hotel Azalai',
-      type: 'Double Bed',
-      capacity: '2 - 3 personnes',
-      bookingDate: 'Lundi 15 juin 2026',
-      bookingTime: '08:29',
-      stayDuration: '2 jours',
-      facilities: [
-        'Climatisation',
-        'LED TV',
-        'Baignoire',
-        'Game Console',
-        'Lit double',
-        'Wi-Fi',
-      ],
-    },
-    totalGalleryCount: 8,
-    galleryPhotos: [
-      {
-        src: 'shared/rooms/room-photo-02.webp',
-        alt: 'Vue principale de la chambre',
-      },
-      {
-        src: 'shared/rooms/room-photo-03.webp',
-        alt: 'Aperçu chambre angle 1',
-      },
-      {
-        src: 'shared/rooms/room-photo-04.webp',
-        alt: 'Aperçu chambre angle 2',
-      },
-      {
-        src: 'shared/rooms/room-photo-05.webp',
-        alt: 'Aperçu chambre angle 3',
-        previewCount: 8,
-      },
-    ],
-    historyRows: createHistoryRows([
-      {
-        clientId: '2',
-        guestName: 'Koné Ibrahim',
-        property: 'Résidence Plateau',
-        duration: '2 jours',
-        period: '14 Avril 2026 - 18 Avril 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/billing-guest-04.webp',
-      },
-      {
-        clientId: '3',
-        guestName: 'Soro Mireille',
-        property: 'Résidence Plateau',
-        duration: '2 jours',
-        period: '09 Avril 2026 - 11 Avril 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/profile-02.webp',
-      },
-      {
-        clientId: '4',
-        guestName: 'Bamba Ismael',
-        property: 'Résidence Plateau',
-        duration: '3 jours',
-        period: '02 Avril 2026 - 05 Avril 2026',
-        status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-03.webp',
-      },
-      {
-        clientId: '5',
-        guestName: 'Yao Charline',
-        property: 'Résidence Plateau',
-        duration: '1 jour',
-        period: '28 Mars 2026 - 29 Mars 2026',
-        status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-04.webp',
-      },
-      {
-        clientId: '6',
-        guestName: 'Boni Jordan',
-        property: 'Résidence Plateau',
-        duration: '4 jours',
-        period: '18 Mars 2026 - 22 Mars 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/profile-03.webp',
-      },
-    ]),
-  },
-  '2': {
-    guest: {
-      clientId: '3',
-      name: 'Clarisse Kouamé',
-      code: '#G-001234126',
-      avatar: 'shared/people/profile-02.webp',
-    },
-    reservation: {
-      title: 'Suite Premium B-1408 - hotel Azalai',
-      type: 'King Size',
-      capacity: '2 personnes',
-      bookingDate: 'Mercredi 24 juin 2026',
-      bookingTime: '11:15',
-      stayDuration: '4 jours',
-      facilities: [
-        'Mini-bar',
-        'LED TV',
-        'Jacuzzi',
-        'Coin salon',
-        'Lit king size',
-        'Wi-Fi',
-      ],
-    },
-    totalGalleryCount: 6,
-    galleryPhotos: [
-      {
-        src: 'shared/rooms/room-photo-02.webp',
-        alt: 'Suite premium vue principale',
-      },
-      {
-        src: 'shared/rooms/room-photo-02.webp',
-        alt: 'Suite premium salon',
-      },
-      {
-        src: 'shared/rooms/room-photo-03.webp',
-        alt: 'Suite premium chambre',
-      },
-      {
-        src: 'shared/rooms/room-photo-05.webp',
-        alt: 'Suite premium salle de bain',
-        previewCount: 6,
-      },
-    ],
-    historyRows: createHistoryRows([
-      {
-        clientId: '2',
-        guestName: 'Hermann Guei',
-        property: 'Hotel Azalai',
-        duration: '4 jours',
-        period: '24 Juin 2026 - 28 Juin 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/billing-guest-04.webp',
-      },
-      {
-        clientId: '5',
-        guestName: 'Assita Koffi',
-        property: 'Hotel Azalai',
-        duration: '2 jours',
-        period: '17 Juin 2026 - 19 Juin 2026',
-        status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-03.webp',
-      },
-      {
-        clientId: '6',
-        guestName: 'Mariam Coulibaly',
-        property: 'Hotel Azalai',
-        duration: '1 jour',
-        period: '11 Juin 2026 - 12 Juin 2026',
-        status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-04.webp',
-      },
-      {
-        clientId: '4',
-        guestName: 'Serge Zadi',
-        property: 'Hotel Azalai',
-        duration: '3 jours',
-        period: '05 Juin 2026 - 08 Juin 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/profile-03.webp',
-      },
-    ]),
-  },
-  '3': {
-    guest: {
-      clientId: '5',
-      name: 'Nadia Touré',
-      code: '#G-001234127',
-      avatar: 'room-detail/avatars/history-04.webp',
-    },
-    reservation: {
-      title: 'Chambre Deluxe C-0912 - hotel Azalai',
-      type: 'Twin Bed',
-      capacity: '3 personnes',
-      bookingDate: 'Vendredi 03 juillet 2026',
-      bookingTime: '19:42',
-      stayDuration: '5 jours',
-      facilities: [
-        'Climatisation',
-        'Smart TV',
-        'Douche italienne',
-        'Bureau',
-        'Lits jumeaux',
-        'Wi-Fi',
-      ],
-    },
-    totalGalleryCount: 5,
-    galleryPhotos: [
-      {
-        src: 'shared/rooms/room-photo-02.webp',
-        alt: 'Chambre deluxe vue principale',
-      },
-      {
-        src: 'shared/rooms/room-photo-04.webp',
-        alt: 'Chambre deluxe angle 1',
-      },
-      {
-        src: 'shared/rooms/room-photo-02.webp',
-        alt: 'Chambre deluxe angle 2',
-      },
-      {
-        src: 'shared/rooms/room-photo-05.webp',
-        alt: 'Chambre deluxe angle 3',
-        previewCount: 5,
-      },
-    ],
-    historyRows: createHistoryRows([
-      {
-        clientId: '2',
-        guestName: 'Béatrice Niamké',
-        property: 'Hotel Azalai',
-        duration: '5 jours',
-        period: '03 Juillet 2026 - 08 Juillet 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/profile-02.webp',
-      },
-      {
-        clientId: '3',
-        guestName: 'Cédric Yéo',
-        property: 'Hotel Azalai',
-        duration: '2 jours',
-        period: '28 Juin 2026 - 30 Juin 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/billing-guest-04.webp',
-      },
-      {
-        clientId: '4',
-        guestName: 'Lydie Mian',
-        property: 'Hotel Azalai',
-        duration: '3 jours',
-        period: '20 Juin 2026 - 23 Juin 2026',
-        status: 'Confirmé',
-        avatar: 'shared/people/profile-03.webp',
-      },
-      {
-        clientId: '6',
-        guestName: 'Georges Yapi',
-        property: 'Hotel Azalai',
-        duration: '1 jour',
-        period: '15 Juin 2026 - 16 Juin 2026',
-        status: 'Confirmé',
-        avatar: 'room-detail/avatars/history-03.webp',
-      },
-    ]),
-  },
+  readonly status: 'Confirme';
+  readonly avatar: string;
 };
 
-const SPACE_DETAIL_KEYS = Object.keys(SPACE_DETAILS);
-
-function resolveDetailId(rawId: string): string {
-  if (SPACE_DETAILS[rawId]) {
-    return rawId;
-  }
-
-  const numericId = Number(rawId);
-  if (Number.isFinite(numericId) && numericId > 0 && SPACE_DETAIL_KEYS.length) {
-    const normalizedIndex =
-      (((Math.trunc(numericId) - 1) % SPACE_DETAIL_KEYS.length) +
-        SPACE_DETAIL_KEYS.length) %
-      SPACE_DETAIL_KEYS.length;
-
-    return SPACE_DETAIL_KEYS[normalizedIndex] ?? DEFAULT_DETAIL_ID;
-  }
-
-  return DEFAULT_DETAIL_ID;
-}
+type LegalDocument = {
+  readonly id: string;
+  readonly name: string;
+  readonly fileUrl: string;
+};
 
 @Component({
   selector: 'ubax-espace-detail-page',
@@ -345,39 +73,209 @@ function resolveDetailId(rawId: string): string {
 })
 export class EspaceDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly requestedDetailId = toSignal(
-    this.route.paramMap.pipe(
-      map((params) => params.get('id') ?? DEFAULT_DETAIL_ID),
-    ),
-    {
-      initialValue: this.route.snapshot.paramMap.get('id') ?? DEFAULT_DETAIL_ID,
-    },
+  private readonly document = inject(DOCUMENT);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly notifications = inject(NOTIFICATION_HANDLER, {
+    optional: true,
+  }) as NotificationHandler | null;
+
+  private readonly detailResponse = signal<PropertyDetailResponse | null>(null);
+  private readonly loadingDetail = signal(false);
+  private readonly detailError = signal<string | null>(null);
+  private readonly hasLoadedDetail = signal(false);
+  readonly documentOpeningId = signal<string | null>(null);
+  readonly previewUrl = signal<string | null>(null);
+  readonly previewName = signal<string>('Document');
+  readonly previewFullscreen = signal(false);
+  readonly previewIsImage = signal(false);
+
+  readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
+
+  readonly detailId = computed(
+    () => this.route.snapshot.paramMap.get('id') ?? '',
   );
 
-  readonly detailId = computed(() => resolveDetailId(this.requestedDetailId()));
-  readonly detail = computed(
-    () => SPACE_DETAILS[this.detailId()] ?? SPACE_DETAILS[DEFAULT_DETAIL_ID],
+  readonly property = computed(() => this.detailResponse()?.property ?? null);
+
+  readonly viewState = computed<ViewState>(() =>
+    deriveViewState(
+      this.loadingDetail(),
+      this.detailError(),
+      !this.property(),
+      this.hasLoadedDetail(),
+    ),
   );
-  readonly guest = computed(() => this.detail().guest);
-  readonly reservation = computed(() => this.detail().reservation);
-  readonly totalGalleryCount = computed(() => this.detail().totalGalleryCount);
-  readonly galleryPhotos = computed(() => this.detail().galleryPhotos);
-  readonly historyRows = computed(() => this.detail().historyRows);
+
+  readonly detailErrorMessage = computed(
+    () =>
+      this.detailError() ?? "Impossible de charger les détails de l'espace.",
+  );
+
+  readonly guest = computed<GuestProfile>(() => ({
+    clientId: (this.property()?.ownerId ?? this.detailId()) || '0',
+    name: this.property()?.ownerName?.trim() || 'Proprietaire non renseigne',
+    code: this.property()?.id ? `#P-${this.property()?.id}` : '#P-000000',
+    avatar: 'shared/people/profile-01.webp',
+  }));
+
+  readonly reservation = computed<ReservationDetail>(() => {
+    const current = this.property();
+    const amenities = (current?.amenities ?? [])
+      .map(
+        (item) => item.customValue || item.customDescription || item.code || '',
+      )
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
+    const createdAt = current?.createdAt ? new Date(current.createdAt) : null;
+    const bookingDate = createdAt
+      ? createdAt.toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        })
+      : '-';
+
+    const bookingTime = createdAt
+      ? createdAt.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '-';
+
+    return {
+      title: current?.title?.trim() || 'Espace hotelier',
+      type: this.normalizeCodeLabel(current?.propertyType ?? ''),
+      capacity:
+        typeof current?.maxOccupancy === 'number'
+          ? `${current.maxOccupancy} personnes`
+          : '-',
+      bookingDate,
+      bookingTime,
+      stayDuration:
+        current?.paymentFrequency === 'NIGHTLY'
+          ? 'Par nuit'
+          : this.normalizeCodeLabel(current?.paymentFrequency ?? ''),
+      facilities:
+        amenities.length > 0 ? amenities : ['Aucune commodite specifiee'],
+    };
+  });
+
+  readonly galleryPhotos = computed<readonly GalleryPhoto[]>(() => {
+    const media = this.detailResponse()?.media ?? [];
+    const sorted = [...media].sort(
+      (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
+    );
+
+    const photos = sorted
+      .filter((item) => (item.mediaType ?? 'PHOTO') !== 'VIDEO')
+      .map((item) => item.fileUrl ?? '')
+      .filter((url) => url.length > 0)
+      .map((url, index, all) => ({
+        src: url,
+        alt: `Photo ${index + 1}`,
+        previewCount: index === all.length - 1 ? all.length : undefined,
+      }));
+
+    if (photos.length > 0) {
+      return photos;
+    }
+
+    return [
+      {
+        src: 'shared/rooms/room-photo-02.webp',
+        alt: 'Photo principale',
+        previewCount: 1,
+      },
+    ];
+  });
+
+  readonly totalGalleryCount = computed(() => this.galleryPhotos().length);
+
+  readonly legalDocuments = computed<readonly LegalDocument[]>(() => {
+    const docs = this.detailResponse()?.documents ?? [];
+    return docs.map((doc, index) => ({
+      id: doc.id ?? `doc-${index}`,
+      name: doc.title?.trim() || doc.fileName?.trim() || 'Document legal',
+      fileUrl: doc.fileUrl ?? '',
+    }));
+  });
+
+  readonly historyRows = computed<readonly HistoryRow[]>(() => []);
+
+  readonly latitude = computed(() => this.property()?.latitude ?? null);
+  readonly longitude = computed(() => this.property()?.longitude ?? null);
+  readonly hasCoordinates = computed(
+    () =>
+      typeof this.latitude() === 'number' &&
+      typeof this.longitude() === 'number',
+  );
+
+  readonly mapSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const lat = this.latitude();
+    const lng = this.longitude();
+    if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+    const d = 0.012;
+    const url =
+      `https://www.openstreetmap.org/export/embed.html` +
+      `?bbox=${lng - d},${lat - d},${lng + d},${lat + d}` +
+      `&layer=mapnik&marker=${lat},${lng}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
+
+  readonly videos = computed(() =>
+    (this.detailResponse()?.media ?? []).filter(
+      (item) => item.mediaType === 'VIDEO' && !!item.fileUrl,
+    ),
+  );
+  readonly hasVideos = computed(() => this.videos().length > 0);
 
   readonly activeGalleryIndex = signal(0);
+
   readonly activeGalleryPhoto = computed(() => {
     const photos = this.galleryPhotos();
-    const fallbackPhoto = photos[0];
     const safeIndex = Math.min(this.activeGalleryIndex(), photos.length - 1);
-
-    return photos[safeIndex] ?? fallbackPhoto;
+    return photos[safeIndex] ?? photos[0] ?? { src: '', alt: '' };
   });
+
   readonly galleryCounterLabel = computed(() => {
     const photos = this.galleryPhotos();
     const safeIndex = Math.min(this.activeGalleryIndex(), photos.length - 1);
-
     return `${safeIndex + 1}/${this.totalGalleryCount()}`;
   });
+
+  constructor() {
+    const id = this.detailId();
+    if (id) {
+      void this.loadDetail(id);
+    }
+
+    effect((onCleanup) => {
+      const hasOverlay = !!this.previewUrl();
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+
+      onCleanup(() => {
+        if (hasOverlay) {
+          this.document.body.classList.remove('ubax-overlay-open');
+        }
+      });
+    });
+  }
+
+  retryLoad(): void {
+    const id = this.detailId();
+    if (!id) {
+      return;
+    }
+
+    void this.loadDetail(id);
+  }
 
   selectGalleryImage(index: number): void {
     this.activeGalleryIndex.set(index);
@@ -385,7 +283,6 @@ export class EspaceDetailPageComponent {
 
   previousGalleryImage(): void {
     const photos = this.galleryPhotos();
-
     this.activeGalleryIndex.update((index) =>
       index === 0 ? photos.length - 1 : index - 1,
     );
@@ -393,9 +290,165 @@ export class EspaceDetailPageComponent {
 
   nextGalleryImage(): void {
     const photos = this.galleryPhotos();
-
     this.activeGalleryIndex.update((index) =>
       index === photos.length - 1 ? 0 : index + 1,
     );
+  }
+
+  async openDocument(
+    fileUrl: string,
+    fileName?: string,
+    docId?: string,
+  ): Promise<void> {
+    if (!fileUrl) return;
+
+    if (docId) {
+      this.documentOpeningId.set(docId);
+    }
+
+    try {
+      const response = await firstValueFrom(
+        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+      );
+      const resolvedUrl =
+        this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(resolvedUrl, fileName));
+      this.previewUrl.set(resolvedUrl);
+    } catch {
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
+    } finally {
+      if (docId) {
+        this.documentOpeningId.set(null);
+      }
+    }
+  }
+
+  closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewName.set('Document');
+    this.previewIsImage.set(false);
+    this.previewFullscreen.set(false);
+  }
+
+  togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((value) => !value);
+  }
+
+  async downloadDocument(
+    fileUrl: string,
+    fileName: string,
+    docId?: string,
+  ): Promise<void> {
+    if (!fileUrl) return;
+
+    if (docId) {
+      this.documentOpeningId.set(docId);
+    }
+
+    let resolvedUrl = fileUrl;
+
+    try {
+      const response = await firstValueFrom(
+        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+      );
+      resolvedUrl = this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+    } catch {
+      resolvedUrl = fileUrl;
+    }
+
+    const link = document.createElement('a');
+    link.href = resolvedUrl;
+    link.download = fileName || 'document';
+    link.rel = 'noopener';
+    link.target = '_blank';
+    link.click();
+
+    if (docId) {
+      this.documentOpeningId.set(null);
+    }
+  }
+
+  private async loadDetail(id: string): Promise<void> {
+    try {
+      this.loadingDetail.set(true);
+      this.detailError.set(null);
+      const response = await firstValueFrom(
+        getById(this.http, this.apiConfig.rootUrl, {
+          id,
+        }),
+      );
+      this.detailResponse.set(this.extractDetailFromResponse(response.body));
+      this.hasLoadedDetail.set(true);
+      this.activeGalleryIndex.set(0);
+    } catch {
+      this.detailResponse.set(null);
+      this.hasLoadedDetail.set(true);
+      this.detailError.set("Impossible de charger les détails de l'espace.");
+      this.notifications?.error(this.detailErrorMessage());
+    } finally {
+      this.loadingDetail.set(false);
+    }
+  }
+
+  private extractDetailFromResponse(
+    body: unknown,
+  ): PropertyDetailResponse | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as PropertyDetailResponse;
+    if (direct.property || direct.media || direct.documents) {
+      return direct;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      return wrapped.data as PropertyDetailResponse;
+    }
+
+    return null;
+  }
+
+  private normalizeCodeLabel(raw: string): string {
+    if (!raw) {
+      return '-';
+    }
+
+    return raw
+      .toLowerCase()
+      .split('_')
+      .filter((part) => part.length > 0)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  private extractReadUrlFromResponse(body: unknown): string | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as { readUrl?: unknown };
+    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) {
+      return direct.readUrl;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      const nested = wrapped.data as { readUrl?: unknown };
+      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) {
+        return nested.readUrl;
+      }
+    }
+
+    return null;
+  }
+
+  private isPreviewImage(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/.test(target);
   }
 }
