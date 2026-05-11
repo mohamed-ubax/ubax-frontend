@@ -257,7 +257,15 @@
 
 <!-- Overlay : Prévisualisation de document -->
 @if (previewItem()) {
-  <div class="doc-preview-backdrop" (click)="closePreview()"></div>
+  <div
+    class="doc-preview-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="Fermer l'aperçu"
+    (click)="closePreview()"
+    (keyup.enter)="closePreview()"
+    (keydown.escape)="closePreview()"
+  ></div>
   <div class="doc-preview" [class.doc-preview--fullscreen]="previewFullscreen()">
     <header class="doc-preview__header">
       <div class="doc-preview__title">

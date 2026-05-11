@@ -197,13 +197,22 @@
 ═══════════════════════════════════════════════════════════ -->
 @if (showForm()) {
   <div class="admin-drawer-portal">
-    <div class="admin-overlay admin-overlay--drawer" (click)="closeForm()">
+    <div
+      class="admin-overlay admin-overlay--drawer"
+      role="button"
+      tabindex="0"
+      aria-label="Fermer le formulaire"
+      (click)="closeForm()"
+      (keyup.enter)="closeForm()"
+      (keydown.escape)="closeForm()"
+    >
       <aside
         class="admin-drawer"
         role="dialog"
         aria-modal="true"
         [attr.aria-label]="formTitle()"
         (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
       >
         <!-- Dark header -->
         <header class="admin-drawer__header">
@@ -481,13 +490,22 @@
 ═══════════════════════════════════════════════════════════ -->
 @if (showDetails()) {
   <div class="admin-drawer-portal">
-    <div class="admin-overlay admin-overlay--drawer" (click)="closeDetails()">
+    <div
+      class="admin-overlay admin-overlay--drawer"
+      role="button"
+      tabindex="0"
+      aria-label="Fermer les détails"
+      (click)="closeDetails()"
+      (keyup.enter)="closeDetails()"
+      (keydown.escape)="closeDetails()"
+    >
       <aside
         class="admin-drawer"
         role="dialog"
         aria-modal="true"
         aria-label="Détails de l'administrateur"
         (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
       >
         @if (selectedAdmin(); as admin) {
           <!-- Dark header -->
