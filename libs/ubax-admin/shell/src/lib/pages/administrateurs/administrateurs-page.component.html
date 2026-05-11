@@ -121,10 +121,7 @@
               <ng-template ubaxDataTableCell="name" let-row>
                 <div class="admin-member-cell">
                   <div class="admin-member-cell__avatar">{{ initials(row) }}</div>
-                  <div class="admin-member-cell__meta">
-                    <span class="admin-member-cell__name">{{ fullName(row) }}</span>
-                    <span class="admin-member-cell__sub">{{ row.email }}</span>
-                  </div>
+                  <span class="admin-member-cell__name">{{ fullName(row) }}</span>
                 </div>
               </ng-template>
 
@@ -549,10 +546,6 @@
                     <div class="admin-drawer__details-field">
                       <span class="admin-drawer__details-label">Rôle principal</span>
                       <span class="admin-drawer__details-value">{{ roleLabel(admin) }}</span>
-                    </div>
-                    <div class="admin-drawer__details-field">
-                      <span class="admin-drawer__details-label">Keycloak ID</span>
-                      <span class="admin-drawer__details-value admin-drawer__details-value--mono">{{ admin.keycloakId ?? '—' }}</span>
                     </div>
                   </div>
                 </div>

@@ -263,11 +263,11 @@ export class AdministrateursPageComponent implements OnInit {
 
   // ── Table columns ──────────────────────────────────────────────────────────
   protected readonly tableColumns: readonly UiDataTableColumn<AdminUserResponse>[] = [
-    { key: 'name',    header: 'Nom complet',  width: '30%' },
-    { key: 'email',   header: 'Email',        width: '28%' },
+    { key: 'name',    header: 'Nom complet',  width: '28%' },
+    { key: 'email',   header: 'Email',        width: '22%' },
     { key: 'phone',   header: 'Téléphone',    width: '18%' },
     { key: 'role',    header: 'Rôle',         width: '14%' },
-    { key: 'actions', header: '',             width: '10%', align: 'end' },
+    { key: 'actions', header: 'Actions',      width: '18%', align: 'end' },
   ];
 
   // ── Pagination ─────────────────────────────────────────────────────────────
