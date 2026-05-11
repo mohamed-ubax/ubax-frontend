@@ -12,10 +12,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   AuthService,
   clearStoredAuthSession,
+  DEFAULT_UBAX_ADMIN_HOME_PATH,
   DEFAULT_UBAX_WEB_HOME_PATH,
+  deriveUserFromAuthToken,
   type LoginResponse,
   persistAuthSession,
   resolveUbaxWebRedirectTarget,
+  UbaxRole,
 } from '@ubax-workspace/shared-data-access';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
@@ -85,7 +88,9 @@ export class LoginPageComponent implements OnInit {
       }
 
       persistAuthSession(sessionTokens);
-      this.document.defaultView?.location.assign(this.redirectTarget());
+      this.document.defaultView?.location.assign(
+        this.redirectTarget(sessionTokens.accessToken),
+      );
     } catch (error) {
       this.serverError.set(this.resolveErrorMessage(error));
     } finally {
@@ -93,11 +98,25 @@ export class LoginPageComponent implements OnInit {
     }
   }
 
-  private redirectTarget(): string {
-    return resolveUbaxWebRedirectTarget(
-      this.route.snapshot.queryParamMap.get('redirect') ??
-        DEFAULT_UBAX_WEB_HOME_PATH,
-    );
+  private redirectTarget(accessToken: string): string {
+    const redirectParam = this.route.snapshot.queryParamMap.get('redirect');
+    const resolved = resolveUbaxWebRedirectTarget(redirectParam);
+
+    // Si un redirect param valide est présent (app ou admin), l'utiliser directement
+    if (resolved !== DEFAULT_UBAX_WEB_HOME_PATH) {
+      return resolved;
+    }
+
+    // Sinon, router selon le rôle extrait du JWT
+    const user = deriveUserFromAuthToken(accessToken);
+    if (
+      user?.mainRole === UbaxRole.ADMIN ||
+      user?.mainRole === UbaxRole.SUPER_ADMIN
+    ) {
+      return DEFAULT_UBAX_ADMIN_HOME_PATH;
+    }
+
+    return DEFAULT_UBAX_WEB_HOME_PATH;
   }
 
   private extractSessionTokens(

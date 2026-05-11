@@ -1,0 +1,16 @@
+// ============================================================
+// UBAX Design System — Styles barrel
+// Import order matters: tokens → layout → components → utilities
+// ============================================================
+
+// 1. Responsive CSS custom properties (must be first)
+@use '../tokens/tokens.responsive';
+
+// 2. Layout helpers
+@use 'layout';
+
+// 3. PrimeNG component overrides
+@use 'components';
+
+// 4. Utility classes
+@use 'utilities';

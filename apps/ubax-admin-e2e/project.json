@@ -1,0 +1,14 @@
+{
+ "name": "ubax-admin-e2e",
+ "projectType": "application",
+ "sourceRoot": "apps/ubax-admin-e2e/src",
+ "tags": [
+  "scope:admin",
+  "type:e2e"
+ ],
+ "implicitDependencies": [
+  "ubax-admin"
+ ],
+ "// targets": "to see all targets run: nx show project ubax-admin-e2e --web",
+ "targets": {}
+}

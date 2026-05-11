@@ -1,0 +1,20 @@
+// ============================================================
+// UBAX Design System — Shadow / Elevation Tokens
+// Extracted from Figma: BACK-OFFICE-UBAX
+// ============================================================
+
+// ── Elevation Scale ───────────────────────────────────────────
+// Figma: Neutral/Shadow 02
+$shadow-01: 0 1px 4px 0 rgba(25, 33, 61, 0.08);   // Cards, inputs
+$shadow-02: 0 2px 8px 0 rgba(25, 33, 61, 0.10);   // Dropdowns
+$shadow-03: 0 4px 16px 0 rgba(25, 33, 61, 0.12);  // Modals
+$shadow-04: 0 8px 32px 0 rgba(25, 33, 61, 0.16);  // Overlays
+
+// ── Semantic Shadows ──────────────────────────────────────────
+$shadow-card:     $shadow-01;
+$shadow-dropdown: $shadow-02;
+$shadow-modal:    $shadow-03;
+$shadow-overlay:  $shadow-04;
+
+// ── Identifier dot shadow ─────────────────────────────────────
+$shadow-dot: 0 1px 4px 0 rgba(25, 33, 61, 0.08);

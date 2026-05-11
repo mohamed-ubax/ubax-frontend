@@ -1,0 +1,50 @@
+<div class="ubax-shell">
+
+  <!-- Sidebar du design system -->
+  <ubax-sidebar [navGroups]="navGroups" class="ubax-sidebar">
+
+    <!-- Logo slot -->
+    <div logo class="flex items-center gap-2">
+      <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-orange text-white font-semibold text-lg leading-none">U</span>
+      <span class="text-white font-semibold text-2xl tracking-wide">BAX</span>
+    </div>
+
+    <!-- Déconnexion dans le footer -->
+    <div footer class="px-2">
+      <button
+        type="button"
+        class="flex items-center gap-3 w-full px-4 py-3 rounded-xl
+               text-white/60 text-xl font-regular leading-normal
+               transition-colors duration-150 ease-linear
+               hover:bg-white/10 hover:text-white"
+        (click)="logout()"
+      >
+        <i class="pi pi-sign-out text-lg w-6 flex-shrink-0"></i>
+        <span>Déconnexion</span>
+      </button>
+    </div>
+  </ubax-sidebar>
+
+  <!-- Zone principale -->
+  <div class="ubax-main">
+
+    <!-- Topbar -->
+    <header class="ubax-header">
+      <div></div>
+      <div class="text-right">
+        <p class="text-xl font-medium text-neutral-900 m-0 leading-tight">{{ fullName() }}</p>
+        <p class="text-base font-regular text-neutral-500 m-0 leading-tight mt-0.5">
+          {{ user()?.mainRole === 'UBAX_SUPER_ADMIN' ? 'Super Admin' : 'Administrateur' }}
+        </p>
+      </div>
+    </header>
+
+    <!-- Contenu de la page -->
+    <main class="ubax-content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>
+
+<p-toast position="bottom-right" />

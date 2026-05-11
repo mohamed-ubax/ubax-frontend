@@ -1,0 +1,13 @@
+{
+  "ELECTRON_RUN_AS_NODE": "1",
+  "NX_CLI_SET": "true",
+  "NX_LOAD_DOT_ENV_FILES": "true",
+  "NX_TASK_HASH": "13283192663131221880",
+  "NX_TASK_TARGET_PROJECT": "ubax-admin-shell",
+  "NX_TASK_TARGET_TARGET": "test",
+  "NX_TERMINAL_CAPTURE_STDERR": "true",
+  "NX_TUI": "false",
+  "NX_VERBOSE_LOGGING": "false",
+  "NX_WORKSPACE_ROOT": "c:\\Users\\rawan\\Desktop\\Code\\ubax-frontend",
+  "NX_WORKSPACE_ROOT_PATH": "c:\\Users\\rawan\\Desktop\\Code\\ubax-frontend"
+}

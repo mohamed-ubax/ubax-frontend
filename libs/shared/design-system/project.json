@@ -1,0 +1,11 @@
+{
+  "name": "shared-design-system",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/design-system/src",
+  "prefix": "ubax",
+  "projectType": "library",
+  "tags": [
+    "scope:shared",
+    "type:ui"
+  ]
+}

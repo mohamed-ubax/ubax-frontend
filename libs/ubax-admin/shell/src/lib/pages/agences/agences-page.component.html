@@ -1,0 +1,148 @@
+<div class="partners-page">
+
+  <!-- En-tête -->
+  <div class="partners-page__header">
+    <div class="partners-page__title-block">
+      <p class="partners-page__eyebrow">Back-office UBAX</p>
+      <div class="partners-page__title-row">
+        <h1 class="partners-page__title">Agences</h1>
+        <span class="partners-page__count">{{ agencyCount() }} agence(s)</span>
+      </div>
+      <p class="partners-page__subtitle">
+        Gérez les agences partenaires, leur statut et consultez leurs équipes.
+      </p>
+    </div>
+  </div>
+
+  <!-- Carte principale -->
+  <ubax-section-card bodyClass="p-0">
+    <ubax-search-filter-bar
+      class="partners-toolbar"
+      placeholder="Rechercher une agence..."
+      [filters]="searchFilters"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    <p-table
+      [value]="filteredAgencies()"
+      [loading]="loading()"
+      [paginator]="filteredAgencies().length > 15"
+      [rows]="15"
+      styleClass="partners-table"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Agence</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Ville</th>
+          <th>Abonnement</th>
+          <th>Statut</th>
+          <th class="partners-table__actions-head">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-agency>
+        <tr>
+          <!-- Agence -->
+          <td>
+            <div class="partners-user-cell">
+              @if (agency.logoUrl) {
+                <img
+                  [src]="agency.logoUrl"
+                  [alt]="agency.name"
+                  class="partners-user-cell__logo"
+                />
+              } @else {
+                <p-avatar
+                  [label]="initials(agency)"
+                  shape="circle"
+                  size="normal"
+                  class="partners-user-cell__avatar"
+                />
+              }
+              <div class="partners-user-cell__meta">
+                <p class="partners-user-cell__name">{{ agency.name ?? '—' }}</p>
+                <p class="partners-user-cell__sub">{{ agency.city ?? '—' }}</p>
+              </div>
+            </div>
+          </td>
+
+          <td class="partners-table__cell">{{ agency.email ?? '—' }}</td>
+          <td class="partners-table__cell partners-table__cell--muted">{{ agency.phone ?? '—' }}</td>
+          <td class="partners-table__cell partners-table__cell--muted">{{ agency.city ?? '—' }}</td>
+
+          <!-- Abonnement -->
+          <td>
+            @if (agency.subscriptionActive) {
+              <ubax-status-badge variant="active">{{ agency.subscriptionPlan ?? 'Actif' }}</ubax-status-badge>
+            } @else {
+              <ubax-status-badge variant="neutral">Inactif</ubax-status-badge>
+            }
+          </td>
+
+          <!-- Statut -->
+          <td>
+            @if (agency.active) {
+              <ubax-status-badge variant="active">Active</ubax-status-badge>
+            } @else {
+              <ubax-status-badge variant="suspended">Suspendue</ubax-status-badge>
+            }
+          </td>
+
+          <!-- Actions -->
+          <td class="partners-table__actions">
+            <div class="partners-actions">
+              <button
+                type="button"
+                class="partners-action-btn"
+                title="Voir les membres"
+                (click)="viewMembers(agency)"
+              >
+                <i class="pi pi-users"></i>
+              </button>
+
+              @if (isSuperAdmin()) {
+                <button
+                  type="button"
+                  [class]="agency.active ? 'partners-action-btn partners-action-btn--warn' : 'partners-action-btn partners-action-btn--success'"
+                  [title]="agency.active ? 'Suspendre' : 'Activer'"
+                  (click)="promptToggle(agency)"
+                >
+                  <i [class]="agency.active ? 'pi pi-ban' : 'pi pi-check-circle'"></i>
+                </button>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <ubax-empty-state
+              icon="pi pi-home"
+              title="Aucune agence trouvée"
+              [description]="searchQuery() ? 'Aucune agence ne correspond à votre recherche.' : 'Aucune agence partenaire enregistrée.'"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ubax-section-card>
+
+</div>
+
+<ubax-confirm-dialog
+  [visible]="showConfirm()"
+  (visibleChange)="showConfirm.set($event)"
+  [title]="confirmTitle"
+  icon="pi pi-exclamation-triangle"
+  [message]="confirmMessage"
+  [confirmLabel]="confirmLabel"
+  [confirmSeverity]="confirmSeverity"
+  [loading]="actionLoading()"
+  (confirmed)="confirmToggle()"
+/>

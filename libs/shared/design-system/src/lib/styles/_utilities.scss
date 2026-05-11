@@ -1,0 +1,253 @@
+// ============================================================
+// UBAX Design System — Utility classes
+// Semantic helpers not covered by Tailwind
+// ============================================================
+
+@use 'sass:color';
+@use '../tokens/colors' as c;
+@use '../tokens/typography' as t;
+@use '../tokens/spacing' as s;
+@use '../tokens/radius' as r;
+@use '../tokens/shadows' as sh;
+
+// ── Status badge utilities ────────────────────────────────────
+.ubax-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: r.$radius-xs;
+  padding: 3px s.$space-2;
+  font-family: t.$font-family-primary;
+  font-size: t.$text-base;
+  font-weight: t.$font-weight-regular;
+  line-height: 20px;
+  white-space: nowrap;
+
+  &--confirmed,
+  &--active,
+  &--success {
+    background: c.$color-success-bg;
+    color: c.$color-success;
+  }
+
+  &--pending,
+  &--warning {
+    background: c.$color-warning-bg;
+    color: c.$color-warning;
+  }
+
+  &--cancelled,
+  &--suspended,
+  &--danger {
+    background: c.$color-danger-bg;
+    color: c.$color-danger;
+  }
+
+  &--info {
+    background: c.$color-info-bg;
+    color: c.$color-info;
+  }
+
+  &--neutral {
+    background: c.$color-neutral-100;
+    color: c.$color-neutral-500;
+  }
+}
+
+// ── Card surface ──────────────────────────────────────────────
+.ubax-card {
+  background: c.$color-surface-card;
+  border-radius: r.$radius-xl;
+  box-shadow: sh.$shadow-01;
+  overflow: hidden;
+}
+
+// ── Section title ─────────────────────────────────────────────
+.ubax-section-title {
+  font-family: t.$font-family-primary;
+  font-size: t.$text-2xl;
+  font-weight: t.$font-weight-semibold;
+  color: c.$color-brand-navy;
+  line-height: 19px;
+}
+
+// ── Page title ────────────────────────────────────────────────
+.ubax-page-title {
+  font-family: t.$font-family-primary;
+  font-size: t.$text-5xl;
+  font-weight: t.$font-weight-semibold;
+  color: c.$color-neutral-900;
+  line-height: normal;
+}
+
+// ── Muted text ────────────────────────────────────────────────
+.ubax-text-muted {
+  font-family: t.$font-family-primary;
+  font-size: t.$text-md;
+  color: c.$color-neutral-500;
+}
+
+// ── Divider ───────────────────────────────────────────────────
+.ubax-divider {
+  border: none;
+  border-top: 1px solid c.$color-neutral-300;
+  margin: 0;
+}
+
+// ── Sidebar active indicator ──────────────────────────────────
+.ubax-sidebar-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: c.$color-brand-orange;
+  border-radius: 0 r.$radius-xs r.$radius-xs 0;
+}
+
+// ── KPI trend ─────────────────────────────────────────────────
+.ubax-trend-up {
+  color: c.$color-success;
+}
+.ubax-trend-down {
+  color: c.$color-danger;
+}
+.ubax-trend-flat {
+  color: c.$color-neutral-500;
+}
+
+// ── Table row hover ───────────────────────────────────────────
+.ubax-table-row {
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background: c.$color-neutral-50;
+  }
+}
+
+// ── Action icon buttons (eye / edit / delete) ─────────────────
+.ubax-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 33px;
+  border-radius: r.$radius-md;
+  border: 1px solid c.$color-neutral-300;
+  background: c.$color-surface-card;
+  color: c.$color-neutral-600;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
+
+  &:hover {
+    background: c.$color-info-bg;
+    border-color: c.$color-brand-blue;
+    color: c.$color-brand-blue;
+  }
+
+  &--danger:hover {
+    background: c.$color-danger-bg;
+    border-color: c.$color-danger;
+    color: c.$color-danger;
+  }
+}
+
+// ── Secondary button (Figma "Background+Border" pattern) ──────
+.ubax-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: s.$space-2;
+  padding: s.$space-2 s.$space-4;
+  border-radius: r.$radius-md;
+  border: 1px solid c.$color-neutral-300;
+  background: c.$color-neutral-50;
+  color: c.$color-neutral-900;
+  font-family: t.$font-family-primary;
+  font-size: t.$text-lg;
+  font-weight: t.$font-weight-regular;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    background: c.$color-info-bg;
+    border-color: c.$color-brand-blue;
+    color: c.$color-brand-blue;
+  }
+}
+
+// ── CTA button (orange, Figma primary action) ─────────────────
+.ubax-btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: s.$space-2;
+  padding: s.$space-2 s.$space-4;
+  border-radius: r.$radius-sm;
+  border: none;
+  background: c.$color-brand-orange;
+  color: #fff;
+  font-family: t.$font-family-primary;
+  font-size: t.$text-lg;
+  font-weight: t.$font-weight-medium;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    background: color.adjust(c.$color-brand-orange, $lightness: -8%);
+    box-shadow: sh.$shadow-02;
+  }
+}
+
+// ── Progress bar (revenue by category) ───────────────────────
+.ubax-progress {
+  height: 10px;
+  border-radius: r.$radius-full;
+  background: c.$color-neutral-100;
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    border-radius: r.$radius-full;
+    transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+
+    &--blue {
+      background: c.$color-brand-blue;
+    }
+    &--orange {
+      background: c.$color-brand-orange;
+    }
+    &--green {
+      background: c.$color-success;
+    }
+    &--teal {
+      background: c.$color-brand-teal;
+    }
+  }
+}
+
+// ── Map pin dot ───────────────────────────────────────────────
+.ubax-legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: r.$radius-full;
+  box-shadow: sh.$shadow-dot;
+  flex-shrink: 0;
+
+  &--blue {
+    background: c.$color-brand-blue;
+  }
+  &--orange {
+    background: c.$color-brand-orange;
+  }
+  &--green {
+    background: c.$color-success;
+  }
+}

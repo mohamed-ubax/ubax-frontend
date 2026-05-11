@@ -1,0 +1,82 @@
+import { Route } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
+
+export const adminRoutes: Route[] = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./layout/main-layout/main-layout.component').then(
+        (m) => m.MainLayoutComponent,
+      ),
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'tableau-de-bord',
+        pathMatch: 'full',
+      },
+      {
+        path: 'tableau-de-bord',
+        loadComponent: () =>
+          import('./pages/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent,
+          ),
+      },
+      {
+        path: 'administrateurs',
+        loadComponent: () =>
+          import('./pages/administrateurs/administrateurs-page.component').then(
+            (m) => m.AdministrateursPageComponent,
+          ),
+      },
+      // Agences
+      {
+        path: 'agences',
+        loadComponent: () =>
+          import('./pages/agences/agences-page.component').then(
+            (m) => m.AgencesPageComponent,
+          ),
+      },
+      // FE-408 — Membres d'une agence (lecture seule)
+      {
+        path: 'agences/:agencyId/membres',
+        loadComponent: () =>
+          import('./pages/membres/membres-agence-page.component').then(
+            (m) => m.MembresAgencePageComponent,
+          ),
+      },
+      // Hôtels
+      {
+        path: 'hotels',
+        loadComponent: () =>
+          import('./pages/hotels/hotels-page.component').then(
+            (m) => m.HotelsPageComponent,
+          ),
+      },
+      // FE-409 — Membres d'un hôtel (lecture seule)
+      {
+        path: 'hotels/:hotelId/membres',
+        loadComponent: () =>
+          import('./pages/membres/membres-hotel-page.component').then(
+            (m) => m.MembresHotelPageComponent,
+          ),
+      },
+      // UBAX-FE-502 — Liste des candidatures partenaires
+      {
+        path: 'candidatures',
+        loadComponent: () =>
+          import('./pages/candidatures/candidatures-list-page.component').then(
+            (m) => m.CandidaturesListPageComponent,
+          ),
+      },
+      // UBAX-FE-503 — Détail d'une candidature partenaire
+      {
+        path: 'candidatures/:id',
+        loadComponent: () =>
+          import('./pages/candidatures/candidatures-detail-page.component').then(
+            (m) => m.CandidaturesDetailPageComponent,
+          ),
+      },
+    ],
+  },
+];

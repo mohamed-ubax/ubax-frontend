@@ -21,6 +21,9 @@
       "@ubax-workspace/ubax-portal-features": [
         "libs/ubax-portal/features/src/index.ts"
       ],
+      "@ubax-workspace/shared-design-system": [
+        "libs/shared/design-system/src/index.ts"
+      ],
       "@ubax-workspace/shared-ui": ["libs/shared/ui/src/index.ts"],
       "@ubax-workspace/shared-api-types": [
         "libs/shared/api-types/src/index.ts"
@@ -82,6 +85,18 @@
       ],
       "@ubax-workspace/ubax-web-profil": [
         "libs/ubax-web/features/profil/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell": [
+        "libs/ubax-admin/shell/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell/admin-routes": [
+        "libs/ubax-admin/shell/src/lib/admin.routes.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell/interceptors": [
+        "libs/ubax-admin/shell/src/lib/interceptors/auth.interceptor.ts"
+      ],
+      "@ubax-workspace/ubax-admin-shell/notification-service": [
+        "libs/ubax-admin/shell/src/lib/services/notification.service.ts"
       ]
     }
   },

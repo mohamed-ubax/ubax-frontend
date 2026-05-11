@@ -1,0 +1,27 @@
+{
+ "name": "ubax-admin-shell",
+ "sourceRoot": "libs/ubax-admin/shell/src",
+ "prefix": "ubax-admin",
+ "projectType": "library",
+ "tags": [
+  "scope:admin",
+  "type:shell"
+ ],
+ "targets": {
+  "lint": {
+   "executor": "@nx/eslint:lint"
+  },
+  "test": {
+   "executor": "nx:run-commands",
+   "cache": true,
+   "inputs": [
+    "default",
+    "^production"
+   ],
+   "options": {
+    "command": "npx vitest run --config libs/ubax-admin/shell/vitest.config.mts",
+    "cwd": "{workspaceRoot}"
+   }
+  }
+ }
+}

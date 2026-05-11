@@ -1,0 +1,232 @@
+@use '../../../libs/shared/design-system/src/lib/styles/index';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'primeicons/primeicons.css';
+
+/* ── PrimeNG component token overrides (Ubax Design — Figma BACK-OFFICE-UBAX) */
+:root {
+  /* Buttons */
+  --p-button-border-radius: 5px;
+  --p-button-font-size: 14px;
+  --p-button-font-weight: 500;
+
+  /* Inputs */
+  --p-inputtext-border-radius: 6px;
+  --p-inputtext-border-color: #e1e4ed;
+  --p-inputtext-focus-border-color: #2b7fff;
+  --p-inputtext-shadow: 0 1px 4px 0 rgba(25, 33, 61, 0.08);
+  --p-inputtext-font-size: 13px;
+
+  /* Select */
+  --p-select-border-radius: 6px;
+  --p-select-border-color: #e1e4ed;
+
+  /* DatePicker */
+  --p-datepicker-border-radius: 6px;
+
+  /* Card */
+  --p-card-border-radius: 10px;
+  --p-card-shadow: 0 1px 4px 0 rgba(25, 33, 61, 0.08);
+  --p-card-body-padding: 24px;
+
+  /* Dialog */
+  --p-dialog-border-radius: 16px;
+  --p-dialog-header-padding: 24px 24px 16px;
+  --p-dialog-content-padding: 0 24px 24px;
+  --p-dialog-footer-padding: 16px 24px 24px;
+
+  /* Badge / Tag */
+  --p-badge-border-radius: 2px;
+  --p-badge-font-size: 12px;
+  --p-tag-border-radius: 2px;
+
+  /* Paginator */
+  --p-paginator-nav-button-border-radius: 6px;
+  --p-paginator-nav-button-width: 36px;
+  --p-paginator-nav-button-height: 36px;
+
+  /* Toast */
+  --p-toast-border-radius: 10px;
+  --p-toast-shadow: 0 4px 16px 0 rgba(25, 33, 61, 0.12);
+
+  /* Skeleton */
+  --p-skeleton-border-radius: 6px;
+
+  /* ProgressBar */
+  --p-progressbar-border-radius: 9999px;
+  --p-progressbar-height: 10px;
+
+  /* Motion */
+  --ubax-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ubax-motion-ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Z-index */
+  --ubax-z-topbar: 100;
+  --ubax-z-overlay: 2147483647;
+}
+
+/* ── Reset global ─────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    'Lexend',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: #ecf2f7;
+  color: #222;
+}
+
+/* ── View transitions ─────────────────────────────────────────────────────── */
+::view-transition-old(ubax-route-stage),
+::view-transition-new(ubax-route-stage) {
+  animation-duration: 680ms;
+  animation-timing-function: var(--ubax-motion-ease);
+}
+
+::view-transition-old(ubax-route-stage) {
+  animation-name: ubaxRouteStageExit;
+}
+
+::view-transition-new(ubax-route-stage) {
+  animation-name: ubaxRouteStageEnter;
+}
+
+@keyframes ubaxRouteStageEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.985);
+    filter: saturate(0.94) blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: none;
+  }
+}
+
+@keyframes ubaxRouteStageExit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.992);
+    filter: saturate(0.96) blur(6px);
+  }
+}
+
+/* ── Motion utilities ─────────────────────────────────────────────────────── */
+[data-ubax-motion] {
+  opacity: 0.001;
+  transform: translate3d(0, var(--ubax-motion-y, 18px), 0)
+    scale(var(--ubax-motion-scale, 0.992));
+  transition:
+    opacity var(--ubax-motion-duration, 620ms) var(--ubax-motion-ease-soft)
+      var(--ubax-motion-delay, 0ms),
+    transform var(--ubax-motion-duration, 620ms) var(--ubax-motion-ease)
+      var(--ubax-motion-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-ubax-motion='page'] {
+  --ubax-motion-y: 20px;
+  --ubax-motion-scale: 0.988;
+  --ubax-motion-duration: 460ms;
+}
+
+[data-ubax-motion='surface'] {
+  --ubax-motion-y: 18px;
+  --ubax-motion-scale: 0.992;
+  --ubax-motion-duration: 640ms;
+}
+
+[data-ubax-motion='item'] {
+  --ubax-motion-y: 14px;
+  --ubax-motion-scale: 0.996;
+  --ubax-motion-duration: 560ms;
+}
+
+[data-ubax-motion].is-visible {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Fallback: keep DS surfaces visible when no runtime motion orchestrator is active. */
+.ubax-shell [data-ubax-motion],
+.ubax-page [data-ubax-motion] {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+body
+  :where(
+    div,
+    section,
+    article,
+    aside,
+    main,
+    header,
+    footer,
+    nav,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    option,
+    label,
+    li,
+    ul,
+    ol,
+    dt,
+    dd,
+    td,
+    th,
+    strong,
+    small,
+    em
+  ):not(.pi) {
+  font-family: inherit !important;
+}
+
+.p-component {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(ubax-route-stage),
+  ::view-transition-new(ubax-route-stage),
+  [data-ubax-motion] {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+  }
+
+  [data-ubax-motion] {
+    transform: none !important;
+  }
+}

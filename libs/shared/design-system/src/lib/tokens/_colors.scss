@@ -1,0 +1,40 @@
+// ============================================================
+// UBAX Design System — Color Tokens
+// Extracted from Figma: BACK-OFFICE-UBAX
+// ============================================================
+
+// ── Primitives ────────────────────────────────────────────────
+// Brand
+$color-brand-navy:        #1a3047;   // Sidebar background
+$color-brand-orange:      #e87d1e;   // Primary CTA / accent
+$color-brand-blue:        #2b7fff;   // Interactive / primary
+$color-brand-teal:        #009966;   // Success dark (header accent)
+
+// Semantic
+$color-success:           #34c759;
+$color-success-bg:        #e1ffe9;
+$color-warning:           #e87d1e;
+$color-warning-bg:        #ffeddd;
+$color-danger:            #e7000b;
+$color-danger-bg:         #ffdbdd;
+$color-info:              #2b7fff;
+$color-info-bg:           #e8f0ff;
+
+// Neutrals
+$color-neutral-50:        #f8faff;   // --neutral-colors/200
+$color-neutral-100:       #f7f7f7;
+$color-neutral-200:       #ecf2f7;   // Page background
+$color-neutral-300:       #e1e4ed;   // --neutral-colors/400 / borders
+$color-neutral-400:       #c9c9c9;
+$color-neutral-500:       #979797;   // Muted text
+$color-neutral-600:       #6e6e6e;
+$color-neutral-700:       #444;
+$color-neutral-800:       #292929;
+$color-neutral-900:       #1c1c1c;   // Primary text
+$color-neutral-950:       #222;      // Body text
+
+// Surfaces
+$color-surface-page:      $color-neutral-200;
+$color-surface-card:      #ffffff;
+$color-surface-sidebar:   $color-brand-navy;
+$color-surface-header:    #ffffff;

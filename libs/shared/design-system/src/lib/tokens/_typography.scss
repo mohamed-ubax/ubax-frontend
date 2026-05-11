@@ -1,0 +1,81 @@
+// ============================================================
+// UBAX Design System — Typography Tokens
+// Extracted from Figma: BACK-OFFICE-UBAX
+// ============================================================
+
+// ── Font Families ─────────────────────────────────────────────
+$font-family-primary:   'Lexend', system-ui, -apple-system, sans-serif;
+$font-family-secondary: 'Inter', system-ui, -apple-system, sans-serif;
+
+// ── Font Weights ──────────────────────────────────────────────
+$font-weight-light:     300;
+$font-weight-regular:   400;
+$font-weight-medium:    500;
+$font-weight-semibold:  600;
+
+// ── Font Sizes (mobile-first, px) ─────────────────────────────
+$text-xs:    8px;
+$text-sm:    10px;
+$text-base:  12px;
+$text-md:    13px;
+$text-lg:    14px;
+$text-xl:    15px;
+$text-2xl:   16px;
+$text-3xl:   20px;
+$text-4xl:   22px;
+$text-5xl:   24px;
+
+// ── Line Heights ──────────────────────────────────────────────
+$leading-tight:   1.2;
+$leading-snug:    1.4;
+$leading-normal:  1.5;
+$leading-relaxed: 1.6;
+
+// ── Figma Text Styles ─────────────────────────────────────────
+// Page title (h1)
+$text-style-page-title: (
+  family: $font-family-primary,
+  weight: $font-weight-semibold,
+  size: $text-5xl,
+  line-height: normal,
+);
+
+// Section title (h2)
+$text-style-section-title: (
+  family: $font-family-primary,
+  weight: $font-weight-semibold,
+  size: $text-2xl,
+  line-height: 19px,
+);
+
+// Card label
+$text-style-card-label: (
+  family: $font-family-primary,
+  weight: $font-weight-medium,
+  size: $text-md,
+  line-height: 19px,
+);
+
+// Body regular
+$text-style-body: (
+  family: $font-family-primary,
+  weight: $font-weight-regular,
+  size: $text-md,
+  line-height: 20px,
+);
+
+// Caption
+$text-style-caption: (
+  family: $font-family-primary,
+  weight: $font-weight-regular,
+  size: $text-base,
+  line-height: 20px,
+);
+
+// Micro
+$text-style-micro: (
+  family: $font-family-primary,
+  weight: $font-weight-light,
+  size: $text-sm,
+  line-height: 20px,
+);
