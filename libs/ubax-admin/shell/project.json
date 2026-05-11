@@ -12,8 +12,16 @@
    "executor": "@nx/eslint:lint"
   },
   "test": {
-   "executor": "@angular/build:unit-test",
-   "options": {}
+   "executor": "nx:run-commands",
+   "cache": true,
+   "inputs": [
+    "default",
+    "^production"
+   ],
+   "options": {
+    "command": "npx vitest run --config libs/ubax-admin/shell/vitest.config.mts",
+    "cwd": "{workspaceRoot}"
+   }
   }
  }
 }
