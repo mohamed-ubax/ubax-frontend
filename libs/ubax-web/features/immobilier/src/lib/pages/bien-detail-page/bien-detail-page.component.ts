@@ -91,18 +91,22 @@ const CONDITION_LABELS: Record<string, string> = {
 
 const MIN_GALLERY_SLOTS = 4;
 
-const AMENITY_LABELS: Record<string, string> = {
-  AC: 'Climatisation',
-  SECURITY: 'Securite',
-  PARKING: 'Parking prive',
-  GARDEN: 'Jardin',
-  WATER_TANK: "Reservoir d'eau",
-  WIFI: 'Wi-Fi',
-  ELEVATOR: 'Ascenseur',
-  GENERATOR: 'Groupe electrogene',
-  POOL: 'Piscine',
-  FURNISHED: 'Meuble',
-};
+function readAmenityPayloadLabel(item: {
+  readonly code?: string;
+  readonly customDescription?: string;
+  readonly customValue?: string;
+  readonly description?: string;
+  readonly value?: string;
+}): string {
+  return (
+    item.description?.trim() ||
+    item.value?.trim() ||
+    item.customDescription?.trim() ||
+    item.customValue?.trim() ||
+    item.code?.trim() ||
+    ''
+  );
+}
 
 @Component({
   selector: 'ubax-bien-detail-page',
@@ -359,11 +363,9 @@ export class BienDetailPageComponent {
   protected readonly amenityColumns = computed(() => {
     const source = this.property()?.amenities ?? [];
     const labels = source
-      .map(
-        (item) => item.customValue || item.customDescription || item.code || '',
-      )
+      .map((item) => readAmenityPayloadLabel(item))
       .map((item) => item.trim())
-      .map((item) => AMENITY_LABELS[item] ?? this.normalizeCodeLabel(item))
+      .map((item) => this.normalizeCodeLabel(item))
       .filter((item) => item.length > 0);
 
     if (labels.length === 0) {
