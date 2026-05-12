@@ -545,7 +545,7 @@
                 <a [routerLink]="[card.id]" class="espace-card__link">
                   <img
                     class="espace-card__image"
-                    src="shared/rooms/room-photo-01.webp"
+                    [src]="card.image"
                     [alt]="card.title"
                     [attr.loading]="index === 0 ? 'eager' : 'lazy'"
                     decoding="async"
@@ -685,7 +685,7 @@
                   <div class="espace-list-card__media">
                     <img
                       class="espace-list-card__image"
-                      src="shared/rooms/room-photo-01.webp"
+                      [src]="card.image"
                       [alt]="card.title"
                       [attr.loading]="index === 0 ? 'eager' : 'lazy'"
                       decoding="async"

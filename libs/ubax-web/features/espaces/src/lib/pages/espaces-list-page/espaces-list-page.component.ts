@@ -24,6 +24,7 @@ import {
   MesEspacesStore,
   EspaceStatus,
   ESPACE_STATUS_LABELS,
+  resolvePropertyCardImage,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
   LaCodeListDto,
@@ -44,6 +45,7 @@ type FilterOption = {
 type EspaceCard = {
   readonly id: string;
   readonly title: string;
+  readonly image: string;
   readonly city: string;
   readonly typeLabel: string;
   readonly typeRaw: string;
@@ -60,6 +62,7 @@ type EspaceCard = {
 
 const PAGE_SIZE_GRID = 12;
 const PAGE_SIZE_LIST = 10;
+const DEFAULT_ESPACE_IMAGE = 'shared/rooms/room-photo-01.webp';
 
 const STATUS_TONE_MAP: Record<EspaceStatus, FilterOption['tone']> = {
   DRAFT: 'neutral',
@@ -96,6 +99,7 @@ function mapToEspaceCard(
   return {
     id: property.id ?? `espace-${index}`,
     title: property.title?.trim() || 'Espace sans titre',
+    image: resolvePropertyCardImage(property, DEFAULT_ESPACE_IMAGE),
     city: property.city ?? '—',
     typeLabel,
     typeRaw,

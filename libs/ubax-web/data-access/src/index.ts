@@ -48,6 +48,10 @@ export { BienCreationStore } from './lib/store/biens/bien-creation.store';
 export type { BienCreationState } from './lib/store/biens/bien-creation.store';
 export { MesBiensStore } from './lib/store/biens/mes-biens.store';
 export { BienEditStore } from './lib/store/biens/bien-edit.store';
+export {
+  readPropertyCoverPhotoUrl,
+  resolvePropertyCardImage,
+} from './lib/property-card-image.helper';
 
 // ─── Espaces hôteliers ────────────────────────────────────────────────────────
 export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
