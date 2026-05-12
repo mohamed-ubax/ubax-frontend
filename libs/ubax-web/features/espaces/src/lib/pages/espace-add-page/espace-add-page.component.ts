@@ -532,10 +532,12 @@ export class EspaceAddPageComponent implements OnInit {
 
       const id = this.editPropertyId();
       this.editPending.set(false);
-      if (id) {
-        this.notifications?.success('Espace modifié avec succès.');
-        this.router.navigate(['/hotel/espaces', id]);
+      if (!id) {
+        return;
       }
+
+      this.notifications?.success("Informations de l'espace mises à jour.");
+      this.nextStep();
     });
 
     // Navigate to list once submitted (status → PENDING)
@@ -952,6 +954,13 @@ export class EspaceAddPageComponent implements OnInit {
       if (!property) {
         return;
       }
+
+      this.store.hydrateExistingDraftContext({
+        propertyId: id,
+        property,
+        medias: detail?.media ?? [],
+        documents: detail?.documents ?? [],
+      });
 
       this._step1.update((state) => ({
         ...state,

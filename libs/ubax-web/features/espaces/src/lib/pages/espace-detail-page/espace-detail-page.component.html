@@ -262,13 +262,21 @@
 
       <section class="gallery-panel" aria-label="Galerie de la chambre">
         <div class="gallery-panel__main">
-          <img
-            class="gallery-panel__main-image"
-            [src]="activeGalleryPhoto().src"
-            [alt]="reservation().title"
-            loading="eager"
-            decoding="async"
-          />
+          @if (isGalleryImageAvailable(activeGalleryPhoto())) {
+            <img
+              class="gallery-panel__main-image"
+              [src]="activeGalleryPhoto().src"
+              [alt]="activeGalleryPhoto().alt || reservation().title"
+              loading="eager"
+              decoding="async"
+              (error)="markGalleryImageBroken(activeGalleryPhoto().key)"
+            />
+          } @else {
+            <div class="gallery-panel__placeholder" aria-live="polite">
+              <i class="pi pi-image" aria-hidden="true"></i>
+              <span>Image indisponible</span>
+            </div>
+          }
 
           <div class="gallery-panel__nav">
             <button
@@ -296,7 +304,7 @@
         </div>
 
         <div class="gallery-panel__thumbs">
-          @for (photo of galleryPhotos(); track photo.src; let index = $index) {
+          @for (photo of galleryPhotos(); track photo.key; let index = $index) {
             <button
               class="gallery-thumb"
               [class.gallery-thumb--active]="activeGalleryIndex() === index"
@@ -304,15 +312,23 @@
               [attr.aria-label]="'Afficher ' + photo.alt"
               (click)="selectGalleryImage(index)"
             >
-              <img
-                class="gallery-thumb__image"
-                [src]="photo.src"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
+              @if (isGalleryImageAvailable(photo)) {
+                <img
+                  class="gallery-thumb__image"
+                  [src]="photo.src"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  (error)="markGalleryImageBroken(photo.key)"
+                />
+              } @else {
+                <div class="gallery-thumb__placeholder">
+                  <i class="pi pi-image" aria-hidden="true"></i>
+                  <span>Image indisponible</span>
+                </div>
+              }
 
-              @if (photo.previewCount) {
+              @if (photo.previewCount && isGalleryImageAvailable(photo)) {
                 <span class="gallery-thumb__overlay">
                   <i class="pi pi-images"></i>
                   <span>{{ photo.previewCount }}</span>

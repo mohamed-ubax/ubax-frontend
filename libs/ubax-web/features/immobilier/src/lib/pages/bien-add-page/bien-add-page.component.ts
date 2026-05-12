@@ -10,6 +10,7 @@
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe, DOCUMENT } from '@angular/common';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import {
   form,
   submit,
@@ -155,12 +156,16 @@ export class BienAddPageComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
   private readonly document = inject(DOCUMENT);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
 
   protected readonly saving = this.store.saving;
-  protected readonly error = this.store.error;
+  private readonly guardedError = signal<string | null>(null);
+  protected readonly error = computed(
+    () => this.guardedError() ?? this.store.error(),
+  );
   protected readonly medias = this.store.medias;
   protected readonly documents = this.store.documents;
   protected readonly property = this.store.property;
@@ -173,15 +178,30 @@ export class BienAddPageComponent implements OnInit {
   protected readonly documentTypesCodeList = this.store.codeListDocumentTypes;
   protected readonly documentUploadStage = this.store.documentUploadStage;
   protected readonly documentOpeningId = signal<string | null>(null);
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly previewName = signal<string>('Document');
+  protected readonly previewFullscreen = signal(false);
+  protected readonly previewIsImage = signal(false);
+  protected readonly previewIsVideo = signal(false);
+  protected readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
 
   protected readonly isSessionError = computed(() => {
     const msg = this.error() ?? '';
     return (
       msg.includes('401') ||
+      /token.*authentification/i.test(msg) ||
       /session expir/i.test(msg) ||
       /unauthorized/i.test(msg) ||
       /non autoris/i.test(msg)
     );
+  });
+
+  protected readonly hasWritableSession = computed(() => {
+    const token = this.authStore.token();
+    return !!token;
   });
 
   protected expireAndRedirect(): void {
@@ -353,6 +373,7 @@ export class BienAddPageComponent implements OnInit {
   /** Becomes true once proceedStep4 triggers creerBrouillon, resets on navigation. */
   private readonly step4Pending = signal(false);
   private readonly editPending = signal(false);
+  private readonly submitPending = signal(false);
 
   protected readonly editPropertyId = computed(
     () => this.route.snapshot.paramMap.get('id') ?? '',
@@ -360,16 +381,34 @@ export class BienAddPageComponent implements OnInit {
   protected readonly isEditMode = computed(
     () => this.editPropertyId().length > 0,
   );
+  protected readonly canSubmitForModeration = computed(() => {
+    const status = this.property()?.status;
+    return status === 'DRAFT' || status === 'REJECTED' || !status;
+  });
 
   protected readonly coverMediaId = computed(
     () => this.medias().find((m) => m.cover)?.id ?? null,
   );
 
   constructor() {
-    // Redirect to detail page once the bien transitions to PENDING status.
+    // Redirect to detail page only after an explicit submit action.
     effect(() => {
+      if (!this.submitPending()) {
+        return;
+      }
+
       const prop = this.property();
+      if (this.store.saving()) {
+        return;
+      }
+
+      if (this.store.error()) {
+        this.submitPending.set(false);
+        return;
+      }
+
       if (prop?.id && prop.status === 'PENDING') {
+        this.submitPending.set(false);
         this.store.reset();
         this.router.navigate(['/biens', prop.id]);
       }
@@ -383,6 +422,7 @@ export class BienAddPageComponent implements OnInit {
         !this.store.saving()
       ) {
         this.step4Pending.set(false);
+        this.guardedError.set(null);
         this.notifications?.success('Brouillon créé avec succès.');
         this.nextStep();
       }
@@ -406,21 +446,54 @@ export class BienAddPageComponent implements OnInit {
 
       const id = this.editPropertyId();
       this.editPending.set(false);
-      if (id) {
-        this.notifications?.success('Bien modifié avec succès.');
-        this.router.navigate(['/biens', id]);
+      if (!id) {
+        return;
       }
+
+      this.notifications?.success('Informations du bien mises à jour.');
+      this.guardedError.set(null);
+      this.nextStep();
     });
 
-    // Lower topbar when any confirmation modal is open.
     effect(() => {
-      const isOpen = !!(this.mediaDeleteTarget() || this.docDeleteTarget());
-      this.document.body.classList.toggle('ubax-overlay-open', isOpen);
+      const options = this.docTypes();
+      const current = this.selectedDocType();
+
+      if (!options.length) {
+        if (current) {
+          this.selectedDocType.set('');
+        }
+        return;
+      }
+
+      if (options.some((option) => option.value === current)) {
+        return;
+      }
+
+      this.selectedDocType.set(options[0]?.value ?? '');
+    });
+
+    // Lower topbar when any overlay is open.
+    effect((onCleanup) => {
+      const hasConfirmOverlay = !!(
+        this.mediaDeleteTarget() || this.docDeleteTarget()
+      );
+      const hasDocPreviewOverlay = !!this.previewUrl();
+      const hasOverlay = hasConfirmOverlay || hasDocPreviewOverlay;
+
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+
+      onCleanup(() => {
+        if (hasOverlay) {
+          this.document.body.classList.remove('ubax-overlay-open');
+        }
+      });
     });
   }
 
   ngOnInit(): void {
     this.store.chargerReferentiels();
+    this.guardedError.set(null);
     const id = this.editPropertyId();
     if (id) {
       void this.prefillFromProperty(id);
@@ -479,6 +552,10 @@ export class BienAddPageComponent implements OnInit {
   protected proceedStep4(): void {
     submit(this.formStep4, {
       action: async () => {
+        if (!this.ensureWritableSession()) {
+          return null;
+        }
+
         const s1 = this._step1();
         const s2 = this._step2();
         const s3 = this._step3();
@@ -563,8 +640,22 @@ export class BienAddPageComponent implements OnInit {
   }
 
   private uploadFiles(files: File[]): void {
+    if (!this.ensureWritableSession()) {
+      return;
+    }
+
     files.forEach((file) => {
-      const mediaType = file.type.startsWith('video/') ? 'VIDEO' : 'PHOTO';
+      const isVideo = file.type.startsWith('video/');
+      const mediaType = isVideo ? 'VIDEO' : 'PHOTO';
+
+      if (isVideo) {
+        this.store.uploaderMediaPresign({
+          file,
+          mediaType,
+        });
+        return;
+      }
+
       this.store.uploaderMediaDirect({
         file,
         mediaType,
@@ -574,6 +665,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected setCover(mediaId: string): void {
+    if (!this.ensureWritableSession()) {
+      return;
+    }
+
     this.store.definirCouverture(mediaId);
   }
 
@@ -587,7 +682,7 @@ export class BienAddPageComponent implements OnInit {
 
   protected confirmDeleteMedia(): void {
     const mediaId = this.mediaDeleteTarget();
-    if (!mediaId) return;
+    if (!mediaId || !this.ensureWritableSession()) return;
     const wasCover = this.coverMediaId() === mediaId;
     this.store.supprimerMedia(mediaId);
     this.mediaDeleteTarget.set(null);
@@ -601,6 +696,12 @@ export class BienAddPageComponent implements OnInit {
   // ── Document handlers ────────────────────────────────────────────────────
 
   protected onDocFileSelected(event: Event): void {
+    if (!this.ensureWritableSession()) {
+      const input = event.target as HTMLInputElement;
+      input.value = '';
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -611,30 +712,75 @@ export class BienAddPageComponent implements OnInit {
       input.value = '';
       return;
     }
+
+    const docType = this.selectedDocType() || this.docTypes()[0]?.value || '';
+    if (!docType) {
+      this.docFileError.set('Veuillez sélectionner un type de document.');
+      input.value = '';
+      return;
+    }
+
     this.docFileError.set(null);
     const title = this.docTitle() || file.name;
     this.store.uploaderDocument({
       file,
-      docType: this.selectedDocType(),
+      docType,
       title,
     });
     input.value = '';
     this.docTitle.set('');
   }
 
-  protected async openDocument(fileUrl: string, docId?: string): Promise<void> {
+  protected async openDocument(
+    fileUrl: string,
+    fileName?: string,
+    docId?: string,
+  ): Promise<void> {
+    if (!fileUrl) return;
+
     if (docId) this.documentOpeningId.set(docId);
+    if (this.isPublicPropertyMediaUrl(fileUrl)) {
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
+
+      if (docId) {
+        this.documentOpeningId.set(null);
+      }
+      return;
+    }
+
     try {
       const response = await firstValueFrom(
         generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
       );
-      const readUrl = response.body?.readUrl;
-      window.open(readUrl ?? fileUrl, '_blank', 'noopener,noreferrer');
+      const resolvedUrl =
+        this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(resolvedUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(resolvedUrl, fileName));
+      this.previewUrl.set(resolvedUrl);
     } catch {
-      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
     } finally {
       if (docId) this.documentOpeningId.set(null);
     }
+  }
+
+  protected closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewName.set('Document');
+    this.previewIsImage.set(false);
+    this.previewIsVideo.set(false);
+    this.previewFullscreen.set(false);
+  }
+
+  protected togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((value) => !value);
   }
 
   protected requestDeleteDoc(docId: string): void {
@@ -647,7 +793,7 @@ export class BienAddPageComponent implements OnInit {
 
   protected confirmDeleteDoc(): void {
     const docId = this.docDeleteTarget();
-    if (!docId) return;
+    if (!docId || !this.ensureWritableSession()) return;
     this.store.supprimerDocument(docId);
     this.docDeleteTarget.set(null);
   }
@@ -660,7 +806,22 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected soumettre(): void {
+    if (!this.ensureWritableSession()) {
+      return;
+    }
+
+    this.submitPending.set(true);
     this.store.soumettre();
+  }
+
+  protected terminerModification(): void {
+    const id = this.editPropertyId();
+    if (!id) {
+      return;
+    }
+
+    this.notifications?.success('Modifications enregistrées.');
+    void this.router.navigate(['/biens', id]);
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -676,6 +837,24 @@ export class BienAddPageComponent implements OnInit {
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
   }
 
+  private ensureWritableSession(): boolean {
+    if (this.hasWritableSession()) {
+      this.guardedError.set(null);
+      return true;
+    }
+
+    this.submitPending.set(false);
+    this.step4Pending.set(false);
+    this.editPending.set(false);
+
+    const message =
+      'Cette action requiert une session authentifiée valide. Reconnectez-vous au portail pour continuer.';
+
+    this.guardedError.set(message);
+    this.notifications?.error(message);
+    return false;
+  }
+
   private async prefillFromProperty(id: string): Promise<void> {
     try {
       const response = await firstValueFrom(
@@ -687,6 +866,13 @@ export class BienAddPageComponent implements OnInit {
       if (!property) {
         return;
       }
+
+      this.store.hydrateExistingDraftContext({
+        propertyId: id,
+        property,
+        medias: detail?.media ?? [],
+        documents: detail?.documents ?? [],
+      });
 
       this._step1.update((state) => ({
         ...state,
@@ -754,5 +940,40 @@ export class BienAddPageComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private extractReadUrlFromResponse(body: unknown): string | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as { readUrl?: unknown };
+    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) {
+      return direct.readUrl;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      const nested = wrapped.data as { readUrl?: unknown };
+      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) {
+        return nested.readUrl;
+      }
+    }
+
+    return null;
+  }
+
+  private isPublicPropertyMediaUrl(fileUrl: string): boolean {
+    return /\/properties-media\//i.test(fileUrl);
+  }
+
+  private isPreviewImage(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/.test(target);
+  }
+
+  private isPreviewVideo(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.mp4|\.webm|\.ogg|\.mov|\.m4v)(\?|$|\s)/.test(target);
   }
 }

@@ -41,8 +41,10 @@ type ReservationDetail = {
 };
 
 type GalleryPhoto = {
-  readonly src: string;
+  readonly key: string;
+  readonly src: string | null;
   readonly alt: string;
+  readonly isPlaceholder: boolean;
   readonly previewCount?: number;
 };
 
@@ -62,6 +64,8 @@ type LegalDocument = {
   readonly name: string;
   readonly fileUrl: string;
 };
+
+const MIN_GALLERY_SLOTS = 4;
 
 @Component({
   selector: 'ubax-espace-detail-page',
@@ -85,6 +89,7 @@ export class EspaceDetailPageComponent {
   private readonly loadingDetail = signal(false);
   private readonly detailError = signal<string | null>(null);
   private readonly hasLoadedDetail = signal(false);
+  readonly brokenGalleryImageKeys = signal<Record<string, true>>({});
   readonly documentOpeningId = signal<string | null>(null);
   readonly previewUrl = signal<string | null>(null);
   readonly previewName = signal<string>('Document');
@@ -173,27 +178,36 @@ export class EspaceDetailPageComponent {
       (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
     );
 
-    const photos = sorted
+    const photos: GalleryPhoto[] = sorted
       .filter((item) => (item.mediaType ?? 'PHOTO') !== 'VIDEO')
-      .map((item) => item.fileUrl ?? '')
-      .filter((url) => url.length > 0)
-      .map((url, index, all) => ({
-        src: url,
+      .map((item, index) => ({
+        key: item.id ?? `gallery-${index}`,
+        src: item.fileUrl?.trim() || null,
         alt: `Photo ${index + 1}`,
-        previewCount: index === all.length - 1 ? all.length : undefined,
+        isPlaceholder: !(item.fileUrl?.trim() || null),
+        previewCount: undefined,
       }));
 
-    if (photos.length > 0) {
-      return photos;
+    const items: GalleryPhoto[] = photos.map((photo, index, all) => ({
+      ...photo,
+      previewCount:
+        photo.src && index === all.length - 1
+          ? all.filter((item) => !!item.src).length
+          : undefined,
+    }));
+
+    while (items.length < MIN_GALLERY_SLOTS) {
+      const slotNumber = items.length + 1;
+      items.push({
+        key: `gallery-placeholder-${slotNumber}`,
+        src: null,
+        alt: `Image indisponible ${slotNumber}`,
+        isPlaceholder: true,
+        previewCount: undefined,
+      });
     }
 
-    return [
-      {
-        src: 'shared/rooms/room-photo-02.webp',
-        alt: 'Photo principale',
-        previewCount: 1,
-      },
-    ];
+    return items;
   });
 
   readonly totalGalleryCount = computed(() => this.galleryPhotos().length);
@@ -241,7 +255,16 @@ export class EspaceDetailPageComponent {
   readonly activeGalleryPhoto = computed(() => {
     const photos = this.galleryPhotos();
     const safeIndex = Math.min(this.activeGalleryIndex(), photos.length - 1);
-    return photos[safeIndex] ?? photos[0] ?? { src: '', alt: '' };
+    return (
+      photos[safeIndex] ??
+      photos[0] ?? {
+        key: 'gallery-fallback',
+        src: null,
+        alt: 'Image indisponible',
+        isPlaceholder: true,
+        previewCount: undefined,
+      }
+    );
   });
 
   readonly galleryCounterLabel = computed(() => {
@@ -279,6 +302,27 @@ export class EspaceDetailPageComponent {
 
   selectGalleryImage(index: number): void {
     this.activeGalleryIndex.set(index);
+  }
+
+  isGalleryImageAvailable(item: GalleryPhoto): boolean {
+    return (
+      !!item.src &&
+      !item.isPlaceholder &&
+      !this.brokenGalleryImageKeys()[item.key]
+    );
+  }
+
+  markGalleryImageBroken(key: string): void {
+    this.brokenGalleryImageKeys.update((current) => {
+      if (current[key]) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [key]: true,
+      };
+    });
   }
 
   previousGalleryImage(): void {

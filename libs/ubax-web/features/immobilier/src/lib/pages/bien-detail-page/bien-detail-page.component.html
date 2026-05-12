@@ -227,11 +227,19 @@
           <div class="gallery-section__main">
             <span class="gallery-section__status">{{ transactionLabel() }}</span>
 
-            <img
-              class="gallery-section__image"
-              [src]="activeImage()"
-              [alt]="propertyTitle()"
-            />
+            @if (isGalleryImageAvailable(activeGalleryItem())) {
+              <img
+                class="gallery-section__image"
+                [src]="activeGalleryItem().src"
+                [alt]="activeGalleryItem().alt || propertyTitle()"
+                (error)="markGalleryImageBroken(activeGalleryItem().key)"
+              />
+            } @else {
+              <div class="gallery-section__placeholder" aria-live="polite">
+                <i class="pi pi-image" aria-hidden="true"></i>
+                <span>Image indisponible</span>
+              </div>
+            }
 
             <button
               class="gallery-nav gallery-nav--previous"
@@ -253,14 +261,25 @@
           </div>
 
           <div class="gallery-section__thumbs">
-            @for (image of galleryImages(); track image; let index = $index) {
+            @for (image of galleryItems(); track image.key; let index = $index) {
               <button
                 class="gallery-thumb"
                 [class.is-active]="activeImageIndex() === index"
                 type="button"
                 (click)="selectImage(index)"
               >
-                <img [src]="image" alt="Aperçu du bien" />
+                @if (isGalleryImageAvailable(image)) {
+                  <img
+                    [src]="image.src"
+                    [alt]="image.alt"
+                    (error)="markGalleryImageBroken(image.key)"
+                  />
+                } @else {
+                  <div class="gallery-thumb__placeholder">
+                    <i class="pi pi-image" aria-hidden="true"></i>
+                    <span>Image indisponible</span>
+                  </div>
+                }
               </button>
             }
           </div>
@@ -377,16 +396,27 @@
           </div>
 
           @if (hasVideos()) {
-            @for (video of videos(); track video.fileUrl) {
+            @for (video of videos(); track video.key) {
               <div class="video-panel">
                 <video
                   class="video-panel__player"
                   controls
                   preload="metadata"
-                  [src]="video.fileUrl"
+                  playsinline
                   [attr.aria-label]="'Vidéo de ' + propertyTitle()"
                 >
+                  <source
+                    [src]="video.playbackUrl"
+                    [attr.type]="video.mimeType ?? null"
+                  />
                   Votre navigateur ne supporte pas la lecture vidéo.
+                  <a
+                    [href]="video.playbackUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Ouvrir la vidéo dans un nouvel onglet
+                  </a>
                 </video>
               </div>
             }

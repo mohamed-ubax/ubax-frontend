@@ -35,11 +35,26 @@ type BienMetric = {
   readonly value: string;
 };
 
+type BienGalleryItem = {
+  readonly key: string;
+  readonly src: string | null;
+  readonly alt: string;
+  readonly isPlaceholder: boolean;
+};
+
 type BienComment = {
   readonly author: string;
   readonly avatar: string;
   readonly rating: number;
   readonly review: string;
+};
+
+type BienVideo = {
+  readonly key: string;
+  readonly fileUrl: string;
+  readonly playbackUrl: string;
+  readonly fileName?: string;
+  readonly mimeType?: string;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -73,6 +88,8 @@ const CONDITION_LABELS: Record<string, string> = {
   GOOD: 'Bon etat',
   RENOVATE: 'A renover',
 };
+
+const MIN_GALLERY_SLOTS = 4;
 
 const AMENITY_LABELS: Record<string, string> = {
   AC: 'Climatisation',
@@ -110,10 +127,12 @@ export class BienDetailPageComponent {
   private readonly loadingDetail = signal(false);
   private readonly detailError = signal<string | null>(null);
   private readonly hasLoadedDetail = signal(false);
+  private readonly resolvedVideoUrls = signal<Record<string, string>>({});
 
   protected readonly comments: readonly BienComment[] = [];
   protected readonly ratingStars = [1, 2, 3, 4, 5] as const;
   protected readonly activeImageIndex = signal(0);
+  protected readonly brokenGalleryImageKeys = signal<Record<string, true>>({});
   protected readonly archiveConfirmOpen = signal(false);
   protected readonly archivePending = signal(false);
   protected readonly propertyArchived = signal(false);
@@ -167,25 +186,58 @@ export class BienDetailPageComponent {
     return 'active';
   });
 
-  protected readonly galleryImages = computed(() => {
+  protected readonly galleryItems = computed<readonly BienGalleryItem[]>(() => {
     const media = this.propertyDetail()?.media ?? [];
     const photos = [...media]
       .filter((item) => (item.mediaType ?? 'PHOTO') !== 'VIDEO')
       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-      .map((item) => item.fileUrl ?? '')
-      .filter((url) => url.length > 0);
+      .map((item, index) => {
+        const src = item.fileUrl?.trim() || null;
 
-    return photos;
+        return {
+          key: item.id ?? `gallery-${index}`,
+          src,
+          alt: `Photo du bien ${index + 1}`,
+          isPlaceholder: !src,
+        } satisfies BienGalleryItem;
+      });
+
+    const items = [...photos];
+
+    while (items.length < MIN_GALLERY_SLOTS) {
+      const slotNumber = items.length + 1;
+      items.push({
+        key: `gallery-placeholder-${slotNumber}`,
+        src: null,
+        alt: `Image indisponible ${slotNumber}`,
+        isPlaceholder: true,
+      });
+    }
+
+    return items;
   });
 
-  protected readonly videos = computed(() =>
-    (this.propertyDetail()?.media ?? []).filter(
-      (item) => item.mediaType === 'VIDEO' && !!item.fileUrl,
-    ),
-  );
+  protected readonly videos = computed<readonly BienVideo[]>(() => {
+    const resolvedUrls = this.resolvedVideoUrls();
 
-  protected readonly hasGallery = computed(
-    () => this.galleryImages().length > 0,
+    return (this.propertyDetail()?.media ?? [])
+      .filter((item) => item.mediaType === 'VIDEO' && !!item.fileUrl)
+      .map((item, index) => {
+        const fileUrl = item.fileUrl ?? '';
+        const key = (item.id ?? fileUrl) || `video-${index}`;
+
+        return {
+          key,
+          fileUrl,
+          playbackUrl: resolvedUrls[key] ?? fileUrl,
+          fileName: item.fileName ?? undefined,
+          mimeType: item.mimeType ?? undefined,
+        } satisfies BienVideo;
+      });
+  });
+
+  protected readonly hasGallery = computed(() =>
+    this.galleryItems().some((item) => !!item.src),
   );
   protected readonly hasVideos = computed(() => this.videos().length > 0);
 
@@ -200,13 +252,19 @@ export class BienDetailPageComponent {
 
   protected readonly hasDocuments = computed(() => this.documents().length > 0);
 
-  protected readonly activeImage = computed(() => {
-    const images = this.galleryImages();
-    if (images.length === 0) {
-      return 'shared/rooms/room-photo-01.webp';
-    }
-    const index = Math.min(this.activeImageIndex(), images.length - 1);
-    return images[index] ?? images[0];
+  protected readonly activeGalleryItem = computed<BienGalleryItem>(() => {
+    const items = this.galleryItems();
+    const index = Math.min(this.activeImageIndex(), items.length - 1);
+
+    return (
+      items[index] ??
+      items[0] ?? {
+        key: 'gallery-fallback',
+        src: null,
+        alt: 'Image indisponible',
+        isPlaceholder: true,
+      }
+    );
   });
 
   protected readonly propertyTitle = computed(
@@ -400,19 +458,40 @@ export class BienDetailPageComponent {
   }
 
   protected previousImage(): void {
-    const images = this.galleryImages();
-    if (images.length <= 1) return;
+    const items = this.galleryItems();
+    if (items.length <= 1) return;
     this.activeImageIndex.update((current) =>
-      current === 0 ? images.length - 1 : current - 1,
+      current === 0 ? items.length - 1 : current - 1,
     );
   }
 
   protected nextImage(): void {
-    const images = this.galleryImages();
-    if (images.length <= 1) return;
+    const items = this.galleryItems();
+    if (items.length <= 1) return;
     this.activeImageIndex.update((current) =>
-      current === images.length - 1 ? 0 : current + 1,
+      current === items.length - 1 ? 0 : current + 1,
     );
+  }
+
+  protected isGalleryImageAvailable(item: BienGalleryItem): boolean {
+    return (
+      !!item.src &&
+      !item.isPlaceholder &&
+      !this.brokenGalleryImageKeys()[item.key]
+    );
+  }
+
+  protected markGalleryImageBroken(key: string): void {
+    this.brokenGalleryImageKeys.update((current) => {
+      if (current[key]) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [key]: true,
+      };
+    });
   }
 
   protected openArchiveConfirm(): void {
@@ -533,14 +612,18 @@ export class BienDetailPageComponent {
     try {
       this.loadingDetail.set(true);
       this.detailError.set(null);
+      this.resolvedVideoUrls.set({});
       const response = await firstValueFrom(
         getById(this.http, this.apiConfig.rootUrl, { id }),
       );
-      this.propertyDetail.set(this.extractDetailFromResponse(response.body));
+      const detail = this.extractDetailFromResponse(response.body);
+      this.propertyDetail.set(detail);
+      void this.resolveVideoReadUrls(detail);
       this.hasLoadedDetail.set(true);
       this.activeImageIndex.set(0);
     } catch {
       this.propertyDetail.set(null);
+      this.resolvedVideoUrls.set({});
       this.hasLoadedDetail.set(true);
       this.detailError.set(
         'Impossible de charger les details complets de ce bien.',
@@ -549,6 +632,51 @@ export class BienDetailPageComponent {
     } finally {
       this.loadingDetail.set(false);
     }
+  }
+
+  private async resolveVideoReadUrls(
+    detail: PropertyDetailResponse | null,
+  ): Promise<void> {
+    const videoEntries = (detail?.media ?? [])
+      .filter((item) => item.mediaType === 'VIDEO' && !!item.fileUrl)
+      .map((item, index) => ({
+        key: (item.id ?? item.fileUrl) || `video-${index}`,
+        fileUrl: item.fileUrl ?? '',
+      }));
+
+    if (!videoEntries.length) {
+      this.resolvedVideoUrls.set({});
+      return;
+    }
+
+    const resolvedEntries = await Promise.all(
+      videoEntries.map(async (entry) => {
+        if (this.isPublicPropertyMediaUrl(entry.fileUrl)) {
+          return [entry.key, entry.fileUrl] as const;
+        }
+
+        try {
+          const response = await firstValueFrom(
+            generateReadUrl(this.http, this.apiConfig.rootUrl, {
+              fileUrl: entry.fileUrl,
+            }),
+          );
+
+          return [
+            entry.key,
+            this.extractReadUrlFromResponse(response.body) ?? entry.fileUrl,
+          ] as const;
+        } catch {
+          return [entry.key, entry.fileUrl] as const;
+        }
+      }),
+    );
+
+    this.resolvedVideoUrls.set(Object.fromEntries(resolvedEntries));
+  }
+
+  private isPublicPropertyMediaUrl(fileUrl: string): boolean {
+    return /\/properties-media\//i.test(fileUrl);
   }
 
   private extractDetailFromResponse(
