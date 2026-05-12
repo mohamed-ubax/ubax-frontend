@@ -1,5 +1,10 @@
-<div class="espace-add-page">
-  <h1 class="espace-add-page__title">Nouvel espace</h1>
+<div
+  class="espace-add-page"
+  [class.espace-add-page--read-only]="isModificationLocked()"
+>
+  <h1 class="espace-add-page__title">
+    {{ isEditMode() ? "Modifier l'espace" : 'Nouvel espace' }}
+  </h1>
 
   <!-- ── Stepper ──────────────────────────────────────────────────────────── -->
   <div class="stepper">
@@ -81,41 +86,91 @@
     </div>
   }
 
+  @if (isModificationLocked()) {
+    <output class="form-lock-banner" aria-live="polite">
+      <strong>Modification verrouillée.</strong>
+      <span>
+        Modification autorisée uniquement en statut DRAFT ou REJECTED. Statut
+        actuel : {{ modificationLockedStatusLabel() }}.
+      </span>
+    </output>
+  }
+
   <!-- ── Type cards (always visible) ─────────────────────────────────────── -->
-  <div class="type-cards">
-    @for (option of propertyTypeOptions(); track option.value) {
-      <button
-        class="type-card"
-        [class.type-card--active]="selectedPropertyType === option.value"
-        type="button"
-        (click)="selectPropertyType(option.value)"
-        [attr.aria-pressed]="selectedPropertyType === option.value"
+  <div
+    class="type-cards-stage"
+    [attr.inert]="isModificationLocked() ? '' : null"
+    [attr.aria-busy]="
+      showPropertyTypeSkeleton() || typeCardsLeavingSkeleton() ? 'true' : null
+    "
+  >
+    @if (showPropertyTypeSkeleton() || typeCardsLeavingSkeleton()) {
+      <div
+        class="type-cards type-cards--skeleton"
+        [class.type-cards--skeleton-leaving]="typeCardsLeavingSkeleton()"
+        aria-hidden="true"
       >
-        <span class="type-card__head">
-          <span class="type-card__icon-wrap" aria-hidden="true">
-            <img [src]="option.icon" alt="" />
-          </span>
-          <span
-            class="type-card__check"
-            [class.type-card__check--active]="
-              selectedPropertyType === option.value
-            "
-            aria-hidden="true"
+        @for (item of propertyTypeSkeletonItems; track item) {
+          <div class="type-card type-card--skeleton">
+            <span class="type-card__head">
+              <span
+                class="type-card__icon-wrap type-card__icon-wrap--skeleton"
+              ></span>
+              <span class="type-card__check type-card__check--skeleton"></span>
+            </span>
+            <span class="type-card__content type-card__content--skeleton">
+              <span class="type-card__title-skeleton"></span>
+              <span class="type-card__description-skeleton"></span>
+            </span>
+          </div>
+        }
+      </div>
+    }
+
+    @if (propertyTypeOptions().length) {
+      <div
+        class="type-cards type-cards--content"
+        [class.type-cards--content-entering]="
+          showPropertyTypeSkeleton() || typeCardsLeavingSkeleton()
+        "
+      >
+        @for (option of propertyTypeOptions(); track option.value) {
+          <button
+            class="type-card"
+            [class.type-card--active]="selectedPropertyType === option.value"
+            type="button"
+            (click)="selectPropertyType(option.value)"
+            [attr.aria-pressed]="selectedPropertyType === option.value"
           >
-            @if (selectedPropertyType === option.value) {
-              <img src="space-add/icons/check.svg" alt="" />
-            }
-          </span>
-        </span>
-        <span class="type-card__content">
-          <span class="type-card__title">{{ option.label }}</span>
-          <span class="type-card__description">{{ option.description }}</span>
-        </span>
-      </button>
+            <span class="type-card__head">
+              <span class="type-card__icon-wrap" aria-hidden="true">
+                <img [src]="option.icon" alt="" />
+              </span>
+              <span
+                class="type-card__check"
+                [class.type-card__check--active]="
+                  selectedPropertyType === option.value
+                "
+                aria-hidden="true"
+              >
+                @if (selectedPropertyType === option.value) {
+                  <img src="space-add/icons/check.svg" alt="" />
+                }
+              </span>
+            </span>
+            <span class="type-card__content">
+              <span class="type-card__title">{{ option.label }}</span>
+              <span class="type-card__description">{{
+                option.description
+              }}</span>
+            </span>
+          </button>
+        }
+      </div>
     }
   </div>
 
-  <div class="page-layout">
+  <div class="page-layout" [attr.inert]="isModificationLocked() ? '' : null">
     <div class="main-column">
       <!-- ════════════════════════════════════════════════════════════════════
            STEP 0 — Identité
@@ -827,15 +882,17 @@
           <button
             class="step-nav__btn step-nav__btn--next"
             type="button"
-            [disabled]="saving()"
+            [disabled]="isWorking()"
             (click)="proceedStep4()"
           >
-            @if (saving()) {
+            @if (isEditMode()) {
+              Suivant
+            } @else if (saving()) {
               Création en cours…
             } @else {
               Créer le brouillon
             }
-            @if (!saving()) {
+            @if (!saving() || isEditMode()) {
               <svg
                 viewBox="0 0 20 20"
                 fill="none"
@@ -991,13 +1048,35 @@
                     [class.gallery-grid__item--cover]="media.cover"
                   >
                     <div class="gallery-grid__thumb">
-                      <img
-                        class="gallery-grid__img"
-                        [src]="media.fileUrl"
-                        [alt]="media.mediaType ?? 'Média'"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      @if (media.mediaType === 'VIDEO') {
+                        <div class="gallery-grid__video-placeholder">
+                          <span
+                            class="gallery-grid__video-orb"
+                            aria-hidden="true"
+                          >
+                            <i class="pi pi-play"></i>
+                          </span>
+                          <span class="gallery-grid__video-label">Vidéo</span>
+                          <button
+                            class="gallery-grid__video-action"
+                            type="button"
+                            (click)="
+                              media.fileUrl && openDocument(media.fileUrl)
+                            "
+                          >
+                            <i class="pi pi-eye" aria-hidden="true"></i>
+                            Lire
+                          </button>
+                        </div>
+                      } @else {
+                        <img
+                          class="gallery-grid__img"
+                          [src]="media.fileUrl"
+                          [alt]="media.mediaType ?? 'Média'"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      }
 
                       @if (media.cover) {
                         <span
@@ -1022,6 +1101,16 @@
                     </div>
 
                     <figcaption class="gallery-grid__actions">
+                      <button
+                        class="gallery-grid__btn gallery-grid__btn--preview"
+                        type="button"
+                        [disabled]="!media.fileUrl"
+                        (click)="media.fileUrl && openDocument(media.fileUrl)"
+                        title="Prévisualiser"
+                        aria-label="Prévisualiser ce média"
+                      >
+                        Prévisualiser
+                      </button>
                       @if (!media.cover) {
                         <button
                           class="gallery-grid__btn gallery-grid__btn--cover"
@@ -1140,7 +1229,13 @@
             </span>
             <div class="section-card__heading">
               <h2>Finalisation</h2>
-              <p>Enregistrez en brouillon ou soumettez à la modération</p>
+              <p>
+                {{
+                  isEditMode()
+                    ? 'Vérifiez vos changements puis enregistrez-les ou soumettez la modification finale.'
+                    : 'Enregistrez en brouillon ou soumettez à la modération'
+                }}
+              </p>
             </div>
           </header>
 
@@ -1350,23 +1445,46 @@
           <button
             class="save-action__button save-action__button--ghost"
             type="button"
-            [disabled]="saving()"
+            [disabled]="isWorking()"
             (click)="sauvegarderBrouillon()"
           >
-            Enregistrer en brouillon
+            {{
+              isEditMode()
+                ? 'Enregistrer les modifications'
+                : 'Enregistrer en brouillon'
+            }}
           </button>
-          <button
-            class="save-action__button"
-            type="button"
-            [disabled]="saving()"
-            (click)="soumettre()"
-          >
-            @if (saving()) {
-              Soumission…
-            } @else {
-              Soumettre à la modération
-            }
-          </button>
+          @if (canSubmitForModeration()) {
+            <button
+              class="save-action__button"
+              type="button"
+              [disabled]="isWorking()"
+              (click)="soumettre()"
+            >
+              @if (isWorking()) {
+                @if (isEditMode()) {
+                  Soumission de la modification…
+                } @else {
+                  Soumission…
+                }
+              } @else {
+                @if (isEditMode()) {
+                  Soumettre la modification
+                } @else {
+                  Soumettre à la modération
+                }
+              }
+            </button>
+          } @else if (isEditMode()) {
+            <button
+              class="save-action__button"
+              type="button"
+              [disabled]="isWorking()"
+              (click)="terminerModification()"
+            >
+              Enregistrer et terminer
+            </button>
+          }
         </div>
 
         <div class="step-nav step-nav--final">
@@ -1525,6 +1643,96 @@
       </div>
     </div>
   </dialog>
+}
+
+@if (previewUrl()) {
+  <div
+    class="doc-preview-backdrop ubax-modal-overlay"
+    (click)="closePreview()"
+  ></div>
+  <div
+    class="doc-preview"
+    [class.doc-preview--fullscreen]="previewFullscreen()"
+  >
+    <header class="doc-preview__header">
+      <div class="doc-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-video]="previewIsVideo()"
+          [class.pi-file-pdf]="!previewIsImage() && !previewIsVideo()"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+
+      <div class="doc-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="doc-preview__action-btn"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="doc-preview__action-btn"
+          (click)="togglePreviewFullscreen()"
+          [title]="
+            previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+          "
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="doc-preview__action-btn doc-preview__action-btn--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="doc-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="doc-preview__image"
+        />
+      } @else if (previewIsVideo()) {
+        <video
+          [src]="previewUrl()"
+          class="doc-preview__video"
+          controls
+          autoplay
+          playsinline
+          preload="metadata"
+        >
+          <track
+            kind="captions"
+            srclang="fr"
+            label="Sous-titres français"
+            default
+            src="data:text/vtt;charset=utf-8,WEBVTT"
+          />
+        </video>
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="doc-preview__iframe"
+          title="Prévisualisation du document"
+        ></iframe>
+      }
+    </div>
+  </div>
 }
 
 @if (docDeleteTarget()) {

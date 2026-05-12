@@ -51,15 +51,8 @@ export { BienEditStore } from './lib/store/biens/bien-edit.store';
 
 // ─── Espaces hôteliers ────────────────────────────────────────────────────────
 export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
-export type {
-  EspaceStatus,
-  HotelPropertyType,
-} from './lib/store/espaces/mes-espaces.store';
-export {
-  HOTEL_PROPERTY_TYPES,
-  HOTEL_PROPERTY_TYPE_LABELS,
-  ESPACE_STATUS_LABELS,
-} from './lib/store/espaces/mes-espaces.store';
+export type { EspaceStatus } from './lib/store/espaces/mes-espaces.store';
+export { ESPACE_STATUS_LABELS } from './lib/store/espaces/mes-espaces.store';
 export { EspaceCreationStore } from './lib/store/espaces/espace-creation.store';
 export type { EspaceCreationState } from './lib/store/espaces/espace-creation.store';
 export { EspaceEditStore } from './lib/store/espaces/espace-edit.store';

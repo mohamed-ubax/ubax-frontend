@@ -9,7 +9,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
   UbaxMorphTabsDirective,
@@ -24,10 +23,12 @@ import {
 import {
   MesEspacesStore,
   EspaceStatus,
-  HOTEL_PROPERTY_TYPE_LABELS,
   ESPACE_STATUS_LABELS,
 } from '@ubax-workspace/ubax-web-data-access';
-import { PropertyResponse } from '@ubax-workspace/shared-api-types';
+import {
+  LaCodeListDto,
+  PropertyResponse,
+} from '@ubax-workspace/shared-api-types';
 import { EspacesListSkeletonComponent } from './espaces-list-skeleton/espaces-list-skeleton.component';
 import { EspacesCardsSkeletonComponent } from './espaces-cards-skeleton/espaces-cards-skeleton.component';
 
@@ -75,16 +76,22 @@ function formatPrice(price: number | null | undefined): string {
   return new Intl.NumberFormat('fr-FR').format(price);
 }
 
+function readCodeListValue(item: LaCodeListDto): string {
+  return item.value ?? '';
+}
+
+function readCodeListLabel(item: LaCodeListDto): string {
+  return item.description ?? item.value ?? '';
+}
+
 function mapToEspaceCard(
   property: PropertyResponse,
   index: number,
+  propertyTypeLabels: ReadonlyMap<string, string>,
 ): EspaceCard {
   const statusRaw = (property.status ?? 'DRAFT') as EspaceStatus;
   const typeRaw = property.propertyType ?? '';
-  const typeLabel =
-    HOTEL_PROPERTY_TYPE_LABELS[
-      typeRaw as keyof typeof HOTEL_PROPERTY_TYPE_LABELS
-    ] ?? typeRaw;
+  const typeLabel = propertyTypeLabels.get(typeRaw) ?? typeRaw;
 
   return {
     id: property.id ?? `espace-${index}`,
@@ -167,13 +174,34 @@ export class EspacesListPageComponent {
   // ─────────────────────────────────────────────────────────────────────────
 
   // ── Filter options ────────────────────────────────────────────────────────
-  readonly typeOptions: readonly FilterOption[] = [
-    { label: "Type d'espace", value: 'all', tone: 'neutral' },
-    { label: 'Chambre', value: 'ROOM', tone: 'accent' },
-    { label: 'Suite', value: 'SUITE', tone: 'accent' },
-    { label: 'Salle de conférence', value: 'CONFERENCE_ROOM', tone: 'accent' },
-    { label: 'Appartement', value: 'APARTMENT', tone: 'accent' },
-  ];
+  readonly typeOptions = computed<readonly FilterOption[]>(() => {
+    const usedTypeValues = new Set(
+      this.store
+        .entities()
+        .map((entity) => entity.propertyType ?? '')
+        .filter((value) => value.length > 0),
+    );
+
+    const options: FilterOption[] = [];
+
+    this.store.codeListPropertyTypes().forEach((item) => {
+      const value = readCodeListValue(item);
+      if (!value || (usedTypeValues.size > 0 && !usedTypeValues.has(value))) {
+        return;
+      }
+
+      options.push({
+        label: readCodeListLabel(item),
+        value,
+        tone: 'accent' as const,
+      });
+    });
+
+    return [
+      { label: "Type d'espace", value: 'all', tone: 'neutral' },
+      ...options,
+    ];
+  });
 
   readonly statusOptions: readonly FilterOption[] = [
     { label: 'Statut', value: 'all', tone: 'neutral' },
@@ -190,19 +218,30 @@ export class EspacesListPageComponent {
   );
 
   protected readonly selectedTypeLabel = computed(() =>
-    this.getOptionLabel(this.typeOptions, this.selectedType()),
+    this.getOptionLabel(this.typeOptions(), this.selectedType()),
   );
 
   protected readonly selectedStatusLabel = computed(() =>
     this.getOptionLabel(this.statusOptions, this.selectedStatus()),
   );
 
+  private readonly propertyTypeLabels = computed(
+    () =>
+      new Map(
+        this.store
+          .codeListPropertyTypes()
+          .map((item) => [readCodeListValue(item), readCodeListLabel(item)]),
+      ),
+  );
+
   private readonly filteredCards = computed(() => {
     const type = this.selectedType();
     const status = this.selectedStatus();
+    const propertyTypeLabels = this.propertyTypeLabels();
+
     return this.store
       .entities()
-      .map((p, i) => mapToEspaceCard(p, i))
+      .map((p, i) => mapToEspaceCard(p, i, propertyTypeLabels))
       .filter((card) => {
         const matchesType = type === 'all' || card.typeRaw === type;
         const matchesStatus = status === 'all' || card.statusRaw === status;

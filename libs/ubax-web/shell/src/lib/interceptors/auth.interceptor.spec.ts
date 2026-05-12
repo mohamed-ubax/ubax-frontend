@@ -249,7 +249,7 @@ describe('authInterceptor', () => {
     expect(next).toHaveBeenCalledTimes(2);
   });
 
-  it("n'expire pas la session si le refresh échoue pendant l'association d'un document", async () => {
+  it("tente un refresh pendant l'association d'un document sans expirer la session", async () => {
     authStore.token.mockReturnValue('expired-token');
     authService.refreshToken.mockReturnValue(
       throwError(
@@ -276,7 +276,37 @@ describe('authInterceptor', () => {
     expect(authStore.expireSession).not.toHaveBeenCalled();
   });
 
-  it("n'expire pas la session si le refresh échoue sur une requête de création d'espace", async () => {
+  it("tente un refresh sur le presign d'un media propriété sans expirer la session", async () => {
+    authStore.token.mockReturnValue('expired-token');
+    authService.refreshToken.mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' }),
+      ),
+    );
+
+    const req = new HttpRequest(
+      'GET',
+      '/api/v1/storage/presign/property-media',
+    );
+    const next = vi.fn().mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            url: '/api/v1/storage/presign/property-media',
+          }),
+      ),
+    );
+
+    await expect(firstValueFrom(run(req, next))).rejects.toBeInstanceOf(
+      HttpErrorResponse,
+    );
+
+    expect(authService.refreshToken).toHaveBeenCalledTimes(1);
+    expect(authStore.expireSession).not.toHaveBeenCalled();
+  });
+
+  it("tente un refresh sur une requête de création d'espace sans expirer la session", async () => {
     authStore.token.mockReturnValue('expired-token');
     authService.refreshToken.mockReturnValue(
       throwError(
@@ -291,6 +321,33 @@ describe('authInterceptor', () => {
           new HttpErrorResponse({
             status: 401,
             url: '/v1/properties',
+          }),
+      ),
+    );
+
+    await expect(firstValueFrom(run(req, next))).rejects.toBeInstanceOf(
+      HttpErrorResponse,
+    );
+
+    expect(authService.refreshToken).toHaveBeenCalledTimes(1);
+    expect(authStore.expireSession).not.toHaveBeenCalled();
+  });
+
+  it("tente un refresh sur le chargement d'un détail d'espace sans expirer la session", async () => {
+    authStore.token.mockReturnValue('expired-token');
+    authService.refreshToken.mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 401, url: '/api/auth/refresh' }),
+      ),
+    );
+
+    const req = new HttpRequest('GET', '/v1/properties/property-id');
+    const next = vi.fn().mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            url: '/v1/properties/property-id',
           }),
       ),
     );

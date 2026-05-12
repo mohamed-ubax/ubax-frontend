@@ -1,4 +1,7 @@
-﻿<section class="bien-add-page">
+﻿<section
+  class="bien-add-page"
+  [class.bien-add-page--read-only]="isModificationLocked()"
+>
   <header class="bien-add-page__header">
     <h1>Ajouter un bien</h1>
   </header>
@@ -49,6 +52,16 @@
         <span>{{ error() }}</span>
       </div>
     }
+  }
+
+  @if (isModificationLocked()) {
+    <output class="alert alert--lock" aria-live="polite">
+      <i class="pi pi-lock" aria-hidden="true"></i>
+      <span>
+        Modification autorisée uniquement en statut DRAFT ou REJECTED. Statut
+        actuel : {{ modificationLockedStatusLabel() }}.
+      </span>
+    </output>
   }
 
   <!-- ═══════════════════════════════════════════════════════════════════════
@@ -525,9 +538,16 @@
             class="primary-action"
             type="button"
             (click)="proceedStep4()"
-            [disabled]="saving()"
+            [disabled]="isWorking()"
           >
-            @if (saving()) {
+            @if (isEditMode()) {
+              @if (isWorking()) {
+                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                Enregistrement en cours…
+              } @else {
+                Suivant
+              }
+            } @else if (saving()) {
               <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
               Création en cours…
             } @else {

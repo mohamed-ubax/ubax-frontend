@@ -8,6 +8,7 @@ import {
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
 import {
   AuthService,
+  readStoredAuthToken,
   type LoginResponse,
 } from '@ubax-workspace/shared-data-access';
 import { catchError, switchMap, throwError } from 'rxjs';
@@ -20,6 +21,12 @@ function isAuthSkipped(url: string): boolean {
 
 function isPropertyDocumentLinkRequest(url: string): boolean {
   return /\/v1\/properties\/[^/]+\/documents(?:\?|$)/.test(url);
+}
+
+function isPropertyStorageRequest(url: string): boolean {
+  return /(?:\/api)?\/v1\/storage\/presign\/property-(?:document|media)(?:\?|$)/.test(
+    url,
+  );
 }
 
 function isPropertyWorkflowRequest(url: string): boolean {
@@ -94,7 +101,7 @@ export const authInterceptor: HttpInterceptorFn = (
 ) => {
   const authStore = inject(AuthStore);
   const authService = inject(AuthService);
-  const token = authStore.token();
+  const token = authStore.token() ?? readStoredAuthToken();
   const isBackendRequest = isBackendApiRequest(req.url);
 
   const authedReq =
@@ -113,6 +120,7 @@ export const authInterceptor: HttpInterceptorFn = (
           if (
             shouldExpireSessionOnRefreshError(refreshErr) &&
             !isPropertyDocumentLinkRequest(req.url) &&
+            !isPropertyStorageRequest(req.url) &&
             !isPropertyWorkflowRequest(req.url)
           ) {
             authStore.expireSession();

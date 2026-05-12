@@ -170,6 +170,14 @@ export class BienDetailPageComponent {
   protected readonly statusCode = computed(
     () => this.property()?.status ?? 'DRAFT',
   );
+  protected readonly canEditProperty = computed(() => {
+    const property = this.property();
+
+    return (
+      !!property &&
+      (property.status === 'DRAFT' || property.status === 'REJECTED')
+    );
+  });
 
   protected readonly propertyStatus = computed(() => {
     if (this.propertyArchived()) {

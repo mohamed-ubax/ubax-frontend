@@ -61,6 +61,16 @@ const ACCEPTED_MEDIA =
 const ACCEPTED_DOCS = 'application/pdf,image/jpeg,image/png,image/webp';
 const MAX_DOC_SIZE_MB = 20;
 
+const PROPERTY_STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Brouillon',
+  PENDING: 'En attente',
+  PUBLISHED: 'Publié',
+  RESERVED: 'Réservé',
+  SOLD: 'Vendu',
+  ARCHIVED: 'Archivé',
+  REJECTED: 'Rejeté',
+};
+
 const AMENITY_ICON_BY_CODE: Record<string, string> = {
   AC: 'pi-wind',
   PARKING: 'pi-car',
@@ -97,6 +107,10 @@ function resolveTimelineStatus(
   }
 
   return 'pending';
+}
+
+function isEditablePropertyStatus(status: string | null | undefined): boolean {
+  return status === 'DRAFT' || status === 'REJECTED';
 }
 
 // ── Form models (one interface per wizard step) ─────────────────────────────
@@ -162,6 +176,9 @@ export class BienAddPageComponent implements OnInit {
   }) as NotificationHandler | null;
 
   protected readonly saving = this.store.saving;
+  protected readonly isWorking = computed(
+    () => this.store.saving() || this.editStore.saving(),
+  );
   private readonly guardedError = signal<string | null>(null);
   protected readonly error = computed(
     () => this.guardedError() ?? this.store.error(),
@@ -351,6 +368,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected toggleAmenity(code: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this._step4.update((s) => {
       const already = s.amenities.includes(code);
       return {
@@ -381,6 +402,27 @@ export class BienAddPageComponent implements OnInit {
   protected readonly isEditMode = computed(
     () => this.editPropertyId().length > 0,
   );
+  protected readonly isModificationLocked = computed(() => {
+    if (!this.isEditMode()) {
+      return false;
+    }
+
+    const property = this.property();
+    if (!property) {
+      return false;
+    }
+
+    return !isEditablePropertyStatus(property.status ?? null);
+  });
+  protected readonly modificationLockedStatusLabel = computed(() => {
+    const status = this.property()?.status;
+
+    if (!status) {
+      return 'inconnu';
+    }
+
+    return PROPERTY_STATUS_LABELS[status] ?? status;
+  });
   protected readonly canSubmitForModeration = computed(() => {
     const status = this.property()?.status;
     return status === 'DRAFT' || status === 'REJECTED' || !status;
@@ -519,6 +561,10 @@ export class BienAddPageComponent implements OnInit {
   // ── Step advances ────────────────────────────────────────────────────────
 
   protected proceedStep1(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep1, {
       action: async () => {
         this.nextStep();
@@ -528,6 +574,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected proceedStep2(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep2, {
       action: async () => {
         this.nextStep();
@@ -537,6 +587,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected proceedStep3(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep3, {
       action: async () => {
         this.nextStep();
@@ -550,6 +604,10 @@ export class BienAddPageComponent implements OnInit {
    * Navigation to step 5 happens reactively once the store confirms the creation.
    */
   protected proceedStep4(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep4, {
       action: async () => {
         if (!this.ensureWritableSession()) {
@@ -617,6 +675,10 @@ export class BienAddPageComponent implements OnInit {
   // ── Media handlers ───────────────────────────────────────────────────────
 
   protected onMediaFilesSelected(event: Event): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
     this.uploadFiles(Array.from(input.files));
@@ -635,6 +697,11 @@ export class BienAddPageComponent implements OnInit {
   protected onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(false);
+
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const files = Array.from(event.dataTransfer?.files ?? []);
     this.uploadFiles(files);
   }
@@ -665,6 +732,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected setCover(mediaId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     if (!this.ensureWritableSession()) {
       return;
     }
@@ -673,6 +744,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected requestDeleteMedia(mediaId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.mediaDeleteTarget.set(mediaId);
   }
 
@@ -681,6 +756,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected confirmDeleteMedia(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const mediaId = this.mediaDeleteTarget();
     if (!mediaId || !this.ensureWritableSession()) return;
     const wasCover = this.coverMediaId() === mediaId;
@@ -696,6 +775,12 @@ export class BienAddPageComponent implements OnInit {
   // ── Document handlers ────────────────────────────────────────────────────
 
   protected onDocFileSelected(event: Event): void {
+    if (this.isModificationLocked()) {
+      const input = event.target as HTMLInputElement;
+      input.value = '';
+      return;
+    }
+
     if (!this.ensureWritableSession()) {
       const input = event.target as HTMLInputElement;
       input.value = '';
@@ -784,6 +869,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected requestDeleteDoc(docId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.docDeleteTarget.set(docId);
   }
 
@@ -792,6 +881,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected confirmDeleteDoc(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const docId = this.docDeleteTarget();
     if (!docId || !this.ensureWritableSession()) return;
     this.store.supprimerDocument(docId);
@@ -801,11 +894,19 @@ export class BienAddPageComponent implements OnInit {
   // ── Final actions ────────────────────────────────────────────────────────
 
   protected sauvegarderBrouillon(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.store.reset();
     this.router.navigate(['/biens']);
   }
 
   protected soumettre(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     if (!this.ensureWritableSession()) {
       return;
     }
@@ -815,6 +916,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected terminerModification(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const id = this.editPropertyId();
     if (!id) {
       return;

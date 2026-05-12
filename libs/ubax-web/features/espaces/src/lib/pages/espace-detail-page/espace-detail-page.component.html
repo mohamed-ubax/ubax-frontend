@@ -10,13 +10,27 @@
 
     <h1 class="reservation-detail-page__title">Détails réservations</h1>
 
-    <a
-      class="reservation-detail-page__edit"
-      [routerLink]="['/hotel/espaces', detailId(), 'modifier']"
-    >
-      <i class="pi pi-pencil"></i>
-      <span>Modifier</span>
-    </a>
+    <div class="reservation-detail-page__actions">
+      <span
+        class="status-pill"
+        [class.status-pill--archived]="statusClass() === 'archived'"
+        [class.status-pill--pending]="statusClass() === 'pending'"
+        [class.status-pill--rejected]="statusClass() === 'rejected'"
+      >
+        {{ propertyStatus() }}
+      </span>
+
+      @if (canEditProperty()) {
+        <a
+          class="reservation-detail-page__edit"
+          [routerLink]="['/hotel/espaces', detailId(), 'modifier']"
+          [state]="{ propertyDetail: propertyDetailState() }"
+        >
+          <i class="pi pi-pencil"></i>
+          <span>Modifier</span>
+        </a>
+      }
+    </div>
   </header>
 
   @if (viewState() === 'loading') {
@@ -213,51 +227,6 @@
             <i class="pi pi-angle-down"></i>
           </button>
         </article>
-
-        <article class="booking-card booking-card--docs">
-          <h2 class="booking-card__title">Documents légaux</h2>
-
-          <div class="booking-card__docs-list">
-            @for (document of legalDocuments(); track document.id) {
-              <div class="booking-card__doc-row">
-                <span class="booking-card__doc-name">{{ document.name }}</span>
-                <div class="booking-card__doc-actions">
-                  <button
-                    type="button"
-                    aria-label="Prévisualiser le document"
-                    [disabled]="documentOpeningId() === document.id"
-                    (click)="
-                      openDocument(document.fileUrl, document.name, document.id)
-                    "
-                  >
-                    <i
-                      class="pi"
-                      [class.pi-eye]="documentOpeningId() !== document.id"
-                      [class.pi-spin]="documentOpeningId() === document.id"
-                      [class.pi-spinner]="documentOpeningId() === document.id"
-                    ></i>
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Télécharger le document"
-                    [disabled]="documentOpeningId() === document.id"
-                    (click)="
-                      downloadDocument(
-                        document.fileUrl,
-                        document.name,
-                        document.id
-                      )
-                    "
-                  >
-                    <i class="pi pi-download"></i>
-                  </button>
-                </div>
-              </div>
-            } @empty {
-              <p class="booking-card__doc-empty">Aucun document disponible.</p>
-            }
-          </div>
-        </article>
       </div>
 
       <section class="gallery-panel" aria-label="Galerie de la chambre">
@@ -340,6 +309,128 @@
       </section>
     </section>
 
+    <section
+      class="reservation-detail-page__documents"
+      aria-label="Documents légaux"
+    >
+      <article class="booking-card booking-card--docs">
+        <div class="docs-card__hero">
+          <div class="docs-card__hero-copy">
+            <span class="docs-card__eyebrow">Dossier sécurisé</span>
+            <h2 class="booking-card__title">Documents légaux</h2>
+            <p class="docs-card__subtitle">
+              Tous les justificatifs et pièces juridiques de cet espace sont
+              regroupés dans une zone large, lisible et pensée pour la
+              consultation rapide.
+            </p>
+          </div>
+
+          <div class="docs-card__hero-side">
+            <div class="docs-card__count-pill">
+              <strong>{{ legalDocuments().length }}</strong>
+              <span>{{
+                legalDocuments().length > 1 ? 'documents' : 'document'
+              }}</span>
+            </div>
+
+            @if (featuredLegalDocument()) {
+              <button
+                type="button"
+                class="docs-card__hero-action"
+                [disabled]="documentOpeningId() === featuredLegalDocument()!.id"
+                (click)="
+                  openDocument(
+                    featuredLegalDocument()!.fileUrl,
+                    featuredLegalDocument()!.name,
+                    featuredLegalDocument()!.id
+                  )
+                "
+              >
+                <i class="pi pi-eye" aria-hidden="true"></i>
+                <span>Ouvrir le dossier principal</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="booking-card__docs-list docs-card__list">
+          @for (document of legalDocuments(); track document.id) {
+            <article class="docs-file-card">
+              <div class="docs-file-card__icon" aria-hidden="true">
+                <span>{{ document.extension }}</span>
+              </div>
+
+              <div class="docs-file-card__copy">
+                <div class="docs-file-card__meta-row">
+                  <span class="docs-file-card__kind">{{
+                    document.kindLabel
+                  }}</span>
+                  <span class="docs-file-card__dot"></span>
+                  <span class="docs-file-card__status">Accès sécurisé</span>
+                </div>
+                <h3 class="docs-file-card__name">{{ document.name }}</h3>
+                <p class="docs-file-card__hint">
+                  Aperçu intégré, téléchargement direct et bascule plein écran
+                  depuis une mise en page large.
+                </p>
+              </div>
+
+              <div class="docs-file-card__actions">
+                <button
+                  type="button"
+                  class="docs-file-card__action docs-file-card__action--primary"
+                  [disabled]="documentOpeningId() === document.id"
+                  (click)="
+                    openDocument(document.fileUrl, document.name, document.id)
+                  "
+                >
+                  <i
+                    class="pi"
+                    [class.pi-eye]="documentOpeningId() !== document.id"
+                    [class.pi-spin]="documentOpeningId() === document.id"
+                    [class.pi-spinner]="documentOpeningId() === document.id"
+                  ></i>
+                  <span>{{
+                    documentOpeningId() === document.id
+                      ? 'Ouverture…'
+                      : 'Prévisualiser'
+                  }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="docs-file-card__action"
+                  [disabled]="documentOpeningId() === document.id"
+                  (click)="
+                    downloadDocument(
+                      document.fileUrl,
+                      document.name,
+                      document.id
+                    )
+                  "
+                >
+                  <i class="pi pi-download"></i>
+                  <span>Télécharger</span>
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <div class="docs-card__empty">
+              <div class="docs-card__empty-orb" aria-hidden="true">
+                <i class="pi pi-folder-open"></i>
+              </div>
+              <div>
+                <h3>Aucun document disponible</h3>
+                <p>
+                  Les pièces légales apparaîtront ici dès qu'elles seront
+                  attachées à cet espace.
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+    </section>
+
     <section class="history-card" aria-label="Historique des clients">
       <h2 class="history-card__title">Historique des clients</h2>
 
@@ -405,6 +496,7 @@
         (click)="closePreview()"
       ></div>
       <div
+        id="espace-detail-preview"
         class="doc-preview"
         [class.doc-preview--fullscreen]="previewFullscreen()"
       >
@@ -413,7 +505,8 @@
             <i
               class="pi"
               [class.pi-image]="previewIsImage()"
-              [class.pi-file-pdf]="!previewIsImage()"
+              [class.pi-video]="previewIsVideo()"
+              [class.pi-file-pdf]="!previewIsImage() && !previewIsVideo()"
             ></i>
             <span>{{ previewName() }}</span>
           </div>
@@ -454,18 +547,50 @@
         </header>
 
         <div class="doc-preview__body">
-          @if (previewIsImage()) {
+          @if (previewLoading()) {
+            <div class="doc-preview__state">
+              <div class="doc-preview__spinner" aria-hidden="true"></div>
+              <div>
+                <strong>Préparation de l’aperçu</strong>
+                <p>Récupération du meilleur flux de lecture disponible…</p>
+              </div>
+            </div>
+          } @else if (previewIsImage()) {
             <img
               [src]="previewSafeUrl()"
               [alt]="previewName()"
               class="doc-preview__image"
             />
+          } @else if (previewIsVideo()) {
+            <video
+              [src]="previewUrl()"
+              class="doc-preview__video"
+              controls
+              autoplay
+              playsinline
+              preload="metadata"
+            >
+              <track
+                kind="captions"
+                srclang="fr"
+                label="Sous-titres français"
+                default
+                src="data:text/vtt;charset=utf-8,WEBVTT"
+              />
+            </video>
           } @else {
             <iframe
               [src]="previewSafeUrl()"
               class="doc-preview__iframe"
               title="Prévisualisation du document"
             ></iframe>
+          }
+
+          @if (previewNotice()) {
+            <div class="doc-preview__notice">
+              <i class="pi pi-info-circle" aria-hidden="true"></i>
+              <span>{{ previewNotice() }}</span>
+            </div>
           }
         </div>
       </div>

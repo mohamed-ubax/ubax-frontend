@@ -37,14 +37,16 @@
         </span>
       </button>
 
-      <button
-        class="secondary-action"
-        type="button"
-        [routerLink]="['/biens', propertyId(), 'modifier']"
-      >
-        <i class="pi pi-pencil" aria-hidden="true"></i>
-        <span>Modifier</span>
-      </button>
+      @if (canEditProperty()) {
+        <button
+          class="secondary-action"
+          type="button"
+          [routerLink]="['/biens', propertyId(), 'modifier']"
+        >
+          <i class="pi pi-pencil" aria-hidden="true"></i>
+          <span>Modifier</span>
+        </button>
+      }
 
       <a class="primary-action" routerLink="/biens/ajouter">
         <span>Ajouter un bien</span>

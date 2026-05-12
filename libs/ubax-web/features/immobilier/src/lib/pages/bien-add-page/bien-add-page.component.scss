@@ -159,6 +159,33 @@
   }
 }
 
+.alert--lock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ubax-navy) 14%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ubax-navy) 8%, white),
+    color-mix(in srgb, var(--ubax-navy) 4%, white)
+  );
+  color: var(--ubax-navy);
+}
+
+.bien-add-page--read-only {
+  .journey-stepper,
+  form,
+  .surface-card,
+  .page-actions {
+    pointer-events: none;
+    opacity: 0.58;
+    filter: saturate(0.82);
+  }
+}
+
 .journey-stepper {
   display: flex;
   align-items: flex-start;

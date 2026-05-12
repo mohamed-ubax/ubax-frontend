@@ -457,16 +457,15 @@ export class AuthService {
   refreshToken(): Observable<LoginResponse> {
     const storedRefreshToken = readStoredRefreshToken();
 
+    if (!storedRefreshToken) {
+      return throwError(() => new Error('Missing refresh token'));
+    }
+
     return this.http
-      .post<RefreshApiResponse>(
-        `${this.apiConfig.rootUrl}/auth/refresh`,
-        storedRefreshToken
-          ? {
-              refreshToken: storedRefreshToken,
-              refresh_token: storedRefreshToken,
-            }
-          : {},
-      )
+      .post<RefreshApiResponse>(`${this.apiConfig.rootUrl}/auth/refresh`, {
+        refreshToken: storedRefreshToken,
+        refresh_token: storedRefreshToken,
+      })
       .pipe(
         map((response) => {
           const { accessToken, refreshToken } = resolveRefreshTokens(

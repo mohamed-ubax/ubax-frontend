@@ -63,9 +63,42 @@ type LegalDocument = {
   readonly id: string;
   readonly name: string;
   readonly fileUrl: string;
+  readonly extension: string;
+  readonly kindLabel: string;
 };
 
 const MIN_GALLERY_SLOTS = 4;
+const STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Brouillon',
+  PENDING: 'En attente',
+  PUBLISHED: 'Publié',
+  RESERVED: 'Réservé',
+  SOLD: 'Vendu',
+  ARCHIVED: 'Archivé',
+  REJECTED: 'Rejeté',
+};
+
+function isEditableEspaceStatus(status: string | null | undefined): boolean {
+  return status === 'DRAFT' || status === 'REJECTED';
+}
+
+function extractFileExtension(name: string, fileUrl: string): string {
+  const source = name || fileUrl;
+  const match = /\.([a-z0-9]{2,5})(?:$|\?)/i.exec(source);
+  return (match?.[1] ?? 'doc').toUpperCase();
+}
+
+function resolveDocumentKindLabel(extension: string): string {
+  if (extension === 'PDF') {
+    return 'Dossier PDF';
+  }
+
+  if (['PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'BMP', 'SVG'].includes(extension)) {
+    return 'Justificatif image';
+  }
+
+  return 'Pièce légale';
+}
 
 @Component({
   selector: 'ubax-espace-detail-page',
@@ -95,6 +128,9 @@ export class EspaceDetailPageComponent {
   readonly previewName = signal<string>('Document');
   readonly previewFullscreen = signal(false);
   readonly previewIsImage = signal(false);
+  readonly previewIsVideo = signal(false);
+  readonly previewLoading = signal(false);
+  readonly previewNotice = signal<string | null>(null);
 
   readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
     const url = this.previewUrl();
@@ -105,7 +141,26 @@ export class EspaceDetailPageComponent {
     () => this.route.snapshot.paramMap.get('id') ?? '',
   );
 
+  protected readonly propertyDetailState = computed(() =>
+    this.detailResponse(),
+  );
+
   readonly property = computed(() => this.detailResponse()?.property ?? null);
+  readonly statusCode = computed(() => this.property()?.status ?? 'DRAFT');
+  readonly propertyStatus = computed(
+    () => STATUS_LABELS[this.statusCode()] ?? this.statusCode(),
+  );
+  readonly statusClass = computed(() => {
+    const code = this.statusCode();
+
+    if (code === 'ARCHIVED') return 'archived';
+    if (code === 'PENDING') return 'pending';
+    if (code === 'REJECTED') return 'rejected';
+    return 'active';
+  });
+  readonly canEditProperty = computed(() =>
+    isEditableEspaceStatus(this.property()?.status ?? null),
+  );
 
   readonly viewState = computed<ViewState>(() =>
     deriveViewState(
@@ -218,8 +273,22 @@ export class EspaceDetailPageComponent {
       id: doc.id ?? `doc-${index}`,
       name: doc.title?.trim() || doc.fileName?.trim() || 'Document legal',
       fileUrl: doc.fileUrl ?? '',
+      extension: extractFileExtension(
+        doc.title?.trim() || doc.fileName?.trim() || '',
+        doc.fileUrl ?? '',
+      ),
+      kindLabel: resolveDocumentKindLabel(
+        extractFileExtension(
+          doc.title?.trim() || doc.fileName?.trim() || '',
+          doc.fileUrl ?? '',
+        ),
+      ),
     }));
   });
+
+  readonly featuredLegalDocument = computed(
+    () => this.legalDocuments()[0] ?? null,
+  );
 
   readonly historyRows = computed<readonly HistoryRow[]>(() => []);
 
@@ -289,6 +358,25 @@ export class EspaceDetailPageComponent {
         }
       });
     });
+
+    effect((onCleanup) => {
+      const syncFullscreenState = () => {
+        const fullscreenNode = this.document.fullscreenElement;
+        this.previewFullscreen.set(
+          fullscreenNode instanceof HTMLElement &&
+            fullscreenNode.id === 'espace-detail-preview',
+        );
+      };
+
+      this.document.addEventListener('fullscreenchange', syncFullscreenState);
+
+      onCleanup(() => {
+        this.document.removeEventListener(
+          'fullscreenchange',
+          syncFullscreenState,
+        );
+      });
+    });
   }
 
   retryLoad(): void {
@@ -350,6 +438,22 @@ export class EspaceDetailPageComponent {
       this.documentOpeningId.set(docId);
     }
 
+    this.previewLoading.set(true);
+    this.previewNotice.set(null);
+
+    if (this.isPublicPropertyMediaUrl(fileUrl)) {
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
+      this.previewLoading.set(false);
+
+      if (docId) {
+        this.documentOpeningId.set(null);
+      }
+      return;
+    }
+
     try {
       const response = await firstValueFrom(
         generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
@@ -358,12 +462,18 @@ export class EspaceDetailPageComponent {
         this.extractReadUrlFromResponse(response.body) ?? fileUrl;
       this.previewName.set(fileName?.trim() || 'Document');
       this.previewIsImage.set(this.isPreviewImage(resolvedUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(resolvedUrl, fileName));
       this.previewUrl.set(resolvedUrl);
     } catch {
       this.previewName.set(fileName?.trim() || 'Document');
       this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl, fileName));
       this.previewUrl.set(fileUrl);
+      this.previewNotice.set(
+        'Aperçu sécurisé indisponible pour le moment. Ouverture directe du fichier en repli.',
+      );
     } finally {
+      this.previewLoading.set(false);
       if (docId) {
         this.documentOpeningId.set(null);
       }
@@ -374,10 +484,33 @@ export class EspaceDetailPageComponent {
     this.previewUrl.set(null);
     this.previewName.set('Document');
     this.previewIsImage.set(false);
+    this.previewIsVideo.set(false);
     this.previewFullscreen.set(false);
+    this.previewLoading.set(false);
+    this.previewNotice.set(null);
   }
 
-  togglePreviewFullscreen(): void {
+  async togglePreviewFullscreen(): Promise<void> {
+    const previewElement = this.document.getElementById(
+      'espace-detail-preview',
+    );
+
+    if (this.document.fullscreenElement) {
+      await this.document.exitFullscreen?.().catch(() => undefined);
+      this.previewFullscreen.set(false);
+      return;
+    }
+
+    if (previewElement?.requestFullscreen) {
+      try {
+        await previewElement.requestFullscreen();
+        this.previewFullscreen.set(true);
+        return;
+      } catch {
+        // Fall back to CSS fullscreen state below.
+      }
+    }
+
     this.previewFullscreen.update((value) => !value);
   }
 
@@ -394,13 +527,17 @@ export class EspaceDetailPageComponent {
 
     let resolvedUrl = fileUrl;
 
-    try {
-      const response = await firstValueFrom(
-        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
-      );
-      resolvedUrl = this.extractReadUrlFromResponse(response.body) ?? fileUrl;
-    } catch {
+    if (this.isPublicPropertyMediaUrl(fileUrl)) {
       resolvedUrl = fileUrl;
+    } else {
+      try {
+        const response = await firstValueFrom(
+          generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+        );
+        resolvedUrl = this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+      } catch {
+        resolvedUrl = fileUrl;
+      }
     }
 
     const link = document.createElement('a');
@@ -494,5 +631,14 @@ export class EspaceDetailPageComponent {
   private isPreviewImage(url: string, fileName?: string): boolean {
     const target = `${fileName ?? ''} ${url}`.toLowerCase();
     return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/.test(target);
+  }
+
+  private isPreviewVideo(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.mp4|\.webm|\.ogg|\.mov|\.m4v)(\?|$|\s)/.test(target);
+  }
+
+  private isPublicPropertyMediaUrl(fileUrl: string): boolean {
+    return /\/properties-media\//i.test(fileUrl);
   }
 }
