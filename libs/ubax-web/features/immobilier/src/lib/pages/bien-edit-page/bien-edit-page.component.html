@@ -1,0 +1,19 @@
+<section class="bien-edit-page">
+  <header class="bien-edit-page__header">
+    <a
+      class="bien-edit-page__back"
+      [routerLink]="['/biens', propertyId]"
+      aria-label="Retour"
+    >
+      <i class="pi pi-arrow-left" aria-hidden="true"></i>
+    </a>
+    <h1>Modifier un bien</h1>
+  </header>
+
+  <article class="surface-card bien-edit-page__placeholder">
+    <p>La page d'edition est en cours de finalisation.</p>
+    <button type="button" class="primary-action" (click)="goBack()">
+      Retour au detail du bien
+    </button>
+  </article>
+</section>

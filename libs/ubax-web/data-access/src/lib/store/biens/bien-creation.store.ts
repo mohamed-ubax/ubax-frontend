@@ -162,6 +162,23 @@ export const BienCreationStore = signalStore(
         patchState(store, initialState);
       },
 
+      hydrateExistingDraftContext(payload: {
+        propertyId: string;
+        property: PropertyResponse | null;
+        medias: PropertyMediaResponse[];
+        documents: PropertyDocumentResponse[];
+      }): void {
+        patchState(store, {
+          propertyId: payload.propertyId,
+          property: payload.property,
+          medias: payload.medias,
+          documents: payload.documents,
+          saving: false,
+          error: null,
+          documentUploadStage: 'idle',
+        });
+      },
+
       chargerReferentiels: rxMethod<void>(
         pipe(
           tap(() => patchState(store, { error: null })),

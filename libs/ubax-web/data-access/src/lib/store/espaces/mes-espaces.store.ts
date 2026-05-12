@@ -8,33 +8,18 @@ import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
   archive,
   ApiConfiguration,
+  findAllByType,
   getById,
+  LaCodeListDto,
   listMine,
   ListMine$Params,
   Pageable,
   PropertyResponse,
   submit,
 } from '@ubax-workspace/shared-api-types';
-import { exhaustMap, map, pipe, tap } from 'rxjs';
+import { exhaustMap, forkJoin, map, of, pipe, tap } from 'rxjs';
 
 export type EspaceStatus = NonNullable<ListMine$Params['status']>;
-
-/** Types de propriété hôteliers uniquement */
-export const HOTEL_PROPERTY_TYPES = [
-  'ROOM',
-  'SUITE',
-  'CONFERENCE_ROOM',
-  'APARTMENT',
-] as const;
-
-export type HotelPropertyType = (typeof HOTEL_PROPERTY_TYPES)[number];
-
-export const HOTEL_PROPERTY_TYPE_LABELS: Record<HotelPropertyType, string> = {
-  ROOM: 'Chambre',
-  SUITE: 'Suite',
-  CONFERENCE_ROOM: 'Salle de conférence',
-  APARTMENT: 'Appartement',
-};
 
 export const ESPACE_STATUS_LABELS: Record<EspaceStatus, string> = {
   DRAFT: 'Brouillon',
@@ -47,6 +32,7 @@ export const ESPACE_STATUS_LABELS: Record<EspaceStatus, string> = {
 };
 
 type MesEspacesState = {
+  codeListPropertyTypes: LaCodeListDto[];
   archivingEspaceIds: string[];
   lastArchivedEspaceId: string | null;
   archiveError: string | null;
@@ -56,6 +42,7 @@ type MesEspacesState = {
 };
 
 const initialState: MesEspacesState = {
+  codeListPropertyTypes: [],
   archivingEspaceIds: [],
   lastArchivedEspaceId: null,
   archiveError: null,
@@ -99,36 +86,27 @@ function extractList<T>(body: unknown): T[] {
   return [];
 }
 
-function extractTotalElements(body: unknown): number {
-  if (!body || typeof body !== 'object') return 0;
-
-  const record = body as Record<string, unknown>;
-  if (typeof record['totalElements'] === 'number') return record['totalElements'];
-
-  const data = record['data'];
-  if (data && typeof data === 'object') {
-    const nested = data as Record<string, unknown>;
-    if (typeof nested['totalElements'] === 'number') return nested['totalElements'];
-    if (typeof nested['total'] === 'number') return nested['total'];
-  }
-
-  return extractList<unknown>(body).length;
-}
-
 function extractFirstItem<T>(body: unknown): T | null {
   if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
-  if (record['data'] && typeof record['data'] === 'object') return record['data'] as T;
+  if (record['data'] && typeof record['data'] === 'object')
+    return record['data'] as T;
   return record as T;
 }
 
-function normalizeEspace(property: PropertyResponse, index: number): PropertyResponse {
+function normalizeEspace(
+  property: PropertyResponse,
+  index: number,
+): PropertyResponse {
   if (property.id) return property;
   return { ...property, id: `espace-${index + 1}` };
 }
 
 function selectEspaceId(property: PropertyResponse): string {
-  return property.id ?? `${property.title ?? 'espace'}-${property.createdAt ?? 'unknown'}`;
+  return (
+    property.id ??
+    `${property.title ?? 'espace'}-${property.createdAt ?? 'unknown'}`
+  );
 }
 
 function pageRequest(page: number, size: number): Pageable {
@@ -137,6 +115,10 @@ function pageRequest(page: number, size: number): Pageable {
 
 function withoutId(ids: string[], id: string): string[] {
   return ids.filter((i) => i !== id);
+}
+
+function extractCodeListValue(item: LaCodeListDto): string {
+  return item.value ?? '';
 }
 
 function markArchived(entity: PropertyResponse): PropertyResponse {
@@ -199,20 +181,37 @@ export const MesEspacesStore = signalStore(
           exhaustMap((params) => {
             const page = params?.page ?? 0;
             const size = params?.size ?? 20;
-            return listMine(http, apiConfig.rootUrl, {
-              status: params?.status,
-              pageable: pageRequest(page, size),
+            const propertyTypes$ = store.codeListPropertyTypes().length
+              ? of(store.codeListPropertyTypes())
+              : findAllByType(http, apiConfig.rootUrl, {
+                  type: 'PROPERTY_TYPE',
+                }).pipe(map((r) => extractList<LaCodeListDto>(r.body)));
+
+            return forkJoin({
+              body: listMine(http, apiConfig.rootUrl, {
+                status: params?.status,
+                pageable: pageRequest(page, size),
+              }).pipe(map((r) => r.body)),
+              propertyTypes: propertyTypes$,
             }).pipe(
-              map((r) => r.body),
               tapResponse({
-                next: (body) => {
+                next: ({ body, propertyTypes }) => {
                   const items = extractList<PropertyResponse>(body).map(
                     (p, i) => normalizeEspace(p, i),
+                  );
+                  const sortedPropertyTypes = [...propertyTypes].sort((a, b) =>
+                    extractCodeListValue(a).localeCompare(
+                      extractCodeListValue(b),
+                    ),
                   );
                   patchState(
                     store,
                     setAllEntities(items, { selectId: selectEspaceId }),
-                    { loading: false, error: null },
+                    {
+                      codeListPropertyTypes: sortedPropertyTypes,
+                      loading: false,
+                      error: null,
+                    },
                   );
                 },
                 error: (err: HttpErrorResponse) =>
@@ -243,16 +242,21 @@ export const MesEspacesStore = signalStore(
               tapResponse({
                 next: () => {
                   const nextEntities = preserveInList
-                    ? store.entities().map((e) =>
-                        selectEspaceId(e) === id ? markArchived(e) : e,
-                      )
+                    ? store
+                        .entities()
+                        .map((e) =>
+                          selectEspaceId(e) === id ? markArchived(e) : e,
+                        )
                     : store.entities().filter((e) => selectEspaceId(e) !== id);
 
                   patchState(
                     store,
                     setAllEntities(nextEntities, { selectId: selectEspaceId }),
                     (state) => ({
-                      archivingEspaceIds: withoutId(state.archivingEspaceIds, id),
+                      archivingEspaceIds: withoutId(
+                        state.archivingEspaceIds,
+                        id,
+                      ),
                       lastArchivedEspaceId: id,
                       archiveError: null,
                     }),
@@ -299,7 +303,10 @@ export const MesEspacesStore = signalStore(
                     store,
                     setAllEntities(nextEntities, { selectId: selectEspaceId }),
                     (state) => ({
-                      submittingEspaceIds: withoutId(state.submittingEspaceIds, id),
+                      submittingEspaceIds: withoutId(
+                        state.submittingEspaceIds,
+                        id,
+                      ),
                       lastSubmittedEspaceId: id,
                       submitError: null,
                     }),
@@ -307,7 +314,10 @@ export const MesEspacesStore = signalStore(
                 },
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
-                    submittingEspaceIds: withoutId(state.submittingEspaceIds, id),
+                    submittingEspaceIds: withoutId(
+                      state.submittingEspaceIds,
+                      id,
+                    ),
                     submitError: err.message,
                   })),
               }),

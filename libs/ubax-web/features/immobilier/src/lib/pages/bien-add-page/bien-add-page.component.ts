@@ -8,8 +8,9 @@
   signal,
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe, DOCUMENT } from '@angular/common';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import {
   form,
   submit,
@@ -27,11 +28,14 @@ import {
 import {
   ApiConfiguration,
   generateReadUrl,
+  getById,
+  PropertyDetailResponse,
   PropertyAmenityRequest,
 } from '@ubax-workspace/shared-api-types';
 import {
   AuthStore,
   BienCreationStore,
+  BienEditStore,
 } from '@ubax-workspace/ubax-web-data-access';
 import { firstValueFrom } from 'rxjs';
 
@@ -56,6 +60,16 @@ const ACCEPTED_MEDIA =
   'image/jpeg,image/png,image/webp,video/mp4,video/quicktime';
 const ACCEPTED_DOCS = 'application/pdf,image/jpeg,image/png,image/webp';
 const MAX_DOC_SIZE_MB = 20;
+
+const PROPERTY_STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Brouillon',
+  PENDING: 'En attente',
+  PUBLISHED: 'Publié',
+  RESERVED: 'Réservé',
+  SOLD: 'Vendu',
+  ARCHIVED: 'Archivé',
+  REJECTED: 'Rejeté',
+};
 
 const AMENITY_ICON_BY_CODE: Record<string, string> = {
   AC: 'pi-wind',
@@ -93,6 +107,10 @@ function resolveTimelineStatus(
   }
 
   return 'pending';
+}
+
+function isEditablePropertyStatus(status: string | null | undefined): boolean {
+  return status === 'DRAFT' || status === 'REJECTED';
 }
 
 // ── Form models (one interface per wizard step) ─────────────────────────────
@@ -138,24 +156,33 @@ interface BienStep4 {
   selector: 'ubax-bien-add-page',
   standalone: true,
   imports: [FormField, DecimalPipe],
-  providers: [BienCreationStore],
+  providers: [BienCreationStore, BienEditStore],
   templateUrl: './bien-add-page.component.html',
   styleUrl: './bien-add-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BienAddPageComponent implements OnInit {
   private readonly store = inject(BienCreationStore);
+  private readonly editStore = inject(BienEditStore);
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
   private readonly document = inject(DOCUMENT);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
 
   protected readonly saving = this.store.saving;
-  protected readonly error = this.store.error;
+  protected readonly isWorking = computed(
+    () => this.store.saving() || this.editStore.saving(),
+  );
+  private readonly guardedError = signal<string | null>(null);
+  protected readonly error = computed(
+    () => this.guardedError() ?? this.store.error(),
+  );
   protected readonly medias = this.store.medias;
   protected readonly documents = this.store.documents;
   protected readonly property = this.store.property;
@@ -168,15 +195,30 @@ export class BienAddPageComponent implements OnInit {
   protected readonly documentTypesCodeList = this.store.codeListDocumentTypes;
   protected readonly documentUploadStage = this.store.documentUploadStage;
   protected readonly documentOpeningId = signal<string | null>(null);
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly previewName = signal<string>('Document');
+  protected readonly previewFullscreen = signal(false);
+  protected readonly previewIsImage = signal(false);
+  protected readonly previewIsVideo = signal(false);
+  protected readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
 
   protected readonly isSessionError = computed(() => {
     const msg = this.error() ?? '';
     return (
       msg.includes('401') ||
+      /token.*authentification/i.test(msg) ||
       /session expir/i.test(msg) ||
       /unauthorized/i.test(msg) ||
       /non autoris/i.test(msg)
     );
+  });
+
+  protected readonly hasWritableSession = computed(() => {
+    const token = this.authStore.token();
+    return !!token;
   });
 
   protected expireAndRedirect(): void {
@@ -256,11 +298,11 @@ export class BienAddPageComponent implements OnInit {
 
   // ── Signal Forms – step 1 (Informations générales) ──────────────────────
   private readonly _step1 = signal<BienStep1>({
-    title: 'Villa familiale avec jardin privatif',
+    title: '',
     propertyType: '',
     transactionType: '',
-    condition: 'GOOD',
-    yearBuilt: 2014,
+    condition: '',
+    yearBuilt: null,
     ownerId: '',
   });
   protected readonly formStep1 = form(this._step1, (p) => {
@@ -274,14 +316,14 @@ export class BienAddPageComponent implements OnInit {
 
   // ── Signal Forms – step 2 (Surfaces & pièces) ────────────────────────────
   private readonly _step2 = signal<BienStep2>({
-    rooms: 6,
-    bedrooms: 4,
-    bathrooms: 2,
-    balconies: 2,
-    surfaceTotal: 280,
-    surfaceLiving: 210,
-    floor: 0,
-    totalFloors: 2,
+    rooms: null,
+    bedrooms: null,
+    bathrooms: null,
+    balconies: null,
+    surfaceTotal: null,
+    surfaceLiving: null,
+    floor: null,
+    totalFloors: null,
   });
   protected readonly formStep2 = form(this._step2, (p) => {
     min(p.rooms, 0);
@@ -296,11 +338,11 @@ export class BienAddPageComponent implements OnInit {
   // ── Signal Forms – step 3 (Localisation) ─────────────────────────────────
   private readonly _step3 = signal<BienStep3>({
     city: '',
-    district: 'Riviera 3',
-    street: 'Boulevard Latrille',
-    address: 'Lot 48, îlot 7, Riviera 3',
-    latitude: 5.3568,
-    longitude: -3.9669,
+    district: '',
+    street: '',
+    address: '',
+    latitude: null,
+    longitude: null,
   });
   protected readonly formStep3 = form(this._step3, (p) => {
     required(p.city, { message: 'La ville est requise' });
@@ -312,10 +354,9 @@ export class BienAddPageComponent implements OnInit {
 
   // ── Signal Forms – step 4 (Équipements & Prix) ───────────────────────────
   private readonly _step4 = signal<BienStep4>({
-    price: 950000,
-    description:
-      'Villa spacieuse en zone résidentielle calme, avec grand séjour, jardin arboré et stationnement intérieur sécurisé.',
-    amenities: ['AC', 'SECURITY', 'PARKING', 'GARDEN', 'WATER_TANK'],
+    price: 0,
+    description: '',
+    amenities: [],
   });
   protected readonly formStep4 = form(this._step4, (p) => {
     required(p.price, { message: 'Le prix est requis' });
@@ -327,6 +368,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected toggleAmenity(code: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this._step4.update((s) => {
       const already = s.amenities.includes(code);
       return {
@@ -348,44 +393,66 @@ export class BienAddPageComponent implements OnInit {
 
   /** Becomes true once proceedStep4 triggers creerBrouillon, resets on navigation. */
   private readonly step4Pending = signal(false);
+  private readonly editPending = signal(false);
+  private readonly submitPending = signal(false);
+
+  protected readonly editPropertyId = computed(
+    () => this.route.snapshot.paramMap.get('id') ?? '',
+  );
+  protected readonly isEditMode = computed(
+    () => this.editPropertyId().length > 0,
+  );
+  protected readonly isModificationLocked = computed(() => {
+    if (!this.isEditMode()) {
+      return false;
+    }
+
+    const property = this.property();
+    if (!property) {
+      return false;
+    }
+
+    return !isEditablePropertyStatus(property.status ?? null);
+  });
+  protected readonly modificationLockedStatusLabel = computed(() => {
+    const status = this.property()?.status;
+
+    if (!status) {
+      return 'inconnu';
+    }
+
+    return PROPERTY_STATUS_LABELS[status] ?? status;
+  });
+  protected readonly canSubmitForModeration = computed(() => {
+    const status = this.property()?.status;
+    return status === 'DRAFT' || status === 'REJECTED' || !status;
+  });
 
   protected readonly coverMediaId = computed(
     () => this.medias().find((m) => m.cover)?.id ?? null,
   );
 
   constructor() {
-    // Once referentials are loaded, auto-select first valid options for test runs.
+    // Redirect to detail page only after an explicit submit action.
     effect(() => {
-      const firstPropertyType = this.propertyTypes()[0]?.value ?? '';
-      const firstTransactionType = this.transactionTypes()[0]?.value ?? '';
-      const firstCity = this.cities()[0]?.value ?? '';
-
-      this._step1.update((s) => ({
-        ...s,
-        propertyType: s.propertyType || firstPropertyType,
-        transactionType: s.transactionType || firstTransactionType,
-      }));
-      this._step3.update((s) => ({
-        ...s,
-        city: s.city || firstCity,
-      }));
-
-      const availableDocTypes = this.docTypes();
-      const firstDocType = availableDocTypes[0]?.value ?? '';
-      if (
-        firstDocType &&
-        !availableDocTypes.some((dt) => dt.value === this.selectedDocType())
-      ) {
-        this.selectedDocType.set(firstDocType);
+      if (!this.submitPending()) {
+        return;
       }
-    });
 
-    // Redirect to detail page once the bien transitions to PENDING status.
-    effect(() => {
       const prop = this.property();
+      if (this.store.saving()) {
+        return;
+      }
+
+      if (this.store.error()) {
+        this.submitPending.set(false);
+        return;
+      }
+
       if (prop?.id && prop.status === 'PENDING') {
+        this.submitPending.set(false);
         this.store.reset();
-        this.router.navigate(['/immobilier', prop.id]);
+        this.router.navigate(['/biens', prop.id]);
       }
     });
 
@@ -397,20 +464,82 @@ export class BienAddPageComponent implements OnInit {
         !this.store.saving()
       ) {
         this.step4Pending.set(false);
+        this.guardedError.set(null);
         this.notifications?.success('Brouillon créé avec succès.');
         this.nextStep();
       }
     });
 
-    // Lower topbar when any confirmation modal is open.
     effect(() => {
-      const isOpen = !!(this.mediaDeleteTarget() || this.docDeleteTarget());
-      this.document.body.classList.toggle('ubax-overlay-open', isOpen);
+      if (
+        !this.isEditMode() ||
+        !this.editPending() ||
+        this.editStore.saving()
+      ) {
+        return;
+      }
+
+      const error = this.editStore.error();
+      if (error) {
+        this.editPending.set(false);
+        this.notifications?.error('La modification du bien a échoué.');
+        return;
+      }
+
+      const id = this.editPropertyId();
+      this.editPending.set(false);
+      if (!id) {
+        return;
+      }
+
+      this.notifications?.success('Informations du bien mises à jour.');
+      this.guardedError.set(null);
+      this.nextStep();
+    });
+
+    effect(() => {
+      const options = this.docTypes();
+      const current = this.selectedDocType();
+
+      if (!options.length) {
+        if (current) {
+          this.selectedDocType.set('');
+        }
+        return;
+      }
+
+      if (options.some((option) => option.value === current)) {
+        return;
+      }
+
+      this.selectedDocType.set(options[0]?.value ?? '');
+    });
+
+    // Lower topbar when any overlay is open.
+    effect((onCleanup) => {
+      const hasConfirmOverlay = !!(
+        this.mediaDeleteTarget() || this.docDeleteTarget()
+      );
+      const hasDocPreviewOverlay = !!this.previewUrl();
+      const hasOverlay = hasConfirmOverlay || hasDocPreviewOverlay;
+
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+
+      onCleanup(() => {
+        if (hasOverlay) {
+          this.document.body.classList.remove('ubax-overlay-open');
+        }
+      });
     });
   }
 
   ngOnInit(): void {
     this.store.chargerReferentiels();
+    this.guardedError.set(null);
+    const id = this.editPropertyId();
+    if (id) {
+      void this.prefillFromProperty(id);
+    }
   }
 
   protected isReachedStep(index: number): boolean {
@@ -432,6 +561,10 @@ export class BienAddPageComponent implements OnInit {
   // ── Step advances ────────────────────────────────────────────────────────
 
   protected proceedStep1(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep1, {
       action: async () => {
         this.nextStep();
@@ -441,6 +574,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected proceedStep2(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep2, {
       action: async () => {
         this.nextStep();
@@ -450,6 +587,10 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected proceedStep3(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep3, {
       action: async () => {
         this.nextStep();
@@ -463,8 +604,16 @@ export class BienAddPageComponent implements OnInit {
    * Navigation to step 5 happens reactively once the store confirms the creation.
    */
   protected proceedStep4(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep4, {
       action: async () => {
+        if (!this.ensureWritableSession()) {
+          return null;
+        }
+
         const s1 = this._step1();
         const s2 = this._step2();
         const s3 = this._step3();
@@ -475,7 +624,7 @@ export class BienAddPageComponent implements OnInit {
           (code) => ({ code }),
         );
 
-        this.store.creerBrouillon({
+        const payload = {
           title: s1.title || undefined,
           propertyType: s1.propertyType || undefined,
           transactionType: s1.transactionType || undefined,
@@ -499,6 +648,22 @@ export class BienAddPageComponent implements OnInit {
           price: s4.price ?? 0,
           description: s4.description || undefined,
           amenities: amenities.length > 0 ? amenities : undefined,
+        };
+
+        if (this.isEditMode()) {
+          const id = this.editPropertyId();
+          if (!id) {
+            this.notifications?.error('Identifiant du bien introuvable.');
+            return null;
+          }
+
+          this.editStore.updateProperty({ id, ...payload });
+          this.editPending.set(true);
+          return null;
+        }
+
+        this.store.creerBrouillon({
+          ...payload,
         });
 
         this.step4Pending.set(true);
@@ -510,6 +675,10 @@ export class BienAddPageComponent implements OnInit {
   // ── Media handlers ───────────────────────────────────────────────────────
 
   protected onMediaFilesSelected(event: Event): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
     this.uploadFiles(Array.from(input.files));
@@ -528,13 +697,32 @@ export class BienAddPageComponent implements OnInit {
   protected onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(false);
+
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const files = Array.from(event.dataTransfer?.files ?? []);
     this.uploadFiles(files);
   }
 
   private uploadFiles(files: File[]): void {
+    if (!this.ensureWritableSession()) {
+      return;
+    }
+
     files.forEach((file) => {
-      const mediaType = file.type.startsWith('video/') ? 'VIDEO' : 'PHOTO';
+      const isVideo = file.type.startsWith('video/');
+      const mediaType = isVideo ? 'VIDEO' : 'PHOTO';
+
+      if (isVideo) {
+        this.store.uploaderMediaPresign({
+          file,
+          mediaType,
+        });
+        return;
+      }
+
       this.store.uploaderMediaDirect({
         file,
         mediaType,
@@ -544,10 +732,22 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected setCover(mediaId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
+    if (!this.ensureWritableSession()) {
+      return;
+    }
+
     this.store.definirCouverture(mediaId);
   }
 
   protected requestDeleteMedia(mediaId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.mediaDeleteTarget.set(mediaId);
   }
 
@@ -556,8 +756,12 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected confirmDeleteMedia(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const mediaId = this.mediaDeleteTarget();
-    if (!mediaId) return;
+    if (!mediaId || !this.ensureWritableSession()) return;
     const wasCover = this.coverMediaId() === mediaId;
     this.store.supprimerMedia(mediaId);
     this.mediaDeleteTarget.set(null);
@@ -571,6 +775,18 @@ export class BienAddPageComponent implements OnInit {
   // ── Document handlers ────────────────────────────────────────────────────
 
   protected onDocFileSelected(event: Event): void {
+    if (this.isModificationLocked()) {
+      const input = event.target as HTMLInputElement;
+      input.value = '';
+      return;
+    }
+
+    if (!this.ensureWritableSession()) {
+      const input = event.target as HTMLInputElement;
+      input.value = '';
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -581,33 +797,82 @@ export class BienAddPageComponent implements OnInit {
       input.value = '';
       return;
     }
+
+    const docType = this.selectedDocType() || this.docTypes()[0]?.value || '';
+    if (!docType) {
+      this.docFileError.set('Veuillez sélectionner un type de document.');
+      input.value = '';
+      return;
+    }
+
     this.docFileError.set(null);
     const title = this.docTitle() || file.name;
     this.store.uploaderDocument({
       file,
-      docType: this.selectedDocType(),
+      docType,
       title,
     });
     input.value = '';
     this.docTitle.set('');
   }
 
-  protected async openDocument(fileUrl: string, docId?: string): Promise<void> {
+  protected async openDocument(
+    fileUrl: string,
+    fileName?: string,
+    docId?: string,
+  ): Promise<void> {
+    if (!fileUrl) return;
+
     if (docId) this.documentOpeningId.set(docId);
+    if (this.isPublicPropertyMediaUrl(fileUrl)) {
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
+
+      if (docId) {
+        this.documentOpeningId.set(null);
+      }
+      return;
+    }
+
     try {
       const response = await firstValueFrom(
         generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
       );
-      const readUrl = response.body?.readUrl;
-      window.open(readUrl ?? fileUrl, '_blank', 'noopener,noreferrer');
+      const resolvedUrl =
+        this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(resolvedUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(resolvedUrl, fileName));
+      this.previewUrl.set(resolvedUrl);
     } catch {
-      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
     } finally {
       if (docId) this.documentOpeningId.set(null);
     }
   }
 
+  protected closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewName.set('Document');
+    this.previewIsImage.set(false);
+    this.previewIsVideo.set(false);
+    this.previewFullscreen.set(false);
+  }
+
+  protected togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((value) => !value);
+  }
+
   protected requestDeleteDoc(docId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.docDeleteTarget.set(docId);
   }
 
@@ -616,8 +881,12 @@ export class BienAddPageComponent implements OnInit {
   }
 
   protected confirmDeleteDoc(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const docId = this.docDeleteTarget();
-    if (!docId) return;
+    if (!docId || !this.ensureWritableSession()) return;
     this.store.supprimerDocument(docId);
     this.docDeleteTarget.set(null);
   }
@@ -625,12 +894,39 @@ export class BienAddPageComponent implements OnInit {
   // ── Final actions ────────────────────────────────────────────────────────
 
   protected sauvegarderBrouillon(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.store.reset();
-    this.router.navigate(['/immobilier']);
+    this.router.navigate(['/biens']);
   }
 
   protected soumettre(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
+    if (!this.ensureWritableSession()) {
+      return;
+    }
+
+    this.submitPending.set(true);
     this.store.soumettre();
+  }
+
+  protected terminerModification(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
+    const id = this.editPropertyId();
+    if (!id) {
+      return;
+    }
+
+    this.notifications?.success('Modifications enregistrées.');
+    void this.router.navigate(['/biens', id]);
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -644,5 +940,145 @@ export class BienAddPageComponent implements OnInit {
     if (bytes < 1024) return `${bytes} o`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
+  private ensureWritableSession(): boolean {
+    if (this.hasWritableSession()) {
+      this.guardedError.set(null);
+      return true;
+    }
+
+    this.submitPending.set(false);
+    this.step4Pending.set(false);
+    this.editPending.set(false);
+
+    const message =
+      'Cette action requiert une session authentifiée valide. Reconnectez-vous au portail pour continuer.';
+
+    this.guardedError.set(message);
+    this.notifications?.error(message);
+    return false;
+  }
+
+  private async prefillFromProperty(id: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        getById(this.http, this.apiConfig.rootUrl, { id }),
+      );
+      const detail = this.extractDetailFromResponse(response.body);
+      const property = detail?.property;
+
+      if (!property) {
+        return;
+      }
+
+      this.store.hydrateExistingDraftContext({
+        propertyId: id,
+        property,
+        medias: detail?.media ?? [],
+        documents: detail?.documents ?? [],
+      });
+
+      this._step1.update((state) => ({
+        ...state,
+        title: property.title ?? state.title,
+        propertyType: property.propertyType ?? state.propertyType,
+        transactionType: property.transactionType ?? state.transactionType,
+        condition: property.condition ?? state.condition,
+        yearBuilt: property.yearBuilt ?? state.yearBuilt,
+        ownerId: property.ownerId ?? state.ownerId,
+      }));
+
+      this._step2.update((state) => ({
+        ...state,
+        rooms: property.rooms ?? state.rooms,
+        bedrooms: property.bedrooms ?? state.bedrooms,
+        bathrooms: property.bathrooms ?? state.bathrooms,
+        balconies: property.balconies ?? state.balconies,
+        surfaceTotal: property.surfaceTotal ?? state.surfaceTotal,
+        surfaceLiving: property.surfaceLiving ?? state.surfaceLiving,
+        floor: property.floor ?? state.floor,
+        totalFloors: property.totalFloors ?? state.totalFloors,
+      }));
+
+      this._step3.update((state) => ({
+        ...state,
+        city: property.city ?? state.city,
+        district: property.district ?? state.district,
+        street: property.street ?? state.street,
+        address: property.address ?? state.address,
+        latitude: property.latitude ?? state.latitude,
+        longitude: property.longitude ?? state.longitude,
+      }));
+
+      this._step4.update((state) => ({
+        ...state,
+        price: property.price ?? state.price,
+        description: property.description ?? state.description,
+        amenities:
+          property.amenities
+            ?.map((item) => item.code ?? '')
+            .filter((code) => code.length > 0) ?? state.amenities,
+      }));
+    } catch {
+      this.notifications?.error(
+        'Impossible de préremplir le formulaire de modification.',
+      );
+    }
+  }
+
+  private extractDetailFromResponse(
+    body: unknown,
+  ): PropertyDetailResponse | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as PropertyDetailResponse;
+    if (direct.property || direct.media || direct.documents) {
+      return direct;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      return wrapped.data as PropertyDetailResponse;
+    }
+
+    return null;
+  }
+
+  private extractReadUrlFromResponse(body: unknown): string | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as { readUrl?: unknown };
+    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) {
+      return direct.readUrl;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      const nested = wrapped.data as { readUrl?: unknown };
+      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) {
+        return nested.readUrl;
+      }
+    }
+
+    return null;
+  }
+
+  private isPublicPropertyMediaUrl(fileUrl: string): boolean {
+    return /\/properties-media\//i.test(fileUrl);
+  }
+
+  private isPreviewImage(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/.test(target);
+  }
+
+  private isPreviewVideo(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.mp4|\.webm|\.ogg|\.mov|\.m4v)(\?|$|\s)/.test(target);
   }
 }

@@ -9,7 +9,11 @@
     </div>
 
     <div class="bien-detail-page__actions">
-      <span class="status-pill" [class.status-pill--archived]="propertyStatus() === 'Archivé'">
+      <span class="status-pill"
+        [class.status-pill--archived]="statusClass() === 'archived'"
+        [class.status-pill--pending]="statusClass() === 'pending'"
+        [class.status-pill--rejected]="statusClass() === 'rejected'"
+      >
         {{ propertyStatus() }}
       </span>
 
@@ -23,18 +27,26 @@
         <span>
           @if (archivePending()) {
             Archivage...
-          } @else if (propertyStatus() === 'Archivé') {
+          } @else if (statusClass() === 'archived') {
             Déjà archivé
+          } @else if (statusClass() === 'pending') {
+            En validation
           } @else {
             Archiver ce bien
           }
         </span>
       </button>
 
-      <button class="secondary-action" type="button">
-        <i class="pi pi-pencil" aria-hidden="true"></i>
-        <span>Modifier</span>
-      </button>
+      @if (canEditProperty()) {
+        <button
+          class="secondary-action"
+          type="button"
+          [routerLink]="['/biens', propertyId(), 'modifier']"
+        >
+          <i class="pi pi-pencil" aria-hidden="true"></i>
+          <span>Modifier</span>
+        </button>
+      }
 
       <a class="primary-action" routerLink="/biens/ajouter">
         <span>Ajouter un bien</span>
@@ -45,6 +57,67 @@
     </div>
   </header>
 
+  @if (viewState() === 'loading') {
+    <div class="detail-skeleton" role="status" aria-live="polite" aria-label="Chargement du bien" aria-busy="true">
+      <div class="detail-skeleton__layout">
+        <!-- Sidebar skeleton -->
+        <div class="detail-skeleton__sidebar">
+          <div class="detail-skeleton__scard">
+            <div class="detail-skeleton__scard-avatar"></div>
+            <div class="detail-skeleton__lines">
+              <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
+              <div class="detail-skeleton__line detail-skeleton__line--sm"></div>
+              <div class="detail-skeleton__line detail-skeleton__line--sm"></div>
+            </div>
+          </div>
+          <div class="detail-skeleton__scard">
+            <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
+            <div class="detail-skeleton__line"></div>
+            <div class="detail-skeleton__line detail-skeleton__line--sm"></div>
+          </div>
+        </div>
+        <!-- Main content skeleton -->
+        <div class="detail-skeleton__body">
+          <div class="detail-skeleton__gallery"></div>
+          <div class="detail-skeleton__thumbs">
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div class="detail-skeleton__thumb"></div>
+            }
+          </div>
+          <div class="detail-skeleton__line detail-skeleton__line--xl"></div>
+          <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
+          <div class="detail-skeleton__metric-row">
+            @for (i of [0, 1, 2, 3, 4]; track i) {
+              <div class="detail-skeleton__metric"></div>
+            }
+          </div>
+          <div class="detail-skeleton__line"></div>
+          <div class="detail-skeleton__line"></div>
+          <div class="detail-skeleton__line detail-skeleton__line--sm"></div>
+          <div class="detail-skeleton__location"></div>
+          <div class="detail-skeleton__video"></div>
+          <div class="detail-skeleton__comments">
+            @for (i of [0, 1]; track i) {
+              <div class="detail-skeleton__comment-card"></div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else if (viewState() === 'error') {
+    <div class="detail-view-state detail-view-state--error" role="alert">
+      <h2>Chargement impossible</h2>
+      <p>{{ detailErrorMessage() }}</p>
+      <button type="button" class="detail-view-state__action" (click)="retryLoad()">
+        Reessayer
+      </button>
+    </div>
+  } @else if (viewState() === 'empty') {
+    <div class="detail-view-state" role="status" aria-live="polite">
+      <h2>Bien introuvable</h2>
+      <p>Aucune donnee n'a ete retournee pour ce bien.</p>
+    </div>
+  } @else {
   <div class="bien-detail-page__layout">
     <aside class="bien-detail-sidebar">
       <article class="info-card">
@@ -57,20 +130,21 @@
           <img
             class="owner-card__avatar"
             src="biens/detail/owner-avatar.webp"
-            alt="Koffi Jean-Marc"
+            [alt]="ownerName()"
           />
 
           <div class="owner-card__meta">
-            <p class="owner-card__name">Koffi Jean-Marc</p>
-            <p class="owner-card__phone">+225 07 58 23 41 89</p>
+            <p class="owner-card__name">{{ ownerName() }}</p>
+            <p class="owner-card__phone">{{ ownerPhone() }}</p>
           </div>
         </div>
 
-        <a class="card-link" routerLink="/biens/bailleurs/1">
+        <a class="card-link" [routerLink]="ownerProfileLink()">
           Voir le profil
         </a>
       </article>
 
+      @if (showTenantInfo()) {
       <article class="info-card info-card--tenant">
         <div class="info-card__header">
           <i class="pi pi-users" aria-hidden="true"></i>
@@ -113,6 +187,7 @@
           Voir le profil
         </a>
       </article>
+      }
 
       <article class="info-card">
         <div class="info-card__header">
@@ -121,7 +196,7 @@
         </div>
 
         <div class="document-list">
-          @for (document of documents; track document.name) {
+          @for (document of documents(); track document.id) {
             <div class="document-row">
               <div class="document-row__label">
                 <i class="pi pi-file-pdf" aria-hidden="true"></i>
@@ -129,12 +204,18 @@
               </div>
 
               <div class="document-row__actions">
-                <button type="button" aria-label="Prévisualiser le document">
-                  <i class="pi pi-eye" aria-hidden="true"></i>
+                <button type="button" aria-label="Prévisualiser le document" [disabled]="documentOpeningId() === document.id" (click)="openDocument(document.fileUrl, document.name, document.id)">
+                  <i class="pi" [class.pi-eye]="documentOpeningId() !== document.id" [class.pi-spin]="documentOpeningId() === document.id" [class.pi-spinner]="documentOpeningId() === document.id" aria-hidden="true"></i>
                 </button>
-                <button type="button" aria-label="Télécharger le document">
+                <button type="button" aria-label="Télécharger le document" [disabled]="documentOpeningId() === document.id" (click)="downloadDocument(document.fileUrl, document.name, document.id)">
                   <i class="pi pi-download" aria-hidden="true"></i>
                 </button>
+              </div>
+            </div>
+          } @empty {
+            <div class="document-row document-row--empty">
+              <div class="document-row__label">
+                <span>Aucun document disponible</span>
               </div>
             </div>
           }
@@ -146,13 +227,21 @@
       <article class="bien-detail-shell">
         <section class="gallery-section">
           <div class="gallery-section__main">
-            <span class="gallery-section__status">Location</span>
+            <span class="gallery-section__status">{{ transactionLabel() }}</span>
 
-            <img
-              class="gallery-section__image"
-              [src]="activeImage()"
-              [alt]="propertyTitle()"
-            />
+            @if (isGalleryImageAvailable(activeGalleryItem())) {
+              <img
+                class="gallery-section__image"
+                [src]="activeGalleryItem().src"
+                [alt]="activeGalleryItem().alt || propertyTitle()"
+                (error)="markGalleryImageBroken(activeGalleryItem().key)"
+              />
+            } @else {
+              <div class="gallery-section__placeholder" aria-live="polite">
+                <i class="pi pi-image" aria-hidden="true"></i>
+                <span>Image indisponible</span>
+              </div>
+            }
 
             <button
               class="gallery-nav gallery-nav--previous"
@@ -174,14 +263,25 @@
           </div>
 
           <div class="gallery-section__thumbs">
-            @for (image of galleryImages; track image; let index = $index) {
+            @for (image of galleryItems(); track image.key; let index = $index) {
               <button
                 class="gallery-thumb"
                 [class.is-active]="activeImageIndex() === index"
                 type="button"
                 (click)="selectImage(index)"
               >
-                <img [src]="image" alt="Aperçu du bien" />
+                @if (isGalleryImageAvailable(image)) {
+                  <img
+                    [src]="image.src"
+                    [alt]="image.alt"
+                    (error)="markGalleryImageBroken(image.key)"
+                  />
+                } @else {
+                  <div class="gallery-thumb__placeholder">
+                    <i class="pi pi-image" aria-hidden="true"></i>
+                    <span>Image indisponible</span>
+                  </div>
+                }
               </button>
             }
           </div>
@@ -190,32 +290,36 @@
         <section class="overview-section">
           <div class="overview-section__intro">
             <div>
-              <span class="lease-badge">12 mois</span>
+              <span class="lease-badge">{{ propertyTypeLabel() }}</span>
               <h2>{{ propertyTitle() }}</h2>
               <p class="overview-section__location">
                 <i class="pi pi-map-marker" aria-hidden="true"></i>
-                Abidjan, Cocody
+                {{ locationLabel() }}
               </p>
+                <p class="overview-section__location">
+                  <i class="pi pi-home" aria-hidden="true"></i>
+                  {{ fullAddress() }}
+                </p>
             </div>
 
             <div class="overview-section__stats">
-              <p class="overview-section__price">450 000 FCFA</p>
+              <p class="overview-section__price">{{ priceLabel() }}</p>
 
               <div class="overview-section__meta">
                 <span>
-                  <strong>4.8</strong>
-                  <em>note</em>
+                    <strong>{{ transactionLabel() }}</strong>
+                    <em>transaction</em>
                 </span>
                 <span>
-                  <strong>148</strong>
-                  <em>vues</em>
+                    <strong>{{ conditionLabel() }}</strong>
+                    <em>etat</em>
                 </span>
               </div>
             </div>
           </div>
 
           <div class="metric-grid">
-            @for (metric of metrics; track metric.label) {
+            @for (metric of metrics(); track metric.label) {
               <div class="metric-pill">
                 <span class="metric-pill__value">{{ metric.value }}</span>
                 <span class="metric-pill__label">{{ metric.label }}</span>
@@ -226,26 +330,16 @@
 
         <section class="content-section">
           <h3>Description</h3>
-          <p>
-            Découvrez ce magnifique appartement de 3 pièces situé dans le
-            quartier résidentiel prisé de Cocody Riviera. Conçu pour offrir un
-            confort optimal et un cadre de vie paisible, ce bien combine
-            modernité, fonctionnalité et sécurité.
-          </p>
-          <p>
-            Dès l’entrée, vous êtes accueilli par un vaste séjour lumineux
-            bénéficiant de grandes baies vitrées qui laissent entrer une lumière
-            naturelle abondante tout au long de la journée. Le salon s’ouvre sur
-            un balcon spacieux, idéal pour vos moments de détente ou pour
-            recevoir des invités.
-          </p>
+          @for (paragraph of descriptionParagraphs(); track paragraph) {
+            <p>{{ paragraph }}</p>
+          }
         </section>
 
         <section class="content-section">
           <h3>Commodités</h3>
 
           <div class="amenities-grid">
-            @for (column of amenityColumns; track $index) {
+            @for (column of amenityColumns(); track $index) {
               <div class="amenity-column">
                 @for (item of column; track item) {
                   <div class="amenity-item">
@@ -264,11 +358,21 @@
           <h3>Localisation</h3>
 
           <div class="location-panel">
-            <img
-              class="location-panel__map"
-              src="biens/detail/location-map.webp"
-              alt="Carte du bien"
-            />
+            @if (hasCoordinates()) {
+              <iframe
+                class="location-panel__map"
+                [src]="mapSafeUrl()"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Localisation du bien"
+                aria-label="Carte de localisation"
+              ></iframe>
+            } @else {
+              <div class="location-panel__map-placeholder">
+                <i class="pi pi-map" aria-hidden="true"></i>
+                <span>Coordonnées GPS non renseignées</span>
+              </div>
+            }
 
             <div class="location-panel__card">
               <img
@@ -280,7 +384,7 @@
                 <p>{{ propertyTitle() }}</p>
                 <span>
                   <i class="pi pi-map-marker" aria-hidden="true"></i>
-                  Abidjan, Cocody
+                  {{ locationLabel() }}
                 </span>
               </div>
             </div>
@@ -289,28 +393,43 @@
 
         <section class="content-section content-section--video">
           <div class="content-section__header-row">
-            <h3>Video 360</h3>
-            <span class="video-tag">video</span>
+            <h3>Vidéo 360</h3>
+            <span class="video-tag">vidéo</span>
           </div>
 
-          <div class="video-panel">
-            <img
-              class="video-panel__cover"
-              src="biens/detail/property-side-01.webp"
-              [alt]="'Vidéo de ' + propertyTitle()"
-            />
-
-            <div class="video-panel__overlay">
-              <button type="button" aria-label="Lire la vidéo">
-                <i class="pi pi-play" aria-hidden="true"></i>
-              </button>
-
-              <div>
-                <p>Vidéo de {{ propertyTitle() }}</p>
-                <span>10 : 15</span>
+          @if (hasVideos()) {
+            @for (video of videos(); track video.key) {
+              <div class="video-panel">
+                <video
+                  class="video-panel__player"
+                  controls
+                  preload="metadata"
+                  playsinline
+                  [attr.aria-label]="'Vidéo de ' + propertyTitle()"
+                >
+                  <source
+                    [src]="video.playbackUrl"
+                    [attr.type]="video.mimeType ?? null"
+                  />
+                  Votre navigateur ne supporte pas la lecture vidéo.
+                  <a
+                    [href]="video.playbackUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Ouvrir la vidéo dans un nouvel onglet
+                  </a>
+                </video>
+              </div>
+            }
+          } @else {
+            <div class="video-panel video-panel--placeholder">
+              <div class="video-panel__placeholder-inner">
+                <i class="pi pi-video" aria-hidden="true"></i>
+                <p>Aucune vidéo disponible pour ce bien</p>
               </div>
             </div>
-          </div>
+          }
         </section>
 
         <section class="content-section content-section--comments">
@@ -350,12 +469,19 @@
 
                 <p class="comment-card__review">{{ comment.review }}</p>
               </article>
+            } @empty {
+              <div class="comment-empty-state">
+                <i class="pi pi-comment" aria-hidden="true"></i>
+                <p>Aucun avis pour le moment</p>
+                <span>Les avis des locataires et acheteurs apparaîtront ici.</span>
+              </div>
             }
           </div>
         </section>
       </article>
     </div>
   </div>
+  }
 
   @if (archiveConfirmOpen()) {
     <div class="archive-confirm-overlay" (click)="closeArchiveConfirm()">
@@ -393,6 +519,61 @@
           </button>
         </div>
       </dialog>
+    </div>
+  }
+
+  @if (previewUrl()) {
+    <div
+      class="doc-preview-backdrop ubax-modal-overlay"
+      (click)="closePreview()"
+    ></div>
+    <div class="doc-preview" [class.doc-preview--fullscreen]="previewFullscreen()">
+      <header class="doc-preview__header">
+        <div class="doc-preview__title">
+          <i class="pi" [class.pi-image]="previewIsImage()" [class.pi-file-pdf]="!previewIsImage()"></i>
+          <span>{{ previewName() }}</span>
+        </div>
+
+        <div class="doc-preview__actions">
+          <a
+            [href]="previewUrl()"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="doc-preview__action-btn"
+            title="Ouvrir dans un nouvel onglet"
+          >
+            <i class="pi pi-external-link"></i>
+          </a>
+          <button
+            type="button"
+            class="doc-preview__action-btn"
+            (click)="togglePreviewFullscreen()"
+            [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+          >
+            <i class="pi" [class.pi-window-maximize]="!previewFullscreen()" [class.pi-window-minimize]="previewFullscreen()"></i>
+          </button>
+          <button
+            type="button"
+            class="doc-preview__action-btn doc-preview__action-btn--close"
+            (click)="closePreview()"
+            title="Fermer"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="doc-preview__body">
+        @if (previewIsImage()) {
+          <img [src]="previewSafeUrl()" [alt]="previewName()" class="doc-preview__image" />
+        } @else {
+          <iframe
+            [src]="previewSafeUrl()"
+            class="doc-preview__iframe"
+            title="Prévisualisation du document"
+          ></iframe>
+        }
+      </div>
     </div>
   }
 </section>

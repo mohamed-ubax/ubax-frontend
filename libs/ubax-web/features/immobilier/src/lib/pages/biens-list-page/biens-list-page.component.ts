@@ -13,7 +13,10 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { MesBiensStore } from '@ubax-workspace/ubax-web-data-access';
+import {
+  MesBiensStore,
+  resolvePropertyCardImage,
+} from '@ubax-workspace/ubax-web-data-access';
 import {
   LaCodeListDto,
   ListMine$Params,
@@ -1067,7 +1070,10 @@ export class BiensListPageComponent implements OnDestroy {
       tenant: property.ownerName?.trim() || 'Propriétaire non renseigné',
       tenantRole: 'Propriétaire',
       price: formatPrice(property.price),
-      image: IMAGE_POOL[index % IMAGE_POOL.length],
+      image: resolvePropertyCardImage(
+        property,
+        IMAGE_POOL[index % IMAGE_POOL.length],
+      ),
       avatar: null,
       type: property.propertyType || 'N/A',
       category: transactionLabel,

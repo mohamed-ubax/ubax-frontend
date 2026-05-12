@@ -8,7 +8,6 @@ import {
 import { RouterOutlet } from '@angular/router';
 import { Toast } from 'primeng/toast';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
-import { DevRoleSwitcherComponent } from '../dev-role-switcher/dev-role-switcher.component';
 import { UbaxAutoMotionDirective } from '../motion/auto-motion.directive';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { InactivityService } from '../../services/inactivity.service';
@@ -16,13 +15,7 @@ import { InactivityService } from '../../services/inactivity.service';
 @Component({
   selector: 'ubax-main-layout',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    Toast,
-    TopbarComponent,
-    DevRoleSwitcherComponent,
-    UbaxAutoMotionDirective,
-  ],
+  imports: [RouterOutlet, Toast, TopbarComponent, UbaxAutoMotionDirective],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

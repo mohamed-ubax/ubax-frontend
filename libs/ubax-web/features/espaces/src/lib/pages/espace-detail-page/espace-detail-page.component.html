@@ -9,249 +9,601 @@
     </a>
 
     <h1 class="reservation-detail-page__title">Détails réservations</h1>
+
+    <div class="reservation-detail-page__actions">
+      <span
+        class="status-pill"
+        [class.status-pill--archived]="statusClass() === 'archived'"
+        [class.status-pill--pending]="statusClass() === 'pending'"
+        [class.status-pill--rejected]="statusClass() === 'rejected'"
+      >
+        {{ propertyStatus() }}
+      </span>
+
+      @if (canEditProperty()) {
+        <a
+          class="reservation-detail-page__edit"
+          [routerLink]="['/hotel/espaces', detailId(), 'modifier']"
+          [state]="{ propertyDetail: propertyDetailState() }"
+        >
+          <i class="pi pi-pencil"></i>
+          <span>Modifier</span>
+        </a>
+      }
+    </div>
   </header>
 
-  <section class="reservation-detail-page__hero">
-    <div class="reservation-detail-page__sidebar">
-      <article class="guest-card">
-        <a
-          class="guest-card__link"
-          [routerLink]="['/hotel/clients', guest().clientId]"
-          [queryParams]="{ spaceId: detailId() }"
-          aria-label="Voir les détails du client actuel"
-        >
-          <div class="guest-card__avatar-frame">
-            <div class="guest-card__avatar-inner">
-              <img
-                class="guest-card__avatar"
-                [src]="guest().avatar"
-                [alt]="guest().name"
-                loading="eager"
-                decoding="async"
-              />
+  @if (viewState() === 'loading') {
+    <div
+      class="detail-skeleton"
+      role="status"
+      aria-live="polite"
+      aria-label="Chargement de l'espace"
+      aria-busy="true"
+    >
+      <div class="detail-skeleton__hero-layout">
+        <!-- Sidebar cards -->
+        <div class="detail-skeleton__sidebar">
+          <div class="detail-skeleton__scard">
+            <div class="detail-skeleton__scard-avatar"></div>
+            <div class="detail-skeleton__lines">
+              <div
+                class="detail-skeleton__line detail-skeleton__line--lg"
+              ></div>
+              <div
+                class="detail-skeleton__line detail-skeleton__line--sm"
+              ></div>
             </div>
           </div>
-
-          <div class="guest-card__content">
-            <h2 class="guest-card__name">{{ guest().name }}</h2>
-            <p class="guest-card__code">{{ guest().code }}</p>
+          <div class="detail-skeleton__scard">
+            <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
+            <div class="detail-skeleton__line"></div>
+            <div class="detail-skeleton__line"></div>
+            <div class="detail-skeleton__line detail-skeleton__line--sm"></div>
           </div>
-        </a>
-      </article>
-
-      <article class="booking-card">
-        <h2 class="booking-card__title">{{ reservation().title }}</h2>
-
-        <div class="booking-card__dual-grid booking-card__dual-grid--summary">
-          <div class="booking-card__metric">
-            <p class="booking-card__label">Type</p>
-            <div class="booking-card__metric-row">
-              <img
-                class="booking-card__asset-icon booking-card__asset-icon--bed"
-                src="space-add/icons/bed-double.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <span class="booking-card__metric-value">{{
-                reservation().type
-              }}</span>
-            </div>
-          </div>
-
-          <div class="booking-card__metric booking-card__metric--capacity">
-            <p class="booking-card__label">Capacité chambre</p>
-            <div class="booking-card__metric-row">
-              <span class="booking-card__pi-icon" aria-hidden="true">
-                <i class="pi pi-user"></i>
-              </span>
-              <span class="booking-card__metric-value">{{
-                reservation().capacity
-              }}</span>
-            </div>
+          <div class="detail-skeleton__scard">
+            <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
+            <div class="detail-skeleton__line"></div>
+            <div class="detail-skeleton__line detail-skeleton__line--sm"></div>
           </div>
         </div>
-
-        <div class="booking-card__dual-grid booking-card__dual-grid--booking">
-          <div class="booking-card__metric booking-card__metric--booking-date">
-            <p class="booking-card__label">Date de reservation</p>
-            <div
-              class="booking-card__metric-row booking-card__metric-row--stacked"
-            >
-              <span class="booking-card__pi-icon" aria-hidden="true">
-                <i class="pi pi-calendar"></i>
-              </span>
-              <div class="booking-card__booking-copy">
-                <span class="booking-card__metric-value">{{
-                  reservation().bookingDate
-                }}</span>
-                <span class="booking-card__booking-time">{{
-                  reservation().bookingTime
-                }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="booking-card__metric booking-card__metric--duration">
-            <p class="booking-card__label booking-card__label--spacer">Durée</p>
-            <div class="booking-card__metric-row">
-              <span class="booking-card__pi-icon" aria-hidden="true">
-                <i class="pi pi-clock"></i>
-              </span>
-              <span class="booking-card__metric-value">{{
-                reservation().stayDuration
-              }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="booking-card__facilities">
-          <p class="booking-card__label">Facilities</p>
-
-          <div class="booking-card__facility-grid">
-            @for (facility of reservation().facilities; track facility) {
-              <div class="booking-card__facility-item">
-                <span class="booking-card__facility-check" aria-hidden="true">
-                  <img
-                    src="space-add/icons/check.svg"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-                <span class="booking-card__facility-label">{{ facility }}</span>
-              </div>
+        <!-- Gallery skeleton -->
+        <div class="detail-skeleton__gallery-panel">
+          <div class="detail-skeleton__gallery-main"></div>
+          <div class="detail-skeleton__thumbs-row">
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div class="detail-skeleton__thumb"></div>
             }
           </div>
-        </div>
-
-        <button class="booking-card__more" type="button">
-          <span>voir plus</span>
-          <i class="pi pi-angle-down"></i>
-        </button>
-      </article>
-    </div>
-
-    <section class="gallery-panel" aria-label="Galerie de la chambre">
-      <div class="gallery-panel__main">
-        <img
-          class="gallery-panel__main-image"
-          [src]="activeGalleryPhoto().src"
-          [alt]="reservation().title"
-          loading="eager"
-          decoding="async"
-        />
-
-        <div class="gallery-panel__nav">
-          <button
-            class="gallery-panel__nav-button"
-            type="button"
-            aria-label="Image précédente"
-            (click)="previousGalleryImage()"
-          >
-            <i class="pi pi-angle-left"></i>
-          </button>
-
-          <span class="gallery-panel__nav-count">{{
-            galleryCounterLabel()
-          }}</span>
-
-          <button
-            class="gallery-panel__nav-button"
-            type="button"
-            aria-label="Image suivante"
-            (click)="nextGalleryImage()"
-          >
-            <i class="pi pi-angle-right"></i>
-          </button>
         </div>
       </div>
-
-      <div class="gallery-panel__thumbs">
-        @for (photo of galleryPhotos(); track photo.src; let index = $index) {
-          <button
-            class="gallery-thumb"
-            [class.gallery-thumb--active]="activeGalleryIndex() === index"
-            type="button"
-            [attr.aria-label]="'Afficher ' + photo.alt"
-            (click)="selectGalleryImage(index)"
-          >
-            <img
-              class="gallery-thumb__image"
-              [src]="photo.src"
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-
-            @if (photo.previewCount) {
-              <span class="gallery-thumb__overlay">
-                <i class="pi pi-images"></i>
-                <span>{{ photo.previewCount }}</span>
-              </span>
-            }
-          </button>
+      <div class="detail-skeleton__history">
+        <div class="detail-skeleton__line detail-skeleton__line--title"></div>
+        @for (i of [0, 1, 2]; track i) {
+          <div class="detail-skeleton__history-row"></div>
         }
       </div>
-    </section>
-  </section>
-
-  <section class="history-card" aria-label="Historique des clients">
-    <h2 class="history-card__title">Historique des clients</h2>
-
-    <div class="history-card__table-wrap">
-      <div class="history-table">
-        <div class="history-table__head">
-          <span>Invité</span>
-          <span>Biens</span>
-          <span>Durée</span>
-          <span>Arrivée&nbsp;&nbsp;-&nbsp;&nbsp;Départ</span>
-          <span>Statut</span>
-          <span>Actions</span>
-        </div>
-
-        <div class="history-table__body">
-          @for (row of historyRows(); track row.id) {
-            <div class="history-table__row">
-              <div class="history-table__guest">
+    </div>
+  } @else if (viewState() === 'error') {
+    <div class="detail-view-state detail-view-state--error" role="alert">
+      <h2>Chargement impossible</h2>
+      <p>{{ detailErrorMessage() }}</p>
+      <button
+        class="detail-view-state__action"
+        type="button"
+        (click)="retryLoad()"
+      >
+        Reessayer
+      </button>
+    </div>
+  } @else if (viewState() === 'empty') {
+    <div class="detail-view-state" role="status" aria-live="polite">
+      <h2>Espace introuvable</h2>
+      <p>Aucune donnée n'a été retournée pour cet espace.</p>
+    </div>
+  } @else {
+    <section class="reservation-detail-page__hero">
+      <div class="reservation-detail-page__sidebar">
+        <article class="guest-card">
+          <a
+            class="guest-card__link"
+            [routerLink]="['/hotel/clients', guest().clientId]"
+            [queryParams]="{ spaceId: detailId() }"
+            aria-label="Voir les détails du client actuel"
+          >
+            <div class="guest-card__avatar-frame">
+              <div class="guest-card__avatar-inner">
                 <img
-                  class="history-table__guest-avatar"
-                  [src]="row.avatar"
-                  [alt]="row.guestName"
+                  class="guest-card__avatar"
+                  [src]="guest().avatar"
+                  [alt]="guest().name"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
+            </div>
+
+            <div class="guest-card__content">
+              <h2 class="guest-card__name">{{ guest().name }}</h2>
+              <p class="guest-card__code">{{ guest().code }}</p>
+            </div>
+          </a>
+        </article>
+
+        <article class="booking-card">
+          <h2 class="booking-card__title">{{ reservation().title }}</h2>
+
+          <div class="booking-card__dual-grid booking-card__dual-grid--summary">
+            <div class="booking-card__metric">
+              <p class="booking-card__label">Type</p>
+              <div class="booking-card__metric-row">
+                <img
+                  class="booking-card__asset-icon booking-card__asset-icon--bed"
+                  src="space-add/icons/bed-double.svg"
+                  alt=""
                   loading="lazy"
                   decoding="async"
                 />
-                <span class="history-table__guest-name">{{
-                  row.guestName
+                <span class="booking-card__metric-value">{{
+                  reservation().type
                 }}</span>
               </div>
+            </div>
 
-              <span class="history-table__text">{{ row.property }}</span>
-              <span class="history-table__text">{{ row.duration }}</span>
-              <span class="history-table__text history-table__text--period">{{
-                row.period
+            <div class="booking-card__metric booking-card__metric--capacity">
+              <p class="booking-card__label">Capacité chambre</p>
+              <div class="booking-card__metric-row">
+                <span class="booking-card__pi-icon" aria-hidden="true">
+                  <i class="pi pi-user"></i>
+                </span>
+                <span class="booking-card__metric-value">{{
+                  reservation().capacity
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-card__dual-grid booking-card__dual-grid--booking">
+            <div
+              class="booking-card__metric booking-card__metric--booking-date"
+            >
+              <p class="booking-card__label">Date de reservation</p>
+              <div
+                class="booking-card__metric-row booking-card__metric-row--stacked"
+              >
+                <span class="booking-card__pi-icon" aria-hidden="true">
+                  <i class="pi pi-calendar"></i>
+                </span>
+                <div class="booking-card__booking-copy">
+                  <span class="booking-card__metric-value">{{
+                    reservation().bookingDate
+                  }}</span>
+                  <span class="booking-card__booking-time">{{
+                    reservation().bookingTime
+                  }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-card__metric booking-card__metric--duration">
+              <p class="booking-card__label booking-card__label--spacer">
+                Durée
+              </p>
+              <div class="booking-card__metric-row">
+                <span class="booking-card__pi-icon" aria-hidden="true">
+                  <i class="pi pi-clock"></i>
+                </span>
+                <span class="booking-card__metric-value">{{
+                  reservation().stayDuration
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-card__facilities">
+            <p class="booking-card__label">Facilities</p>
+
+            <div class="booking-card__facility-grid">
+              @for (facility of reservation().facilities; track facility) {
+                <div class="booking-card__facility-item">
+                  <span class="booking-card__facility-check" aria-hidden="true">
+                    <img
+                      src="space-add/icons/check.svg"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <span class="booking-card__facility-label">{{
+                    facility
+                  }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <button class="booking-card__more" type="button">
+            <span>voir plus</span>
+            <i class="pi pi-angle-down"></i>
+          </button>
+        </article>
+      </div>
+
+      <section class="gallery-panel" aria-label="Galerie de la chambre">
+        <div class="gallery-panel__main">
+          @if (isGalleryImageAvailable(activeGalleryPhoto())) {
+            <img
+              class="gallery-panel__main-image"
+              [src]="activeGalleryPhoto().src"
+              [alt]="activeGalleryPhoto().alt || reservation().title"
+              loading="eager"
+              decoding="async"
+              (error)="markGalleryImageBroken(activeGalleryPhoto().key)"
+            />
+          } @else {
+            <div class="gallery-panel__placeholder" aria-live="polite">
+              <i class="pi pi-image" aria-hidden="true"></i>
+              <span>Image indisponible</span>
+            </div>
+          }
+
+          <div class="gallery-panel__nav">
+            <button
+              class="gallery-panel__nav-button"
+              type="button"
+              aria-label="Image précédente"
+              (click)="previousGalleryImage()"
+            >
+              <i class="pi pi-angle-left"></i>
+            </button>
+
+            <span class="gallery-panel__nav-count">{{
+              galleryCounterLabel()
+            }}</span>
+
+            <button
+              class="gallery-panel__nav-button"
+              type="button"
+              aria-label="Image suivante"
+              (click)="nextGalleryImage()"
+            >
+              <i class="pi pi-angle-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="gallery-panel__thumbs">
+          @for (photo of galleryPhotos(); track photo.key; let index = $index) {
+            <button
+              class="gallery-thumb"
+              [class.gallery-thumb--active]="activeGalleryIndex() === index"
+              type="button"
+              [attr.aria-label]="'Afficher ' + photo.alt"
+              (click)="selectGalleryImage(index)"
+            >
+              @if (isGalleryImageAvailable(photo)) {
+                <img
+                  class="gallery-thumb__image"
+                  [src]="photo.src"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  (error)="markGalleryImageBroken(photo.key)"
+                />
+              } @else {
+                <div class="gallery-thumb__placeholder">
+                  <i class="pi pi-image" aria-hidden="true"></i>
+                  <span>Image indisponible</span>
+                </div>
+              }
+
+              @if (photo.previewCount && isGalleryImageAvailable(photo)) {
+                <span class="gallery-thumb__overlay">
+                  <i class="pi pi-images"></i>
+                  <span>{{ photo.previewCount }}</span>
+                </span>
+              }
+            </button>
+          }
+        </div>
+      </section>
+    </section>
+
+    <section
+      class="reservation-detail-page__documents"
+      aria-label="Documents légaux"
+    >
+      <article class="booking-card booking-card--docs">
+        <div class="docs-card__hero">
+          <div class="docs-card__hero-copy">
+            <span class="docs-card__eyebrow">Dossier sécurisé</span>
+            <h2 class="booking-card__title">Documents légaux</h2>
+            <p class="docs-card__subtitle">
+              Tous les justificatifs et pièces juridiques de cet espace sont
+              regroupés dans une zone large, lisible et pensée pour la
+              consultation rapide.
+            </p>
+          </div>
+
+          <div class="docs-card__hero-side">
+            <div class="docs-card__count-pill">
+              <strong>{{ legalDocuments().length }}</strong>
+              <span>{{
+                legalDocuments().length > 1 ? 'documents' : 'document'
               }}</span>
+            </div>
 
-              <div class="history-table__status">
-                <span class="history-table__status-badge">{{
-                  row.status
-                }}</span>
+            @if (featuredLegalDocument()) {
+              <button
+                type="button"
+                class="docs-card__hero-action"
+                [disabled]="documentOpeningId() === featuredLegalDocument()!.id"
+                (click)="
+                  openDocument(
+                    featuredLegalDocument()!.fileUrl,
+                    featuredLegalDocument()!.name,
+                    featuredLegalDocument()!.id
+                  )
+                "
+              >
+                <i class="pi pi-eye" aria-hidden="true"></i>
+                <span>Ouvrir le dossier principal</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="booking-card__docs-list docs-card__list">
+          @for (document of legalDocuments(); track document.id) {
+            <article class="docs-file-card">
+              <div class="docs-file-card__icon" aria-hidden="true">
+                <span>{{ document.extension }}</span>
               </div>
 
-              <div class="history-table__actions">
-                <a
-                  class="history-table__action history-table__action--view"
-                  [routerLink]="['/hotel/clients', row.clientId]"
-                  [queryParams]="{ spaceId: detailId() }"
+              <div class="docs-file-card__copy">
+                <div class="docs-file-card__meta-row">
+                  <span class="docs-file-card__kind">{{
+                    document.kindLabel
+                  }}</span>
+                  <span class="docs-file-card__dot"></span>
+                  <span class="docs-file-card__status">Accès sécurisé</span>
+                </div>
+                <h3 class="docs-file-card__name">{{ document.name }}</h3>
+                <p class="docs-file-card__hint">
+                  Aperçu intégré, téléchargement direct et bascule plein écran
+                  depuis une mise en page large.
+                </p>
+              </div>
+
+              <div class="docs-file-card__actions">
+                <button
+                  type="button"
+                  class="docs-file-card__action docs-file-card__action--primary"
+                  [disabled]="documentOpeningId() === document.id"
+                  (click)="
+                    openDocument(document.fileUrl, document.name, document.id)
+                  "
                 >
-                  <i class="pi pi-eye"></i>
-                  <span>Voir</span>
-                </a>
+                  <i
+                    class="pi"
+                    [class.pi-eye]="documentOpeningId() !== document.id"
+                    [class.pi-spin]="documentOpeningId() === document.id"
+                    [class.pi-spinner]="documentOpeningId() === document.id"
+                  ></i>
+                  <span>{{
+                    documentOpeningId() === document.id
+                      ? 'Ouverture…'
+                      : 'Prévisualiser'
+                  }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="docs-file-card__action"
+                  [disabled]="documentOpeningId() === document.id"
+                  (click)="
+                    downloadDocument(
+                      document.fileUrl,
+                      document.name,
+                      document.id
+                    )
+                  "
+                >
+                  <i class="pi pi-download"></i>
+                  <span>Télécharger</span>
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <div class="docs-card__empty">
+              <div class="docs-card__empty-orb" aria-hidden="true">
+                <i class="pi pi-folder-open"></i>
+              </div>
+              <div>
+                <h3>Aucun document disponible</h3>
+                <p>
+                  Les pièces légales apparaîtront ici dès qu'elles seront
+                  attachées à cet espace.
+                </p>
               </div>
             </div>
           }
         </div>
+      </article>
+    </section>
+
+    <section class="history-card" aria-label="Historique des clients">
+      <h2 class="history-card__title">Historique des clients</h2>
+
+      <div class="history-card__table-wrap">
+        <div class="history-table">
+          <div class="history-table__head">
+            <span>Invité</span>
+            <span>Biens</span>
+            <span>Durée</span>
+            <span>Arrivée&nbsp;&nbsp;-&nbsp;&nbsp;Départ</span>
+            <span>Statut</span>
+            <span>Actions</span>
+          </div>
+
+          @if (historyRows().length) {
+            <div class="history-table__body">
+              @for (row of historyRows(); track row.id) {
+                <div class="history-table__row">
+                  <div class="history-table__guest">
+                    <img
+                      class="history-table__guest-avatar"
+                      [src]="row.avatar"
+                      [alt]="row.guestName"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span class="history-table__guest-name">{{
+                      row.guestName
+                    }}</span>
+                  </div>
+
+                  <span class="history-table__text">{{ row.property }}</span>
+                  <span class="history-table__text">{{ row.duration }}</span>
+                  <span
+                    class="history-table__text history-table__text--period"
+                    >{{ row.period }}</span
+                  >
+
+                  <div class="history-table__status">
+                    <span class="history-table__status-badge">{{
+                      row.status
+                    }}</span>
+                  </div>
+
+                  <div class="history-table__actions">
+                    <a
+                      class="history-table__action history-table__action--view"
+                      [routerLink]="['/hotel/clients', row.clientId]"
+                      [queryParams]="{ spaceId: detailId() }"
+                    >
+                      <i class="pi pi-eye"></i>
+                      <span>Voir</span>
+                    </a>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <output class="history-table__empty" aria-live="polite">
+              <p class="history-table__empty-title">Historique vide</p>
+              <span class="history-table__empty-copy">
+                Aucun client n'a encore ete enregistre pour cet espace.
+              </span>
+            </output>
+          }
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    @if (previewUrl()) {
+      <div
+        class="doc-preview-backdrop ubax-modal-overlay"
+        (click)="closePreview()"
+      ></div>
+      <div
+        id="espace-detail-preview"
+        class="doc-preview"
+        [class.doc-preview--fullscreen]="previewFullscreen()"
+      >
+        <header class="doc-preview__header">
+          <div class="doc-preview__title">
+            <i
+              class="pi"
+              [class.pi-image]="previewIsImage()"
+              [class.pi-video]="previewIsVideo()"
+              [class.pi-file-pdf]="!previewIsImage() && !previewIsVideo()"
+            ></i>
+            <span>{{ previewName() }}</span>
+          </div>
+
+          <div class="doc-preview__actions">
+            <a
+              [href]="previewUrl()"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="doc-preview__action-btn"
+              title="Ouvrir dans un nouvel onglet"
+            >
+              <i class="pi pi-external-link"></i>
+            </a>
+            <button
+              type="button"
+              class="doc-preview__action-btn"
+              (click)="togglePreviewFullscreen()"
+              [title]="
+                previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+              "
+            >
+              <i
+                class="pi"
+                [class.pi-window-maximize]="!previewFullscreen()"
+                [class.pi-window-minimize]="previewFullscreen()"
+              ></i>
+            </button>
+            <button
+              type="button"
+              class="doc-preview__action-btn doc-preview__action-btn--close"
+              (click)="closePreview()"
+              title="Fermer"
+            >
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        </header>
+
+        <div class="doc-preview__body">
+          @if (previewLoading()) {
+            <div class="doc-preview__state">
+              <div class="doc-preview__spinner" aria-hidden="true"></div>
+              <div>
+                <strong>Préparation de l’aperçu</strong>
+                <p>Récupération du meilleur flux de lecture disponible…</p>
+              </div>
+            </div>
+          } @else if (previewIsImage()) {
+            <img
+              [src]="previewSafeUrl()"
+              [alt]="previewName()"
+              class="doc-preview__image"
+            />
+          } @else if (previewIsVideo()) {
+            <video
+              [src]="previewUrl()"
+              class="doc-preview__video"
+              controls
+              autoplay
+              playsinline
+              preload="metadata"
+            >
+              <track
+                kind="captions"
+                srclang="fr"
+                label="Sous-titres français"
+                default
+                src="data:text/vtt;charset=utf-8,WEBVTT"
+              />
+            </video>
+          } @else {
+            <iframe
+              [src]="previewSafeUrl()"
+              class="doc-preview__iframe"
+              title="Prévisualisation du document"
+            ></iframe>
+          }
+
+          @if (previewNotice()) {
+            <div class="doc-preview__notice">
+              <i class="pi pi-info-circle" aria-hidden="true"></i>
+              <span>{{ previewNotice() }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
 </div>

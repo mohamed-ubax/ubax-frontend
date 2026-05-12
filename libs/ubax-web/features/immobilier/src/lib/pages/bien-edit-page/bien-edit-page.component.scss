@@ -1,0 +1,340 @@
+.bien-edit-page {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bien-edit-page__header {
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--ubax-text-primary);
+  }
+}
+
+.journey-stepper {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 20px;
+  align-items: center;
+}
+
+.journey-stepper__segment {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.journey-stepper__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--ubax-surface);
+  border: 1px solid var(--ubax-border-subtle);
+  transition: all 200ms ease-in-out;
+
+  &.is-reached {
+    background: var(--ubax-primary-light);
+    border-color: var(--ubax-primary);
+  }
+
+  &.is-pending {
+    opacity: 0.6;
+  }
+}
+
+.journey-stepper__circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ubax-border-subtle);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ubax-text-secondary);
+  flex-shrink: 0;
+
+  .journey-stepper__item.is-reached & {
+    background: var(--ubax-primary);
+    color: white;
+  }
+}
+
+.journey-stepper__label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.journey-stepper__line {
+  flex: 1;
+  height: 2px;
+  background: var(--ubax-border-subtle);
+  transition: background 200ms ease-in-out;
+
+  &.is-complete {
+    background: var(--ubax-primary);
+  }
+}
+
+.form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.surface-card,
+.editor-sheet {
+  padding: 30px;
+  background: var(--ubax-surface);
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 12px;
+  box-shadow: var(--ubax-shadow-card-soft);
+
+  h2 {
+    margin: 0 0 24px 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ubax-text-primary);
+  }
+
+  h3 {
+    margin: 20px 0 16px 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--ubax-text-primary);
+  }
+}
+
+.field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  &--wide {
+    grid-column: span 2;
+  }
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ubax-text-primary);
+
+  .req {
+    color: var(--ubax-danger);
+    margin-left: 4px;
+  }
+}
+
+.field-input {
+  padding: 10px 12px;
+  border: 1px solid var(--ubax-border-subtle);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 200ms ease-in-out;
+  background: white;
+  color: var(--ubax-text-primary);
+
+  &:focus {
+    outline: none;
+    border-color: var(--ubax-primary);
+    box-shadow: 0 0 0 3px rgba(var(--ubax-primary-rgb), 0.1);
+  }
+
+  &:disabled {
+    background: var(--ubax-surface);
+    color: var(--ubax-text-disabled);
+    cursor: not-allowed;
+  }
+
+  &.is-invalid {
+    border-color: var(--ubax-danger);
+  }
+}
+
+.field-select {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23666' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 32px;
+}
+
+.field-textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.field-error {
+  font-size: 12px;
+  color: var(--ubax-danger);
+  margin-top: -4px;
+}
+
+.field-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  &--trio {
+    grid-template-columns: repeat(3, 1fr);
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &--duo {
+    grid-template-columns: repeat(2, 1fr);
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &--quad {
+    grid-template-columns: repeat(4, 1fr);
+
+    @media (max-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.editor-sheet__footer {
+  margin-top: 30px;
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+
+  &--end {
+    justify-content: flex-end;
+  }
+
+  &--split {
+    justify-content: space-between;
+  }
+}
+
+.primary-action,
+.circle-action {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.primary-action {
+  background: var(--ubax-primary);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: var(--ubax-primary-dark);
+  }
+}
+
+.circle-action {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  background: var(--ubax-surface);
+  border: 1px solid var(--ubax-border-subtle);
+  color: var(--ubax-text-primary);
+
+  &:hover:not(:disabled) {
+    background: var(--ubax-primary-light);
+    border-color: var(--ubax-primary);
+  }
+}
+
+.alert {
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  i {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  &--error {
+    background: rgba(var(--ubax-danger-rgb), 0.1);
+    color: var(--ubax-danger);
+    border-left: 4px solid var(--ubax-danger);
+  }
+
+  &--warning {
+    background: rgba(var(--ubax-warning-rgb), 0.1);
+    color: var(--ubax-warning);
+    border-left: 4px solid var(--ubax-warning);
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 40px;
+  text-align: center;
+  color: var(--ubax-text-secondary);
+
+  i {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bien-edit-page {
+    padding: 20px;
+    gap: 24px;
+  }
+
+  .journey-stepper {
+    flex-wrap: wrap;
+  }
+
+  .surface-card,
+  .editor-sheet {
+    padding: 20px;
+  }
+}

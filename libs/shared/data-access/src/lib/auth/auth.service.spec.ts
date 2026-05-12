@@ -291,17 +291,12 @@ describe('AuthService', () => {
     ).toBe('new-refresh');
   });
 
-  it("refreshToken envoie un corps vide si aucun token n'est stocké", async () => {
-    http.post.mockReturnValue(
-      of({ ...LOGIN_RESPONSE, access_token: '', refresh_token: '' }),
+  it("refreshToken échoue immédiatement si aucun token n'est stocké", async () => {
+    await expect(firstValueFrom(service.refreshToken())).rejects.toThrow(
+      'Missing refresh token',
     );
 
-    await firstValueFrom(service.refreshToken());
-
-    expect(http.post).toHaveBeenCalledWith(
-      'https://test.local/auth/refresh',
-      {},
-    );
+    expect(http.post).not.toHaveBeenCalled();
   });
 
   it('refreshToken accepte une réponse data.accessToken/data.refreshToken', async () => {

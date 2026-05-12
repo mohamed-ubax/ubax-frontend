@@ -7,10 +7,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import {
   form,
   submit,
@@ -26,13 +28,19 @@ import {
 import {
   ApiConfiguration,
   generateReadUrl,
+  getById,
   LaCodeListDto,
+  PropertyCreateRequest,
+  PropertyDetailResponse,
   PropertyAmenityRequest,
   PropertyDocumentResponse,
 } from '@ubax-workspace/shared-api-types';
 import {
   AuthStore,
+  ESPACE_STATUS_LABELS,
   EspaceCreationStore,
+  EspaceEditStore,
+  EspaceStatus,
 } from '@ubax-workspace/ubax-web-data-access';
 import { SelectModule } from 'primeng/select';
 import { firstValueFrom } from 'rxjs';
@@ -66,6 +74,8 @@ type UploadTimelineStep = {
   status: 'done' | 'active' | 'pending';
 };
 
+type EditFinalAction = 'save' | 'submit' | 'finish';
+
 const DEFAULT_DOC_TYPE_LABELS: Readonly<Record<string, string>> = {
   TITLE_DEED: 'Titre foncier',
   BUILDING_PERMIT: 'Permis de construire',
@@ -75,31 +85,44 @@ const DEFAULT_DOC_TYPE_LABELS: Readonly<Record<string, string>> = {
   CONFORMITY_CERTIFICATE: 'Certificat de conformite',
   OTHER: 'Autre',
 };
-
-const PROPERTY_TYPE_META: Readonly<
-  Record<string, { icon: string; description: string }>
-> = {
-  HOTEL_ROOM: {
-    icon: 'space-add/icons/bed-double.svg',
-    description: 'Standard, Deluxe, Suite Junior, Familiale',
-  },
-  ROOM: {
-    icon: 'space-add/icons/bed-double.svg',
-    description: 'Standard, Deluxe, Suite Junior, Familiale',
-  },
-  SUITE: {
-    icon: 'space-add/icons/bed-double.svg',
-    description: 'Suite Junior, Suite Présidentielle',
-  },
-  CONFERENCE_ROOM: {
-    icon: 'space-add/icons/conference-room.svg',
-    description: 'Réunion, Séminaire, Événement professionnel',
-  },
-  APARTMENT: {
-    icon: 'space-add/icons/bed-double.svg',
-    description: 'Appartement meublé court séjour',
-  },
+const DEFAULT_PROPERTY_TYPE_ICON = 'space-add/icons/bed-double.svg';
+const PROPERTY_TYPE_SKELETON_ITEMS = [1, 2, 3, 4] as const;
+const PROPERTY_TYPE_SUPPORTING_TEXT: Readonly<Record<string, string>> = {
+  APARTMENT: 'Logement independant',
+  STUDIO: 'Format compact et autonome',
+  LOFT: 'Volume ouvert et moderne',
+  ROOM: 'Hebergement individuel',
+  HOTEL_ROOM: 'Hebergement individuel',
+  SUITE: 'Hebergement premium',
+  CONFERENCE_ROOM: 'Usage evenementiel',
+  VILLA: 'Hebergement privatif',
+  HOUSE: 'Hebergement privatif',
+  LAND: 'Espace a amenager',
 };
+
+function humanizePropertyTypeValue(value: string): string {
+  return value
+    .toLowerCase()
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function resolvePropertyTypeSupportingText(value: string): string {
+  return (
+    PROPERTY_TYPE_SUPPORTING_TEXT[value] ??
+    `Format ${humanizePropertyTypeValue(value)}`
+  );
+}
+
+type TimeoutHandle = ReturnType<typeof setTimeout>;
+
+function isEditableEspaceStatus(
+  status: EspaceStatus | null | undefined,
+): boolean {
+  return status === 'DRAFT' || status === 'REJECTED';
+}
 
 // ── Floor options ─────────────────────────────────────────────────────────────
 const FLOOR_OPTIONS = [
@@ -199,17 +222,21 @@ function resolveTimelineStatus(
   selector: 'ubax-espace-add-page',
   standalone: true,
   imports: [FormField, DecimalPipe, FormsModule, SelectModule],
-  providers: [EspaceCreationStore],
+  providers: [EspaceCreationStore, EspaceEditStore],
   templateUrl: './espace-add-page.component.html',
   styleUrl: './espace-add-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EspaceAddPageComponent implements OnInit {
   private readonly store = inject(EspaceCreationStore);
+  private readonly editStore = inject(EspaceEditStore);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly authStore = inject(AuthStore);
+  private readonly document = inject(DOCUMENT);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
@@ -219,8 +246,10 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly error = this.store.error;
   protected readonly medias = this.store.medias;
   protected readonly documents = this.store.documents;
+  protected readonly property = this.store.property;
   protected readonly propertyId = this.store.propertyId;
   protected readonly propertyTypes = this.store.codeListPropertyTypes;
+  protected readonly codeListsLoading = this.store.codeListsLoading;
   protected readonly bedTypesCodeList = this.store.codeListBedTypes;
   protected readonly mealPlansCodeList = this.store.codeListMealPlans;
   protected readonly paymentFrequenciesCodeList =
@@ -233,6 +262,10 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly cities = this.store.codeListCities;
   protected readonly documentTypesCodeList = this.store.codeListDocumentTypes;
   protected readonly documentUploadStage = this.store.documentUploadStage;
+  protected readonly editSaving = this.editStore.saving;
+  protected readonly isWorking = computed(
+    () => this.store.saving() || this.editStore.saving(),
+  );
 
   /** true si l'erreur est liée à une session expirée / token invalide */
   protected readonly isSessionError = computed(() => {
@@ -265,13 +298,11 @@ export class EspaceAddPageComponent implements OnInit {
       .map((item) => {
         const value = this.getCodeListValue(item);
         if (!value) return null;
-        const meta = PROPERTY_TYPE_META[value];
         return {
           value,
           label: this.getCodeListLabel(item),
-          icon: meta?.icon ?? 'space-add/icons/bed-double.svg',
-          description:
-            meta?.description ?? 'Type d espace disponible a la reservation',
+          icon: DEFAULT_PROPERTY_TYPE_ICON,
+          description: resolvePropertyTypeSupportingText(value),
         };
       })
       .filter((item): item is PropertyTypeOption => item !== null),
@@ -374,8 +405,57 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly docTitle = signal('');
   protected readonly docFileError = signal<string | null>(null);
   protected readonly documentOpeningId = signal<string | null>(null);
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly previewName = signal('Document');
+  protected readonly previewFullscreen = signal(false);
+  protected readonly previewIsImage = signal(false);
+  protected readonly previewIsVideo = signal(false);
   protected readonly coverWarnVisible = signal(false);
+  protected readonly showPropertyTypeSkeleton = signal(true);
+  protected readonly typeCardsLeavingSkeleton = signal(false);
+  protected readonly propertyTypeSkeletonItems = PROPERTY_TYPE_SKELETON_ITEMS;
+  private readonly hasRequestedPropertyTypes = signal(false);
   private readonly step4Pending = signal(false);
+  private readonly editPending = signal(false);
+  private readonly editFinalAction = signal<EditFinalAction | null>(null);
+  private readonly submitPending = signal(false);
+
+  protected readonly editPropertyId = computed(
+    () => this.route.snapshot.paramMap.get('id') ?? '',
+  );
+  protected readonly isEditMode = computed(
+    () => this.editPropertyId().length > 0,
+  );
+  protected readonly isModificationLocked = computed(() => {
+    if (!this.isEditMode()) {
+      return false;
+    }
+
+    const property = this.property();
+    if (!property) {
+      return false;
+    }
+
+    return !isEditableEspaceStatus(property.status ?? null);
+  });
+  protected readonly modificationLockedStatusLabel = computed(() => {
+    const status = this.property()?.status;
+
+    if (!status) {
+      return 'inconnu';
+    }
+
+    return ESPACE_STATUS_LABELS[status as EspaceStatus] ?? status;
+  });
+  protected readonly canSubmitForModeration = computed(() => {
+    const status = this.property()?.status;
+    return status === 'DRAFT' || status === 'REJECTED' || !status;
+  });
+
+  protected readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
 
   // ── Computed ──────────────────────────────────────────────────────────────
   protected readonly isCreated = computed(() => !!this.store.propertyId());
@@ -410,16 +490,16 @@ export class EspaceAddPageComponent implements OnInit {
 
   // Step 2 — Capacité & Surfaces
   protected readonly _step2 = signal<EspaceStep2>({
-    rooms: 1,
-    bedrooms: 1,
-    bathrooms: 1,
+    rooms: null,
+    bedrooms: null,
+    bathrooms: null,
     balconies: null,
     surfaceTotal: null,
     surfaceLiving: null,
-    floor: 'RDC',
+    floor: '',
     totalFloors: null,
     bedType: '',
-    maxOccupancy: 2,
+    maxOccupancy: null,
   });
 
   protected readonly formStep2 = form(this._step2, (p) => {
@@ -456,7 +536,7 @@ export class EspaceAddPageComponent implements OnInit {
     description: '',
     mealPlan: '',
     paymentFrequency: '',
-    amenities: ['AC', 'SECURITY', 'PARKING'],
+    amenities: [],
   });
 
   protected readonly formStep4 = form(this._step4, (p) => {
@@ -476,68 +556,71 @@ export class EspaceAddPageComponent implements OnInit {
   protected readonly previewCity = computed(() => this._step3().city);
   protected readonly previewFloor = computed(() => this._step2().floor);
 
+  private showPropertyTypeSkeletonState(): void {
+    if (!this.showPropertyTypeSkeleton()) {
+      this.showPropertyTypeSkeleton.set(true);
+    }
+    if (this.typeCardsLeavingSkeleton()) {
+      this.typeCardsLeavingSkeleton.set(false);
+    }
+  }
+
+  private hidePropertyTypeSkeletonState(): void {
+    if (this.showPropertyTypeSkeleton()) {
+      this.showPropertyTypeSkeleton.set(false);
+    }
+    if (this.typeCardsLeavingSkeleton()) {
+      this.typeCardsLeavingSkeleton.set(false);
+    }
+  }
+
+  private leavePropertyTypeSkeletonState(): TimeoutHandle | null {
+    if (!this.showPropertyTypeSkeleton() || this.typeCardsLeavingSkeleton()) {
+      return null;
+    }
+
+    this.typeCardsLeavingSkeleton.set(true);
+    return setTimeout(() => {
+      this.showPropertyTypeSkeleton.set(false);
+      this.typeCardsLeavingSkeleton.set(false);
+    }, 220);
+  }
+
+  private syncPropertyTypeSkeletonState(
+    loading: boolean,
+    hasOptions: boolean,
+  ): TimeoutHandle | null {
+    if (loading && !hasOptions) {
+      this.showPropertyTypeSkeletonState();
+      return null;
+    }
+
+    if (hasOptions) {
+      return this.leavePropertyTypeSkeletonState();
+    }
+
+    this.hidePropertyTypeSkeletonState();
+    return null;
+  }
+
   constructor() {
-    // Auto-select first city once code lists load
-    effect(() => {
-      const firstCity = this.cities()[0]?.value ?? '';
-      if (firstCity && !this._step3().city) {
-        this._step3.update((s) => ({ ...s, city: firstCity }));
+    effect((onCleanup) => {
+      if (!this.hasRequestedPropertyTypes()) {
+        return;
       }
-    });
 
-    effect(() => {
-      const first = this.propertyTypeOptions()[0]?.value;
-      const current = this._step1().propertyType;
-      if (first && !current) {
-        this._step1.update((s) => ({ ...s, propertyType: first }));
-      }
-    });
+      const loading = this.codeListsLoading();
+      const hasOptions = this.propertyTypeOptions().length > 0;
+      const leaveTimeout = this.syncPropertyTypeSkeletonState(
+        loading,
+        hasOptions,
+      );
 
-    effect(() => {
-      const first = this.transactionTypeOptions()[0]?.value;
-      const current = this._step1().transactionType;
-      if (first && !current) {
-        this._step1.update((s) => ({ ...s, transactionType: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.conditionOptions()[0]?.value;
-      const current = this._step1().condition;
-      if (first && !current) {
-        this._step1.update((s) => ({ ...s, condition: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.bedTypeOptions()[0]?.value;
-      const current = this._step2().bedType;
-      if (first && !current) {
-        this._step2.update((s) => ({ ...s, bedType: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.mealPlanOptions()[0]?.value;
-      const current = this._step4().mealPlan;
-      if (first && !current) {
-        this._step4.update((s) => ({ ...s, mealPlan: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.paymentFrequencyOptions()[0]?.value;
-      const current = this._step4().paymentFrequency;
-      if (first && !current) {
-        this._step4.update((s) => ({ ...s, paymentFrequency: first }));
-      }
-    });
-
-    effect(() => {
-      const first = this.docTypeOptions()[0]?.value;
-      if (first && !this.selectedDocType()) {
-        this.selectedDocType.set(first);
-      }
+      onCleanup(() => {
+        if (leaveTimeout !== null) {
+          clearTimeout(leaveTimeout);
+        }
+      });
     });
 
     effect(() => {
@@ -548,15 +631,6 @@ export class EspaceAddPageComponent implements OnInit {
 
       if (filtered.length !== selected.length) {
         this._step4.update((s) => ({ ...s, amenities: filtered }));
-      }
-
-      if (filtered.length === 0) {
-        const fallback = this.equipmentItems()
-          .slice(0, 3)
-          .map((item) => item.code);
-        if (fallback.length > 0) {
-          this._step4.update((s) => ({ ...s, amenities: fallback }));
-        }
       }
     });
 
@@ -573,18 +647,144 @@ export class EspaceAddPageComponent implements OnInit {
       }
     });
 
-    // Navigate to list once submitted (status → PENDING)
     effect(() => {
-      const prop = this.store.property();
-      if (prop?.id && prop.status === 'PENDING') {
-        this.store.reset();
-        this.router.navigate(['/hotel/espaces']);
+      if (
+        !this.isEditMode() ||
+        !this.editPending() ||
+        this.editStore.saving()
+      ) {
+        return;
       }
+
+      const action = this.editFinalAction();
+      const error = this.editStore.error();
+
+      this.editPending.set(false);
+      this.editFinalAction.set(null);
+
+      if (error) {
+        this.notifications?.error("La modification de l'espace a échoué.");
+        return;
+      }
+
+      const id = this.editPropertyId();
+      if (!id || !action) {
+        return;
+      }
+
+      if (action === 'submit') {
+        this.submitPending.set(true);
+        this.store.soumettre();
+        return;
+      }
+
+      this.notifications?.success(
+        action === 'save'
+          ? 'Modifications enregistrées.'
+          : 'Modification terminée.',
+      );
+      void this.router.navigate(['/hotel/espaces', id]);
+    });
+
+    effect(() => {
+      if (!this.submitPending()) {
+        return;
+      }
+
+      const prop = this.property();
+      if (this.store.saving()) {
+        return;
+      }
+
+      if (this.store.error()) {
+        this.submitPending.set(false);
+        return;
+      }
+
+      if (prop?.id && prop.status === 'PENDING') {
+        this.submitPending.set(false);
+        this.store.reset();
+        this.router.navigate(['/hotel/espaces', prop.id]);
+      }
+    });
+
+    effect(() => {
+      const options = this.docTypeOptions();
+      const current = this.selectedDocType();
+
+      if (!options.length) {
+        if (current) {
+          this.selectedDocType.set('');
+        }
+        return;
+      }
+
+      if (options.some((option) => option.value === current)) {
+        return;
+      }
+
+      this.selectedDocType.set(options[0]?.value ?? '');
+    });
+
+    effect((onCleanup) => {
+      const hasConfirmOverlay = !!(
+        this.mediaDeleteTarget() || this.docDeleteTarget()
+      );
+      const hasDocPreviewOverlay = !!this.previewUrl();
+      const hasOverlay = hasConfirmOverlay || hasDocPreviewOverlay;
+
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+
+      onCleanup(() => {
+        if (hasOverlay) {
+          this.document.body.classList.remove('ubax-overlay-open');
+        }
+      });
+    });
+  }
+
+  private uploadFiles(files: File[]): void {
+    const propertyId = this.store.propertyId();
+    if (!propertyId) {
+      this.notifications?.error(
+        "Créez d'abord l'espace avant d'ajouter des médias.",
+      );
+      return;
+    }
+
+    files.forEach((file) => {
+      if (!this.validateFile(file)) return;
+
+      const isVideo = file.type.startsWith('video/');
+      const mediaType: 'PHOTO' | 'VIDEO' | 'PLAN' = isVideo
+        ? 'VIDEO'
+        : this._step1().propertyType === 'CONFERENCE_ROOM'
+          ? 'PLAN'
+          : 'PHOTO';
+
+      if (isVideo) {
+        this.store.uploaderMediaPresign({ file, mediaType });
+        return;
+      }
+
+      this.store.uploaderMediaDirect({ file, mediaType, cover: false });
     });
   }
 
   ngOnInit(): void {
+    this.hasRequestedPropertyTypes.set(true);
     this.store.chargerReferentiels();
+    const id = this.editPropertyId();
+    if (id) {
+      const detailFromNavigation = this.readPropertyDetailFromNavigationState();
+
+      if (detailFromNavigation?.property) {
+        this.applyPropertyDetail(detailFromNavigation, id);
+        return;
+      }
+
+      void this.prefillFromProperty(id);
+    }
   }
 
   // ── Wizard navigation ─────────────────────────────────────────────────────
@@ -655,6 +855,10 @@ export class EspaceAddPageComponent implements OnInit {
 
   // ── Step proceeds ─────────────────────────────────────────────────────────
   protected proceedStep1(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep1, {
       action: async () => {
         this.nextStep();
@@ -664,6 +868,10 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   protected proceedStep2(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep2, {
       action: async () => {
         this.nextStep();
@@ -673,6 +881,10 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   protected proceedStep3(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep3, {
       action: async () => {
         this.nextStep();
@@ -682,52 +894,23 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   /**
-   * Validates step 4, then triggers brouillon creation.
-   * Navigation to step 5 (médias) happens reactively once the store confirms.
+   * Valide le step 4.
+   * - création : crée le brouillon puis ouvre les médias
+   * - modification : passe simplement au step suivant
    */
   protected proceedStep4(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     submit(this.formStep4, {
       action: async () => {
-        const s1 = this._step1();
-        const s2 = this._step2();
-        const s3 = this._step3();
-        const s4 = this._step4();
+        if (this.isEditMode()) {
+          this.nextStep();
+          return null;
+        }
 
-        const amenities: PropertyAmenityRequest[] = s4.amenities.map(
-          (code) => ({ code }),
-        );
-
-        // Resolve floor: 'RDC' → 0, else parse int
-        const floorNum =
-          s2.floor === 'RDC' ? 0 : Number.parseInt(s2.floor, 10) || null;
-
-        this.store.creerEspace({
-          title: s1.title,
-          description: s4.description || undefined,
-          propertyType: s1.propertyType,
-          transactionType: s1.transactionType,
-          condition: s1.condition,
-          price: s4.price,
-          surfaceTotal: s2.surfaceTotal ?? undefined,
-          surfaceLiving: s2.surfaceLiving ?? undefined,
-          rooms: s2.rooms ?? undefined,
-          bedrooms: s2.bedrooms ?? undefined,
-          bathrooms: s2.bathrooms ?? undefined,
-          balconies: s2.balconies ?? undefined,
-          floor: floorNum ?? undefined,
-          totalFloors: s2.totalFloors ?? undefined,
-          bedType: s2.bedType || undefined,
-          maxOccupancy: s2.maxOccupancy ?? undefined,
-          mealPlan: s4.mealPlan || undefined,
-          paymentFrequency: s4.paymentFrequency || undefined,
-          city: s3.city,
-          district: s3.district || undefined,
-          address: s3.address || undefined,
-          street: s3.street || undefined,
-          latitude: s3.latitude ?? undefined,
-          longitude: s3.longitude ?? undefined,
-          amenities: amenities.length > 0 ? amenities : undefined,
-        });
+        this.store.creerEspace(this.buildPropertyPayload());
 
         this.step4Pending.set(true);
         return null;
@@ -737,6 +920,10 @@ export class EspaceAddPageComponent implements OnInit {
 
   // ── Media handlers ────────────────────────────────────────────────────────
   protected onMediaFilesSelected(event: Event): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
     this.uploadFiles(Array.from(input.files));
@@ -755,28 +942,13 @@ export class EspaceAddPageComponent implements OnInit {
   protected onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(false);
-    const files = Array.from(event.dataTransfer?.files ?? []);
-    this.uploadFiles(files);
-  }
 
-  private uploadFiles(files: File[]): void {
-    const propertyId = this.store.propertyId();
-    if (!propertyId) {
-      this.notifications?.error(
-        "Créez d'abord l'espace avant d'ajouter des médias.",
-      );
+    if (this.isModificationLocked()) {
       return;
     }
-    files.forEach((file) => {
-      if (!this.validateFile(file)) return;
-      let mediaType: 'PHOTO' | 'VIDEO' | 'PLAN' = 'PHOTO';
-      if (file.type.startsWith('video/')) {
-        mediaType = 'VIDEO';
-      } else if (this._step1().propertyType === 'CONFERENCE_ROOM') {
-        mediaType = 'PLAN';
-      }
-      this.store.uploaderMediaDirect({ file, mediaType, cover: false });
-    });
+
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    this.uploadFiles(files);
   }
 
   private validateFile(file: File): boolean {
@@ -797,10 +969,18 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   protected setCover(mediaId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.store.definirCouverture(mediaId);
   }
 
   protected requestDeleteMedia(mediaId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.mediaDeleteTarget.set(mediaId);
   }
 
@@ -809,6 +989,10 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   protected confirmDeleteMedia(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const mediaId = this.mediaDeleteTarget();
     if (!mediaId) return;
     const wasCover = this.coverMediaId() === mediaId;
@@ -823,10 +1007,18 @@ export class EspaceAddPageComponent implements OnInit {
 
   // ── Document handlers ───────────────────────────────────────────────────
   protected onDocTypeChange(value: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.selectedDocType.set(value ?? '');
   }
 
   protected onDocFileSelected(event: Event): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
@@ -849,7 +1041,8 @@ export class EspaceAddPageComponent implements OnInit {
       return;
     }
 
-    const docType = this.selectedDocType();
+    const docType =
+      this.selectedDocType() || this.docTypeOptions()[0]?.value || '';
     if (!docType) {
       this.docFileError.set('Selectionnez un type de document.');
       input.value = '';
@@ -869,20 +1062,55 @@ export class EspaceAddPageComponent implements OnInit {
   protected async openDocument(fileUrl: string, docId?: string): Promise<void> {
     if (docId) this.documentOpeningId.set(docId);
 
+    if (this.isPublicPropertyMediaUrl(fileUrl)) {
+      this.previewName.set('Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl));
+      this.previewUrl.set(fileUrl);
+
+      if (docId) {
+        this.documentOpeningId.set(null);
+      }
+      return;
+    }
+
     try {
       const response = await firstValueFrom(
         generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
       );
-      const readUrl = response.body?.readUrl;
-      window.open(readUrl ?? fileUrl, '_blank', 'noopener,noreferrer');
+      const resolvedUrl =
+        this.extractReadUrlFromResponse(response.body) ?? fileUrl;
+      this.previewName.set('Document');
+      this.previewIsImage.set(this.isPreviewImage(resolvedUrl));
+      this.previewIsVideo.set(this.isPreviewVideo(resolvedUrl));
+      this.previewUrl.set(resolvedUrl);
     } catch {
-      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+      this.previewName.set('Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl));
+      this.previewIsVideo.set(this.isPreviewVideo(fileUrl));
+      this.previewUrl.set(fileUrl);
     } finally {
       if (docId) this.documentOpeningId.set(null);
     }
   }
 
+  protected closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewName.set('Document');
+    this.previewIsImage.set(false);
+    this.previewIsVideo.set(false);
+    this.previewFullscreen.set(false);
+  }
+
+  protected togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((value) => !value);
+  }
+
   protected requestDeleteDoc(docId: string): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     this.docDeleteTarget.set(docId);
   }
 
@@ -891,6 +1119,10 @@ export class EspaceAddPageComponent implements OnInit {
   }
 
   protected confirmDeleteDoc(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
     const docId = this.docDeleteTarget();
     if (!docId) return;
 
@@ -900,12 +1132,39 @@ export class EspaceAddPageComponent implements OnInit {
 
   // ── Final actions ─────────────────────────────────────────────────────────
   protected sauvegarderBrouillon(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
+    if (this.isEditMode()) {
+      this.persistEditChanges('save');
+      return;
+    }
+
     this.store.reset();
-    this.router.navigate(['/hotel/espaces']);
+    void this.router.navigate(['/hotel/espaces']);
   }
 
   protected soumettre(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
+    if (this.isEditMode()) {
+      this.persistEditChanges('submit');
+      return;
+    }
+
+    this.submitPending.set(true);
     this.store.soumettre();
+  }
+
+  protected terminerModification(): void {
+    if (this.isModificationLocked()) {
+      return;
+    }
+
+    this.persistEditChanges('finish');
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -954,5 +1213,201 @@ export class EspaceAddPageComponent implements OnInit {
 
   protected trackDocument(_: number, doc: PropertyDocumentResponse): string {
     return doc.id ?? doc.fileUrl ?? doc.title ?? `${_}`;
+  }
+
+  private buildPropertyPayload(): PropertyCreateRequest {
+    const s1 = this._step1();
+    const s2 = this._step2();
+    const s3 = this._step3();
+    const s4 = this._step4();
+
+    const amenities: PropertyAmenityRequest[] = s4.amenities.map((code) => ({
+      code,
+    }));
+
+    const floorNum =
+      s2.floor === 'RDC' ? 0 : Number.parseInt(s2.floor, 10) || null;
+
+    return {
+      title: s1.title,
+      description: s4.description || undefined,
+      propertyType: s1.propertyType || undefined,
+      transactionType: s1.transactionType,
+      condition: s1.condition,
+      price: s4.price,
+      surfaceTotal: s2.surfaceTotal ?? undefined,
+      surfaceLiving: s2.surfaceLiving ?? undefined,
+      rooms: s2.rooms ?? undefined,
+      bedrooms: s2.bedrooms ?? undefined,
+      bathrooms: s2.bathrooms ?? undefined,
+      balconies: s2.balconies ?? undefined,
+      floor: floorNum ?? undefined,
+      totalFloors: s2.totalFloors ?? undefined,
+      bedType: s2.bedType || undefined,
+      maxOccupancy: s2.maxOccupancy ?? undefined,
+      mealPlan: s4.mealPlan || undefined,
+      paymentFrequency: s4.paymentFrequency || undefined,
+      city: s3.city,
+      district: s3.district || undefined,
+      address: s3.address || undefined,
+      street: s3.street || undefined,
+      latitude: s3.latitude ?? undefined,
+      longitude: s3.longitude ?? undefined,
+      amenities: amenities.length > 0 ? amenities : undefined,
+    };
+  }
+
+  private persistEditChanges(action: EditFinalAction): void {
+    const id = this.editPropertyId();
+    if (!id) {
+      this.notifications?.error("Identifiant de l'espace introuvable.");
+      return;
+    }
+
+    this.editFinalAction.set(action);
+    this.editStore.updateEspace({ id, ...this.buildPropertyPayload() });
+    this.editPending.set(true);
+  }
+
+  private async prefillFromProperty(id: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        getById(this.http, this.apiConfig.rootUrl, { id }),
+      );
+      const detail = this.extractDetailFromResponse(response.body);
+      this.applyPropertyDetail(detail, id);
+    } catch {
+      this.notifications?.error(
+        "Impossible de préremplir l'espace à modifier.",
+      );
+    }
+  }
+
+  private readPropertyDetailFromNavigationState(): PropertyDetailResponse | null {
+    const navigationState =
+      this.router.getCurrentNavigation()?.extras.state?.['propertyDetail'] ??
+      this.document.defaultView?.history.state?.['propertyDetail'];
+
+    return this.extractDetailFromResponse(navigationState);
+  }
+
+  private applyPropertyDetail(
+    detail: PropertyDetailResponse | null,
+    propertyId: string,
+  ): void {
+    const property = detail?.property;
+
+    if (!property) {
+      return;
+    }
+
+    this.store.hydrateExistingDraftContext({
+      propertyId,
+      property,
+      medias: detail?.media ?? [],
+      documents: detail?.documents ?? [],
+    });
+
+    this._step1.update((state) => ({
+      ...state,
+      title: property.title ?? state.title,
+      propertyType: property.propertyType ?? state.propertyType,
+      transactionType: property.transactionType ?? state.transactionType,
+      condition: property.condition ?? state.condition,
+    }));
+
+    this._step2.update((state) => ({
+      ...state,
+      rooms: property.rooms ?? state.rooms,
+      bedrooms: property.bedrooms ?? state.bedrooms,
+      bathrooms: property.bathrooms ?? state.bathrooms,
+      balconies: property.balconies ?? state.balconies,
+      surfaceTotal: property.surfaceTotal ?? state.surfaceTotal,
+      surfaceLiving: property.surfaceLiving ?? state.surfaceLiving,
+      floor:
+        typeof property.floor === 'number'
+          ? property.floor === 0
+            ? 'RDC'
+            : `${property.floor}`
+          : state.floor,
+      totalFloors: property.totalFloors ?? state.totalFloors,
+      bedType: property.bedType ?? state.bedType,
+      maxOccupancy: property.maxOccupancy ?? state.maxOccupancy,
+    }));
+
+    this._step3.update((state) => ({
+      ...state,
+      city: property.city ?? state.city,
+      district: property.district ?? state.district,
+      address: property.address ?? state.address,
+      street: property.street ?? state.street,
+      latitude: property.latitude ?? state.latitude,
+      longitude: property.longitude ?? state.longitude,
+    }));
+
+    this._step4.update((state) => ({
+      ...state,
+      price: property.price ?? state.price,
+      description: property.description ?? state.description,
+      mealPlan: property.mealPlan ?? state.mealPlan,
+      paymentFrequency: property.paymentFrequency ?? state.paymentFrequency,
+      amenities:
+        property.amenities
+          ?.map((item) => item.code ?? '')
+          .filter((code) => code.length > 0) ?? state.amenities,
+    }));
+  }
+
+  private extractDetailFromResponse(
+    body: unknown,
+  ): PropertyDetailResponse | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as PropertyDetailResponse;
+    if (direct.property || direct.media || direct.documents) {
+      return direct;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      return wrapped.data as PropertyDetailResponse;
+    }
+
+    return null;
+  }
+
+  private extractReadUrlFromResponse(body: unknown): string | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as { readUrl?: unknown };
+    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) {
+      return direct.readUrl;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      const nested = wrapped.data as { readUrl?: unknown };
+      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) {
+        return nested.readUrl;
+      }
+    }
+
+    return null;
+  }
+
+  private isPublicPropertyMediaUrl(fileUrl: string): boolean {
+    return /\/properties-media\//i.test(fileUrl);
+  }
+
+  private isPreviewImage(url: string): boolean {
+    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/i.test(url);
+  }
+
+  private isPreviewVideo(url: string): boolean {
+    return /(\.mp4|\.webm|\.ogg|\.mov|\.m4v)(\?|$|\s)/i.test(url);
   }
 }

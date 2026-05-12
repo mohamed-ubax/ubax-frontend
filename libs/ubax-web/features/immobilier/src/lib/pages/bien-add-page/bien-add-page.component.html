@@ -1,4 +1,7 @@
-﻿<section class="bien-add-page">
+﻿<section
+  class="bien-add-page"
+  [class.bien-add-page--read-only]="isModificationLocked()"
+>
   <header class="bien-add-page__header">
     <h1>Ajouter un bien</h1>
   </header>
@@ -49,6 +52,16 @@
         <span>{{ error() }}</span>
       </div>
     }
+  }
+
+  @if (isModificationLocked()) {
+    <output class="alert alert--lock" aria-live="polite">
+      <i class="pi pi-lock" aria-hidden="true"></i>
+      <span>
+        Modification autorisée uniquement en statut DRAFT ou REJECTED. Statut
+        actuel : {{ modificationLockedStatusLabel() }}.
+      </span>
+    </output>
   }
 
   <!-- ═══════════════════════════════════════════════════════════════════════
@@ -525,9 +538,16 @@
             class="primary-action"
             type="button"
             (click)="proceedStep4()"
-            [disabled]="saving()"
+            [disabled]="isWorking()"
           >
-            @if (saving()) {
+            @if (isEditMode()) {
+              @if (isWorking()) {
+                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                Enregistrement en cours…
+              } @else {
+                Suivant
+              }
+            } @else if (saving()) {
               <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
               Création en cours…
             } @else {
@@ -623,16 +643,22 @@
               <div class="media-card__preview">
                 @if (media.mimeType?.startsWith('video/')) {
                   <div class="media-card__video-placeholder">
-                    <i class="pi pi-video" aria-hidden="true"></i>
-                    <span>Vidéo</span>
+                    <div class="media-card__video-orb" aria-hidden="true">
+                      <i class="pi pi-video"></i>
+                    </div>
+                    <span class="media-card__video-label">Vidéo 360</span>
+                    <span class="media-card__video-caption">
+                      Prévisualisation sécurisée
+                    </span>
                     @if (media.fileUrl) {
                       <button
-                        class="btn-icon btn-icon--accent"
+                        class="media-card__video-action"
                         type="button"
                         title="Prévisualiser la vidéo"
-                        (click)="openDocument(media.fileUrl)"
+                        (click)="openDocument(media.fileUrl, media.fileName)"
                       >
-                        <i class="pi pi-eye" aria-hidden="true"></i>
+                        <i class="pi pi-play-circle" aria-hidden="true"></i>
+                        Lire la vidéo
                       </button>
                     }
                   </div>
@@ -871,7 +897,13 @@
                           type="button"
                           title="Consulter"
                           [disabled]="documentOpeningId() === doc.id"
-                          (click)="openDocument(doc.fileUrl!, doc.id)"
+                          (click)="
+                            openDocument(
+                              doc.fileUrl!,
+                              doc.fileName ?? doc.title,
+                              doc.id
+                            )
+                          "
                         >
                           @if (documentOpeningId() === doc.id) {
                             <i
@@ -991,11 +1023,7 @@
           >
             Garder en brouillon
           </button>
-          @if (
-            property()?.status === 'DRAFT' ||
-            property()?.status === 'REJECTED' ||
-            !property()?.status
-          ) {
+          @if (canSubmitForModeration()) {
             <button
               class="primary-action"
               type="button"
@@ -1004,10 +1032,26 @@
             >
               @if (saving()) {
                 <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-                Soumission…
+                @if (isEditMode()) {
+                  Soumission de la modification…
+                } @else {
+                  Soumission…
+                }
               } @else {
-                Soumettre à la modération
+                @if (isEditMode()) {
+                  Soumettre la modification
+                } @else {
+                  Soumettre à la modération
+                }
               }
+            </button>
+          } @else if (isEditMode()) {
+            <button
+              class="primary-action"
+              type="button"
+              (click)="terminerModification()"
+            >
+              Terminer la modification
             </button>
           }
         </div>
@@ -1039,5 +1083,95 @@
         </dialog>
       </div>
     }
+  }
+
+  @if (previewUrl()) {
+    <div
+      class="doc-preview-backdrop ubax-modal-overlay"
+      (click)="closePreview()"
+    ></div>
+    <div
+      class="doc-preview"
+      [class.doc-preview--fullscreen]="previewFullscreen()"
+    >
+      <header class="doc-preview__header">
+        <div class="doc-preview__title">
+          <i
+            class="pi"
+            [class.pi-image]="previewIsImage()"
+            [class.pi-video]="previewIsVideo()"
+            [class.pi-file-pdf]="!previewIsImage() && !previewIsVideo()"
+          ></i>
+          <span>{{ previewName() }}</span>
+        </div>
+
+        <div class="doc-preview__actions">
+          <a
+            [href]="previewUrl()"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="doc-preview__action-btn"
+            title="Ouvrir dans un nouvel onglet"
+          >
+            <i class="pi pi-external-link"></i>
+          </a>
+          <button
+            type="button"
+            class="doc-preview__action-btn"
+            (click)="togglePreviewFullscreen()"
+            [title]="
+              previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+            "
+          >
+            <i
+              class="pi"
+              [class.pi-window-maximize]="!previewFullscreen()"
+              [class.pi-window-minimize]="previewFullscreen()"
+            ></i>
+          </button>
+          <button
+            type="button"
+            class="doc-preview__action-btn doc-preview__action-btn--close"
+            (click)="closePreview()"
+            title="Fermer"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="doc-preview__body">
+        @if (previewIsImage()) {
+          <img
+            [src]="previewSafeUrl()"
+            [alt]="previewName()"
+            class="doc-preview__image"
+          />
+        } @else if (previewIsVideo()) {
+          <video
+            [src]="previewUrl()"
+            class="doc-preview__video"
+            controls
+            autoplay
+            playsinline
+            preload="metadata"
+          >
+            <track
+              kind="captions"
+              srclang="fr"
+              label="Sous-titres français"
+              default
+              src="data:text/vtt;charset=utf-8,WEBVTT"
+            />
+          </video>
+        } @else {
+          <iframe
+            [src]="previewSafeUrl()"
+            class="doc-preview__iframe"
+            title="Prévisualisation du document"
+          ></iframe>
+        }
+      </div>
+    </div>
   }
 </section>
