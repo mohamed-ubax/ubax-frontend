@@ -186,9 +186,16 @@ export class EspaceDetailPageComponent {
   readonly reservation = computed<ReservationDetail>(() => {
     const current = this.property();
     const amenities = (current?.amenities ?? [])
-      .map(
-        (item) => item.customValue || item.customDescription || item.code || '',
-      )
+      .map((item) => {
+        const label =
+          item.customDescription?.trim() || item.customValue?.trim();
+
+        if (label) {
+          return label;
+        }
+
+        return this.normalizeCodeLabel(item.code ?? '');
+      })
       .map((item) => item.trim())
       .filter((item) => item.length > 0);
 

@@ -445,47 +445,57 @@
             <span>Actions</span>
           </div>
 
-          <div class="history-table__body">
-            @for (row of historyRows(); track row.id) {
-              <div class="history-table__row">
-                <div class="history-table__guest">
-                  <img
-                    class="history-table__guest-avatar"
-                    [src]="row.avatar"
-                    [alt]="row.guestName"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <span class="history-table__guest-name">{{
-                    row.guestName
-                  }}</span>
-                </div>
+          @if (historyRows().length) {
+            <div class="history-table__body">
+              @for (row of historyRows(); track row.id) {
+                <div class="history-table__row">
+                  <div class="history-table__guest">
+                    <img
+                      class="history-table__guest-avatar"
+                      [src]="row.avatar"
+                      [alt]="row.guestName"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span class="history-table__guest-name">{{
+                      row.guestName
+                    }}</span>
+                  </div>
 
-                <span class="history-table__text">{{ row.property }}</span>
-                <span class="history-table__text">{{ row.duration }}</span>
-                <span class="history-table__text history-table__text--period">{{
-                  row.period
-                }}</span>
-
-                <div class="history-table__status">
-                  <span class="history-table__status-badge">{{
-                    row.status
-                  }}</span>
-                </div>
-
-                <div class="history-table__actions">
-                  <a
-                    class="history-table__action history-table__action--view"
-                    [routerLink]="['/hotel/clients', row.clientId]"
-                    [queryParams]="{ spaceId: detailId() }"
+                  <span class="history-table__text">{{ row.property }}</span>
+                  <span class="history-table__text">{{ row.duration }}</span>
+                  <span
+                    class="history-table__text history-table__text--period"
+                    >{{ row.period }}</span
                   >
-                    <i class="pi pi-eye"></i>
-                    <span>Voir</span>
-                  </a>
+
+                  <div class="history-table__status">
+                    <span class="history-table__status-badge">{{
+                      row.status
+                    }}</span>
+                  </div>
+
+                  <div class="history-table__actions">
+                    <a
+                      class="history-table__action history-table__action--view"
+                      [routerLink]="['/hotel/clients', row.clientId]"
+                      [queryParams]="{ spaceId: detailId() }"
+                    >
+                      <i class="pi pi-eye"></i>
+                      <span>Voir</span>
+                    </a>
+                  </div>
                 </div>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          } @else {
+            <output class="history-table__empty" aria-live="polite">
+              <p class="history-table__empty-title">Historique vide</p>
+              <span class="history-table__empty-copy">
+                Aucun client n'a encore ete enregistre pour cet espace.
+              </span>
+            </output>
+          }
         </div>
       </div>
     </section>

@@ -1321,6 +1321,31 @@
   padding: 0 14px 0;
 }
 
+.history-table__empty {
+  min-height: 240px;
+  padding: 32px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.history-table__empty-title {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.history-table__empty-copy {
+  max-width: 420px;
+  color: var(--muted);
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
 .history-table__row {
   min-height: 65px;
   padding: 0 18px 0 10px;
