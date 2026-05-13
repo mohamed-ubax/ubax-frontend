@@ -44,6 +44,9 @@ export class UiFormSelectComponent implements OnDestroy {
   private readonly vcr = inject(ViewContainerRef);
   private readonly renderer = inject(Renderer2);
 
+  /** Listener de scroll — capture phase pour attraper tous les conteneurs scrollables */
+  private scrollUnlisten: (() => void) | null = null;
+
   protected toggle(): void {
     if (this.disabled()) {
       return;
@@ -66,6 +69,13 @@ export class UiFormSelectComponent implements OnDestroy {
     if (this.menuEl) {
       this.renderer.appendChild(document.body, this.menuEl);
     }
+
+    // addEventListener en capture phase pour attraper le scroll de TOUS les
+    // conteneurs (window:scroll ne se déclenche pas sur un div overflow:auto)
+    const handler = () => this.close();
+    document.addEventListener('scroll', handler, { capture: true, passive: true });
+    this.scrollUnlisten = () =>
+      document.removeEventListener('scroll', handler, { capture: true });
   }
 
   protected select(option: string): void {
@@ -75,6 +85,10 @@ export class UiFormSelectComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyMenu(true);
+    if (this.scrollUnlisten) {
+      this.scrollUnlisten();
+      this.scrollUnlisten = null;
+    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -111,6 +125,12 @@ export class UiFormSelectComponent implements OnDestroy {
 
     this.isOpen.set(false);
     this.destroyMenu();
+
+    // Nettoyer le listener de scroll
+    if (this.scrollUnlisten) {
+      this.scrollUnlisten();
+      this.scrollUnlisten = null;
+    }
   }
 
   private destroyMenu(skipAnimation = false): void {

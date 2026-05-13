@@ -25,7 +25,8 @@
   padding: 16px 72px 16px 18px;
   border: 0;
   border-radius: 27.5px;
-  background: var(--ubax-page-bg);
+  /* Fallback : --ubax-page-bg peut ne pas être défini dans tous les contextes */
+  background: var(--ubax-page-bg, #ecf2f7);
   font-family: 'Lexend', sans-serif;
   font-size: 15px;
   font-weight: 300;
@@ -108,7 +109,8 @@
   padding: 12px;
   border: 1px solid rgb(166 181 191 / 0.18);
   border-radius: 20px;
-  background: var(--ubax-surface);
+  /* Fallback explicite : --ubax-surface peut ne pas être défini dans tous les contextes */
+  background: var(--ubax-surface, #ffffff);
   box-shadow: 0 20px 40px rgb(38 37 53 / 0.1);
   overflow-y: auto;
   overscroll-behavior: contain;

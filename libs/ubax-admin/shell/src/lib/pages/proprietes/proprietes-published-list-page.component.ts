@@ -83,6 +83,8 @@ export class ProprietesPublishedListPageComponent {
   readonly pageTitle = input.required<string>();
   readonly kpis = input<PropertyKpi[]>([]);
   readonly transactionTypeFilter = input<string | undefined>(undefined);
+  /** Quand fourni, filtre les biens par hotelId (?hotelId=) et affiche hotelName */
+  readonly hotelId = input<string | undefined>(undefined);
 
   private readonly svc = inject(AdminPropertiesService);
   private readonly notif = inject(NOTIFICATION_HANDLER);
@@ -113,6 +115,7 @@ export class ProprietesPublishedListPageComponent {
         (p.title ?? '').toLowerCase().includes(q) ||
         (p.city ?? '').toLowerCase().includes(q) ||
         (p.agencyName ?? '').toLowerCase().includes(q) ||
+        (p.hotelName ?? '').toLowerCase().includes(q) ||
         (p.ownerName ?? '').toLowerCase().includes(q) ||
         (p.district ?? '').toLowerCase().includes(q),
     );
@@ -120,30 +123,38 @@ export class ProprietesPublishedListPageComponent {
 
   constructor() {
     effect(() => {
-      void this.loadProperties();
-    });
-  }
-
-  private async loadProperties(): Promise<void> {
-    this.loading.set(true);
-    try {
-      const cityVal = this.cityLabel();
-      const typeVal = this.typeLabel();
+      // Lire tous les signaux ici (corps synchrone) pour que Angular les enregistre
+      // comme dépendances de l'effect — les fonctions async ne tracent pas les signaux
+      const city = this.cityLabel() === 'Toutes les villes' ? undefined : this.cityLabel();
+      const propertyType = this.typeLabel() === 'Tous les types' ? undefined : TYPE_VALUE_MAP[this.typeLabel()];
       const txVal = this.transactionLabel();
-
-      const city = cityVal === 'Toutes les villes' ? undefined : cityVal;
-      const propertyType = typeVal === 'Tous les types' ? undefined : TYPE_VALUE_MAP[typeVal];
       const transactionType = txVal === "Tous les types d'offre"
         ? (this.transactionTypeFilter() || undefined)
         : TRANSACTION_VALUE_MAP[txVal];
+      const page = this.currentPage() - 1;
+      const hotelId = this.hotelId() || undefined;
 
+      void this.loadProperties({ city, propertyType, transactionType, page, hotelId });
+    });
+  }
+
+  private async loadProperties(params: {
+    city: string | undefined;
+    propertyType: string | undefined;
+    transactionType: string | undefined;
+    page: number;
+    hotelId: string | undefined;
+  }): Promise<void> {
+    this.loading.set(true);
+    try {
       const result = await firstValueFrom(
         this.svc.listPublished({
-          page: this.currentPage() - 1,
+          page: params.page,
           size: PAGE_SIZE,
-          city,
-          propertyType,
-          transactionType,
+          city: params.city,
+          propertyType: params.propertyType,
+          transactionType: params.transactionType,
+          hotelId: params.hotelId,
         }),
       );
       this.properties.set(result.items);
@@ -163,24 +174,20 @@ export class ProprietesPublishedListPageComponent {
   protected onCityChange(value: string): void {
     this.cityLabel.set(value);
     this.currentPage.set(1);
-    void this.loadProperties();
   }
 
   protected onTypeChange(value: string): void {
     this.typeLabel.set(value);
     this.currentPage.set(1);
-    void this.loadProperties();
   }
 
   protected onTransactionChange(value: string): void {
     this.transactionLabel.set(value);
     this.currentPage.set(1);
-    void this.loadProperties();
   }
 
   protected onPageChange(page: number): void {
     this.currentPage.set(page);
-    void this.loadProperties();
   }
 
   protected viewDetail(property: PropertyResponse): void {

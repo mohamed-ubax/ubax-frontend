@@ -55,7 +55,6 @@ const HOTELS_KPIS: PropertyKpi[] = [
     <ubax-proprietes-published-list
       pageTitle="Liste propriétés hôtels"
       [kpis]="kpis"
-      transactionTypeFilter="SHORT_STAY"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

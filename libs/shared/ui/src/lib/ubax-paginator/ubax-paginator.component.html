@@ -1,39 +1,53 @@
-<div class="paginator" [class.paginator--white]="variant() === 'white'">
+<nav class="paginator" [class.paginator--white]="variant() === 'white'" aria-label="Pagination">
+
+  <!-- Bouton Précédent -->
   <button
-    class="paginator-arrow"
+    class="paginator-arrow paginator-arrow--prev"
+    type="button"
     (click)="prev()"
     [disabled]="currentPage() === 1"
+    aria-label="Page précédente"
   >
-    @if (previousIconSrc(); as previousIconSrc) {
-      <img class="paginator-arrow__icon" [src]="previousIconSrc" alt="" />
+    @if (previousIconSrc(); as src) {
+      <img class="paginator-arrow__icon" [src]="src" alt="" />
     } @else {
-      <i class="pi pi-chevron-left"></i>
+      <i class="pi pi-angle-left"></i>
     }
-    <span class="paginator-arrow__label">Page précédente</span>
   </button>
 
+  <!-- Pages + ellipsis -->
   <div class="paginator-pages">
-    @for (page of pages(); track page) {
-      <button
-        class="paginator-page"
-        [class.is-active]="page === currentPage()"
-        (click)="goTo(page)"
-      >
-        {{ page }}
-      </button>
+    @for (item of pageItems(); track trackByItem($index, item)) {
+      @if (item.type === 'page') {
+        <button
+          class="paginator-page"
+          type="button"
+          [class.is-active]="item.value === currentPage()"
+          (click)="goTo(item.value)"
+          [attr.aria-current]="item.value === currentPage() ? 'page' : null"
+          [attr.aria-label]="'Page ' + item.value"
+        >
+          {{ item.value }}
+        </button>
+      } @else {
+        <span class="paginator-ellipsis" aria-hidden="true">…</span>
+      }
     }
   </div>
 
+  <!-- Bouton Suivant -->
   <button
-    class="paginator-arrow"
+    class="paginator-arrow paginator-arrow--next"
+    type="button"
     (click)="next()"
     [disabled]="currentPage() === totalPages()"
+    aria-label="Page suivante"
   >
-    @if (nextIconSrc(); as nextIconSrc) {
-      <img class="paginator-arrow__icon" [src]="nextIconSrc" alt="" />
+    @if (nextIconSrc(); as src) {
+      <img class="paginator-arrow__icon" [src]="src" alt="" />
     } @else {
-      <i class="pi pi-chevron-right"></i>
+      <i class="pi pi-angle-right"></i>
     }
-    <span class="paginator-arrow__label">Page suivante</span>
   </button>
-</div>
+
+</nav>

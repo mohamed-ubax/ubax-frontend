@@ -47,21 +47,25 @@ export class AdminPropertiesService {
       },
     }).pipe(
       map((r) => {
-        // API response shape:
-        // { status, statusCode, message, data: { totalItems, totalPages, page, perPage, isFirst, isLast, results: [...] } }
+        // Réponse réelle du backend :
+        // { data: { totalItems, perPage, total_pages, page, results: [...] }, total_pages, total_items }
         const body = r.body as unknown as {
           data?: {
             results?: PropertyResponse[];
             content?: PropertyResponse[];
             totalItems?: number;
+            total_items?: number;
             totalElements?: number;
             totalPages?: number;
+            total_pages?: number;
           };
           results?: PropertyResponse[];
           content?: PropertyResponse[];
           totalItems?: number;
+          total_items?: number;
           totalElements?: number;
           totalPages?: number;
+          total_pages?: number;
         };
 
         const data = body?.data ?? body;
@@ -73,11 +77,19 @@ export class AdminPropertiesService {
 
         const totalElements =
           data?.totalItems ??
+          data?.total_items ??
+          (data as Record<string, unknown>)?.['total-items'] as number | undefined ??
           data?.totalElements ??
           items.length;
 
-        const totalPages =
-          data?.totalPages ?? 1;
+        // Le backend renvoie "total-pages" (avec tiret) — accès obligatoire par bracket notation
+        const rawTotalPages =
+          (data as Record<string, unknown>)['total-pages'] as number | undefined ??
+          data?.total_pages ??
+          data?.totalPages ??
+          (body as Record<string, unknown>)['total-pages'] as number | undefined;
+
+        const totalPages = rawTotalPages ?? (Math.ceil(totalElements / (params.size ?? 20)) || 1);
 
         return { items, totalElements, totalPages };
       }),
@@ -92,6 +104,7 @@ export class AdminPropertiesService {
     propertyType?: string;
     transactionType?: string;
     agencyId?: string;
+    hotelId?: string;
     minPrice?: number;
     maxPrice?: number;
   } = {}): Observable<{ items: PropertyResponse[]; totalElements: number; totalPages: number }> {
@@ -101,6 +114,7 @@ export class AdminPropertiesService {
       propertyType: params.propertyType || undefined,
       transactionType: params.transactionType || undefined,
       agencyId: params.agencyId || undefined,
+      hotelId: params.hotelId || undefined,
       minPrice: params.minPrice || undefined,
       maxPrice: params.maxPrice || undefined,
       pageable: {
@@ -110,27 +124,50 @@ export class AdminPropertiesService {
       },
     }).pipe(
       map((r) => {
+        // Réponse réelle du backend :
+        // { data: { totalItems, perPage, total_pages, page, results: [...] }, total_pages, total_items }
         const body = r.body as unknown as {
           data?: {
             results?: PropertyResponse[];
             content?: PropertyResponse[];
             totalItems?: number;
+            total_items?: number;
             totalElements?: number;
             totalPages?: number;
+            total_pages?: number;
           };
           results?: PropertyResponse[];
           content?: PropertyResponse[];
           totalItems?: number;
+          total_items?: number;
           totalElements?: number;
           totalPages?: number;
+          total_pages?: number;
         };
+
         const data = body?.data ?? body;
+
         const items: PropertyResponse[] =
           data?.results ??
           data?.content ??
           (Array.isArray(body) ? (body as PropertyResponse[]) : []);
-        const totalElements = data?.totalItems ?? data?.totalElements ?? items.length;
-        const totalPages = data?.totalPages ?? 1;
+
+        const totalElements =
+          data?.totalItems ??
+          data?.total_items ??
+          (data as Record<string, unknown>)?.['total-items'] as number | undefined ??
+          data?.totalElements ??
+          items.length;
+
+        // Le backend renvoie "total-pages" (avec tiret) — accès obligatoire par bracket notation
+        const rawTotalPages =
+          (data as Record<string, unknown>)['total-pages'] as number | undefined ??
+          data?.total_pages ??
+          data?.totalPages ??
+          (body as Record<string, unknown>)['total-pages'] as number | undefined;
+
+        const totalPages = rawTotalPages ?? (Math.ceil(totalElements / (params.size ?? 12)) || 1);
+
         return { items, totalElements, totalPages };
       }),
     );

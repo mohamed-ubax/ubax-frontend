@@ -116,13 +116,13 @@
 
             <!-- Nom agence/propriétaire + prix -->
             <div class="props-card__bottom-overlay">
-              @if (property.agencyName || property.ownerName) {
+              @if (property.hotelName || property.agencyName || property.ownerName) {
                 <div class="props-card__owner-row">
                   <div class="props-card__owner-avatar">
                     <i class="pi pi-building"></i>
                   </div>
                   <span class="props-card__owner-name">
-                    {{ property.agencyName ?? property.ownerName }}
+                    {{ property.hotelName ?? property.agencyName ?? property.ownerName }}
                   </span>
                 </div>
               }
@@ -171,13 +171,11 @@
   @if (!loading() && totalElements() > 0) {
     <div class="props-footer">
       <p class="props-footer__count">{{ getDisplayCount() }}</p>
-      @if (totalPages() > 1) {
-        <ubax-paginator
-          [currentPage]="currentPage()"
-          [totalPages]="totalPages()"
-          (currentPageChange)="onPageChange($event)"
-        />
-      }
+      <ubax-paginator
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        (currentPageChange)="onPageChange($event)"
+      />
     </div>
   }
 
