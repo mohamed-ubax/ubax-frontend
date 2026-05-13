@@ -21,8 +21,6 @@ import {
   ApiConfiguration,
   generateReadUrl,
   type PropertyDetailResponse,
-  type PropertyMediaResponse,
-  type PropertyDocumentResponse,
   type PresignedReadUrlResponse,
 } from '@ubax-workspace/shared-api-types';
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
@@ -58,35 +56,46 @@ type BienMetric = {
 const MIN_GALLERY_SLOTS = 4;
 
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  APARTMENT: 'Appartement', VILLA: 'Villa', HOUSE: 'Maison',
-  LAND: 'Terrain', OFFICE: 'Bureau', COMMERCIAL: 'Commercial',
-  STUDIO: 'Studio', DUPLEX: 'Duplex', PENTHOUSE: 'Penthouse',
-  HOTEL_ROOM: 'Chambre hôtel', HOTEL_SUITE: 'Suite hôtel',
+  APARTMENT: 'Appartement',
+  VILLA: 'Villa',
+  HOUSE: 'Maison',
+  LAND: 'Terrain',
+  OFFICE: 'Bureau',
+  COMMERCIAL: 'Commercial',
+  STUDIO: 'Studio',
+  DUPLEX: 'Duplex',
+  PENTHOUSE: 'Penthouse',
+  HOTEL_ROOM: 'Chambre hôtel',
+  HOTEL_SUITE: 'Suite hôtel',
 };
 
 const TRANSACTION_TYPE_LABELS: Record<string, string> = {
-  SALE: 'Vente', RENT: 'Location',
-  RENT_FURNISHED: 'Location meublée', SHORT_STAY: 'Court séjour',
+  SALE: 'Vente',
+  RENT: 'Location',
+  RENT_FURNISHED: 'Location meublée',
+  SHORT_STAY: 'Court séjour',
 };
 
 const CONDITION_LABELS: Record<string, string> = {
-  NEW: 'Neuf', GOOD: 'Bon état', RENOVATE: 'À rénover',
+  NEW: 'Neuf',
+  GOOD: 'Bon état',
+  RENOVATE: 'À rénover',
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Brouillon', PENDING: 'En attente', PUBLISHED: 'Publié',
-  RESERVED: 'Réservé', SOLD: 'Vendu', ARCHIVED: 'Archivé', REJECTED: 'Rejeté',
+  DRAFT: 'Brouillon',
+  PENDING: 'En attente',
+  PUBLISHED: 'Publié',
+  RESERVED: 'Réservé',
+  SOLD: 'Vendu',
+  ARCHIVED: 'Archivé',
+  REJECTED: 'Rejeté',
 };
 
 @Component({
   selector: 'ubax-admin-proprietes-detail-page',
   standalone: true,
-  imports: [
-    DatePipe,
-    ReactiveFormsModule,
-    DialogModule,
-    TextareaModule,
-  ],
+  imports: [DatePipe, ReactiveFormsModule, DialogModule, TextareaModule],
   templateUrl: './proprietes-detail-page.component.html',
   styleUrl: './proprietes-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -132,7 +141,9 @@ export class ProprietesDetailPageComponent {
 
   // ── ViewState ─────────────────────────────────────────────────────────────
 
-  protected readonly property = computed(() => this.propertyDetail()?.property ?? null);
+  protected readonly property = computed(
+    () => this.propertyDetail()?.property ?? null,
+  );
 
   protected readonly viewState = computed<ViewState>(() =>
     deriveViewState(
@@ -149,7 +160,9 @@ export class ProprietesDetailPageComponent {
 
   // ── Status ────────────────────────────────────────────────────────────────
 
-  protected readonly statusCode = computed(() => this.property()?.status ?? 'PENDING');
+  protected readonly statusCode = computed(
+    () => this.property()?.status ?? 'PENDING',
+  );
 
   protected readonly propertyStatus = computed(
     () => STATUS_LABELS[this.statusCode()] ?? this.statusCode(),
@@ -164,9 +177,14 @@ export class ProprietesDetailPageComponent {
     return 'active';
   });
 
-  protected readonly isPending = computed(() => this.statusCode() === 'PENDING');
-  protected readonly isTerminal = computed(() =>
-    this.statusCode() === 'PUBLISHED' || this.statusCode() === 'REJECTED' || this.statusCode() === 'ARCHIVED',
+  protected readonly isPending = computed(
+    () => this.statusCode() === 'PENDING',
+  );
+  protected readonly isTerminal = computed(
+    () =>
+      this.statusCode() === 'PUBLISHED' ||
+      this.statusCode() === 'REJECTED' ||
+      this.statusCode() === 'ARCHIVED',
   );
 
   // ── Gallery ───────────────────────────────────────────────────────────────
@@ -176,12 +194,15 @@ export class ProprietesDetailPageComponent {
     const photos = [...media]
       .filter((item) => (item.mediaType ?? 'PHOTO') !== 'VIDEO')
       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-      .map((item, index) => ({
-        key: item.id ?? `gallery-${index}`,
-        src: item.fileUrl?.trim() || null,
-        alt: `Photo du bien ${index + 1}`,
-        isPlaceholder: !item.fileUrl?.trim(),
-      } satisfies BienGalleryItem));
+      .map(
+        (item, index) =>
+          ({
+            key: item.id ?? `gallery-${index}`,
+            src: item.fileUrl?.trim() || null,
+            alt: `Photo du bien ${index + 1}`,
+            isPlaceholder: !item.fileUrl?.trim(),
+          }) satisfies BienGalleryItem,
+      );
 
     const items = [...photos];
     while (items.length < MIN_GALLERY_SLOTS) {
@@ -198,7 +219,10 @@ export class ProprietesDetailPageComponent {
   protected readonly activeGalleryItem = computed<BienGalleryItem>(() => {
     const items = this.galleryItems();
     const index = Math.min(this.activeImageIndex(), items.length - 1);
-    return items[index] ?? items[0] ?? { key: 'fallback', src: null, alt: '', isPlaceholder: true };
+    return (
+      items[index] ??
+      items[0] ?? { key: 'fallback', src: null, alt: '', isPlaceholder: true }
+    );
   });
 
   // ── Documents ─────────────────────────────────────────────────────────────
@@ -251,7 +275,10 @@ export class ProprietesDetailPageComponent {
   });
 
   protected readonly ownerName = computed(
-    () => this.property()?.ownerName?.trim() || this.property()?.agencyName?.trim() || 'Non renseigné',
+    () =>
+      this.property()?.ownerName?.trim() ||
+      this.property()?.agencyName?.trim() ||
+      'Non renseigné',
   );
 
   protected readonly metrics = computed<readonly BienMetric[]>(() => {
@@ -261,14 +288,21 @@ export class ProprietesDetailPageComponent {
       { label: 'Chambres', value: this.formatNumber(p?.bedrooms) },
       { label: 'Salles de bains', value: this.formatNumber(p?.bathrooms) },
       { label: 'Balcons', value: this.formatNumber(p?.balconies) },
-      { label: 'Surface', value: typeof p?.surfaceTotal === 'number' ? `${p.surfaceTotal} m²` : '—' },
+      {
+        label: 'Surface',
+        value:
+          typeof p?.surfaceTotal === 'number' ? `${p.surfaceTotal} m²` : '—',
+      },
     ];
   });
 
   protected readonly descriptionParagraphs = computed(() => {
     const raw = this.property()?.description?.trim() ?? '';
     if (!raw) return ['Aucune description disponible pour ce bien.'];
-    return raw.split(/\n+/).map((c) => c.trim()).filter(Boolean);
+    return raw
+      .split(/\n+/)
+      .map((c) => c.trim())
+      .filter(Boolean);
   });
 
   protected readonly amenityColumns = computed(() => {
@@ -285,7 +319,9 @@ export class ProprietesDetailPageComponent {
   });
 
   protected readonly hasCoordinates = computed(
-    () => typeof this.property()?.latitude === 'number' && typeof this.property()?.longitude === 'number',
+    () =>
+      typeof this.property()?.latitude === 'number' &&
+      typeof this.property()?.longitude === 'number',
   );
 
   protected readonly mapSafeUrl = computed<SafeResourceUrl | null>(() => {
@@ -346,7 +382,9 @@ export class ProprietesDetailPageComponent {
 
   // ── Gallery ───────────────────────────────────────────────────────────────
 
-  protected selectImage(index: number): void { this.activeImageIndex.set(index); }
+  protected selectImage(index: number): void {
+    this.activeImageIndex.set(index);
+  }
 
   protected previousImage(): void {
     const items = this.galleryItems();
@@ -361,23 +399,39 @@ export class ProprietesDetailPageComponent {
   }
 
   protected isGalleryImageAvailable(item: BienGalleryItem): boolean {
-    return !!item.src && !item.isPlaceholder && !this.brokenGalleryImageKeys()[item.key];
+    return (
+      !!item.src &&
+      !item.isPlaceholder &&
+      !this.brokenGalleryImageKeys()[item.key]
+    );
   }
 
   protected markGalleryImageBroken(key: string): void {
-    this.brokenGalleryImageKeys.update((c) => c[key] ? c : { ...c, [key]: true });
+    this.brokenGalleryImageKeys.update((c) =>
+      c[key] ? c : { ...c, [key]: true },
+    );
   }
 
   // ── Documents ─────────────────────────────────────────────────────────────
 
-  protected async openDocument(fileUrl: string, fileName?: string, docId?: string): Promise<void> {
+  protected async openDocument(
+    fileUrl: string,
+    fileName?: string,
+    docId?: string,
+  ): Promise<void> {
     if (!fileUrl) return;
     if (docId) this.documentOpeningId.set(docId);
     try {
-      const res = await firstValueFrom(generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }));
-      const body = res.body as unknown as { data?: PresignedReadUrlResponse } | PresignedReadUrlResponse;
-      const url = (body as { data?: PresignedReadUrlResponse })?.data?.readUrl
-        ?? (body as PresignedReadUrlResponse)?.readUrl ?? fileUrl;
+      const res = await firstValueFrom(
+        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+      );
+      const body = res.body as unknown as
+        | { data?: PresignedReadUrlResponse }
+        | PresignedReadUrlResponse;
+      const url =
+        (body as { data?: PresignedReadUrlResponse })?.data?.readUrl ??
+        (body as PresignedReadUrlResponse)?.readUrl ??
+        fileUrl;
       this.previewName.set(fileName?.trim() || 'Document');
       this.previewIsImage.set(this.isPreviewImage(url, fileName));
       this.previewUrl.set(url);
@@ -408,7 +462,9 @@ export class ProprietesDetailPageComponent {
     this.activeModal.set(type);
   }
 
-  protected closeModal(): void { this.activeModal.set(null); }
+  protected closeModal(): void {
+    this.activeModal.set(null);
+  }
 
   protected async submitApprove(): Promise<void> {
     await this.submitDecision('PUBLISHED');
@@ -416,17 +472,25 @@ export class ProprietesDetailPageComponent {
   }
 
   protected async submitReject(): Promise<void> {
-    if (this.rejectionForm.invalid) { this.rejectionForm.markAllAsTouched(); return; }
+    if (this.rejectionForm.invalid) {
+      this.rejectionForm.markAllAsTouched();
+      return;
+    }
     await this.submitDecision('REJECTED', this.rejectionForm.value.reason);
     this.closeModal();
   }
 
-  private async submitDecision(status: PropertyModerationStatus, rejectionReason?: string): Promise<void> {
+  private async submitDecision(
+    status: PropertyModerationStatus,
+    rejectionReason?: string,
+  ): Promise<void> {
     const id = this.propertyId();
     if (!id) return;
     this.saving.set(true);
     try {
-      const updated = await firstValueFrom(this.svc.decide(id, { status, rejectionReason }));
+      const updated = await firstValueFrom(
+        this.svc.decide(id, { status, rejectionReason }),
+      );
       const current = this.propertyDetail();
       if (current) this.propertyDetail.set({ ...current, property: updated });
       if (status === 'PUBLISHED') {
@@ -445,8 +509,12 @@ export class ProprietesDetailPageComponent {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   private normalizeCodeLabel(raw: string): string {
-    return raw.toLowerCase().split('_').filter(Boolean)
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    return raw
+      .toLowerCase()
+      .split('_')
+      .filter(Boolean)
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ');
   }
 
   private isPreviewImage(url: string, fileName?: string): boolean {

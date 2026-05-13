@@ -1,16 +1,21 @@
 <section class="bien-detail-page">
-
   <!-- Header -->
   <header class="bien-detail-page__header">
     <div class="bien-detail-page__heading">
-      <button type="button" class="bien-back-button" (click)="goBack()" aria-label="Retour">
+      <button
+        type="button"
+        class="bien-back-button"
+        (click)="goBack()"
+        aria-label="Retour"
+      >
         <i class="pi pi-arrow-left" aria-hidden="true"></i>
       </button>
       <h1 class="bien-detail-page__title">Détails d'un bien</h1>
     </div>
 
     <div class="bien-detail-page__actions">
-      <span class="status-pill"
+      <span
+        class="status-pill"
         [class.status-pill--pending]="statusClass() === 'pending'"
         [class.status-pill--rejected]="statusClass() === 'rejected'"
         [class.status-pill--archived]="statusClass() === 'archived'"
@@ -19,11 +24,21 @@
       </span>
 
       @if (isPending()) {
-        <button type="button" class="secondary-action" [disabled]="saving()" (click)="openModal('reject')">
+        <button
+          type="button"
+          class="secondary-action"
+          [disabled]="saving()"
+          (click)="openModal('reject')"
+        >
           <i class="pi pi-times-circle" aria-hidden="true"></i>
           <span>Rejeter</span>
         </button>
-        <button type="button" class="primary-action" [disabled]="saving()" (click)="openModal('approve')">
+        <button
+          type="button"
+          class="primary-action"
+          [disabled]="saving()"
+          (click)="openModal('approve')"
+        >
           <span>Approuver</span>
           <span class="primary-action__icon">
             <i class="pi pi-check" aria-hidden="true"></i>
@@ -35,14 +50,23 @@
 
   <!-- Loading -->
   @if (viewState() === 'loading') {
-    <div class="detail-skeleton" role="status" aria-live="polite" aria-busy="true">
+    <div
+      class="detail-skeleton"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
       <div class="detail-skeleton__layout">
         <div class="detail-skeleton__sidebar">
           <div class="detail-skeleton__scard">
             <div class="detail-skeleton__scard-avatar"></div>
             <div class="detail-skeleton__lines">
-              <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
-              <div class="detail-skeleton__line detail-skeleton__line--sm"></div>
+              <div
+                class="detail-skeleton__line detail-skeleton__line--lg"
+              ></div>
+              <div
+                class="detail-skeleton__line detail-skeleton__line--sm"
+              ></div>
             </div>
           </div>
           <div class="detail-skeleton__scard">
@@ -53,39 +77,47 @@
         <div class="detail-skeleton__body">
           <div class="detail-skeleton__gallery"></div>
           <div class="detail-skeleton__thumbs">
-            @for (i of [0,1,2,3]; track i) { <div class="detail-skeleton__thumb"></div> }
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div class="detail-skeleton__thumb"></div>
+            }
           </div>
           <div class="detail-skeleton__line detail-skeleton__line--xl"></div>
           <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
           <div class="detail-skeleton__metric-row">
-            @for (i of [0,1,2,3,4]; track i) { <div class="detail-skeleton__metric"></div> }
+            @for (i of [0, 1, 2, 3, 4]; track i) {
+              <div class="detail-skeleton__metric"></div>
+            }
           </div>
         </div>
       </div>
     </div>
 
-  <!-- Error -->
+    <!-- Error -->
   } @else if (viewState() === 'error') {
     <div class="detail-view-state detail-view-state--error" role="alert">
       <h2>Chargement impossible</h2>
       <p>{{ detailErrorMessage() }}</p>
-      <button type="button" class="detail-view-state__action" (click)="retryLoad()">Réessayer</button>
+      <button
+        type="button"
+        class="detail-view-state__action"
+        (click)="retryLoad()"
+      >
+        Réessayer
+      </button>
     </div>
 
-  <!-- Empty -->
+    <!-- Empty -->
   } @else if (viewState() === 'empty') {
     <div class="detail-view-state" role="status">
       <h2>Bien introuvable</h2>
       <p>Aucune donnée n'a été retournée pour ce bien.</p>
     </div>
 
-  <!-- Success -->
+    <!-- Success -->
   } @else {
     <div class="bien-detail-page__layout">
-
       <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
       <aside class="bien-detail-sidebar">
-
         <!-- Propriétaire / Agence -->
         <article class="info-card">
           <div class="info-card__header">
@@ -119,14 +151,19 @@
                   <span>{{ doc.name }}</span>
                 </div>
                 <div class="document-row__actions">
-                  <button type="button" aria-label="Prévisualiser"
+                  <button
+                    type="button"
+                    aria-label="Prévisualiser"
                     [disabled]="documentOpeningId() === doc.id"
-                    (click)="openDocument(doc.fileUrl, doc.name, doc.id)">
-                    <i class="pi"
-                       [class.pi-eye]="documentOpeningId() !== doc.id"
-                       [class.pi-spin]="documentOpeningId() === doc.id"
-                       [class.pi-spinner]="documentOpeningId() === doc.id"
-                       aria-hidden="true"></i>
+                    (click)="openDocument(doc.fileUrl, doc.name, doc.id)"
+                  >
+                    <i
+                      class="pi"
+                      [class.pi-eye]="documentOpeningId() !== doc.id"
+                      [class.pi-spin]="documentOpeningId() === doc.id"
+                      [class.pi-spinner]="documentOpeningId() === doc.id"
+                      aria-hidden="true"
+                    ></i>
                   </button>
                 </div>
               </div>
@@ -146,15 +183,24 @@
               <h2>Modération</h2>
             </div>
             <p class="moderation-hint">
-              Ce bien est en attente de validation. Examinez les informations, les photos et les documents avant de statuer.
+              Ce bien est en attente de validation. Examinez les informations,
+              les photos et les documents avant de statuer.
             </p>
             <div class="moderation-actions">
-              <button type="button" class="moderation-btn moderation-btn--reject"
-                [disabled]="saving()" (click)="openModal('reject')">
+              <button
+                type="button"
+                class="moderation-btn moderation-btn--reject"
+                [disabled]="saving()"
+                (click)="openModal('reject')"
+              >
                 <i class="pi pi-times-circle"></i> Rejeter
               </button>
-              <button type="button" class="moderation-btn moderation-btn--approve"
-                [disabled]="saving()" (click)="openModal('approve')">
+              <button
+                type="button"
+                class="moderation-btn moderation-btn--approve"
+                [disabled]="saving()"
+                (click)="openModal('approve')"
+              >
                 <i class="pi pi-check-circle"></i> Approuver
               </button>
             </div>
@@ -173,7 +219,9 @@
                 <i class="pi pi-check-circle"></i>
                 <div>
                   <p class="terminal-banner__title">Bien publié</p>
-                  <p class="terminal-banner__sub">Publié le {{ property()?.publishedAt | date: 'dd/MM/yyyy' }}</p>
+                  <p class="terminal-banner__sub">
+                    Publié le {{ property()?.publishedAt | date: 'dd/MM/yyyy' }}
+                  </p>
                 </div>
               </div>
             }
@@ -183,27 +231,30 @@
                 <div>
                   <p class="terminal-banner__title">Bien rejeté</p>
                   @if (property()?.rejectionReason) {
-                    <p class="terminal-banner__reason">{{ property()?.rejectionReason }}</p>
+                    <p class="terminal-banner__reason">
+                      {{ property()?.rejectionReason }}
+                    </p>
                   }
                 </div>
               </div>
             }
           </article>
         }
-
       </aside>
 
       <!-- ── Contenu principal ───────────────────────────────────────────── -->
       <div class="bien-detail-content">
         <article class="bien-detail-shell">
-
           <!-- Galerie -->
           <section class="gallery-section">
             <div class="gallery-section__main">
-              <span class="gallery-section__status">{{ transactionLabel() }}</span>
+              <span class="gallery-section__status">{{
+                transactionLabel()
+              }}</span>
 
               @if (isGalleryImageAvailable(activeGalleryItem())) {
-                <img class="gallery-section__image"
+                <img
+                  class="gallery-section__image"
                   [src]="activeGalleryItem().src"
                   [alt]="activeGalleryItem().alt || propertyTitle()"
                   (error)="markGalleryImageBroken(activeGalleryItem().key)"
@@ -215,23 +266,42 @@
                 </div>
               }
 
-              <button class="gallery-nav gallery-nav--previous" type="button"
-                (click)="previousImage()" aria-label="Image précédente">
+              <button
+                class="gallery-nav gallery-nav--previous"
+                type="button"
+                (click)="previousImage()"
+                aria-label="Image précédente"
+              >
                 <i class="pi pi-angle-left" aria-hidden="true"></i>
               </button>
-              <button class="gallery-nav gallery-nav--next" type="button"
-                (click)="nextImage()" aria-label="Image suivante">
+              <button
+                class="gallery-nav gallery-nav--next"
+                type="button"
+                (click)="nextImage()"
+                aria-label="Image suivante"
+              >
                 <i class="pi pi-angle-right" aria-hidden="true"></i>
               </button>
             </div>
 
             <div class="gallery-section__thumbs">
-              @for (image of galleryItems(); track image.key; let index = $index) {
-                <button class="gallery-thumb" [class.is-active]="activeImageIndex() === index"
-                  type="button" (click)="selectImage(index)">
+              @for (
+                image of galleryItems();
+                track image.key;
+                let index = $index
+              ) {
+                <button
+                  class="gallery-thumb"
+                  [class.is-active]="activeImageIndex() === index"
+                  type="button"
+                  (click)="selectImage(index)"
+                >
                   @if (isGalleryImageAvailable(image)) {
-                    <img [src]="image.src" [alt]="image.alt"
-                      (error)="markGalleryImageBroken(image.key)" />
+                    <img
+                      [src]="image.src"
+                      [alt]="image.alt"
+                      (error)="markGalleryImageBroken(image.key)"
+                    />
                   } @else {
                     <div class="gallery-thumb__placeholder">
                       <i class="pi pi-image" aria-hidden="true"></i>
@@ -314,9 +384,13 @@
             <h3>Localisation</h3>
             <div class="location-panel">
               @if (hasCoordinates()) {
-                <iframe class="location-panel__map" [src]="mapSafeUrl()"
-                  loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                  title="Localisation du bien"></iframe>
+                <iframe
+                  class="location-panel__map"
+                  [src]="mapSafeUrl()"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Localisation du bien"
+                ></iframe>
               } @else {
                 <div class="location-panel__map-placeholder">
                   <i class="pi pi-map" aria-hidden="true"></i>
@@ -325,59 +399,103 @@
               }
             </div>
           </section>
-
         </article>
       </div>
     </div>
   }
-
 </section>
 
 <!-- ── Document preview ──────────────────────────────────────────────────── -->
 @if (previewUrl()) {
-  <div class="doc-preview-backdrop" (click)="closePreview()"></div>
-  <div class="doc-preview" [class.doc-preview--fullscreen]="previewFullscreen()">
+  <button
+    type="button"
+    class="doc-preview-backdrop"
+    (click)="closePreview()"
+    aria-label="Fermer l'aperçu du document"
+  ></button>
+  <div
+    class="doc-preview"
+    [class.doc-preview--fullscreen]="previewFullscreen()"
+  >
     <header class="doc-preview__header">
       <div class="doc-preview__title">
-        <i class="pi" [class.pi-image]="previewIsImage()" [class.pi-file-pdf]="!previewIsImage()"></i>
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file-pdf]="!previewIsImage()"
+        ></i>
         <span>{{ previewName() }}</span>
       </div>
       <div class="doc-preview__actions">
-        <a [href]="previewUrl()" target="_blank" rel="noopener noreferrer"
-           class="doc-preview__action-btn" title="Ouvrir dans un nouvel onglet">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="doc-preview__action-btn"
+          title="Ouvrir dans un nouvel onglet"
+        >
           <i class="pi pi-external-link"></i>
         </a>
-        <button type="button" class="doc-preview__action-btn" (click)="togglePreviewFullscreen()"
-          [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'">
-          <i class="pi" [class.pi-window-maximize]="!previewFullscreen()" [class.pi-window-minimize]="previewFullscreen()"></i>
+        <button
+          type="button"
+          class="doc-preview__action-btn"
+          (click)="togglePreviewFullscreen()"
+          [title]="
+            previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+          "
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
         </button>
-        <button type="button" class="doc-preview__action-btn doc-preview__action-btn--close"
-          (click)="closePreview()" title="Fermer">
+        <button
+          type="button"
+          class="doc-preview__action-btn doc-preview__action-btn--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
           <i class="pi pi-times"></i>
         </button>
       </div>
     </header>
     <div class="doc-preview__body">
       @if (previewIsImage()) {
-        <img [src]="previewSafeUrl()" [alt]="previewName()" class="doc-preview__image" />
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="doc-preview__image"
+        />
       } @else {
-        <iframe [src]="previewSafeUrl()" class="doc-preview__iframe" title="Prévisualisation"></iframe>
+        <iframe
+          [src]="previewSafeUrl()"
+          class="doc-preview__iframe"
+          title="Prévisualisation"
+        ></iframe>
       }
     </div>
   </div>
 }
 
 <!-- ── Modal : Approuver ─────────────────────────────────────────────────── -->
-<p-dialog [visible]="activeModal() === 'approve'" (visibleChange)="$event ? null : closeModal()"
-  header="Approuver ce bien" [modal]="true" [closable]="true" [style]="{width:'520px'}"
-  styleClass="propriete-modal">
+<p-dialog
+  [visible]="activeModal() === 'approve'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Approuver ce bien"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '520px' }"
+  styleClass="propriete-modal"
+>
   <div class="propriete-modal__approve">
     <div class="propriete-modal__approve-icon">
       <i class="pi pi-check-circle"></i>
     </div>
     <p class="propriete-modal__approve-title">Confirmer la publication</p>
     <p class="propriete-modal__approve-desc">
-      Ce bien sera immédiatement publié sur la plateforme UBAX et visible par tous les utilisateurs.
+      Ce bien sera immédiatement publié sur la plateforme UBAX et visible par
+      tous les utilisateurs.
     </p>
     <div class="propriete-modal__summary">
       <div class="summary-row">
@@ -398,8 +516,19 @@
   </div>
   <ng-template pTemplate="footer">
     <div class="propriete-modal__footer">
-      <button type="button" class="propriete-btn propriete-btn--ghost" (click)="closeModal()">Annuler</button>
-      <button type="button" class="propriete-btn propriete-btn--success" [disabled]="saving()" (click)="submitApprove()">
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--ghost"
+        (click)="closeModal()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--success"
+        [disabled]="saving()"
+        (click)="submitApprove()"
+      >
         <i class="pi pi-check"></i>
         {{ saving() ? 'Publication...' : 'Confirmer la publication' }}
       </button>
@@ -408,31 +537,62 @@
 </p-dialog>
 
 <!-- ── Modal : Rejeter ───────────────────────────────────────────────────── -->
-<p-dialog [visible]="activeModal() === 'reject'" (visibleChange)="$event ? null : closeModal()"
-  header="Rejeter ce bien" [modal]="true" [closable]="true" [style]="{width:'560px'}"
-  styleClass="propriete-modal">
+<p-dialog
+  [visible]="activeModal() === 'reject'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Rejeter ce bien"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '560px' }"
+  styleClass="propriete-modal"
+>
   <form [formGroup]="rejectionForm" class="propriete-modal__form">
     <p class="propriete-modal__description">
-      Veuillez indiquer le motif du rejet. Ce message sera transmis au propriétaire ou à l'agence.
+      Veuillez indiquer le motif du rejet. Ce message sera transmis au
+      propriétaire ou à l'agence.
     </p>
     <div class="propriete-modal__field">
       <label class="propriete-modal__label" for="rejection-reason">
         Motif du rejet <span class="propriete-modal__required">*</span>
       </label>
-      <textarea pTextarea id="rejection-reason" formControlName="reason" rows="5"
+      <textarea
+        pTextarea
+        id="rejection-reason"
+        formControlName="reason"
+        rows="5"
         placeholder="Ex : Photos insuffisantes, informations incomplètes..."
         class="propriete-modal__textarea"
-        [class.ng-invalid]="rejectionForm.get('reason')?.invalid && rejectionForm.get('reason')?.touched">
+        [class.ng-invalid]="
+          rejectionForm.get('reason')?.invalid &&
+          rejectionForm.get('reason')?.touched
+        "
+      >
       </textarea>
-      @if (rejectionForm.get('reason')?.invalid && rejectionForm.get('reason')?.touched) {
-        <span class="propriete-modal__error">Le motif est obligatoire (minimum 10 caractères).</span>
+      @if (
+        rejectionForm.get('reason')?.invalid &&
+        rejectionForm.get('reason')?.touched
+      ) {
+        <span class="propriete-modal__error"
+          >Le motif est obligatoire (minimum 10 caractères).</span
+        >
       }
     </div>
   </form>
   <ng-template pTemplate="footer">
     <div class="propriete-modal__footer">
-      <button type="button" class="propriete-btn propriete-btn--ghost" (click)="closeModal()">Annuler</button>
-      <button type="button" class="propriete-btn propriete-btn--danger" [disabled]="saving()" (click)="submitReject()">
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--ghost"
+        (click)="closeModal()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--danger"
+        [disabled]="saving()"
+        (click)="submitReject()"
+      >
         <i class="pi pi-times"></i>
         {{ saving() ? 'Rejet en cours...' : 'Confirmer le rejet' }}
       </button>
