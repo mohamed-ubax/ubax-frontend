@@ -19,7 +19,7 @@
         </span>
       }
 
-      <span class="form-select__display">{{ value() }}</span>
+      <span class="form-select__display">{{ displayLabel() }}</span>
 
       <span class="form-select__chevron" aria-hidden="true">
         <i class="pi pi-angle-down"></i>
@@ -35,16 +35,16 @@
       [style.width.px]="menuWidth()"
       [style.max-height.px]="menuMaxHeight()"
     >
-      @for (option of options(); track option) {
+      @for (option of normalizedOptions(); track option.value) {
         <button
           class="form-select__option"
-          [class.is-active]="value() === option"
+          [class.is-active]="value() === option.value"
           type="button"
-          (click)="select(option)"
+          (click)="select(option.value)"
         >
-          <span class="form-select__option-label">{{ option }}</span>
+          <span class="form-select__option-label">{{ option.label }}</span>
 
-          @if (value() === option) {
+          @if (value() === option.value) {
             <span class="form-select__option-check" aria-hidden="true">
               <i class="pi pi-check"></i>
             </span>

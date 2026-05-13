@@ -1,8 +1,11 @@
 import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import {
+  ApiConfiguration,
   Api,
   type AdminAgencyResponse,
   type AdminHotelResponse,
+  type AgencyResponse,
   activateAgency,
   activateHotel,
   listAgencies,
@@ -11,6 +14,12 @@ import {
   suspendHotel,
 } from '@ubax-workspace/shared-api-types';
 import { from, map, Observable } from 'rxjs';
+
+export interface PartnerFilterOption {
+  id?: string;
+  name?: string;
+  city?: string;
+}
 
 /**
  * Extrait un tableau depuis n'importe quelle enveloppe API.
@@ -48,7 +57,13 @@ function readCollection(raw: unknown): unknown[] {
 
 @Injectable({ providedIn: 'root' })
 export class AdminPartnersService {
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
   private readonly api = inject(Api);
+
+  private get rootUrl(): string {
+    return this.apiConfig.rootUrl;
+  }
 
   listAgencies(): Observable<AdminAgencyResponse[]> {
     return from(
@@ -60,6 +75,30 @@ export class AdminPartnersService {
     return from(
       this.api.invoke(listHotels, { pageable: { page: 0, size: 200 } }),
     ).pipe(map((raw) => readCollection(raw) as AdminHotelResponse[]));
+  }
+
+  listAgencyFilterOptions(): Observable<PartnerFilterOption[]> {
+    return this.http
+      .get<unknown>(`${this.rootUrl}/v1/agencies`, {
+        params: {
+          page: 0,
+          size: 200,
+          sort: 'name,ASC',
+        },
+      })
+      .pipe(map((raw) => readCollection(raw) as AgencyResponse[]));
+  }
+
+  listHotelFilterOptions(): Observable<PartnerFilterOption[]> {
+    return this.http
+      .get<unknown>(`${this.rootUrl}/v1/hotels`, {
+        params: {
+          page: 0,
+          size: 200,
+          sort: 'name,ASC',
+        },
+      })
+      .pipe(map((raw) => readCollection(raw) as AdminHotelResponse[]));
   }
 
   activateAgency(id: string): Observable<AdminAgencyResponse> {

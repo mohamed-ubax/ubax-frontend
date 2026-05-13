@@ -10,12 +10,26 @@ import {
   type PropertyResponse,
   type PropertyStatusUpdateRequest,
 } from '@ubax-workspace/shared-api-types';
+import {
+  buildAdminScopedPropertyQueryParams,
+  normalizePropertyPageResponse,
+  type AdminPropertyStatusFilter,
+  type PropertyPageResult,
+} from './admin-properties.helpers';
 
 export type PropertyModerationStatus = 'PUBLISHED' | 'REJECTED';
 
 export interface PropertyModerationDecision {
   status: PropertyModerationStatus;
   rejectionReason?: string;
+}
+
+export interface AdminScopedPropertyParams {
+  page?: number;
+  size?: number;
+  status?: AdminPropertyStatusFilter;
+  agencyId?: string;
+  hotelId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,13 +42,15 @@ export class AdminPropertiesService {
   }
 
   /** GET /v1/properties?status=PENDING — liste paginée côté serveur */
-  listPending(params: {
-    page?: number;
-    size?: number;
-    city?: string;
-    propertyType?: string;
-    agencyId?: string;
-  } = {}): Observable<{ items: PropertyResponse[]; totalElements: number; totalPages: number }> {
+  listPending(
+    params: {
+      page?: number;
+      size?: number;
+      city?: string;
+      propertyType?: string;
+      agencyId?: string;
+    } = {},
+  ): Observable<PropertyPageResult> {
     return list1(this.http, this.rootUrl, {
       status: 'PENDING',
       city: params.city || undefined,
@@ -46,68 +62,24 @@ export class AdminPropertiesService {
         sort: ['createdAt,desc'],
       },
     }).pipe(
-      map((r) => {
-        // Réponse réelle du backend :
-        // { data: { totalItems, perPage, total_pages, page, results: [...] }, total_pages, total_items }
-        const body = r.body as unknown as {
-          data?: {
-            results?: PropertyResponse[];
-            content?: PropertyResponse[];
-            totalItems?: number;
-            total_items?: number;
-            totalElements?: number;
-            totalPages?: number;
-            total_pages?: number;
-          };
-          results?: PropertyResponse[];
-          content?: PropertyResponse[];
-          totalItems?: number;
-          total_items?: number;
-          totalElements?: number;
-          totalPages?: number;
-          total_pages?: number;
-        };
-
-        const data = body?.data ?? body;
-
-        const items: PropertyResponse[] =
-          data?.results ??
-          data?.content ??
-          (Array.isArray(body) ? (body as PropertyResponse[]) : []);
-
-        const totalElements =
-          data?.totalItems ??
-          data?.total_items ??
-          (data as Record<string, unknown>)?.['total-items'] as number | undefined ??
-          data?.totalElements ??
-          items.length;
-
-        // Le backend renvoie "total-pages" (avec tiret) — accès obligatoire par bracket notation
-        const rawTotalPages =
-          (data as Record<string, unknown>)['total-pages'] as number | undefined ??
-          data?.total_pages ??
-          data?.totalPages ??
-          (body as Record<string, unknown>)['total-pages'] as number | undefined;
-
-        const totalPages = rawTotalPages ?? (Math.ceil(totalElements / (params.size ?? 20)) || 1);
-
-        return { items, totalElements, totalPages };
-      }),
+      map((r) => normalizePropertyPageResponse(r.body, params.size ?? 20)),
     );
   }
 
   /** GET /v1/properties?status=PUBLISHED — liste paginée côté serveur */
-  listPublished(params: {
-    page?: number;
-    size?: number;
-    city?: string;
-    propertyType?: string;
-    transactionType?: string;
-    agencyId?: string;
-    hotelId?: string;
-    minPrice?: number;
-    maxPrice?: number;
-  } = {}): Observable<{ items: PropertyResponse[]; totalElements: number; totalPages: number }> {
+  listPublished(
+    params: {
+      page?: number;
+      size?: number;
+      city?: string;
+      propertyType?: string;
+      transactionType?: string;
+      agencyId?: string;
+      hotelId?: string;
+      minPrice?: number;
+      maxPrice?: number;
+    } = {},
+  ): Observable<PropertyPageResult> {
     return list1(this.http, this.rootUrl, {
       status: 'PUBLISHED',
       city: params.city || undefined,
@@ -123,55 +95,44 @@ export class AdminPropertiesService {
         sort: ['publishedAt,desc'],
       },
     }).pipe(
-      map((r) => {
-        // Réponse réelle du backend :
-        // { data: { totalItems, perPage, total_pages, page, results: [...] }, total_pages, total_items }
-        const body = r.body as unknown as {
-          data?: {
-            results?: PropertyResponse[];
-            content?: PropertyResponse[];
-            totalItems?: number;
-            total_items?: number;
-            totalElements?: number;
-            totalPages?: number;
-            total_pages?: number;
-          };
-          results?: PropertyResponse[];
-          content?: PropertyResponse[];
-          totalItems?: number;
-          total_items?: number;
-          totalElements?: number;
-          totalPages?: number;
-          total_pages?: number;
-        };
-
-        const data = body?.data ?? body;
-
-        const items: PropertyResponse[] =
-          data?.results ??
-          data?.content ??
-          (Array.isArray(body) ? (body as PropertyResponse[]) : []);
-
-        const totalElements =
-          data?.totalItems ??
-          data?.total_items ??
-          (data as Record<string, unknown>)?.['total-items'] as number | undefined ??
-          data?.totalElements ??
-          items.length;
-
-        // Le backend renvoie "total-pages" (avec tiret) — accès obligatoire par bracket notation
-        const rawTotalPages =
-          (data as Record<string, unknown>)['total-pages'] as number | undefined ??
-          data?.total_pages ??
-          data?.totalPages ??
-          (body as Record<string, unknown>)['total-pages'] as number | undefined;
-
-        const totalPages = rawTotalPages ?? (Math.ceil(totalElements / (params.size ?? 12)) || 1);
-
-        return { items, totalElements, totalPages };
-      }),
+      map((r) => normalizePropertyPageResponse(r.body, params.size ?? 12)),
     );
   }
+
+  listAdminAgencyProperties(
+    params: AdminScopedPropertyParams = {},
+  ): Observable<PropertyPageResult> {
+    const pageSize = Math.min(Math.max(params.size ?? 20, 1), 200);
+
+    return this.http
+      .get<unknown>(`${this.rootUrl}/v1/properties/admin/agencies`, {
+        params: buildAdminScopedPropertyQueryParams({
+          page: params.page,
+          size: pageSize,
+          status: params.status,
+          agencyId: params.agencyId,
+        }),
+      })
+      .pipe(map((body) => normalizePropertyPageResponse(body, pageSize)));
+  }
+
+  listAdminHotelProperties(
+    params: AdminScopedPropertyParams = {},
+  ): Observable<PropertyPageResult> {
+    const pageSize = Math.min(Math.max(params.size ?? 20, 1), 200);
+
+    return this.http
+      .get<unknown>(`${this.rootUrl}/v1/properties/admin/hotels`, {
+        params: buildAdminScopedPropertyQueryParams({
+          page: params.page,
+          size: pageSize,
+          status: params.status,
+          hotelId: params.hotelId,
+        }),
+      })
+      .pipe(map((body) => normalizePropertyPageResponse(body, pageSize)));
+  }
+
   getDetail(id: string): Observable<PropertyDetailResponse> {
     return getById(this.http, this.rootUrl, { id }).pipe(
       map((r) => {
@@ -180,21 +141,34 @@ export class AdminPropertiesService {
         const body = r.body as unknown as
           | { data?: PropertyDetailResponse }
           | PropertyDetailResponse;
-        return (body as { data?: PropertyDetailResponse })?.data ?? (body as PropertyDetailResponse);
+        return (
+          (body as { data?: PropertyDetailResponse })?.data ??
+          (body as PropertyDetailResponse)
+        );
       }),
     );
   }
 
   /** PATCH /v1/properties/:id/status — approuver ou rejeter */
-  decide(id: string, decision: PropertyModerationDecision): Observable<PropertyResponse> {
+  decide(
+    id: string,
+    decision: PropertyModerationDecision,
+  ): Observable<PropertyResponse> {
     const payload: PropertyStatusUpdateRequest = {
       status: decision.status,
-      ...(decision.rejectionReason ? { rejectionReason: decision.rejectionReason } : {}),
+      ...(decision.rejectionReason
+        ? { rejectionReason: decision.rejectionReason }
+        : {}),
     };
     return updateStatus1(this.http, this.rootUrl, { id, body: payload }).pipe(
       map((r) => {
-        const body = r.body as unknown as { data?: PropertyResponse } | PropertyResponse;
-        return (body as { data?: PropertyResponse })?.data ?? (body as PropertyResponse);
+        const body = r.body as unknown as
+          | { data?: PropertyResponse }
+          | PropertyResponse;
+        return (
+          (body as { data?: PropertyResponse })?.data ??
+          (body as PropertyResponse)
+        );
       }),
     );
   }

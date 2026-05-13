@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   EmbeddedViewRef,
   HostListener,
@@ -15,6 +16,37 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 
+export interface UiFormSelectOption {
+  label: string;
+  value: string;
+}
+
+function normalizeSelectOption(
+  option: string | UiFormSelectOption | Record<string, unknown>,
+): UiFormSelectOption {
+  if (typeof option === 'string') {
+    return { label: option, value: option };
+  }
+
+  const optionRecord = option as Record<string, unknown>;
+
+  const labelCandidate =
+    (typeof optionRecord['label'] === 'string' && optionRecord['label']) ||
+    (typeof optionRecord['name'] === 'string' && optionRecord['name']) ||
+    (typeof optionRecord['title'] === 'string' && optionRecord['title']) ||
+    '';
+
+  const valueCandidate =
+    (typeof optionRecord['value'] === 'string' && optionRecord['value']) ||
+    (typeof optionRecord['id'] === 'string' && optionRecord['id']) ||
+    labelCandidate;
+
+  return {
+    label: labelCandidate || String(valueCandidate || ''),
+    value: valueCandidate || labelCandidate || '',
+  };
+}
+
 @Component({
   selector: 'ubax-ui-form-select',
   standalone: true,
@@ -24,10 +56,24 @@ import {
 })
 export class UiFormSelectComponent implements OnDestroy {
   readonly label = input('');
-  readonly options = input<readonly string[]>([]);
+  readonly options = input<
+    readonly (string | UiFormSelectOption | Record<string, unknown>)[]
+  >([]);
   readonly leadingIconSrc = input('');
   readonly disabled = input(false);
   readonly value = model('');
+
+  protected readonly normalizedOptions = computed<
+    readonly UiFormSelectOption[]
+  >(() => this.options().map((option) => normalizeSelectOption(option)));
+
+  protected readonly displayLabel = computed(() => {
+    const selectedOption = this.normalizedOptions().find(
+      (option) => option.value === this.value(),
+    );
+
+    return selectedOption?.label ?? this.value();
+  });
 
   protected readonly isOpen = signal(false);
   protected readonly menuTop = signal(0);
@@ -57,8 +103,8 @@ export class UiFormSelectComponent implements OnDestroy {
       return;
     }
 
-    this.updateMenuPosition();
     this.isOpen.set(true);
+    this.updateMenuPosition();
     this.menuView = this.vcr.createEmbeddedView(this.menuTpl);
     this.menuView.detectChanges();
     this.menuEl =
@@ -70,16 +116,21 @@ export class UiFormSelectComponent implements OnDestroy {
       this.renderer.appendChild(document.body, this.menuEl);
     }
 
+    queueMicrotask(() => this.updateMenuPosition());
+
     // addEventListener en capture phase pour attraper le scroll de TOUS les
     // conteneurs (window:scroll ne se déclenche pas sur un div overflow:auto)
-    const handler = () => this.close();
-    document.addEventListener('scroll', handler, { capture: true, passive: true });
+    const handler = () => this.repositionMenu();
+    document.addEventListener('scroll', handler, {
+      capture: true,
+      passive: true,
+    });
     this.scrollUnlisten = () =>
       document.removeEventListener('scroll', handler, { capture: true });
   }
 
-  protected select(option: string): void {
-    this.value.set(option);
+  protected select(optionValue: string): void {
+    this.value.set(optionValue);
     this.close();
   }
 
@@ -113,9 +164,7 @@ export class UiFormSelectComponent implements OnDestroy {
 
   @HostListener('window:resize')
   protected onResize(): void {
-    if (this.isOpen()) {
-      this.updateMenuPosition();
-    }
+    this.repositionMenu();
   }
 
   private close(): void {
@@ -155,6 +204,12 @@ export class UiFormSelectComponent implements OnDestroy {
     });
   }
 
+  private repositionMenu(): void {
+    if (this.isOpen()) {
+      this.updateMenuPosition();
+    }
+  }
+
   private updateMenuPosition(): void {
     const trigger = this.el.nativeElement.querySelector(
       '.form-select__trigger',
@@ -167,7 +222,11 @@ export class UiFormSelectComponent implements OnDestroy {
     const rect = trigger.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const horizontalMargin = 16;
-    const width = Math.min(rect.width, viewportWidth - horizontalMargin * 2);
+    const contentWidth = this.menuEl?.scrollWidth ?? rect.width;
+    const width = Math.min(
+      Math.max(rect.width, contentWidth),
+      viewportWidth - horizontalMargin * 2,
+    );
     const maxLeft = Math.max(
       horizontalMargin,
       viewportWidth - width - horizontalMargin,

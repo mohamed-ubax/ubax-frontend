@@ -1,8 +1,7 @@
 <div class="props-page">
-
   <!-- En-tête -->
   <div class="props-page__header">
-    <p class="props-page__eyebrow">Propriétés publiées</p>
+    <p class="props-page__eyebrow">{{ eyebrowLabel() }}</p>
     <div class="props-page__title-row">
       <h1 class="props-page__title">{{ pageTitle() }}</h1>
       <span class="props-page__count">{{ totalElements() }} bien(s)</span>
@@ -35,41 +34,25 @@
       <input
         type="text"
         class="props-filters__search-input"
-        placeholder="Recherche par titre, référence..."
+        placeholder="Recherche par titre, ville, partenaire..."
         [value]="searchQuery()"
         (input)="onSearch($event)"
       />
     </div>
 
-    <!-- Ville -->
+    <!-- Agence / Hôtel -->
     <ubax-ui-form-select
       class="props-filters__select-field"
-      [options]="cityOptions"
-      [value]="cityLabel()"
-      (valueChange)="onCityChange($event)"
-    />
-
-    <!-- Type de bien -->
-    <ubax-ui-form-select
-      class="props-filters__select-field"
-      [options]="typeOptions"
-      [value]="typeLabel()"
-      (valueChange)="onTypeChange($event)"
-    />
-
-    <!-- Type d'offre -->
-    <ubax-ui-form-select
-      class="props-filters__select-field"
-      [options]="transactionOptions"
-      [value]="transactionLabel()"
-      (valueChange)="onTransactionChange($event)"
+      [options]="partnerOptions()"
+      [value]="partnerLabel()"
+      (valueChange)="onPartnerChange($event)"
     />
   </div>
 
   <!-- Grille de cartes -->
   @if (loading()) {
     <div class="props-grid">
-      @for (i of [1,2,3,4,5,6,7,8]; track i) {
+      @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
         <div class="props-card-skeleton"></div>
       }
     </div>
@@ -77,16 +60,16 @@
     <ubax-empty-state
       icon="pi pi-home"
       title="Aucune propriété trouvée"
-      [description]="searchQuery() ? 'Aucune propriété ne correspond à votre recherche.' : 'Aucune propriété publiée pour le moment.'"
+      [description]="
+        searchQuery()
+          ? 'Aucune propriété ne correspond à votre recherche.'
+          : 'Aucune propriété publiée pour le moment.'
+      "
     />
   } @else {
     <div class="props-grid">
       @for (property of filteredProperties(); track property.id) {
-        <button
-          type="button"
-          class="props-card"
-          (click)="viewDetail(property)"
-        >
+        <button type="button" class="props-card" (click)="viewDetail(property)">
           <!-- Photo + gradient -->
           <div class="props-card__photo-wrap">
             @if (getCoverPhotoUrl(property)) {
@@ -111,18 +94,29 @@
               {{ getTransactionTypeLabel(property.transactionType) }}
             </span>
 
-            <!-- Badge disponibilité -->
-            <span class="props-card__availability-badge">Disponible</span>
+            <!-- Badge statut -->
+            <span
+              class="props-card__status-badge"
+              [style.background]="getStatusColor(property.status)"
+            >
+              {{ getStatusLabel(property.status) }}
+            </span>
 
             <!-- Nom agence/propriétaire + prix -->
             <div class="props-card__bottom-overlay">
-              @if (property.hotelName || property.agencyName || property.ownerName) {
+              @if (
+                property.hotelName || property.agencyName || property.ownerName
+              ) {
                 <div class="props-card__owner-row">
                   <div class="props-card__owner-avatar">
                     <i class="pi pi-building"></i>
                   </div>
                   <span class="props-card__owner-name">
-                    {{ property.hotelName ?? property.agencyName ?? property.ownerName }}
+                    {{
+                      property.hotelName ??
+                        property.agencyName ??
+                        property.ownerName
+                    }}
                   </span>
                 </div>
               }
@@ -137,7 +131,10 @@
             <p class="props-card__title">{{ property.title ?? '—' }}</p>
             <p class="props-card__location">
               <i class="pi pi-map-marker"></i>
-              {{ property.city ?? '' }}@if (property.district) { · {{ property.district }}}
+              {{ property.city ?? '' }}
+              @if (property.district) {
+                · {{ property.district }}
+              }
             </p>
 
             <!-- Caractéristiques -->
@@ -178,5 +175,4 @@
       />
     </div>
   }
-
 </div>
