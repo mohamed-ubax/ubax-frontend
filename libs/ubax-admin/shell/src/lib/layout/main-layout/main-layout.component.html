@@ -1,29 +1,108 @@
 <div class="ubax-shell">
 
-  <!-- Sidebar du design system -->
-  <ubax-sidebar [navGroups]="navGroups" class="ubax-sidebar">
+  <!-- Sidebar custom avec sous-items Propriétés -->
+  <aside class="ubax-sidebar bg-surface-sidebar flex flex-col h-full flex-shrink-0 overflow-y-auto overflow-x-hidden"
+         role="navigation" aria-label="Navigation principale">
 
-    <!-- Logo slot -->
-    <div logo class="flex items-center gap-2">
+    <!-- Logo -->
+    <div class="flex items-center px-5 py-6 flex-shrink-0 gap-2">
       <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-orange text-white font-semibold text-lg leading-none">U</span>
       <span class="text-white font-semibold text-2xl tracking-wide">BAX</span>
     </div>
 
-    <!-- Déconnexion dans le footer -->
-    <div footer class="px-2">
-      <button
-        type="button"
-        class="flex items-center gap-3 w-full px-4 py-3 rounded-xl
-               text-white/60 text-xl font-regular leading-normal
-               transition-colors duration-150 ease-linear
-               hover:bg-white/10 hover:text-white"
-        (click)="logout()"
-      >
+    <!-- Navigation -->
+    <nav class="flex-1 flex flex-col gap-1 py-2">
+
+      <a routerLink="/tableau-de-bord" routerLinkActive="bg-brand-orange text-white"
+         [routerLinkActiveOptions]="{exact:true}" class="sidebar-nav-item">
+        <i class="pi pi-th-large text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Tableau de bord</span>
+      </a>
+
+      <a routerLink="/hotels" routerLinkActive="bg-brand-orange text-white" class="sidebar-nav-item">
+        <i class="pi pi-building text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Hôtels</span>
+      </a>
+
+      <a routerLink="/agences" routerLinkActive="bg-brand-orange text-white" class="sidebar-nav-item">
+        <i class="pi pi-home text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Agences</span>
+      </a>
+
+      <a routerLink="/candidatures" routerLinkActive="bg-brand-orange text-white" class="sidebar-nav-item">
+        <i class="pi pi-inbox text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Candidatures</span>
+      </a>
+
+      <!-- Item Propriétés expandable -->
+      <button type="button"
+              class="sidebar-nav-item sidebar-nav-item--btn"
+              [class.sidebar-nav-item--expanded]="proprietesExpanded()"
+              (click)="toggleProprietes()">
+        <i class="pi pi-map-marker text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate text-left">Propriétés</span>
+        <i class="pi text-sm flex-shrink-0 sidebar-chevron"
+           [class.pi-chevron-down]="!proprietesExpanded()"
+           [class.pi-chevron-up]="proprietesExpanded()"></i>
+      </button>
+
+      <!-- Sous-items Propriétés -->
+      @if (proprietesExpanded()) {
+        <div class="sidebar-subnav">
+          <div class="sidebar-subnav__track">
+            <div class="sidebar-subnav__line-bg"></div>
+            <div class="sidebar-subnav__items">
+              <a routerLink="/proprietes/agences" routerLinkActive="sidebar-subitem--active"
+                 class="sidebar-subitem">
+                <span>Liste propriétés agence</span>
+              </a>
+              <a routerLink="/proprietes/hotels" routerLinkActive="sidebar-subitem--active"
+                 class="sidebar-subitem">
+                <span>Liste propriétés hôtels</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Modération -->
+      <a routerLink="/proprietes" routerLinkActive="bg-brand-orange text-white"
+         [routerLinkActiveOptions]="{exact:true}" class="sidebar-nav-item">
+        <i class="pi pi-shield text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Modération</span>
+      </a>
+
+      <span class="sidebar-nav-item sidebar-nav-item--disabled">
+        <i class="pi pi-calendar text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Réservations</span>
+      </span>
+
+      <a routerLink="/administrateurs" routerLinkActive="bg-brand-orange text-white" class="sidebar-nav-item">
+        <i class="pi pi-users text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Administrateurs</span>
+      </a>
+
+      <span class="sidebar-nav-item sidebar-nav-item--disabled">
+        <i class="pi pi-wallet text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Paiements</span>
+      </span>
+
+      <span class="sidebar-nav-item sidebar-nav-item--disabled">
+        <i class="pi pi-chart-bar text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Statistiques</span>
+      </span>
+
+    </nav>
+
+    <!-- Footer -->
+    <div class="flex-shrink-0 border-t border-white/10 py-4 px-2">
+      <button type="button" class="sidebar-nav-item w-full" (click)="logout()">
         <i class="pi pi-sign-out text-lg w-6 flex-shrink-0"></i>
         <span>Déconnexion</span>
       </button>
     </div>
-  </ubax-sidebar>
+
+  </aside>
 
   <!-- Zone principale -->
   <div class="ubax-main">

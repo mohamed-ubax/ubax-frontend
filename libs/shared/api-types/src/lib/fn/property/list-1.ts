@@ -11,15 +11,67 @@ import { Pageable } from '../../models/pageable';
 import { PropertyResponse } from '../../models/property-response';
 
 export interface List1$Params {
+
+/**
+ * Statut des biens (défaut : PUBLISHED). ADMIN requis pour tout autre statut.
+ */
   status?: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'RESERVED' | 'SOLD' | 'ARCHIVED' | 'REJECTED';
+
+/**
+ * Filtre par ville (insensible à la casse)
+ */
   city?: string;
+
+/**
+ * Filtre par type de bien (APARTMENT, VILLA, HOTEL_SUITE…)
+ */
   propertyType?: string;
+
+/**
+ * Filtre par type de transaction (SALE, RENT, SHORT_STAY…)
+ */
   transactionType?: string;
+
+/**
+ * Prix minimum en XOF
+ */
   minPrice?: number;
+
+/**
+ * Prix maximum en XOF
+ */
   maxPrice?: number;
+
+/**
+ * Filtre par agence immobilière (UUID)
+ */
   agencyId?: string;
+
+/**
+ * Filtre par propriétaire / bailleur (UUID)
+ */
   ownerId?: string;
+
+/**
+ * Filtre par hôtel – retourne uniquement les chambres/suites de cet hôtel (UUID)
+ */
+  hotelId?: string;
   pageable: Pageable;
+
+/**
+ * Numéro de page (0-based)
+ */
+  page?: number;
+
+/**
+ * Nombre de résultats par page (max 200)
+ */
+  size?: number;
+
+/**
+ * Tri : champ,direction — ex: `createdAt,desc` · `price,asc` · `publishedAt,desc`
+ */
+  sort?: string;
 }
 
 export function list1(http: HttpClient, rootUrl: string, params: List1$Params, context?: HttpContext): Observable<StrictHttpResponse<PropertyResponse>> {
@@ -33,7 +85,11 @@ export function list1(http: HttpClient, rootUrl: string, params: List1$Params, c
     rb.query('maxPrice', params.maxPrice, {});
     rb.query('agencyId', params.agencyId, {});
     rb.query('ownerId', params.ownerId, {});
+    rb.query('hotelId', params.hotelId, {});
     rb.query('pageable', params.pageable, {});
+    rb.query('page', params.page, {});
+    rb.query('size', params.size, {});
+    rb.query('sort', params.sort, {});
   }
 
   return http.request(

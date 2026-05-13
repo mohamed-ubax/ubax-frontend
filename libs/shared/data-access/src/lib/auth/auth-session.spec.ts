@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer';
 import {
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
   AUTH_TOKEN_STORAGE_KEY,
+  DEFAULT_UBAX_ADMIN_HOME_PATH,
   DEFAULT_UBAX_WEB_HOME_PATH,
   buildPortalLoginUrl,
   clearStoredAuthSession,
@@ -13,6 +14,7 @@ import {
   readStoredRefreshToken,
   readKeycloakIdCandidatesFromAuthToken,
   redirectBrowserToPortalLogin,
+  resolvePostLoginRedirectTarget,
   resolveUbaxWebRedirectTarget,
 } from './auth-session';
 import { UbaxRole, UbaxSubRole } from './user.model';
@@ -178,5 +180,50 @@ describe('auth-session helpers', () => {
     expect(assign).toHaveBeenCalledWith(
       '/connexion?redirect=%2Fapp%2Freservations%3Fpage%3D2%23details',
     );
+  });
+
+  it('keeps admin redirects for internal admins after login', () => {
+    const adminToken = createJwt({
+      sub: 'admin-1',
+      email: 'admin@ubax.com',
+      roles: ['UBAX_ADMIN'],
+    });
+
+    expect(
+      resolvePostLoginRedirectTarget(
+        adminToken,
+        '/admin/utilisateurs?tab=actifs',
+      ),
+    ).toBe('/admin/utilisateurs?tab=actifs');
+    expect(resolvePostLoginRedirectTarget(adminToken, null)).toBe(
+      DEFAULT_UBAX_ADMIN_HOME_PATH,
+    );
+  });
+
+  it('ignores stale web redirects for internal admin logins', () => {
+    const adminToken = createJwt({
+      sub: 'admin-2',
+      email: 'admin@ubax.com',
+      roles: ['UBAX_ADMIN'],
+    });
+
+    expect(resolvePostLoginRedirectTarget(adminToken, '/app/equipe')).toBe(
+      DEFAULT_UBAX_ADMIN_HOME_PATH,
+    );
+  });
+
+  it('ignores stale admin redirects for partner logins', () => {
+    const partnerToken = createJwt({
+      sub: 'partner-1',
+      email: 'agency@ubax.com',
+      roles: ['UBAX_PARTNER'],
+    });
+
+    expect(
+      resolvePostLoginRedirectTarget(partnerToken, '/admin/utilisateurs'),
+    ).toBe(DEFAULT_UBAX_WEB_HOME_PATH);
+    expect(
+      resolvePostLoginRedirectTarget(partnerToken, '/app/equipe?tab=planning'),
+    ).toBe('/app/equipe?tab=planning');
   });
 });

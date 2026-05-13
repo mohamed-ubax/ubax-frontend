@@ -444,6 +444,36 @@ export function resolveUbaxWebRedirectTarget(
   return resolveRedirectTarget(candidate, DEFAULT_UBAX_WEB_HOME_PATH);
 }
 
+function isAdminAppPath(path: string): boolean {
+  return path === '/admin' || path.startsWith('/admin/');
+}
+
+function isWebAppPath(path: string): boolean {
+  return path === '/app' || path.startsWith('/app/');
+}
+
+function isInternalAdminRole(role: UbaxRole | null | undefined): boolean {
+  return role === UbaxRole.ADMIN || role === UbaxRole.SUPER_ADMIN;
+}
+
+export function resolvePostLoginRedirectTarget(
+  accessToken: string | null | undefined,
+  candidate: string | null | undefined,
+): string {
+  const user = deriveUserFromAuthToken(accessToken);
+  const isInternalAdmin = isInternalAdminRole(user?.mainRole);
+  const defaultPath = isInternalAdmin
+    ? DEFAULT_UBAX_ADMIN_HOME_PATH
+    : DEFAULT_UBAX_WEB_HOME_PATH;
+  const resolved = resolveRedirectTarget(candidate, defaultPath);
+
+  if (isInternalAdmin) {
+    return isWebAppPath(resolved) ? DEFAULT_UBAX_ADMIN_HOME_PATH : resolved;
+  }
+
+  return isAdminAppPath(resolved) ? DEFAULT_UBAX_WEB_HOME_PATH : resolved;
+}
+
 export function currentBrowserPath(): string {
   if (typeof globalThis === 'undefined' || !('location' in globalThis)) {
     return DEFAULT_UBAX_WEB_HOME_PATH;
@@ -469,10 +499,7 @@ export function currentAdminBrowserPath(): string {
 }
 
 export function buildPortalLoginUrl(returnTo?: string): string {
-  const redirect = resolveRedirectTarget(
-    returnTo,
-    DEFAULT_UBAX_WEB_HOME_PATH,
-  );
+  const redirect = resolveRedirectTarget(returnTo, DEFAULT_UBAX_WEB_HOME_PATH);
   return `/connexion?redirect=${encodeURIComponent(redirect)}`;
 }
 

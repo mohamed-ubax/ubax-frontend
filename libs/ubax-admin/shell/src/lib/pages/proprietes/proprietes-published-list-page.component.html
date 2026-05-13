@@ -1,0 +1,178 @@
+<div class="props-page">
+  <!-- En-tête -->
+  <div class="props-page__header">
+    <p class="props-page__eyebrow">{{ eyebrowLabel() }}</p>
+    <div class="props-page__title-row">
+      <h1 class="props-page__title">{{ pageTitle() }}</h1>
+      <span class="props-page__count">{{ totalElements() }} bien(s)</span>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  @if (kpis().length > 0) {
+    <div class="props-kpi-grid">
+      @for (kpi of kpis(); track kpi.label) {
+        <div class="props-kpi-card">
+          <div class="props-kpi-card__icon" [style.background]="kpi.iconBg">
+            <i [class]="kpi.icon" [style.color]="kpi.iconColor"></i>
+          </div>
+          <div class="props-kpi-card__content">
+            <p class="props-kpi-card__label">{{ kpi.label }}</p>
+            <p class="props-kpi-card__value">{{ kpi.value }}</p>
+            <p class="props-kpi-card__trend">{{ kpi.trend }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Barre de filtres -->
+  <div class="props-filters">
+    <!-- Recherche -->
+    <div class="props-filters__search">
+      <i class="pi pi-search props-filters__search-icon"></i>
+      <input
+        type="text"
+        class="props-filters__search-input"
+        placeholder="Recherche par titre, ville, partenaire..."
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    <!-- Agence / Hôtel -->
+    <ubax-ui-form-select
+      class="props-filters__select-field"
+      [options]="partnerOptions()"
+      [value]="partnerLabel()"
+      (valueChange)="onPartnerChange($event)"
+    />
+  </div>
+
+  <!-- Grille de cartes -->
+  @if (loading()) {
+    <div class="props-grid">
+      @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+        <div class="props-card-skeleton"></div>
+      }
+    </div>
+  } @else if (filteredProperties().length === 0) {
+    <ubax-empty-state
+      icon="pi pi-home"
+      title="Aucune propriété trouvée"
+      [description]="
+        searchQuery()
+          ? 'Aucune propriété ne correspond à votre recherche.'
+          : 'Aucune propriété publiée pour le moment.'
+      "
+    />
+  } @else {
+    <div class="props-grid">
+      @for (property of filteredProperties(); track property.id) {
+        <button type="button" class="props-card" (click)="viewDetail(property)">
+          <!-- Photo + gradient -->
+          <div class="props-card__photo-wrap">
+            @if (getCoverPhotoUrl(property)) {
+              <img
+                [src]="getCoverPhotoUrl(property)"
+                [alt]="property.title"
+                class="props-card__photo"
+                loading="lazy"
+              />
+            } @else {
+              <div class="props-card__photo-placeholder">
+                <i class="pi pi-home"></i>
+              </div>
+            }
+            <div class="props-card__gradient"></div>
+
+            <!-- Badge transaction type -->
+            <span
+              class="props-card__transaction-badge"
+              [style.background]="getTransactionColor(property.transactionType)"
+            >
+              {{ getTransactionTypeLabel(property.transactionType) }}
+            </span>
+
+            <!-- Badge statut -->
+            <span
+              class="props-card__status-badge"
+              [style.background]="getStatusColor(property.status)"
+            >
+              {{ getStatusLabel(property.status) }}
+            </span>
+
+            <!-- Nom agence/propriétaire + prix -->
+            <div class="props-card__bottom-overlay">
+              @if (
+                property.hotelName || property.agencyName || property.ownerName
+              ) {
+                <div class="props-card__owner-row">
+                  <div class="props-card__owner-avatar">
+                    <i class="pi pi-building"></i>
+                  </div>
+                  <span class="props-card__owner-name">
+                    {{
+                      property.hotelName ??
+                        property.agencyName ??
+                        property.ownerName
+                    }}
+                  </span>
+                </div>
+              }
+              <span class="props-card__price">
+                {{ formatPrice(property.price, property.transactionType) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Infos bas de carte -->
+          <div class="props-card__info">
+            <p class="props-card__title">{{ property.title ?? '—' }}</p>
+            <p class="props-card__location">
+              <i class="pi pi-map-marker"></i>
+              {{ property.city ?? '' }}
+              @if (property.district) {
+                · {{ property.district }}
+              }
+            </p>
+
+            <!-- Caractéristiques -->
+            <div class="props-card__features">
+              @if (property.bedrooms) {
+                <span class="props-card__feature">
+                  <i class="pi pi-th-large"></i>
+                  {{ property.bedrooms }} Ch.
+                </span>
+              }
+              @if (property.bathrooms) {
+                <span class="props-card__feature">
+                  <i class="pi pi-circle"></i>
+                  {{ property.bathrooms }} SdB
+                </span>
+              }
+              @if (property.surfaceLiving) {
+                <span class="props-card__feature">
+                  <i class="pi pi-expand"></i>
+                  {{ property.surfaceLiving }} m²
+                </span>
+              }
+            </div>
+          </div>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Footer : compteur + pagination -->
+  @if (!loading() && totalElements() > 0) {
+    <div class="props-footer">
+      <p class="props-footer__count">{{ getDisplayCount() }}</p>
+      <ubax-paginator
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        (currentPageChange)="onPageChange($event)"
+      />
+    </div>
+  }
+</div>

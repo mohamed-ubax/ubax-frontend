@@ -1,0 +1,601 @@
+<section class="bien-detail-page">
+  <!-- Header -->
+  <header class="bien-detail-page__header">
+    <div class="bien-detail-page__heading">
+      <button
+        type="button"
+        class="bien-back-button"
+        (click)="goBack()"
+        aria-label="Retour"
+      >
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      </button>
+      <h1 class="bien-detail-page__title">Détails d'un bien</h1>
+    </div>
+
+    <div class="bien-detail-page__actions">
+      <span
+        class="status-pill"
+        [class.status-pill--pending]="statusClass() === 'pending'"
+        [class.status-pill--rejected]="statusClass() === 'rejected'"
+        [class.status-pill--archived]="statusClass() === 'archived'"
+      >
+        {{ propertyStatus() }}
+      </span>
+
+      @if (isPending()) {
+        <button
+          type="button"
+          class="secondary-action"
+          [disabled]="saving()"
+          (click)="openModal('reject')"
+        >
+          <i class="pi pi-times-circle" aria-hidden="true"></i>
+          <span>Rejeter</span>
+        </button>
+        <button
+          type="button"
+          class="primary-action"
+          [disabled]="saving()"
+          (click)="openModal('approve')"
+        >
+          <span>Approuver</span>
+          <span class="primary-action__icon">
+            <i class="pi pi-check" aria-hidden="true"></i>
+          </span>
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Loading -->
+  @if (viewState() === 'loading') {
+    <div
+      class="detail-skeleton"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <div class="detail-skeleton__layout">
+        <div class="detail-skeleton__sidebar">
+          <div class="detail-skeleton__scard">
+            <div class="detail-skeleton__scard-avatar"></div>
+            <div class="detail-skeleton__lines">
+              <div
+                class="detail-skeleton__line detail-skeleton__line--lg"
+              ></div>
+              <div
+                class="detail-skeleton__line detail-skeleton__line--sm"
+              ></div>
+            </div>
+          </div>
+          <div class="detail-skeleton__scard">
+            <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
+            <div class="detail-skeleton__line"></div>
+          </div>
+        </div>
+        <div class="detail-skeleton__body">
+          <div class="detail-skeleton__gallery"></div>
+          <div class="detail-skeleton__thumbs">
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div class="detail-skeleton__thumb"></div>
+            }
+          </div>
+          <div class="detail-skeleton__line detail-skeleton__line--xl"></div>
+          <div class="detail-skeleton__line detail-skeleton__line--lg"></div>
+          <div class="detail-skeleton__metric-row">
+            @for (i of [0, 1, 2, 3, 4]; track i) {
+              <div class="detail-skeleton__metric"></div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+  } @else if (viewState() === 'error') {
+    <div class="detail-view-state detail-view-state--error" role="alert">
+      <h2>Chargement impossible</h2>
+      <p>{{ detailErrorMessage() }}</p>
+      <button
+        type="button"
+        class="detail-view-state__action"
+        (click)="retryLoad()"
+      >
+        Réessayer
+      </button>
+    </div>
+
+    <!-- Empty -->
+  } @else if (viewState() === 'empty') {
+    <div class="detail-view-state" role="status">
+      <h2>Bien introuvable</h2>
+      <p>Aucune donnée n'a été retournée pour ce bien.</p>
+    </div>
+
+    <!-- Success -->
+  } @else {
+    <div class="bien-detail-page__layout">
+      <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+      <aside class="bien-detail-sidebar">
+        <!-- Propriétaire / Agence -->
+        <article class="info-card">
+          <div class="info-card__header">
+            <i class="pi pi-user" aria-hidden="true"></i>
+            <h2>{{ property()?.agencyName ? 'Agence' : 'Propriétaire' }}</h2>
+          </div>
+          <div class="owner-card">
+            <div class="owner-card__avatar-placeholder">
+              <i class="pi pi-building" aria-hidden="true"></i>
+            </div>
+            <div class="owner-card__meta">
+              <p class="owner-card__name">{{ ownerName() }}</p>
+              @if (property()?.agencyId) {
+                <p class="owner-card__sub">ID : {{ property()?.agencyId }}</p>
+              }
+            </div>
+          </div>
+        </article>
+
+        <!-- Documents -->
+        <article class="info-card">
+          <div class="info-card__header">
+            <i class="pi pi-file" aria-hidden="true"></i>
+            <h2>Documents</h2>
+          </div>
+          <div class="document-list">
+            @for (doc of documents(); track doc.id) {
+              <div class="document-row">
+                <div class="document-row__label">
+                  <i class="pi pi-file-pdf" aria-hidden="true"></i>
+                  <span>{{ doc.name }}</span>
+                </div>
+                <div class="document-row__actions">
+                  <button
+                    type="button"
+                    aria-label="Prévisualiser"
+                    [disabled]="documentOpeningId() === doc.id"
+                    (click)="openDocument(doc.fileUrl, doc.name, doc.id)"
+                  >
+                    <i
+                      class="pi"
+                      [class.pi-eye]="documentOpeningId() !== doc.id"
+                      [class.pi-spin]="documentOpeningId() === doc.id"
+                      [class.pi-spinner]="documentOpeningId() === doc.id"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <div class="document-row document-row--empty">
+                <span>Aucun document disponible</span>
+              </div>
+            }
+          </div>
+        </article>
+
+        <!-- Statut modération (si PENDING) -->
+        @if (isPending()) {
+          <article class="info-card info-card--moderation">
+            <div class="info-card__header">
+              <i class="pi pi-shield" aria-hidden="true"></i>
+              <h2>Modération</h2>
+            </div>
+            <p class="moderation-hint">
+              Ce bien est en attente de validation. Examinez les informations,
+              les photos et les documents avant de statuer.
+            </p>
+            <div class="moderation-actions">
+              <button
+                type="button"
+                class="moderation-btn moderation-btn--reject"
+                [disabled]="saving()"
+                (click)="openModal('reject')"
+              >
+                <i class="pi pi-times-circle"></i> Rejeter
+              </button>
+              <button
+                type="button"
+                class="moderation-btn moderation-btn--approve"
+                [disabled]="saving()"
+                (click)="openModal('approve')"
+              >
+                <i class="pi pi-check-circle"></i> Approuver
+              </button>
+            </div>
+          </article>
+        }
+
+        <!-- Statut terminal -->
+        @if (isTerminal()) {
+          <article class="info-card">
+            <div class="info-card__header">
+              <i class="pi pi-info-circle" aria-hidden="true"></i>
+              <h2>Statut</h2>
+            </div>
+            @if (statusCode() === 'PUBLISHED') {
+              <div class="terminal-banner terminal-banner--published">
+                <i class="pi pi-check-circle"></i>
+                <div>
+                  <p class="terminal-banner__title">Bien publié</p>
+                  <p class="terminal-banner__sub">
+                    Publié le {{ property()?.publishedAt | date: 'dd/MM/yyyy' }}
+                  </p>
+                </div>
+              </div>
+            }
+            @if (statusCode() === 'REJECTED') {
+              <div class="terminal-banner terminal-banner--rejected">
+                <i class="pi pi-times-circle"></i>
+                <div>
+                  <p class="terminal-banner__title">Bien rejeté</p>
+                  @if (property()?.rejectionReason) {
+                    <p class="terminal-banner__reason">
+                      {{ property()?.rejectionReason }}
+                    </p>
+                  }
+                </div>
+              </div>
+            }
+          </article>
+        }
+      </aside>
+
+      <!-- ── Contenu principal ───────────────────────────────────────────── -->
+      <div class="bien-detail-content">
+        <article class="bien-detail-shell">
+          <!-- Galerie -->
+          <section class="gallery-section">
+            <div class="gallery-section__main">
+              <span class="gallery-section__status">{{
+                transactionLabel()
+              }}</span>
+
+              @if (isGalleryImageAvailable(activeGalleryItem())) {
+                <img
+                  class="gallery-section__image"
+                  [src]="activeGalleryItem().src"
+                  [alt]="activeGalleryItem().alt || propertyTitle()"
+                  (error)="markGalleryImageBroken(activeGalleryItem().key)"
+                />
+              } @else {
+                <div class="gallery-section__placeholder">
+                  <i class="pi pi-image" aria-hidden="true"></i>
+                  <span>Image indisponible</span>
+                </div>
+              }
+
+              <button
+                class="gallery-nav gallery-nav--previous"
+                type="button"
+                (click)="previousImage()"
+                aria-label="Image précédente"
+              >
+                <i class="pi pi-angle-left" aria-hidden="true"></i>
+              </button>
+              <button
+                class="gallery-nav gallery-nav--next"
+                type="button"
+                (click)="nextImage()"
+                aria-label="Image suivante"
+              >
+                <i class="pi pi-angle-right" aria-hidden="true"></i>
+              </button>
+            </div>
+
+            <div class="gallery-section__thumbs">
+              @for (
+                image of galleryItems();
+                track image.key;
+                let index = $index
+              ) {
+                <button
+                  class="gallery-thumb"
+                  [class.is-active]="activeImageIndex() === index"
+                  type="button"
+                  (click)="selectImage(index)"
+                >
+                  @if (isGalleryImageAvailable(image)) {
+                    <img
+                      [src]="image.src"
+                      [alt]="image.alt"
+                      (error)="markGalleryImageBroken(image.key)"
+                    />
+                  } @else {
+                    <div class="gallery-thumb__placeholder">
+                      <i class="pi pi-image" aria-hidden="true"></i>
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+          </section>
+
+          <!-- Overview -->
+          <section class="overview-section">
+            <div class="overview-section__intro">
+              <div>
+                <span class="lease-badge">{{ propertyTypeLabel() }}</span>
+                <h2>{{ propertyTitle() }}</h2>
+                <p class="overview-section__location">
+                  <i class="pi pi-map-marker" aria-hidden="true"></i>
+                  {{ locationLabel() }}
+                </p>
+                <p class="overview-section__location">
+                  <i class="pi pi-home" aria-hidden="true"></i>
+                  {{ fullAddress() }}
+                </p>
+              </div>
+              <div class="overview-section__stats">
+                <p class="overview-section__price">{{ priceLabel() }}</p>
+                <div class="overview-section__meta">
+                  <span>
+                    <strong>{{ transactionLabel() }}</strong>
+                    <em>transaction</em>
+                  </span>
+                  <span>
+                    <strong>{{ conditionLabel() }}</strong>
+                    <em>état</em>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              @for (metric of metrics(); track metric.label) {
+                <div class="metric-pill">
+                  <span class="metric-pill__value">{{ metric.value }}</span>
+                  <span class="metric-pill__label">{{ metric.label }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Description -->
+          <section class="content-section">
+            <h3>Description</h3>
+            @for (paragraph of descriptionParagraphs(); track paragraph) {
+              <p>{{ paragraph }}</p>
+            }
+          </section>
+
+          <!-- Commodités -->
+          <section class="content-section">
+            <h3>Commodités</h3>
+            <div class="amenities-grid">
+              @for (column of amenityColumns(); track $index) {
+                <div class="amenity-column">
+                  @for (item of column; track item) {
+                    <div class="amenity-item">
+                      <span class="amenity-item__icon">
+                        <i class="pi pi-check" aria-hidden="true"></i>
+                      </span>
+                      <span>{{ item }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Localisation -->
+          <section class="content-section content-section--location">
+            <h3>Localisation</h3>
+            <div class="location-panel">
+              @if (hasCoordinates()) {
+                <iframe
+                  class="location-panel__map"
+                  [src]="mapSafeUrl()"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Localisation du bien"
+                ></iframe>
+              } @else {
+                <div class="location-panel__map-placeholder">
+                  <i class="pi pi-map" aria-hidden="true"></i>
+                  <span>Coordonnées GPS non renseignées</span>
+                </div>
+              }
+            </div>
+          </section>
+        </article>
+      </div>
+    </div>
+  }
+</section>
+
+<!-- ── Document preview ──────────────────────────────────────────────────── -->
+@if (previewUrl()) {
+  <button
+    type="button"
+    class="doc-preview-backdrop"
+    (click)="closePreview()"
+    aria-label="Fermer l'aperçu du document"
+  ></button>
+  <div
+    class="doc-preview"
+    [class.doc-preview--fullscreen]="previewFullscreen()"
+  >
+    <header class="doc-preview__header">
+      <div class="doc-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file-pdf]="!previewIsImage()"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+      <div class="doc-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="doc-preview__action-btn"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="doc-preview__action-btn"
+          (click)="togglePreviewFullscreen()"
+          [title]="
+            previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+          "
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="doc-preview__action-btn doc-preview__action-btn--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+    <div class="doc-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="doc-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="doc-preview__iframe"
+          title="Prévisualisation"
+        ></iframe>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Modal : Approuver ─────────────────────────────────────────────────── -->
+<p-dialog
+  [visible]="activeModal() === 'approve'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Approuver ce bien"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '520px' }"
+  styleClass="propriete-modal"
+>
+  <div class="propriete-modal__approve">
+    <div class="propriete-modal__approve-icon">
+      <i class="pi pi-check-circle"></i>
+    </div>
+    <p class="propriete-modal__approve-title">Confirmer la publication</p>
+    <p class="propriete-modal__approve-desc">
+      Ce bien sera immédiatement publié sur la plateforme UBAX et visible par
+      tous les utilisateurs.
+    </p>
+    <div class="propriete-modal__summary">
+      <div class="summary-row">
+        <div class="summary-col">
+          <span class="summary-col__label">Bien</span>
+          <span class="summary-col__value">{{ propertyTitle() }}</span>
+        </div>
+        <div class="summary-col">
+          <span class="summary-col__label">Ville</span>
+          <span class="summary-col__value">{{ property()?.city ?? '—' }}</span>
+        </div>
+        <div class="summary-col">
+          <span class="summary-col__label">Prix</span>
+          <span class="summary-col__value">{{ priceLabel() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="propriete-modal__footer">
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--ghost"
+        (click)="closeModal()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--success"
+        [disabled]="saving()"
+        (click)="submitApprove()"
+      >
+        <i class="pi pi-check"></i>
+        {{ saving() ? 'Publication...' : 'Confirmer la publication' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ── Modal : Rejeter ───────────────────────────────────────────────────── -->
+<p-dialog
+  [visible]="activeModal() === 'reject'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Rejeter ce bien"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '560px' }"
+  styleClass="propriete-modal"
+>
+  <form [formGroup]="rejectionForm" class="propriete-modal__form">
+    <p class="propriete-modal__description">
+      Veuillez indiquer le motif du rejet. Ce message sera transmis au
+      propriétaire ou à l'agence.
+    </p>
+    <div class="propriete-modal__field">
+      <label class="propriete-modal__label" for="rejection-reason">
+        Motif du rejet <span class="propriete-modal__required">*</span>
+      </label>
+      <textarea
+        pTextarea
+        id="rejection-reason"
+        formControlName="reason"
+        rows="5"
+        placeholder="Ex : Photos insuffisantes, informations incomplètes..."
+        class="propriete-modal__textarea"
+        [class.ng-invalid]="
+          rejectionForm.get('reason')?.invalid &&
+          rejectionForm.get('reason')?.touched
+        "
+      >
+      </textarea>
+      @if (
+        rejectionForm.get('reason')?.invalid &&
+        rejectionForm.get('reason')?.touched
+      ) {
+        <span class="propriete-modal__error"
+          >Le motif est obligatoire (minimum 10 caractères).</span
+        >
+      }
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <div class="propriete-modal__footer">
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--ghost"
+        (click)="closeModal()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--danger"
+        [disabled]="saving()"
+        (click)="submitReject()"
+      >
+        <i class="pi pi-times"></i>
+        {{ saving() ? 'Rejet en cours...' : 'Confirmer le rejet' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
