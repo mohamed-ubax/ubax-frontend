@@ -69,6 +69,11 @@ export interface PropertyResponse {
   condition?: string;
 
   /**
+   * URL de la photo de couverture (null si aucun média uploadé)
+   */
+  coverPhotoUrl?: string;
+
+  /**
    * Date de création
    */
   createdAt?: string;
@@ -87,6 +92,16 @@ export interface PropertyResponse {
    * Étage du bien (0 = RDC, null = villa/terrain)
    */
   floor?: number;
+
+  /**
+   * Identifiant de l'hôtel propriétaire (null si bien immobilier classique)
+   */
+  hotelId?: string;
+
+  /**
+   * Nom de l'hôtel propriétaire (null si bien immobilier classique)
+   */
+  hotelName?: string;
 
   /**
    * Identifiant unique du bien

@@ -7,16 +7,14 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { BailleurAgencyResponse } from '../../models/bailleur-agency-response';
 
-export interface ListAttachments$Params {
-  ticketId: string;
+export interface GetMyAgencies$Params {
 }
 
-export function listAttachments(http: HttpClient, rootUrl: string, params: ListAttachments$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, listAttachments.PATH, 'get');
+export function getMyAgencies(http: HttpClient, rootUrl: string, params?: GetMyAgencies$Params, context?: HttpContext): Observable<StrictHttpResponse<BailleurAgencyResponse>> {
+  const rb = new RequestBuilder(rootUrl, getMyAgencies.PATH, 'get');
   if (params) {
-    rb.path('ticketId', params.ticketId, {});
   }
 
   return http.request(
@@ -24,9 +22,9 @@ export function listAttachments(http: HttpClient, rootUrl: string, params: ListA
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<BailleurAgencyResponse>;
     })
   );
 }
 
-listAttachments.PATH = '/v1/tickets/{ticketId}/attachments';
+getMyAgencies.PATH = '/v1/bailleur/my-agencies';

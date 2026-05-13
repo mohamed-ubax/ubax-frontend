@@ -44,7 +44,7 @@
   }
 }
 
-// KPI Grid — 5 colonnes comme dans le design
+// KPI Grid — 5 colonnes
 .props-kpi-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -73,9 +73,7 @@
     justify-content: center;
     flex-shrink: 0;
 
-    i {
-      font-size: 1.5rem;
-    }
+    i { font-size: 1.5rem; }
   }
 
   &__label {
@@ -113,121 +111,62 @@
   &__search {
     position: relative;
     flex: 1;
-    min-width: 280px;
+    min-width: 260px;
   }
 
   &__search-icon {
     position: absolute;
-    left: 1rem;
+    left: 1.125rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--color-neutral-500);
     font-size: 0.875rem;
     pointer-events: none;
+    z-index: 1;
   }
 
   &__search-input {
     width: 100%;
-    height: 56px;
+    height: 55px;
     padding: 0 1rem 0 2.75rem;
-    border: 1px solid var(--color-neutral-300);
-    border-radius: 9999px;
-    background: white;
-    font-size: 0.75rem;
+    border: none;
+    border-radius: 27.5px;
+    background: var(--color-neutral-200);
+    font-size: 0.9375rem;
+    font-weight: 300;
     color: var(--color-brand-navy);
     font-family: 'Lexend', sans-serif;
     outline: none;
-    transition: border-color 0.15s;
+    transition: box-shadow 0.18s ease;
 
-    &::placeholder {
-      color: #565656;
-    }
+    &::placeholder { color: #565656; }
 
-    &:focus {
-      border-color: var(--color-brand-blue);
-    }
+    &:hover { box-shadow: 0 14px 26px rgb(13 10 44 / 0.08); }
+    &:focus { box-shadow: inset 0 0 0 1px rgb(26 48 71 / 0.12); }
   }
 
-  &__select-wrap {
-    position: relative;
+  // Override UiFormSelectComponent pour matcher le style pill
+  &__select-field {
     flex-shrink: 0;
-  }
+    min-width: 180px;
 
-  &__select {
-    height: 56px;
-    padding: 0 2.5rem 0 1rem;
-    border: 1px solid var(--color-neutral-300);
-    border-radius: 9999px;
-    background: white;
-    font-size: 0.75rem;
-    color: #565656;
-    font-family: 'Lexend', sans-serif;
-    appearance: none;
-    cursor: pointer;
-    outline: none;
-    min-width: 160px;
-    transition: border-color 0.15s;
-
-    &:focus {
-      border-color: var(--color-brand-blue);
+    // Le composant utilise .form-select__trigger avec border-radius: 27.5px
+    // et background: var(--ubax-page-bg) — on surcharge pour matcher le contexte admin
+    :host ::ng-deep .form-select__trigger {
+      background: var(--color-neutral-200);
+      min-height: 55px;
     }
-  }
-
-  &__select-icon {
-    position: absolute;
-    right: 0.875rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--color-neutral-500);
-    font-size: 0.75rem;
-    pointer-events: none;
-  }
-
-  &__price-range {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: white;
-    border: 1px solid var(--color-neutral-300);
-    border-radius: 9999px;
-    padding: 0 1rem;
-    height: 56px;
-    flex-shrink: 0;
-  }
-
-  &__price-input {
-    width: 110px;
-    border: none;
-    outline: none;
-    font-size: 0.75rem;
-    color: #565656;
-    font-family: 'Lexend', sans-serif;
-    background: transparent;
-
-    &::placeholder {
-      color: #565656;
-    }
-  }
-
-  &__price-sep {
-    color: var(--color-neutral-500);
-    font-size: 0.75rem;
   }
 }
 
-// Grille de cartes — 4 colonnes comme dans le design
+// Grille de cartes — 4 colonnes
 .props-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
 
-  @media (max-width: 1600px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  @media (max-width: 1600px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
 }
 
 // Skeleton
@@ -264,7 +203,7 @@
 
   &__photo-wrap {
     position: absolute;
-    inset: 0 0 31.79% 0; // ~68% de hauteur pour la photo
+    inset: 0 0 31.79% 0;
     border-radius: 20px 20px 0 0;
     overflow: hidden;
   }
@@ -284,10 +223,7 @@
     align-items: center;
     justify-content: center;
 
-    i {
-      font-size: 3rem;
-      color: rgba(255, 255, 255, 0.3);
-    }
+    i { font-size: 3rem; color: rgba(255, 255, 255, 0.3); }
   }
 
   &__gradient {
@@ -323,14 +259,22 @@
     z-index: 2;
   }
 
-  &__owner-overlay {
+  &__bottom-overlay {
     position: absolute;
-    bottom: 36%; // juste au-dessus de la zone blanche
-    left: 14px;
+    bottom: 32%;
+    left: 0;
+    right: 0;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+  }
+
+  &__owner-row {
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    z-index: 2;
   }
 
   &__owner-avatar {
@@ -343,10 +287,7 @@
     justify-content: center;
     flex-shrink: 0;
 
-    i {
-      font-size: 0.5rem;
-      color: white;
-    }
+    i { font-size: 0.5rem; color: white; }
   }
 
   &__owner-name {
@@ -357,14 +298,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 160px;
-  }
-
-  &__price-overlay {
-    position: absolute;
-    bottom: 33%;
-    right: 14px;
-    z-index: 2;
+    max-width: 120px;
   }
 
   &__price {
@@ -375,11 +309,11 @@
     white-space: nowrap;
   }
 
-  // Zone blanche du bas (backdrop-blur)
+  // Zone blanche du bas
   &__info {
     position: absolute;
     inset: 68.21% 0 0 0;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(2px);
     border-radius: 0 0 15px 15px;
     padding: 0.625rem 0.875rem 0.5rem;
@@ -408,18 +342,19 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
-    i {
-      font-size: 0.5rem;
-      color: var(--color-brand-orange);
-    }
+    i { font-size: 0.5rem; color: var(--color-brand-orange); flex-shrink: 0; }
   }
 
   &__features {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    gap: 0.625rem;
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
 
   &__feature {
@@ -429,11 +364,9 @@
     font-size: 0.625rem;
     color: #1c1c1c;
     font-family: 'Lexend', sans-serif;
+    white-space: nowrap;
 
-    i {
-      font-size: 0.625rem;
-      color: var(--color-neutral-500);
-    }
+    i { font-size: 0.625rem; color: var(--color-neutral-500); }
   }
 }
 

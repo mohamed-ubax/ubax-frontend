@@ -4,8 +4,6 @@
 import { BailleurPropertyRequest } from '../models/bailleur-property-request';
 export interface BailleurApplyRequest {
   agencyId: string;
-  email?: string;
-  firstName?: string;
 
   /**
    * Numéro de la pièce d'identité correspondant au type sélectionné
@@ -16,7 +14,5 @@ export interface BailleurApplyRequest {
    * Type de pièce d'identité — valeurs disponibles via GET /v1/code-list/type/ID_TYPE
    */
   idType?: 'CNI' | 'PASSEPORT' | 'PERMIS_CONDUIRE' | 'TITRE_SEJOUR' | 'CARTE_CONSULAIRE';
-  lastName?: string;
-  phone?: string;
   properties?: Array<BailleurPropertyRequest>;
 }

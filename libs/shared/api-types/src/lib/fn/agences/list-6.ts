@@ -7,9 +7,10 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { AgencyResponse } from '../../models/agency-response';
 
-export interface FindAll$Params {
+export interface List6$Params {
+  city?: string;
 
 /**
  * Zero-based page index (0..N)
@@ -27,9 +28,10 @@ export interface FindAll$Params {
   sort?: Array<string>;
 }
 
-export function findAll(http: HttpClient, rootUrl: string, params?: FindAll$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, findAll.PATH, 'get');
+export function list6(http: HttpClient, rootUrl: string, params?: List6$Params, context?: HttpContext): Observable<StrictHttpResponse<AgencyResponse>> {
+  const rb = new RequestBuilder(rootUrl, list6.PATH, 'get');
   if (params) {
+    rb.query('city', params.city, {});
     rb.query('page', params.page, {});
     rb.query('size', params.size, {});
     rb.query('sort', params.sort, {});
@@ -40,9 +42,9 @@ export function findAll(http: HttpClient, rootUrl: string, params?: FindAll$Para
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<AgencyResponse>;
     })
   );
 }
 
-findAll.PATH = '/v1/code-list';
+list6.PATH = '/v1/agencies';

@@ -10,11 +10,9 @@ import {
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import type { PropertyResponse } from '@ubax-workspace/shared-api-types';
-import {
-  EmptyStateComponent,
-} from '@ubax-workspace/shared-design-system';
+import { EmptyStateComponent } from '@ubax-workspace/shared-design-system';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
-import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import { UbaxPaginatorComponent, UiFormSelectComponent } from '@ubax-workspace/shared-ui';
 import { AdminPropertiesService } from '../../services/admin-properties.service';
 
 export interface PropertyKpi {
@@ -56,19 +54,32 @@ const TRANSACTION_COLORS: Record<string, string> = {
   SHORT_STAY: '#2b7fff',
 };
 
+// Options pour les selects
+const CITY_OPTIONS = ['Toutes les villes', 'Dakar', 'Abidjan', 'Douala', 'Yaoundé', 'Bamako', 'Lomé', 'Cotonou', 'Ouagadougou', 'Niamey'];
+const TYPE_OPTIONS = ['Tous les types', 'Appartement', 'Villa', 'Maison', 'Terrain', 'Bureau', 'Studio', 'Duplex'];
+const TRANSACTION_OPTIONS = ["Tous les types d'offre", 'Vente', 'Location', 'Location meublée', 'Court séjour'];
+
+const TYPE_VALUE_MAP: Record<string, string> = {
+  'Appartement': 'APARTMENT', 'Villa': 'VILLA', 'Maison': 'HOUSE',
+  'Terrain': 'LAND', 'Bureau': 'OFFICE', 'Studio': 'STUDIO', 'Duplex': 'DUPLEX',
+};
+const TRANSACTION_VALUE_MAP: Record<string, string> = {
+  'Vente': 'SALE', 'Location': 'RENT', 'Location meublée': 'RENT_FURNISHED', 'Court séjour': 'SHORT_STAY',
+};
+
 @Component({
   selector: 'ubax-proprietes-published-list',
   standalone: true,
   imports: [
     EmptyStateComponent,
     UbaxPaginatorComponent,
+    UiFormSelectComponent,
   ],
   templateUrl: './proprietes-published-list-page.component.html',
   styleUrl: './proprietes-published-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProprietesPublishedListPageComponent {
-  // Inputs pour personnaliser selon agences vs hôtels
   readonly pageTitle = input.required<string>();
   readonly kpis = input<PropertyKpi[]>([]);
   readonly transactionTypeFilter = input<string | undefined>(undefined);
@@ -81,15 +92,18 @@ export class ProprietesPublishedListPageComponent {
   protected readonly properties = signal<PropertyResponse[]>([]);
   protected readonly totalElements = signal(0);
   protected readonly totalPages = signal(1);
-  protected readonly currentPage = signal(1); // 1-based for paginator
+  protected readonly currentPage = signal(1);
 
-  // Filtres
+  // Select values (label-based for UiFormSelectComponent)
   protected readonly searchQuery = signal('');
-  protected readonly cityFilter = signal('');
-  protected readonly typeFilter = signal('');
-  protected readonly transactionFilter = signal('');
-  protected readonly minPriceFilter = signal('');
-  protected readonly maxPriceFilter = signal('');
+  protected readonly cityLabel = signal('Toutes les villes');
+  protected readonly typeLabel = signal('Tous les types');
+  protected readonly transactionLabel = signal("Tous les types d'offre");
+
+  // Options
+  protected readonly cityOptions = CITY_OPTIONS;
+  protected readonly typeOptions = TYPE_OPTIONS;
+  protected readonly transactionOptions = TRANSACTION_OPTIONS;
 
   protected readonly filteredProperties = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -106,7 +120,6 @@ export class ProprietesPublishedListPageComponent {
 
   constructor() {
     effect(() => {
-      // Re-fetch when page changes
       void this.loadProperties();
     });
   }
@@ -114,15 +127,23 @@ export class ProprietesPublishedListPageComponent {
   private async loadProperties(): Promise<void> {
     this.loading.set(true);
     try {
+      const cityVal = this.cityLabel();
+      const typeVal = this.typeLabel();
+      const txVal = this.transactionLabel();
+
+      const city = cityVal === 'Toutes les villes' ? undefined : cityVal;
+      const propertyType = typeVal === 'Tous les types' ? undefined : TYPE_VALUE_MAP[typeVal];
+      const transactionType = txVal === "Tous les types d'offre"
+        ? (this.transactionTypeFilter() || undefined)
+        : TRANSACTION_VALUE_MAP[txVal];
+
       const result = await firstValueFrom(
         this.svc.listPublished({
           page: this.currentPage() - 1,
           size: PAGE_SIZE,
-          city: this.cityFilter() || undefined,
-          propertyType: this.typeFilter() || undefined,
-          transactionType: this.transactionFilter() || this.transactionTypeFilter() || undefined,
-          minPrice: this.minPriceFilter() ? Number(this.minPriceFilter()) : undefined,
-          maxPrice: this.maxPriceFilter() ? Number(this.maxPriceFilter()) : undefined,
+          city,
+          propertyType,
+          transactionType,
         }),
       );
       this.properties.set(result.items);
@@ -139,20 +160,20 @@ export class ProprietesPublishedListPageComponent {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }
 
-  protected onCityChange(event: Event): void {
-    this.cityFilter.set((event.target as HTMLSelectElement).value);
+  protected onCityChange(value: string): void {
+    this.cityLabel.set(value);
     this.currentPage.set(1);
     void this.loadProperties();
   }
 
-  protected onTypeChange(event: Event): void {
-    this.typeFilter.set((event.target as HTMLSelectElement).value);
+  protected onTypeChange(value: string): void {
+    this.typeLabel.set(value);
     this.currentPage.set(1);
     void this.loadProperties();
   }
 
-  protected onTransactionChange(event: Event): void {
-    this.transactionFilter.set((event.target as HTMLSelectElement).value);
+  protected onTransactionChange(value: string): void {
+    this.transactionLabel.set(value);
     this.currentPage.set(1);
     void this.loadProperties();
   }
@@ -170,7 +191,7 @@ export class ProprietesPublishedListPageComponent {
     return PROPERTY_TYPE_LABELS[type ?? ''] ?? (type ?? '—');
   }
 
-  protected getTransactionLabel(type: string | undefined): string {
+  protected getTransactionTypeLabel(type: string | undefined): string {
     return TRANSACTION_TYPE_LABELS[type ?? ''] ?? (type ?? '—');
   }
 
@@ -180,9 +201,7 @@ export class ProprietesPublishedListPageComponent {
 
   protected formatPrice(price: number | undefined, transactionType?: string): string {
     if (!price) return '—';
-    const formatted = new Intl.NumberFormat('fr-FR', {
-      maximumFractionDigits: 0,
-    }).format(price);
+    const formatted = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(price);
     const suffix = transactionType === 'SALE' ? 'FCFA' : 'FCFA/Mois';
     return `${formatted} ${suffix}`;
   }

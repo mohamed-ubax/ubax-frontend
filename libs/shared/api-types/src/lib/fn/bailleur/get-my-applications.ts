@@ -7,9 +7,14 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { BailleurApplicationResponse } from '../../models/bailleur-application-response';
 
-export interface FindAll$Params {
+export interface GetMyApplications$Params {
+
+/**
+ * Filtrer par statut (optionnel)
+ */
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 
 /**
  * Zero-based page index (0..N)
@@ -27,9 +32,10 @@ export interface FindAll$Params {
   sort?: Array<string>;
 }
 
-export function findAll(http: HttpClient, rootUrl: string, params?: FindAll$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, findAll.PATH, 'get');
+export function getMyApplications(http: HttpClient, rootUrl: string, params?: GetMyApplications$Params, context?: HttpContext): Observable<StrictHttpResponse<BailleurApplicationResponse>> {
+  const rb = new RequestBuilder(rootUrl, getMyApplications.PATH, 'get');
   if (params) {
+    rb.query('status', params.status, {});
     rb.query('page', params.page, {});
     rb.query('size', params.size, {});
     rb.query('sort', params.sort, {});
@@ -40,9 +46,9 @@ export function findAll(http: HttpClient, rootUrl: string, params?: FindAll$Para
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<BailleurApplicationResponse>;
     })
   );
 }
 
-findAll.PATH = '/v1/code-list';
+getMyApplications.PATH = '/v1/bailleur/my-applications';

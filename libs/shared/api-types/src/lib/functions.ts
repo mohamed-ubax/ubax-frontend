@@ -237,6 +237,10 @@ export type { Apply1$Params as Apply1$Params } from './fn/bailleur/apply-1';
 export { apply1 as apply1 } from './fn/bailleur/apply-1';
 export type { ProcessDecision$Params as ProcessDecision$Params } from './fn/bailleur/process-decision';
 export { processDecision as processDecision } from './fn/bailleur/process-decision';
+export type { GetMyApplications$Params as GetMyApplications$Params } from './fn/bailleur/get-my-applications';
+export { getMyApplications as getMyApplications } from './fn/bailleur/get-my-applications';
+export type { GetMyAgencies$Params as GetMyAgencies$Params } from './fn/bailleur/get-my-agencies';
+export { getMyAgencies as getMyAgencies } from './fn/bailleur/get-my-agencies';
 export type { ListByAgency$Params as ListByAgency$Params } from './fn/bailleur/list-by-agency';
 export { listByAgency as listByAgency } from './fn/bailleur/list-by-agency';
 export type { GetById7$Params as GetById7$Params } from './fn/bailleur/get-by-id-7';
@@ -293,3 +297,5 @@ export type { GetAgencyDashboard$Params as GetAgencyDashboard$Params } from './f
 export { getAgencyDashboard as getAgencyDashboard } from './fn/dashboard/get-agency-dashboard';
 export type { GetAdminDashboard$Params as GetAdminDashboard$Params } from './fn/dashboard/get-admin-dashboard';
 export { getAdminDashboard as getAdminDashboard } from './fn/dashboard/get-admin-dashboard';
+export type { List6$Params as List6$Params } from './fn/agences/list-6';
+export { list6 as list6 } from './fn/agences/list-6';

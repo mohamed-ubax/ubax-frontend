@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -21,17 +21,12 @@ import {
   ApiConfiguration,
   generateReadUrl,
   type PropertyDetailResponse,
-  type PropertyResponse,
   type PropertyMediaResponse,
   type PropertyDocumentResponse,
   type PresignedReadUrlResponse,
 } from '@ubax-workspace/shared-api-types';
-import {
-  EmptyStateComponent,
-  SectionCardComponent,
-  StatusBadgeComponent,
-  type InfoItem,
-} from '@ubax-workspace/shared-design-system';
+import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
+// shared-design-system components not used in this template (uses bien-detail-page pattern directly)
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
@@ -42,39 +37,45 @@ import {
 
 type ModalType = 'approve' | 'reject' | null;
 
+type BienGalleryItem = {
+  readonly key: string;
+  readonly src: string | null;
+  readonly alt: string;
+  readonly isPlaceholder: boolean;
+};
+
+type BienDocument = {
+  readonly id: string;
+  readonly name: string;
+  readonly fileUrl: string;
+};
+
+type BienMetric = {
+  readonly label: string;
+  readonly value: string;
+};
+
+const MIN_GALLERY_SLOTS = 4;
+
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  APARTMENT: 'Appartement',
-  VILLA: 'Villa',
-  HOUSE: 'Maison',
-  LAND: 'Terrain',
-  OFFICE: 'Bureau',
-  COMMERCIAL: 'Commercial',
-  STUDIO: 'Studio',
-  DUPLEX: 'Duplex',
-  PENTHOUSE: 'Penthouse',
+  APARTMENT: 'Appartement', VILLA: 'Villa', HOUSE: 'Maison',
+  LAND: 'Terrain', OFFICE: 'Bureau', COMMERCIAL: 'Commercial',
+  STUDIO: 'Studio', DUPLEX: 'Duplex', PENTHOUSE: 'Penthouse',
+  HOTEL_ROOM: 'Chambre hôtel', HOTEL_SUITE: 'Suite hôtel',
 };
 
 const TRANSACTION_TYPE_LABELS: Record<string, string> = {
-  SALE: 'Vente',
-  RENT: 'Location',
-  RENT_FURNISHED: 'Location meublée',
-  SHORT_STAY: 'Court séjour',
+  SALE: 'Vente', RENT: 'Location',
+  RENT_FURNISHED: 'Location meublée', SHORT_STAY: 'Court séjour',
 };
 
 const CONDITION_LABELS: Record<string, string> = {
-  NEW: 'Neuf',
-  GOOD: 'Bon état',
-  RENOVATE: 'À rénover',
+  NEW: 'Neuf', GOOD: 'Bon état', RENOVATE: 'À rénover',
 };
 
-const DOC_TYPE_LABELS: Record<string, string> = {
-  TITLE_DEED: 'Titre de propriété',
-  BUILDING_PERMIT: 'Permis de construire',
-  DIAGNOSTIC: 'Diagnostic',
-  CADASTRAL_PLAN: 'Plan cadastral',
-  INSURANCE: 'Assurance',
-  CONFORMITY_CERTIFICATE: 'Certificat de conformité',
-  OTHER: 'Autre',
+const STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Brouillon', PENDING: 'En attente', PUBLISHED: 'Publié',
+  RESERVED: 'Réservé', SOLD: 'Vendu', ARCHIVED: 'Archivé', REJECTED: 'Rejeté',
 };
 
 @Component({
@@ -82,11 +83,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   standalone: true,
   imports: [
     DatePipe,
-    RouterLink,
     ReactiveFormsModule,
-    SectionCardComponent,
-    StatusBadgeComponent,
-    EmptyStateComponent,
     DialogModule,
     TextareaModule,
   ],
@@ -109,107 +106,309 @@ export class ProprietesDetailPageComponent {
     { initialValue: '' },
   );
 
-  protected readonly loading = signal(false);
-  protected readonly saving = signal(false);
-  protected readonly detail = signal<PropertyDetailResponse | null>(null);
+  private readonly propertyDetail = signal<PropertyDetailResponse | null>(null);
+  private readonly loadingDetail = signal(false);
+  private readonly detailError = signal<string | null>(null);
+  private readonly hasLoadedDetail = signal(false);
+
+  protected readonly activeImageIndex = signal(0);
+  protected readonly brokenGalleryImageKeys = signal<Record<string, true>>({});
   protected readonly activeModal = signal<ModalType>(null);
-  protected readonly activeMediaIndex = signal(0);
-  protected readonly lightboxOpen = signal(false);
-  protected readonly lightboxUrl = signal<string | null>(null);
-  protected readonly lightboxSafeUrl = computed<SafeResourceUrl | null>(() => {
-    const url = this.lightboxUrl();
+  protected readonly saving = signal(false);
+  protected readonly documentOpeningId = signal<string | null>(null);
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly previewName = signal<string>('Document');
+  protected readonly previewFullscreen = signal(false);
+  protected readonly previewIsImage = signal(false);
+
+  protected readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   });
-  protected readonly lightboxIsImage = signal(false);
-  protected readonly openingMediaId = signal<string | null>(null);
-  protected readonly openingDocId = signal<string | null>(null);
 
   protected readonly rejectionForm = this.fb.group({
     reason: ['', [Validators.required, Validators.minLength(10)]],
   });
 
-  // ── Computed ──────────────────────────────────────────────────────────────
+  // ── ViewState ─────────────────────────────────────────────────────────────
 
-  protected readonly property = computed(() => this.detail()?.property ?? null);
+  protected readonly property = computed(() => this.propertyDetail()?.property ?? null);
 
-  protected readonly media = computed(() => this.detail()?.media ?? []);
-
-  protected readonly coverMedia = computed(() =>
-    this.media().find((m) => m.cover) ?? this.media()[0] ?? null,
+  protected readonly viewState = computed<ViewState>(() =>
+    deriveViewState(
+      this.loadingDetail(),
+      this.detailError(),
+      !this.property(),
+      this.hasLoadedDetail(),
+    ),
   );
 
-  protected readonly galleryMedia = computed(() =>
-    this.media().filter((m) => m.mediaType === 'IMAGE' || !m.mediaType),
+  protected readonly detailErrorMessage = computed(
+    () => this.detailError() ?? 'Impossible de charger les détails de ce bien.',
   );
 
-  protected readonly documents = computed(() => this.detail()?.documents ?? []);
+  // ── Status ────────────────────────────────────────────────────────────────
 
-  protected readonly infoItems = computed<InfoItem[]>(() => {
+  protected readonly statusCode = computed(() => this.property()?.status ?? 'PENDING');
+
+  protected readonly propertyStatus = computed(
+    () => STATUS_LABELS[this.statusCode()] ?? this.statusCode(),
+  );
+
+  protected readonly statusClass = computed(() => {
+    const code = this.statusCode();
+    if (code === 'ARCHIVED') return 'archived';
+    if (code === 'PENDING') return 'pending';
+    if (code === 'REJECTED') return 'rejected';
+    if (code === 'PUBLISHED') return 'active';
+    return 'active';
+  });
+
+  protected readonly isPending = computed(() => this.statusCode() === 'PENDING');
+  protected readonly isTerminal = computed(() =>
+    this.statusCode() === 'PUBLISHED' || this.statusCode() === 'REJECTED' || this.statusCode() === 'ARCHIVED',
+  );
+
+  // ── Gallery ───────────────────────────────────────────────────────────────
+
+  protected readonly galleryItems = computed<readonly BienGalleryItem[]>(() => {
+    const media = this.propertyDetail()?.media ?? [];
+    const photos = [...media]
+      .filter((item) => (item.mediaType ?? 'PHOTO') !== 'VIDEO')
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((item, index) => ({
+        key: item.id ?? `gallery-${index}`,
+        src: item.fileUrl?.trim() || null,
+        alt: `Photo du bien ${index + 1}`,
+        isPlaceholder: !item.fileUrl?.trim(),
+      } satisfies BienGalleryItem));
+
+    const items = [...photos];
+    while (items.length < MIN_GALLERY_SLOTS) {
+      items.push({
+        key: `gallery-placeholder-${items.length + 1}`,
+        src: null,
+        alt: `Image indisponible ${items.length + 1}`,
+        isPlaceholder: true,
+      });
+    }
+    return items;
+  });
+
+  protected readonly activeGalleryItem = computed<BienGalleryItem>(() => {
+    const items = this.galleryItems();
+    const index = Math.min(this.activeImageIndex(), items.length - 1);
+    return items[index] ?? items[0] ?? { key: 'fallback', src: null, alt: '', isPlaceholder: true };
+  });
+
+  // ── Documents ─────────────────────────────────────────────────────────────
+
+  protected readonly documents = computed<readonly BienDocument[]>(() =>
+    (this.propertyDetail()?.documents ?? []).map((doc, i) => ({
+      id: doc.id ?? `doc-${i}`,
+      name: doc.title?.trim() || doc.fileName?.trim() || 'Document',
+      fileUrl: doc.fileUrl ?? '',
+    })),
+  );
+
+  // ── Computed labels ───────────────────────────────────────────────────────
+
+  protected readonly propertyTitle = computed(
+    () => this.property()?.title?.trim() || 'Bien immobilier',
+  );
+
+  protected readonly propertyTypeLabel = computed(() => {
+    const code = this.property()?.propertyType ?? '';
+    return PROPERTY_TYPE_LABELS[code] ?? this.normalizeCodeLabel(code);
+  });
+
+  protected readonly transactionLabel = computed(() => {
+    const code = this.property()?.transactionType ?? '';
+    return TRANSACTION_TYPE_LABELS[code] ?? this.normalizeCodeLabel(code);
+  });
+
+  protected readonly conditionLabel = computed(() => {
+    const code = this.property()?.condition ?? '';
+    return CONDITION_LABELS[code] ?? this.normalizeCodeLabel(code);
+  });
+
+  protected readonly locationLabel = computed(() => {
+    const city = this.normalizeCodeLabel(this.property()?.city ?? '');
+    const district = (this.property()?.district ?? '').trim();
+    return [city, district].filter(Boolean).join(', ') || '—';
+  });
+
+  protected readonly fullAddress = computed(() => {
+    const street = (this.property()?.street ?? '').trim();
+    const address = (this.property()?.address ?? '').trim();
+    return [street, address].filter(Boolean).join(', ') || '—';
+  });
+
+  protected readonly priceLabel = computed(() => {
+    const amount = this.property()?.price;
+    if (typeof amount !== 'number') return '—';
+    return `${amount.toLocaleString('fr-FR')} FCFA`;
+  });
+
+  protected readonly ownerName = computed(
+    () => this.property()?.ownerName?.trim() || this.property()?.agencyName?.trim() || 'Non renseigné',
+  );
+
+  protected readonly metrics = computed<readonly BienMetric[]>(() => {
     const p = this.property();
-    if (!p) return [];
     return [
-      { label: 'Type de bien', value: this.getPropertyTypeLabel(p.propertyType) },
-      { label: 'Transaction', value: this.getTransactionTypeLabel(p.transactionType) },
-      { label: 'Ville', value: p.city ?? '—' },
-      { label: 'Quartier', value: p.district ?? '—' },
-      { label: 'Adresse', value: p.address ?? p.street ?? '—' },
-      { label: 'Prix', value: this.formatPrice(p.price) },
+      { label: 'Pièces', value: this.formatNumber(p?.rooms) },
+      { label: 'Chambres', value: this.formatNumber(p?.bedrooms) },
+      { label: 'Salles de bains', value: this.formatNumber(p?.bathrooms) },
+      { label: 'Balcons', value: this.formatNumber(p?.balconies) },
+      { label: 'Surface', value: typeof p?.surfaceTotal === 'number' ? `${p.surfaceTotal} m²` : '—' },
     ];
   });
 
-  protected readonly detailItems = computed<InfoItem[]>(() => {
-    const p = this.property();
-    if (!p) return [];
-    const items: InfoItem[] = [];
-    if (p.surfaceLiving) items.push({ label: 'Surface habitable', value: `${p.surfaceLiving} m²` });
-    if (p.surfaceTotal) items.push({ label: 'Surface totale', value: `${p.surfaceTotal} m²` });
-    if (p.rooms) items.push({ label: 'Pièces', value: String(p.rooms) });
-    if (p.bedrooms) items.push({ label: 'Chambres', value: String(p.bedrooms) });
-    if (p.bathrooms) items.push({ label: 'Salles de bain', value: String(p.bathrooms) });
-    if (p.floor !== undefined && p.floor !== null) items.push({ label: 'Étage', value: p.floor === 0 ? 'RDC' : String(p.floor) });
-    if (p.totalFloors) items.push({ label: 'Nb étages', value: String(p.totalFloors) });
-    if (p.condition) items.push({ label: 'État', value: CONDITION_LABELS[p.condition] ?? p.condition });
-    if (p.yearBuilt) items.push({ label: 'Année construction', value: String(p.yearBuilt) });
-    return items;
+  protected readonly descriptionParagraphs = computed(() => {
+    const raw = this.property()?.description?.trim() ?? '';
+    if (!raw) return ['Aucune description disponible pour ce bien.'];
+    return raw.split(/\n+/).map((c) => c.trim()).filter(Boolean);
   });
 
-  protected readonly ownerInfo = computed<InfoItem[]>(() => {
-    const p = this.property();
-    if (!p) return [];
-    const items: InfoItem[] = [];
-    if (p.agencyName) items.push({ label: 'Agence', value: p.agencyName });
-    if (p.ownerName) items.push({ label: 'Propriétaire', value: p.ownerName });
-    return items;
+  protected readonly amenityColumns = computed(() => {
+    const source = this.property()?.amenities ?? [];
+    const labels = source
+      .map((item) => item.customValue?.trim() || item.code?.trim() || '')
+      .map((l) => this.normalizeCodeLabel(l))
+      .filter(Boolean);
+
+    if (!labels.length) return [['Aucune commodité spécifiée']];
+    const cols: string[][] = [[], [], []];
+    labels.forEach((l, i) => cols[i % 3]?.push(l));
+    return cols.filter((c) => c.length > 0);
   });
+
+  protected readonly hasCoordinates = computed(
+    () => typeof this.property()?.latitude === 'number' && typeof this.property()?.longitude === 'number',
+  );
+
+  protected readonly mapSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const lat = this.property()?.latitude;
+    const lng = this.property()?.longitude;
+    if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+    const d = 0.012;
+    const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d},${lat - d},${lng + d},${lat + d}&layer=mapnik&marker=${lat},${lng}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
+
+  // ── Back navigation ───────────────────────────────────────────────────────
+
+  /** Retourne à la page précédente dans l'historique, ou à la modération par défaut */
+  protected goBack(): void {
+    // On vérifie si on vient d'une page propriétés publiées ou de la modération
+    const referrer = document.referrer;
+    if (referrer.includes('/proprietes/agences')) {
+      void this.router.navigate(['/proprietes/agences']);
+    } else if (referrer.includes('/proprietes/hotels')) {
+      void this.router.navigate(['/proprietes/hotels']);
+    } else {
+      void this.router.navigate(['/proprietes']);
+    }
+  }
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   constructor() {
     effect(() => {
       const id = this.propertyId();
-      if (id) void this.loadDetail(id);
+      if (id) void this.loadPropertyDetail(id);
     });
   }
 
-  private async loadDetail(id: string): Promise<void> {
-    this.loading.set(true);
+  private async loadPropertyDetail(id: string): Promise<void> {
+    this.loadingDetail.set(true);
+    this.detailError.set(null);
     try {
-      this.detail.set(await firstValueFrom(this.svc.getDetail(id)));
+      const detail = await firstValueFrom(this.svc.getDetail(id));
+      this.propertyDetail.set(detail);
+      this.hasLoadedDetail.set(true);
+      this.activeImageIndex.set(0);
     } catch {
-      this.notif.error('Impossible de charger le détail du bien.');
+      this.propertyDetail.set(null);
+      this.hasLoadedDetail.set(true);
+      this.detailError.set('Impossible de charger les détails de ce bien.');
+      this.notif.error(this.detailErrorMessage());
     } finally {
-      this.loading.set(false);
+      this.loadingDetail.set(false);
     }
   }
 
-  // ── Modals ────────────────────────────────────────────────────────────────
+  protected retryLoad(): void {
+    const id = this.propertyId();
+    if (id) void this.loadPropertyDetail(id);
+  }
+
+  // ── Gallery ───────────────────────────────────────────────────────────────
+
+  protected selectImage(index: number): void { this.activeImageIndex.set(index); }
+
+  protected previousImage(): void {
+    const items = this.galleryItems();
+    if (items.length <= 1) return;
+    this.activeImageIndex.update((i) => (i === 0 ? items.length - 1 : i - 1));
+  }
+
+  protected nextImage(): void {
+    const items = this.galleryItems();
+    if (items.length <= 1) return;
+    this.activeImageIndex.update((i) => (i === items.length - 1 ? 0 : i + 1));
+  }
+
+  protected isGalleryImageAvailable(item: BienGalleryItem): boolean {
+    return !!item.src && !item.isPlaceholder && !this.brokenGalleryImageKeys()[item.key];
+  }
+
+  protected markGalleryImageBroken(key: string): void {
+    this.brokenGalleryImageKeys.update((c) => c[key] ? c : { ...c, [key]: true });
+  }
+
+  // ── Documents ─────────────────────────────────────────────────────────────
+
+  protected async openDocument(fileUrl: string, fileName?: string, docId?: string): Promise<void> {
+    if (!fileUrl) return;
+    if (docId) this.documentOpeningId.set(docId);
+    try {
+      const res = await firstValueFrom(generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }));
+      const body = res.body as unknown as { data?: PresignedReadUrlResponse } | PresignedReadUrlResponse;
+      const url = (body as { data?: PresignedReadUrlResponse })?.data?.readUrl
+        ?? (body as PresignedReadUrlResponse)?.readUrl ?? fileUrl;
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(url, fileName));
+      this.previewUrl.set(url);
+    } catch {
+      this.previewName.set(fileName?.trim() || 'Document');
+      this.previewIsImage.set(this.isPreviewImage(fileUrl, fileName));
+      this.previewUrl.set(fileUrl);
+    } finally {
+      if (docId) this.documentOpeningId.set(null);
+    }
+  }
+
+  protected closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewName.set('Document');
+    this.previewIsImage.set(false);
+    this.previewFullscreen.set(false);
+  }
+
+  protected togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((v) => !v);
+  }
+
+  // ── Moderation ────────────────────────────────────────────────────────────
 
   protected openModal(type: ModalType): void {
     this.rejectionForm.reset();
     this.activeModal.set(type);
   }
 
-  protected closeModal(): void {
-    this.activeModal.set(null);
-  }
+  protected closeModal(): void { this.activeModal.set(null); }
 
   protected async submitApprove(): Promise<void> {
     await this.submitDecision('PUBLISHED');
@@ -217,40 +416,25 @@ export class ProprietesDetailPageComponent {
   }
 
   protected async submitReject(): Promise<void> {
-    if (this.rejectionForm.invalid) {
-      this.rejectionForm.markAllAsTouched();
-      return;
-    }
+    if (this.rejectionForm.invalid) { this.rejectionForm.markAllAsTouched(); return; }
     await this.submitDecision('REJECTED', this.rejectionForm.value.reason);
     this.closeModal();
   }
 
-  private async submitDecision(
-    status: PropertyModerationStatus,
-    rejectionReason?: string,
-  ): Promise<void> {
+  private async submitDecision(status: PropertyModerationStatus, rejectionReason?: string): Promise<void> {
     const id = this.propertyId();
     if (!id) return;
-
     this.saving.set(true);
     try {
-      const updated = await firstValueFrom(
-        this.svc.decide(id, { status, rejectionReason }),
-      );
-      // Update the detail signal with the new property status
-      const current = this.detail();
-      if (current) {
-        this.detail.set({ ...current, property: updated });
-      }
-
+      const updated = await firstValueFrom(this.svc.decide(id, { status, rejectionReason }));
+      const current = this.propertyDetail();
+      if (current) this.propertyDetail.set({ ...current, property: updated });
       if (status === 'PUBLISHED') {
         this.notif.success('Bien approuvé et publié avec succès.');
-        // Navigate back to list after short delay
-        setTimeout(() => void this.router.navigate(['/proprietes']), 1500);
       } else {
         this.notif.success('Bien rejeté. Le propriétaire sera notifié.');
-        setTimeout(() => void this.router.navigate(['/proprietes']), 1500);
       }
+      setTimeout(() => void this.router.navigate(['/proprietes']), 1500);
     } catch {
       this.notif.error("L'opération a échoué. Veuillez réessayer.");
     } finally {
@@ -258,106 +442,19 @@ export class ProprietesDetailPageComponent {
     }
   }
 
-  // ── Media / Lightbox ──────────────────────────────────────────────────────
-
-  protected async openMedia(media: PropertyMediaResponse): Promise<void> {
-    if (!media.fileUrl) return;
-    this.openingMediaId.set(media.id ?? 'loading');
-    try {
-      const res = await firstValueFrom(
-        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl: media.fileUrl }),
-      );
-      const body = res.body as unknown as { data?: PresignedReadUrlResponse } | PresignedReadUrlResponse;
-      const url =
-        (body as { data?: PresignedReadUrlResponse })?.data?.readUrl ??
-        (body as PresignedReadUrlResponse)?.readUrl ??
-        media.fileUrl;
-      this.lightboxUrl.set(url);
-      this.lightboxIsImage.set(
-        media.mediaType === 'IMAGE' || (media.mimeType ?? '').startsWith('image/') || !media.mimeType,
-      );
-      this.lightboxOpen.set(true);
-    } catch {
-      // Fallback to raw URL
-      this.lightboxUrl.set(media.fileUrl ?? null);
-      this.lightboxIsImage.set(true);
-      this.lightboxOpen.set(true);
-    } finally {
-      this.openingMediaId.set(null);
-    }
-  }
-
-  protected async openDocument(doc: PropertyDocumentResponse): Promise<void> {
-    if (!doc.fileUrl) return;
-    this.openingDocId.set(doc.id ?? 'loading');
-    try {
-      const res = await firstValueFrom(
-        generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl: doc.fileUrl }),
-      );
-      const body = res.body as unknown as { data?: PresignedReadUrlResponse } | PresignedReadUrlResponse;
-      const url =
-        (body as { data?: PresignedReadUrlResponse })?.data?.readUrl ??
-        (body as PresignedReadUrlResponse)?.readUrl ??
-        doc.fileUrl;
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch {
-      window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
-    } finally {
-      this.openingDocId.set(null);
-    }
-  }
-
-  protected closeLightbox(): void {
-    this.lightboxOpen.set(false);
-    this.lightboxUrl.set(null);
-  }
-
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  protected getPropertyTypeLabel(type: string | undefined): string {
-    return PROPERTY_TYPE_LABELS[type ?? ''] ?? (type ?? '—');
+  private normalizeCodeLabel(raw: string): string {
+    return raw.toLowerCase().split('_').filter(Boolean)
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
   }
 
-  protected getTransactionTypeLabel(type: string | undefined): string {
-    return TRANSACTION_TYPE_LABELS[type ?? ''] ?? (type ?? '—');
+  private isPreviewImage(url: string, fileName?: string): boolean {
+    const target = `${fileName ?? ''} ${url}`.toLowerCase();
+    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/.test(target);
   }
 
-  protected getTransactionBadge(type: string | undefined): 'info' | 'neutral' | 'active' | 'warning' {
-    switch (type) {
-      case 'SALE': return 'active';
-      case 'RENT': return 'info';
-      case 'RENT_FURNISHED': return 'info';
-      case 'SHORT_STAY': return 'warning';
-      default: return 'neutral';
-    }
-  }
-
-  protected getDocTypeLabel(type: string | undefined): string {
-    return DOC_TYPE_LABELS[type ?? ''] ?? (type ?? 'Document');
-  }
-
-  protected formatPrice(price: number | undefined): string {
-    if (!price) return '—';
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
-      maximumFractionDigits: 0,
-    }).format(price);
-  }
-
-  protected formatFileSize(bytes: number | undefined): string {
-    if (!bytes) return '';
-    if (bytes < 1024) return `${bytes} o`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
-  }
-
-  protected isTerminal(): boolean {
-    const status = this.property()?.status;
-    return status === 'PUBLISHED' || status === 'REJECTED' || status === 'ARCHIVED';
-  }
-
-  protected isPending(): boolean {
-    return this.property()?.status === 'PENDING';
+  private formatNumber(value: number | undefined): string {
+    return typeof value === 'number' ? `${value}` : '—';
   }
 }
