@@ -84,7 +84,57 @@ export class AdminPropertiesService {
     );
   }
 
-  /** GET /v1/properties/:id — détail complet avec médias et documents */
+  /** GET /v1/properties?status=PUBLISHED — liste paginée côté serveur */
+  listPublished(params: {
+    page?: number;
+    size?: number;
+    city?: string;
+    propertyType?: string;
+    transactionType?: string;
+    agencyId?: string;
+    minPrice?: number;
+    maxPrice?: number;
+  } = {}): Observable<{ items: PropertyResponse[]; totalElements: number; totalPages: number }> {
+    return list1(this.http, this.rootUrl, {
+      status: 'PUBLISHED',
+      city: params.city || undefined,
+      propertyType: params.propertyType || undefined,
+      transactionType: params.transactionType || undefined,
+      agencyId: params.agencyId || undefined,
+      minPrice: params.minPrice || undefined,
+      maxPrice: params.maxPrice || undefined,
+      pageable: {
+        page: params.page ?? 0,
+        size: params.size ?? 12,
+        sort: ['publishedAt,desc'],
+      },
+    }).pipe(
+      map((r) => {
+        const body = r.body as unknown as {
+          data?: {
+            results?: PropertyResponse[];
+            content?: PropertyResponse[];
+            totalItems?: number;
+            totalElements?: number;
+            totalPages?: number;
+          };
+          results?: PropertyResponse[];
+          content?: PropertyResponse[];
+          totalItems?: number;
+          totalElements?: number;
+          totalPages?: number;
+        };
+        const data = body?.data ?? body;
+        const items: PropertyResponse[] =
+          data?.results ??
+          data?.content ??
+          (Array.isArray(body) ? (body as PropertyResponse[]) : []);
+        const totalElements = data?.totalItems ?? data?.totalElements ?? items.length;
+        const totalPages = data?.totalPages ?? 1;
+        return { items, totalElements, totalPages };
+      }),
+    );
+  }
   getDetail(id: string): Observable<PropertyDetailResponse> {
     return getById(this.http, this.rootUrl, { id }).pipe(
       map((r) => {

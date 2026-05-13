@@ -1,0 +1,224 @@
+<div class="props-page">
+
+  <!-- En-tête -->
+  <div class="props-page__header">
+    <p class="props-page__eyebrow">Propriétés publiées</p>
+    <div class="props-page__title-row">
+      <h1 class="props-page__title">{{ pageTitle() }}</h1>
+      <span class="props-page__count">{{ totalElements() }} bien(s)</span>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  @if (kpis().length > 0) {
+    <div class="props-kpi-grid">
+      @for (kpi of kpis(); track kpi.label) {
+        <div class="props-kpi-card">
+          <div class="props-kpi-card__icon" [style.background]="kpi.iconBg">
+            <i [class]="kpi.icon" [style.color]="kpi.iconColor"></i>
+          </div>
+          <div class="props-kpi-card__content">
+            <p class="props-kpi-card__label">{{ kpi.label }}</p>
+            <p class="props-kpi-card__value">{{ kpi.value }}</p>
+            <p class="props-kpi-card__trend">{{ kpi.trend }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Barre de filtres -->
+  <div class="props-filters">
+    <!-- Recherche -->
+    <div class="props-filters__search">
+      <i class="pi pi-search props-filters__search-icon"></i>
+      <input
+        type="text"
+        class="props-filters__search-input"
+        placeholder="Recherche par titre, référence..."
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    <!-- Ville -->
+    <div class="props-filters__select-wrap">
+      <select class="props-filters__select" (change)="onCityChange($event)">
+        <option value="">Choisir une ville</option>
+        <option value="Dakar">Dakar</option>
+        <option value="Abidjan">Abidjan</option>
+        <option value="Douala">Douala</option>
+        <option value="Yaoundé">Yaoundé</option>
+        <option value="Bamako">Bamako</option>
+        <option value="Lomé">Lomé</option>
+        <option value="Cotonou">Cotonou</option>
+      </select>
+      <i class="pi pi-chevron-down props-filters__select-icon"></i>
+    </div>
+
+    <!-- Type de bien -->
+    <div class="props-filters__select-wrap">
+      <select class="props-filters__select" (change)="onTypeChange($event)">
+        <option value="">Type de biens</option>
+        <option value="APARTMENT">Appartement</option>
+        <option value="VILLA">Villa</option>
+        <option value="HOUSE">Maison</option>
+        <option value="LAND">Terrain</option>
+        <option value="OFFICE">Bureau</option>
+        <option value="STUDIO">Studio</option>
+        <option value="DUPLEX">Duplex</option>
+      </select>
+      <i class="pi pi-chevron-down props-filters__select-icon"></i>
+    </div>
+
+    <!-- Type d'offre -->
+    <div class="props-filters__select-wrap">
+      <select class="props-filters__select" (change)="onTransactionChange($event)">
+        <option value="">Type d'offre</option>
+        <option value="SALE">Vente</option>
+        <option value="RENT">Location</option>
+        <option value="RENT_FURNISHED">Location meublée</option>
+        <option value="SHORT_STAY">Court séjour</option>
+      </select>
+      <i class="pi pi-chevron-down props-filters__select-icon"></i>
+    </div>
+
+    <!-- Plage de prix -->
+    <div class="props-filters__price-range">
+      <input
+        type="number"
+        class="props-filters__price-input"
+        placeholder="Prix min FCFA"
+        [value]="minPriceFilter()"
+        (change)="onSearch($event)"
+      />
+      <span class="props-filters__price-sep">—</span>
+      <input
+        type="number"
+        class="props-filters__price-input"
+        placeholder="Prix max"
+        [value]="maxPriceFilter()"
+        (change)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Grille de cartes -->
+  @if (loading()) {
+    <div class="props-grid">
+      @for (i of [1,2,3,4,5,6,7,8]; track i) {
+        <div class="props-card-skeleton"></div>
+      }
+    </div>
+  } @else if (filteredProperties().length === 0) {
+    <ubax-empty-state
+      icon="pi pi-home"
+      title="Aucune propriété trouvée"
+      [description]="searchQuery() ? 'Aucune propriété ne correspond à votre recherche.' : 'Aucune propriété publiée pour le moment.'"
+    />
+  } @else {
+    <div class="props-grid">
+      @for (property of filteredProperties(); track property.id) {
+        <button
+          type="button"
+          class="props-card"
+          (click)="viewDetail(property)"
+        >
+          <!-- Photo + gradient -->
+          <div class="props-card__photo-wrap">
+            @if (getCoverPhotoUrl(property)) {
+              <img
+                [src]="getCoverPhotoUrl(property)"
+                [alt]="property.title"
+                class="props-card__photo"
+                loading="lazy"
+              />
+            } @else {
+              <div class="props-card__photo-placeholder">
+                <i class="pi pi-home"></i>
+              </div>
+            }
+            <div class="props-card__gradient"></div>
+
+            <!-- Badge transaction type -->
+            <span
+              class="props-card__transaction-badge"
+              [style.background]="getTransactionColor(property.transactionType)"
+            >
+              {{ getTransactionLabel(property.transactionType) }}
+            </span>
+
+            <!-- Badge disponibilité -->
+            <span class="props-card__availability-badge">Disponible</span>
+
+            <!-- Nom agence/propriétaire -->
+            @if (property.agencyName || property.ownerName) {
+              <div class="props-card__owner-overlay">
+                <div class="props-card__owner-avatar">
+                  <i class="pi pi-building"></i>
+                </div>
+                <span class="props-card__owner-name">
+                  {{ property.agencyName ?? property.ownerName }}
+                </span>
+              </div>
+            }
+
+            <!-- Prix -->
+            <div class="props-card__price-overlay">
+              <span class="props-card__price">
+                {{ formatPrice(property.price, property.transactionType) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Infos bas de carte -->
+          <div class="props-card__info">
+            <p class="props-card__title">{{ property.title ?? '—' }}</p>
+            <p class="props-card__location">
+              <i class="pi pi-map-marker"></i>
+              {{ property.city ?? '' }}
+              @if (property.district) { · {{ property.district }} }
+            </p>
+
+            <!-- Caractéristiques -->
+            <div class="props-card__features">
+              @if (property.bedrooms) {
+                <span class="props-card__feature">
+                  <i class="pi pi-th-large"></i>
+                  {{ property.bedrooms }} Chambre{{ property.bedrooms > 1 ? 's' : '' }}
+                </span>
+              }
+              @if (property.bathrooms) {
+                <span class="props-card__feature">
+                  <i class="pi pi-circle"></i>
+                  {{ property.bathrooms }} Salle{{ property.bathrooms > 1 ? 's' : '' }} de bain
+                </span>
+              }
+              @if (property.surfaceLiving) {
+                <span class="props-card__feature">
+                  <i class="pi pi-expand"></i>
+                  Surface {{ property.surfaceLiving }} m²
+                </span>
+              }
+            </div>
+          </div>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Footer : compteur + pagination -->
+  @if (!loading() && totalElements() > 0) {
+    <div class="props-footer">
+      <p class="props-footer__count">{{ getDisplayCount() }}</p>
+      @if (totalPages() > 1) {
+        <ubax-paginator
+          [currentPage]="currentPage()"
+          [totalPages]="totalPages()"
+          (currentPageChange)="onPageChange($event)"
+        />
+      }
+    </div>
+  }
+
+</div>

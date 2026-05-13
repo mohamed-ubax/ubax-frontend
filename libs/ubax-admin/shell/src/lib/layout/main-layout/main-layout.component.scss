@@ -1,2 +1,124 @@
-// Layout handled entirely by ubax-shell / ubax-sidebar / ubax-main / ubax-header / ubax-content
+// Layout handled by ubax-shell / ubax-main / ubax-header / ubax-content
 // from libs/shared/design-system/src/lib/styles/_layout.scss
+
+// ── Sidebar nav items ─────────────────────────────────────────────────────────
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  margin: 0 0.5rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  font-family: 'Lexend', sans-serif;
+  line-height: normal;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  &--disabled {
+    color: rgba(255, 255, 255, 0.3);
+    cursor: not-allowed;
+    pointer-events: none;
+
+    &:hover {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  &--btn {
+    width: calc(100% - 1rem);
+    text-align: left;
+  }
+
+  &--expanded {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+  }
+}
+
+.sidebar-chevron {
+  transition: transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+// ── Sous-navigation Propriétés ────────────────────────────────────────────────
+
+.sidebar-subnav {
+  margin: 0 0.5rem 0 1rem;
+  animation: slideDown 0.18s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sidebar-subnav__track {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+.sidebar-subnav__line-bg {
+  width: 2px;
+  background: rgba(255, 255, 255, 0.19);
+  border-radius: 5px;
+  margin-left: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sidebar-subnav__items {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-left: 0.5rem;
+}
+
+.sidebar-subitem {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  font-family: 'Lexend', sans-serif;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  position: relative;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+  }
+
+  &--active {
+    color: white;
+    font-weight: 500;
+
+    // Indicateur blanc sur la ligne verticale
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.625rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 49px;
+      background: white;
+      border-radius: 5px;
+    }
+  }
+}
