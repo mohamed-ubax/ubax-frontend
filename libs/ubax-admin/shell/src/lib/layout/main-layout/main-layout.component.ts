@@ -25,7 +25,7 @@ export class MainLayoutComponent {
         { label: 'Hôtels',          icon: 'pi pi-building',  routerLink: '/hotels' },
         { label: 'Agences',         icon: 'pi pi-home',      routerLink: '/agences' },
         { label: 'Candidatures',    icon: 'pi pi-inbox',     routerLink: '/candidatures' },
-        { label: 'Propriétés',      icon: 'pi pi-map-marker',routerLink: '/proprietes',      disabled: true },
+        { label: 'Modération',       icon: 'pi pi-shield',    routerLink: '/proprietes' },
         { label: 'Réservations',    icon: 'pi pi-calendar',  routerLink: '/reservations',    disabled: true },
         { label: 'Administrateurs', icon: 'pi pi-users',     routerLink: '/administrateurs' },
         { label: 'Paiements',       icon: 'pi pi-wallet',    routerLink: '/paiements',       disabled: true },

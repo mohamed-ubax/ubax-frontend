@@ -77,6 +77,22 @@ export const adminRoutes: Route[] = [
             (m) => m.CandidaturesDetailPageComponent,
           ),
       },
+      // UBAX-FE-613 — Modération des biens PENDING
+      {
+        path: 'proprietes',
+        loadComponent: () =>
+          import('./pages/proprietes/proprietes-list-page.component').then(
+            (m) => m.ProprietesListPageComponent,
+          ),
+      },
+      // UBAX-FE-613 — Détail d'un bien en attente de modération
+      {
+        path: 'proprietes/:id',
+        loadComponent: () =>
+          import('./pages/proprietes/proprietes-detail-page.component').then(
+            (m) => m.ProprietesDetailPageComponent,
+          ),
+      },
     ],
   },
 ];

@@ -1,0 +1,474 @@
+<div class="propriete-detail">
+
+  <!-- Fil d'Ariane -->
+  <nav class="propriete-detail__breadcrumb">
+    <a routerLink="/proprietes" class="propriete-detail__breadcrumb-link">
+      <i class="pi pi-arrow-left"></i>
+      Retour à la file d'attente
+    </a>
+  </nav>
+
+  @if (loading()) {
+    <ubax-empty-state
+      icon="pi pi-spin pi-spinner"
+      title="Chargement..."
+      description="Récupération des données du bien."
+    />
+  } @else if (!property()) {
+    <ubax-empty-state
+      icon="pi pi-exclamation-triangle"
+      title="Bien introuvable"
+      description="Ce bien n'existe pas ou a été supprimé."
+    />
+  } @else {
+
+    <!-- En-tête du bien -->
+    <div class="propriete-detail__header">
+      <div class="propriete-detail__header-left">
+        <div class="propriete-detail__title-block">
+          <div class="propriete-detail__title-row">
+            <h1 class="propriete-detail__title">{{ property()?.title ?? '—' }}</h1>
+            <ubax-status-badge [variant]="getTransactionBadge(property()?.transactionType)">
+              {{ getTransactionTypeLabel(property()?.transactionType) }}
+            </ubax-status-badge>
+          </div>
+          <p class="propriete-detail__location">
+            <i class="pi pi-map-marker"></i>
+            {{ property()?.city ?? '' }}
+            @if (property()?.district) { · {{ property()?.district }} }
+            @if (property()?.address) { · {{ property()?.address }} }
+          </p>
+          <p class="propriete-detail__price">{{ formatPrice(property()?.price) }}</p>
+        </div>
+      </div>
+
+      <!-- Actions de modération -->
+      @if (isPending()) {
+        <div class="propriete-detail__actions">
+          <button
+            type="button"
+            class="propriete-btn propriete-btn--danger"
+            [disabled]="saving()"
+            (click)="openModal('reject')"
+          >
+            <i class="pi pi-times-circle"></i>
+            Rejeter
+          </button>
+          <button
+            type="button"
+            class="propriete-btn propriete-btn--success"
+            [disabled]="saving()"
+            (click)="openModal('approve')"
+          >
+            <i class="pi pi-check-circle"></i>
+            Approuver
+          </button>
+        </div>
+      }
+
+      @if (isTerminal()) {
+        <div class="propriete-terminal-badge">
+          @if (property()?.status === 'PUBLISHED') {
+            <div class="propriete-terminal propriete-terminal--published">
+              <i class="pi pi-check-circle"></i>
+              <div>
+                <p class="propriete-terminal__title">Bien publié</p>
+                <p class="propriete-terminal__sub">
+                  Publié le {{ property()?.publishedAt | date: 'dd/MM/yyyy' }}
+                </p>
+              </div>
+            </div>
+          }
+          @if (property()?.status === 'REJECTED') {
+            <div class="propriete-terminal propriete-terminal--rejected">
+              <i class="pi pi-times-circle"></i>
+              <div>
+                <p class="propriete-terminal__title">Bien rejeté</p>
+                @if (property()?.rejectionReason) {
+                  <p class="propriete-terminal__reason">
+                    Motif : {{ property()?.rejectionReason }}
+                  </p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Corps de la page -->
+    <div class="propriete-detail__body">
+
+      <!-- Colonne principale -->
+      <div class="propriete-detail__main">
+
+        <!-- Galerie photos -->
+        @if (galleryMedia().length > 0) {
+          <ubax-section-card title="Photos">
+            <div class="propriete-gallery">
+              @for (media of galleryMedia(); track media.id; let i = $index) {
+                <button
+                  type="button"
+                  class="propriete-gallery__item"
+                  [class.propriete-gallery__item--cover]="media.cover"
+                  [disabled]="openingMediaId() === media.id"
+                  (click)="openMedia(media)"
+                  [title]="media.cover ? 'Photo de couverture' : 'Voir la photo'"
+                >
+                  <img
+                    [src]="media.fileUrl"
+                    [alt]="'Photo ' + (i + 1)"
+                    class="propriete-gallery__img"
+                    loading="lazy"
+                  />
+                  @if (media.cover) {
+                    <span class="propriete-gallery__cover-badge">
+                      <i class="pi pi-star-fill"></i> Couverture
+                    </span>
+                  }
+                  @if (openingMediaId() === media.id) {
+                    <div class="propriete-gallery__loading">
+                      <i class="pi pi-spin pi-spinner"></i>
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+          </ubax-section-card>
+        }
+
+        <!-- Informations générales -->
+        <ubax-section-card title="Informations générales">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-item__label">Type de bien</span>
+              <span class="info-item__value">{{ getPropertyTypeLabel(property()?.propertyType) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Transaction</span>
+              <span class="info-item__value">{{ getTransactionTypeLabel(property()?.transactionType) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Prix</span>
+              <span class="info-item__value info-item__value--price">{{ formatPrice(property()?.price) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Ville</span>
+              <span class="info-item__value">{{ property()?.city ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Quartier</span>
+              <span class="info-item__value">{{ property()?.district ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Adresse</span>
+              <span class="info-item__value">{{ property()?.address ?? property()?.street ?? '—' }}</span>
+            </div>
+          </div>
+        </ubax-section-card>
+
+        <!-- Caractéristiques -->
+        @if (detailItems().length > 0) {
+          <ubax-section-card title="Caractéristiques">
+            <div class="info-grid">
+              @for (item of detailItems(); track item.label) {
+                <div class="info-item">
+                  <span class="info-item__label">{{ item.label }}</span>
+                  <span class="info-item__value">{{ item.value }}</span>
+                </div>
+              }
+            </div>
+          </ubax-section-card>
+        }
+
+        <!-- Description -->
+        @if (property()?.description) {
+          <ubax-section-card title="Description">
+            <p class="propriete-detail__description">{{ property()?.description }}</p>
+          </ubax-section-card>
+        }
+
+        <!-- Commodités -->
+        @if ((property()?.amenities?.length ?? 0) > 0) {
+          <ubax-section-card title="Commodités">
+            <div class="propriete-amenities">
+              @for (amenity of property()?.amenities ?? []; track amenity.id) {
+                <span class="propriete-amenity-chip">
+                  <i class="pi pi-check"></i>
+                  {{ amenity.customValue ?? amenity.code ?? amenity.customDescription }}
+                </span>
+              }
+            </div>
+          </ubax-section-card>
+        }
+
+      </div>
+
+      <!-- Colonne latérale -->
+      <div class="propriete-detail__side">
+
+        <!-- Propriétaire / Agence -->
+        <ubax-section-card title="Soumis par">
+          <div class="propriete-owner-card">
+            @if (property()?.agencyName) {
+              <div class="propriete-owner-card__avatar propriete-owner-card__avatar--agency">
+                <i class="pi pi-building"></i>
+              </div>
+              <div class="propriete-owner-card__info">
+                <p class="propriete-owner-card__name">{{ property()?.agencyName }}</p>
+                <p class="propriete-owner-card__type">Agence immobilière</p>
+              </div>
+            } @else if (property()?.ownerName) {
+              <div class="propriete-owner-card__avatar propriete-owner-card__avatar--owner">
+                <i class="pi pi-user"></i>
+              </div>
+              <div class="propriete-owner-card__info">
+                <p class="propriete-owner-card__name">{{ property()?.ownerName }}</p>
+                <p class="propriete-owner-card__type">Propriétaire particulier</p>
+              </div>
+            } @else {
+              <p class="text-sm text-neutral-500">Informations non disponibles.</p>
+            }
+          </div>
+          <div class="propriete-owner-meta">
+            <div class="propriete-owner-meta__item">
+              <span class="propriete-owner-meta__label">Soumis le</span>
+              <span class="propriete-owner-meta__value">{{ property()?.createdAt | date: 'dd/MM/yyyy à HH:mm' }}</span>
+            </div>
+            <div class="propriete-owner-meta__item">
+              <span class="propriete-owner-meta__label">Dernière mise à jour</span>
+              <span class="propriete-owner-meta__value">{{ property()?.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}</span>
+            </div>
+          </div>
+        </ubax-section-card>
+
+        <!-- Documents légaux -->
+        <ubax-section-card title="Documents légaux">
+          @if (documents().length === 0) {
+            <p class="text-sm text-neutral-500 py-2">Aucun document joint.</p>
+          } @else {
+            <div class="propriete-docs">
+              @for (doc of documents(); track doc.id) {
+                <button
+                  type="button"
+                  class="propriete-doc-item"
+                  [disabled]="openingDocId() === doc.id"
+                  (click)="openDocument(doc)"
+                >
+                  <div class="propriete-doc-item__icon">
+                    <i class="pi pi-file-pdf"></i>
+                  </div>
+                  <div class="propriete-doc-item__meta">
+                    <p class="propriete-doc-item__name">{{ doc.title ?? getDocTypeLabel(doc.docType) }}</p>
+                    <p class="propriete-doc-item__sub">
+                      {{ getDocTypeLabel(doc.docType) }}
+                      @if (doc.fileSize) { · {{ formatFileSize(doc.fileSize) }} }
+                    </p>
+                  </div>
+                  <div class="propriete-doc-item__action">
+                    @if (openingDocId() === doc.id) {
+                      <i class="pi pi-spin pi-spinner"></i>
+                    } @else {
+                      <i class="pi pi-external-link"></i>
+                    }
+                  </div>
+                </button>
+              }
+            </div>
+          }
+        </ubax-section-card>
+
+        <!-- Statut actuel -->
+        <ubax-section-card title="Statut de modération">
+          <div class="propriete-status-block">
+            <div class="propriete-status-block__indicator propriete-status-block__indicator--pending">
+              <i class="pi pi-clock"></i>
+            </div>
+            <div>
+              <p class="propriete-status-block__label">En attente de modération</p>
+              <p class="propriete-status-block__sub">
+                Ce bien est dans la file d'attente depuis le
+                {{ property()?.createdAt | date: 'dd/MM/yyyy' }}.
+              </p>
+            </div>
+          </div>
+
+          @if (isPending()) {
+            <div class="propriete-status-block__cta">
+              <button
+                type="button"
+                class="propriete-btn propriete-btn--danger propriete-btn--full"
+                [disabled]="saving()"
+                (click)="openModal('reject')"
+              >
+                <i class="pi pi-times-circle"></i>
+                Rejeter ce bien
+              </button>
+              <button
+                type="button"
+                class="propriete-btn propriete-btn--success propriete-btn--full"
+                [disabled]="saving()"
+                (click)="openModal('approve')"
+              >
+                <i class="pi pi-check-circle"></i>
+                Approuver et publier
+              </button>
+            </div>
+          }
+        </ubax-section-card>
+
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ── Lightbox ──────────────────────────────────────────────────────────── -->
+@if (lightboxOpen()) {
+  <div
+    class="lightbox-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="Fermer l'aperçu"
+    (click)="closeLightbox()"
+    (keyup.enter)="closeLightbox()"
+    (keydown.escape)="closeLightbox()"
+  ></div>
+  <div class="lightbox">
+    <header class="lightbox__header">
+      <span class="lightbox__title">
+        <i class="pi pi-image"></i>
+        Aperçu
+      </span>
+      <div class="lightbox__actions">
+        <a
+          [href]="lightboxUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="lightbox__btn"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button type="button" class="lightbox__btn lightbox__btn--close" (click)="closeLightbox()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+    <div class="lightbox__body">
+      @if (lightboxIsImage()) {
+        <img [src]="lightboxSafeUrl()" alt="Aperçu" class="lightbox__image" />
+      } @else {
+        <iframe [src]="lightboxSafeUrl()" class="lightbox__iframe" title="Aperçu du document"></iframe>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Modal : Approuver ─────────────────────────────────────────────────── -->
+<p-dialog
+  [visible]="activeModal() === 'approve'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Approuver ce bien"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '520px' }"
+  styleClass="propriete-modal"
+>
+  <div class="propriete-modal__approve">
+    <div class="propriete-modal__approve-icon">
+      <i class="pi pi-check-circle"></i>
+    </div>
+    <p class="propriete-modal__approve-title">Confirmer la publication</p>
+    <p class="propriete-modal__approve-desc">
+      Ce bien sera immédiatement publié sur la plateforme UBAX et visible par tous les utilisateurs.
+      Le propriétaire ou l'agence sera notifié(e).
+    </p>
+    <div class="propriete-modal__summary">
+      <div class="summary-row">
+        <div class="summary-col">
+          <span class="summary-col__label">Bien</span>
+          <span class="summary-col__value">{{ property()?.title ?? '—' }}</span>
+        </div>
+        <div class="summary-col">
+          <span class="summary-col__label">Ville</span>
+          <span class="summary-col__value">{{ property()?.city ?? '—' }}</span>
+        </div>
+        <div class="summary-col">
+          <span class="summary-col__label">Prix</span>
+          <span class="summary-col__value">{{ formatPrice(property()?.price) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="propriete-modal__footer">
+      <button type="button" class="propriete-btn propriete-btn--ghost" (click)="closeModal()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--success"
+        [disabled]="saving()"
+        (click)="submitApprove()"
+      >
+        <i class="pi pi-check"></i>
+        {{ saving() ? 'Publication...' : 'Confirmer la publication' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ── Modal : Rejeter ───────────────────────────────────────────────────── -->
+<p-dialog
+  [visible]="activeModal() === 'reject'"
+  (visibleChange)="$event ? null : closeModal()"
+  header="Rejeter ce bien"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '560px' }"
+  styleClass="propriete-modal"
+>
+  <form [formGroup]="rejectionForm" class="propriete-modal__form">
+    <p class="propriete-modal__description">
+      Veuillez indiquer le motif du rejet. Ce message sera transmis au propriétaire ou à l'agence.
+    </p>
+    <div class="propriete-modal__field">
+      <label class="propriete-modal__label" for="rejection-reason">
+        Motif du rejet <span class="propriete-modal__required">*</span>
+      </label>
+      <textarea
+        pTextarea
+        id="rejection-reason"
+        formControlName="reason"
+        rows="5"
+        placeholder="Ex : Photos insuffisantes, informations incomplètes, prix incohérent avec le marché..."
+        class="propriete-modal__textarea"
+        [class.ng-invalid]="rejectionForm.get('reason')?.invalid && rejectionForm.get('reason')?.touched"
+      ></textarea>
+      @if (rejectionForm.get('reason')?.invalid && rejectionForm.get('reason')?.touched) {
+        <span class="propriete-modal__error">
+          Le motif est obligatoire (minimum 10 caractères).
+        </span>
+      }
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="propriete-modal__footer">
+      <button type="button" class="propriete-btn propriete-btn--ghost" (click)="closeModal()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="propriete-btn propriete-btn--danger"
+        [disabled]="saving()"
+        (click)="submitReject()"
+      >
+        <i class="pi pi-times"></i>
+        {{ saving() ? 'Rejet en cours...' : 'Confirmer le rejet' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,168 @@
+<div class="proprietes-page">
+
+  <!-- En-tête -->
+  <div class="proprietes-page__header">
+    <div class="proprietes-page__title-block">
+      <p class="proprietes-page__eyebrow">Modération des biens</p>
+      <div class="proprietes-page__title-row">
+        <h1 class="proprietes-page__title">File d'attente — Biens PENDING</h1>
+        <span class="proprietes-page__count">{{ totalElements() }} bien(s) en attente</span>
+      </div>
+      <p class="proprietes-page__subtitle">
+        Examinez et statuez sur chaque bien soumis par les agences et propriétaires.
+      </p>
+    </div>
+  </div>
+
+  <!-- Carte principale -->
+  <ubax-section-card bodyClass="p-0">
+
+    <!-- Barre de recherche + filtres -->
+    <ubax-search-filter-bar
+      class="proprietes-toolbar"
+      placeholder="Rechercher par titre, ville, agence..."
+      [filters]="searchFilters"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    <!-- Table -->
+    <p-table
+      [value]="filteredProperties()"
+      [loading]="loading()"
+      [lazy]="true"
+      [totalRecords]="totalElements()"
+      [rows]="20"
+      [paginator]="totalElements() > 20"
+      (onPage)="onPageChange($event)"
+      styleClass="proprietes-table"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Bien</th>
+          <th>Type</th>
+          <th>Transaction</th>
+          <th>Ville</th>
+          <th>Prix</th>
+          <th>Agence / Propriétaire</th>
+          <th>Soumis le</th>
+          <th class="proprietes-table__actions-head">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-property>
+        <tr
+          class="proprietes-table__row"
+          (click)="viewDetail(property)"
+          style="cursor: pointer;"
+        >
+          <!-- Bien -->
+          <td>
+            <div class="proprietes-property-cell">
+              @if (getCoverPhotoUrl(property)) {
+                <img
+                  [src]="getCoverPhotoUrl(property)"
+                  [alt]="property.title"
+                  class="proprietes-property-cell__photo"
+                />
+              } @else {
+                <div class="proprietes-property-cell__placeholder">
+                  <i class="pi pi-home"></i>
+                </div>
+              }
+              <div class="proprietes-property-cell__meta">
+                <p class="proprietes-property-cell__title">{{ property.title ?? '—' }}</p>
+                <p class="proprietes-property-cell__sub">
+                  {{ property.district ?? property.street ?? '' }}
+                </p>
+              </div>
+            </div>
+          </td>
+
+          <!-- Type de bien -->
+          <td>
+            <span class="proprietes-type-chip">
+              {{ getPropertyTypeLabel(property.propertyType) }}
+            </span>
+          </td>
+
+          <!-- Type de transaction -->
+          <td>
+            <ubax-status-badge [variant]="getTransactionBadge(property.transactionType)">
+              {{ getTransactionTypeLabel(property.transactionType) }}
+            </ubax-status-badge>
+          </td>
+
+          <!-- Ville -->
+          <td class="proprietes-table__cell proprietes-table__cell--muted">
+            {{ property.city ?? '—' }}
+          </td>
+
+          <!-- Prix -->
+          <td class="proprietes-table__cell proprietes-table__cell--price">
+            {{ formatPrice(property.price) }}
+          </td>
+
+          <!-- Agence / Propriétaire -->
+          <td>
+            <div class="proprietes-owner-cell">
+              @if (property.agencyName) {
+                <div class="proprietes-owner-cell__avatar proprietes-owner-cell__avatar--agency">
+                  <i class="pi pi-building"></i>
+                </div>
+                <div class="proprietes-owner-cell__meta">
+                  <p class="proprietes-owner-cell__name">{{ property.agencyName }}</p>
+                  <p class="proprietes-owner-cell__sub">Agence</p>
+                </div>
+              } @else if (property.ownerName) {
+                <div class="proprietes-owner-cell__avatar proprietes-owner-cell__avatar--owner">
+                  <i class="pi pi-user"></i>
+                </div>
+                <div class="proprietes-owner-cell__meta">
+                  <p class="proprietes-owner-cell__name">{{ property.ownerName }}</p>
+                  <p class="proprietes-owner-cell__sub">Propriétaire</p>
+                </div>
+              } @else {
+                <span class="proprietes-table__cell--muted">—</span>
+              }
+            </div>
+          </td>
+
+          <!-- Date de soumission -->
+          <td class="proprietes-table__cell proprietes-table__cell--muted">
+            {{ property.createdAt | date: 'dd/MM/yyyy' }}
+          </td>
+
+          <!-- Actions -->
+          <td class="proprietes-table__actions" (click)="$event.stopPropagation()">
+            <div class="proprietes-actions">
+              <button
+                type="button"
+                class="proprietes-action-btn proprietes-action-btn--view"
+                title="Examiner ce bien"
+                (click)="viewDetail(property)"
+              >
+                <i class="pi pi-eye"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8">
+            <ubax-empty-state
+              icon="pi pi-check-circle"
+              title="File d'attente vide"
+              [description]="searchQuery() ? 'Aucun bien ne correspond à votre recherche.' : 'Aucun bien en attente de modération. Tout est à jour !'"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+  </ubax-section-card>
+
+</div>
