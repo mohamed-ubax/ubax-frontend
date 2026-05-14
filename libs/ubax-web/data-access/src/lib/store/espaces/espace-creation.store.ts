@@ -7,7 +7,7 @@ import {
   addDocument,
   addMedia,
   ApiConfiguration,
-  create3,
+  create4,
   deleteDocument,
   deleteMedia,
   findAllByType,
@@ -302,7 +302,7 @@ export const EspaceCreationStore = signalStore(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap((body) =>
-            create3(http, apiConfig.rootUrl, {
+            create4(http, apiConfig.rootUrl, {
               body,
             }).pipe(
               map((r) => extractProperty(r.body)),

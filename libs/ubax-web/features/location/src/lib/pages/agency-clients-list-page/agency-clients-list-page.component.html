@@ -1,0 +1,264 @@
+<div class="cl-page" data-ubax-motion="page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="cl-header">
+    <div class="cl-header__left">
+      <div class="cl-header__eyebrow">
+        <i class="pi pi-users"></i>
+        <span>Agence · Clientèle</span>
+      </div>
+      <h1 class="cl-header__title">Liste des clients</h1>
+      <p class="cl-header__subtitle">Gérez et suivez les clients de votre agence</p>
+    </div>
+    <div class="cl-header__actions">
+      @if (clientsActifs().length > 0) {
+        <div class="cl-active-badge">
+          <span class="cl-active-badge__dot"></span>
+          <span>{{ clientsActifs().length }} client{{ clientsActifs().length > 1 ? 's' : '' }} actif{{ clientsActifs().length > 1 ? 's' : '' }}</span>
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- ── KPI Cards ─────────────────────────────────────────────────────── -->
+  <section class="cl-kpi-grid" aria-label="Statistiques clients">
+    @for (card of kpiCards(); track card.label) {
+      <article
+        class="cl-kpi-card"
+        [style.--kpi-accent]="card.accent"
+        [style.--kpi-bg]="card.bg"
+      >
+        <span class="cl-kpi-card__icon"><i [class]="card.icon"></i></span>
+        <div class="cl-kpi-card__body">
+          <p class="cl-kpi-card__value">{{ card.value }}</p>
+          <p class="cl-kpi-card__label">{{ card.label }}</p>
+        </div>
+        <span class="cl-kpi-card__orb"></span>
+      </article>
+    }
+  </section>
+
+  <!-- ── Main card ─────────────────────────────────────────────────────── -->
+  <section class="cl-card" data-ubax-motion="surface">
+
+    <!-- Filters -->
+    <div class="cl-filters">
+      <label class="cl-search" aria-label="Rechercher un client">
+        <i class="pi pi-search cl-search__icon"></i>
+        <input
+          class="cl-search__input"
+          type="search"
+          placeholder="Nom, email, téléphone, ville…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </label>
+
+      <p-select
+        [options]="verifOptions"
+        [ngModel]="filterVerif()"
+        (ngModelChange)="onFilterVerifChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        [styleClass]="'cl-select'"
+        [panelStyleClass]="'cl-select-panel'"
+        ariaLabel="Filtrer par vérification"
+      />
+    </div>
+
+    <!-- Status tabs -->
+    <div class="cl-tabs" role="tablist" aria-label="Filtrer par statut">
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="filterStatus() === 'all'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'all'"
+        (click)="filterStatus.set('all')"
+      >
+        Tous
+        <span class="cl-tab__count">{{ store.entities().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="filterStatus() === 'active'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'active'"
+        (click)="filterStatus.set('active')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--active"></span>
+        Actifs
+        <span class="cl-tab__count">{{ clientsActifs().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="filterStatus() === 'inactive'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'inactive'"
+        (click)="filterStatus.set('inactive')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--inactive"></span>
+        Inactifs
+        <span class="cl-tab__count">{{ clientsInactifs().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="filterVerif() === 'verified'"
+        role="tab"
+        [attr.aria-selected]="filterVerif() === 'verified'"
+        (click)="filterVerif.set(filterVerif() === 'verified' ? 'all' : 'verified')"
+      >
+        <i class="pi pi-shield"></i>
+        Vérifiés
+        <span class="cl-tab__count">{{ clientsVerifies().length }}</span>
+      </button>
+    </div>
+
+    <!-- ViewState -->
+    @switch (viewState()) {
+
+      @case ('loading') {
+        <div class="cl-skeleton-wrap">
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <div class="cl-skeleton-row">
+              <div class="cl-skeleton-avatar"></div>
+              <div class="cl-skeleton-lines">
+                <span class="cl-skeleton cl-skeleton--name"></span>
+                <span class="cl-skeleton cl-skeleton--email"></span>
+              </div>
+              <span class="cl-skeleton cl-skeleton--md"></span>
+              <span class="cl-skeleton cl-skeleton--verif"></span>
+              <span class="cl-skeleton cl-skeleton--sm"></span>
+              <span class="cl-skeleton cl-skeleton--sm"></span>
+            </div>
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <div class="cl-state-box cl-state-box--error">
+          <i class="pi pi-exclamation-triangle cl-state-box__icon"></i>
+          <p class="cl-state-box__title">Erreur de chargement</p>
+          <p class="cl-state-box__desc">{{ store.error() }}</p>
+          <button class="cl-btn cl-btn--primary" type="button" (click)="retryLoad()">
+            <i class="pi pi-refresh"></i> Réessayer
+          </button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="cl-state-box">
+          <i class="pi pi-users cl-state-box__icon"></i>
+          <p class="cl-state-box__title">Aucun client</p>
+          <p class="cl-state-box__desc">Aucun client enregistré pour votre agence.</p>
+        </div>
+      }
+
+      @case ('success') {
+        <div class="cl-table-wrap">
+          <div class="cl-table">
+
+            <div class="cl-table__head">
+              <span></span>
+              <span>Client</span>
+              <span>Contact</span>
+              <span>Vérifications</span>
+              <span>Statut</span>
+              <span>Dernière connexion</span>
+              <span></span>
+            </div>
+
+            <div class="cl-table__body">
+              @if (pagedClients().length === 0) {
+                <div class="cl-table__no-results">
+                  Aucun client ne correspond aux filtres sélectionnés.
+                </div>
+              }
+
+              @for (client of pagedClients(); track client.id) {
+                <div class="cl-row">
+                  <div
+                    class="cl-row__avatar"
+                    [class.cl-row__avatar--active]="client.active"
+                    [class.cl-row__avatar--inactive]="!client.active"
+                  >
+                    {{ getInitials(client.firstName, client.lastName) }}
+                  </div>
+
+                  <div class="cl-row__identity">
+                    <span class="cl-row__name">
+                      {{ (client.firstName ?? '') + ' ' + (client.lastName ?? '') }}
+                    </span>
+                    <span class="cl-row__sub">{{ client.email ?? '—' }}</span>
+                  </div>
+
+                  <div class="cl-row__contact">
+                    <span class="cl-row__phone">{{ client.phone ?? '—' }}</span>
+                    @if (client.city) {
+                      <span class="cl-row__city">
+                        <i class="pi pi-map-marker"></i>{{ client.city }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="cl-row__verifs">
+                    <span
+                      class="cl-verif"
+                      [class.cl-verif--ok]="client.emailVerified"
+                      [title]="client.emailVerified ? 'Email vérifié' : 'Email non vérifié'"
+                    >
+                      <i class="pi pi-envelope"></i>
+                    </span>
+                    <span
+                      class="cl-verif"
+                      [class.cl-verif--ok]="client.phoneVerified"
+                      [title]="client.phoneVerified ? 'Téléphone vérifié' : 'Téléphone non vérifié'"
+                    >
+                      <i class="pi pi-phone"></i>
+                    </span>
+                    <span
+                      class="cl-verif"
+                      [class.cl-verif--ok]="client.identityVerified"
+                      [title]="client.identityVerified ? 'Identité vérifiée' : 'Identité non vérifiée'"
+                    >
+                      <i class="pi pi-id-card"></i>
+                    </span>
+                  </div>
+
+                  <span
+                    class="cl-status"
+                    [class.cl-status--active]="client.active"
+                    [class.cl-status--inactive]="!client.active"
+                  >
+                    <span class="cl-status__dot"></span>
+                    {{ client.active ? 'Actif' : 'Inactif' }}
+                  </span>
+
+                  <span class="cl-row__date">{{ formatLastLogin(client.lastLoginAt) }}</span>
+
+                  <button
+                    class="cl-row__action"
+                    type="button"
+                    aria-label="Voir le profil"
+                    title="Voir le profil"
+                  >
+                    <i class="pi pi-arrow-right"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <footer class="cl-footer">
+          <p class="cl-footer__results">{{ resultsLabel() }}</p>
+          <ubax-paginator
+            [(currentPage)]="currentPage"
+            [totalPages]="totalPages()"
+            (currentPageChange)="onPageChange($event)"
+          />
+        </footer>
+      }
+    }
+  </section>
+</div>

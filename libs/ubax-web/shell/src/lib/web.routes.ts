@@ -143,6 +143,17 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: ROUTE_ROLE_ACCESS.locataires,
       },
+
+      // ── Clients agence ────────────────────────────────────────────────────────
+      {
+        path: 'clients',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-location').then(
+            (m) => m.agencyClientsRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.clientsAgence,
+      },
     ],
   },
 

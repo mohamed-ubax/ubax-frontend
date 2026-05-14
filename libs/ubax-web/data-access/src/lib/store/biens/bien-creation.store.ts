@@ -8,7 +8,7 @@ import {
   addMedia,
   ApiConfiguration,
   BailleurApplicationResponse,
-  create3,
+  create4,
   deleteDocument,
   deleteMedia,
   findAllByType,
@@ -234,7 +234,7 @@ export const BienCreationStore = signalStore(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
           exhaustMap((body) =>
-            create3(http, apiConfig.rootUrl, { body }).pipe(
+            create4(http, apiConfig.rootUrl, { body }).pipe(
               map((r) => extractProperty(r.body)),
               tapResponse({
                 next: (property: PropertyResponse) =>

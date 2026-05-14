@@ -14,12 +14,12 @@ import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
   cancel,
-  create6,
-  getById1,
-  list4,
+  create7,
+  getById2,
+  list5,
   submit1,
   terminate,
-  update1,
+  update2,
   TerminateContractRequest,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, pipe, tap } from 'rxjs';
@@ -135,11 +135,11 @@ function updateContractStatusInList(
 
 export const ContratsStore = signalStore(
   { providedIn: 'root' },
-  withApiResource<ContractResponse, typeof list4, typeof getById1, typeof create6, typeof update1>({
-    list: list4,
-    getById: getById1,
-    create: create6,
-    update: update1,
+  withApiResource<ContractResponse, typeof list5, typeof getById2, typeof create7, typeof update2>({
+    list: list5,
+    getById: getById2,
+    create: create7,
+    update: update2,
     buildGetByIdParams: (id) => ({ id }),
     idSelector: (c) => c.id,
     mapList: extractContractList,

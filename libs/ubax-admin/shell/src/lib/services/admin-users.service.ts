@@ -6,12 +6,12 @@ import {
   type AssignAdminRoleRequest,
   type CreateAdminRequest,
   assignAdminRole,
-  assignSubRoles2,
+  assignSubRoles1,
   createAdmin,
   deleteAdmin,
-  getSubRoles2,
+  getSubRoles1,
   listAdmins,
-  revokeSubRole2,
+  revokeSubRole1,
 } from '@ubax-workspace/shared-api-types';
 import { HttpClient } from '@angular/common/http';
 import { from, map, Observable, of, switchMap } from 'rxjs';
@@ -289,7 +289,7 @@ export class AdminUsersService {
 
   getSubRoles(userId: string): Observable<AdminSubRole[]> {
     return from(
-      this.api.invoke(getSubRoles2, { userId, scope: 'UBAX_INTERNAL' }),
+      this.api.invoke(getSubRoles1, { userId, scope: 'UBAX_INTERNAL' }),
     ).pipe(
       // getSubRoles2 uses responseType:'blob' — parse the Blob as JSON first
       switchMap((raw) => {
@@ -306,7 +306,7 @@ export class AdminUsersService {
 
   assignSubRoles(userId: string, roles: string[]): Observable<AdminSubRole[]> {
     return from(
-      this.api.invoke(assignSubRoles2, {
+      this.api.invoke(assignSubRoles1, {
         userId,
         body: { roles, scope: 'UBAX_INTERNAL' },
       }),
@@ -325,7 +325,7 @@ export class AdminUsersService {
 
   revokeSubRole(userId: string, role: string): Observable<AdminSubRole[]> {
     return from(
-      this.api.invoke(revokeSubRole2, { userId, role, scope: 'UBAX_INTERNAL' }),
+      this.api.invoke(revokeSubRole1, { userId, role, scope: 'UBAX_INTERNAL' }),
     ).pipe(
       switchMap((raw) => {
         if (raw instanceof Blob) {

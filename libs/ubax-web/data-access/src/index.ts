@@ -75,6 +75,10 @@ export type { ContractResponse, ContractStatus } from './lib/store/contrats/cont
 export type { EspaceCreationState } from './lib/store/espaces/espace-creation.store';
 export { EspaceEditStore } from './lib/store/espaces/espace-edit.store';
 
+// ─── Clients ─────────────────────────────────────────────────────────────────
+export { HotelClientsStore } from './lib/store/clients/hotel-clients.store';
+export { AgencyClientsStore } from './lib/store/clients/agency-clients.store';
+
 // ─── Configs API prêtes à l'emploi avec createApiStore ───────────────────────
 // Usage : const BiensStore = createApiStore(biensApiConfig);
 //         @Component({ providers: [BiensStore] }) class MyComponent { store = inject(BiensStore) }

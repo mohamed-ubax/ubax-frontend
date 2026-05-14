@@ -18,7 +18,7 @@ import {
   assign,
   Assign$Params,
   create,
-  getById2,
+  getById3,
   list,
   listMessages,
   scheduleIntervention,
@@ -138,7 +138,7 @@ export const TicketingStore = signalStore(
   { providedIn: 'root' },
   withApiResource({
     list,
-    getById: getById2,
+    getById: getById3,
     buildGetByIdParams: (id) => ({ ticketId: id }),
     mapGetById: extractTicketFromResponse,
     create,

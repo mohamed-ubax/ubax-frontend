@@ -2,249 +2,225 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import { HotelClientsStore } from '@ubax-workspace/ubax-web-data-access';
+import { SelectModule } from 'primeng/select';
 
-import {
-  CLIENT_DETAILS,
-  type ClientDetailData,
-} from '../client-detail-page/client-detail.data';
+type StatusFilter = 'all' | 'active' | 'inactive';
+type VerifFilter = 'all' | 'verified' | 'unverified';
 
-type ClientTabId = 'all' | 'active' | 'upcoming' | 'archived';
-type ClientListTone = 'active' | 'upcoming' | 'archived';
-
-type ClientListRow = {
-  readonly id: string;
-  readonly code: string;
-  readonly name: string;
-  readonly initials: string;
-  readonly email: string;
-  readonly phone: string;
-  readonly roomLabel: string;
-  readonly stayPeriod: string;
-  readonly address: string;
-  readonly total: string;
-  readonly status: string;
-  readonly tone: ClientListTone;
-  readonly primarySpaceId: string;};
-
-const TAB_LABELS: Record<ClientTabId, string> = {
-  all: 'Tous les clients',
-  active: 'En séjour',
-  upcoming: 'À venir',
-  archived: 'Archivés',
-};
-
-const STATUS_ORDER: Record<ClientListTone, number> = {
-  active: 0,
-  upcoming: 1,
-  archived: 2,
-};
-
-const FRENCH_MONTHS: Record<string, number> = {
-  janvier: 0,
-  fevrier: 1,
-  mars: 2,
-  avril: 3,
-  mai: 4,
-  juin: 5,
-  juillet: 6,
-  aout: 7,
-  septembre: 8,
-  octobre: 9,
-  novembre: 10,
-  decembre: 11,
-};
-
-function normalizeDateLabel(label: string): string {
-  return label
-    .toLowerCase()
-    .normalize('NFD')
-    .split(/[\u0300-\u036f]/g)
-    .join('');
-}
-
-function parseFrenchDate(label: string): Date | null {
-  const normalizedLabel = normalizeDateLabel(label);
-  const match = /(\d{1,2})\s+([a-z]+)\s+(\d{4})/.exec(normalizedLabel);
-
-  if (!match) {
-    return null;
-  }
-
-  const day = Number(match[1]);
-  const month = FRENCH_MONTHS[match[2] ?? ''];
-  const year = Number(match[3]);
-
-  if (!Number.isFinite(day) || month === undefined || !Number.isFinite(year)) {
-    return null;
-  }
-
-  return new Date(year, month, day, 12, 0, 0, 0);
-}
-
-function buildClientStatus(stay: ClientDetailData['stay']): {
+type KpiCard = {
   label: string;
-  tone: ClientListTone;
-} {
-  const arrival = parseFrenchDate(stay.arrival);
-  const departure = parseFrenchDate(stay.departure);
-  const today = new Date();
-  const todayAtMidday = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-    12,
-    0,
-    0,
-    0,
-  );
+  value: number;
+  accent: string;
+  bg: string;
+  icon: string;
+};
 
-  if (arrival && departure) {
-    if (todayAtMidday < arrival) {
-      return { label: 'À venir', tone: 'upcoming' };
-    }
+const PAGE_SIZE = 10;
 
-    if (todayAtMidday > departure) {
-      return { label: 'Archivé', tone: 'archived' };
-    }
-  }
-
-  return { label: 'En séjour', tone: 'active' };
+function normalizeText(v: string): string {
+  return v
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim();
 }
 
-function toInitials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
-}
-
-function buildClientCode(id: string): string {
-  return '#CL-' + id.padStart(3, '0');
-}
-
-function buildPrimarySpaceId(id: string): string {
-  const numericId = Number(id);
-  if (!Number.isFinite(numericId) || numericId <= 0) {
-    return '1';
-  }
-
-  return String(((Math.trunc(numericId) - 1) % 3) + 1);
+function initials(firstName?: string, lastName?: string): string {
+  const f = firstName?.[0]?.toUpperCase() ?? '';
+  const l = lastName?.[0]?.toUpperCase() ?? '';
+  return f + l || '?';
 }
 
 @Component({
   selector: 'ubax-clients-list-page',
   standalone: true,
-  imports: [RouterLink, UbaxMorphTabsDirective],
+  imports: [CommonModule, FormsModule, SelectModule, UbaxPaginatorComponent],
   templateUrl: './clients-list-page.component.html',
   styleUrl: './clients-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClientsListPageComponent {
-  readonly activeTab = signal<ClientTabId>('all');
-  readonly searchValue = signal('');
+  readonly store = inject(HotelClientsStore);
 
-  readonly allClients = computed<ClientListRow[]>(() =>
-    Object.entries(CLIENT_DETAILS)
-      .map(([id, client]) => {
-        const status = buildClientStatus(client.stay);
+  readonly searchTerm = signal('');
+  readonly filterStatus = signal<StatusFilter>('all');
+  readonly filterVerif = signal<VerifFilter>('all');
+  readonly currentPage = signal(1);
+  private readonly hasLoaded = signal(false);
 
-        return {
-          id,
-          code: buildClientCode(id),
-          name: client.identity.name,
-          initials: toInitials(client.identity.name),
-          email: client.identity.email,
-          phone: client.identity.phone,
-          roomLabel: client.stay.roomType + ' · ' + client.stay.roomNumber,
-          stayPeriod: client.stay.arrival + ' - ' + client.stay.departure,
-          address: client.stay.address,
-          total: client.summary.total,
-          status: status.label,
-          tone: status.tone,
-          primarySpaceId: buildPrimarySpaceId(id),
-        };
-      })
-      .sort((left, right) => {
-        const toneDifference =
-          STATUS_ORDER[left.tone] - STATUS_ORDER[right.tone];
-        if (toneDifference !== 0) {
-          return toneDifference;
-        }
+  readonly statusOptions: { label: string; value: StatusFilter }[] = [
+    { label: 'Tous les statuts', value: 'all' },
+    { label: 'Actifs', value: 'active' },
+    { label: 'Inactifs', value: 'inactive' },
+  ];
 
-        return left.name.localeCompare(right.name, 'fr');
-      }),
-  );
+  readonly verifOptions: { label: string; value: VerifFilter }[] = [
+    { label: 'Toutes vérifications', value: 'all' },
+    { label: 'Identité vérifiée', value: 'verified' },
+    { label: 'Non vérifiés', value: 'unverified' },
+  ];
 
-  readonly tabs = computed(() => {
-    const clients = this.allClients();
+  readonly viewState = computed(() => {
+    if (this.store.loading() && !this.hasLoaded()) return 'loading';
+    if (this.store.error()) return 'error';
+    if (!this.store.loading() && this.store.entities().length === 0 && this.hasLoaded()) return 'empty';
+    return 'success';
+  });
+
+  readonly kpiCards = computed<KpiCard[]>(() => {
+    const all = this.store.entities();
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     return [
-      { id: 'all' as const, label: TAB_LABELS.all, count: clients.length },
       {
-        id: 'active' as const,
-        label: TAB_LABELS.active,
-        count: clients.filter((client) => client.tone === 'active').length,
+        label: 'Total clients',
+        value: all.length,
+        accent: 'var(--ubax-info)',
+        bg: 'var(--ubax-blue-soft)',
+        icon: 'pi pi-users',
       },
       {
-        id: 'upcoming' as const,
-        label: TAB_LABELS.upcoming,
-        count: clients.filter((client) => client.tone === 'upcoming').length,
+        label: 'Comptes actifs',
+        value: all.filter((c) => c.active).length,
+        accent: 'var(--ubax-success)',
+        bg: 'var(--ubax-success-soft)',
+        icon: 'pi pi-check-circle',
       },
       {
-        id: 'archived' as const,
-        label: TAB_LABELS.archived,
-        count: clients.filter((client) => client.tone === 'archived').length,
+        label: 'Identité vérifiée',
+        value: all.filter((c) => c.identityVerified).length,
+        accent: 'var(--ubax-accent)',
+        bg: 'var(--ubax-peach-soft)',
+        icon: 'pi pi-shield',
+      },
+      {
+        label: 'Nouveaux ce mois',
+        value: all.filter((c) => c.createdAt && new Date(c.createdAt) >= startOfMonth).length,
+        accent: '#7c3aed',
+        bg: 'rgba(124, 58, 237, 0.08)',
+        icon: 'pi pi-user-plus',
       },
     ];
   });
 
+  readonly clientsActifs = computed(() => this.store.entities().filter((c) => c.active));
+  readonly clientsInactifs = computed(() => this.store.entities().filter((c) => !c.active));
+  readonly clientsVerifies = computed(() => this.store.entities().filter((c) => c.identityVerified));
+
   readonly filteredClients = computed(() => {
-    const search = normalizeDateLabel(this.searchValue().trim());
+    const query = normalizeText(this.searchTerm());
+    const status = this.filterStatus();
+    const verif = this.filterVerif();
 
-    return this.allClients().filter((client) => {
-      const matchesTab =
-        this.activeTab() === 'all' ||
-        (this.activeTab() === 'active' && client.tone === 'active') ||
-        (this.activeTab() === 'upcoming' && client.tone === 'upcoming') ||
-        (this.activeTab() === 'archived' && client.tone === 'archived');
+    return this.store.entities().filter((c) => {
+      if (status === 'active' && !c.active) return false;
+      if (status === 'inactive' && c.active) return false;
+      if (verif === 'verified' && !c.identityVerified) return false;
+      if (verif === 'unverified' && c.identityVerified) return false;
 
-      if (!matchesTab) {
-        return false;
+      if (query) {
+        const text = normalizeText(
+          [c.firstName, c.lastName, c.email, c.phone, c.city].filter(Boolean).join(' '),
+        );
+        if (!text.includes(query)) return false;
       }
-
-      if (!search) {
-        return true;
-      }
-
-      return normalizeDateLabel(
-        [
-          client.name,
-          client.code,
-          client.email,
-          client.phone,
-          client.roomLabel,
-          client.stayPeriod,
-          client.address,
-          client.status,
-        ].join(' '),
-      ).includes(search);
+      return true;
     });
   });
 
-  setTab(tabId: ClientTabId): void {
-    this.activeTab.set(tabId);
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredClients().length / PAGE_SIZE)),
+  );
+
+  readonly pagedClients = computed(() => {
+    const page = Math.min(this.currentPage(), this.totalPages());
+    const start = (page - 1) * PAGE_SIZE;
+    return this.filteredClients().slice(start, start + PAGE_SIZE);
+  });
+
+  readonly resultsLabel = computed(() => {
+    const total = this.filteredClients().length;
+    if (!total) return 'Aucun résultat';
+    const page = Math.min(this.currentPage(), this.totalPages());
+    const start = (page - 1) * PAGE_SIZE + 1;
+    const end = Math.min(start + PAGE_SIZE - 1, total);
+    return `${start}–${end} sur ${total} client${total > 1 ? 's' : ''}`;
+  });
+
+  constructor() {
+    effect(() => {
+      this.store.load!({ pageable: { page: 0, size: 200 } });
+    });
+
+    effect(() => {
+      if (!this.store.loading() && !this.hasLoaded()) {
+        this.hasLoaded.set(true);
+      }
+    });
+
+    effect(() => {
+      this.searchTerm();
+      this.filterStatus();
+      this.filterVerif();
+      this.currentPage.set(1);
+    });
   }
 
-  updateSearch(event: Event): void {
-    const target = event.target;
-    if (target instanceof HTMLInputElement) {
-      this.searchValue.set(target.value);
-    }
+  getInitials(firstName?: string, lastName?: string): string {
+    return initials(firstName, lastName);
+  }
+
+  formatDate(dateStr?: string): string {
+    if (!dateStr) return '—';
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(dateStr));
+  }
+
+  formatLastLogin(dateStr?: string): string {
+    if (!dateStr) return 'Jamais';
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffDays === 0) return "Aujourd'hui";
+    if (diffDays === 1) return 'Hier';
+    if (diffDays < 7) return `Il y a ${diffDays} jours`;
+    if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} sem.`;
+    return this.formatDate(dateStr);
+  }
+
+  onFilterVerifChange(v: unknown): void {
+    this.filterVerif.set(v as VerifFilter);
+  }
+
+  onFilterStatusChange(v: unknown): void {
+    this.filterStatus.set(v as StatusFilter);
+  }
+
+  onSearch(term: unknown): void {
+    this.searchTerm.set(typeof term === 'string' ? term : '');
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  retryLoad(): void {
+    this.hasLoaded.set(false);
+    this.store.load!({ pageable: { page: 0, size: 200 } });
   }
 }

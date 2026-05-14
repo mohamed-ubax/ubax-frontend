@@ -17,24 +17,18 @@ import {
 import { UbaxScope, withApiResource } from '@ubax-workspace/shared-data-access';
 import {
   addMember,
-  addMember1,
   AddTeamMemberRequest,
   AdminUserResponse,
   ApiConfiguration,
   assignSubRoles,
-  assignSubRoles1,
   AssignSubRolesRequest,
   findAllByType,
   getByKeycloakId,
   getSubRoles,
-  getSubRoles1,
   getTeamMembers,
-  getTeamMembers1,
   LaCodeListDto,
   removeMember,
-  removeMember1,
   revokeSubRole,
-  revokeSubRole1,
   StorageUploadResponse,
   upload,
 } from '@ubax-workspace/shared-api-types';
@@ -262,10 +256,7 @@ export const AgencyStore = signalStore(
             tap(() => patchState(store, { loading: true, error: null })),
             exhaustMap((params) => {
               const scope = resolveScope(params?.scope);
-              const request =
-                scope === 'HOTEL'
-                  ? getTeamMembers(http, apiConfig.rootUrl, {})
-                  : getTeamMembers1(http, apiConfig.rootUrl, {});
+              const request = getTeamMembers(http, apiConfig.rootUrl, {});
 
               return request.pipe(
                 mergeMap((response) => parseResponseBody(response.body)),
@@ -370,11 +361,7 @@ export const AgencyStore = signalStore(
                 return of([] as string[]);
               }
 
-              const scope = resolveScope();
-              const request =
-                scope === 'HOTEL'
-                  ? getSubRoles(http, apiConfig.rootUrl, { userId })
-                  : getSubRoles1(http, apiConfig.rootUrl, { userId });
+              const request = getSubRoles(http, apiConfig.rootUrl, { userId });
 
               return request.pipe(
                 map((response) => extractStringArray(response.body?.data)),
@@ -427,11 +414,7 @@ export const AgencyStore = signalStore(
             exhaustMap(
               (params: AddTeamMemberRequest & { avatarFile?: File }) => {
                 const { avatarFile, ...body } = params;
-                const scope = resolveScope();
-                const request =
-                  scope === 'HOTEL'
-                    ? addMember(http, apiConfig.rootUrl, { body })
-                    : addMember1(http, apiConfig.rootUrl, { body });
+                const request = addMember(http, apiConfig.rootUrl, { body });
 
                 return request.pipe(
                   mergeMap((response) => parseResponseBody(response.body)),
@@ -531,16 +514,10 @@ export const AgencyStore = signalStore(
             tap(() => patchState(store, { saving: true, error: null })),
             exhaustMap(({ userId, body }) => {
               const scope = resolveScope(body.scope ?? null);
-              const request =
-                scope === 'HOTEL'
-                  ? assignSubRoles(http, apiConfig.rootUrl, {
-                      userId,
-                      body: body.roles ?? [],
-                    })
-                  : assignSubRoles1(http, apiConfig.rootUrl, {
-                      userId,
-                      body: body.roles ?? [],
-                    });
+              const request = assignSubRoles(http, apiConfig.rootUrl, {
+                userId,
+                body: body.roles ?? [],
+              });
 
               return request.pipe(
                 tapResponse({
@@ -574,11 +551,7 @@ export const AgencyStore = signalStore(
           pipe(
             tap(() => patchState(store, { saving: true, error: null })),
             exhaustMap(({ userId, role }) => {
-              const scope = resolveScope();
-              const request =
-                scope === 'HOTEL'
-                  ? revokeSubRole(http, apiConfig.rootUrl, { userId, role })
-                  : revokeSubRole1(http, apiConfig.rootUrl, { userId, role });
+              const request = revokeSubRole(http, apiConfig.rootUrl, { userId, role });
 
               return request.pipe(
                 tapResponse({
@@ -610,11 +583,7 @@ export const AgencyStore = signalStore(
           pipe(
             tap(() => patchState(store, { saving: true, error: null })),
             exhaustMap((userId) => {
-              const scope = resolveScope();
-              const request =
-                scope === 'HOTEL'
-                  ? removeMember(http, apiConfig.rootUrl, { userId })
-                  : removeMember1(http, apiConfig.rootUrl, { userId });
+              const request = removeMember(http, apiConfig.rootUrl, { userId });
 
               return request.pipe(
                 tapResponse({

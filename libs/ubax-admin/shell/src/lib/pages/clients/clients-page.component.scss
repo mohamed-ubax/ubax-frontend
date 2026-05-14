@@ -1,0 +1,119 @@
+:host { display: block; }
+
+.clients-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 48px;
+
+  &__header { display: flex; flex-direction: column; gap: 4px; }
+
+  &__eyebrow {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ubax-text-muted);
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ubax-navy);
+  }
+
+  &__count {
+    padding: 4px 12px;
+    border-radius: 50px;
+    background: var(--ubax-page-bg);
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ubax-text-muted);
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+}
+
+.clients-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &__avatar {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--ubax-page-bg);
+    color: var(--ubax-text-muted);
+
+    &--active {
+      background: var(--ubax-success-soft);
+      color: var(--ubax-success);
+    }
+  }
+
+  &__meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+  &__name {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ubax-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.clients-table {
+  &__cell { font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; }
+  &__cell--muted { color: var(--ubax-text-muted); }
+}
+
+.clients-verifs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clients-verif {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--ubax-page-bg);
+  color: var(--ubax-text-muted);
+
+  i { font-size: 13px; }
+
+  &--ok {
+    background: var(--ubax-success-soft);
+    color: var(--ubax-success);
+  }
+}
