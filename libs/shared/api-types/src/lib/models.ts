@@ -31,6 +31,7 @@ export type { ExpenseBreakdownItem } from './models/expense-breakdown-item';
 export type { ExpenseCreateRequest } from './models/expense-create-request';
 export type { ExpenseResponse } from './models/expense-response';
 export type { ForgotPasswordRequest } from './models/forgot-password-request';
+export type { HotelResponse } from './models/hotel-response';
 export type { LaCodeListDto } from './models/la-code-list-dto';
 export type { LoginRequest } from './models/login-request';
 export type { LoginResponse } from './models/login-response';

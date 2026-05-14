@@ -9,7 +9,7 @@ import { RequestBuilder } from '../../request-builder';
 
 import { AgencyResponse } from '../../models/agency-response';
 
-export interface List6$Params {
+export interface List7$Params {
   city?: string;
 
 /**
@@ -28,8 +28,8 @@ export interface List6$Params {
   sort?: Array<string>;
 }
 
-export function list6(http: HttpClient, rootUrl: string, params?: List6$Params, context?: HttpContext): Observable<StrictHttpResponse<AgencyResponse>> {
-  const rb = new RequestBuilder(rootUrl, list6.PATH, 'get');
+export function list7(http: HttpClient, rootUrl: string, params?: List7$Params, context?: HttpContext): Observable<StrictHttpResponse<AgencyResponse>> {
+  const rb = new RequestBuilder(rootUrl, list7.PATH, 'get');
   if (params) {
     rb.query('city', params.city, {});
     rb.query('page', params.page, {});
@@ -47,4 +47,4 @@ export function list6(http: HttpClient, rootUrl: string, params?: List6$Params, 
   );
 }
 
-list6.PATH = '/v1/agencies';
+list7.PATH = '/v1/agencies';

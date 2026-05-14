@@ -297,9 +297,11 @@ export type { ListClients$Params as ListClients$Params } from './fn/admin-gestio
 export { listClients as listClients } from './fn/admin-gestion-des-partenaires/list-clients';
 export type { ListAgencies$Params as ListAgencies$Params } from './fn/admin-gestion-des-partenaires/list-agencies';
 export { listAgencies as listAgencies } from './fn/admin-gestion-des-partenaires/list-agencies';
+export type { List6$Params as List6$Params } from './fn/hotels/list-6';
+export { list6 as list6 } from './fn/hotels/list-6';
 export type { GetAgencyDashboard$Params as GetAgencyDashboard$Params } from './fn/dashboard/get-agency-dashboard';
 export { getAgencyDashboard as getAgencyDashboard } from './fn/dashboard/get-agency-dashboard';
 export type { GetAdminDashboard$Params as GetAdminDashboard$Params } from './fn/dashboard/get-admin-dashboard';
 export { getAdminDashboard as getAdminDashboard } from './fn/dashboard/get-admin-dashboard';
-export type { List6$Params as List6$Params } from './fn/agences/list-6';
-export { list6 as list6 } from './fn/agences/list-6';
+export type { List7$Params as List7$Params } from './fn/agences/list-7';
+export { list7 as list7 } from './fn/agences/list-7';
