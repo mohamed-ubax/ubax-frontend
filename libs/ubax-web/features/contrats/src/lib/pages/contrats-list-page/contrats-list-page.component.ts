@@ -8,11 +8,11 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
 import { ContratsStore, ContractStatus } from '@ubax-workspace/ubax-web-data-access';
 import {
   StatusBadgeComponent,
   type StatusVariant,
-  type SubNavTab,
 } from '@ubax-workspace/shared-design-system';
 import { UbaxPaginatorComponent, deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
 import { ContratsSkeletonComponent } from '../../components/contrats-skeleton/contrats-skeleton.component';
@@ -43,6 +43,7 @@ const STATUS_VARIANTS: Record<ContractStatus, StatusVariant> = {
   imports: [
     RouterLink,
     FormsModule,
+    Select,
     StatusBadgeComponent,
     UbaxPaginatorComponent,
     ContratsSkeletonComponent,
@@ -68,13 +69,44 @@ export class ContratsListPageComponent {
     ),
   );
 
-  readonly tabs: SubNavTab[] = [
-    { label: 'Tous', value: 'all' },
+  readonly statusOptions = [
+    { label: 'Tous les statuts', value: 'all' },
     { label: 'Brouillons', value: 'DRAFT' },
     { label: 'En attente', value: 'PENDING_SIGNATURE' },
     { label: 'Actifs', value: 'ACTIVE' },
     { label: 'Résiliés / Annulés', value: 'TERMINATED' },
   ];
+
+  readonly kpiCards = computed(() => [
+    {
+      label: 'Total contrats',
+      value: this.store.entities().length,
+      icon: 'pi pi-file',
+      accent: 'var(--ubax-info)',
+      bg: 'var(--ubax-blue-soft)',
+    },
+    {
+      label: 'Actifs',
+      value: this.store.contratsActifs().length,
+      icon: 'pi pi-check-circle',
+      accent: 'var(--ubax-success)',
+      bg: 'var(--ubax-success-soft)',
+    },
+    {
+      label: 'En attente',
+      value: this.store.contratsEnAttente().length,
+      icon: 'pi pi-clock',
+      accent: '#f97316',
+      bg: '#fff7ed',
+    },
+    {
+      label: 'Résiliés / Annulés',
+      value: this.store.contratsTermines().length,
+      icon: 'pi pi-times-circle',
+      accent: 'var(--ubax-danger)',
+      bg: '#fef2f2',
+    },
+  ]);
 
   readonly filteredRows = computed(() => {
     const search = this.searchValue().toLowerCase().trim();
@@ -107,6 +139,11 @@ export class ContratsListPageComponent {
   readonly pagedRows = computed(() => {
     const start = (this.currentPage() - 1) * PAGE_SIZE;
     return this.filteredRows().slice(start, start + PAGE_SIZE);
+  });
+
+  readonly resultsLabel = computed(() => {
+    const count = this.filteredRows().length;
+    return `${count} contrat${count > 1 ? 's' : ''}`;
   });
 
   constructor() {

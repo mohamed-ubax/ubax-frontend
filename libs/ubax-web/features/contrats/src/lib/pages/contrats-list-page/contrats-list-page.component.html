@@ -1,70 +1,128 @@
-<div class="cl-page">
+<div class="cl-page" data-ubax-motion="page">
 
-  <!-- Header -->
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="cl-header">
     <div class="cl-header__left">
+      <div class="cl-header__eyebrow">
+        <i class="pi pi-file-edit"></i>
+        <span>Agence · Contrats</span>
+      </div>
       <h1 class="cl-header__title">Contrats de bail</h1>
-      <span class="cl-header__subtitle">Gestion du cycle de vie des baux locatifs</span>
+      <p class="cl-header__subtitle">Gestion du cycle de vie des baux locatifs</p>
     </div>
     <div class="cl-header__actions">
-      <a class="cl-btn-primary" routerLink="nouveau">
+      <a class="cl-btn cl-btn--primary" routerLink="nouveau">
         <i class="pi pi-plus"></i> Nouveau contrat
       </a>
     </div>
   </header>
 
-  <!-- KPI Strip -->
-  <div class="cl-kpi-strip">
-    <div class="cl-kpi-chip cl-kpi-chip--active">
-      <span class="cl-kpi-chip__dot"></span>
-      <span class="cl-kpi-chip__count">{{ store.contratsActifs().length }}</span>
-      <span class="cl-kpi-chip__label">Actifs</span>
-    </div>
-    <div class="cl-kpi-chip cl-kpi-chip--pending">
-      <span class="cl-kpi-chip__dot"></span>
-      <span class="cl-kpi-chip__count">{{ store.contratsEnAttente().length }}</span>
-      <span class="cl-kpi-chip__label">En attente</span>
-    </div>
-    <div class="cl-kpi-chip cl-kpi-chip--draft">
-      <span class="cl-kpi-chip__dot"></span>
-      <span class="cl-kpi-chip__count">{{ store.contratsBrouillons().length }}</span>
-      <span class="cl-kpi-chip__label">Brouillons</span>
-    </div>
-    <div class="cl-kpi-chip cl-kpi-chip--terminated">
-      <span class="cl-kpi-chip__dot"></span>
-      <span class="cl-kpi-chip__count">{{ store.contratsTermines().length }}</span>
-      <span class="cl-kpi-chip__label">Résiliés / Annulés</span>
-    </div>
-  </div>
+  <!-- ── KPI Cards ─────────────────────────────────────────────────────── -->
+  <section class="cl-kpi-grid" aria-label="Statistiques contrats">
+    @for (card of kpiCards(); track card.label) {
+      <article
+        class="cl-kpi-card"
+        [style.--kpi-accent]="card.accent"
+        [style.--kpi-bg]="card.bg"
+      >
+        <span class="cl-kpi-card__icon"><i [class]="card.icon"></i></span>
+        <div class="cl-kpi-card__body">
+          <p class="cl-kpi-card__value">{{ card.value }}</p>
+          <p class="cl-kpi-card__label">{{ card.label }}</p>
+        </div>
+        <span class="cl-kpi-card__orb"></span>
+      </article>
+    }
+  </section>
 
-  <!-- Toolbar: tabs + search -->
-  <div class="cl-toolbar">
-    <div class="cl-tabs">
-      @for (tab of tabs; track tab.value) {
-        <button
-          class="cl-tab"
-          [class.cl-tab--active]="activeTab() === tab.value"
-          (click)="onTabChange(tab.value)"
-        >
-          {{ tab.label }}
-        </button>
-      }
-    </div>
+  <!-- ── Main card ─────────────────────────────────────────────────────── -->
+  <section class="cl-card" data-ubax-motion="surface">
 
-    <label class="cl-search">
-      <i class="pi pi-search cl-search__icon"></i>
-      <input
-        class="cl-search__input"
-        type="search"
-        placeholder="Rechercher par locataire ou bien…"
-        [ngModel]="searchValue()"
-        (ngModelChange)="onSearch($event)"
+    <!-- Filters -->
+    <div class="cl-filters">
+      <label class="cl-search" aria-label="Rechercher un contrat">
+        <i class="pi pi-search cl-search__icon"></i>
+        <input
+          class="cl-search__input"
+          type="search"
+          placeholder="Rechercher par locataire ou bien…"
+          [ngModel]="searchValue()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </label>
+
+      <p-select
+        [options]="statusOptions"
+        [ngModel]="activeTab()"
+        (ngModelChange)="onTabChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="cl-select"
+        panelStyleClass="cl-select-panel"
+        ariaLabel="Filtrer par statut"
       />
-    </label>
-  </div>
+    </div>
 
-  <!-- Main card -->
-  <div class="cl-card">
+    <!-- Status tabs -->
+    <div class="cl-tabs" role="tablist" aria-label="Filtrer par statut">
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'all'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'all'"
+        (click)="onTabChange('all')"
+      >
+        Tous
+        <span class="cl-tab__count">{{ store.entities().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'DRAFT'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'DRAFT'"
+        (click)="onTabChange('DRAFT')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--draft"></span>
+        Brouillons
+        <span class="cl-tab__count">{{ store.contratsBrouillons().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'PENDING_SIGNATURE'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'PENDING_SIGNATURE'"
+        (click)="onTabChange('PENDING_SIGNATURE')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--pending"></span>
+        En attente
+        <span class="cl-tab__count">{{ store.contratsEnAttente().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'ACTIVE'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'ACTIVE'"
+        (click)="onTabChange('ACTIVE')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--active"></span>
+        Actifs
+        <span class="cl-tab__count">{{ store.contratsActifs().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'TERMINATED'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'TERMINATED'"
+        (click)="onTabChange('TERMINATED')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--terminated"></span>
+        Résiliés / Annulés
+        <span class="cl-tab__count">{{ store.contratsTermines().length }}</span>
+      </button>
+    </div>
+
+    <!-- ViewState -->
     @switch (viewState()) {
 
       @case ('loading') {
@@ -72,22 +130,22 @@
       }
 
       @case ('error') {
-        <div class="cl-state cl-state--error">
-          <i class="pi pi-exclamation-triangle cl-state__icon"></i>
-          <p class="cl-state__title">Erreur de chargement</p>
-          <p class="cl-state__desc">Impossible de charger les contrats. Vérifiez votre connexion.</p>
-          <button class="cl-btn-ghost" (click)="retryLoad()">
+        <div class="cl-state-box cl-state-box--error">
+          <i class="pi pi-exclamation-triangle cl-state-box__icon"></i>
+          <p class="cl-state-box__title">Erreur de chargement</p>
+          <p class="cl-state-box__desc">Impossible de charger les contrats. Vérifiez votre connexion.</p>
+          <button class="cl-btn cl-btn--primary" type="button" (click)="retryLoad()">
             <i class="pi pi-refresh"></i> Réessayer
           </button>
         </div>
       }
 
       @case ('empty') {
-        <div class="cl-state">
-          <i class="pi pi-file-edit cl-state__icon"></i>
-          <p class="cl-state__title">Aucun contrat créé pour le moment</p>
-          <p class="cl-state__desc">Commencez par créer votre premier contrat de bail.</p>
-          <a class="cl-btn-primary" routerLink="nouveau">
+        <div class="cl-state-box">
+          <i class="pi pi-file-edit cl-state-box__icon"></i>
+          <p class="cl-state-box__title">Aucun contrat créé pour le moment</p>
+          <p class="cl-state-box__desc">Commencez par créer votre premier contrat de bail.</p>
+          <a class="cl-btn cl-btn--primary" routerLink="nouveau">
             <i class="pi pi-plus"></i> Créer un contrat
           </a>
         </div>
@@ -95,10 +153,10 @@
 
       @case ('success') {
         @if (filteredRows().length === 0) {
-          <div class="cl-state">
-            <i class="pi pi-search cl-state__icon"></i>
-            <p class="cl-state__title">Aucun résultat</p>
-            <p class="cl-state__desc">Aucun contrat ne correspond à votre recherche.</p>
+          <div class="cl-state-box">
+            <i class="pi pi-search cl-state-box__icon"></i>
+            <p class="cl-state-box__title">Aucun résultat</p>
+            <p class="cl-state-box__desc">Aucun contrat ne correspond à votre recherche.</p>
           </div>
         } @else {
           <div class="cl-table-wrap">
@@ -135,8 +193,8 @@
                     <td><span class="cl-date">{{ formatDate(contrat.startDate) }}</span></td>
                     <td><span class="cl-date">{{ formatDate(contrat.endDate) }}</span></td>
                     <td>
-                      <a class="cl-view-btn" [routerLink]="[contrat.id]" (click)="$event.stopPropagation()" title="Voir le détail">
-                        <i class="pi pi-eye"></i>
+                      <a class="cl-row__action" [routerLink]="[contrat.id]" (click)="$event.stopPropagation()" title="Voir le détail">
+                        <i class="pi pi-arrow-right"></i>
                       </a>
                     </td>
                   </tr>
@@ -146,13 +204,11 @@
           </div>
 
           <footer class="cl-footer">
-            <p class="cl-footer__results">
-              {{ filteredRows().length }} contrat{{ filteredRows().length > 1 ? 's' : '' }}
-            </p>
+            <p class="cl-footer__results">{{ resultsLabel() }}</p>
             <ubax-paginator [(currentPage)]="currentPage" [totalPages]="totalPages()" />
           </footer>
         }
       }
     }
-  </div>
+  </section>
 </div>
