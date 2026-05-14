@@ -1,0 +1,444 @@
+<div class="kd-page" data-ubax-motion="page">
+
+  <!-- ── Breadcrumb ────────────────────────────────────────────────────────── -->
+  <nav class="kd-breadcrumb" aria-label="Fil d'Ariane">
+    <button class="kd-breadcrumb__back" type="button" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <span class="kd-breadcrumb__item" role="button" tabindex="0" (click)="goBack()" (keydown.enter)="goBack()">
+      Dossiers Locataires
+    </span>
+    <i class="pi pi-chevron-right kd-breadcrumb__sep"></i>
+    <span class="kd-breadcrumb__item kd-breadcrumb__item--active">
+      {{ tenant()?.fullName ?? 'Détail du dossier' }}
+    </span>
+  </nav>
+
+  <!-- ── ViewState ────────────────────────────────────────────────────────── -->
+  @switch (viewState()) {
+
+    @case ('loading') {
+      <div class="kd-skeleton-layout">
+        <div class="kd-skeleton-main">
+          @for (i of [1,2,3]; track i) {
+            <div class="kd-skeleton-card">
+              <div class="kd-skeleton kd-skeleton--title"></div>
+              <div class="kd-skeleton kd-skeleton--row"></div>
+              <div class="kd-skeleton kd-skeleton--row"></div>
+              <div class="kd-skeleton kd-skeleton--row kd-skeleton--short"></div>
+            </div>
+          }
+        </div>
+        <div class="kd-skeleton-side">
+          <div class="kd-skeleton-card">
+            <div class="kd-skeleton kd-skeleton--title"></div>
+            <div class="kd-skeleton kd-skeleton--row"></div>
+            <div class="kd-skeleton kd-skeleton--row"></div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="kd-state-box kd-state-box--error">
+        <i class="pi pi-exclamation-triangle kd-state-box__icon"></i>
+        <p class="kd-state-box__title">Erreur de chargement</p>
+        <p class="kd-state-box__desc">Impossible de récupérer ce dossier.</p>
+        <button class="kd-btn kd-btn--primary" (click)="retryLoad()">
+          <i class="pi pi-refresh"></i> Réessayer
+        </button>
+      </div>
+    }
+
+    @case ('not-found') {
+      <div class="kd-state-box">
+        <i class="pi pi-search kd-state-box__icon"></i>
+        <p class="kd-state-box__title">Dossier introuvable</p>
+        <p class="kd-state-box__desc">Ce dossier n'existe pas ou a été supprimé.</p>
+        <button class="kd-btn kd-btn--ghost" (click)="goBack()">Retour à la liste</button>
+      </div>
+    }
+
+    @case ('success') {
+      <div class="kd-layout">
+
+        <!-- ══ Colonne principale (65%) ═══════════════════════════════════════ -->
+        <div class="kd-main">
+
+          <!-- Hero identité -->
+          <section class="kd-card kd-hero" data-ubax-motion="surface">
+            <div class="kd-hero__avatar" [attr.data-status]="tenant()?.status">
+              {{ getInitials(tenant()?.fullName) }}
+            </div>
+            <div class="kd-hero__info">
+              <h2 class="kd-hero__name">{{ tenant()?.fullName ?? '—' }}</h2>
+              <p class="kd-hero__email">{{ tenant()?.email ?? '—' }}</p>
+              <span
+                class="kd-status-badge"
+                [style.color]="getStatusMeta(tenant()?.status).color"
+                [style.background]="getStatusMeta(tenant()?.status).bg"
+              >
+                <span
+                  class="kd-status-badge__dot"
+                  [style.background]="getStatusMeta(tenant()?.status).dot"
+                ></span>
+                {{ getStatusMeta(tenant()?.status).label }}
+              </span>
+            </div>
+            <div class="kd-hero__meta">
+              <div class="kd-meta-item">
+                <span class="kd-meta-item__label">Soumis le</span>
+                <span class="kd-meta-item__value">{{ formatDate(tenant()?.createdAt) }}</span>
+              </div>
+              @if (tenant()?.qualifiedAt) {
+                <div class="kd-meta-item">
+                  <span class="kd-meta-item__label">Qualifié le</span>
+                  <span class="kd-meta-item__value">{{ formatDate(tenant()?.qualifiedAt) }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Informations personnelles -->
+          <section class="kd-card" data-ubax-motion="surface">
+            <div class="kd-card__header">
+              <div class="kd-card__icon kd-card__icon--blue">
+                <i class="pi pi-user"></i>
+              </div>
+              <div>
+                <h3 class="kd-card__title">Informations personnelles</h3>
+                <p class="kd-card__subtitle">Identité et coordonnées</p>
+              </div>
+            </div>
+            <div class="kd-info-grid">
+              @for (block of infoBlocks(); track block.label) {
+                <div class="kd-info-item">
+                  <span class="kd-info-item__label">
+                    <i [class]="block.icon"></i>
+                    {{ block.label }}
+                  </span>
+                  <span class="kd-info-item__value">{{ block.value }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Situation professionnelle -->
+          <section class="kd-card" data-ubax-motion="surface">
+            <div class="kd-card__header">
+              <div class="kd-card__icon kd-card__icon--amber">
+                <i class="pi pi-briefcase"></i>
+              </div>
+              <div>
+                <h3 class="kd-card__title">Situation professionnelle</h3>
+                <p class="kd-card__subtitle">Emploi et revenus</p>
+              </div>
+            </div>
+            <div class="kd-info-grid">
+              @for (block of employmentBlocks(); track block.label) {
+                <div class="kd-info-item">
+                  <span class="kd-info-item__label">
+                    <i [class]="block.icon"></i>
+                    {{ block.label }}
+                  </span>
+                  <span class="kd-info-item__value">{{ block.value }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Documents -->
+          <section class="kd-card" data-ubax-motion="surface">
+            <div class="kd-card__header">
+              <div class="kd-card__icon kd-card__icon--violet">
+                <i class="pi pi-file"></i>
+              </div>
+              <div>
+                <h3 class="kd-card__title">Pièces justificatives</h3>
+                <p class="kd-card__subtitle">Documents soumis par le locataire</p>
+              </div>
+            </div>
+            <div class="kd-docs-grid">
+              @for (doc of documents(); track doc.label) {
+                <div class="kd-doc-item" [class.kd-doc-item--available]="doc.available">
+                  <div class="kd-doc-item__icon">
+                    <i [class]="doc.icon"></i>
+                  </div>
+                  <div class="kd-doc-item__body">
+                    <span class="kd-doc-item__label">{{ doc.label }}</span>
+                    @if (doc.available) {
+                      <span class="kd-doc-item__status kd-doc-item__status--ok">
+                        <i class="pi pi-check"></i> Disponible
+                      </span>
+                    } @else {
+                      <span class="kd-doc-item__status kd-doc-item__status--missing">
+                        <i class="pi pi-times"></i> Non fourni
+                      </span>
+                    }
+                  </div>
+                  @if (doc.available && doc.url) {
+                    <a
+                      class="kd-doc-item__action"
+                      [href]="doc.url"
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="Voir le document"
+                    >
+                      <i class="pi pi-external-link"></i>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Garant (conditionnel) -->
+          @if (tenant()?.hasGuarantor) {
+            <section class="kd-card" data-ubax-motion="surface">
+              <div class="kd-card__header">
+                <div class="kd-card__icon kd-card__icon--green">
+                  <i class="pi pi-users"></i>
+                </div>
+                <div>
+                  <h3 class="kd-card__title">Garant</h3>
+                  <p class="kd-card__subtitle">Informations sur le garant</p>
+                </div>
+              </div>
+              <div class="kd-info-grid">
+                @for (block of guarantorBlocks(); track block.label) {
+                  <div class="kd-info-item">
+                    <span class="kd-info-item__label">
+                      <i [class]="block.icon"></i>
+                      {{ block.label }}
+                    </span>
+                    <span class="kd-info-item__value">{{ block.value }}</span>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        </div>
+
+        <!-- ══ Colonne latérale (35%) ═════════════════════════════════════════ -->
+        <aside class="kd-side">
+
+          <!-- Décision -->
+          <div class="kd-card kd-decision-card" data-ubax-motion="surface">
+            <h3 class="kd-decision-card__title">Décision KYC</h3>
+
+            @if (isPending()) {
+              <p class="kd-decision-card__desc">
+                Ce dossier est en attente de traitement. Examinez les informations
+                et les documents avant de prendre une décision.
+              </p>
+              <div class="kd-decision-actions">
+                <button
+                  class="kd-btn kd-btn--qualify"
+                  [disabled]="isSaving()"
+                  (click)="openQualifyDialog()"
+                >
+                  <i class="pi pi-check-circle"></i>
+                  Qualifier le dossier
+                </button>
+                <button
+                  class="kd-btn kd-btn--reject"
+                  [disabled]="isSaving()"
+                  (click)="openRejectDialog()"
+                >
+                  <i class="pi pi-times-circle"></i>
+                  Rejeter le dossier
+                </button>
+              </div>
+            } @else if (tenant()?.status === 'QUALIFIED') {
+              <div class="kd-decision-result kd-decision-result--qualified">
+                <i class="pi pi-check-circle"></i>
+                <div>
+                  <p class="kd-decision-result__label">Dossier qualifié</p>
+                  @if (tenant()?.qualifiedAt) {
+                    <p class="kd-decision-result__date">
+                      {{ formatDate(tenant()?.qualifiedAt) }}
+                    </p>
+                  }
+                </div>
+              </div>
+            } @else if (tenant()?.status === 'REJECTED') {
+              <div class="kd-decision-result kd-decision-result--rejected">
+                <i class="pi pi-times-circle"></i>
+                <div>
+                  <p class="kd-decision-result__label">Dossier rejeté</p>
+                  @if (tenant()?.rejectionReason) {
+                    <p class="kd-decision-result__reason">
+                      {{ tenant()?.rejectionReason }}
+                    </p>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="kd-decision-result kd-decision-result--neutral">
+                <i class="pi pi-info-circle"></i>
+                <div>
+                  <p class="kd-decision-result__label">
+                    Statut : {{ getStatusMeta(tenant()?.status).label }}
+                  </p>
+                  <p class="kd-decision-result__date">Aucune action disponible</p>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Récapitulatif -->
+          <div class="kd-card kd-summary-card" data-ubax-motion="surface">
+            <h3 class="kd-summary-card__title">Récapitulatif</h3>
+            <div class="kd-summary-rows">
+              <div class="kd-summary-row">
+                <span class="kd-summary-row__label">ID Dossier</span>
+                <span class="kd-summary-row__value kd-summary-row__value--mono">
+                  {{ (tenant()?.id ?? '—') | slice:0:12 }}…
+                </span>
+              </div>
+              <div class="kd-summary-row">
+                <span class="kd-summary-row__label">User ID</span>
+                <span class="kd-summary-row__value kd-summary-row__value--mono">
+                  {{ (tenant()?.userId ?? '—') | slice:0:12 }}…
+                </span>
+              </div>
+              <div class="kd-summary-row">
+                <span class="kd-summary-row__label">Garant</span>
+                <span class="kd-summary-row__value">
+                  {{ tenant()?.hasGuarantor ? 'Oui' : 'Non' }}
+                </span>
+              </div>
+              <div class="kd-summary-row">
+                <span class="kd-summary-row__label">Soumis le</span>
+                <span class="kd-summary-row__value">
+                  {{ formatDate(tenant()?.createdAt) }}
+                </span>
+              </div>
+              <div class="kd-summary-row">
+                <span class="kd-summary-row__label">Mis à jour</span>
+                <span class="kd-summary-row__value">
+                  {{ formatDate(tenant()?.updatedAt) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documents checklist -->
+          <div class="kd-card kd-docs-summary">
+            <h3 class="kd-docs-summary__title">Checklist documents</h3>
+            <div class="kd-check-rows">
+              <div class="kd-check-row" [class.kd-check-row--ok]="!!tenant()?.idDocumentUrl">
+                <i [class]="tenant()?.idDocumentUrl ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                <span>Pièce d'identité</span>
+              </div>
+              <div class="kd-check-row" [class.kd-check-row--ok]="!!tenant()?.addressProofUrl">
+                <i [class]="tenant()?.addressProofUrl ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                <span>Justificatif domicile</span>
+              </div>
+              <div class="kd-check-row" [class.kd-check-row--ok]="!!tenant()?.incomeProofUrl">
+                <i [class]="tenant()?.incomeProofUrl ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                <span>Justificatif revenus</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    }
+  }
+</div>
+
+<!-- ══ Dialog : Qualifier ════════════════════════════════════════════════════ -->
+@if (dialogMode() === 'qualify') {
+  <div class="kd-overlay" (click)="closeDialog()" role="dialog" aria-modal="true" aria-label="Qualifier le dossier">
+    <div class="kd-dialog kd-dialog--qualify" (click)="$event.stopPropagation()">
+      <div class="kd-dialog__icon kd-dialog__icon--qualify">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <h2 class="kd-dialog__title">Qualifier ce dossier ?</h2>
+      <p class="kd-dialog__desc">
+        Vous vous apprêtez à valider le dossier de
+        <strong>{{ tenant()?.fullName ?? 'ce locataire' }}</strong>.
+        Cette action confirme que le dossier est complet et conforme.
+      </p>
+      <div class="kd-dialog__actions">
+        <button class="kd-btn kd-btn--ghost" (click)="closeDialog()">
+          Annuler
+        </button>
+        <button
+          class="kd-btn kd-btn--qualify"
+          [disabled]="isSaving()"
+          (click)="confirmQualify()"
+        >
+          @if (isSaving()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <i class="pi pi-check"></i>
+          }
+          Qualifier
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ Dialog : Rejeter ══════════════════════════════════════════════════════ -->
+@if (dialogMode() === 'reject') {
+  <div class="kd-overlay" (click)="closeDialog()" role="dialog" aria-modal="true" aria-label="Rejeter le dossier">
+    <div class="kd-dialog kd-dialog--reject" (click)="$event.stopPropagation()" [formGroup]="rejectForm">
+      <div class="kd-dialog__icon kd-dialog__icon--reject">
+        <i class="pi pi-times-circle"></i>
+      </div>
+      <h2 class="kd-dialog__title">Rejeter ce dossier ?</h2>
+      <p class="kd-dialog__desc">
+        Indiquez le motif de rejet. Le locataire pourra être informé de
+        cette décision.
+      </p>
+
+      <div class="kd-field">
+        <label class="kd-field__label" for="reject-reason">
+          Motif du rejet <span class="kd-field__required">*</span>
+        </label>
+        <textarea
+          id="reject-reason"
+          class="kd-field__textarea"
+          [class.kd-field__textarea--error]="reasonControl.invalid && reasonControl.touched"
+          formControlName="reason"
+          placeholder="Décrivez la raison du rejet (10 caractères minimum)…"
+          rows="4"
+        ></textarea>
+        @if (reasonControl.invalid && reasonControl.touched) {
+          <span class="kd-field__error">
+            @if (reasonControl.errors?.['required']) {
+              Le motif est obligatoire.
+            } @else if (reasonControl.errors?.['minlength']) {
+              Le motif doit contenir au moins 10 caractères.
+            } @else if (reasonControl.errors?.['maxlength']) {
+              Le motif ne peut pas dépasser 500 caractères.
+            }
+          </span>
+        }
+        <span class="kd-field__count">
+          {{ reasonControl.value.length }} / 500
+        </span>
+      </div>
+
+      <div class="kd-dialog__actions">
+        <button class="kd-btn kd-btn--ghost" (click)="closeDialog()">
+          Annuler
+        </button>
+        <button
+          class="kd-btn kd-btn--reject"
+          [disabled]="isSaving()"
+          (click)="confirmReject()"
+        >
+          @if (isSaving()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <i class="pi pi-times"></i>
+          }
+          Rejeter
+        </button>
+      </div>
+    </div>
+  </div>
+}

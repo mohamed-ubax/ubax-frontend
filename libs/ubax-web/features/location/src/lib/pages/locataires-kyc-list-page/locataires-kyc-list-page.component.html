@@ -1,0 +1,242 @@
+<div class="kl-page" data-ubax-motion="page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="kl-header">
+    <div class="kl-header__left">
+      <div class="kl-header__eyebrow">
+        <i class="pi pi-id-card"></i>
+        <span>KYC · Portail Agence</span>
+      </div>
+      <h1 class="kl-header__title">Dossiers Locataires</h1>
+      <p class="kl-header__subtitle">Vérification et qualification des dossiers</p>
+    </div>
+
+    <div class="kl-header__actions">
+      <div class="kl-pending-alert" *ngIf="store.locatairesEnAttente().length > 0">
+        <span class="kl-pending-alert__dot"></span>
+        <span>{{ store.locatairesEnAttente().length }} dossier(s) à traiter</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── KPI Cards ─────────────────────────────────────────────────────── -->
+  <section class="kl-kpi-grid" aria-label="Métriques KYC">
+    @for (card of kpiCards(); track card.label) {
+      <article
+        class="kl-kpi-card"
+        [style.--kpi-accent]="card.accent"
+        [style.--kpi-bg]="card.bg"
+      >
+        <span class="kl-kpi-card__icon">
+          <i [class]="card.icon"></i>
+        </span>
+        <div class="kl-kpi-card__body">
+          <p class="kl-kpi-card__value">{{ card.value }}</p>
+          <p class="kl-kpi-card__label">{{ card.label }}</p>
+        </div>
+        <span class="kl-kpi-card__bar"></span>
+      </article>
+    }
+  </section>
+
+  <!-- ── Tableau + filtres ──────────────────────────────────────────────── -->
+  <section class="kl-card" data-ubax-motion="surface">
+
+    <!-- Barre de filtres -->
+    <div class="kl-filters">
+      <label class="kl-search" aria-label="Rechercher un dossier">
+        <i class="pi pi-search kl-search__icon"></i>
+        <input
+          class="kl-search__input"
+          type="search"
+          placeholder="Rechercher par nom, email, ID…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </label>
+
+      <p-select
+        [options]="statusOptions"
+        [ngModel]="filterStatus()"
+        (ngModelChange)="filterStatus.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="kl-select"
+        panelStyleClass="kl-select-panel"
+        ariaLabel="Filtrer par statut"
+      />
+    </div>
+
+    <!-- Tabs statuts rapides -->
+    <div class="kl-status-tabs">
+      <button
+        class="kl-status-tab"
+        [class.kl-status-tab--active]="filterStatus() === 'all'"
+        (click)="filterStatus.set('all')"
+      >
+        Tous
+        <span class="kl-status-tab__count">{{ store.entities().length }}</span>
+      </button>
+      <button
+        class="kl-status-tab kl-status-tab--pending"
+        [class.kl-status-tab--active]="filterStatus() === 'PENDING_REVIEW'"
+        (click)="filterStatus.set('PENDING_REVIEW')"
+      >
+        <span class="kl-status-tab__dot"></span>
+        En attente
+        <span class="kl-status-tab__count">{{ store.locatairesEnAttente().length }}</span>
+      </button>
+      <button
+        class="kl-status-tab kl-status-tab--qualified"
+        [class.kl-status-tab--active]="filterStatus() === 'QUALIFIED'"
+        (click)="filterStatus.set('QUALIFIED')"
+      >
+        <span class="kl-status-tab__dot"></span>
+        Qualifiés
+        <span class="kl-status-tab__count">{{ store.locatairesActifs().length }}</span>
+      </button>
+      <button
+        class="kl-status-tab kl-status-tab--rejected"
+        [class.kl-status-tab--active]="filterStatus() === 'REJECTED'"
+        (click)="filterStatus.set('REJECTED')"
+      >
+        <span class="kl-status-tab__dot"></span>
+        Rejetés
+        <span class="kl-status-tab__count">{{ store.locatairesRejetes().length }}</span>
+      </button>
+    </div>
+
+    <!-- ViewState -->
+    @switch (viewState()) {
+
+      @case ('loading') {
+        <div class="kl-skeleton-wrap">
+          @for (i of [1,2,3,4,5,6,7]; track i) {
+            <div class="kl-skeleton-row">
+              <div class="kl-skeleton-avatar"></div>
+              <span class="kl-skeleton kl-skeleton--lg"></span>
+              <span class="kl-skeleton kl-skeleton--md"></span>
+              <span class="kl-skeleton kl-skeleton--sm"></span>
+              <span class="kl-skeleton kl-skeleton--sm"></span>
+              <span class="kl-skeleton kl-skeleton--sm"></span>
+            </div>
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <div class="kl-state-box kl-state-box--error">
+          <i class="pi pi-exclamation-triangle kl-state-box__icon"></i>
+          <p class="kl-state-box__title">Erreur de chargement</p>
+          <p class="kl-state-box__desc">Impossible de récupérer les dossiers.</p>
+          <button class="kl-btn kl-btn--primary" (click)="retryLoad()">
+            <i class="pi pi-refresh"></i> Réessayer
+          </button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="kl-state-box">
+          <i class="pi pi-folder-open kl-state-box__icon"></i>
+          <p class="kl-state-box__title">Aucun dossier locataire</p>
+          <p class="kl-state-box__desc">Aucun dossier KYC soumis pour le moment.</p>
+        </div>
+      }
+
+      @case ('success') {
+        <div class="kl-table-wrap">
+          <div class="kl-table">
+
+            <div class="kl-table__head">
+              <span></span>
+              <span>Locataire</span>
+              <span>Emploi</span>
+              <span>Revenu mensuel</span>
+              <span>Statut</span>
+              <span>Soumis le</span>
+              <span></span>
+            </div>
+
+            <div class="kl-table__body">
+              @if (pagedTenants().length === 0) {
+                <div class="kl-table__no-results">
+                  Aucun dossier ne correspond aux filtres sélectionnés.
+                </div>
+              }
+
+              @for (tenant of pagedTenants(); track tenant.id) {
+                <div
+                  class="kl-row"
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-label]="'Voir le dossier de ' + (tenant.fullName ?? 'Locataire')"
+                  (click)="goToDetail(tenant.id)"
+                  (keydown.enter)="goToDetail(tenant.id)"
+                >
+                  <!-- Avatar -->
+                  <div class="kl-row__avatar" [attr.data-status]="tenant.status">
+                    {{ getInitials(tenant.fullName) }}
+                  </div>
+
+                  <!-- Identité -->
+                  <div class="kl-row__identity">
+                    <span class="kl-row__name">{{ tenant.fullName ?? '—' }}</span>
+                    <span class="kl-row__email">{{ tenant.email ?? '—' }}</span>
+                  </div>
+
+                  <!-- Emploi -->
+                  <div class="kl-row__employment">
+                    <span class="kl-row__employer">{{ tenant.employerName ?? '—' }}</span>
+                    <span class="kl-row__status-job">{{ tenant.employmentStatus ?? '—' }}</span>
+                  </div>
+
+                  <!-- Revenu -->
+                  <span class="kl-row__income">
+                    {{ formatIncome(tenant.monthlyIncome) }}
+                  </span>
+
+                  <!-- Badge statut -->
+                  <span
+                    class="kl-badge"
+                    [style.color]="getStatusMeta(tenant.status).color"
+                    [style.background]="getStatusMeta(tenant.status).bg"
+                  >
+                    <span
+                      class="kl-badge__dot"
+                      [style.background]="getStatusMeta(tenant.status).dot"
+                    ></span>
+                    {{ getStatusMeta(tenant.status).label }}
+                  </span>
+
+                  <!-- Date -->
+                  <span class="kl-row__date">
+                    {{ formatDate(tenant.createdAt) }}
+                  </span>
+
+                  <!-- Action -->
+                  <button
+                    class="kl-row__action"
+                    type="button"
+                    aria-label="Voir le dossier"
+                    (click)="$event.stopPropagation(); goToDetail(tenant.id)"
+                  >
+                    <i class="pi pi-arrow-right"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <footer class="kl-footer">
+          <p class="kl-footer__results">{{ resultsLabel() }}</p>
+          <ubax-paginator
+            [(currentPage)]="currentPage"
+            [totalPages]="totalPages()"
+          />
+        </footer>
+      }
+    }
+  </section>
+</div>

@@ -162,6 +162,10 @@ export const ROUTE_ROLE_ACCESS = {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
   },
+  locataires: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
   finances: {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
@@ -277,6 +281,13 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
       UbaxSubRole.COMMERCIAL,
       UbaxSubRole.COMPTABLE_AGENCE,
     ],
+  },
+  {
+    label: 'Locataires KYC',
+    path: '/locataires',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
   },
   // ── Partenaire — hôtel ───────────────────────────────────────────────────
   {

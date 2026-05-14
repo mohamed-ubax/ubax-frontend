@@ -132,6 +132,17 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: ROUTE_ROLE_ACCESS.contrats,
       },
+
+      // ── Locataires KYC ───────────────────────────────────────────────────────
+      {
+        path: 'locataires',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-location').then(
+            (m) => m.locatairesKycRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.locataires,
+      },
     ],
   },
 

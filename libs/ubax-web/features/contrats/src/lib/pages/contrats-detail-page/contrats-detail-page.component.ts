@@ -13,7 +13,6 @@ import { ContratsStore, ContractStatus } from '@ubax-workspace/ubax-web-data-acc
 import {
   BreadcrumbNavComponent,
   DetailInfoBlockComponent,
-  EmptyStateComponent,
   SectionCardComponent,
   StatusBadgeComponent,
   type InfoItem,
@@ -34,7 +33,6 @@ import { ContratCancelDialogComponent } from '../../components/contrat-cancel-di
     SectionCardComponent,
     DetailInfoBlockComponent,
     StatusBadgeComponent,
-    EmptyStateComponent,
     ContratsSkeletonComponent,
     ContratSubmitDialogComponent,
     ContratTerminateDialogComponent,

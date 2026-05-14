@@ -18,7 +18,6 @@ import { map } from 'rxjs';
 import { ContratsStore } from '@ubax-workspace/ubax-web-data-access';
 import {
   BreadcrumbNavComponent,
-  EmptyStateComponent,
   StatusBadgeComponent,
 } from '@ubax-workspace/shared-design-system';
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
@@ -32,7 +31,6 @@ import { ContratsSkeletonComponent } from '../../components/contrats-skeleton/co
     ReactiveFormsModule,
     FormsModule,
     BreadcrumbNavComponent,
-    EmptyStateComponent,
     StatusBadgeComponent,
     ContratsSkeletonComponent,
   ],

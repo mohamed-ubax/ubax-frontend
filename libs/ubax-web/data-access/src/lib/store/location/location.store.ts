@@ -13,8 +13,8 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { withApiResource } from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
-  getById2,
-  list4,
+  getById3,
+  list5,
   qualify,
   reject,
   TenantResponse,
@@ -69,9 +69,9 @@ const mapPaginated = (raw: unknown): Tenant[] => {
  */
 export const LocationStore = signalStore(
   { providedIn: 'root' },
-  withApiResource<Tenant, typeof list4, typeof getById2>({
-    list: list4,
-    getById: getById2,
+  withApiResource<Tenant, typeof list5, typeof getById3>({
+    list: list5,
+    getById: getById3,
     idSelector: (tenant) => tenant.id,
     mapList: mapPaginated,
     mapGetById: (raw, requestedId) => {
