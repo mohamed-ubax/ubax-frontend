@@ -12,7 +12,6 @@
       class="topbar-logo"
       #topbarLogo
       aria-label="Accueil Ubax"
-      (click)="closeMobileMenu()"
     >
       <img [src]="logoSrc()" alt="Ubax" />
     </a>
@@ -31,7 +30,6 @@
             [routerLink]="item.path"
             [class.is-active]="isItemActive(item)"
             class="topbar-nav__item"
-            (click)="closeMobileMenu()"
             >{{ item.label }}</a
           >
         }

@@ -209,21 +209,21 @@ export type NavItemConfig = {
 };
 
 const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
-  // ── Partenaire — commun ──────────────────────────────────────────────────
+  // ── Admin / Super Admin ──────────────────────────────────────────────────
   {
     label: 'Tableau de bord',
     path: '/tableau-de-bord',
     mainRoles: [UbaxRole.ADMIN, UbaxRole.SUPER_ADMIN],
   },
 
-  // ── Partenaire — agence ──────────────────────────────────────────────────
+  // ── Partenaire — commun ──────────────────────────────────────────────────
   {
-    label: 'Membres',
-    path: '/equipe',
-    activePaths: ['/equipe', '/hotel/equipe'],
+    label: 'Tableau de bord',
+    path: '/tableau-de-bord',
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'AGENCE',
   },
+
+  // ── Partenaire — agence ──────────────────────────────────────────────────
   {
     label: 'Biens',
     path: '/biens',
@@ -289,14 +289,15 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
   },
-  // ── Partenaire — hôtel ───────────────────────────────────────────────────
   {
     label: 'Membres',
-    path: '/hotel/equipe',
-    activePaths: ['/hotel/equipe', '/equipe'],
+    path: '/equipe',
+    activePaths: ['/equipe', '/hotel/equipe'],
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'HOTEL',
+    scope: 'AGENCE',
   },
+
+  // ── Partenaire — hôtel ───────────────────────────────────────────────────
   {
     label: 'Réservations',
     path: '/hotel/reservations',
@@ -328,6 +329,13 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
     subRoles: [UbaxSubRole.GERANT_HOTEL, UbaxSubRole.COMPTABLE_HOTEL],
+  },
+  {
+    label: 'Membres',
+    path: '/hotel/equipe',
+    activePaths: ['/hotel/equipe', '/equipe'],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'HOTEL',
   },
 ];
 
