@@ -154,6 +154,10 @@ export const ROUTE_ROLE_ACCESS = {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
   },
+  tickets: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
   finances: {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
@@ -237,6 +241,13 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
       UbaxSubRole.COMPTABLE_AGENCE,
       UbaxSubRole.AGENT_SAV,
     ],
+  },
+  {
+    label: 'Tickets SAV',
+    path: '/tickets',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.AGENT_SAV],
   },
   {
     label: 'Finances',

@@ -1,0 +1,509 @@
+:host {
+  display: block;
+}
+
+// ─── Page layout ──────────────────────────────────────────────────────────────
+.tl-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-bottom: 40px;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+.tl-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  &__left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ubax-navy);
+  }
+
+  &__subtitle {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+}
+
+// ─── Buttons ──────────────────────────────────────────────────────────────────
+.tl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 0.88; }
+
+  &--primary {
+    background: var(--ubax-accent);
+    color: #fff;
+  }
+
+  &--ghost {
+    background: var(--ubax-surface);
+    color: var(--ubax-navy);
+    border: 1px solid var(--ubax-border-card);
+    box-shadow: var(--ubax-shadow-card-soft);
+  }
+}
+
+// ─── KPI Grid ─────────────────────────────────────────────────────────────────
+.tl-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.tl-kpi-card {
+  --kpi-accent: var(--ubax-info);
+  --kpi-bg: var(--ubax-blue-soft);
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: var(--ubax-surface);
+  border-left: 4px solid var(--kpi-accent);
+  box-shadow: var(--ubax-shadow-card-soft);
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--kpi-bg);
+    flex-shrink: 0;
+
+    i {
+      font-size: 22px;
+      color: var(--kpi-accent);
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__value {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--ubax-navy);
+  }
+
+  &__label {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+}
+
+// ─── Main card ────────────────────────────────────────────────────────────────
+.tl-card {
+  border-radius: 20px;
+  background: var(--ubax-surface);
+  box-shadow: var(--ubax-shadow-card-soft);
+  overflow: hidden;
+}
+
+// ─── Filters ──────────────────────────────────────────────────────────────────
+.tl-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 14px;
+  padding: 20px 20px 0;
+}
+
+.tl-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 10px;
+  background: var(--ubax-page-bg);
+  cursor: text;
+
+  &__icon {
+    color: var(--ubax-text-muted);
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+    outline: none;
+
+    &::placeholder { color: var(--ubax-text-muted); }
+  }
+}
+
+:host ::ng-deep .tl-select {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 10px;
+  background: var(--ubax-page-bg);
+  box-shadow: none;
+
+  .p-select-label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+  }
+
+  .p-select-dropdown {
+    width: 40px;
+    color: var(--ubax-text-muted);
+  }
+
+  &.p-focus { box-shadow: 0 0 0 2px rgb(232 125 30 / 0.25); }
+}
+
+:host ::ng-deep .tl-select-panel {
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgb(26 48 71 / 0.1);
+  overflow: hidden;
+
+  .p-select-option {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+    border-radius: 8px;
+    margin: 2px 6px;
+  }
+
+  .p-select-option.p-select-option-selected {
+    background: rgb(232 125 30 / 0.1);
+    color: var(--ubax-accent);
+    font-weight: 500;
+  }
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+.tl-skeleton-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 20px 20px 0;
+}
+
+.tl-skeleton-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 120px 100px 110px 100px 60px;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ubax-border-card);
+}
+
+.tl-skeleton {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f2f6 25%, #e4e8ef 50%, #f0f2f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+
+  &--sm { width: 70%; }
+  &--md { width: 85%; }
+  &--lg { width: 100%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ─── State boxes ──────────────────────────────────────────────────────────────
+.tl-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 320px;
+  padding: 40px 24px;
+  text-align: center;
+
+  &__icon {
+    font-size: 48px;
+    color: var(--ubax-text-muted);
+    opacity: 0.5;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  &__desc {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+
+  &--error &__icon { color: var(--ubax-danger); opacity: 0.7; }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+.tl-table-wrap {
+  overflow-x: auto;
+  padding: 20px 20px 0;
+}
+
+.tl-table {
+  min-width: 900px;
+
+  &__head {
+    display: grid;
+    grid-template-columns: 100px 1fr 130px 110px 140px 110px 56px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--ubax-page-bg);
+    margin-bottom: 4px;
+
+    span {
+      font-family: 'Lexend', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ubax-text-muted);
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__no-results {
+    display: grid;
+    place-items: center;
+    min-height: 180px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+}
+
+// ─── Row ──────────────────────────────────────────────────────────────────────
+.tl-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 130px 110px 140px 110px 56px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ubax-border-card);
+  cursor: pointer;
+  transition: background 0.12s;
+
+  &:hover { background: rgb(232 125 30 / 0.03); }
+  &:last-child { border-bottom: none; }
+
+  &__id {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ubax-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ubax-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__category {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+  }
+
+  &__date {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+
+  &__action {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--ubax-page-bg);
+    color: var(--ubax-navy);
+    cursor: pointer;
+    transition: background 0.12s;
+
+    &:hover { background: var(--ubax-blue-soft); color: var(--ubax-info); }
+
+    i { font-size: 15px; }
+  }
+}
+
+// ─── Badge ────────────────────────────────────────────────────────────────────
+.tl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  i { font-size: 11px; }
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+.tl-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px 20px;
+  flex-wrap: wrap;
+
+  &__results {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+
+  ubax-paginator {
+    --paginator-edge-gap: 14px;
+    --paginator-page-gap: 8px;
+    --paginator-padding-block: 10px;
+    --paginator-padding-inline: 14px;
+    --paginator-background: var(--ubax-page-bg);
+    --paginator-surface: var(--ubax-surface);
+    --paginator-border-color: var(--ubax-border-card);
+    --paginator-page-size: 38px;
+    --paginator-page-font-size: 13px;
+    --paginator-page-active-font-size: 14px;
+    --paginator-page-active-font-weight: 600;
+    --paginator-arrow-width: 38px;
+    --paginator-arrow-height: 38px;
+    --paginator-arrow-radius: 8px;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 1280px) {
+  .tl-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tl-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .tl-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tl-header__title { font-size: 24px; }
+
+  .tl-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .tl-filters {
+    grid-template-columns: 1fr;
+    padding: 14px 14px 0;
+  }
+
+  .tl-footer {
+    flex-direction: column;
+    align-items: stretch;
+
+    ubax-paginator { align-self: center; }
+  }
+}
+
+@media (max-width: 480px) {
+  .tl-kpi-grid { grid-template-columns: 1fr; }
+  .tl-kpi-card__value { font-size: 22px; }
+}

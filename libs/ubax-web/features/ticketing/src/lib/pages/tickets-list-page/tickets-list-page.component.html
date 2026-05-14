@@ -1,0 +1,228 @@
+<div class="tl-page" data-ubax-motion="page">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="tl-header">
+    <div class="tl-header__left">
+      <h1 class="tl-header__title">Tickets SAV</h1>
+      <span class="tl-header__subtitle">Gestion des incidents & interventions</span>
+    </div>
+
+    <div class="tl-header__actions">
+      <button class="tl-btn tl-btn--ghost" (click)="exportCsv()">
+        <i class="pi pi-download"></i>
+        Exporter
+      </button>
+      <button class="tl-btn tl-btn--primary" (click)="goToCreate()">
+        <i class="pi pi-plus"></i>
+        Créer un ticket
+      </button>
+    </div>
+  </header>
+
+  <!-- ── KPI Cards ──────────────────────────────────────────────────────── -->
+  <section class="tl-kpi-grid" aria-label="Métriques">
+    @for (card of kpiCards(); track card.label) {
+      <article
+        class="tl-kpi-card"
+        [style.--kpi-accent]="card.accent"
+        [style.--kpi-bg]="card.bg"
+      >
+        <span class="tl-kpi-card__icon">
+          <i [class]="card.icon"></i>
+        </span>
+        <div class="tl-kpi-card__body">
+          <p class="tl-kpi-card__value">{{ card.value }}</p>
+          <p class="tl-kpi-card__label">{{ card.label }}</p>
+        </div>
+      </article>
+    }
+  </section>
+
+  <!-- ── Filtres + Tableau ───────────────────────────────────────────────── -->
+  <section class="tl-card" data-ubax-motion="surface">
+
+    <!-- Barre de filtres -->
+    <div class="tl-filters">
+      <label class="tl-search" aria-label="Rechercher un ticket">
+        <i class="pi pi-search tl-search__icon"></i>
+        <input
+          class="tl-search__input"
+          type="search"
+          placeholder="Rechercher par titre, ID, catégorie…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </label>
+
+      <p-select
+        [options]="statusOptions"
+        [ngModel]="filterStatus()"
+        (ngModelChange)="filterStatus.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="tl-select"
+        panelStyleClass="tl-select-panel"
+        ariaLabel="Filtrer par statut"
+      />
+
+      <p-select
+        [options]="priorityOptions"
+        [ngModel]="filterPriority()"
+        (ngModelChange)="filterPriority.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="tl-select"
+        panelStyleClass="tl-select-panel"
+        ariaLabel="Filtrer par priorité"
+      />
+
+      <p-select
+        [options]="categoryOptions"
+        [ngModel]="filterCategory()"
+        (ngModelChange)="filterCategory.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="tl-select tl-select--wide"
+        panelStyleClass="tl-select-panel"
+        ariaLabel="Filtrer par catégorie"
+      />
+    </div>
+
+    <!-- ViewState -->
+    @switch (viewState()) {
+
+      @case ('loading') {
+        <div class="tl-skeleton-wrap">
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <div class="tl-skeleton-row">
+              <span class="tl-skeleton tl-skeleton--sm"></span>
+              <span class="tl-skeleton tl-skeleton--lg"></span>
+              <span class="tl-skeleton tl-skeleton--md"></span>
+              <span class="tl-skeleton tl-skeleton--sm"></span>
+              <span class="tl-skeleton tl-skeleton--sm"></span>
+              <span class="tl-skeleton tl-skeleton--sm"></span>
+              <span class="tl-skeleton tl-skeleton--sm"></span>
+            </div>
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <div class="tl-state-box tl-state-box--error">
+          <i class="pi pi-exclamation-triangle tl-state-box__icon"></i>
+          <p class="tl-state-box__title">Erreur de chargement</p>
+          <p class="tl-state-box__desc">Impossible de récupérer les tickets.</p>
+          <button class="tl-btn tl-btn--primary" (click)="retryLoad()">
+            <i class="pi pi-refresh"></i> Réessayer
+          </button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="tl-state-box">
+          <i class="pi pi-inbox tl-state-box__icon"></i>
+          <p class="tl-state-box__title">Aucun ticket SAV</p>
+          <p class="tl-state-box__desc">Aucun incident signalé pour le moment.</p>
+          <button class="tl-btn tl-btn--primary" (click)="goToCreate()">
+            <i class="pi pi-plus"></i> Créer le premier ticket
+          </button>
+        </div>
+      }
+
+      @case ('success') {
+        <!-- Tableau -->
+        <div class="tl-table-wrap">
+          <div class="tl-table">
+
+            <!-- En-tête -->
+            <div class="tl-table__head">
+              <span>#</span>
+              <span>Titre</span>
+              <span>Catégorie</span>
+              <span>Priorité</span>
+              <span>Statut</span>
+              <span>Créé le</span>
+              <span></span>
+            </div>
+
+            <!-- Corps -->
+            <div class="tl-table__body">
+              @if (pagedTickets().length === 0) {
+                <div class="tl-table__no-results">
+                  Aucun ticket ne correspond aux filtres sélectionnés.
+                </div>
+              }
+
+              @for (ticket of pagedTickets(); track ticket.id) {
+                <div
+                  class="tl-row"
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-label]="'Voir le ticket ' + ticket.title"
+                  (click)="goToDetail(ticket)"
+                  (keydown.enter)="goToDetail(ticket)"
+                >
+                  <span class="tl-row__id">
+                    {{ ticket.id | slice:0:8 }}…
+                  </span>
+
+                  <span class="tl-row__title">
+                    {{ truncate(ticket.title) }}
+                  </span>
+
+                  <span class="tl-row__category">
+                    {{ getCategoryLabel(ticket.category) }}
+                  </span>
+
+                  <span
+                    class="tl-badge"
+                    [style.color]="getPriorityMeta(ticket.priority).color"
+                    [style.background]="getPriorityMeta(ticket.priority).bg"
+                  >
+                    @if (ticket.priority === 'URGENT') {
+                      <i class="pi pi-bolt"></i>
+                    }
+                    {{ getPriorityMeta(ticket.priority).label }}
+                  </span>
+
+                  <span
+                    class="tl-badge"
+                    [style.color]="getStatusMeta(ticket.status).color"
+                    [style.background]="getStatusMeta(ticket.status).bg"
+                  >
+                    {{ getStatusMeta(ticket.status).label }}
+                  </span>
+
+                  <span class="tl-row__date">
+                    {{ formatDate(ticket.createdAt) }}
+                  </span>
+
+                  <button
+                    class="tl-row__action"
+                    type="button"
+                    aria-label="Voir le détail"
+                    (click)="$event.stopPropagation(); goToDetail(ticket)"
+                  >
+                    <i class="pi pi-eye"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer pagination -->
+        <footer class="tl-footer">
+          <p class="tl-footer__results">{{ resultsLabel() }}</p>
+          <ubax-paginator
+            [(currentPage)]="currentPage"
+            [totalPages]="totalPages()"
+          />
+        </footer>
+      }
+    }
+  </section>
+</div>

@@ -1,0 +1,506 @@
+<div class="td-page" data-ubax-motion="page">
+
+  <!-- ── Breadcrumb ─────────────────────────────────────────────────────── -->
+  <nav class="td-breadcrumb" aria-label="Fil d'Ariane">
+    <button class="td-breadcrumb__back" type="button" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <span class="td-breadcrumb__item" (click)="goBack()" role="button" tabindex="0">Tickets SAV</span>
+    <i class="pi pi-chevron-right td-breadcrumb__sep"></i>
+    <span class="td-breadcrumb__item td-breadcrumb__item--active">
+      {{ ticket()?.title ?? 'Détail du ticket' }}
+    </span>
+  </nav>
+
+  <!-- ── ViewState ──────────────────────────────────────────────────────── -->
+  @switch (viewState()) {
+
+    @case ('loading') {
+      <div class="td-skeleton-layout">
+        <div class="td-skeleton-main">
+          <div class="td-skeleton td-skeleton--title"></div>
+          <div class="td-skeleton td-skeleton--stepper"></div>
+          <div class="td-skeleton td-skeleton--block"></div>
+          <div class="td-skeleton td-skeleton--block"></div>
+        </div>
+        <div class="td-skeleton-side">
+          <div class="td-skeleton td-skeleton--block"></div>
+          <div class="td-skeleton td-skeleton--block"></div>
+        </div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="td-state-box td-state-box--error">
+        <i class="pi pi-exclamation-triangle td-state-box__icon"></i>
+        <p class="td-state-box__title">Erreur de chargement</p>
+        <p class="td-state-box__desc">Impossible de récupérer ce ticket.</p>
+        <button class="td-btn td-btn--primary" (click)="retryLoad()">
+          <i class="pi pi-refresh"></i> Réessayer
+        </button>
+      </div>
+    }
+
+    @case ('not-found') {
+      <div class="td-state-box">
+        <i class="pi pi-search td-state-box__icon"></i>
+        <p class="td-state-box__title">Ticket introuvable</p>
+        <p class="td-state-box__desc">Ce ticket n'existe pas ou a été supprimé.</p>
+        <button class="td-btn td-btn--ghost" (click)="goBack()">
+          Retour à la liste
+        </button>
+      </div>
+    }
+
+    @case ('success') {
+      <div class="td-layout">
+
+        <!-- ── Colonne principale ──────────────────────────────────────── -->
+        <div class="td-main">
+
+          <!-- En-tête ticket -->
+          <section class="td-card td-hero" data-ubax-motion="surface">
+            <div class="td-hero__top">
+              <div class="td-hero__meta">
+                <span
+                  class="td-badge"
+                  [style.color]="getPriorityMeta(ticket()?.priority).color"
+                  [style.background]="getPriorityMeta(ticket()?.priority).bg"
+                >
+                  @if (ticket()?.priority === 'URGENT') {
+                    <i class="pi pi-bolt"></i>
+                  }
+                  {{ getPriorityMeta(ticket()?.priority).label }}
+                </span>
+
+                <span
+                  class="td-badge"
+                  [style.color]="getStatusMeta(ticket()?.status).color"
+                  [style.background]="getStatusMeta(ticket()?.status).bg"
+                >
+                  {{ getStatusMeta(ticket()?.status).label }}
+                </span>
+
+                <span class="td-hero__category">
+                  <i class="pi pi-tag"></i>
+                  {{ getCategoryLabel(ticket()?.category) }}
+                </span>
+              </div>
+
+              @if (!isClosed()) {
+                <button
+                  class="td-btn td-btn--outline"
+                  type="button"
+                  (click)="openInterventionDrawer()"
+                >
+                  <i class="pi pi-cog"></i>
+                  Gérer l'intervention
+                </button>
+              }
+            </div>
+
+            <h1 class="td-hero__title">{{ ticket()?.title }}</h1>
+
+            @if (ticket()?.description) {
+              <p class="td-hero__desc">{{ ticket()?.description }}</p>
+            }
+
+            <div class="td-hero__dates">
+              <span><i class="pi pi-calendar"></i> Créé le {{ formatDate(ticket()?.createdAt) }}</span>
+              @if (ticket()?.interventionScheduledAt) {
+                <span class="td-hero__scheduled">
+                  <i class="pi pi-clock"></i>
+                  Intervention : {{ formatDateTime(ticket()!.interventionScheduledAt!) }}
+                </span>
+              }
+            </div>
+          </section>
+
+          <!-- Stepper de statut -->
+          <section class="td-card td-stepper-card" data-ubax-motion="surface">
+            <h2 class="td-card__title">Progression du ticket</h2>
+
+            <div class="td-stepper">
+              @for (step of statusFlow; track step; let i = $index) {
+                <div
+                  class="td-step"
+                  [class.td-step--completed]="isStepCompleted(i)"
+                  [class.td-step--active]="isStepActive(i)"
+                >
+                  <div class="td-step__circle">
+                    @if (isStepCompleted(i)) {
+                      <i class="pi pi-check"></i>
+                    } @else {
+                      <span>{{ i + 1 }}</span>
+                    }
+                  </div>
+                  <span class="td-step__label">{{ statusMeta[step].label }}</span>
+                </div>
+
+                @if (i < statusFlow.length - 1) {
+                  <div
+                    class="td-step__connector"
+                    [class.td-step__connector--done]="isStepCompleted(i + 1) || isStepActive(i + 1)"
+                  ></div>
+                }
+              }
+            </div>
+
+            <!-- Boutons de transition -->
+            @if (!isClosed() && allowedNextStatuses().length > 0) {
+              <div class="td-stepper__actions">
+                <span class="td-stepper__actions-label">Passer à :</span>
+                @for (next of allowedNextStatuses(); track next) {
+                  <button
+                    class="td-btn td-btn--transition"
+                    [style.--t-color]="statusMeta[next].color"
+                    [style.--t-bg]="statusMeta[next].bg"
+                    type="button"
+                    [disabled]="store.saving()"
+                    (click)="advanceStatus(next)"
+                  >
+                    @if (store.saving()) {
+                      <i class="pi pi-spin pi-spinner"></i>
+                    }
+                    {{ statusMeta[next].label }}
+                    @if (next === 'CLOSED') {
+                      <i class="pi pi-lock"></i>
+                    }
+                  </button>
+                }
+              </div>
+            }
+          </section>
+
+          <!-- Informations générales -->
+          <section class="td-card" data-ubax-motion="surface">
+            <h2 class="td-card__title">Informations générales</h2>
+            <div class="td-info-grid">
+              @for (block of infoBlocks(); track block.label) {
+                <div class="td-info-block">
+                  <span class="td-info-block__label">{{ block.label }}</span>
+                  <span class="td-info-block__value">{{ block.value }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Messagerie -->
+          <section class="td-card td-messaging" data-ubax-motion="surface">
+            <h2 class="td-card__title">
+              <i class="pi pi-comments"></i>
+              Fil de messages
+              <span class="td-card__count">{{ messages().length }}</span>
+            </h2>
+
+            <div class="td-messages">
+              @if (messages().length === 0) {
+                <div class="td-messages__empty">
+                  <i class="pi pi-comment"></i>
+                  <p>Aucun message pour ce ticket.</p>
+                </div>
+              }
+
+              @for (msg of messages(); track msg.id) {
+                <article
+                  class="td-msg"
+                  [class.td-msg--internal]="msg.messageType === 'INTERNAL'"
+                >
+                  <div class="td-msg__avatar">
+                    {{ getMessageInitials(msg) }}
+                  </div>
+                  <div class="td-msg__body">
+                    <div class="td-msg__header">
+                      <span class="td-msg__sender">{{ msg.senderName ?? msg.senderId }}</span>
+                      @if (msg.messageType === 'INTERNAL') {
+                        <span class="td-msg__internal-tag">Note interne</span>
+                      }
+                      <span class="td-msg__time">{{ formatMessageTime(msg.createdAt) }}</span>
+                    </div>
+                    <p class="td-msg__content">{{ msg.message }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+
+            <!-- Zone de saisie -->
+            @if (!isClosed()) {
+              <div class="td-compose">
+                <div class="td-compose__type">
+                  <button
+                    type="button"
+                    class="td-compose__type-btn"
+                    [class.td-compose__type-btn--active]="messageType() === 'PUBLIC'"
+                    (click)="messageType.set('PUBLIC')"
+                  >
+                    <i class="pi pi-globe"></i> Public
+                  </button>
+                  <button
+                    type="button"
+                    class="td-compose__type-btn"
+                    [class.td-compose__type-btn--active]="messageType() === 'INTERNAL'"
+                    (click)="messageType.set('INTERNAL')"
+                  >
+                    <i class="pi pi-eye-slash"></i> Interne
+                  </button>
+                </div>
+
+                <div class="td-compose__input-row">
+                  <textarea
+                    class="td-compose__textarea"
+                    rows="3"
+                    placeholder="Écrire un message… (Entrée pour envoyer, Maj+Entrée pour saut de ligne)"
+                    [value]="messageInput()"
+                    (input)="messageInput.set($any($event.target).value)"
+                    (keydown)="onMessageKeydown($event)"
+                  ></textarea>
+                  <button
+                    type="button"
+                    class="td-compose__send"
+                    [disabled]="!messageInput().trim()"
+                    (click)="sendMessage()"
+                    aria-label="Envoyer"
+                  >
+                    <i class="pi pi-send"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </section>
+        </div>
+
+        <!-- ── Colonne latérale ────────────────────────────────────────── -->
+        <aside class="td-side">
+
+          <!-- Intervention -->
+          <section class="td-card" data-ubax-motion="surface">
+            <div class="td-card__header">
+              <h2 class="td-card__title">Intervention</h2>
+              @if (!isClosed()) {
+                <button
+                  class="td-card__edit-btn"
+                  type="button"
+                  (click)="openInterventionDrawer()"
+                >
+                  <i class="pi pi-pencil"></i>
+                </button>
+              }
+            </div>
+
+            <div class="td-side-blocks">
+              @for (block of interventionBlocks(); track block.label) {
+                <div class="td-side-block">
+                  <span class="td-side-block__label">{{ block.label }}</span>
+                  <span class="td-side-block__value">{{ block.value }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Pièces jointes -->
+          @if (ticket()?.attachments?.length) {
+            <section class="td-card" data-ubax-motion="surface">
+              <h2 class="td-card__title">
+                <i class="pi pi-paperclip"></i>
+                Pièces jointes
+              </h2>
+              <div class="td-attachments">
+                @for (att of ticket()!.attachments!; track att.id) {
+                  <a
+                    class="td-attachment"
+                    [href]="att.fileUrl"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    @if (att.type === 'PHOTO') {
+                      <img [src]="att.fileUrl" alt="Photo" class="td-attachment__img" />
+                    } @else {
+                      <div class="td-attachment__file">
+                        <i class="pi pi-file-pdf"></i>
+                      </div>
+                    }
+                    <span class="td-attachment__date">{{ formatDate(att.createdAt) }}</span>
+                  </a>
+                }
+              </div>
+            </section>
+          }
+        </aside>
+      </div>
+    }
+  }
+
+  <!-- ── Dialog confirmation clôture ───────────────────────────────────── -->
+  @if (showCloseConfirm()) {
+    <div class="td-overlay" role="dialog" aria-modal="true" aria-labelledby="close-dialog-title">
+      <div class="td-dialog">
+        <div class="td-dialog__icon">
+          <i class="pi pi-lock"></i>
+        </div>
+        <h3 id="close-dialog-title" class="td-dialog__title">Clôturer ce ticket ?</h3>
+        <p class="td-dialog__desc">
+          Une fois clôturé, le ticket ne pourra plus être modifié.
+          Assurez-vous que l'intervention est terminée et le locataire satisfait.
+        </p>
+        <div class="td-dialog__actions">
+          <button class="td-btn td-btn--ghost" type="button" (click)="cancelClose()">
+            Annuler
+          </button>
+          <button
+            class="td-btn td-btn--danger"
+            type="button"
+            [disabled]="store.saving()"
+            (click)="confirmClose()"
+          >
+            @if (store.saving()) {
+              <i class="pi pi-spin pi-spinner"></i>
+            }
+            Confirmer la clôture
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── Drawer intervention ────────────────────────────────────────────── -->
+  @if (drawerOpen() === 'intervention') {
+    <div class="td-drawer-backdrop" (click)="closeDrawer()"></div>
+    <aside class="td-drawer" role="complementary" aria-label="Gestion de l'intervention">
+      <div class="td-drawer__header">
+        <h2 class="td-drawer__title">
+          <i class="pi pi-cog"></i>
+          Gestion de l'intervention
+        </h2>
+        <button class="td-drawer__close" type="button" (click)="closeDrawer()" aria-label="Fermer">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="td-drawer__body" [formGroup]="interventionForm">
+
+        <!-- Section : Assignation -->
+        <div class="td-drawer__section">
+          <h3 class="td-drawer__section-title">
+            <i class="pi pi-user"></i> Agent assigné
+          </h3>
+          <div class="td-field">
+            <label class="td-label" for="dr-agent">ID de l'agent SAV</label>
+            <input
+              id="dr-agent"
+              class="td-input"
+              type="text"
+              placeholder="UUID de l'agent SAV"
+              formControlName="assignedToId"
+            />
+          </div>
+        </div>
+
+        <!-- Section : Technicien -->
+        <div class="td-drawer__section">
+          <h3 class="td-drawer__section-title">
+            <i class="pi pi-wrench"></i> Technicien
+          </h3>
+          <div class="td-field">
+            <label class="td-label" for="dr-tech-name">Nom du technicien</label>
+            <input
+              id="dr-tech-name"
+              class="td-input"
+              type="text"
+              placeholder="Ex. : Jean Kouassi"
+              formControlName="technicianName"
+            />
+          </div>
+          <div class="td-field">
+            <label class="td-label" for="dr-tech-phone">Téléphone</label>
+            <input
+              id="dr-tech-phone"
+              class="td-input"
+              type="tel"
+              placeholder="+225 07 00 00 00 00"
+              formControlName="technicianPhone"
+            />
+          </div>
+        </div>
+
+        <!-- Section : Planification -->
+        <div class="td-drawer__section">
+          <h3 class="td-drawer__section-title">
+            <i class="pi pi-calendar"></i> Date d'intervention
+          </h3>
+          <div class="td-field">
+            <label class="td-label" for="dr-date">Date et heure</label>
+            <p-datepicker
+              inputId="dr-date"
+              formControlName="interventionDate"
+              [showTime]="true"
+              [showIcon]="true"
+              [minDate]="$any(null)"
+              dateFormat="dd/mm/yy"
+              hourFormat="24"
+              appendTo="body"
+              styleClass="td-datepicker"
+              panelStyleClass="td-datepicker-panel"
+              placeholder="Sélectionner date et heure"
+            />
+          </div>
+        </div>
+
+        <!-- Section : Coût -->
+        <div class="td-drawer__section">
+          <h3 class="td-drawer__section-title">
+            <i class="pi pi-wallet"></i> Coût de réparation
+          </h3>
+          <div class="td-field">
+            <label class="td-label" for="dr-cost">Montant (FCFA)</label>
+            <div class="td-input-suffix">
+              <input
+                id="dr-cost"
+                class="td-input"
+                type="number"
+                min="0"
+                placeholder="Ex. : 25 000"
+                formControlName="repairCost"
+              />
+              <span class="td-input-suffix__label">FCFA</span>
+            </div>
+          </div>
+          <div class="td-field">
+            <label class="td-label" for="dr-imputation">Imputation</label>
+            <select id="dr-imputation" class="td-select-native" formControlName="costImputedTo">
+              <option value="OWNER">Propriétaire</option>
+              <option value="TENANT">Locataire</option>
+              <option value="SHARED">Partagé</option>
+            </select>
+          </div>
+          <div class="td-field">
+            <label class="td-label" for="dr-note">Note de résolution</label>
+            <textarea
+              id="dr-note"
+              class="td-textarea"
+              rows="3"
+              placeholder="Décrivez les travaux effectués…"
+              formControlName="resolutionNote"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="td-drawer__footer">
+        <button class="td-btn td-btn--ghost" type="button" (click)="closeDrawer()">
+          Annuler
+        </button>
+        <button
+          class="td-btn td-btn--primary"
+          type="button"
+          [disabled]="store.saving()"
+          (click)="saveIntervention()"
+        >
+          @if (store.saving()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          }
+          Enregistrer
+        </button>
+      </div>
+    </aside>
+  }
+</div>

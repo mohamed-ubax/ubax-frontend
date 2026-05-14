@@ -53,6 +53,16 @@ export {
   resolvePropertyCardImage,
 } from './lib/property-card-image.helper';
 
+// ─── Ticketing SAV ────────────────────────────────────────────────────────────
+export { TicketingStore } from './lib/store/ticketing/ticketing.store';
+export type {
+  TicketCategory,
+  TicketMessage,
+  TicketPriority,
+  TicketStatus,
+  Ticket as TicketSav,
+} from './lib/store/ticketing/ticketing.store';
+
 // ─── Espaces hôteliers ────────────────────────────────────────────────────────
 export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
 export type { EspaceStatus } from './lib/store/espaces/mes-espaces.store';

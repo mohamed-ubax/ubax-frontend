@@ -110,6 +110,17 @@ export const webRoutes: Route[] = [
         loadChildren: () =>
           import('@ubax-workspace/ubax-web-profil').then((m) => m.profilRoutes),
       },
+
+      // ── Ticketing SAV ────────────────────────────────────────────────────────
+      {
+        path: 'tickets',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-ticketing').then(
+            (m) => m.ticketingRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.tickets,
+      },
     ],
   },
 
