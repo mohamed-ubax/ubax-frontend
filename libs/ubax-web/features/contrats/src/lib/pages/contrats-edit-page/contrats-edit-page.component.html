@@ -1,0 +1,130 @@
+<div class="ce-page">
+
+  <ubax-breadcrumb-nav [items]="[
+    { label: 'Contrats de bail', routerLink: '/contrats' },
+    { label: 'Modifier le contrat' }
+  ]" />
+
+  @switch (viewState()) {
+
+    @case ('loading') {
+      <ubax-contrats-skeleton />
+    }
+
+    @case ('error') {
+      <div class="ce-state">
+        <i class="pi pi-exclamation-triangle ce-state__icon"></i>
+        <p class="ce-state__title">Contrat introuvable</p>
+        <p class="ce-state__desc">Ce contrat n'existe pas ou ne peut pas être modifié.</p>
+        <a class="ce-btn ce-btn--ghost" routerLink="/contrats">Retour à la liste</a>
+      </div>
+    }
+
+    @case ('success') {
+      <div class="ce-header">
+        <div class="ce-header__left">
+          <h1 class="ce-header__title">Modifier le contrat</h1>
+          <div class="ce-header__meta">
+            <ubax-status-badge variant="neutral">Brouillon</ubax-status-badge>
+            <span class="ce-header__warning">
+              <i class="pi pi-info-circle"></i>
+              Modification possible uniquement en statut Brouillon
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ce-card">
+        <form [formGroup]="editForm">
+
+          <div class="ce-section">
+            <h3 class="ce-section__title">Bien &amp; Propriétaire</h3>
+            <div class="ce-form-row">
+              <div class="ce-field">
+                <label class="ce-label">Identifiant du bien <span class="req">*</span></label>
+                <input class="ce-input" type="text" formControlName="propertyId" placeholder="UUID du bien" />
+                @if (editForm.get('propertyId')?.invalid && editForm.get('propertyId')?.touched) {
+                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Requis</span>
+                }
+              </div>
+              <div class="ce-field">
+                <label class="ce-label">Identifiant du propriétaire <span class="req">*</span></label>
+                <input class="ce-input" type="text" formControlName="ownerId" placeholder="UUID du propriétaire" />
+                @if (editForm.get('ownerId')?.invalid && editForm.get('ownerId')?.touched) {
+                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Requis</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="ce-section">
+            <h3 class="ce-section__title">Locataire</h3>
+            <div class="ce-field">
+              <label class="ce-label">Identifiant du locataire</label>
+              <input class="ce-input" type="text" formControlName="tenantId" placeholder="UUID du locataire (QUALIFIED)" />
+              <span class="ce-hint"><i class="pi pi-info-circle"></i> Seuls les locataires qualifiés sont acceptés.</span>
+            </div>
+          </div>
+
+          <div class="ce-section">
+            <h3 class="ce-section__title">Conditions financières</h3>
+            <div class="ce-form-row">
+              <div class="ce-field">
+                <label class="ce-label">Loyer mensuel (FCFA) <span class="req">*</span></label>
+                <input class="ce-input" type="number" formControlName="monthlyRent" min="1" />
+                @if (editForm.get('monthlyRent')?.invalid && editForm.get('monthlyRent')?.touched) {
+                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Loyer requis &gt; 0</span>
+                }
+              </div>
+              <div class="ce-field">
+                <label class="ce-label">Caution (FCFA) <span class="req">*</span></label>
+                <input class="ce-input" type="number" formControlName="depositAmount" min="0" />
+                @if (editForm.get('depositAmount')?.invalid && editForm.get('depositAmount')?.touched) {
+                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Caution requise ≥ 0</span>
+                }
+              </div>
+            </div>
+            <div class="ce-form-row">
+              <div class="ce-field">
+                <label class="ce-label">Date de début <span class="req">*</span></label>
+                <input class="ce-input" type="date" formControlName="startDate" />
+                @if (editForm.get('startDate')?.invalid && editForm.get('startDate')?.touched) {
+                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Requis</span>
+                }
+              </div>
+              <div class="ce-field">
+                <label class="ce-label">Date de fin</label>
+                <input class="ce-input" type="date" formControlName="endDate" [attr.disabled]="openEnded() ? true : null" />
+                <label class="ce-checkbox-row">
+                  <input type="checkbox" [ngModel]="openEnded()" (ngModelChange)="openEnded.set($event)" [ngModelOptions]="{standalone: true}" />
+                  <span>Bail à durée indéterminée</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          @if (store.error()) {
+            <div class="ce-error-banner">
+              <i class="pi pi-exclamation-triangle"></i>
+              {{ store.error() }}
+            </div>
+          }
+
+          <div class="ce-actions">
+            <a class="ce-btn ce-btn--ghost" [routerLink]="['..']">
+              <i class="pi pi-times"></i> Annuler
+            </a>
+            <button class="ce-btn ce-btn--primary" (click)="save()" [disabled]="store.saving()">
+              @if (store.saving()) {
+                <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+              } @else {
+                <i class="pi pi-check"></i> Enregistrer les modifications
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+    }
+  }
+</div>

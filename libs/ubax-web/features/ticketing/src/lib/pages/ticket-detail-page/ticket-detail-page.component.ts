@@ -31,7 +31,7 @@ import {
   TicketStatus,
 } from '../tickets-list-page/tickets-list-page.component';
 
-// UpdateTicketStatusRequest does not include 'OPEN'
+// UpdateTicketStatusRequest does not include 'OPEN' — only these are valid next statuses
 type AllowedNextStatus = 'IN_ANALYSIS' | 'TECHNICIAN_SENT' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
 
 const ALLOWED_TRANSITIONS: Partial<Record<TicketStatus, AllowedNextStatus[]>> = {
@@ -76,7 +76,6 @@ export class TicketDetailPageComponent {
   readonly showCloseConfirm = signal(false);
   readonly messageInput = signal('');
   readonly messageType = signal<'PUBLIC' | 'INTERNAL'>('PUBLIC');
-  readonly sendingMessage = signal(false);
   readonly hasLoaded = signal(false);
 
   // ── Intervention form ───────────────────────────────────────────────────────
@@ -184,7 +183,7 @@ export class TicketDetailPageComponent {
   }
 
   // ── Actions statut ──────────────────────────────────────────────────────────
-  advanceStatus(nextStatus: TicketStatus): void {
+  advanceStatus(nextStatus: AllowedNextStatus): void {
     if (nextStatus === 'CLOSED') {
       this.showCloseConfirm.set(true);
       return;
@@ -201,10 +200,10 @@ export class TicketDetailPageComponent {
     this.showCloseConfirm.set(false);
   }
 
-  private doStatusChange(status: TicketStatus): void {
+  private doStatusChange(status: AllowedNextStatus): void {
     const id = this.ticketId();
     if (!id) return;
-    this.store.changerStatut({ ticketId: id, body: { status: status as AllowedNextStatus } });
+    this.store.changerStatut({ ticketId: id, body: { status } });
   }
 
   // ── Drawer intervention ─────────────────────────────────────────────────────
@@ -248,12 +247,10 @@ export class TicketDetailPageComponent {
       resolutionNote,
     } = this.interventionForm.getRawValue();
 
-    // Assigner l'agent
     if (assignedToId) {
       this.store.assignerAgent({ ticketId: id, body: { assignedToId } });
     }
 
-    // Planifier l'intervention
     if (interventionDate) {
       this.store.planifierIntervention({
         ticketId: id,
@@ -265,7 +262,6 @@ export class TicketDetailPageComponent {
       });
     }
 
-    // Coût de réparation
     if (repairCost != null && repairCost > 0) {
       this.store.mettreAJourCout({
         ticketId: id,
@@ -337,11 +333,11 @@ export class TicketDetailPageComponent {
   }
 
   getPriorityMeta(priority: string | undefined) {
-    return PRIORITY_META[(priority as keyof typeof PRIORITY_META) ?? 'NORMAL'] ?? PRIORITY_META['NORMAL'];
+    return PRIORITY_META[(priority as TicketPriority) ?? 'NORMAL'] ?? PRIORITY_META['NORMAL'];
   }
 
   getCategoryLabel(category: string | undefined): string {
-    return CATEGORY_LABELS[(category as keyof typeof CATEGORY_LABELS) ?? 'OTHER'] ?? 'Autre';
+    return CATEGORY_LABELS[(category as TicketCategory) ?? 'OTHER'] ?? 'Autre';
   }
 
   isStepCompleted(index: number): boolean {
@@ -365,5 +361,10 @@ export class TicketDetailPageComponent {
   getMessageInitials(msg: TicketMessage): string {
     const name = msg.senderName ?? msg.senderId ?? '?';
     return name.slice(0, 2).toUpperCase();
+  }
+
+  // Template helper: cast AllowedNextStatus[] for statusMeta lookup
+  asTicketStatus(s: AllowedNextStatus): TicketStatus {
+    return s as TicketStatus;
   }
 }

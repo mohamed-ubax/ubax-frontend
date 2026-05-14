@@ -1,0 +1,223 @@
+:host {
+  display: block;
+}
+
+.cd-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+// ─── Status banners ───────────────────────────────────────────────────────────
+.cd-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+
+  i { font-size: 16px; }
+
+  &--terminated {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  &--cancelled {
+    background: var(--ubax-page-bg);
+    color: var(--ubax-text-muted);
+    border: 1px solid var(--ubax-border-card);
+  }
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+.cd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  &__left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__id {
+    font-family: 'Lexend', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ubax-text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ubax-navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__sep { color: var(--ubax-border-card); }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}
+
+// ─── Buttons ──────────────────────────────────────────────────────────────────
+.cd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.1s;
+
+  &:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  &--primary {
+    background: var(--ubax-accent);
+    color: #fff;
+  }
+
+  &--ghost {
+    background: var(--ubax-surface);
+    color: var(--ubax-navy);
+    border: 1px solid var(--ubax-border-card);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  &--danger {
+    background: transparent;
+    color: var(--ubax-danger);
+    border: 1.5px solid var(--ubax-danger);
+
+    &:hover {
+      background: var(--ubax-danger);
+      color: #fff;
+      opacity: 1;
+    }
+  }
+}
+
+// ─── Sections grid ────────────────────────────────────────────────────────────
+.cd-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ─── Document download ────────────────────────────────────────────────────────
+.cd-doc {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--ubax-page-bg);
+  border-radius: 12px;
+  border: 1px solid var(--ubax-border-card);
+
+  &__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: #fef2f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i { font-size: 22px; color: #dc2626; }
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__name {
+    font-family: 'Lexend', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ubax-navy);
+  }
+
+  &__hint {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    color: var(--ubax-text-muted);
+  }
+}
+
+.cd-doc-generating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ubax-text-muted);
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  padding: 8px;
+
+  i { font-size: 16px; }
+}
+
+// ─── Payments link ────────────────────────────────────────────────────────────
+.cd-payments {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  &__hint {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    color: var(--ubax-text-muted);
+  }
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+.cd-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 360px;
+  text-align: center;
+
+  &__icon { font-size: 52px; color: var(--ubax-text-muted); opacity: 0.4; }
+  &__title { margin: 0; font-family: 'Lexend', sans-serif; font-size: 18px; font-weight: 600; color: var(--ubax-navy); }
+  &__desc { margin: 0; font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; color: var(--ubax-text-muted); }
+}
+
+@media (max-width: 768px) {
+  .cd-header { flex-direction: column; }
+  .cd-header__title { font-size: 20px; }
+}

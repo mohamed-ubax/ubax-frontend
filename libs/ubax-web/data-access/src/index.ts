@@ -68,6 +68,10 @@ export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
 export type { EspaceStatus } from './lib/store/espaces/mes-espaces.store';
 export { ESPACE_STATUS_LABELS } from './lib/store/espaces/mes-espaces.store';
 export { EspaceCreationStore } from './lib/store/espaces/espace-creation.store';
+
+// ─── Contrats & Baux ──────────────────────────────────────────────────────────
+export { ContratsStore } from './lib/store/contrats/contrats.store';
+export type { ContractResponse, ContractStatus } from './lib/store/contrats/contrats.store';
 export type { EspaceCreationState } from './lib/store/espaces/espace-creation.store';
 export { EspaceEditStore } from './lib/store/espaces/espace-edit.store';
 

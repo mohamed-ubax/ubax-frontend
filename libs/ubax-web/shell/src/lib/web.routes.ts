@@ -121,6 +121,17 @@ export const webRoutes: Route[] = [
         canActivate: [roleGuard],
         data: ROUTE_ROLE_ACCESS.tickets,
       },
+
+      // ── Contrats & Baux ──────────────────────────────────────────────────────
+      {
+        path: 'contrats',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-contrats').then(
+            (m) => m.contratsRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.contrats,
+      },
     ],
   },
 

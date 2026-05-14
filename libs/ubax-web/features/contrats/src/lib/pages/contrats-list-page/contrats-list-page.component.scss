@@ -1,0 +1,440 @@
+:host {
+  display: block;
+}
+
+.cl-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-bottom: 40px;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+.cl-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  &__left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ubax-navy);
+  }
+
+  &__subtitle {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+// ─── CTA Button ───────────────────────────────────────────────────────────────
+.cl-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  border: none;
+  background: var(--ubax-accent);
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.1s;
+
+  &:hover { opacity: 0.88; transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+
+  i { font-size: 13px; }
+}
+
+.cl-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1px solid var(--ubax-border-card);
+  background: var(--ubax-surface);
+  color: var(--ubax-navy);
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover { background: var(--ubax-page-bg); }
+}
+
+// ─── KPI Strip ────────────────────────────────────────────────────────────────
+.cl-kpi-strip {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cl-kpi-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  border: 1.5px solid transparent;
+  background: var(--ubax-surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__count {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ubax-navy);
+  }
+
+  &__label {
+    color: var(--ubax-text-muted);
+  }
+
+  &--active {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    .cl-kpi-chip__dot { background: #22c55e; }
+    .cl-kpi-chip__count { color: #15803d; }
+  }
+
+  &--pending {
+    border-color: #fed7aa;
+    background: #fff7ed;
+    .cl-kpi-chip__dot { background: #f97316; }
+    .cl-kpi-chip__count { color: #c2410c; }
+  }
+
+  &--draft {
+    border-color: var(--ubax-border-card);
+    .cl-kpi-chip__dot { background: var(--ubax-text-muted); }
+  }
+
+  &--terminated {
+    border-color: #fecaca;
+    background: #fef2f2;
+    .cl-kpi-chip__dot { background: #ef4444; }
+    .cl-kpi-chip__count { color: #b91c1c; }
+  }
+}
+
+// ─── Toolbar (tabs + search) ──────────────────────────────────────────────────
+.cl-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cl-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--ubax-border-card);
+  border-radius: 12px;
+  background: var(--ubax-surface);
+  min-width: 280px;
+  flex: 1;
+  max-width: 400px;
+
+  &__icon {
+    color: var(--ubax-text-muted);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+    outline: none;
+
+    &::placeholder { color: var(--ubax-text-muted); }
+  }
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+.cl-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--ubax-page-bg);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.cl-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ubax-text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+
+  &:hover { background: var(--ubax-surface); color: var(--ubax-navy); }
+
+  &--active {
+    background: var(--ubax-surface);
+    color: var(--ubax-navy);
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--ubax-page-bg);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ubax-text-muted);
+  }
+}
+
+// ─── Main card ────────────────────────────────────────────────────────────────
+.cl-card {
+  background: var(--ubax-surface);
+  border-radius: 20px;
+  box-shadow: var(--ubax-shadow-card-soft);
+  overflow: hidden;
+}
+
+// ─── State boxes ──────────────────────────────────────────────────────────────
+.cl-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 360px;
+  padding: 48px 24px;
+  text-align: center;
+
+  &__icon {
+    font-size: 52px;
+    color: var(--ubax-text-muted);
+    opacity: 0.4;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  &__desc {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+    max-width: 320px;
+  }
+
+  &--error &__icon { color: var(--ubax-danger); opacity: 0.7; }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+.cl-table-wrap {
+  overflow-x: auto;
+}
+
+.cl-table {
+  min-width: 960px;
+  width: 100%;
+  border-collapse: collapse;
+
+  &__head {
+    background: var(--ubax-page-bg);
+    border-bottom: 1.5px solid var(--ubax-border-card);
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-family: 'Lexend', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ubax-text-muted);
+      white-space: nowrap;
+    }
+  }
+
+  &__body {
+    tr {
+      border-bottom: 1px solid var(--ubax-border-card);
+      transition: background 0.12s;
+      cursor: pointer;
+
+      &:hover { background: rgba(232, 125, 30, 0.025); }
+      &:last-child { border-bottom: none; }
+
+      &.row--active td:first-child {
+        border-left: 3px solid #22c55e;
+      }
+    }
+
+    td {
+      padding: 14px 16px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ubax-text-primary);
+      vertical-align: middle;
+    }
+  }
+}
+
+.cl-tenant-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cl-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ubax-navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.cl-property-cell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ubax-text-muted);
+  font-size: 13px;
+}
+
+.cl-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--ubax-navy);
+}
+
+.cl-date {
+  white-space: nowrap;
+  color: var(--ubax-text-muted);
+  font-size: 13px;
+}
+
+.cl-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--ubax-page-bg);
+  color: var(--ubax-navy);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    background: var(--ubax-navy);
+    color: #fff;
+  }
+
+  i { font-size: 14px; }
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+.cl-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px 20px;
+  flex-wrap: wrap;
+
+  &__results {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .cl-toolbar { flex-direction: column; align-items: stretch; }
+  .cl-search { max-width: 100%; }
+  .cl-tabs { overflow-x: auto; }
+}
+
+@media (max-width: 768px) {
+  .cl-header { flex-direction: column; align-items: flex-start; }
+  .cl-header__title { font-size: 24px; }
+  .cl-kpi-strip { gap: 8px; }
+}

@@ -158,6 +158,10 @@ export const ROUTE_ROLE_ACCESS = {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
   },
+  contrats: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
   finances: {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
@@ -262,6 +266,17 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
+  },
+  {
+    label: 'Contrats',
+    path: '/contrats',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [
+      UbaxSubRole.DIRECTEUR_AGENCE,
+      UbaxSubRole.COMMERCIAL,
+      UbaxSubRole.COMPTABLE_AGENCE,
+    ],
   },
   // ── Partenaire — hôtel ───────────────────────────────────────────────────
   {
