@@ -58,9 +58,11 @@ export class TopbarComponent implements AfterViewInit {
   private readonly elementRef = inject(ElementRef);
   protected readonly notificationCount = 3;
   protected readonly isMobileNavOpen = signal(false);
+  protected readonly isMobileNavClosing = signal(false);
   protected readonly isCompactNav = signal(false);
   protected readonly isScrolled = signal(false);
   protected readonly isUserMenuOpen = signal(false);
+  private navCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private inlineNavRequiredWidth = 0;
   private readonly topbarInner =
     viewChild<ElementRef<HTMLElement>>('topbarInner');
@@ -113,6 +115,10 @@ export class TopbarComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.observeCompactNavState();
     this.observeScrollState();
+    // Clean up close timer on destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.navCloseTimer) clearTimeout(this.navCloseTimer);
+    });
   }
 
   protected isItemActive(item: NavItemConfig): boolean {
@@ -125,11 +131,33 @@ export class TopbarComponent implements AfterViewInit {
   }
 
   protected toggleMobileMenu(): void {
-    this.isMobileNavOpen.update((isOpen) => !isOpen);
+    if (this.isMobileNavOpen()) {
+      this.closeMobileMenuWithAnimation();
+    } else {
+      if (this.navCloseTimer) {
+        clearTimeout(this.navCloseTimer);
+        this.navCloseTimer = null;
+      }
+      this.isMobileNavClosing.set(false);
+      this.isMobileNavOpen.set(true);
+    }
   }
 
   protected closeMobileMenu(): void {
-    this.isMobileNavOpen.set(false);
+    this.closeMobileMenuWithAnimation();
+  }
+
+  private closeMobileMenuWithAnimation(): void {
+    if (!this.isMobileNavOpen()) return;
+    // Trigger exit animation class
+    this.isMobileNavClosing.set(true);
+    // Wait for animation to finish (matches CSS duration 340ms) then remove from DOM
+    if (this.navCloseTimer) clearTimeout(this.navCloseTimer);
+    this.navCloseTimer = setTimeout(() => {
+      this.isMobileNavOpen.set(false);
+      this.isMobileNavClosing.set(false);
+      this.navCloseTimer = null;
+    }, 340);
   }
 
   protected toggleUserMenu(event: MouseEvent): void {

@@ -2,6 +2,7 @@
   class="ubax-topbar"
   [class.ubax-topbar--compact]="isCompactNav()"
   [class.ubax-topbar--menu-open]="isCompactNav() && isMobileNavOpen()"
+  [class.ubax-topbar--menu-closing]="isCompactNav() && isMobileNavClosing()"
   [class.ubax-topbar--scrolled]="isScrolled()"
 >
   <div class="topbar-inner" #topbarInner>
