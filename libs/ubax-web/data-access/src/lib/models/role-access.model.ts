@@ -255,13 +255,6 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     ],
   },
   {
-    label: 'Tickets SAV',
-    path: '/tickets',
-    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'AGENCE',
-    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.AGENT_SAV],
-  },
-  {
     label: 'Finances',
     path: '/finances',
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
@@ -285,6 +278,13 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
       UbaxSubRole.COMMERCIAL,
       UbaxSubRole.COMPTABLE_AGENCE,
     ],
+  },
+  {
+    label: 'Tickets SAV',
+    path: '/tickets',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.AGENT_SAV],
   },
   {
     label: 'Locataires KYC',
