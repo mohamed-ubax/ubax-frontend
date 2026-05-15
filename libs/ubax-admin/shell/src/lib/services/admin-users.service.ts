@@ -308,7 +308,7 @@ export class AdminUsersService {
     return from(
       this.api.invoke(assignSubRoles1, {
         userId,
-        body: { roles, scope: 'UBAX_INTERNAL' },
+        body: roles,
       }),
     ).pipe(
       switchMap((raw) => {

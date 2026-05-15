@@ -503,7 +503,7 @@ export class AdministrateursPageComponent implements OnInit {
     const email = form.email.trim();
 
     if (!firstName || !lastName || !email) {
-      this.notif.error('Le prénom, le nom et l’email sont requis.');
+      this.notif.error("Le prénom, le nom et l’email sont requis.");
       return;
     }
 
@@ -524,8 +524,8 @@ export class AdministrateursPageComponent implements OnInit {
     } catch (err) {
       this.notif.error(
         (err as { status?: number })?.status === 409
-          ? ‘Cet email est déjà utilisé.’
-          : resolveHttpErrorMessage(err, ‘La création de l’administrateur a échoué.’),
+          ? "Cet email est déjà utilisé."
+          : resolveHttpErrorMessage(err, "La création de l’administrateur a échoué."),
       );
     } finally {
       this.formLoading.set(false);
