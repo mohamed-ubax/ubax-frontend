@@ -86,6 +86,12 @@
       "@ubax-workspace/ubax-web-profil": [
         "libs/ubax-web/features/profil/src/index.ts"
       ],
+      "@ubax-workspace/ubax-web-ticketing": [
+        "libs/ubax-web/features/ticketing/src/index.ts"
+      ],
+      "@ubax-workspace/ubax-web-contrats": [
+        "libs/ubax-web/features/contrats/src/index.ts"
+      ],
       "@ubax-workspace/ubax-admin-shell": [
         "libs/ubax-admin/shell/src/index.ts"
       ],

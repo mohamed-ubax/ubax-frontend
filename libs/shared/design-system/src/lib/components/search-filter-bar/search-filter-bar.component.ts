@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, model, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -49,8 +49,8 @@ export interface FilterOption {
           pInputText
           type="text"
           [placeholder]="placeholder()"
-          [(ngModel)]="searchValue"
-          (ngModelChange)="searchChange.emit($event)"
+          [ngModel]="searchValue()"
+          (ngModelChange)="searchValue.set($event); searchChange.emit($event)"
           class="w-full pl-9 pr-4 py-2.5 text-md rounded-md
                  border border-neutral-300 bg-surface-card
                  placeholder:text-neutral-500
@@ -82,8 +82,8 @@ export interface FilterOption {
 export class SearchFilterBarComponent {
   readonly placeholder  = input<string>('Rechercher...');
   readonly filters      = input<{ label: string; options: FilterOption[] }[]>([]);
+  readonly searchValue  = model<string>('');
 
-  searchValue = '';
   filterValues: Record<string, unknown> = {};
 
   readonly searchChange = output<string>();

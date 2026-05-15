@@ -17,7 +17,7 @@ import {
   StatusBadgeComponent,
 } from '@ubax-workspace/shared-design-system';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   UiDataTableCellDefDirective,
   UiDataTableColumn,
@@ -365,8 +365,8 @@ export class AdministrateursPageComponent implements OnInit {
     this.loading.set(true);
     try {
       this.admins.set(await firstValueFrom(this.svc.listAdmins()));
-    } catch {
-      this.notif.error('Impossible de charger la liste des administrateurs.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des administrateurs.'));
     } finally {
       this.loading.set(false);
     }
@@ -407,8 +407,8 @@ export class AdministrateursPageComponent implements OnInit {
       this.editAdminSubRoles.set(roles);
       // Keep details panel in sync too
       this.selectedSubRoles.set(roles);
-    } catch {
-      this.notif.error('Impossible de charger les sous-rôles.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger les sous-rôles.'));
     } finally {
       this.editSubRolesLoading.set(false);
     }
@@ -431,8 +431,8 @@ export class AdministrateursPageComponent implements OnInit {
       this.notif.success('Rôle principal mis à jour.');
       this.showForm.set(false);
       await this.loadAdmins();
-    } catch {
-      this.notif.error('La mise à jour du rôle a échoué.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'La mise à jour du rôle a échoué.'));
     } finally {
       this.formLoading.set(false);
     }
@@ -455,13 +455,13 @@ export class AdministrateursPageComponent implements OnInit {
       // Reload to sync with real server state (may override optimistic if API returns differently)
       await this.loadEditSubRoles(admin);
       this.notif.success('Sous-rôle(s) assigné(s) avec succès.');
-    } catch {
+    } catch (err) {
       // Rollback: remove the optimistically added roles
       this.editAdminSubRoles.update((current) =>
         current.filter((r) => !toAdd.includes(r)),
       );
       this.newSubRolesToAssign.set(toAdd);
-      this.notif.error("L'assignation des sous-rôles a échoué.");
+      this.notif.error(resolveHttpErrorMessage(err, "L'assignation des sous-rôles a échoué."));
     } finally {
       this.subRolesAssigning.set(false);
     }
@@ -485,12 +485,12 @@ export class AdministrateursPageComponent implements OnInit {
       this.selectedSubRoles.set(freshRoles);
       this.editAdminSubRoles.set(freshRoles);
       this.notif.success('Sous-rôle(s) assigné(s) avec succès.');
-    } catch {
+    } catch (err) {
       // Rollback
       this.selectedSubRoles.update((current) => current.filter((r) => !toAdd.includes(r)));
       this.editAdminSubRoles.update((current) => current.filter((r) => !toAdd.includes(r)));
       this.detailsNewSubRolesToAssign.set(toAdd);
-      this.notif.error("L'assignation des sous-rôles a échoué.");
+      this.notif.error(resolveHttpErrorMessage(err, "L'assignation des sous-rôles a échoué."));
     } finally {
       this.detailsSubRolesAssigning.set(false);
     }
@@ -503,7 +503,7 @@ export class AdministrateursPageComponent implements OnInit {
     const email = form.email.trim();
 
     if (!firstName || !lastName || !email) {
-      this.notif.error('Le prénom, le nom et l’email sont requis.');
+      this.notif.error("Le prénom, le nom et l’email sont requis.");
       return;
     }
 
@@ -521,12 +521,11 @@ export class AdministrateursPageComponent implements OnInit {
       this.notif.success('Administrateur créé avec succès.');
       this.showForm.set(false);
       await this.loadAdmins();
-    } catch (error: unknown) {
-      const status = (error as { status?: number })?.status;
+    } catch (err) {
       this.notif.error(
-        status === 409
-          ? 'Cet email est déjà utilisé.'
-          : 'La création de l’administrateur a échoué.',
+        (err as { status?: number })?.status === 409
+          ? "Cet email est déjà utilisé."
+          : resolveHttpErrorMessage(err, "La création de l’administrateur a échoué."),
       );
     } finally {
       this.formLoading.set(false);
@@ -552,8 +551,8 @@ export class AdministrateursPageComponent implements OnInit {
       const roles = subRoles.map((subRole) => subRole.role);
       this.selectedSubRoles.set(roles);
       this.editAdminSubRoles.set(roles);
-    } catch {
-      this.notif.error('Impossible de charger les sous-rôles.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger les sous-rôles.'));
     } finally {
       this.detailsLoading.set(false);
     }
@@ -570,8 +569,8 @@ export class AdministrateursPageComponent implements OnInit {
       );
       this.selectedSubRoles.set(subRoles.map((subRole) => subRole.role));
       this.notif.success('Sous-rôles mis à jour.');
-    } catch {
-      this.notif.error('La mise à jour des sous-rôles a échoué.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'La mise à jour des sous-rôles a échoué.'));
     } finally {
       this.formLoading.set(false);
     }
@@ -602,13 +601,13 @@ export class AdministrateursPageComponent implements OnInit {
       this.notif.success('Sous-rôle révoqué.');
       this.showRevokeConfirm.set(false);
       this.pendingRevokeRole.set(null);
-    } catch {
+    } catch (err) {
       // Rollback optimistic removal
       const restored = await firstValueFrom(this.svc.getSubRoles(admin.userId)).catch(() => []);
       const restoredRoles = restored.map((sr) => sr.role);
       this.editAdminSubRoles.set(restoredRoles);
       this.selectedSubRoles.set(restoredRoles);
-      this.notif.error('La révocation a échoué.');
+      this.notif.error(resolveHttpErrorMessage(err, 'La révocation a échoué.'));
     } finally {
       this.formLoading.set(false);
     }
@@ -629,8 +628,8 @@ export class AdministrateursPageComponent implements OnInit {
       this.notif.success('Administrateur supprimé.');
       this.showDeleteConfirm.set(false);
       await this.loadAdmins();
-    } catch {
-      this.notif.error('La suppression a échoué.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'La suppression a échoué.'));
     } finally {
       this.formLoading.set(false);
     }

@@ -1,0 +1,154 @@
+<div class="cd-page">
+  @switch (viewState()) {
+
+    @case ('loading') {
+      <ubax-contrats-skeleton />
+    }
+
+    @case ('error') {
+      <div class="cd-state">
+        <i class="pi pi-exclamation-triangle cd-state__icon"></i>
+        <p class="cd-state__title">Contrat introuvable</p>
+        <p class="cd-state__desc">Ce contrat n'existe pas ou a été supprimé.</p>
+        <a class="cd-btn cd-btn--ghost" routerLink="/contrats">
+          <i class="pi pi-arrow-left"></i> Retour à la liste
+        </a>
+      </div>
+    }
+
+    @case ('success') {
+      @let c = contrat();
+      @if (c) {
+
+        <!-- Breadcrumb -->
+        <ubax-breadcrumb-nav [items]="[
+          { label: 'Contrats de bail', routerLink: '/contrats' },
+          { label: (c.tenantName ?? 'Contrat') + ' — ' + (c.propertyAddress ?? '') }
+        ]" />
+
+        <!-- Status banners -->
+        @if (c.status === 'TERMINATED') {
+          <div class="cd-banner cd-banner--terminated">
+            <i class="pi pi-times-circle"></i>
+            Ce contrat a été résilié.
+          </div>
+        }
+        @if (c.status === 'CANCELLED') {
+          <div class="cd-banner cd-banner--cancelled">
+            <i class="pi pi-ban"></i>
+            Ce contrat a été annulé.
+          </div>
+        }
+
+        <!-- Header -->
+        <div class="cd-header">
+          <div class="cd-header__left">
+            <span class="cd-header__id">Contrat #{{ shortId(c.id) }}</span>
+            <h1 class="cd-header__title">
+              {{ c.tenantName ?? '—' }}
+              <span class="cd-header__sep">·</span>
+              {{ c.propertyAddress ?? '—' }}
+            </h1>
+            <ubax-status-badge [variant]="getStatusVariant(c.status)">
+              {{ getStatusLabel(c.status) }}
+            </ubax-status-badge>
+          </div>
+
+          <div class="cd-header__actions">
+            @if (c.status === 'DRAFT') {
+              <a class="cd-btn cd-btn--ghost" [routerLink]="['modifier']">
+                <i class="pi pi-pencil"></i> Modifier
+              </a>
+              <button class="cd-btn cd-btn--primary" (click)="showSubmitDialog.set(true)">
+                <i class="pi pi-send"></i> Soumettre à signature
+              </button>
+              <button class="cd-btn cd-btn--danger" (click)="showCancelDialog.set(true)">
+                <i class="pi pi-ban"></i> Annuler
+              </button>
+            }
+            @if (c.status === 'PENDING_SIGNATURE') {
+              <button class="cd-btn cd-btn--danger" (click)="showCancelDialog.set(true)">
+                <i class="pi pi-ban"></i> Annuler
+              </button>
+            }
+            @if (c.status === 'ACTIVE') {
+              <button class="cd-btn cd-btn--danger" (click)="showTerminateDialog.set(true)">
+                <i class="pi pi-times-circle"></i> Résilier
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Sections -->
+        <div class="cd-sections">
+
+          <ubax-section-card title="Parties du contrat">
+            <ubax-detail-info-block [items]="partiesItems()" [columns]="3" />
+          </ubax-section-card>
+
+          <ubax-section-card title="Conditions financières">
+            <ubax-detail-info-block [items]="financialItems()" [columns]="2" />
+          </ubax-section-card>
+
+          @if (c.status === 'PENDING_SIGNATURE' || c.status === 'ACTIVE' || c.status === 'TERMINATED') {
+            <ubax-section-card title="Document contractuel">
+              @if (c.signedFileUrl) {
+                <div class="cd-doc">
+                  <div class="cd-doc__icon"><i class="pi pi-file-pdf"></i></div>
+                  <div class="cd-doc__info">
+                    <span class="cd-doc__name">Contrat signé — PDF</span>
+                    <span class="cd-doc__hint">Cliquez pour télécharger</span>
+                  </div>
+                  <a [href]="c.signedFileUrl" target="_blank" class="cd-btn cd-btn--primary">
+                    <i class="pi pi-download"></i> Télécharger
+                  </a>
+                </div>
+              } @else {
+                <div class="cd-doc-generating">
+                  <i class="pi pi-spin pi-spinner"></i>
+                  <span>Document en cours de génération…</span>
+                </div>
+              }
+            </ubax-section-card>
+          }
+
+          @if (c.status === 'ACTIVE') {
+            <ubax-section-card title="Historique des paiements">
+              <div class="cd-payments">
+                <p class="cd-payments__hint">Consultez tous les paiements liés à ce contrat.</p>
+                <a class="cd-btn cd-btn--ghost" [routerLink]="['/finances']" [queryParams]="{ contractId: c.id }">
+                  <i class="pi pi-credit-card"></i> Voir les paiements
+                </a>
+              </div>
+            </ubax-section-card>
+          }
+
+        </div>
+      }
+    }
+  }
+</div>
+
+<!-- Dialogs -->
+@if (showSubmitDialog() && contrat()) {
+  <ubax-contrat-submit-dialog
+    [contrat]="contrat()!"
+    [loading]="!!store.submittingId()"
+    (confirm)="onSubmitConfirm()"
+    (cancel)="showSubmitDialog.set(false)"
+  />
+}
+@if (showTerminateDialog()) {
+  <ubax-contrat-terminate-dialog
+    [loading]="!!store.terminatingId()"
+    (confirm)="onTerminateConfirm($event)"
+    (cancel)="showTerminateDialog.set(false)"
+  />
+}
+@if (showCancelDialog()) {
+  <ubax-contrat-cancel-dialog
+    [loading]="!!store.cancellingId()"
+    (confirm)="onCancelConfirm()"
+    (cancel)="showCancelDialog.set(false)"
+  />
+}

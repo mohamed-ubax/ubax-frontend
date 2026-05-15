@@ -28,6 +28,7 @@ import {
   ApiResourceState,
   AnyApiFn,
   PaginationMeta,
+  resolveHttpErrorMessage,
 } from './api-resource.types';
 import { NOTIFICATION_HANDLER } from './notification.token';
 
@@ -315,7 +316,7 @@ export function withApiResource<
                           pagination,
                         }),
                       error: (err: HttpErrorResponse) => {
-                        const msg = err.message ?? API_ERROR_MESSAGES.load;
+                        const msg = resolveHttpErrorMessage(err, API_ERROR_MESSAGES.load);
                         notif?.error(msg);
                         patchState(store, { loading: false, error: msg });
                       },
@@ -345,7 +346,7 @@ export function withApiResource<
                           selectedId: selectId(item),
                         }),
                       error: (err: HttpErrorResponse) => {
-                        const msg = err.message ?? API_ERROR_MESSAGES.load;
+                        const msg = resolveHttpErrorMessage(err, API_ERROR_MESSAGES.load);
                         notif?.error(msg);
                         patchState(store, { loading: false, error: msg });
                       },
@@ -374,7 +375,7 @@ export function withApiResource<
                           saving: false,
                         }),
                       error: (err: HttpErrorResponse) => {
-                        const msg = err.message ?? API_ERROR_MESSAGES.create;
+                        const msg = resolveHttpErrorMessage(err, API_ERROR_MESSAGES.create);
                         notif?.error(msg);
                         patchState(store, { saving: false, error: msg });
                       },
@@ -408,7 +409,7 @@ export function withApiResource<
                           { saving: false },
                         ),
                       error: (err: HttpErrorResponse) => {
-                        const msg = err.message ?? API_ERROR_MESSAGES.update;
+                        const msg = resolveHttpErrorMessage(err, API_ERROR_MESSAGES.update);
                         notif?.error(msg);
                         patchState(store, { saving: false, error: msg });
                       },
@@ -427,7 +428,7 @@ export function withApiResource<
                     tapResponse({
                       next: () => patchState(store, removeEntity(id)),
                       error: (err: HttpErrorResponse) => {
-                        const msg = err.message ?? API_ERROR_MESSAGES.remove;
+                        const msg = resolveHttpErrorMessage(err, API_ERROR_MESSAGES.remove);
                         notif?.error(msg);
                         patchState(store, { error: msg });
                       },

@@ -39,6 +39,7 @@ export class UbaxMorphTabsDirective implements AfterViewInit {
   private readonly observedItems = new Set<HTMLElement>();
   private indicator: HTMLSpanElement | null = null;
   private animationFrameId = 0;
+  private isReady = false; // NOSONAR — assigned to true in syncIndicator
 
   constructor() {
     effect(() => {
@@ -187,7 +188,12 @@ export class UbaxMorphTabsDirective implements AfterViewInit {
     const activeItem = this.resolveActiveItem(items);
 
     if (!activeItem) {
-      host.classList.remove('ubax-morph-tabs--ready');
+      // Once positioned, keep indicator visible at last known position so
+      // it doesn't flash away during the brief moment between navigation
+      // start and NavigationEnd (when no item has is-active yet).
+      if (!this.isReady) {
+        host.classList.remove('ubax-morph-tabs--ready');
+      }
       return;
     }
 
@@ -195,7 +201,9 @@ export class UbaxMorphTabsDirective implements AfterViewInit {
     const height = activeItem.offsetHeight;
 
     if (!width || !height) {
-      host.classList.remove('ubax-morph-tabs--ready');
+      if (!this.isReady) {
+        host.classList.remove('ubax-morph-tabs--ready');
+      }
       return;
     }
 
@@ -204,5 +212,6 @@ export class UbaxMorphTabsDirective implements AfterViewInit {
     host.style.setProperty('--ubax-morph-width', `${width}px`);
     host.style.setProperty('--ubax-morph-height', `${height}px`);
     host.classList.add('ubax-morph-tabs--ready');
+    this.isReady = true;
   }
 }

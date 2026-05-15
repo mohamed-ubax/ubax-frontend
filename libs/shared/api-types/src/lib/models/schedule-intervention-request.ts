@@ -4,17 +4,27 @@
 export interface ScheduleInterventionRequest {
 
   /**
+   * Prix d'intervention négocié en XOF (saisi par l'agent après négociation)
+   */
+  interventionPrice?: number;
+
+  /**
    * Date et heure planifiées pour l'intervention
    */
   interventionScheduledAt: string;
 
   /**
-   * Nom du prestataire ou technicien mandaté
+   * Nom du prestataire (requis si technicienId absent)
    */
   technicianName?: string;
 
   /**
-   * Numéro international du technicien
+   * Téléphone international du prestataire (requis si technicienId absent)
    */
   technicianPhone?: string;
+
+  /**
+   * ID d'un technicien enregistré dans le système — prioritaire sur nom/téléphone
+   */
+  technicienId?: string;
 }

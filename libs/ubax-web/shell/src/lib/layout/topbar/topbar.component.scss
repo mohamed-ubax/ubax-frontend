@@ -459,8 +459,19 @@
   display: none;
 }
 
+// Topbar morphs from pill → rounded rect when menu opens
+.ubax-topbar--compact {
+  transition:
+    border-radius 360ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .ubax-topbar--compact.ubax-topbar--menu-open {
-  border-radius: 30px;
+  border-radius: 28px;
+  box-shadow:
+    0 8px 32px rgb(26 48 71 / 0.12),
+    0 2px 8px rgb(26 48 71 / 0.06);
 }
 
 .ubax-topbar--compact.ubax-topbar--menu-open .topbar-inner {
@@ -479,17 +490,28 @@
 .ubax-topbar--compact.ubax-topbar--menu-open .topbar-nav-shell {
   display: block;
   grid-area: nav;
+  animation: ubax-nav-morph-in 380ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
 .ubax-topbar--compact.ubax-topbar--menu-open .topbar-nav {
   display: flex;
   width: 100%;
   margin: 12px 0 0;
-  justify-content: flex-start;
+  justify-content: center;
   overflow-x: auto;
   scrollbar-width: none;
   clip-path: none;
   flex-wrap: wrap;
+
+  .topbar-nav__item {
+    animation: ubax-nav-item-in 320ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+
+    @for $i from 1 through 12 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 28}ms;
+      }
+    }
+  }
 }
 
 .ubax-topbar--compact.ubax-topbar--menu-open .topbar-nav::-webkit-scrollbar {
@@ -503,6 +525,123 @@
 
 .ubax-topbar--compact.ubax-topbar--menu-open .topbar-nav__item.is-active {
   background: transparent;
+}
+
+// Menu button icon morphs bars ↔ X with rotation
+.topbar-menu-btn {
+  i {
+    transition:
+      transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 200ms ease;
+  }
+
+  &[aria-expanded="true"] i {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes ubax-nav-morph-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scaleY(0.88);
+    transform-origin: top center;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    transform-origin: top center;
+  }
+}
+
+@keyframes ubax-nav-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ─── Exit animation (closing state) ──────────────────────────────────────────
+
+.ubax-topbar--compact.ubax-topbar--menu-closing {
+  border-radius: 28px;
+}
+
+.ubax-topbar--compact.ubax-topbar--menu-closing .topbar-inner {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'logo spacer actions'
+    'nav nav nav';
+  align-items: center;
+  padding: 12px 18px 16px;
+}
+
+.ubax-topbar--compact.ubax-topbar--menu-closing .topbar-logo {
+  grid-area: logo;
+}
+
+.ubax-topbar--compact.ubax-topbar--menu-closing .topbar-nav-shell {
+  display: block;
+  grid-area: nav;
+  animation: ubax-nav-morph-out 340ms cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+.ubax-topbar--compact.ubax-topbar--menu-closing .topbar-nav {
+  display: flex;
+  width: 100%;
+  margin: 12px 0 0;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  clip-path: none;
+  flex-wrap: wrap;
+
+  .topbar-nav__item {
+    animation: ubax-nav-item-out 260ms cubic-bezier(0.4, 0, 0.6, 1) both;
+
+    @for $i from 1 through 12 {
+      &:nth-child(#{$i}) {
+        // Reverse stagger — last items exit first
+        animation-delay: #{max(0, (12 - $i) * 18)}ms;
+      }
+    }
+  }
+}
+
+.ubax-topbar--compact.ubax-topbar--menu-closing .topbar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.ubax-topbar--compact.ubax-topbar--menu-closing .topbar-actions {
+  grid-area: actions;
+  gap: 6px;
+}
+
+@keyframes ubax-nav-morph-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    transform-origin: top center;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.9);
+    transform-origin: top center;
+  }
+}
+
+@keyframes ubax-nav-item-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.93);
+  }
 }
 
 @media (max-width: 760px) {

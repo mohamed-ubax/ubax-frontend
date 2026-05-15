@@ -10,7 +10,7 @@ import {
 } from '@ngrx/signals';
 import { updateEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
   assign,
@@ -18,7 +18,7 @@ import {
   create,
   CreateTicketRequest,
   CustomResponse,
-  getById2,
+  getById3,
   list,
   List$Params,
   updateStatus,
@@ -63,7 +63,7 @@ export const DemandesStore = signalStore(
   { providedIn: 'root' },
   withApiResource({
     list,
-    getById: getById2,
+    getById: getById3,
     buildGetByIdParams: (id) => ({ ticketId: id }),
     mapGetById: (raw, requestedId) => {
       if (raw && typeof raw === 'object') {
@@ -146,7 +146,7 @@ export const DemandesStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),
@@ -170,7 +170,7 @@ export const DemandesStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),

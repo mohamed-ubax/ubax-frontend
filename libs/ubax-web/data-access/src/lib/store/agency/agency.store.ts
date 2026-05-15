@@ -14,7 +14,11 @@ import {
   removeEntity,
   setAllEntities,
 } from '@ngrx/signals/entities';
-import { UbaxScope, withApiResource } from '@ubax-workspace/shared-data-access';
+import {
+  UbaxScope,
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   addMember,
   addMember1,
@@ -63,6 +67,32 @@ import {
 
 type MemberLoadingState = Record<string, boolean>;
 type MemberErrorState = Record<string, string | null>;
+
+type AgencyStoreState = {
+  filterRole: string | null;
+  memberSubRoles: TeamMemberSubRolesMap;
+  memberSubRolesLoading: MemberLoadingState;
+  memberSubRolesError: MemberErrorState;
+  codelistRoles: LaCodeListDto[];
+  codelistRolesLoading: boolean;
+  codelistRolesError: string | null;
+  currentUserDbId: string | null;
+  teamScope: UbaxScope | null;
+  memberAvatars: Record<string, string>;
+};
+
+const initialAgencyStoreState: AgencyStoreState = {
+  filterRole: null,
+  memberSubRoles: {},
+  memberSubRolesLoading: {},
+  memberSubRolesError: {},
+  codelistRoles: [],
+  codelistRolesLoading: false,
+  codelistRolesError: null,
+  currentUserDbId: null,
+  teamScope: null,
+  memberAvatars: {},
+};
 
 function extractStringArray(data: unknown): string[] {
   if (!Array.isArray(data)) {
@@ -179,23 +209,16 @@ function mapPartnerTypeToScope(partnerType: unknown): UbaxScope | null {
   return null;
 }
 
+function isHotelScope(scope: UbaxScope): boolean {
+  return scope === 'HOTEL';
+}
+
 export const AgencyStore = signalStore(
   { providedIn: 'root' },
   withApiResource<AdminUserResponse>({
     idSelector: teamMemberIdSelector,
   }),
-  withState({
-    filterRole: null as string | null,
-    memberSubRoles: {} as TeamMemberSubRolesMap,
-    memberSubRolesLoading: {} as MemberLoadingState,
-    memberSubRolesError: {} as MemberErrorState,
-    codelistRoles: [] as LaCodeListDto[],
-    codelistRolesLoading: false,
-    codelistRolesError: null as string | null,
-    currentUserDbId: null as string | null,
-    teamScope: null as UbaxScope | null,
-    memberAvatars: {} as Record<string, string>,
-  }),
+  withState(initialAgencyStoreState),
   withComputed(({ entities, filterRole, memberSubRoles, codelistRoles }) => ({
     membresActifs: computed(() => entities().filter(readTeamMemberActive)),
     membresFiltres: computed(() => {
@@ -231,6 +254,53 @@ export const AgencyStore = signalStore(
       const resolveScope = (scope?: UbaxScope | null): UbaxScope =>
         scope ?? store.teamScope() ?? 'AGENCE';
 
+      const getTeamRequest = (scope: UbaxScope) =>
+        isHotelScope(scope)
+          ? getTeamMembers(http, apiConfig.rootUrl, {})
+          : getTeamMembers1(http, apiConfig.rootUrl, {});
+
+      const getSubRolesRequest = (scope: UbaxScope, userId: string) =>
+        isHotelScope(scope)
+          ? getSubRoles(http, apiConfig.rootUrl, { userId })
+          : getSubRoles1(http, apiConfig.rootUrl, { userId });
+
+      const addMemberRequest = (
+        scope: UbaxScope,
+        body: AddTeamMemberRequest,
+      ) =>
+        isHotelScope(scope)
+          ? addMember(http, apiConfig.rootUrl, { body })
+          : addMember1(http, apiConfig.rootUrl, { body });
+
+      const assignSubRolesRequest = (
+        scope: UbaxScope,
+        userId: string,
+        roles: readonly string[],
+      ) =>
+        isHotelScope(scope)
+          ? assignSubRoles(http, apiConfig.rootUrl, {
+              userId,
+              body: [...roles],
+            })
+          : assignSubRoles1(http, apiConfig.rootUrl, {
+              userId,
+              body: [...roles],
+            });
+
+      const revokeSubRoleRequest = (
+        scope: UbaxScope,
+        userId: string,
+        role: string,
+      ) =>
+        isHotelScope(scope)
+          ? revokeSubRole(http, apiConfig.rootUrl, { userId, role })
+          : revokeSubRole1(http, apiConfig.rootUrl, { userId, role });
+
+      const removeMemberRequest = (scope: UbaxScope, userId: string) =>
+        isHotelScope(scope)
+          ? removeMember(http, apiConfig.rootUrl, { userId })
+          : removeMember1(http, apiConfig.rootUrl, { userId });
+
       return {
         setFilterRole(role: string | null): void {
           patchState(store, { filterRole: role });
@@ -262,10 +332,7 @@ export const AgencyStore = signalStore(
             tap(() => patchState(store, { loading: true, error: null })),
             exhaustMap((params) => {
               const scope = resolveScope(params?.scope);
-              const request =
-                scope === 'HOTEL'
-                  ? getTeamMembers(http, apiConfig.rootUrl, {})
-                  : getTeamMembers1(http, apiConfig.rootUrl, {});
+              const request = getTeamRequest(scope);
 
               return request.pipe(
                 mergeMap((response) => parseResponseBody(response.body)),
@@ -299,7 +366,13 @@ export const AgencyStore = signalStore(
                   return of(null);
                 }),
                 catchError((err: HttpErrorResponse) => {
-                  patchState(store, { loading: false, error: err.message });
+                  patchState(store, {
+                    loading: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement des membres',
+                    ),
+                  });
                   return of(null);
                 }),
               );
@@ -337,7 +410,10 @@ export const AgencyStore = signalStore(
                     patchState(store, {
                       codelistRoles: [],
                       codelistRolesLoading: false,
-                      codelistRolesError: err.message,
+                      codelistRolesError: resolveHttpErrorMessage(
+                        err,
+                        'Erreur lors du chargement des rôles',
+                      ),
                     }),
                 }),
               ),
@@ -371,10 +447,7 @@ export const AgencyStore = signalStore(
               }
 
               const scope = resolveScope();
-              const request =
-                scope === 'HOTEL'
-                  ? getSubRoles(http, apiConfig.rootUrl, { userId })
-                  : getSubRoles1(http, apiConfig.rootUrl, { userId });
+              const request = getSubRolesRequest(scope, userId);
 
               return request.pipe(
                 map((response) => extractStringArray(response.body?.data)),
@@ -412,7 +485,10 @@ export const AgencyStore = signalStore(
                       memberSubRolesError: setMemberError(
                         store.memberSubRolesError(),
                         userId,
-                        err.message,
+                        resolveHttpErrorMessage(
+                          err,
+                          'Erreur lors du chargement des sous-rôles',
+                        ),
                       ),
                     }),
                 }),
@@ -428,10 +504,7 @@ export const AgencyStore = signalStore(
               (params: AddTeamMemberRequest & { avatarFile?: File }) => {
                 const { avatarFile, ...body } = params;
                 const scope = resolveScope();
-                const request =
-                  scope === 'HOTEL'
-                    ? addMember(http, apiConfig.rootUrl, { body })
-                    : addMember1(http, apiConfig.rootUrl, { body });
+                const request = addMemberRequest(scope, body);
 
                 return request.pipe(
                   mergeMap((response) => parseResponseBody(response.body)),
@@ -440,7 +513,7 @@ export const AgencyStore = signalStore(
                     const raw = parsed as Record<string, unknown> | null;
                     const membre: AdminUserResponse =
                       raw?.['data'] && typeof raw['data'] === 'object'
-                        ? (raw['data'] as AdminUserResponse)
+                        ? raw['data']
                         : ((raw as AdminUserResponse) ?? {});
                     return membre;
                   }),
@@ -515,7 +588,13 @@ export const AgencyStore = signalStore(
                       );
                     },
                     error: (err: HttpErrorResponse) =>
-                      patchState(store, { saving: false, error: err.message }),
+                      patchState(store, {
+                        saving: false,
+                        error: resolveHttpErrorMessage(
+                          err,
+                          'Erreur lors de la mise à jour',
+                        ),
+                      }),
                   }),
                 );
               },
@@ -531,16 +610,11 @@ export const AgencyStore = signalStore(
             tap(() => patchState(store, { saving: true, error: null })),
             exhaustMap(({ userId, body }) => {
               const scope = resolveScope(body.scope ?? null);
-              const request =
-                scope === 'HOTEL'
-                  ? assignSubRoles(http, apiConfig.rootUrl, {
-                      userId,
-                      body: body.roles ?? [],
-                    })
-                  : assignSubRoles1(http, apiConfig.rootUrl, {
-                      userId,
-                      body: body.roles ?? [],
-                    });
+              const request = assignSubRolesRequest(
+                scope,
+                userId,
+                body.roles ?? [],
+              );
 
               return request.pipe(
                 tapResponse({
@@ -563,7 +637,13 @@ export const AgencyStore = signalStore(
                       ),
                     }),
                   error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: err.message }),
+                    patchState(store, {
+                      saving: false,
+                      error: resolveHttpErrorMessage(
+                        err,
+                        'Erreur lors de la mise à jour',
+                      ),
+                    }),
                 }),
               );
             }),
@@ -575,10 +655,7 @@ export const AgencyStore = signalStore(
             tap(() => patchState(store, { saving: true, error: null })),
             exhaustMap(({ userId, role }) => {
               const scope = resolveScope();
-              const request =
-                scope === 'HOTEL'
-                  ? revokeSubRole(http, apiConfig.rootUrl, { userId, role })
-                  : revokeSubRole1(http, apiConfig.rootUrl, { userId, role });
+              const request = revokeSubRoleRequest(scope, userId, role);
 
               return request.pipe(
                 tapResponse({
@@ -599,7 +676,13 @@ export const AgencyStore = signalStore(
                       ),
                     }),
                   error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: err.message }),
+                    patchState(store, {
+                      saving: false,
+                      error: resolveHttpErrorMessage(
+                        err,
+                        'Erreur lors de la mise à jour',
+                      ),
+                    }),
                 }),
               );
             }),
@@ -611,10 +694,7 @@ export const AgencyStore = signalStore(
             tap(() => patchState(store, { saving: true, error: null })),
             exhaustMap((userId) => {
               const scope = resolveScope();
-              const request =
-                scope === 'HOTEL'
-                  ? removeMember(http, apiConfig.rootUrl, { userId })
-                  : removeMember1(http, apiConfig.rootUrl, { userId });
+              const request = removeMemberRequest(scope, userId);
 
               return request.pipe(
                 tapResponse({
@@ -635,7 +715,13 @@ export const AgencyStore = signalStore(
                       ),
                     }),
                   error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: err.message }),
+                    patchState(store, {
+                      saving: false,
+                      error: resolveHttpErrorMessage(
+                        err,
+                        'Erreur lors de la mise à jour',
+                      ),
+                    }),
                 }),
               );
             }),

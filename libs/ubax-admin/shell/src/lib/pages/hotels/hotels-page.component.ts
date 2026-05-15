@@ -18,7 +18,7 @@ import {
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { AvatarModule } from 'primeng/avatar';
 import { TableModule } from 'primeng/table';
 import { AdminPartnersService } from '../../services/admin-partners.service';
@@ -96,8 +96,8 @@ export class HotelsPageComponent implements OnInit {
     this.loading.set(true);
     try {
       this.hotels.set(await firstValueFrom(this.svc.listHotels()));
-    } catch {
-      this.notif.error('Impossible de charger la liste des hôtels.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des hôtels.'));
     } finally {
       this.loading.set(false);
     }
@@ -148,8 +148,8 @@ export class HotelsPageComponent implements OnInit {
         action === 'activate' ? 'Hôtel activé.' : 'Hôtel suspendu.',
       );
       this.showConfirm.set(false);
-    } catch {
-      this.notif.error("L'opération a échoué.");
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, "L'opération a échoué."));
     } finally {
       this.actionLoading.set(false);
     }

@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import type { PropertyResponse } from '@ubax-workspace/shared-api-types';
 import { EmptyStateComponent } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   UbaxPaginatorComponent,
   UiFormSelectComponent,
@@ -374,11 +374,14 @@ export class ProprietesPublishedListPageComponent {
       this.properties.set(result.items);
       this.totalElements.set(result.totalElements);
       this.totalPages.set(result.totalPages);
-    } catch {
+    } catch (err) {
       this.notif.error(
-        params.scope === 'agencies'
-          ? 'Impossible de charger la liste des biens des agences.'
-          : 'Impossible de charger la liste des biens des hôtels.',
+        resolveHttpErrorMessage(
+          err,
+          params.scope === 'agencies'
+            ? 'Impossible de charger la liste des biens des agences.'
+            : 'Impossible de charger la liste des biens des hôtels.',
+        ),
       );
     } finally {
       this.loading.set(false);
@@ -410,7 +413,7 @@ export class ProprietesPublishedListPageComponent {
         defaultOption.label,
         ...options.map((option) => option.label),
       ]);
-    } catch {
+    } catch (err) {
       if (requestId !== this.partnerOptionsRequestId) {
         return;
       }
@@ -418,9 +421,12 @@ export class ProprietesPublishedListPageComponent {
       this.partnerSelectOptions.set([]);
       this.partnerOptions.set([defaultOption.label]);
       this.notif.error(
-        scope === 'agencies'
-          ? 'Impossible de charger les agences pour le filtre.'
-          : 'Impossible de charger les hôtels pour le filtre.',
+        resolveHttpErrorMessage(
+          err,
+          scope === 'agencies'
+            ? 'Impossible de charger les agences pour le filtre.'
+            : 'Impossible de charger les hôtels pour le filtre.',
+        ),
       );
     }
   }

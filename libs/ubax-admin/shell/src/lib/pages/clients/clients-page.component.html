@@ -1,0 +1,124 @@
+<div class="clients-page">
+
+  <!-- En-tête -->
+  <div class="clients-page__header">
+    <div class="clients-page__title-block">
+      <p class="clients-page__eyebrow">Back-office UBAX</p>
+      <div class="clients-page__title-row">
+        <h1 class="clients-page__title">Clients</h1>
+        <span class="clients-page__count">{{ clientCount() }} client(s)</span>
+      </div>
+      <p class="clients-page__subtitle">
+        Consultez l'ensemble des clients enregistrés sur la plateforme.
+      </p>
+    </div>
+  </div>
+
+  <!-- Carte principale -->
+  <ubax-section-card bodyClass="p-0">
+    <ubax-search-filter-bar
+      class="clients-toolbar"
+      placeholder="Rechercher un client..."
+      [filters]="searchFilters"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    <p-table
+      [value]="filteredClients()"
+      [loading]="loading()"
+      [paginator]="filteredClients().length > 15"
+      [rows]="15"
+      styleClass="clients-table"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Client</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Ville</th>
+          <th>Vérifications</th>
+          <th>Statut</th>
+          <th>Dernière connexion</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-client>
+        <tr>
+          <!-- Client -->
+          <td>
+            <div class="clients-user-cell">
+              <div class="clients-user-cell__avatar" [class.clients-user-cell__avatar--active]="client.active">
+                {{ getInitials(client) }}
+              </div>
+              <div class="clients-user-cell__meta">
+                <p class="clients-user-cell__name">
+                  {{ (client.firstName ?? '') + ' ' + (client.lastName ?? '') }}
+                </p>
+              </div>
+            </div>
+          </td>
+
+          <td class="clients-table__cell">{{ client.email ?? '—' }}</td>
+          <td class="clients-table__cell clients-table__cell--muted">{{ client.phone ?? '—' }}</td>
+          <td class="clients-table__cell clients-table__cell--muted">{{ client.city ?? '—' }}</td>
+
+          <!-- Vérifications KYC -->
+          <td>
+            <div class="clients-verifs">
+              <span
+                class="clients-verif"
+                [class.clients-verif--ok]="client.emailVerified"
+                [title]="client.emailVerified ? 'Email vérifié' : 'Email non vérifié'"
+              >
+                <i class="pi pi-envelope"></i>
+              </span>
+              <span
+                class="clients-verif"
+                [class.clients-verif--ok]="client.phoneVerified"
+                [title]="client.phoneVerified ? 'Téléphone vérifié' : 'Téléphone non vérifié'"
+              >
+                <i class="pi pi-phone"></i>
+              </span>
+              <span
+                class="clients-verif"
+                [class.clients-verif--ok]="client.identityVerified"
+                [title]="client.identityVerified ? 'Identité vérifiée' : 'Identité non vérifiée'"
+              >
+                <i class="pi pi-id-card"></i>
+              </span>
+            </div>
+          </td>
+
+          <!-- Statut -->
+          <td>
+            @if (client.active) {
+              <ubax-status-badge variant="active">Actif</ubax-status-badge>
+            } @else {
+              <ubax-status-badge variant="neutral">Inactif</ubax-status-badge>
+            }
+          </td>
+
+          <!-- Dernière connexion -->
+          <td class="clients-table__cell clients-table__cell--muted">
+            {{ formatLastLogin(client.lastLoginAt) }}
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <ubax-empty-state
+              icon="pi pi-users"
+              title="Aucun client trouvé"
+              [description]="searchQuery() ? 'Aucun client ne correspond à votre recherche.' : 'Aucun client enregistré sur la plateforme.'"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ubax-section-card>
+
+</div>

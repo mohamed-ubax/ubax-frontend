@@ -110,6 +110,50 @@ export const webRoutes: Route[] = [
         loadChildren: () =>
           import('@ubax-workspace/ubax-web-profil').then((m) => m.profilRoutes),
       },
+
+      // ── Ticketing SAV ────────────────────────────────────────────────────────
+      {
+        path: 'tickets',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-ticketing').then(
+            (m) => m.ticketingRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.tickets,
+      },
+
+      // ── Contrats & Baux ──────────────────────────────────────────────────────
+      {
+        path: 'contrats',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-contrats').then(
+            (m) => m.contratsRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.contrats,
+      },
+
+      // ── Locataires KYC ───────────────────────────────────────────────────────
+      {
+        path: 'locataires',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-location').then(
+            (m) => m.locatairesKycRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.locataires,
+      },
+
+      // ── Clients agence ────────────────────────────────────────────────────────
+      {
+        path: 'clients',
+        loadChildren: () =>
+          import('@ubax-workspace/ubax-web-location').then(
+            (m) => m.agencyClientsRoutes,
+          ),
+        canActivate: [roleGuard],
+        data: ROUTE_ROLE_ACCESS.clientsAgence,
+      },
     ],
   },
 

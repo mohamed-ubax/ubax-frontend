@@ -4,7 +4,7 @@ import { map, Observable } from 'rxjs';
 import {
   ApiConfiguration,
   getById,
-  list1,
+  list2,
   updateStatus1,
   type PropertyDetailResponse,
   type PropertyResponse,
@@ -51,7 +51,7 @@ export class AdminPropertiesService {
       agencyId?: string;
     } = {},
   ): Observable<PropertyPageResult> {
-    return list1(this.http, this.rootUrl, {
+    return list2(this.http, this.rootUrl, {
       status: 'PENDING',
       city: params.city || undefined,
       propertyType: params.propertyType || undefined,
@@ -80,7 +80,7 @@ export class AdminPropertiesService {
       maxPrice?: number;
     } = {},
   ): Observable<PropertyPageResult> {
-    return list1(this.http, this.rootUrl, {
+    return list2(this.http, this.rootUrl, {
       status: 'PUBLISHED',
       city: params.city || undefined,
       propertyType: params.propertyType || undefined,

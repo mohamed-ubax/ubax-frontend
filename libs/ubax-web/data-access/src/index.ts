@@ -53,13 +53,31 @@ export {
   resolvePropertyCardImage,
 } from './lib/property-card-image.helper';
 
+// ─── Ticketing SAV ────────────────────────────────────────────────────────────
+export { TicketingStore } from './lib/store/ticketing/ticketing.store';
+export type {
+  TicketCategory,
+  TicketMessage,
+  TicketPriority,
+  TicketStatus,
+  Ticket as TicketSav,
+} from './lib/store/ticketing/ticketing.store';
+
 // ─── Espaces hôteliers ────────────────────────────────────────────────────────
 export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
 export type { EspaceStatus } from './lib/store/espaces/mes-espaces.store';
 export { ESPACE_STATUS_LABELS } from './lib/store/espaces/mes-espaces.store';
 export { EspaceCreationStore } from './lib/store/espaces/espace-creation.store';
+
+// ─── Contrats & Baux ──────────────────────────────────────────────────────────
+export { ContratsStore } from './lib/store/contrats/contrats.store';
+export type { ContractResponse, ContractStatus } from './lib/store/contrats/contrats.store';
 export type { EspaceCreationState } from './lib/store/espaces/espace-creation.store';
 export { EspaceEditStore } from './lib/store/espaces/espace-edit.store';
+
+// ─── Clients ─────────────────────────────────────────────────────────────────
+export { HotelClientsStore } from './lib/store/clients/hotel-clients.store';
+export { AgencyClientsStore } from './lib/store/clients/agency-clients.store';
 
 // ─── Configs API prêtes à l'emploi avec createApiStore ───────────────────────
 // Usage : const BiensStore = createApiStore(biensApiConfig);

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   BreadcrumbNavComponent,
   EmptyStateComponent,
@@ -85,8 +85,8 @@ export class MembresHotelPageComponent implements OnInit {
       this.members.set(
         await firstValueFrom(this.svc.getHotelMembers(this.hotelId)),
       );
-    } catch {
-      this.notif.error("Impossible de charger les membres de l'hôtel.");
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, "Impossible de charger les membres de l'hôtel."));
     } finally {
       this.loading.set(false);
     }

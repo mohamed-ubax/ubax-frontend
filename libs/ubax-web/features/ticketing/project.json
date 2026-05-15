@@ -1,0 +1,15 @@
+{
+ "name": "ubax-web-ticketing",
+ "sourceRoot": "libs/ubax-web/features/ticketing/src",
+ "prefix": "ubax",
+ "projectType": "library",
+ "tags": [
+  "scope:web",
+  "type:feature"
+ ],
+ "targets": {
+  "lint": {
+   "executor": "@nx/eslint:lint"
+  }
+ }
+}

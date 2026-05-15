@@ -1,0 +1,214 @@
+<div class="cl-page" data-ubax-motion="page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="cl-header">
+    <div class="cl-header__left">
+      <div class="cl-header__eyebrow">
+        <i class="pi pi-file-edit"></i>
+        <span>Agence · Contrats</span>
+      </div>
+      <h1 class="cl-header__title">Contrats de bail</h1>
+      <p class="cl-header__subtitle">Gestion du cycle de vie des baux locatifs</p>
+    </div>
+    <div class="cl-header__actions">
+      <a class="cl-btn cl-btn--primary" routerLink="nouveau">
+        <i class="pi pi-plus"></i> Nouveau contrat
+      </a>
+    </div>
+  </header>
+
+  <!-- ── KPI Cards ─────────────────────────────────────────────────────── -->
+  <section class="cl-kpi-grid" aria-label="Statistiques contrats">
+    @for (card of kpiCards(); track card.label) {
+      <article
+        class="cl-kpi-card"
+        [style.--kpi-accent]="card.accent"
+        [style.--kpi-bg]="card.bg"
+      >
+        <span class="cl-kpi-card__icon"><i [class]="card.icon"></i></span>
+        <div class="cl-kpi-card__body">
+          <p class="cl-kpi-card__value">{{ card.value }}</p>
+          <p class="cl-kpi-card__label">{{ card.label }}</p>
+        </div>
+        <span class="cl-kpi-card__orb"></span>
+      </article>
+    }
+  </section>
+
+  <!-- ── Main card ─────────────────────────────────────────────────────── -->
+  <section class="cl-card" data-ubax-motion="surface">
+
+    <!-- Filters -->
+    <div class="cl-filters">
+      <label class="cl-search" aria-label="Rechercher un contrat">
+        <i class="pi pi-search cl-search__icon"></i>
+        <input
+          class="cl-search__input"
+          type="search"
+          placeholder="Rechercher par locataire ou bien…"
+          [ngModel]="searchValue()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </label>
+
+      <p-select
+        [options]="statusOptions"
+        [ngModel]="activeTab()"
+        (ngModelChange)="onTabChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="cl-select"
+        panelStyleClass="cl-select-panel"
+        ariaLabel="Filtrer par statut"
+      />
+    </div>
+
+    <!-- Status tabs -->
+    <div class="cl-tabs" role="tablist" aria-label="Filtrer par statut">
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'all'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'all'"
+        (click)="onTabChange('all')"
+      >
+        Tous
+        <span class="cl-tab__count">{{ store.entities().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'DRAFT'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'DRAFT'"
+        (click)="onTabChange('DRAFT')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--draft"></span>
+        Brouillons
+        <span class="cl-tab__count">{{ store.contratsBrouillons().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'PENDING_SIGNATURE'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'PENDING_SIGNATURE'"
+        (click)="onTabChange('PENDING_SIGNATURE')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--pending"></span>
+        En attente
+        <span class="cl-tab__count">{{ store.contratsEnAttente().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'ACTIVE'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'ACTIVE'"
+        (click)="onTabChange('ACTIVE')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--active"></span>
+        Actifs
+        <span class="cl-tab__count">{{ store.contratsActifs().length }}</span>
+      </button>
+      <button
+        class="cl-tab"
+        [class.cl-tab--active]="activeTab() === 'TERMINATED'"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'TERMINATED'"
+        (click)="onTabChange('TERMINATED')"
+      >
+        <span class="cl-tab__dot cl-tab__dot--terminated"></span>
+        Résiliés / Annulés
+        <span class="cl-tab__count">{{ store.contratsTermines().length }}</span>
+      </button>
+    </div>
+
+    <!-- ViewState -->
+    @switch (viewState()) {
+
+      @case ('loading') {
+        <ubax-contrats-skeleton />
+      }
+
+      @case ('error') {
+        <div class="cl-state-box cl-state-box--error">
+          <i class="pi pi-exclamation-triangle cl-state-box__icon"></i>
+          <p class="cl-state-box__title">Erreur de chargement</p>
+          <p class="cl-state-box__desc">Impossible de charger les contrats. Vérifiez votre connexion.</p>
+          <button class="cl-btn cl-btn--primary" type="button" (click)="retryLoad()">
+            <i class="pi pi-refresh"></i> Réessayer
+          </button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="cl-state-box">
+          <i class="pi pi-file-edit cl-state-box__icon"></i>
+          <p class="cl-state-box__title">Aucun contrat créé pour le moment</p>
+          <p class="cl-state-box__desc">Commencez par créer votre premier contrat de bail.</p>
+          <a class="cl-btn cl-btn--primary" routerLink="nouveau">
+            <i class="pi pi-plus"></i> Créer un contrat
+          </a>
+        </div>
+      }
+
+      @case ('success') {
+        @if (filteredRows().length === 0) {
+          <div class="cl-state-box">
+            <i class="pi pi-search cl-state-box__icon"></i>
+            <p class="cl-state-box__title">Aucun résultat</p>
+            <p class="cl-state-box__desc">Aucun contrat ne correspond à votre recherche.</p>
+          </div>
+        } @else {
+          <div class="cl-table-wrap">
+            <table class="cl-table">
+              <thead class="cl-table__head">
+                <tr>
+                  <th>Locataire</th>
+                  <th>Bien</th>
+                  <th>Loyer mensuel</th>
+                  <th>Caution</th>
+                  <th>Statut</th>
+                  <th>Début</th>
+                  <th>Fin</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody class="cl-table__body">
+                @for (contrat of pagedRows(); track contrat.id) {
+                  <tr [class.row--active]="contrat.status === 'ACTIVE'" [routerLink]="[contrat.id]">
+                    <td>
+                      <div class="cl-tenant-cell">
+                        <div class="cl-avatar">{{ (contrat.tenantName ?? 'T')[0].toUpperCase() }}</div>
+                        <span>{{ contrat.tenantName ?? '—' }}</span>
+                      </div>
+                    </td>
+                    <td><span class="cl-property-cell">{{ contrat.propertyAddress ?? '—' }}</span></td>
+                    <td><span class="cl-amount">{{ formatAmount(contrat.monthlyRent) }}</span></td>
+                    <td><span class="cl-amount">{{ formatAmount(contrat.depositAmount) }}</span></td>
+                    <td>
+                      <ubax-status-badge [variant]="getStatusVariant(contrat.status)">
+                        {{ getStatusLabel(contrat.status) }}
+                      </ubax-status-badge>
+                    </td>
+                    <td><span class="cl-date">{{ formatDate(contrat.startDate) }}</span></td>
+                    <td><span class="cl-date">{{ formatDate(contrat.endDate) }}</span></td>
+                    <td>
+                      <a class="cl-row__action" [routerLink]="[contrat.id]" (click)="$event.stopPropagation()" title="Voir le détail">
+                        <i class="pi pi-arrow-right"></i>
+                      </a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <footer class="cl-footer">
+            <p class="cl-footer__results">{{ resultsLabel() }}</p>
+            <ubax-paginator [(currentPage)]="currentPage" [totalPages]="totalPages()" />
+          </footer>
+        }
+      }
+    }
+  </section>
+</div>

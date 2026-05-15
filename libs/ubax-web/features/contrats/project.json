@@ -1,0 +1,15 @@
+{
+ "name": "ubax-web-contrats",
+ "sourceRoot": "libs/ubax-web/features/contrats/src",
+ "prefix": "ubax",
+ "projectType": "library",
+ "tags": [
+  "scope:web",
+  "type:feature"
+ ],
+ "targets": {
+  "lint": {
+   "executor": "@nx/eslint:lint"
+  }
+ }
+}

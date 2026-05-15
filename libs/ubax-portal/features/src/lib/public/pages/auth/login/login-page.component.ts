@@ -14,6 +14,7 @@ import {
   clearStoredAuthSession,
   type LoginResponse,
   persistAuthSession,
+  resolveHttpErrorMessage,
   resolvePostLoginRedirectTarget,
 } from '@ubax-workspace/shared-data-access';
 import { InputText } from 'primeng/inputtext';
@@ -125,12 +126,10 @@ export class LoginPageComponent implements OnInit {
       if (error.status === 401) {
         return 'Email ou mot de passe invalide.';
       }
-
       if (error.status === 0) {
         return "Le serveur d'authentification est inaccessible.";
       }
     }
-
-    return 'La connexion a échoué. Réessaie dans un instant.';
+    return resolveHttpErrorMessage(error, 'La connexion a échoué. Réessaie dans un instant.');
   }
 }

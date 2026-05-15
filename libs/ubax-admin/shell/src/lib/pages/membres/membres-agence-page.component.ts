@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   BreadcrumbNavComponent,
   EmptyStateComponent,
@@ -85,8 +85,8 @@ export class MembresAgencePageComponent implements OnInit {
       this.members.set(
         await firstValueFrom(this.svc.getAgencyMembers(this.agencyId)),
       );
-    } catch {
-      this.notif.error("Impossible de charger les membres de l'agence.");
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, "Impossible de charger les membres de l'agence."));
     } finally {
       this.loading.set(false);
     }

@@ -1,0 +1,41 @@
+<div class="dlg-overlay" (click)="cancel.emit()">
+  <div class="dlg" (click)="$event.stopPropagation()">
+
+    <div class="dlg__icon">
+      <i class="pi pi-times-circle"></i>
+    </div>
+
+    <h2 class="dlg__title">Résilier ce contrat ?</h2>
+
+    <div class="dlg__warning">
+      <i class="pi pi-exclamation-triangle"></i>
+      <p>Cette action est <strong>irréversible</strong>. Le contrat sera marqué comme résilié et les loyers futurs ne seront plus générés.</p>
+    </div>
+
+    <div class="dlg__field">
+      <label class="dlg__label" for="reason">Motif de résiliation <span class="req">*</span></label>
+      <textarea
+        id="reason"
+        class="dlg__textarea"
+        placeholder="Ex. : Résiliation à l'amiable — départ du locataire"
+        [ngModel]="reason()"
+        (ngModelChange)="reason.set($event)"
+        rows="4"
+      ></textarea>
+    </div>
+
+    <div class="dlg__actions">
+      <button class="dlg-btn dlg-btn--ghost" (click)="cancel.emit()" [disabled]="loading()">
+        Annuler
+      </button>
+      <button class="dlg-btn dlg-btn--danger" (click)="submit()" [disabled]="loading() || !reason().trim()">
+        @if (loading()) {
+          <i class="pi pi-spin pi-spinner"></i> Résiliation…
+        } @else {
+          Confirmer la résiliation
+        }
+      </button>
+    </div>
+
+  </div>
+</div>

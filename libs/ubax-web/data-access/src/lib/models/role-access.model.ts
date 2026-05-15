@@ -154,6 +154,18 @@ export const ROUTE_ROLE_ACCESS = {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
   },
+  tickets: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  contrats: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  locataires: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
   finances: {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
@@ -163,6 +175,10 @@ export const ROUTE_ROLE_ACCESS = {
     scope: 'AGENCE' as UbaxScope,
   },
   teamAgence: {
+    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE' as UbaxScope,
+  },
+  clientsAgence: {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
   },
@@ -197,21 +213,21 @@ export type NavItemConfig = {
 };
 
 const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
-  // ── Partenaire — commun ──────────────────────────────────────────────────
+  // ── Admin / Super Admin ──────────────────────────────────────────────────
   {
     label: 'Tableau de bord',
     path: '/tableau-de-bord',
     mainRoles: [UbaxRole.ADMIN, UbaxRole.SUPER_ADMIN],
   },
 
-  // ── Partenaire — agence ──────────────────────────────────────────────────
+  // ── Partenaire — commun ──────────────────────────────────────────────────
   {
-    label: 'Membres',
-    path: '/equipe',
-    activePaths: ['/equipe', '/hotel/equipe'],
+    label: 'Tableau de bord',
+    path: '/tableau-de-bord',
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'AGENCE',
   },
+
+  // ── Partenaire — agence ──────────────────────────────────────────────────
   {
     label: 'Biens',
     path: '/biens',
@@ -239,6 +255,13 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     ],
   },
   {
+    label: 'Tickets SAV',
+    path: '/tickets',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.AGENT_SAV],
+  },
+  {
     label: 'Finances',
     path: '/finances',
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
@@ -252,14 +275,40 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
   },
-  // ── Partenaire — hôtel ───────────────────────────────────────────────────
+  {
+    label: 'Contrats',
+    path: '/contrats',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [
+      UbaxSubRole.DIRECTEUR_AGENCE,
+      UbaxSubRole.COMMERCIAL,
+      UbaxSubRole.COMPTABLE_AGENCE,
+    ],
+  },
+  {
+    label: 'Locataires KYC',
+    path: '/locataires',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
+  },
+  {
+    label: 'Clients',
+    path: '/clients',
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'AGENCE',
+    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
+  },
   {
     label: 'Membres',
-    path: '/hotel/equipe',
-    activePaths: ['/hotel/equipe', '/equipe'],
+    path: '/equipe',
+    activePaths: ['/equipe', '/hotel/equipe'],
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'HOTEL',
+    scope: 'AGENCE',
   },
+
+  // ── Partenaire — hôtel ───────────────────────────────────────────────────
   {
     label: 'Réservations',
     path: '/hotel/reservations',
@@ -291,6 +340,13 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
     subRoles: [UbaxSubRole.GERANT_HOTEL, UbaxSubRole.COMPTABLE_HOTEL],
+  },
+  {
+    label: 'Membres',
+    path: '/hotel/equipe',
+    activePaths: ['/hotel/equipe', '/equipe'],
+    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
+    scope: 'HOTEL',
   },
 ];
 

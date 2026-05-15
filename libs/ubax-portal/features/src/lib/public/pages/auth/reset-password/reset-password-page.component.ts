@@ -11,6 +11,7 @@ import { Button } from 'primeng/button';
 import { Password } from 'primeng/password';
 import { HttpClient } from '@angular/common/http';
 import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
+import { resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { firstValueFrom } from 'rxjs';
 
 /** Règles de complexité minimale */
@@ -100,6 +101,6 @@ export class ResetPasswordPageComponent {
         return 'Le serveur est inaccessible. Réessaie dans un instant.';
       }
     }
-    return 'La réinitialisation a échoué. Réessaie dans un instant.';
+    return resolveHttpErrorMessage(error, 'La réinitialisation a échoué. Réessaie dans un instant.');
   }
 }

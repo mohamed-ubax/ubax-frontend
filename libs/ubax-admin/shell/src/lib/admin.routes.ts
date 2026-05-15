@@ -101,6 +101,15 @@ export const adminRoutes: Route[] = [
             (m) => m.ProprietesHotelsPageComponent,
           ),
       },
+      // BE-CLIENT-01 — Liste des clients
+      {
+        path: 'clients',
+        loadComponent: () =>
+          import('./pages/clients/clients-page.component').then(
+            (m) => m.ClientsPageComponent,
+          ),
+      },
+
       // UBAX-FE-613 — Détail d'un bien en attente de modération
       {
         path: 'proprietes/:id',

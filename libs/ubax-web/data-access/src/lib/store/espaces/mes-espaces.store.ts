@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   archive,
   ApiConfiguration,
@@ -215,7 +215,7 @@ export const MesEspacesStore = signalStore(
                   );
                 },
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { loading: false, error: err.message }),
+                  patchState(store, { loading: false, error: resolveHttpErrorMessage(err, 'Erreur lors du chargement') }),
               }),
             );
           }),
@@ -265,7 +265,7 @@ export const MesEspacesStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     archivingEspaceIds: withoutId(state.archivingEspaceIds, id),
-                    archiveError: err.message,
+                    archiveError: resolveHttpErrorMessage(err, 'Erreur lors de l\'archivage de l\'espace'),
                   })),
               }),
             ),
@@ -318,7 +318,7 @@ export const MesEspacesStore = signalStore(
                       state.submittingEspaceIds,
                       id,
                     ),
-                    submitError: err.message,
+                    submitError: resolveHttpErrorMessage(err, 'Erreur lors de la soumission de l\'espace'),
                   })),
               }),
             ),
