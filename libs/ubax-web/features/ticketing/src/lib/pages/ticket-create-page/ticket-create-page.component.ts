@@ -33,6 +33,11 @@ type CategoryOption = {
   icon: string;
 };
 
+type CategoryIconRule = {
+  icon: string;
+  keywords: readonly string[];
+};
+
 const PRIORITY_STYLE_MAP: Record<
   TicketPriority,
   Omit<PriorityOption, 'value' | 'label'> & { defaultLabel: string }
@@ -63,23 +68,64 @@ const PRIORITY_STYLE_MAP: Record<
   },
 };
 
-const CATEGORY_ICON_MAP = {
-  PLUMBING: 'pi pi-wrench',
-  LEAK: 'pi pi-tint',
-  ELECTRICAL: 'pi pi-bolt',
-  LOCK: 'pi pi-lock',
-  APPLIANCE: 'pi pi-desktop',
-  STRUCTURE: 'pi pi-building',
-  PEST: 'pi pi-exclamation-circle',
-  COMMON_AREA: 'pi pi-users',
-  OTHER: 'pi pi-question-circle',
-} as const;
+const CATEGORY_ICON_RULES: readonly CategoryIconRule[] = [
+  {
+    icon: 'pi pi-wave-pulse',
+    keywords: ['leak', 'fuite', 'eau'],
+  },
+  {
+    icon: 'pi pi-wrench',
+    keywords: ['plumbing', 'plomb', 'plombier', 'sanitaire'],
+  },
+  {
+    icon: 'pi pi-bolt',
+    keywords: ['electrical', 'electric', 'electricien', 'electricite'],
+  },
+  {
+    icon: 'pi pi-lock',
+    keywords: ['lock', 'serr', 'acces', 'blindage'],
+  },
+  {
+    icon: 'pi pi-desktop',
+    keywords: ['appliance', 'electromenager', 'equipement'],
+  },
+  {
+    icon: 'pi pi-building',
+    keywords: ['structure', 'batiment', 'maçon', 'macon'],
+  },
+  {
+    icon: 'pi pi-exclamation-circle',
+    keywords: ['pest', 'nuisible', 'parasite'],
+  },
+  {
+    icon: 'pi pi-users',
+    keywords: ['common_area', 'parties communes', 'commun'],
+  },
+  {
+    icon: 'pi pi-question-circle',
+    keywords: ['other', 'autre'],
+  },
+];
 
-function resolveCategoryIcon(category: TicketCategory): string {
-  return (
-    CATEGORY_ICON_MAP[category as keyof typeof CATEGORY_ICON_MAP] ??
-    'pi pi-briefcase'
+function normalizeCategoryToken(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function resolveCategoryIcon(category: TicketCategory, label?: string): string {
+  const haystack = [category, label]
+    .filter((value): value is string => Boolean(value))
+    .map((value) => normalizeCategoryToken(value))
+    .join(' ');
+
+  const match = CATEGORY_ICON_RULES.find((rule) =>
+    rule.keywords.some((keyword) => haystack.includes(keyword)),
   );
+
+  return match?.icon ?? 'pi pi-briefcase';
 }
 
 function resolvePriorityOption(
@@ -118,7 +164,7 @@ export class TicketCreatePageComponent {
   readonly categoryOptions = computed<readonly CategoryOption[]>(() =>
     this.store.ticketCategoryOptions().map((option) => ({
       ...option,
-      icon: resolveCategoryIcon(option.value),
+      icon: resolveCategoryIcon(option.value, option.label),
     })),
   );
 
@@ -242,10 +288,16 @@ export class TicketCreatePageComponent {
       return;
     }
 
+    const createTicket = this.store.create;
+
+    if (!createTicket) {
+      return;
+    }
+
     const { title, description, category, priority, contractId } =
       this.form.getRawValue();
 
-    this.store.create!({
+    createTicket({
       body: {
         title: title || undefined,
         description: description || undefined,
