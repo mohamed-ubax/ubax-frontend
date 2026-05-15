@@ -89,7 +89,7 @@ export const PRIORITY_META: Record<
   },
 };
 
-export const CATEGORY_LABELS: Record<TicketCategory, string> = {
+export const CATEGORY_LABELS = {
   LEAK: 'Fuite',
   ELECTRICAL: 'Électricité',
   LOCK: 'Serrurerie',
@@ -99,7 +99,7 @@ export const CATEGORY_LABELS: Record<TicketCategory, string> = {
   PEST: 'Nuisibles',
   COMMON_AREA: 'Parties communes',
   OTHER: 'Autre',
-};
+} as const;
 
 function normalizeText(v: string): string {
   return v
@@ -114,7 +114,13 @@ function normalizeText(v: string): string {
 @Component({
   selector: 'ubax-tickets-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectModule, DatePickerModule, UbaxPaginatorComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SelectModule,
+    DatePickerModule,
+    UbaxPaginatorComponent,
+  ],
   templateUrl: './tickets-list-page.component.html',
   styleUrl: './tickets-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -151,19 +157,26 @@ export class TicketsListPageComponent {
     { label: '⚡ Urgente', value: 'URGENT' },
   ];
 
-  readonly categoryOptions: SelectOption<TicketCategory | 'all'>[] = [
-    { label: 'Toutes catégories', value: 'all' },
-    ...Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
-      label,
-      value: value as TicketCategory,
-    })),
-  ];
+  readonly categoryOptions = computed<SelectOption<TicketCategory | 'all'>[]>(
+    () => [
+      { label: 'Toutes catégories', value: 'all' },
+      ...this.store.ticketCategoryOptions().map((option) => ({
+        label: option.label,
+        value: option.value,
+      })),
+    ],
+  );
 
   // ── ViewState ───────────────────────────────────────────────────────────────
   readonly viewState = computed(() => {
     if (this.store.loading() && !this.hasLoaded()) return 'loading';
     if (this.store.error()) return 'error';
-    if (!this.store.loading() && this.store.entities().length === 0 && this.hasLoaded()) return 'empty';
+    if (
+      !this.store.loading() &&
+      this.store.entities().length === 0 &&
+      this.hasLoaded()
+    )
+      return 'empty';
     return 'success';
   });
 
@@ -219,7 +232,14 @@ export class TicketsListPageComponent {
         if (category !== 'all' && t.category !== category) return false;
         if (query) {
           const text = normalizeText(
-            [t.id, t.title, t.description, t.category, t.status, t.priority].join(' '),
+            [
+              t.id,
+              t.title,
+              t.description,
+              t.category,
+              t.status,
+              t.priority,
+            ].join(' '),
           );
           if (!text.includes(query)) return false;
         }
@@ -264,9 +284,16 @@ export class TicketsListPageComponent {
   readonly categoryLabels = CATEGORY_LABELS;
 
   constructor() {
+    if (
+      this.store.ticketCategoryOptions().length === 0 &&
+      !this.store.categoryCodeListLoading()
+    ) {
+      this.store.loadTicketCategories();
+    }
+
     // Chargement initial
     effect(() => {
-      this.store.load!({});
+      this.loadTickets();
     });
 
     // Marquer hasLoaded
@@ -287,15 +314,26 @@ export class TicketsListPageComponent {
   }
 
   getStatusMeta(status: string | undefined) {
-    return STATUS_META[(status as TicketStatus) ?? 'OPEN'] ?? STATUS_META['OPEN'];
+    return (
+      STATUS_META[(status as TicketStatus) ?? 'OPEN'] ?? STATUS_META['OPEN']
+    );
   }
 
   getPriorityMeta(priority: string | undefined) {
-    return PRIORITY_META[(priority as TicketPriority) ?? 'NORMAL'] ?? PRIORITY_META['NORMAL'];
+    return (
+      PRIORITY_META[(priority as TicketPriority) ?? 'NORMAL'] ??
+      PRIORITY_META['NORMAL']
+    );
   }
 
-  getCategoryLabel(category: string | undefined): string {
-    return CATEGORY_LABELS[(category as TicketCategory) ?? 'OTHER'] ?? 'Autre';
+  getCategoryLabel(category = 'OTHER'): string {
+    return (
+      this.store
+        .ticketCategoryOptions()
+        .find((option) => option.value === category)?.label ??
+      CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] ??
+      'Autre'
+    );
   }
 
   formatDate(dateStr: string | undefined): string {
@@ -323,7 +361,11 @@ export class TicketsListPageComponent {
 
   retryLoad(): void {
     this.hasLoaded.set(false);
-    this.store.load!({});
+    this.loadTickets();
+  }
+
+  private loadTickets(): void {
+    this.store.load?.({});
   }
 
   goToDetail(ticket: Ticket): void {

@@ -1,18 +1,24 @@
 <div class="tc-page" data-ubax-motion="page">
-
   <!-- ── Breadcrumb ─────────────────────────────────────────────────────── -->
   <nav class="tc-breadcrumb" aria-label="Fil d'Ariane">
     <button class="tc-breadcrumb__back" type="button" (click)="cancel()">
       <i class="pi pi-arrow-left"></i>
     </button>
-    <span class="tc-breadcrumb__item" (click)="cancel()" role="button" tabindex="0">Tickets SAV</span>
+    <span
+      class="tc-breadcrumb__item"
+      (click)="cancel()"
+      role="button"
+      tabindex="0"
+      >Tickets SAV</span
+    >
     <i class="pi pi-chevron-right tc-breadcrumb__sep"></i>
-    <span class="tc-breadcrumb__item tc-breadcrumb__item--active">Créer un ticket</span>
+    <span class="tc-breadcrumb__item tc-breadcrumb__item--active"
+      >Créer un ticket</span
+    >
   </nav>
 
   <!-- ── Layout ─────────────────────────────────────────────────────────── -->
   <div class="tc-layout">
-
     <!-- Sidebar contextuelle -->
     <aside class="tc-sidebar" data-ubax-motion="surface">
       <div class="tc-sidebar__header">
@@ -56,14 +62,15 @@
         [style.--preview-bg]="selectedPriority().bg"
       >
         <i [class]="selectedPriority().icon"></i>
-        <span>Priorité : <strong>{{ selectedPriority().label }}</strong></span>
+        <span
+          >Priorité : <strong>{{ selectedPriority().label }}</strong></span
+        >
       </div>
     </aside>
 
     <!-- Formulaire principal -->
     <main class="tc-main" data-ubax-motion="surface">
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-
         <!-- Titre -->
         <div class="tc-field">
           <label class="tc-label" for="tc-title">
@@ -106,7 +113,8 @@
             </span>
           }
           <span class="tc-field__hint">
-            {{ form.get('description')?.value?.length ?? 0 }} / 20 caractères minimum
+            {{ form.get('description')?.value?.length ?? 0 }} / 20 caractères
+            minimum
           </span>
         </div>
 
@@ -115,19 +123,30 @@
           <label class="tc-label">
             Catégorie <span class="tc-label__required">*</span>
           </label>
-          <div class="tc-category-grid">
-            @for (cat of categoryOptions; track cat.value) {
-              <button
-                type="button"
-                class="tc-category-btn"
-                [class.tc-category-btn--active]="form.get('category')?.value === cat.value"
-                (click)="selectCategory(cat.value)"
-              >
-                <i [class]="cat.icon"></i>
-                <span>{{ cat.label }}</span>
-              </button>
-            }
-          </div>
+          @if (store.categoryCodeListLoading()) {
+            <span class="tc-field__hint">Chargement des catégories...</span>
+          } @else if (store.categoryCodeListError()) {
+            <span class="tc-field__error">
+              <i class="pi pi-exclamation-circle"></i>
+              {{ store.categoryCodeListError() }}
+            </span>
+          } @else {
+            <div class="tc-category-grid">
+              @for (cat of categoryOptions(); track cat.value) {
+                <button
+                  type="button"
+                  class="tc-category-btn"
+                  [class.tc-category-btn--active]="
+                    form.get('category')?.value === cat.value
+                  "
+                  (click)="selectCategory(cat.value)"
+                >
+                  <i [class]="cat.icon"></i>
+                  <span>{{ cat.label }}</span>
+                </button>
+              }
+            </div>
+          }
           @if (categoryError()) {
             <span class="tc-field__error">
               <i class="pi pi-exclamation-circle"></i>
@@ -138,13 +157,17 @@
 
         <!-- Priorité -->
         <div class="tc-field">
-          <label class="tc-label">Priorité <span class="tc-label__required">*</span></label>
+          <label class="tc-label"
+            >Priorité <span class="tc-label__required">*</span></label
+          >
           <div class="tc-priority-row">
             @for (opt of priorityOptions; track opt.value) {
               <button
                 type="button"
                 class="tc-priority-btn"
-                [class.tc-priority-btn--active]="form.get('priority')?.value === opt.value"
+                [class.tc-priority-btn--active]="
+                  form.get('priority')?.value === opt.value
+                "
                 [style.--p-color]="opt.color"
                 [style.--p-bg]="opt.bg"
                 (click)="selectPriority(opt.value)"
@@ -180,14 +203,21 @@
 
         <!-- Pièces jointes -->
         <div class="tc-field">
-          <label class="tc-label">Pièces jointes <span class="tc-label__optional">(optionnel)</span></label>
+          <label class="tc-label"
+            >Pièces jointes
+            <span class="tc-label__optional">(optionnel)</span></label
+          >
 
           @if (uploadPreviews().length > 0) {
             <div class="tc-attachments">
               @for (preview of uploadPreviews(); track $index) {
                 <div class="tc-attachment">
                   @if (preview) {
-                    <img [src]="preview" alt="Pièce jointe" class="tc-attachment__img" />
+                    <img
+                      [src]="preview"
+                      alt="Pièce jointe"
+                      class="tc-attachment__img"
+                    />
                   } @else {
                     <div class="tc-attachment__file">
                       <i class="pi pi-file"></i>
@@ -219,7 +249,9 @@
               (change)="onFileChange($event)"
             />
           </label>
-          <span class="tc-field__hint">JPG, PNG, PDF — max 10 Mo par fichier</span>
+          <span class="tc-field__hint"
+            >JPG, PNG, PDF — max 10 Mo par fichier</span
+          >
         </div>
 
         <!-- Actions -->
@@ -249,7 +281,6 @@
             {{ store.error() }}
           </div>
         }
-
       </form>
     </main>
   </div>

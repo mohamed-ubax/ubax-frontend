@@ -1,10 +1,11 @@
 <div class="tl-page" data-ubax-motion="page">
-
   <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="tl-header">
     <div class="tl-header__left">
       <h1 class="tl-header__title">Tickets SAV</h1>
-      <span class="tl-header__subtitle">Gestion des incidents & interventions</span>
+      <span class="tl-header__subtitle"
+        >Gestion des incidents & interventions</span
+      >
     </div>
 
     <div class="tl-header__actions">
@@ -40,7 +41,6 @@
 
   <!-- ── Filtres + Tableau ───────────────────────────────────────────────── -->
   <section class="tl-card" data-ubax-motion="surface">
-
     <!-- Barre de filtres -->
     <div class="tl-filters">
       <label class="tl-search" aria-label="Rechercher un ticket">
@@ -79,7 +79,7 @@
       />
 
       <p-select
-        [options]="categoryOptions"
+        [options]="categoryOptions()"
         [ngModel]="filterCategory()"
         (ngModelChange)="filterCategory.set($event)"
         optionLabel="label"
@@ -93,10 +93,9 @@
 
     <!-- ViewState -->
     @switch (viewState()) {
-
       @case ('loading') {
         <div class="tl-skeleton-wrap">
-          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
             <div class="tl-skeleton-row">
               <span class="tl-skeleton tl-skeleton--sm"></span>
               <span class="tl-skeleton tl-skeleton--lg"></span>
@@ -125,7 +124,9 @@
         <div class="tl-state-box">
           <i class="pi pi-inbox tl-state-box__icon"></i>
           <p class="tl-state-box__title">Aucun ticket SAV</p>
-          <p class="tl-state-box__desc">Aucun incident signalé pour le moment.</p>
+          <p class="tl-state-box__desc">
+            Aucun incident signalé pour le moment.
+          </p>
           <button class="tl-btn tl-btn--primary" (click)="goToCreate()">
             <i class="pi pi-plus"></i> Créer le premier ticket
           </button>
@@ -136,7 +137,6 @@
         <!-- Tableau -->
         <div class="tl-table-wrap">
           <div class="tl-table">
-
             <!-- En-tête -->
             <div class="tl-table__head">
               <span>#</span>
@@ -166,7 +166,7 @@
                   (keydown.enter)="goToDetail(ticket)"
                 >
                   <span class="tl-row__id">
-                    {{ ticket.id | slice:0:8 }}…
+                    {{ ticket.id | slice: 0 : 8 }}…
                   </span>
 
                   <span class="tl-row__title">

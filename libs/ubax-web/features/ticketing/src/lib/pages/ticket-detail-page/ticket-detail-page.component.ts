@@ -26,20 +26,25 @@ import {
   PRIORITY_META,
   STATUS_META,
   Ticket,
-  TicketCategory,
   TicketPriority,
   TicketStatus,
 } from '../tickets-list-page/tickets-list-page.component';
 
 // UpdateTicketStatusRequest does not include 'OPEN' — only these are valid next statuses
-type AllowedNextStatus = 'IN_ANALYSIS' | 'TECHNICIAN_SENT' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
+type AllowedNextStatus =
+  | 'IN_ANALYSIS'
+  | 'TECHNICIAN_SENT'
+  | 'RESOLVED'
+  | 'CLOSED'
+  | 'CANCELLED';
 
-const ALLOWED_TRANSITIONS: Partial<Record<TicketStatus, AllowedNextStatus[]>> = {
-  OPEN: ['IN_ANALYSIS'],
-  IN_ANALYSIS: ['TECHNICIAN_SENT', 'RESOLVED'],
-  TECHNICIAN_SENT: ['RESOLVED'],
-  RESOLVED: ['CLOSED'],
-};
+const ALLOWED_TRANSITIONS: Partial<Record<TicketStatus, AllowedNextStatus[]>> =
+  {
+    OPEN: ['IN_ANALYSIS'],
+    IN_ANALYSIS: ['TECHNICIAN_SENT', 'RESOLVED'],
+    TECHNICIAN_SENT: ['RESOLVED'],
+    RESOLVED: ['CLOSED'],
+  };
 
 const STATUS_FLOW: TicketStatus[] = [
   'OPEN',
@@ -132,9 +137,17 @@ export class TicketDetailPageComponent {
     const t = this.ticket();
     if (!t) return [];
     return [
-      { label: 'Catégorie', value: CATEGORY_LABELS[(t.category ?? 'OTHER') as TicketCategory] ?? '—' },
-      { label: 'Priorité', value: PRIORITY_META[(t.priority ?? 'NORMAL') as TicketPriority]?.label ?? '—' },
-      { label: 'Statut', value: STATUS_META[(t.status ?? 'OPEN') as TicketStatus]?.label ?? '—' },
+      { label: 'Catégorie', value: this.getCategoryLabel(t.category) },
+      {
+        label: 'Priorité',
+        value:
+          PRIORITY_META[(t.priority ?? 'NORMAL') as TicketPriority]?.label ??
+          '—',
+      },
+      {
+        label: 'Statut',
+        value: STATUS_META[(t.status ?? 'OPEN') as TicketStatus]?.label ?? '—',
+      },
       { label: 'Contrat', value: t.contractId ?? '—' },
       { label: 'Créé le', value: this.formatDate(t.createdAt) },
       { label: 'Mis à jour', value: this.formatDate(t.updatedAt) },
@@ -145,7 +158,10 @@ export class TicketDetailPageComponent {
     const t = this.ticket();
     if (!t) return [];
     return [
-      { label: 'Agent assigné', value: t.assignedToName ?? t.assignedToId ?? 'Non assigné' },
+      {
+        label: 'Agent assigné',
+        value: t.assignedToName ?? t.assignedToId ?? 'Non assigné',
+      },
       { label: 'Technicien', value: t.technicianName ?? '—' },
       { label: 'Tél. technicien', value: t.technicianPhone ?? '—' },
       {
@@ -156,15 +172,23 @@ export class TicketDetailPageComponent {
       },
       {
         label: 'Coût de réparation',
-        value: t.repairCost != null
-          ? new Intl.NumberFormat('fr-FR').format(t.repairCost) + ' FCFA'
-          : 'Non défini',
+        value:
+          t.repairCost != null
+            ? new Intl.NumberFormat('fr-FR').format(t.repairCost) + ' FCFA'
+            : 'Non défini',
       },
       { label: 'Imputation', value: t.costImputedTo ?? '—' },
     ];
   });
 
   constructor() {
+    if (
+      this.store.ticketCategoryOptions().length === 0 &&
+      !this.store.categoryCodeListLoading()
+    ) {
+      this.store.loadTicketCategories();
+    }
+
     // Charger le ticket quand l'id change
     effect(() => {
       const id = this.ticketId();
@@ -218,7 +242,8 @@ export class TicketDetailPageComponent {
           ? new Date(t.interventionScheduledAt)
           : null,
         repairCost: t.repairCost ?? null,
-        costImputedTo: (t.costImputedTo as 'OWNER' | 'TENANT' | 'SHARED') ?? 'OWNER',
+        costImputedTo:
+          (t.costImputedTo as 'OWNER' | 'TENANT' | 'SHARED') ?? 'OWNER',
         resolutionNote: t.resolutionNote ?? '',
       });
     }
@@ -329,15 +354,26 @@ export class TicketDetailPageComponent {
   }
 
   getStatusMeta(status: string | undefined) {
-    return STATUS_META[(status as TicketStatus) ?? 'OPEN'] ?? STATUS_META['OPEN'];
+    return (
+      STATUS_META[(status as TicketStatus) ?? 'OPEN'] ?? STATUS_META['OPEN']
+    );
   }
 
   getPriorityMeta(priority: string | undefined) {
-    return PRIORITY_META[(priority as TicketPriority) ?? 'NORMAL'] ?? PRIORITY_META['NORMAL'];
+    return (
+      PRIORITY_META[(priority as TicketPriority) ?? 'NORMAL'] ??
+      PRIORITY_META['NORMAL']
+    );
   }
 
-  getCategoryLabel(category: string | undefined): string {
-    return CATEGORY_LABELS[(category as TicketCategory) ?? 'OTHER'] ?? 'Autre';
+  getCategoryLabel(category = 'OTHER'): string {
+    return (
+      this.store
+        .ticketCategoryOptions()
+        .find((option) => option.value === category)?.label ??
+      CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] ??
+      'Autre'
+    );
   }
 
   isStepCompleted(index: number): boolean {

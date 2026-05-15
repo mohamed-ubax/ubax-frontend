@@ -12,6 +12,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { type CreateTicketRequest } from '@ubax-workspace/shared-api-types';
 import {
   TicketCategory,
   TicketingStore,
@@ -33,23 +34,54 @@ type CategoryOption = {
 };
 
 const PRIORITY_OPTIONS: PriorityOption[] = [
-  { value: 'LOW', label: 'Faible', color: 'var(--ubax-text-muted)', bg: '#f0f2f6', icon: 'pi pi-arrow-down' },
-  { value: 'NORMAL', label: 'Normale', color: 'var(--ubax-info)', bg: 'var(--ubax-blue-soft)', icon: 'pi pi-minus' },
-  { value: 'HIGH', label: 'Haute', color: 'var(--ubax-accent)', bg: 'var(--ubax-peach-soft)', icon: 'pi pi-arrow-up' },
-  { value: 'URGENT', label: 'Urgente', color: 'var(--ubax-danger)', bg: 'var(--ubax-danger-soft)', icon: 'pi pi-bolt' },
+  {
+    value: 'LOW',
+    label: 'Faible',
+    color: 'var(--ubax-text-muted)',
+    bg: '#f0f2f6',
+    icon: 'pi pi-arrow-down',
+  },
+  {
+    value: 'NORMAL',
+    label: 'Normale',
+    color: 'var(--ubax-info)',
+    bg: 'var(--ubax-blue-soft)',
+    icon: 'pi pi-minus',
+  },
+  {
+    value: 'HIGH',
+    label: 'Haute',
+    color: 'var(--ubax-accent)',
+    bg: 'var(--ubax-peach-soft)',
+    icon: 'pi pi-arrow-up',
+  },
+  {
+    value: 'URGENT',
+    label: 'Urgente',
+    color: 'var(--ubax-danger)',
+    bg: 'var(--ubax-danger-soft)',
+    icon: 'pi pi-bolt',
+  },
 ];
 
-const CATEGORY_OPTIONS: CategoryOption[] = [
-  { value: 'PLUMBING', label: 'Plomberie', icon: 'pi pi-wrench' },
-  { value: 'LEAK', label: 'Fuite', icon: 'pi pi-tint' },
-  { value: 'ELECTRICAL', label: 'Électricité', icon: 'pi pi-bolt' },
-  { value: 'LOCK', label: 'Serrurerie', icon: 'pi pi-lock' },
-  { value: 'APPLIANCE', label: 'Électroménager', icon: 'pi pi-desktop' },
-  { value: 'STRUCTURE', label: 'Structure', icon: 'pi pi-building' },
-  { value: 'PEST', label: 'Nuisibles', icon: 'pi pi-exclamation-circle' },
-  { value: 'COMMON_AREA', label: 'Parties communes', icon: 'pi pi-users' },
-  { value: 'OTHER', label: 'Autre', icon: 'pi pi-question-circle' },
-];
+const CATEGORY_ICON_MAP = {
+  PLUMBING: 'pi pi-wrench',
+  LEAK: 'pi pi-tint',
+  ELECTRICAL: 'pi pi-bolt',
+  LOCK: 'pi pi-lock',
+  APPLIANCE: 'pi pi-desktop',
+  STRUCTURE: 'pi pi-building',
+  PEST: 'pi pi-exclamation-circle',
+  COMMON_AREA: 'pi pi-users',
+  OTHER: 'pi pi-question-circle',
+} as const;
+
+function resolveCategoryIcon(category: TicketCategory): string {
+  return (
+    CATEGORY_ICON_MAP[category as keyof typeof CATEGORY_ICON_MAP] ??
+    'pi pi-briefcase'
+  );
+}
 
 @Component({
   selector: 'ubax-ticket-create-page',
@@ -65,22 +97,33 @@ export class TicketCreatePageComponent {
   readonly store = inject(TicketingStore);
 
   readonly priorityOptions = PRIORITY_OPTIONS;
-  readonly categoryOptions = CATEGORY_OPTIONS;
+  readonly categoryOptions = computed<readonly CategoryOption[]>(() =>
+    this.store.ticketCategoryOptions().map((option) => ({
+      ...option,
+      icon: resolveCategoryIcon(option.value),
+    })),
+  );
 
   readonly submitted = signal(false);
   readonly uploadedFiles = signal<File[]>([]);
   readonly uploadPreviews = signal<string[]>([]);
 
   readonly form = this.fb.group({
-    title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(120)]],
+    title: [
+      '',
+      [Validators.required, Validators.minLength(3), Validators.maxLength(120)],
+    ],
     description: ['', [Validators.required, Validators.minLength(20)]],
     category: ['' as TicketCategory, Validators.required],
     priority: ['NORMAL' as TicketPriority, Validators.required],
     contractId: ['', Validators.required],
   });
 
-  readonly selectedPriority = computed(() =>
-    PRIORITY_OPTIONS.find((p) => p.value === this.form.get('priority')?.value) ?? PRIORITY_OPTIONS[1],
+  readonly selectedPriority = computed(
+    () =>
+      PRIORITY_OPTIONS.find(
+        (p) => p.value === this.form.get('priority')?.value,
+      ) ?? PRIORITY_OPTIONS[1],
   );
 
   readonly isFormValid = computed(() => this.form.valid);
@@ -105,16 +148,27 @@ export class TicketCreatePageComponent {
   readonly categoryError = computed(() => {
     const ctrl = this.form.get('category');
     if (!ctrl?.touched && !this.submitted()) return null;
-    if (ctrl?.hasError('required')) return 'Veuillez sélectionner une catégorie.';
+    if (ctrl?.hasError('required'))
+      return 'Veuillez sélectionner une catégorie.';
     return null;
   });
 
   readonly contractError = computed(() => {
     const ctrl = this.form.get('contractId');
     if (!ctrl?.touched && !this.submitted()) return null;
-    if (ctrl?.hasError('required')) return 'L\'identifiant du contrat est obligatoire.';
+    if (ctrl?.hasError('required'))
+      return "L'identifiant du contrat est obligatoire.";
     return null;
   });
+
+  constructor() {
+    if (
+      this.store.ticketCategoryOptions().length === 0 &&
+      !this.store.categoryCodeListLoading()
+    ) {
+      this.store.loadTicketCategories();
+    }
+  }
 
   selectCategory(cat: TicketCategory): void {
     this.form.get('category')?.setValue(cat);
@@ -168,7 +222,9 @@ export class TicketCreatePageComponent {
       body: {
         title: title || undefined,
         description: description || undefined,
-        category: category || undefined,
+        category: (category || undefined) as
+          | CreateTicketRequest['category']
+          | undefined,
         priority: priority || undefined,
         contractId,
       },
