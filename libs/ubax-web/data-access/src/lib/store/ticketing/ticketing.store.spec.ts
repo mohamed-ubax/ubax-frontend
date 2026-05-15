@@ -81,13 +81,13 @@ describe('TicketingStore', () => {
     store = injector.get(storeToken);
   });
 
-  it('charge les categories SAV depuis le codelist TECHNICIEN_PROFESSION', () => {
+  it('charge les categories SAV depuis le codelist TICKET_CATEGORY', () => {
     store.loadTicketCategories();
 
     expect(apiTypes.findAllByType).toHaveBeenCalledWith(
       {},
       'https://test.local',
-      { type: 'TECHNICIEN_PROFESSION' },
+      { type: 'TICKET_CATEGORY' },
     );
     expect(store.categoryCodeListLoading()).toBe(false);
     expect(store.categoryCodeListError()).toBeNull();
@@ -116,7 +116,7 @@ describe('TicketingStore', () => {
         () =>
           new HttpErrorResponse({
             status: 503,
-            url: '/v1/code-lists/TECHNICIEN_PROFESSION',
+            url: '/v1/code-lists/TICKET_CATEGORY',
           }),
       ) as any,
     );

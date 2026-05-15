@@ -14,7 +14,7 @@ export interface UpdateTechnicienRequest {
   phone?: string;
 
   /**
-   * Valeur de la code-list TECHNICIEN_PROFESSION
+   * Valeur de la code-list TICKET_CATEGORY
    */
   profession?: string;
 }

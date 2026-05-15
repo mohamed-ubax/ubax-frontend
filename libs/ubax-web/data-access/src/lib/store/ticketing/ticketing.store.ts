@@ -293,7 +293,7 @@ export const TicketingStore = signalStore(
           ),
           exhaustMap(() =>
             findAllByType(http, apiConfig.rootUrl, {
-              type: 'TECHNICIEN_PROFESSION',
+              type: 'TICKET_CATEGORY',
             }).pipe(
               map((response) => extractCodeListFromResponse(response.body)),
               tapResponse({
