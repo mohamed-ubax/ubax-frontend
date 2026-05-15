@@ -10,7 +10,7 @@ import {
 } from '@ngrx/signals';
 import { updateEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
   getById3,
@@ -128,7 +128,7 @@ export const LocationStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour du dossier') }),
               }),
             ),
           ),
@@ -149,7 +149,7 @@ export const LocationStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour du dossier') }),
               }),
             ),
           ),

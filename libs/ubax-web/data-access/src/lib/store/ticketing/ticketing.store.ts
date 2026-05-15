@@ -10,7 +10,7 @@ import {
 } from '@ngrx/signals';
 import { updateEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   addMessage,
   AddMessage$Params,
@@ -211,7 +211,7 @@ export const TicketingStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),
@@ -232,7 +232,7 @@ export const TicketingStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),
@@ -253,7 +253,7 @@ export const TicketingStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),
@@ -274,7 +274,7 @@ export const TicketingStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),
@@ -302,7 +302,7 @@ export const TicketingStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     messagesLoading: false,
-                    messagesError: err.message,
+                    messagesError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des messages'),
                   }),
               }),
             ),
@@ -328,7 +328,7 @@ export const TicketingStore = signalStore(
                     messages: [...s.messages, msg],
                   })),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { messagesError: err.message }),
+                  patchState(store, { messagesError: resolveHttpErrorMessage(err, 'Erreur lors de l\'envoi du message') }),
               }),
             ),
           ),

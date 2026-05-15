@@ -14,7 +14,7 @@ import {
   removeEntity,
   setAllEntities,
 } from '@ngrx/signals/entities';
-import { UbaxScope, withApiResource } from '@ubax-workspace/shared-data-access';
+import { UbaxScope, withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   addMember,
   AddTeamMemberRequest,
@@ -290,7 +290,7 @@ export const AgencyStore = signalStore(
                   return of(null);
                 }),
                 catchError((err: HttpErrorResponse) => {
-                  patchState(store, { loading: false, error: err.message });
+                  patchState(store, { loading: false, error: resolveHttpErrorMessage(err, 'Erreur lors du chargement des membres') });
                   return of(null);
                 }),
               );
@@ -328,7 +328,7 @@ export const AgencyStore = signalStore(
                     patchState(store, {
                       codelistRoles: [],
                       codelistRolesLoading: false,
-                      codelistRolesError: err.message,
+                      codelistRolesError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des rôles'),
                     }),
                 }),
               ),
@@ -399,7 +399,7 @@ export const AgencyStore = signalStore(
                       memberSubRolesError: setMemberError(
                         store.memberSubRolesError(),
                         userId,
-                        err.message,
+                        resolveHttpErrorMessage(err, 'Erreur lors du chargement des sous-rôles'),
                       ),
                     }),
                 }),
@@ -498,7 +498,7 @@ export const AgencyStore = signalStore(
                       );
                     },
                     error: (err: HttpErrorResponse) =>
-                      patchState(store, { saving: false, error: err.message }),
+                      patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
                   }),
                 );
               },
@@ -540,7 +540,7 @@ export const AgencyStore = signalStore(
                       ),
                     }),
                   error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: err.message }),
+                    patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
                 }),
               );
             }),
@@ -572,7 +572,7 @@ export const AgencyStore = signalStore(
                       ),
                     }),
                   error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: err.message }),
+                    patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
                 }),
               );
             }),
@@ -604,7 +604,7 @@ export const AgencyStore = signalStore(
                       ),
                     }),
                   error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: err.message }),
+                    patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
                 }),
               );
             }),

@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   archive,
   ApiConfiguration,
@@ -312,7 +312,7 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     codeListsLoading: false,
-                    codeListsError: err.message,
+                    codeListsError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des listes de codes'),
                   }),
               }),
             ),
@@ -345,7 +345,7 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     overviewLoading: false,
-                    overviewError: err.message,
+                    overviewError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des statistiques'),
                   }),
               }),
             ),
@@ -392,7 +392,7 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     archivingPropertyIds: withoutArchivingId(state, id),
-                    archiveError: err.message,
+                    archiveError: resolveHttpErrorMessage(err, 'Erreur lors de l\'archivage du bien'),
                   })),
               }),
             ),
@@ -435,7 +435,7 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     submittingPropertyIds: withoutSubmittingId(state, id),
-                    submitError: err.message,
+                    submitError: resolveHttpErrorMessage(err, 'Erreur lors de la soumission du bien'),
                   })),
               }),
             ),

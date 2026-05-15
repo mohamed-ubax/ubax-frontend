@@ -1,4 +1,4 @@
-import { HttpClient, HttpContext } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StrictHttpResponse } from '@ubax-workspace/shared-api-types';
 
@@ -151,3 +151,30 @@ export const API_ERROR_MESSAGES = {
   update: 'Erreur lors de la mise à jour',
   remove: 'Erreur lors de la suppression',
 } as const;
+
+const HTTP_STATUS_MESSAGES: Record<number, string> = {
+  0:   'Aucune connexion réseau. Vérifiez votre connexion internet.',
+  400: 'Requête invalide. Vérifiez les données envoyées.',
+  401: 'Session expirée. Veuillez vous reconnecter.',
+  403: 'Accès refusé. Vous n\'avez pas les permissions nécessaires pour cette action.',
+  404: 'La ressource demandée est introuvable.',
+  408: 'Délai d\'attente dépassé. Vérifiez votre connexion et réessayez.',
+  409: 'Conflit : cet élément existe déjà ou a été modifié entre-temps.',
+  422: 'Données invalides. Vérifiez les informations saisies.',
+  429: 'Trop de requêtes. Veuillez patienter quelques instants avant de réessayer.',
+  500: 'Erreur interne du serveur. Notre équipe technique a été notifiée.',
+  502: 'Service temporairement indisponible. Réessayez dans quelques instants.',
+  503: 'Service en maintenance. Réessayez dans quelques instants.',
+  504: 'Le serveur ne répond pas. Vérifiez votre connexion et réessayez.',
+};
+
+/**
+ * Traduit une HttpErrorResponse en message utilisateur lisible.
+ * Priorité : code HTTP connu > fallback spécifique à l'opération.
+ */
+export function resolveHttpErrorMessage(
+  err: HttpErrorResponse,
+  fallback: string,
+): string {
+  return HTTP_STATUS_MESSAGES[err.status] ?? fallback;
+}

@@ -11,7 +11,7 @@ export type {
   AnyApiFn,
   PaginationMeta,
 } from './lib/api-resource.types';
-export { API_ERROR_MESSAGES } from './lib/api-resource.types';
+export { API_ERROR_MESSAGES, resolveHttpErrorMessage } from './lib/api-resource.types';
 export { NOTIFICATION_HANDLER } from './lib/notification.token';
 export type { NotificationHandler } from './lib/notification.token';
 export * from './lib/auth/auth.service';

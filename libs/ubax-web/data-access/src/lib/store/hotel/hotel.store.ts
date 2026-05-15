@@ -10,7 +10,7 @@ import {
 } from '@ngrx/signals';
 import { addEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   addMember,
   AddTeamMemberRequest,
@@ -89,7 +89,7 @@ export const HotelStore = signalStore(
                       { saving: false },
                     ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),
@@ -110,7 +110,7 @@ export const HotelStore = signalStore(
               tapResponse({
                 next: () => patchState(store, { saving: false }),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: err.message }),
+                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),
@@ -124,7 +124,7 @@ export const HotelStore = signalStore(
               tapResponse({
                 next: () => undefined,
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { error: err.message }),
+                  patchState(store, { error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour') }),
               }),
             ),
           ),

@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
   findAllByType,
@@ -133,7 +133,7 @@ export const BienEditStore = signalStore(
                     codeListDocumentTypes: documentTypes,
                   }),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { error: err.message }),
+                  patchState(store, { error: resolveHttpErrorMessage(err, 'Erreur lors du chargement') }),
               }),
             ),
           ),
@@ -157,7 +157,7 @@ export const BienEditStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     saving: false,
-                    error: err.message || 'Erreur lors de la modification',
+                    error: resolveHttpErrorMessage(err, 'Erreur lors de la modification'),
                   }),
               }),
             ),

@@ -10,7 +10,7 @@ import {
 } from '@ngrx/signals';
 import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource } from '@ubax-workspace/shared-data-access';
+import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
   cancel,
@@ -207,7 +207,7 @@ export const ContratsStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     submittingId: null,
-                    submitError: err.message,
+                    submitError: resolveHttpErrorMessage(err, 'Erreur lors de la soumission du contrat'),
                   }),
               }),
             ),
@@ -249,7 +249,7 @@ export const ContratsStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     terminatingId: null,
-                    terminateError: err.message,
+                    terminateError: resolveHttpErrorMessage(err, 'Erreur lors de la résiliation du contrat'),
                   }),
               }),
             ),
@@ -288,7 +288,7 @@ export const ContratsStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     cancellingId: null,
-                    cancelError: err.message,
+                    cancelError: resolveHttpErrorMessage(err, 'Erreur lors de l\'annulation du contrat'),
                   }),
               }),
             ),
