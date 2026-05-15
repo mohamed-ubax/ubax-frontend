@@ -25,6 +25,7 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     toggleAvailability: vi.fn(),
     delete$: vi.fn(),
     findAllByType: vi.fn(),
+    upload: vi.fn(),
   };
 });
 
@@ -78,7 +79,7 @@ describe('TechniciansStore', () => {
 
   beforeEach(() => {
     vi.mocked(apiTypes.list1).mockImplementation(() =>
-      of(toStrictResponse({ data: { content: TECHNICIANS } })),
+      of(toStrictResponse({ data: { results: TECHNICIANS } })),
     );
     vi.mocked(apiTypes.create2).mockImplementation(
       (_http, _rootUrl, params: any) =>
@@ -132,6 +133,13 @@ describe('TechniciansStore', () => {
         }),
       ),
     );
+    vi.mocked(apiTypes.upload).mockImplementation(() =>
+      of(
+        toStrictResponse({
+          fileUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
+        }),
+      ),
+    );
 
     const injector = Injector.create({
       providers: [
@@ -168,15 +176,26 @@ describe('TechniciansStore', () => {
   });
 
   it('cree un technicien et l ajoute au store', () => {
+    const avatarFile = new File(['avatar'], 'avatar-tech-3.png', {
+      type: 'image/png',
+    });
+
     store.createTechnician({
       firstName: 'Mariam',
       lastName: 'Diallo',
       phone: '+2250700000003',
+      avatarFile,
     });
 
     expect(
       store.entities().some((technician) => technician.id === 'tech-3'),
     ).toBe(true);
+    expect(apiTypes.upload).toHaveBeenCalled();
+    expect(vi.mocked(apiTypes.create2).mock.calls[0]?.[2]).toMatchObject({
+      body: expect.objectContaining({
+        avatarUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
+      }),
+    });
     expect(store.saving()).toBe(false);
   });
 

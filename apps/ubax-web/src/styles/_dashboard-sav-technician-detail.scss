@@ -188,45 +188,103 @@
     margin-right: 7px;
   }
 
-  &__edit-button {
-    display: inline-flex;
+  &__actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: auto 19px 0;
+    padding-top: 24px;
+  }
+
+  &__action {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 18px;
-    align-self: center;
-    width: 189px;
-    height: 64px;
-    margin-top: auto;
-    padding: 0 8px 0 25px;
+    gap: 12px;
+    min-height: 76px;
+    padding: 12px 14px;
     border: none;
-    border-radius: 33.5px;
-    background: var(--ubax-accent);
-    color: var(--ubax-text-primary);
+    border-radius: 18px;
+    text-align: left;
     cursor: pointer;
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease,
+      background-color 150ms ease;
 
-    > span:first-child {
-      font-family: 'Lexend', sans-serif;
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 25px;
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 28px rgb(19 45 71 / 0.08);
     }
   }
 
-  &__edit-button-icon {
+  &__action-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__action-label,
+  &__action-hint {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    color: inherit;
+  }
+
+  &__action-label {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  &__action-hint {
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 1.4;
+    opacity: 0.82;
+  }
+
+  &__action-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: var(--ubax-surface);
+    background: rgb(255 255 255 / 0.72);
     flex-shrink: 0;
 
-    img {
+    img,
+    svg {
       width: 20px;
       height: 20px;
       object-fit: contain;
     }
+
+    svg {
+      stroke: currentColor;
+    }
+  }
+
+  &__action--edit {
+    background: #eef4fb;
+    color: var(--ubax-navy);
+  }
+
+  &__action--available {
+    background: var(--ubax-success-soft-card);
+    color: var(--ubax-success);
+  }
+
+  &__action--unavailable {
+    background: var(--ubax-warning-soft-alt);
+    color: var(--ubax-accent);
+  }
+
+  &__action--archive {
+    background: rgb(197 60 56 / 0.12);
+    color: var(--ubax-danger);
   }
 
   &__main {
@@ -601,6 +659,12 @@
 
     &__info-row span {
       font-size: 16px;
+    }
+
+    &__actions {
+      grid-template-columns: 1fr;
+      margin: 0 24px;
+      padding-top: 0;
     }
   }
 

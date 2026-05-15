@@ -31,12 +31,11 @@ import {
   List1$Params,
   Pageable,
   toggleAvailability,
+  upload,
   update,
   UpdateTechnicienRequest,
 } from '@ubax-workspace/shared-api-types';
-import { exhaustMap, map, pipe, tap } from 'rxjs';
-
-export type TechnicianProfession = string & {};
+import { catchError, exhaustMap, map, of, pipe, switchMap, tap } from 'rxjs';
 
 export type Technician = {
   id: string;
@@ -45,7 +44,7 @@ export type Technician = {
   phone?: string;
   email?: string;
   avatarUrl?: string;
-  profession?: TechnicianProfession;
+  profession?: string;
   address?: string;
   available: boolean;
   createdAt?: string;
@@ -53,7 +52,7 @@ export type Technician = {
 };
 
 export type TechnicianProfessionOption = {
-  value: TechnicianProfession;
+  value: string;
   label: string;
   description: string;
 };
@@ -62,6 +61,14 @@ type TechniciansState = {
   professionCodeList: LaCodeListDto[];
   professionCodeListLoading: boolean;
   professionCodeListError: string | null;
+};
+
+type SaveTechnicianRequest = CreateTechnicienRequest & {
+  avatarFile?: File;
+};
+
+type UpdateTechnicianPayload = UpdateTechnicienRequest & {
+  avatarFile?: File;
 };
 
 const DEFAULT_PAGEABLE: Pageable = {
@@ -106,9 +113,14 @@ function extractContentArray(body: unknown): unknown[] {
   }
 
   if (data && typeof data === 'object') {
-    const content = (data as Record<string, unknown>)['content'];
-    if (Array.isArray(content)) {
-      return content;
+    const record = data as Record<string, unknown>;
+
+    for (const key of ['content', 'results', 'items']) {
+      const collection = record[key];
+
+      if (Array.isArray(collection)) {
+        return collection;
+      }
     }
   }
 
@@ -130,9 +142,7 @@ function normalizeTechnician(raw: unknown, fallbackId?: string): Technician {
     phone: readString(record['phone']),
     email: readString(record['email']),
     avatarUrl: readString(record['avatarUrl']),
-    profession: readString(record['profession']) as
-      | TechnicianProfession
-      | undefined,
+    profession: readString(record['profession']),
     address: readString(record['address']),
     available:
       readBoolean(record['available']) ??
@@ -178,14 +188,32 @@ function extractCodeListFromResponse(body: unknown): LaCodeListDto[] {
   return [];
 }
 
-function readProfessionValue(item: LaCodeListDto): TechnicianProfession | null {
+function readProfessionValue(item: LaCodeListDto): string | null {
   const candidate = item.value?.trim() || item.id?.trim() || '';
-  return candidate.length > 0 ? (candidate as TechnicianProfession) : null;
+  return candidate.length > 0 ? candidate : null;
 }
 
 function readProfessionLabel(item: LaCodeListDto): string {
   return (
     item.description?.trim() || item.value?.trim() || item.id?.trim() || 'Autre'
+  );
+}
+
+function uploadTechnicianAvatar(
+  http: HttpClient,
+  rootUrl: string,
+  avatarFile?: File,
+) {
+  if (!avatarFile) {
+    return of<string | undefined>(undefined);
+  }
+
+  return upload(http, rootUrl, {
+    bucket: 'users-avatars',
+    body: { file: avatarFile },
+  }).pipe(
+    map((response) => readString(response.body?.fileUrl) ?? undefined),
+    catchError(() => of(undefined)),
   );
 }
 
@@ -228,159 +256,193 @@ export const TechniciansStore = signalStore(
       store,
       http = inject(HttpClient),
       apiConfig = inject(ApiConfiguration),
-    ) => ({
-      loadProfessions: rxMethod<void>(
-        pipe(
-          tap(() =>
-            patchState(store, {
-              professionCodeListLoading: true,
-              professionCodeListError: null,
-            }),
-          ),
-          exhaustMap(() =>
-            findAllByType(http, apiConfig.rootUrl, {
-              type: 'TECHNICIEN_PROFESSION',
-            }).pipe(
-              map((response) => extractCodeListFromResponse(response.body)),
-              tapResponse({
-                next: (professionCodeList: LaCodeListDto[]) =>
-                  patchState(store, {
-                    professionCodeList,
-                    professionCodeListLoading: false,
-                    professionCodeListError: null,
-                  }),
-                error: (error: HttpErrorResponse) =>
-                  patchState(store, {
-                    professionCodeListLoading: false,
-                    professionCodeListError: resolveHttpErrorMessage(
-                      error,
-                      'Erreur lors du chargement des professions technicien',
-                    ),
-                  }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      createTechnician: rxMethod<CreateTechnicienRequest>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap((body) =>
-            create2(http, apiConfig.rootUrl, { body }).pipe(
-              map((response) => mapTechnicianResponse(response.body)),
-              tapResponse({
-                next: (technician: Technician) =>
-                  patchState(
-                    store,
-                    addEntity(technician, { selectId: (entity) => entity.id }),
-                    { saving: false },
-                  ),
-                error: (error: HttpErrorResponse) =>
-                  patchState(store, {
-                    saving: false,
-                    error: resolveHttpErrorMessage(
-                      error,
-                      'Erreur lors de la création du technicien',
-                    ),
-                  }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      updateTechnician: rxMethod<{ id: string; body: UpdateTechnicienRequest }>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap(({ id, body }) =>
-            update(http, apiConfig.rootUrl, { id, body }).pipe(
-              map((response) => mapTechnicianResponse(response.body, id)),
-              tapResponse({
-                next: (technician: Technician) =>
-                  patchState(
-                    store,
-                    updateEntity({ id: technician.id, changes: technician }),
-                    { saving: false },
-                  ),
-                error: (error: HttpErrorResponse) =>
-                  patchState(store, {
-                    saving: false,
-                    error: resolveHttpErrorMessage(
-                      error,
-                      'Erreur lors de la mise à jour du technicien',
-                    ),
-                  }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      toggleTechnicianAvailability: rxMethod<string>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap((id) =>
-            toggleAvailability(http, apiConfig.rootUrl, { id }).pipe(
-              map((response) => mapTechnicianResponse(response.body, id)),
-              tapResponse({
-                next: (technician: Technician) =>
-                  patchState(
-                    store,
-                    updateEntity({ id: technician.id, changes: technician }),
-                    { saving: false },
-                  ),
-                error: (error: HttpErrorResponse) =>
-                  patchState(store, {
-                    saving: false,
-                    error: resolveHttpErrorMessage(
-                      error,
-                      'Erreur lors du changement de disponibilite',
-                    ),
-                  }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      archiveTechnician: rxMethod<string>(
-        pipe(
-          tap(() => patchState(store, { saving: true, error: null })),
-          exhaustMap((id) =>
-            delete$(http, apiConfig.rootUrl, { id }).pipe(
-              tapResponse({
-                next: () =>
-                  patchState(store, removeEntity(id), { saving: false }),
-                error: (error: HttpErrorResponse) =>
-                  patchState(store, {
-                    saving: false,
-                    error: resolveHttpErrorMessage(
-                      error,
-                      'Erreur lors de l archivage du technicien',
-                    ),
-                  }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      replaceAllTechnicians(technicians: Technician[]): void {
+    ) => {
+      const selectTechnicianId = (entity: Technician) => entity.id;
+      const setSavingState = () =>
+        patchState(store, { saving: true, error: null });
+      const handleSaveError = (
+        error: HttpErrorResponse,
+        fallbackMessage: string,
+      ) =>
+        patchState(store, {
+          saving: false,
+          error: resolveHttpErrorMessage(error, fallbackMessage),
+        });
+      const handleCreateSuccess = (technician: Technician) =>
         patchState(
           store,
-          setAllEntities(technicians, {
-            selectId: (entity: Technician) => entity.id,
-          }),
+          addEntity(technician, { selectId: selectTechnicianId }),
+          { saving: false },
         );
-      },
+      const handleUpdateSuccess = (technician: Technician) =>
+        patchState(
+          store,
+          updateEntity({ id: technician.id, changes: technician }),
+          { saving: false },
+        );
+      const handleCreateError = (error: HttpErrorResponse) =>
+        handleSaveError(error, 'Erreur lors de la création du technicien');
+      const handleUpdateError = (error: HttpErrorResponse) =>
+        handleSaveError(error, 'Erreur lors de la mise à jour du technicien');
 
-      defaultListParams(available?: boolean): List1$Params {
-        return {
-          available,
-          pageable: DEFAULT_PAGEABLE,
-        };
-      },
-    }),
+      return {
+        loadProfessions: rxMethod<void>(
+          pipe(
+            tap(() =>
+              patchState(store, {
+                professionCodeListLoading: true,
+                professionCodeListError: null,
+              }),
+            ),
+            exhaustMap(() =>
+              findAllByType(http, apiConfig.rootUrl, {
+                type: 'TECHNICIEN_PROFESSION',
+              }).pipe(
+                map((response) => extractCodeListFromResponse(response.body)),
+                tapResponse({
+                  next: (professionCodeList: LaCodeListDto[]) =>
+                    patchState(store, {
+                      professionCodeList,
+                      professionCodeListLoading: false,
+                      professionCodeListError: null,
+                    }),
+                  error: (error: HttpErrorResponse) =>
+                    patchState(store, {
+                      professionCodeListLoading: false,
+                      professionCodeListError: resolveHttpErrorMessage(
+                        error,
+                        'Erreur lors du chargement des professions technicien',
+                      ),
+                    }),
+                }),
+              ),
+            ),
+          ),
+        ),
+
+        createTechnician: rxMethod<SaveTechnicianRequest>(
+          pipe(
+            tap(setSavingState),
+            exhaustMap(({ avatarFile, ...body }) =>
+              uploadTechnicianAvatar(http, apiConfig.rootUrl, avatarFile).pipe(
+                map((avatarUrl) => ({
+                  ...body,
+                  avatarUrl: avatarUrl ?? body.avatarUrl,
+                })),
+                switchMap((preparedBody) =>
+                  create2(http, apiConfig.rootUrl, { body: preparedBody }).pipe(
+                    map((response) => mapTechnicianResponse(response.body)),
+                    tapResponse({
+                      next: handleCreateSuccess,
+                      error: handleCreateError,
+                    }),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        updateTechnician: rxMethod<{
+          id: string;
+          body: UpdateTechnicianPayload;
+        }>(
+          pipe(
+            tap(setSavingState),
+            exhaustMap(({ id, body }) => {
+              const { avatarFile, ...nextBody } = body;
+
+              return uploadTechnicianAvatar(
+                http,
+                apiConfig.rootUrl,
+                avatarFile,
+              ).pipe(
+                map((avatarUrl) => ({
+                  ...nextBody,
+                  avatarUrl: avatarUrl ?? nextBody.avatarUrl,
+                })),
+                switchMap((preparedBody) =>
+                  update(http, apiConfig.rootUrl, {
+                    id,
+                    body: preparedBody,
+                  }).pipe(
+                    map((response) => mapTechnicianResponse(response.body, id)),
+                    tapResponse({
+                      next: handleUpdateSuccess,
+                      error: handleUpdateError,
+                    }),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+
+        toggleTechnicianAvailability: rxMethod<string>(
+          pipe(
+            tap(() => patchState(store, { saving: true, error: null })),
+            exhaustMap((id) =>
+              toggleAvailability(http, apiConfig.rootUrl, { id }).pipe(
+                map((response) => mapTechnicianResponse(response.body, id)),
+                tapResponse({
+                  next: (technician: Technician) =>
+                    patchState(
+                      store,
+                      updateEntity({ id: technician.id, changes: technician }),
+                      { saving: false },
+                    ),
+                  error: (error: HttpErrorResponse) =>
+                    patchState(store, {
+                      saving: false,
+                      error: resolveHttpErrorMessage(
+                        error,
+                        'Erreur lors du changement de disponibilite',
+                      ),
+                    }),
+                }),
+              ),
+            ),
+          ),
+        ),
+
+        archiveTechnician: rxMethod<string>(
+          pipe(
+            tap(() => patchState(store, { saving: true, error: null })),
+            exhaustMap((id) =>
+              delete$(http, apiConfig.rootUrl, { id }).pipe(
+                tapResponse({
+                  next: () =>
+                    patchState(store, removeEntity(id), { saving: false }),
+                  error: (error: HttpErrorResponse) =>
+                    patchState(store, {
+                      saving: false,
+                      error: resolveHttpErrorMessage(
+                        error,
+                        'Erreur lors de l archivage du technicien',
+                      ),
+                    }),
+                }),
+              ),
+            ),
+          ),
+        ),
+
+        replaceAllTechnicians(technicians: Technician[]): void {
+          patchState(
+            store,
+            setAllEntities(technicians, {
+              selectId: (entity: Technician) => entity.id,
+            }),
+          );
+        },
+
+        defaultListParams(available?: boolean): List1$Params {
+          return {
+            available,
+            pageable: DEFAULT_PAGEABLE,
+          };
+        },
+      };
+    },
   ),
 );

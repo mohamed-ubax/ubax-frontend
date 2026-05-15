@@ -1591,14 +1591,14 @@ label.toolbar-pill {
 .at-modal {
   position: relative;
   z-index: 1;
-  width: min(662px, calc(100vw - 32px));
-  max-height: min(736px, calc(100dvh - 32px));
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(760px, calc(100dvh - 32px));
   margin: 0;
   padding: 0;
   border: 0;
   border-radius: 24px;
   background: var(--ubax-surface);
-  box-shadow: 0 32px 72px rgb(13 10 44 / 0.18);
+  box-shadow: 0 28px 64px rgb(13 10 44 / 0.18);
   overflow: hidden;
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
@@ -1627,15 +1627,15 @@ label.toolbar-pill {
   flex-shrink: 0;
   align-items: center;
   gap: 12px;
-  min-height: 82px;
-  padding: 18px 24px;
-  background: var(--ubax-navy);
+  min-height: 86px;
+  padding: 18px 22px;
+  background: linear-gradient(180deg, #18334d 0%, #16324c 100%);
 }
 
 .at-title {
   margin: 0;
   font-family: 'Lexend', sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.2;
   color: var(--ubax-surface);
@@ -1669,14 +1669,14 @@ label.toolbar-pill {
 .at-modal-form {
   display: flex;
   flex-direction: column;
-  max-height: calc(min(736px, calc(100dvh - 32px)) - 82px);
+  max-height: calc(min(760px, calc(100dvh - 32px)) - 86px);
 }
 
 .at-body {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  padding: 18px 28px;
+  gap: 22px;
+  padding: 22px 26px 12px;
   overflow-y: auto;
   flex: 1 1 auto;
 }
@@ -1691,13 +1691,13 @@ label.toolbar-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 134px;
-    height: 134px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     background: var(--ubax-page-bg);
     border: 2px dashed rgb(166 181 191 / 0.58);
     font-family: 'Lexend', sans-serif;
-    font-size: 36px;
+    font-size: 30px;
     font-weight: 600;
     color: var(--ubax-navy);
     cursor: pointer;
@@ -1736,12 +1736,22 @@ label.toolbar-pill {
     text-decoration: underline;
     text-underline-offset: 2px;
   }
+
+  &__hint {
+    text-align: center;
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--ubax-text-muted);
+  }
 }
 
 .at-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 24px;
+  gap: 16px 22px;
   align-items: start;
 }
 
@@ -1753,12 +1763,73 @@ label.toolbar-pill {
   }
 
   &--phone {
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.at-native-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.at-native-field__label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--ubax-text-primary);
+}
+
+.at-phone-field {
+  position: relative;
+}
+
+.at-phone-field__input {
+  width: 100%;
+  min-height: 42px;
+  padding: 12px 16px 12px 144px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background: var(--ubax-page-bg);
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--ubax-text-primary);
+  outline: none;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+
+  &::placeholder {
+    color: var(--ubax-text-muted);
+    opacity: 1;
   }
 
-  &--payment {
-    grid-column: 1;
+  &:focus {
+    border-color: rgb(19 45 71 / 0.14);
+    box-shadow: 0 0 0 3px rgb(19 45 71 / 0.06);
   }
+}
+
+.at-phone-field.is-invalid .at-phone-field__input {
+  border-color: #c53c38;
+  box-shadow: 0 0 0 3px rgb(197 60 56 / 0.08);
+}
+
+.at-field-note {
+  margin: 8px 0 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ubax-text-muted);
+}
+
+.at-field-note--error {
+  color: #c53c38;
 }
 
 :host ::ng-deep .at-field-shell .form-input,
@@ -1777,12 +1848,12 @@ label.toolbar-pill {
 
 :host ::ng-deep .at-field-shell .form-input__field,
 :host ::ng-deep .at-field-shell .form-select__trigger {
-  min-height: 56px;
-  padding: 16px 18px;
-  border-radius: 18px;
+  min-height: 42px;
+  padding: 12px 16px;
+  border-radius: 16px;
   background: var(--ubax-page-bg);
   font-family: 'Lexend', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 300;
   line-height: 1.2;
   color: var(--ubax-text-primary);
@@ -1794,28 +1865,25 @@ label.toolbar-pill {
 }
 
 :host ::ng-deep .at-field-shell .form-select__trigger {
-  padding-right: 56px;
+  padding-right: 48px;
 }
 
 :host ::ng-deep .at-field-shell .form-select__menu {
-  border-radius: 18px;
-}
-
-:host ::ng-deep .at-field-shell--phone .form-input__field {
-  padding-left: 116px;
+  border-radius: 16px;
 }
 
 :host ::ng-deep .at-phone-code,
 :host ::ng-deep .at-phone-code.p-select {
   position: absolute;
-  left: 18px;
-  bottom: 2px;
-  width: 90px;
-  min-height: 52px;
+  left: 16px;
+  top: 50%;
+  width: 118px;
+  min-height: 40px;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  transform: translateY(-50%);
 
   &::after {
     content: '';
@@ -1831,14 +1899,14 @@ label.toolbar-pill {
   .p-select-label {
     display: inline-flex;
     align-items: center;
-    min-height: 52px;
+    min-height: 40px;
     padding: 0;
     background: transparent;
   }
 
   .p-select-dropdown {
-    width: 18px;
-    min-height: 52px;
+    width: 16px;
+    min-height: 40px;
     padding: 0;
     justify-content: center;
     background: transparent;
@@ -1854,27 +1922,46 @@ label.toolbar-pill {
 .at-phone-code__option {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-family: 'Lexend', sans-serif;
   color: var(--ubax-text-primary);
 }
 
 .at-phone-code__selected {
-  font-size: 13px;
-  font-weight: 400;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1;
 }
 
 .at-phone-code__option {
   width: 100%;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.2;
 }
 
-.at-phone-code__iso {
-  font-weight: 500;
+.at-phone-code__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.at-phone-code__flag {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgb(19 45 71 / 0.08);
+}
+
+.at-phone-code__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .at-phone-code__dial {
@@ -1906,7 +1993,7 @@ label.toolbar-pill {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 20px 28px 28px;
+  padding: 18px 26px 24px;
 }
 
 .at-btn {
@@ -1926,15 +2013,16 @@ label.toolbar-pill {
   }
 
   &--cancel {
-    border: 0;
+    border: none;
     background: #edf2f6;
     color: var(--ubax-navy);
   }
 
   &--save {
     border: none;
-    background: var(--ubax-accent);
+    background: linear-gradient(135deg, #f0a04d 0%, #ffbe7d 100%);
     color: var(--ubax-surface);
+    box-shadow: 0 18px 30px rgb(240 160 77 / 0.28);
   }
 }
 
@@ -2015,7 +2103,7 @@ label.toolbar-pill {
   }
 
   .at-modal {
-    width: min(662px, calc(100vw - 24px));
+    width: min(680px, calc(100vw - 24px));
     max-height: calc(100dvh - 24px);
   }
 
@@ -2156,23 +2244,23 @@ label.toolbar-pill {
   }
 
   .at-body {
-    gap: 24px;
+    gap: 20px;
     padding: 16px 16px 0;
   }
 
   .at-photo__circle {
-    width: 120px;
-    height: 120px;
+    width: 104px;
+    height: 104px;
   }
 
-  :host ::ng-deep .at-field-shell--phone .form-input__field {
-    padding-left: 108px;
+  .at-phone-field__input {
+    padding-left: 140px;
   }
 
   :host ::ng-deep .at-phone-code,
   :host ::ng-deep .at-phone-code.p-select {
     left: 16px;
-    width: 84px;
+    width: 116px;
   }
 
   .at-footer {

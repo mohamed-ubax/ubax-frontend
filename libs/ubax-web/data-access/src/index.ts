@@ -65,7 +65,6 @@ export type {
 export { TechniciansStore } from './lib/store/technicians/technicians.store';
 export type {
   Technician,
-  TechnicianProfession,
   TechnicianProfessionOption,
 } from './lib/store/technicians/technicians.store';
 

@@ -15,6 +15,10 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import {
+  COUNTRY_CODES,
+  type CountryDialCode,
+} from '@ubax-workspace/shared-data-access';
+import {
   LazyChartComponent,
   UiFormInputComponent,
   UiFormSelectComponent,
@@ -33,6 +37,7 @@ type DashboardSavTicketStatusFilter = 'all' | DashboardSavStatusTone;
 type DashboardSavTicketPriorityFilter = 'all' | DashboardSavPriorityTone;
 type DashboardSavInterventionPeriod = 'current-month' | 'quarter' | 'year';
 type DashboardSavStarTone = 'full' | 'half';
+type DashboardSavTechMutationKind = 'create' | 'update';
 
 type DashboardSavSelectOption<TValue> = {
   readonly label: string;
@@ -131,10 +136,9 @@ type DashboardSavSelectedTechnicianDetail = DashboardSavTechnician &
     readonly profileImage: string;
   };
 
-type DashboardSavCountryCodeOption = {
-  readonly iso: string;
-  readonly dialCode: string;
-  readonly display: string;
+type DashboardSavCountryCodeOption = CountryDialCode & {
+  readonly sampleNational: string;
+  readonly sampleE164: string;
 };
 
 type DashboardSavScrollLockState = {
@@ -155,6 +159,7 @@ const DEFAULT_VISIBLE_NOTIFICATIONS = 5;
 const TICKETS_PER_PAGE = 4;
 const PHASE_TRANSITION_DURATION_MS = 260;
 const ADD_TECH_CLOSE_DURATION_MS = 220;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
   day: '2-digit',
@@ -234,13 +239,72 @@ const STAR_ASSET_BY_TONE: Record<DashboardSavStarTone, string> = {
   half: dashboardSavAsset('technicians/star-half.webp'),
 };
 
+const SAV_PHONE_COUNTRY_SAMPLES: Record<
+  string,
+  { national: string; e164: string }
+> = {
+  CI: { national: '07 12 34 56 78', e164: '+2250712345678' },
+  SN: { national: '77 100 20 20', e164: '+221771002020' },
+  BJ: { national: '01 90 12 34 56', e164: '+2290190123456' },
+  TG: { national: '90 12 34 56', e164: '+22890123456' },
+  ML: { national: '70 12 34 56', e164: '+22370123456' },
+};
+
 const COUNTRY_CODE_OPTIONS: readonly DashboardSavCountryCodeOption[] = [
-  { iso: 'CI', dialCode: '225', display: 'CI +225' },
-  { iso: 'SN', dialCode: '221', display: 'SN +221' },
-  { iso: 'BJ', dialCode: '229', display: 'BJ +229' },
-  { iso: 'TG', dialCode: '228', display: 'TG +228' },
-  { iso: 'ML', dialCode: '223', display: 'ML +223' },
-];
+  'CI',
+  'SN',
+  'BJ',
+  'TG',
+  'ML',
+]
+  .map((iso2) => {
+    const country = COUNTRY_CODES.find((entry) => entry.iso2 === iso2);
+    const sample = SAV_PHONE_COUNTRY_SAMPLES[iso2];
+
+    if (!country || !sample) {
+      return null;
+    }
+
+    return {
+      ...country,
+      sampleNational: sample.national,
+      sampleE164: sample.e164,
+    } satisfies DashboardSavCountryCodeOption;
+  })
+  .filter(
+    (country): country is DashboardSavCountryCodeOption => country !== null,
+  );
+
+function composeSavE164Phone(dialCode: string, nationalDigits: string): string {
+  const digits = nationalDigits.replaceAll(/\D/g, '');
+
+  if (!digits.length) {
+    return '';
+  }
+
+  const body = digits.startsWith('0') ? digits.slice(1) : digits;
+
+  if (dialCode === '225') {
+    if (body.length !== 9 || !/^[1-9]\d{8}$/.test(body)) {
+      return '';
+    }
+
+    return `+225${body}`;
+  }
+
+  if (body.length < 6 || body.length > 14 || !/^\d+$/.test(body)) {
+    return '';
+  }
+
+  return `+${dialCode}${body}`;
+}
+
+function sanitizeSavPhoneDraft(value: string, dialCode: string): string {
+  const digits = value.replaceAll(/\D/g, '');
+  const maxLength = dialCode === '225' ? 10 : 14;
+
+  return digits.slice(0, maxLength);
+}
 
 const TICKET_CLIENTS = [
   {
@@ -870,13 +934,19 @@ export class DashboardSavPageComponent implements OnDestroy {
   readonly newPrenom = signal('');
   readonly newNom = signal('');
   readonly newPhone = signal('');
+  readonly newEmail = signal('');
+  readonly newAddress = signal('');
   readonly newSpecialty = signal('Plomberie & sanitaires');
-  readonly newPayment = signal('Espèces');
   readonly newPhotoUrl = signal<string | null>(null);
+  readonly newAvatarFile = signal<File | null>(null);
+  readonly pendingTechMutation = signal<DashboardSavTechMutationKind | null>(
+    null,
+  );
   readonly selectedCountryCode = signal<DashboardSavCountryCodeOption>(
     COUNTRY_CODE_OPTIONS[0],
   );
   private photoObjectUrl: string | null = null;
+  private techMutationRequestStarted = false;
 
   readonly countryCodeOptions = [...COUNTRY_CODE_OPTIONS];
 
@@ -897,8 +967,6 @@ export class DashboardSavPageComponent implements OnDestroy {
         ];
   });
 
-  readonly paymentMethods = ['Espèces', 'Virement', 'Mobile Money', 'Chèque'];
-
   readonly addTechModalTitle = computed(() =>
     this.editingTechnicianId()
       ? 'Modifier un technicien'
@@ -908,6 +976,14 @@ export class DashboardSavPageComponent implements OnDestroy {
   readonly addTechSaveLabel = computed(() =>
     this.editingTechnicianId() ? 'Mettre à jour' : 'Enregistrer',
   );
+
+  readonly addTechSubmitLabel = computed(() => {
+    if (!this.techniciansStore.saving()) {
+      return this.addTechSaveLabel();
+    }
+
+    return this.editingTechnicianId() ? 'Mise à jour...' : 'Enregistrement...';
+  });
 
   readonly addTechModalVisible = computed(
     () => this.addTechOpen() || this.addTechClosing(),
@@ -919,9 +995,47 @@ export class DashboardSavPageComponent implements OnDestroy {
     return `${prenomInitial}${nomInitial}`.trim().toUpperCase() || 'T';
   });
 
+  readonly addTechPhotoHint = computed(() => {
+    return this.newAvatarFile()
+      ? 'Photo prête à être envoyée.'
+      : 'Photo facultative.';
+  });
+
+  readonly phonePlaceholder = computed(
+    () => this.selectedCountryCode().sampleNational,
+  );
+
+  readonly phoneError = computed(() => {
+    const phoneDraft = this.newPhone().trim();
+
+    if (!phoneDraft) {
+      return null;
+    }
+
+    return this.formatPhoneValue(phoneDraft)
+      ? null
+      : `Numéro invalide. Exemple attendu: ${this.selectedCountryCode().sampleE164}`;
+  });
+
+  readonly emailError = computed(() => {
+    const email = this.newEmail().trim();
+
+    if (!email) {
+      return null;
+    }
+
+    return EMAIL_PATTERN.test(email)
+      ? null
+      : 'Renseignez une adresse e-mail valide.';
+  });
+
   readonly canSaveTech = computed(() => {
     return Boolean(
-      this.newPrenom().trim() && this.newNom().trim() && this.newPhone().trim(),
+      this.newPrenom().trim() &&
+        this.newNom().trim() &&
+        this.newPhone().trim() &&
+        !this.phoneError() &&
+        !this.emailError(),
     );
   });
 
@@ -965,6 +1079,41 @@ export class DashboardSavPageComponent implements OnDestroy {
       if (!error) {
         this.lastTechnicianError = null;
       }
+    });
+
+    effect(() => {
+      const pendingMutation = this.pendingTechMutation();
+      const saving = this.techniciansStore.saving();
+      const error = this.techniciansStore.error();
+
+      if (!pendingMutation) {
+        this.techMutationRequestStarted = false;
+        return;
+      }
+
+      if (saving) {
+        this.techMutationRequestStarted = true;
+        return;
+      }
+
+      if (!this.techMutationRequestStarted) {
+        return;
+      }
+
+      this.techMutationRequestStarted = false;
+      this.pendingTechMutation.set(null);
+
+      if (error) {
+        return;
+      }
+
+      this.showToast(
+        'success',
+        pendingMutation === 'update'
+          ? 'Technicien mis à jour.'
+          : 'Technicien ajouté.',
+      );
+      this.closeAddTech();
     });
   }
 
@@ -1332,7 +1481,7 @@ export class DashboardSavPageComponent implements OnDestroy {
   }
 
   closeAddTech(): void {
-    if (!this.addTechOpen()) {
+    if (!this.addTechOpen() || this.techniciansStore.saving()) {
       return;
     }
 
@@ -1382,19 +1531,124 @@ export class DashboardSavPageComponent implements OnDestroy {
     }
 
     this.photoObjectUrl = defaultView.URL.createObjectURL(file);
+    this.newAvatarFile.set(file);
     this.newPhotoUrl.set(this.photoObjectUrl);
+  }
+
+  onPhoneDraftChange(value: string): void {
+    this.newPhone.set(
+      sanitizeSavPhoneDraft(value, this.selectedCountryCode().dialCode),
+    );
+  }
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const nextValue = input?.value ?? '';
+
+    this.onPhoneDraftChange(nextValue);
+
+    if (input && input.value !== this.newPhone()) {
+      input.value = this.newPhone();
+    }
+  }
+
+  onPhoneBeforeInput(event: InputEvent): void {
+    if (event.isComposing) {
+      return;
+    }
+
+    const inputType = event.inputType ?? '';
+
+    if (
+      inputType.startsWith('delete') ||
+      inputType === 'insertFromPaste' ||
+      inputType === 'insertReplacementText'
+    ) {
+      return;
+    }
+
+    if (event.data && /\D/.test(event.data)) {
+      event.preventDefault();
+    }
+  }
+
+  onPhoneKeyDown(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
+    const allowedKeys = new Set([
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowUp',
+      'ArrowDown',
+      'Tab',
+      'Home',
+      'End',
+      'Enter',
+    ]);
+
+    if (allowedKeys.has(event.key)) {
+      return;
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  onPhonePaste(event: ClipboardEvent): void {
+    event.preventDefault();
+
+    const pastedText = event.clipboardData?.getData('text') ?? '';
+    const input = event.target as HTMLInputElement | null;
+    const currentValue = this.newPhone();
+    const selectionStart = input?.selectionStart ?? currentValue.length;
+    const selectionEnd = input?.selectionEnd ?? selectionStart;
+    const mergedValue = `${currentValue.slice(0, selectionStart)}${pastedText}${currentValue.slice(selectionEnd)}`;
+    const sanitizedValue = sanitizeSavPhoneDraft(
+      mergedValue,
+      this.selectedCountryCode().dialCode,
+    );
+
+    this.newPhone.set(sanitizedValue);
+
+    if (!input) {
+      return;
+    }
+
+    input.value = sanitizedValue;
+
+    const pastedDigitsLength = pastedText.replaceAll(/\D/g, '').length;
+    const nextCursor = Math.min(
+      selectionStart + pastedDigitsLength,
+      sanitizedValue.length,
+    );
+
+    queueMicrotask(() => {
+      input.setSelectionRange(nextCursor, nextCursor);
+    });
+  }
+
+  onCountryCodeChange(country: DashboardSavCountryCodeOption): void {
+    this.selectedCountryCode.set(country);
+    this.newPhone.set(sanitizeSavPhoneDraft(this.newPhone(), country.dialCode));
   }
 
   saveTech(): void {
     const prenom = this.newPrenom().trim();
     const nom = this.newNom().trim();
     const phone = this.formatPhoneValue(this.newPhone());
+    const email = this.newEmail().trim();
+    const address = this.newAddress().trim();
     const profession = this.resolveProfessionCode(this.newSpecialty());
     const photoUrl = this.newPhotoUrl();
     const avatarUrl =
       photoUrl && !photoUrl.startsWith('blob:') ? photoUrl : undefined;
 
-    if (!prenom || !nom || !phone) {
+    if (!prenom || !nom || !phone || this.phoneError() || this.emailError()) {
       return;
     }
 
@@ -1402,24 +1656,25 @@ export class DashboardSavPageComponent implements OnDestroy {
       firstName: prenom,
       lastName: nom,
       phone,
+      email: email || undefined,
+      address: address || undefined,
       profession: profession || undefined,
       avatarUrl,
+      avatarFile: this.newAvatarFile() ?? undefined,
     };
 
     const editingTechnicianId = this.editingTechnicianId();
 
     if (editingTechnicianId) {
+      this.pendingTechMutation.set('update');
       this.techniciansStore.updateTechnician({
         id: editingTechnicianId,
         body,
       });
-      this.showToast('success', 'Technicien mis à jour.');
     } else {
+      this.pendingTechMutation.set('create');
       this.techniciansStore.createTechnician(body);
-      this.showToast('success', 'Technicien ajouté.');
     }
-
-    this.closeAddTech();
   }
 
   openEditTech(technician: DashboardSavTechnician): void {
@@ -1428,12 +1683,11 @@ export class DashboardSavPageComponent implements OnDestroy {
 
     this.newPrenom.set(firstName);
     this.newNom.set(rest.join(' ').trim());
+    this.newEmail.set(technician.email ?? '');
+    this.newAddress.set(technician.address ?? '');
     this.newSpecialty.set(technician.specialty);
-    this.newPhotoUrl.set(
-      technician.image.startsWith('blob:')
-        ? technician.image
-        : technician.image,
-    );
+    this.newAvatarFile.set(null);
+    this.newPhotoUrl.set(technician.image);
     this.populatePhoneDraft(technician.phone);
     this.clearAddTechCloseTimeout();
 
@@ -1491,6 +1745,7 @@ export class DashboardSavPageComponent implements OnDestroy {
     }
 
     this.photoObjectUrl = null;
+    this.newAvatarFile.set(null);
     this.newPhotoUrl.set(null);
   }
 
@@ -1850,13 +2105,15 @@ export class DashboardSavPageComponent implements OnDestroy {
 
   private resetAddTechDraft(): void {
     this.editingTechnicianId.set(null);
+    this.pendingTechMutation.set(null);
     this.newPrenom.set('');
     this.newNom.set('');
     this.newPhone.set('');
+    this.newEmail.set('');
+    this.newAddress.set('');
     this.newSpecialty.set(
       this.specialtyOptions()[0] ?? 'Plomberie & sanitaires',
     );
-    this.newPayment.set('Espèces');
     this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
     this.resetPhotoState();
   }
@@ -1868,21 +2125,21 @@ export class DashboardSavPageComponent implements OnDestroy {
       return;
     }
 
-    const normalizedPhone = phone.replace(/\s+/g, ' ').trim();
+    const normalizedPhone = phone.replaceAll(/\s+/g, '').trim();
     const matchingCountry = COUNTRY_CODE_OPTIONS.find((country) =>
       normalizedPhone.startsWith(`+${country.dialCode}`),
     );
 
     if (!matchingCountry) {
       this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
-      this.newPhone.set(normalizedPhone);
+      this.newPhone.set(normalizedPhone.replaceAll(/\D/g, ''));
       return;
     }
 
     this.selectedCountryCode.set(matchingCountry);
     this.newPhone.set(
       normalizedPhone.replace(
-        new RegExp(String.raw`^\+${matchingCountry.dialCode}\s*`),
+        new RegExp(String.raw`^\+${matchingCountry.dialCode}`),
         '',
       ),
     );
@@ -1947,14 +2204,17 @@ export class DashboardSavPageComponent implements OnDestroy {
     severity: 'success' | 'error' | 'info',
     detail: string,
   ): void {
+    let summary = 'Information';
+
+    if (severity === 'success') {
+      summary = 'Operation reussie';
+    } else if (severity === 'error') {
+      summary = 'Action impossible';
+    }
+
     this.messageService.add({
       severity,
-      summary:
-        severity === 'success'
-          ? 'Operation reussie'
-          : severity === 'error'
-            ? 'Action impossible'
-            : 'Information',
+      summary,
       detail,
       life: severity === 'error' ? 6200 : 4200,
       closable: true,
@@ -1965,19 +2225,7 @@ export class DashboardSavPageComponent implements OnDestroy {
   }
 
   private formatPhoneValue(value: string): string {
-    const compactValue = value.replace(/\s+/g, ' ').trim();
-
-    if (!compactValue) {
-      return '';
-    }
-
-    const dialCode = this.selectedCountryCode().dialCode;
-    const withoutCountryCode = compactValue.replace(
-      new RegExp(String.raw`^\+?${dialCode}\s*`),
-      '',
-    );
-
-    return `+${dialCode} ${withoutCountryCode}`.trim();
+    return composeSavE164Phone(this.selectedCountryCode().dialCode, value);
   }
 
   private lockPageScroll(): void {
