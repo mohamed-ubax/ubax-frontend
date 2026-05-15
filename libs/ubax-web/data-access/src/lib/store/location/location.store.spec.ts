@@ -1,5 +1,9 @@
 import '@angular/compiler';
-import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpResponse,
+} from '@angular/common/http';
 import { Injector, ProviderToken, Type } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import {
@@ -15,8 +19,8 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
   return {
     ...actual,
-    list4: vi.fn(),
-    getById2: vi.fn(),
+    list5: vi.fn(),
+    getById3: vi.fn(),
     qualify: vi.fn(),
     reject: vi.fn(),
   };
@@ -29,11 +33,41 @@ function toStrictResponse<T>(body: T): StrictHttpResponse<T> {
 type Tenant = TenantResponse & { id: string };
 
 const TENANTS: Tenant[] = [
-  { id: 'loc-1', userId: 'loc-1', status: 'QUALIFIED', firstName: 'Awa', lastName: 'Diallo' },
-  { id: 'loc-2', userId: 'loc-2', status: 'PENDING_REVIEW', firstName: 'Kone', lastName: 'Ibrahim' },
-  { id: 'loc-3', userId: 'loc-3', status: 'PENDING_REVIEW', firstName: 'Sara', lastName: 'Coulibaly' },
-  { id: 'loc-4', userId: 'loc-4', status: 'REJECTED', firstName: 'Ali', lastName: 'Touré' },
-  { id: 'loc-5', userId: 'loc-5', status: 'QUALIFIED', firstName: 'Nina', lastName: 'Bamba' },
+  {
+    id: 'loc-1',
+    userId: 'loc-1',
+    status: 'QUALIFIED',
+    firstName: 'Awa',
+    lastName: 'Diallo',
+  },
+  {
+    id: 'loc-2',
+    userId: 'loc-2',
+    status: 'PENDING_REVIEW',
+    firstName: 'Kone',
+    lastName: 'Ibrahim',
+  },
+  {
+    id: 'loc-3',
+    userId: 'loc-3',
+    status: 'PENDING_REVIEW',
+    firstName: 'Sara',
+    lastName: 'Coulibaly',
+  },
+  {
+    id: 'loc-4',
+    userId: 'loc-4',
+    status: 'REJECTED',
+    firstName: 'Ali',
+    lastName: 'Touré',
+  },
+  {
+    id: 'loc-5',
+    userId: 'loc-5',
+    status: 'QUALIFIED',
+    firstName: 'Nina',
+    lastName: 'Bamba',
+  },
 ];
 
 type LocationStoreContract = {
@@ -54,13 +88,14 @@ type LocationStoreContract = {
 };
 
 describe('LocationStore', () => {
-  const storeToken = LocationStore as unknown as ProviderToken<LocationStoreContract>;
+  const storeToken =
+    LocationStore as unknown as ProviderToken<LocationStoreContract>;
   const storeClass = LocationStore as unknown as Type<unknown>;
 
   let store: LocationStoreContract;
 
   beforeEach(() => {
-    vi.mocked(apiTypes.list4).mockImplementation(() =>
+    vi.mocked(apiTypes.list5).mockImplementation(() =>
       of(toStrictResponse(TENANTS)),
     );
     vi.mocked(apiTypes.qualify).mockImplementation(
@@ -87,7 +122,10 @@ describe('LocationStore', () => {
     const injector = Injector.create({
       providers: [
         { provide: HttpClient, useValue: {} },
-        { provide: ApiConfiguration, useValue: { rootUrl: 'https://test.local' } },
+        {
+          provide: ApiConfiguration,
+          useValue: { rootUrl: 'https://test.local' },
+        },
         { provide: storeToken, useClass: storeClass },
       ],
     });

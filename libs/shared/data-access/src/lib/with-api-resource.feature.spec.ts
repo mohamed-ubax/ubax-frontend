@@ -226,7 +226,9 @@ describe('withApiResource', () => {
     store.load({ page: 9 });
 
     expect(store.hasError()).toBe(true);
-    expect(store.error()).toContain('500');
+    expect(store.error()).toBe(
+      'Erreur interne du serveur. Notre équipe technique a été notifiée.',
+    );
     expect(store.isLoading()).toBe(false);
 
     store.clearError();
@@ -265,7 +267,9 @@ describe('withApiResource', () => {
       notifStore.load({ page: 1 });
 
       expect(notif.error).toHaveBeenCalledTimes(1);
-      expect(notif.error).toHaveBeenCalledWith(expect.stringContaining('503'));
+      expect(notif.error).toHaveBeenCalledWith(
+        'Service en maintenance. Réessayez dans quelques instants.',
+      );
     });
   });
 
