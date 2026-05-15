@@ -39,6 +39,7 @@ const TECHNICIANS: Technician[] = [
     firstName: 'Awa',
     lastName: 'Traore',
     phone: '+2250700000001',
+    avatarUrl: 'https://storage.test.local/technicians/avatar-tech-1.png',
     profession: 'PLOMBERIE',
     available: true,
   },
@@ -137,7 +138,8 @@ describe('TechniciansStore', () => {
       of(
         toStrictResponse({
           data: {
-            avatarUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
+            avatarUrl:
+              'https://storage.test.local/technicians/avatar-tech-3.png',
           },
         }),
       ),
@@ -162,6 +164,9 @@ describe('TechniciansStore', () => {
 
     expect(store.entities()).toHaveLength(2);
     expect(store.entities()[0]?.id).toBe('tech-1');
+    expect(store.entities()[0]?.avatarUrl).toBe(
+      'https://storage.test.local/technicians/avatar-tech-1.png',
+    );
     expect(store.availableTechnicians()).toHaveLength(1);
   });
 
@@ -210,7 +215,7 @@ describe('TechniciansStore', () => {
     expect(
       store.entities().find((technician) => technician.id === 'tech-3')
         ?.avatarUrl,
-    ).toBe('https://cdn.test.local/users-avatars/avatar-tech-3.png');
+    ).toBe('https://storage.test.local/technicians/avatar-tech-3.png');
     expect(store.saving()).toBe(false);
   });
 
@@ -252,7 +257,7 @@ describe('TechniciansStore', () => {
     expect(
       store.entities().find((technician) => technician.id === 'tech-1')
         ?.avatarUrl,
-    ).toBe('https://cdn.test.local/users-avatars/avatar-tech-3.png');
+    ).toBe('https://storage.test.local/technicians/avatar-tech-3.png');
   });
 
   it('bascule la disponibilite d un technicien', () => {

@@ -35,7 +35,16 @@ import {
   update,
   UpdateTechnicienRequest,
 } from '@ubax-workspace/shared-api-types';
-import { catchError, exhaustMap, map, of, pipe, switchMap, tap } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  exhaustMap,
+  map as rxMap,
+  of,
+  pipe,
+  switchMap as rxSwitchMap,
+  tap,
+} from 'rxjs';
 
 export type Technician = {
   id: string;
@@ -204,7 +213,7 @@ function uploadTechnicianAvatar(
   rootUrl: string,
   technicianId: string | undefined,
   avatarFile?: File,
-) {
+): Observable<string | undefined> {
   if (!avatarFile || !technicianId) {
     return of<string | undefined>(undefined);
   }
@@ -213,7 +222,7 @@ function uploadTechnicianAvatar(
     id: technicianId,
     body: { file: avatarFile },
   }).pipe(
-    map((response) => {
+    rxMap((response) => {
       const body = extractResponseData(response.body);
       const record =
         body && typeof body === 'object'
@@ -231,15 +240,36 @@ function uploadTechnicianAvatar(
   );
 }
 
-function withUploadedAvatar(
+function withUploadedTechnicianAvatar(
   http: HttpClient,
   rootUrl: string,
   technician: Technician,
   avatarFile?: File,
-) {
+  fallbackAvatarUrl?: string,
+): Observable<Technician> {
   return uploadTechnicianAvatar(http, rootUrl, technician.id, avatarFile).pipe(
-    map((avatarUrl) => (avatarUrl ? { ...technician, avatarUrl } : technician)),
+    rxMap(
+      (uploadedAvatarUrl): Technician => ({
+        ...technician,
+        avatarUrl:
+          uploadedAvatarUrl ?? technician.avatarUrl ?? fallbackAvatarUrl,
+      }),
+    ),
   );
+}
+
+function withFallbackAvatarUrl(
+  technician: Technician,
+  fallbackAvatarUrl?: string,
+): Technician {
+  if (technician.avatarUrl || !fallbackAvatarUrl) {
+    return technician;
+  }
+
+  return {
+    ...technician,
+    avatarUrl: fallbackAvatarUrl,
+  };
 }
 
 export const TechniciansStore = signalStore(
@@ -323,7 +353,7 @@ export const TechniciansStore = signalStore(
               findAllByType(http, apiConfig.rootUrl, {
                 type: 'TECHNICIEN_PROFESSION',
               }).pipe(
-                map((response) => extractCodeListFromResponse(response.body)),
+                rxMap((response) => extractCodeListFromResponse(response.body)),
                 tapResponse({
                   next: (professionCodeList: LaCodeListDto[]) =>
                     patchState(store, {
@@ -352,13 +382,14 @@ export const TechniciansStore = signalStore(
               create2(http, apiConfig.rootUrl, {
                 body: body as CreateTechnicienRequest,
               }).pipe(
-                map((response) => mapTechnicianResponse(response.body)),
-                switchMap((technician) =>
-                  withUploadedAvatar(
+                rxMap((response) => mapTechnicianResponse(response.body)),
+                rxSwitchMap((technician) =>
+                  withUploadedTechnicianAvatar(
                     http,
                     apiConfig.rootUrl,
                     technician,
                     avatarFile,
+                    body.avatarUrl,
                   ),
                 ),
                 tapResponse({
@@ -378,18 +409,20 @@ export const TechniciansStore = signalStore(
             tap(setSavingState),
             exhaustMap(({ id, body }) => {
               const { avatarFile, ...nextBody } = body;
+              const currentAvatarUrl = store.entityMap()[id]?.avatarUrl;
 
               return update(http, apiConfig.rootUrl, {
                 id,
                 body: nextBody as UpdateTechnicienRequest,
               }).pipe(
-                map((response) => mapTechnicianResponse(response.body, id)),
-                switchMap((technician) =>
-                  withUploadedAvatar(
+                rxMap((response) => mapTechnicianResponse(response.body, id)),
+                rxSwitchMap((technician) =>
+                  withUploadedTechnicianAvatar(
                     http,
                     apiConfig.rootUrl,
                     technician,
                     avatarFile,
+                    nextBody.avatarUrl ?? currentAvatarUrl,
                   ),
                 ),
                 tapResponse({
@@ -406,7 +439,12 @@ export const TechniciansStore = signalStore(
             tap(() => patchState(store, { saving: true, error: null })),
             exhaustMap((id) =>
               toggleAvailability(http, apiConfig.rootUrl, { id }).pipe(
-                map((response) => mapTechnicianResponse(response.body, id)),
+                rxMap((response) =>
+                  withFallbackAvatarUrl(
+                    mapTechnicianResponse(response.body, id),
+                    store.entityMap()[id]?.avatarUrl,
+                  ),
+                ),
                 tapResponse({
                   next: (technician: Technician) =>
                     patchState(
