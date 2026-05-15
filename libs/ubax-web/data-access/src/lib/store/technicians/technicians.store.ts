@@ -214,15 +214,31 @@ function uploadTechnicianAvatar(
     body: { file: avatarFile },
   }).pipe(
     map((response) => {
-      const body = response.body as Record<string, unknown> | null;
+      const body = extractResponseData(response.body);
+      const record =
+        body && typeof body === 'object'
+          ? (body as Record<string, unknown>)
+          : null;
+
       return (
-        readString(body?.['avatarUrl']) ??
-        readString(body?.['fileUrl']) ??
-        readString(body?.['avatar']) ??
+        readString(record?.['avatarUrl']) ??
+        readString(record?.['fileUrl']) ??
+        readString(record?.['avatar']) ??
         undefined
       );
     }),
     catchError(() => of(undefined)),
+  );
+}
+
+function withUploadedAvatar(
+  http: HttpClient,
+  rootUrl: string,
+  technician: Technician,
+  avatarFile?: File,
+) {
+  return uploadTechnicianAvatar(http, rootUrl, technician.id, avatarFile).pipe(
+    map((avatarUrl) => (avatarUrl ? { ...technician, avatarUrl } : technician)),
   );
 }
 
@@ -333,20 +349,22 @@ export const TechniciansStore = signalStore(
           pipe(
             tap(setSavingState),
             exhaustMap(({ avatarFile, ...body }) =>
-              uploadTechnicianAvatar(http, apiConfig.rootUrl, undefined, avatarFile).pipe(
-                map((avatarUrl) => ({
-                  ...body,
-                  avatarUrl: avatarUrl ?? body.avatarUrl,
-                })),
-                switchMap((preparedBody) =>
-                  create2(http, apiConfig.rootUrl, { body: preparedBody as CreateTechnicienRequest }).pipe(
-                    map((response) => mapTechnicianResponse(response.body)),
-                    tapResponse({
-                      next: handleCreateSuccess,
-                      error: handleCreateError,
-                    }),
+              create2(http, apiConfig.rootUrl, {
+                body: body as CreateTechnicienRequest,
+              }).pipe(
+                map((response) => mapTechnicianResponse(response.body)),
+                switchMap((technician) =>
+                  withUploadedAvatar(
+                    http,
+                    apiConfig.rootUrl,
+                    technician,
+                    avatarFile,
                   ),
                 ),
+                tapResponse({
+                  next: handleCreateSuccess,
+                  error: handleCreateError,
+                }),
               ),
             ),
           ),
@@ -361,28 +379,23 @@ export const TechniciansStore = signalStore(
             exhaustMap(({ id, body }) => {
               const { avatarFile, ...nextBody } = body;
 
-              return uploadTechnicianAvatar(
-                http,
-                apiConfig.rootUrl,
+              return update(http, apiConfig.rootUrl, {
                 id,
-                avatarFile,
-              ).pipe(
-                map((avatarUrl) => ({
-                  ...nextBody,
-                  avatarUrl: avatarUrl ?? nextBody.avatarUrl,
-                })),
-                switchMap((preparedBody) =>
-                  update(http, apiConfig.rootUrl, {
-                    id,
-                    body: preparedBody as UpdateTechnicienRequest,
-                  }).pipe(
-                    map((response) => mapTechnicianResponse(response.body, id)),
-                    tapResponse({
-                      next: handleUpdateSuccess,
-                      error: handleUpdateError,
-                    }),
+                body: nextBody as UpdateTechnicienRequest,
+              }).pipe(
+                map((response) => mapTechnicianResponse(response.body, id)),
+                switchMap((technician) =>
+                  withUploadedAvatar(
+                    http,
+                    apiConfig.rootUrl,
+                    technician,
+                    avatarFile,
                   ),
                 ),
+                tapResponse({
+                  next: handleUpdateSuccess,
+                  error: handleUpdateError,
+                }),
               );
             }),
           ),

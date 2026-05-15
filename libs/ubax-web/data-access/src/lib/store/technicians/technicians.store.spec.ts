@@ -25,7 +25,7 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     toggleAvailability: vi.fn(),
     delete$: vi.fn(),
     findAllByType: vi.fn(),
-    uploadAvatar: vi.fn(),
+    uploadAvatar1: vi.fn(),
   };
 });
 
@@ -133,10 +133,12 @@ describe('TechniciansStore', () => {
         }),
       ),
     );
-    vi.mocked(apiTypes.uploadAvatar).mockImplementation(() =>
+    vi.mocked(apiTypes.uploadAvatar1).mockImplementation(() =>
       of(
         toStrictResponse({
-          avatarUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
+          data: {
+            avatarUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
+          },
         }),
       ),
     );
@@ -190,12 +192,25 @@ describe('TechniciansStore', () => {
     expect(
       store.entities().some((technician) => technician.id === 'tech-3'),
     ).toBe(true);
-    expect(apiTypes.uploadAvatar).toHaveBeenCalled();
+    expect(apiTypes.uploadAvatar1).toHaveBeenCalledWith(
+      expect.anything(),
+      'https://test.local',
+      {
+        id: 'tech-3',
+        body: { file: avatarFile },
+      },
+    );
     expect(vi.mocked(apiTypes.create2).mock.calls[0]?.[2]).toMatchObject({
       body: expect.objectContaining({
-        avatarUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
+        firstName: 'Mariam',
+        lastName: 'Diallo',
+        phone: '+2250700000003',
       }),
     });
+    expect(
+      store.entities().find((technician) => technician.id === 'tech-3')
+        ?.avatarUrl,
+    ).toBe('https://cdn.test.local/users-avatars/avatar-tech-3.png');
     expect(store.saving()).toBe(false);
   });
 
@@ -210,6 +225,34 @@ describe('TechniciansStore', () => {
       store.entities().find((technician) => technician.id === 'tech-1')
         ?.profession,
     ).toBe('CLIMATISATION');
+  });
+
+  it('uploade l avatar via la route du technicien lors d une mise a jour', () => {
+    const avatarFile = new File(['avatar'], 'avatar-tech-1.png', {
+      type: 'image/png',
+    });
+
+    store.load();
+    store.updateTechnician({
+      id: 'tech-1',
+      body: {
+        profession: 'CLIMATISATION',
+        avatarFile,
+      },
+    });
+
+    expect(apiTypes.uploadAvatar1).toHaveBeenCalledWith(
+      expect.anything(),
+      'https://test.local',
+      {
+        id: 'tech-1',
+        body: { file: avatarFile },
+      },
+    );
+    expect(
+      store.entities().find((technician) => technician.id === 'tech-1')
+        ?.avatarUrl,
+    ).toBe('https://cdn.test.local/users-avatars/avatar-tech-3.png');
   });
 
   it('bascule la disponibilite d un technicien', () => {
