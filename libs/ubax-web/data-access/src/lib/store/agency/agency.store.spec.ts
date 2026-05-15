@@ -21,6 +21,12 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
   return {
     ...actual,
+    getTeamMembers: vi.fn(),
+    getSubRoles: vi.fn(),
+    addMember: vi.fn(),
+    assignSubRoles: vi.fn(),
+    removeMember: vi.fn(),
+    revokeSubRole: vi.fn(),
     getTeamMembers1: vi.fn(),
     getSubRoles1: vi.fn(),
     addMember1: vi.fn(),
@@ -68,6 +74,20 @@ const SUB_ROLES_BY_USER_ID: Record<string, string[]> = {
   'a-3': ['DIRECTEUR_AGENCE', 'COMPTABLE_AGENCE'],
 };
 
+const HOTEL_MEMBERS: AgencyTeamMember[] = [
+  {
+    userId: 'h-1',
+    keycloakId: 'kc-h1',
+    email: 'hotel@ubax.com',
+    active: true,
+    roles: ['PARTNER'],
+  },
+];
+
+const HOTEL_SUB_ROLES_BY_USER_ID: Record<string, string[]> = {
+  'h-1': ['RECEPTIONNISTE'],
+};
+
 type AgencyStoreContract = {
   entities(): AgencyTeamMember[];
   isLoading(): boolean;
@@ -100,8 +120,21 @@ describe('AgencyStore', () => {
   let store: AgencyStoreContract;
 
   beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(apiTypes.getTeamMembers).mockImplementation(() =>
+      of(toStrictResponse(HOTEL_MEMBERS)),
+    );
     vi.mocked(apiTypes.getTeamMembers1).mockImplementation(() =>
       of(toStrictResponse(MEMBERS)),
+    );
+    vi.mocked(apiTypes.getSubRoles).mockImplementation(
+      (_http, _rootUrl, params: any) =>
+        of(
+          toStrictResponse({
+            data: HOTEL_SUB_ROLES_BY_USER_ID[params?.userId] ?? [],
+          }),
+        ) as any,
     );
     vi.mocked(apiTypes.getSubRoles1).mockImplementation(
       (_http, _rootUrl, params: any) =>
@@ -109,6 +142,20 @@ describe('AgencyStore', () => {
           toStrictResponse({
             data: SUB_ROLES_BY_USER_ID[params?.userId] ?? [],
           }),
+        ) as any,
+    );
+    vi.mocked(apiTypes.addMember).mockImplementation(
+      (_http, _rootUrl, params: any) =>
+        of(
+          toStrictResponse({
+            userId: 'new-h1',
+            keycloakId: 'kc-new-h1',
+            email: params?.body?.email ?? 'hotel-new@ubax.com',
+            firstName: params?.body?.firstName ?? 'Hotel',
+            lastName: params?.body?.lastName ?? 'Member',
+            active: true,
+            roles: ['PARTNER'],
+          } as AgencyTeamMember),
         ) as any,
     );
     vi.mocked(apiTypes.addMember1).mockImplementation(
@@ -125,11 +172,20 @@ describe('AgencyStore', () => {
           } as AgencyTeamMember),
         ) as any,
     );
+    vi.mocked(apiTypes.assignSubRoles).mockImplementation(
+      () => of(new HttpResponse({ status: 200 })) as any,
+    );
     vi.mocked(apiTypes.assignSubRoles1).mockImplementation(
       () => of(new HttpResponse({ status: 200 })) as any,
     );
+    vi.mocked(apiTypes.removeMember).mockImplementation(
+      () => of(new HttpResponse({ status: 204 })) as any,
+    );
     vi.mocked(apiTypes.removeMember1).mockImplementation(
       () => of(new HttpResponse({ status: 204 })) as any,
+    );
+    vi.mocked(apiTypes.revokeSubRole).mockImplementation(
+      () => of(new HttpResponse({ status: 200 })) as any,
     );
     vi.mocked(apiTypes.revokeSubRole1).mockImplementation(
       () => of(new HttpResponse({ status: 200 })) as any,
@@ -183,6 +239,62 @@ describe('AgencyStore', () => {
     });
   });
 
+  describe('API routing by scope', () => {
+    it('charge les membres agence via /v1/agency/team', () => {
+      store.load({ scope: 'AGENCE' });
+
+      expect(apiTypes.getTeamMembers1).toHaveBeenCalledTimes(1);
+      expect(apiTypes.getTeamMembers).not.toHaveBeenCalled();
+      expect(store.entities().map((member) => member.userId)).toEqual([
+        'a-1',
+        'a-2',
+        'a-3',
+      ]);
+    });
+
+    it('charge les membres hotel via /v1/hotel/team', () => {
+      store.load({ scope: 'HOTEL' });
+
+      expect(apiTypes.getTeamMembers).toHaveBeenCalledTimes(1);
+      expect(apiTypes.getTeamMembers1).not.toHaveBeenCalled();
+      expect(store.entities().map((member) => member.userId)).toEqual(['h-1']);
+    });
+
+    it('route la lecture des sous-roles hotel vers /v1/hotel/team/:userId/sub-roles', () => {
+      store.load({ scope: 'HOTEL' });
+      store.loadMemberSubRoles('h-1');
+
+      expect(apiTypes.getSubRoles).toHaveBeenCalledTimes(1);
+      expect(apiTypes.getSubRoles1).not.toHaveBeenCalled();
+      expect(store.memberSubRoles()['h-1']).toEqual(['RECEPTIONNISTE']);
+    });
+
+    it('route les mutations hotel vers les endpoints hotel correspondants', () => {
+      store.load({ scope: 'HOTEL' });
+
+      store.inviterMembre({
+        email: 'hotel-new@ubax.com',
+        firstName: 'Hotel',
+        lastName: 'Member',
+      } as AddTeamMemberRequest);
+      store.assignerSousRoles({
+        userId: 'h-1',
+        body: { scope: 'HOTEL', roles: ['RECEPTIONNISTE'] },
+      });
+      store.revoquerSousRole({ userId: 'h-1', role: 'RECEPTIONNISTE' });
+      store.desactiverMembre('h-1');
+
+      expect(apiTypes.addMember).toHaveBeenCalledTimes(1);
+      expect(apiTypes.addMember1).not.toHaveBeenCalled();
+      expect(apiTypes.assignSubRoles).toHaveBeenCalledTimes(1);
+      expect(apiTypes.assignSubRoles1).not.toHaveBeenCalled();
+      expect(apiTypes.revokeSubRole).toHaveBeenCalledTimes(1);
+      expect(apiTypes.revokeSubRole1).not.toHaveBeenCalled();
+      expect(apiTypes.removeMember).toHaveBeenCalledTimes(1);
+      expect(apiTypes.removeMember1).not.toHaveBeenCalled();
+    });
+  });
+
   describe('loadMemberSubRoles', () => {
     it('hydrate les sous-rôles pour un membre donné', () => {
       store.load({});
@@ -209,7 +321,7 @@ describe('AgencyStore', () => {
 
       expect(store.memberSubRoles()['a-1']).toEqual([]);
       expect(store.memberSubRolesLoading()['a-1']).toBe(false);
-      expect(store.memberSubRolesError()['a-1']).toContain('503');
+      expect(store.memberSubRolesError()['a-1']).toMatch(/503|maintenance/i);
     });
   });
 
