@@ -73,9 +73,9 @@ export const adminRoutes: Route[] = [
       {
         path: 'candidatures/:id',
         loadComponent: () =>
-          import('./pages/candidatures/candidatures-detail-page.component').then(
-            (m) => m.CandidaturesDetailPageComponent,
-          ),
+          import(
+            './pages/candidatures/candidatures-detail-page.component'
+          ).then((m) => m.CandidaturesDetailPageComponent),
       },
       // UBAX-FE-613 — Modération des biens PENDING
       {
@@ -107,6 +107,13 @@ export const adminRoutes: Route[] = [
         loadComponent: () =>
           import('./pages/clients/clients-page.component').then(
             (m) => m.ClientsPageComponent,
+          ),
+      },
+      {
+        path: 'code-lists',
+        loadComponent: () =>
+          import('./pages/code-lists/code-lists-page.component').then(
+            (m) => m.CodeListsPageComponent,
           ),
       },
 

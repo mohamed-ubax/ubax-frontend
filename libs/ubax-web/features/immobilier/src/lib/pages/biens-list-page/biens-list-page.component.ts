@@ -19,7 +19,7 @@ import {
 } from '@ubax-workspace/ubax-web-data-access';
 import {
   LaCodeListDto,
-  ListMine$Params,
+  ListMine1$Params,
   PropertyResponse,
 } from '@ubax-workspace/shared-api-types';
 import {
@@ -87,7 +87,7 @@ type ListBienCard = {
   readonly rejectionReason: string | null;
 };
 
-type PropertyMineStatus = NonNullable<ListMine$Params['status']>;
+type PropertyMineStatus = NonNullable<ListMine1$Params['status']>;
 
 const DEFAULT_TYPE_OPTIONS: readonly FilterOption[] = [
   { label: 'Type de bien', value: 'all', tone: 'neutral' },
@@ -500,7 +500,7 @@ export class BiensListPageComponent implements OnDestroy {
     () => this.archiveDialogTarget()?.title ?? 'ce bien',
   );
 
-  private readonly loadParams = computed<ListMine$Params>(() => {
+  private readonly loadParams = computed<ListMine1$Params>(() => {
     const page = this.currentPage();
     const size = this.pageSize();
     const sel = this.selectedStatus();

@@ -8,20 +8,15 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
-import { Pageable } from '../../models/pageable';
 
-export interface List5$Params {
-  status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
-  search?: string;
-  pageable: Pageable;
+export interface GetAgencyMembers$Params {
+  agencyId: string;
 }
 
-export function list5(http: HttpClient, rootUrl: string, params: List5$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
+export function getAgencyMembers(http: HttpClient, rootUrl: string, params: GetAgencyMembers$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, getAgencyMembers.PATH, 'get');
   if (params) {
-    rb.query('status', params.status, {});
-    rb.query('search', params.search, {});
-    rb.query('pageable', params.pageable, {});
+    rb.path('agencyId', params.agencyId, {});
   }
 
   return http.request(
@@ -34,4 +29,4 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   );
 }
 
-list5.PATH = '/v1/contracts';
+getAgencyMembers.PATH = '/v1/admin/agencies/{agencyId}/members';

@@ -8,20 +8,15 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
-import { Pageable } from '../../models/pageable';
 
-export interface List5$Params {
-  status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
-  search?: string;
-  pageable: Pageable;
+export interface GetInactiveHotelMembers$Params {
+  hotelId: string;
 }
 
-export function list5(http: HttpClient, rootUrl: string, params: List5$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
+export function getInactiveHotelMembers(http: HttpClient, rootUrl: string, params: GetInactiveHotelMembers$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, getInactiveHotelMembers.PATH, 'get');
   if (params) {
-    rb.query('status', params.status, {});
-    rb.query('search', params.search, {});
-    rb.query('pageable', params.pageable, {});
+    rb.path('hotelId', params.hotelId, {});
   }
 
   return http.request(
@@ -34,4 +29,4 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   );
 }
 
-list5.PATH = '/v1/contracts';
+getInactiveHotelMembers.PATH = '/v1/admin/hotels/{hotelId}/members/inactive';

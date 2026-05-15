@@ -7,20 +7,16 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { ClientUserResponse } from '../../models/client-user-response';
 import { Pageable } from '../../models/pageable';
 
-export interface List5$Params {
-  status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
-  search?: string;
+export interface ListClients$Params {
   pageable: Pageable;
 }
 
-export function list5(http: HttpClient, rootUrl: string, params: List5$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
+export function listClients(http: HttpClient, rootUrl: string, params: ListClients$Params, context?: HttpContext): Observable<StrictHttpResponse<ClientUserResponse>> {
+  const rb = new RequestBuilder(rootUrl, listClients.PATH, 'get');
   if (params) {
-    rb.query('status', params.status, {});
-    rb.query('search', params.search, {});
     rb.query('pageable', params.pageable, {});
   }
 
@@ -29,9 +25,9 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<ClientUserResponse>;
     })
   );
 }
 
-list5.PATH = '/v1/contracts';
+listClients.PATH = '/v1/admin/partners/clients';

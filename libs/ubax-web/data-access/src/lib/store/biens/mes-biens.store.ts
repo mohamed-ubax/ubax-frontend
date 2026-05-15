@@ -11,15 +11,15 @@ import {
   getById,
   findAllByType,
   LaCodeListDto,
-  listMine,
-  ListMine$Params,
+  listMine1,
+  ListMine1$Params,
   Pageable,
   PropertyResponse,
   submit,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, forkJoin, map, pipe, switchMap, tap } from 'rxjs';
 
-type PropertyMineStatus = NonNullable<ListMine$Params['status']>;
+type PropertyMineStatus = NonNullable<ListMine1$Params['status']>;
 
 type BiensOverview = {
   total: number;
@@ -238,7 +238,7 @@ function countByStatus(
   rootUrl: string,
   status?: PropertyMineStatus,
 ) {
-  return listMine(http, rootUrl, {
+  return listMine1(http, rootUrl, {
     status,
     pageable: pageRequest(0, 1),
   }).pipe(map((response) => extractTotalElements(response.body)));
@@ -248,13 +248,13 @@ export const MesBiensStore = signalStore(
   { providedIn: 'root' },
   withApiResource<
     PropertyResponse,
-    typeof listMine,
+    typeof listMine1,
     typeof getById,
     undefined,
     undefined,
     typeof archive
   >({
-    list: listMine,
+    list: listMine1,
     getById: getById,
     delete: archive,
     idSelector: selectPropertyId,

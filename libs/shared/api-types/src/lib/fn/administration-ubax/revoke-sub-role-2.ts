@@ -8,20 +8,19 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
-import { Pageable } from '../../models/pageable';
 
-export interface List5$Params {
-  status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
-  search?: string;
-  pageable: Pageable;
+export interface RevokeSubRole2$Params {
+  userId: string;
+  role: string;
+  scope: 'UBAX_INTERNAL' | 'AGENCE' | 'HOTEL';
 }
 
-export function list5(http: HttpClient, rootUrl: string, params: List5$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
+export function revokeSubRole2(http: HttpClient, rootUrl: string, params: RevokeSubRole2$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, revokeSubRole2.PATH, 'delete');
   if (params) {
-    rb.query('status', params.status, {});
-    rb.query('search', params.search, {});
-    rb.query('pageable', params.pageable, {});
+    rb.path('userId', params.userId, {});
+    rb.path('role', params.role, {});
+    rb.query('scope', params.scope, {});
   }
 
   return http.request(
@@ -34,4 +33,4 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   );
 }
 
-list5.PATH = '/v1/contracts';
+revokeSubRole2.PATH = '/v1/admin/users/{userId}/sub-roles/{role}';

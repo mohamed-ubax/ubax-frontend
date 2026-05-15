@@ -71,6 +71,7 @@ export type { TenantCreateRequest } from './models/tenant-create-request';
 export type { TenantResponse } from './models/tenant-response';
 export type { TenantUpdateRequest } from './models/tenant-update-request';
 export type { TerminateContractRequest } from './models/terminate-contract-request';
+export type { TicketAttachmentInput } from './models/ticket-attachment-input';
 export type { UpdateRepairCostRequest } from './models/update-repair-cost-request';
 export type { UpdateSubscriptionRequest } from './models/update-subscription-request';
 export type { UpdateTechnicienRequest } from './models/update-technicien-request';

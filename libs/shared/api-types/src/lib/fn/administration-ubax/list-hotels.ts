@@ -7,20 +7,16 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { AdminHotelResponse } from '../../models/admin-hotel-response';
 import { Pageable } from '../../models/pageable';
 
-export interface List5$Params {
-  status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
-  search?: string;
+export interface ListHotels$Params {
   pageable: Pageable;
 }
 
-export function list5(http: HttpClient, rootUrl: string, params: List5$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
+export function listHotels(http: HttpClient, rootUrl: string, params: ListHotels$Params, context?: HttpContext): Observable<StrictHttpResponse<AdminHotelResponse>> {
+  const rb = new RequestBuilder(rootUrl, listHotels.PATH, 'get');
   if (params) {
-    rb.query('status', params.status, {});
-    rb.query('search', params.search, {});
     rb.query('pageable', params.pageable, {});
   }
 
@@ -29,9 +25,9 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<AdminHotelResponse>;
     })
   );
 }
 
-list5.PATH = '/v1/contracts';
+listHotels.PATH = '/v1/admin/partners/hotels';

@@ -1,0 +1,482 @@
+<section class="code-lists-page">
+  <header class="code-lists-page__header">
+    <div class="code-lists-page__title-block">
+      <p class="code-lists-page__eyebrow">Back-office UBAX</p>
+      <div class="code-lists-page__title-row">
+        <h1 class="code-lists-page__title">Gestion des listes de codes</h1>
+        <span class="code-lists-page__count"
+          >{{ totalEntries() }} entrée(s)</span
+        >
+      </div>
+      <p class="code-lists-page__subtitle">
+        Centralisez les référentiels métier, harmonisez les valeurs exposées au
+        produit et gardez une vue claire sur les entrées système versus les
+        ajouts manuels.
+      </p>
+    </div>
+
+    <div class="code-lists-page__header-actions">
+      <button
+        type="button"
+        class="code-lists-page__ghost-btn"
+        [disabled]="loading()"
+        (click)="reload()"
+      >
+        <i
+          class="pi"
+          [class.pi-refresh]="!loading()"
+          [class.pi-spinner]="loading()"
+          [class.pi-spin]="loading()"
+          aria-hidden="true"
+        ></i>
+        <span>Rafraîchir</span>
+      </button>
+
+      <button
+        type="button"
+        class="code-lists-page__create-btn"
+        (click)="openCreateModal()"
+      >
+        <i class="pi pi-plus-circle" aria-hidden="true"></i>
+        <span>Nouvelle entrée</span>
+      </button>
+    </div>
+  </header>
+
+  <ubax-section-card>
+    <section class="overview-panel" aria-label="Synthèse des référentiels">
+      <div class="overview-panel__intro">
+        <p class="overview-panel__eyebrow">Vue d’ensemble</p>
+        <h2 class="overview-panel__title">
+          Une console de référence plus nette, plus large et plus actionnable
+        </h2>
+        <p class="overview-panel__text">
+          Gardez la table au centre, ouvrez création et édition dans une modal,
+          puis enchaînez les ajustements sans comprimer la lecture des colonnes.
+        </p>
+      </div>
+
+      <div class="overview-panel__metrics">
+        <article class="overview-metric overview-metric--accent">
+          <span class="overview-metric__label">Entrées totales</span>
+          <strong class="overview-metric__value">{{ totalEntries() }}</strong>
+        </article>
+        <article class="overview-metric">
+          <span class="overview-metric__label">Types distincts</span>
+          <strong class="overview-metric__value">{{ totalTypes() }}</strong>
+        </article>
+        <article class="overview-metric">
+          <span class="overview-metric__label">Entrées système</span>
+          <strong class="overview-metric__value">{{ systemEntries() }}</strong>
+        </article>
+        <article class="overview-metric">
+          <span class="overview-metric__label">Entrées manuelles</span>
+          <strong class="overview-metric__value">{{ manualEntries() }}</strong>
+        </article>
+      </div>
+
+      <div class="overview-panel__footer">
+        @if (typeHighlights().length) {
+          <div
+            class="overview-panel__types"
+            aria-label="Types les plus représentés"
+          >
+            @for (highlight of typeHighlights(); track highlight.type) {
+              <article class="type-pill">
+                <span class="type-pill__label">{{ highlight.label }}</span>
+                <strong class="type-pill__count">{{ highlight.count }}</strong>
+              </article>
+            }
+          </div>
+        }
+
+        <div class="overview-panel__cta">
+          <p class="overview-panel__cta-label">Nouvelle valeur à ajouter ?</p>
+          <button
+            type="button"
+            class="overview-panel__cta-btn"
+            (click)="openCreateModal()"
+          >
+            <i class="pi pi-plus-circle" aria-hidden="true"></i>
+            <span>Ouvrir la modal de création</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </ubax-section-card>
+
+  <ubax-section-card bodyClass="p-0">
+    <section class="workspace-panel">
+      <div class="workspace-panel__heading">
+        <div class="workspace-panel__heading-copy">
+          <p class="workspace-panel__eyebrow">Console de pilotage</p>
+          <h2 class="workspace-panel__title">Référentiels et taxonomie</h2>
+          <p class="workspace-panel__subtitle">{{ activeFilterSummary() }}</p>
+        </div>
+
+        @if (focusEntry(); as focus) {
+          <article class="spotlight-card">
+            <div class="spotlight-card__top">
+              <ubax-status-badge
+                [variant]="focus.systemAssign ? 'neutral' : 'active'"
+              >
+                {{ sourceLabel(focus) }}
+              </ubax-status-badge>
+              <span class="spotlight-card__type">{{
+                formatType(focus.type)
+              }}</span>
+            </div>
+
+            <div class="spotlight-card__body">
+              <h3
+                class="spotlight-card__value"
+                [attr.title]="focus.value || null"
+              >
+                {{ focus.value || 'Valeur non renseignée' }}
+              </h3>
+              <p
+                class="spotlight-card__description"
+                [attr.title]="descriptionLabel(focus)"
+              >
+                {{ descriptionLabel(focus) }}
+              </p>
+            </div>
+
+            <div class="spotlight-card__footer">
+              <span class="spotlight-card__hint">
+                {{ focus.id || 'ID non retourné par l’API' }}
+              </span>
+              <button
+                type="button"
+                class="spotlight-card__action"
+                (click)="editCodeList(focus)"
+              >
+                <i class="pi pi-pen-to-square" aria-hidden="true"></i>
+                <span>Ouvrir la fiche</span>
+              </button>
+            </div>
+          </article>
+        } @else {
+          <article class="spotlight-card spotlight-card--empty">
+            <p class="spotlight-card__empty-title">
+              Aucune entrée sélectionnée
+            </p>
+            <p class="spotlight-card__empty-text">
+              Parcourez la table ou lancez une création pour ouvrir une fiche en
+              modal sans casser le rythme de lecture.
+            </p>
+          </article>
+        }
+      </div>
+
+      <ubax-search-filter-bar
+        class="code-lists-toolbar"
+        placeholder="Rechercher par type, valeur ou description..."
+        [filters]="searchFilters()"
+        (searchChange)="onSearchChange($event)"
+        (filterChange)="onFilterChange($event)"
+      />
+
+      <section class="table-stage" aria-label="Liste des listes de codes">
+        <div class="table-stage__meta">
+          <p>{{ visibleRangeLabel() }}</p>
+          <span>{{
+            hasActiveFilters() ? 'Filtres actifs' : 'Vue complète'
+          }}</span>
+        </div>
+
+        @if (loading()) {
+          <div class="table-stage__loading" aria-busy="true" aria-live="polite">
+            @for (_ of [0, 1, 2, 3, 4, 5]; track $index) {
+              <div class="table-stage__loading-row" aria-hidden="true"></div>
+            }
+          </div>
+        } @else {
+          <div class="table-stage__table-wrap">
+            <ubax-ui-data-table
+              class="code-lists-table"
+              [columns]="tableColumns"
+              [rows]="pagedRows()"
+              rowIdKey="id"
+              emptyStateLabel=""
+            >
+              <ng-template ubaxDataTableEmpty>
+                <ubax-empty-state
+                  icon="pi pi-sliders-h"
+                  title="Aucune entrée trouvée"
+                  [description]="
+                    hasActiveFilters()
+                      ? 'Aucune liste de codes ne correspond aux filtres actifs.'
+                      : 'Aucune entrée de référentiel n’est disponible pour le moment.'
+                  "
+                />
+              </ng-template>
+
+              <ng-template ubaxDataTableCell="type" let-entry>
+                <div class="code-lists-cell code-lists-cell--type">
+                  <p
+                    class="code-lists-cell__title"
+                    [attr.title]="formatType(entry.type)"
+                  >
+                    {{ formatType(entry.type) }}
+                  </p>
+                  <p
+                    class="code-lists-cell__meta"
+                    [attr.title]="entry.type || null"
+                  >
+                    {{ entry.type || '—' }}
+                  </p>
+                </div>
+              </ng-template>
+
+              <ng-template ubaxDataTableCell="value" let-entry>
+                <div
+                  class="code-lists-value-pill"
+                  [attr.title]="entry.value || null"
+                >
+                  {{ entry.value || '—' }}
+                </div>
+              </ng-template>
+
+              <ng-template ubaxDataTableCell="description" let-entry>
+                <div class="code-lists-cell">
+                  <p
+                    class="code-lists-cell__text"
+                    [attr.title]="descriptionLabel(entry)"
+                  >
+                    {{ descriptionLabel(entry) }}
+                  </p>
+                  <p class="code-lists-cell__meta">{{ metaLabel(entry) }}</p>
+                </div>
+              </ng-template>
+
+              <ng-template ubaxDataTableCell="source" let-entry>
+                <ubax-status-badge
+                  [variant]="entry.systemAssign ? 'neutral' : 'info'"
+                >
+                  {{ sourceLabel(entry) }}
+                </ubax-status-badge>
+              </ng-template>
+
+              <ng-template ubaxDataTableCell="actions" let-entry>
+                <button
+                  type="button"
+                  class="code-lists-action-btn"
+                  [class.code-lists-action-btn--active]="
+                    selectedId() === (entry.id ?? null)
+                  "
+                  (click)="editCodeList(entry)"
+                >
+                  <i class="pi pi-pen-to-square" aria-hidden="true"></i>
+                  <span>Modifier</span>
+                </button>
+              </ng-template>
+            </ubax-ui-data-table>
+          </div>
+        }
+
+        @if (!loading() && totalPages() > 1) {
+          <footer class="table-stage__pagination">
+            <ubax-ui-pagination
+              [currentPage]="currentPage()"
+              [totalPages]="totalPages()"
+              [arrowLeftSrc]="paginationArrowLeftSrc"
+              [arrowRightSrc]="paginationArrowRightSrc"
+              variant="members"
+              (pageChange)="onPageChange($event)"
+            />
+          </footer>
+        }
+      </section>
+    </section>
+  </ubax-section-card>
+
+  <p-dialog
+    [visible]="editorOpen()"
+    (visibleChange)="$event ? null : closeEditorModal()"
+    [modal]="true"
+    [closable]="!saving()"
+    [dismissableMask]="!saving()"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '760px', maxWidth: '94vw' }"
+    appendTo="body"
+    styleClass="code-lists-dialog"
+  >
+    <ng-template pTemplate="header">
+      <div class="code-lists-dialog__header">
+        <div>
+          <p class="editor-panel__eyebrow">
+            {{ editorMode() === 'edit' ? 'Édition' : 'Création' }}
+          </p>
+          <h2 class="code-lists-dialog__title">
+            {{
+              editorMode() === 'edit'
+                ? 'Mettre à jour une entrée'
+                : 'Ajouter une nouvelle entrée'
+            }}
+          </h2>
+        </div>
+
+        @if (selectedEntry(); as selectedEntry) {
+          <ubax-status-badge
+            [variant]="selectedEntry.systemAssign ? 'neutral' : 'active'"
+          >
+            {{ sourceLabel(selectedEntry) }}
+          </ubax-status-badge>
+        }
+      </div>
+    </ng-template>
+
+    <form
+      class="editor-modal editor-form"
+      [formGroup]="form"
+      (ngSubmit)="save()"
+    >
+      <section class="editor-modal__intro">
+        <p class="editor-panel__subtitle">
+          Les champs `type` et `value` sont normalisés en majuscules à
+          l’enregistrement pour garder des codes homogènes entre les
+          environnements.
+        </p>
+
+        @if (selectedEntry(); as selectedEntry) {
+          <section class="editor-insight editor-insight--dialog">
+            <div class="editor-insight__row">
+              <span>ID</span>
+              <strong>{{ selectedEntry.id || 'Non retourné' }}</strong>
+            </div>
+            <div class="editor-insight__row">
+              <span>Type</span>
+              <strong>{{ selectedEntry.type || '—' }}</strong>
+            </div>
+            <div class="editor-insight__row">
+              <span>Valeur</span>
+              <strong>{{ selectedEntry.value || '—' }}</strong>
+            </div>
+          </section>
+        }
+      </section>
+
+      <div class="editor-form__grid">
+        <label class="editor-field">
+          <span class="editor-field__label">Type</span>
+          @if (isCustomTypeSelected()) {
+            <input
+              type="text"
+              class="editor-field__control"
+              formControlName="type"
+              placeholder="Ex. : PROPERTY_TYPE"
+            />
+            <button
+              type="button"
+              class="editor-field__mode-btn"
+              (click)="switchToKnownTypeSelect()"
+            >
+              Revenir à la liste des types
+            </button>
+          } @else {
+            <p-select
+              [options]="typeSelectOptions()"
+              [ngModel]="selectedTypeOption()"
+              (ngModelChange)="onTypeOptionChange($event)"
+              [ngModelOptions]="{ standalone: true }"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Choisir un type"
+              appendTo="body"
+              panelStyleClass="code-lists-type-panel"
+              styleClass="ubax-select code-lists-type-select"
+            />
+          }
+
+          @if (isControlInvalid('type')) {
+            <span class="editor-field__error">Le type est requis.</span>
+          }
+        </label>
+
+        <label class="editor-field">
+          <span class="editor-field__label">Valeur</span>
+          <input
+            type="text"
+            class="editor-field__control"
+            formControlName="value"
+            placeholder="Ex. : CHALET"
+          />
+          @if (isControlInvalid('value')) {
+            <span class="editor-field__error">La valeur est requise.</span>
+          }
+        </label>
+      </div>
+
+      <p class="editor-form__helper">
+        Sélectionnez un type existant ou choisissez « Saisir un nouveau type ».
+      </p>
+
+      <label class="editor-field editor-field--stacked">
+        <span class="editor-field__label">Description</span>
+        <textarea
+          class="editor-field__control editor-field__control--textarea"
+          formControlName="description"
+          rows="5"
+          placeholder="Ajoutez une description claire pour aider les équipes produit et ops."
+        ></textarea>
+        @if (isControlInvalid('description')) {
+          <span class="editor-field__error"
+            >La description est trop longue.</span
+          >
+        }
+      </label>
+
+      <label class="editor-toggle">
+        <input type="checkbox" formControlName="systemAssign" />
+        <span>
+          <strong>Entrée système</strong>
+          <small>
+            Utilisez cette option pour identifier une valeur réservée à la
+            plateforme.
+          </small>
+        </span>
+      </label>
+
+      <div class="editor-form__actions editor-form__actions--dialog">
+        <button
+          type="button"
+          class="editor-btn editor-btn--ghost"
+          [disabled]="saving()"
+          (click)="closeEditorModal()"
+        >
+          Fermer
+        </button>
+        <button
+          type="button"
+          class="editor-btn editor-btn--subtle"
+          [disabled]="saving()"
+          (click)="resetEditorForm()"
+        >
+          Réinitialiser
+        </button>
+        <button
+          type="submit"
+          class="editor-btn editor-btn--primary"
+          [disabled]="saving()"
+        >
+          <i
+            class="pi"
+            [class.pi-save]="!saving()"
+            [class.pi-spinner]="saving()"
+            [class.pi-spin]="saving()"
+            aria-hidden="true"
+          ></i>
+          <span>
+            {{
+              editorMode() === 'edit'
+                ? 'Enregistrer les changements'
+                : 'Créer l’entrée'
+            }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </p-dialog>
+</section>

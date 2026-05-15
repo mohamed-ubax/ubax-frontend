@@ -31,7 +31,7 @@ import {
   List1$Params,
   Pageable,
   toggleAvailability,
-  upload,
+  uploadAvatar1,
   update,
   UpdateTechnicienRequest,
 } from '@ubax-workspace/shared-api-types';
@@ -202,17 +202,26 @@ function readProfessionLabel(item: LaCodeListDto): string {
 function uploadTechnicianAvatar(
   http: HttpClient,
   rootUrl: string,
+  technicianId: string | undefined,
   avatarFile?: File,
 ) {
-  if (!avatarFile) {
+  if (!avatarFile || !technicianId) {
     return of<string | undefined>(undefined);
   }
 
-  return upload(http, rootUrl, {
-    bucket: 'users-avatars',
+  return uploadAvatar1(http, rootUrl, {
+    id: technicianId,
     body: { file: avatarFile },
   }).pipe(
-    map((response) => readString(response.body?.fileUrl) ?? undefined),
+    map((response) => {
+      const body = response.body as Record<string, unknown> | null;
+      return (
+        readString(body?.['avatarUrl']) ??
+        readString(body?.['fileUrl']) ??
+        readString(body?.['avatar']) ??
+        undefined
+      );
+    }),
     catchError(() => of(undefined)),
   );
 }
@@ -324,13 +333,13 @@ export const TechniciansStore = signalStore(
           pipe(
             tap(setSavingState),
             exhaustMap(({ avatarFile, ...body }) =>
-              uploadTechnicianAvatar(http, apiConfig.rootUrl, avatarFile).pipe(
+              uploadTechnicianAvatar(http, apiConfig.rootUrl, undefined, avatarFile).pipe(
                 map((avatarUrl) => ({
                   ...body,
                   avatarUrl: avatarUrl ?? body.avatarUrl,
                 })),
                 switchMap((preparedBody) =>
-                  create2(http, apiConfig.rootUrl, { body: preparedBody }).pipe(
+                  create2(http, apiConfig.rootUrl, { body: preparedBody as CreateTechnicienRequest }).pipe(
                     map((response) => mapTechnicianResponse(response.body)),
                     tapResponse({
                       next: handleCreateSuccess,
@@ -355,6 +364,7 @@ export const TechniciansStore = signalStore(
               return uploadTechnicianAvatar(
                 http,
                 apiConfig.rootUrl,
+                id,
                 avatarFile,
               ).pipe(
                 map((avatarUrl) => ({
@@ -364,7 +374,7 @@ export const TechniciansStore = signalStore(
                 switchMap((preparedBody) =>
                   update(http, apiConfig.rootUrl, {
                     id,
-                    body: preparedBody,
+                    body: preparedBody as UpdateTechnicienRequest,
                   }).pipe(
                     map((response) => mapTechnicianResponse(response.body, id)),
                     tapResponse({

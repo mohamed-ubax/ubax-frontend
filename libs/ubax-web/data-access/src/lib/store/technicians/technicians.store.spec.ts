@@ -25,7 +25,7 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     toggleAvailability: vi.fn(),
     delete$: vi.fn(),
     findAllByType: vi.fn(),
-    upload: vi.fn(),
+    uploadAvatar: vi.fn(),
   };
 });
 
@@ -133,10 +133,10 @@ describe('TechniciansStore', () => {
         }),
       ),
     );
-    vi.mocked(apiTypes.upload).mockImplementation(() =>
+    vi.mocked(apiTypes.uploadAvatar).mockImplementation(() =>
       of(
         toStrictResponse({
-          fileUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
+          avatarUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',
         }),
       ),
     );
@@ -190,7 +190,7 @@ describe('TechniciansStore', () => {
     expect(
       store.entities().some((technician) => technician.id === 'tech-3'),
     ).toBe(true);
-    expect(apiTypes.upload).toHaveBeenCalled();
+    expect(apiTypes.uploadAvatar).toHaveBeenCalled();
     expect(vi.mocked(apiTypes.create2).mock.calls[0]?.[2]).toMatchObject({
       body: expect.objectContaining({
         avatarUrl: 'https://cdn.test.local/users-avatars/avatar-tech-3.png',

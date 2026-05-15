@@ -11,15 +11,15 @@ import {
   findAllByType,
   getById,
   LaCodeListDto,
-  listMine,
-  ListMine$Params,
+  listMine1,
+  ListMine1$Params,
   Pageable,
   PropertyResponse,
   submit,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, forkJoin, map, of, pipe, tap } from 'rxjs';
 
-export type EspaceStatus = NonNullable<ListMine$Params['status']>;
+export type EspaceStatus = NonNullable<ListMine1$Params['status']>;
 
 export const ESPACE_STATUS_LABELS: Record<EspaceStatus, string> = {
   DRAFT: 'Brouillon',
@@ -143,13 +143,13 @@ export const MesEspacesStore = signalStore(
   { providedIn: 'root' },
   withApiResource<
     PropertyResponse,
-    typeof listMine,
+    typeof listMine1,
     typeof getById,
     undefined,
     undefined,
     typeof archive
   >({
-    list: listMine,
+    list: listMine1,
     getById: getById,
     delete: archive,
     idSelector: selectEspaceId,
@@ -169,7 +169,7 @@ export const MesEspacesStore = signalStore(
     ) => ({
       /**
        * Charge les espaces hôteliers paginés.
-       * Utilise listMine avec les paramètres fournis.
+       * Utilise listMine1 avec les paramètres fournis.
        */
       chargerEspaces: rxMethod<{
         status?: EspaceStatus;
@@ -188,7 +188,7 @@ export const MesEspacesStore = signalStore(
                 }).pipe(map((r) => extractList<LaCodeListDto>(r.body)));
 
             return forkJoin({
-              body: listMine(http, apiConfig.rootUrl, {
+              body: listMine1(http, apiConfig.rootUrl, {
                 status: params?.status,
                 pageable: pageRequest(page, size),
               }).pipe(map((r) => r.body)),

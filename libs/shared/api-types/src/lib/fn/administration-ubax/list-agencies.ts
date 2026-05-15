@@ -7,18 +7,16 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
+import { AdminAgencyResponse } from '../../models/admin-agency-response';
 import { Pageable } from '../../models/pageable';
-import { PropertyResponse } from '../../models/property-response';
 
-export interface ListMine$Params {
-  status?: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'RESERVED' | 'SOLD' | 'ARCHIVED' | 'REJECTED';
+export interface ListAgencies$Params {
   pageable: Pageable;
 }
 
-export function listMine(http: HttpClient, rootUrl: string, params: ListMine$Params, context?: HttpContext): Observable<StrictHttpResponse<PropertyResponse>> {
-  const rb = new RequestBuilder(rootUrl, listMine.PATH, 'get');
+export function listAgencies(http: HttpClient, rootUrl: string, params: ListAgencies$Params, context?: HttpContext): Observable<StrictHttpResponse<AdminAgencyResponse>> {
+  const rb = new RequestBuilder(rootUrl, listAgencies.PATH, 'get');
   if (params) {
-    rb.query('status', params.status, {});
     rb.query('pageable', params.pageable, {});
   }
 
@@ -27,9 +25,9 @@ export function listMine(http: HttpClient, rootUrl: string, params: ListMine$Par
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<PropertyResponse>;
+      return r as StrictHttpResponse<AdminAgencyResponse>;
     })
   );
 }
 
-listMine.PATH = '/v1/properties/mine';
+listAgencies.PATH = '/v1/admin/partners/agencies';

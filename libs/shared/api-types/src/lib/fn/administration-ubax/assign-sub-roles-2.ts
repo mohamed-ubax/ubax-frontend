@@ -7,21 +7,19 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
+import { AssignSubRolesRequest } from '../../models/assign-sub-roles-request';
 import { CustomResponse } from '../../models/custom-response';
-import { Pageable } from '../../models/pageable';
 
-export interface List5$Params {
-  status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
-  search?: string;
-  pageable: Pageable;
+export interface AssignSubRoles2$Params {
+  userId: string;
+      body: AssignSubRolesRequest
 }
 
-export function list5(http: HttpClient, rootUrl: string, params: List5$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
+export function assignSubRoles2(http: HttpClient, rootUrl: string, params: AssignSubRoles2$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, assignSubRoles2.PATH, 'post');
   if (params) {
-    rb.query('status', params.status, {});
-    rb.query('search', params.search, {});
-    rb.query('pageable', params.pageable, {});
+    rb.path('userId', params.userId, {});
+    rb.body(params.body, 'application/json');
   }
 
   return http.request(
@@ -34,4 +32,4 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   );
 }
 
-list5.PATH = '/v1/contracts';
+assignSubRoles2.PATH = '/v1/admin/users/{userId}/sub-roles';

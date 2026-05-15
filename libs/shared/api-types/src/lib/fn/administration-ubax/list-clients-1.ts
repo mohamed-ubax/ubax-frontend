@@ -10,17 +10,17 @@ import { RequestBuilder } from '../../request-builder';
 import { CustomResponse } from '../../models/custom-response';
 import { Pageable } from '../../models/pageable';
 
-export interface List5$Params {
-  status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
-  search?: string;
+export interface ListClients1$Params {
+  agencyId?: string;
+  hotelId?: string;
   pageable: Pageable;
 }
 
-export function list5(http: HttpClient, rootUrl: string, params: List5$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
+export function listClients1(http: HttpClient, rootUrl: string, params: ListClients1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, listClients1.PATH, 'get');
   if (params) {
-    rb.query('status', params.status, {});
-    rb.query('search', params.search, {});
+    rb.query('agencyId', params.agencyId, {});
+    rb.query('hotelId', params.hotelId, {});
     rb.query('pageable', params.pageable, {});
   }
 
@@ -34,4 +34,4 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   );
 }
 
-list5.PATH = '/v1/contracts';
+listClients1.PATH = '/v1/admin/clients';
