@@ -95,9 +95,12 @@ export type Ticket = {
   createdBy?: string;
   assignedToId?: string;
   assignedToName?: string;
+  technicienId?: string;
+  technicienProfession?: string;
   technicianName?: string;
   technicianPhone?: string;
   interventionScheduledAt?: string;
+  interventionPrice?: number;
   repairCost?: number;
   costImputedTo?: 'OWNER' | 'TENANT' | 'SHARED';
   resolutionNote?: string;

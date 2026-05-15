@@ -2,10 +2,12 @@
   <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="tl-header">
     <div class="tl-header__left">
+      <div class="tl-header__eyebrow">
+        <i class="pi pi-wrench"></i>
+        <span>Agence · Tickets SAV</span>
+      </div>
       <h1 class="tl-header__title">Tickets SAV</h1>
-      <span class="tl-header__subtitle"
-        >Gestion des incidents & interventions</span
-      >
+      <p class="tl-header__subtitle">Gestion des incidents & interventions</p>
     </div>
 
     <div class="tl-header__actions">
@@ -35,6 +37,7 @@
           <p class="tl-kpi-card__value">{{ card.value }}</p>
           <p class="tl-kpi-card__label">{{ card.label }}</p>
         </div>
+        <span class="tl-kpi-card__orb"></span>
       </article>
     }
   </section>
@@ -91,6 +94,79 @@
       />
     </div>
 
+    <div class="tl-tabs" role="tablist" aria-label="Filtrer par statut">
+      <button
+        class="tl-tab"
+        [class.tl-tab--active]="filterStatus() === 'all'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'all'"
+        (click)="filterStatus.set('all')"
+      >
+        Tous
+        <span class="tl-tab__count">{{ ticketCounts().total }}</span>
+      </button>
+
+      <button
+        class="tl-tab"
+        [class.tl-tab--active]="filterStatus() === 'OPEN'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'OPEN'"
+        (click)="filterStatus.set('OPEN')"
+      >
+        <span class="tl-tab__dot tl-tab__dot--open"></span>
+        Ouverts
+        <span class="tl-tab__count">{{ ticketCounts().open }}</span>
+      </button>
+
+      <button
+        class="tl-tab"
+        [class.tl-tab--active]="filterStatus() === 'IN_ANALYSIS'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'IN_ANALYSIS'"
+        (click)="filterStatus.set('IN_ANALYSIS')"
+      >
+        <span class="tl-tab__dot tl-tab__dot--analysis"></span>
+        En analyse
+        <span class="tl-tab__count">{{ ticketCounts().inAnalysis }}</span>
+      </button>
+
+      <button
+        class="tl-tab"
+        [class.tl-tab--active]="filterStatus() === 'TECHNICIAN_SENT'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'TECHNICIAN_SENT'"
+        (click)="filterStatus.set('TECHNICIAN_SENT')"
+      >
+        <span class="tl-tab__dot tl-tab__dot--sent"></span>
+        Technicien envoyé
+        <span class="tl-tab__count">{{ ticketCounts().technicianSent }}</span>
+      </button>
+
+      <button
+        class="tl-tab"
+        [class.tl-tab--active]="filterStatus() === 'RESOLVED'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'RESOLVED'"
+        (click)="filterStatus.set('RESOLVED')"
+      >
+        <span class="tl-tab__dot tl-tab__dot--resolved"></span>
+        Résolus
+        <span class="tl-tab__count">{{ ticketCounts().resolved }}</span>
+      </button>
+
+      <button
+        class="tl-tab"
+        [class.tl-tab--active]="filterStatus() === 'CLOSED'"
+        role="tab"
+        [attr.aria-selected]="filterStatus() === 'CLOSED'"
+        (click)="filterStatus.set('CLOSED')"
+      >
+        <span class="tl-tab__dot tl-tab__dot--closed"></span>
+        Clôturés
+        <span class="tl-tab__count">{{ ticketCounts().closed }}</span>
+      </button>
+    </div>
+
     <!-- ViewState -->
     @switch (viewState()) {
       @case ('loading') {
@@ -134,94 +210,94 @@
       }
 
       @case ('success') {
-        <!-- Tableau -->
-        <div class="tl-table-wrap">
-          <div class="tl-table">
-            <!-- En-tête -->
-            <div class="tl-table__head">
-              <span>#</span>
-              <span>Titre</span>
-              <span>Catégorie</span>
-              <span>Priorité</span>
-              <span>Statut</span>
-              <span>Créé le</span>
-              <span></span>
-            </div>
+        @if (filteredTickets().length === 0) {
+          <div class="tl-state-box">
+            <i class="pi pi-search tl-state-box__icon"></i>
+            <p class="tl-state-box__title">Aucun résultat</p>
+            <p class="tl-state-box__desc">
+              Aucun ticket ne correspond aux filtres sélectionnés.
+            </p>
+          </div>
+        } @else {
+          <div class="tl-table-wrap">
+            <div class="tl-table">
+              <div class="tl-table__head">
+                <span>#</span>
+                <span>Titre</span>
+                <span>Catégorie</span>
+                <span>Priorité</span>
+                <span>Statut</span>
+                <span>Créé le</span>
+                <span></span>
+              </div>
 
-            <!-- Corps -->
-            <div class="tl-table__body">
-              @if (pagedTickets().length === 0) {
-                <div class="tl-table__no-results">
-                  Aucun ticket ne correspond aux filtres sélectionnés.
-                </div>
-              }
-
-              @for (ticket of pagedTickets(); track ticket.id) {
-                <div
-                  class="tl-row"
-                  role="button"
-                  tabindex="0"
-                  [attr.aria-label]="'Voir le ticket ' + ticket.title"
-                  (click)="goToDetail(ticket)"
-                  (keydown.enter)="goToDetail(ticket)"
-                >
-                  <span class="tl-row__id">
-                    {{ ticket.id | slice: 0 : 8 }}…
-                  </span>
-
-                  <span class="tl-row__title">
-                    {{ truncate(ticket.title) }}
-                  </span>
-
-                  <span class="tl-row__category">
-                    {{ getCategoryLabel(ticket.category) }}
-                  </span>
-
-                  <span
-                    class="tl-badge"
-                    [style.color]="getPriorityMeta(ticket.priority).color"
-                    [style.background]="getPriorityMeta(ticket.priority).bg"
+              <div class="tl-table__body">
+                @for (ticket of pagedTickets(); track ticket.id) {
+                  <div
+                    class="tl-row"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'Voir le ticket ' + ticket.title"
+                    (click)="goToDetail(ticket)"
+                    (keydown.enter)="goToDetail(ticket)"
                   >
-                    @if (ticket.priority === 'URGENT') {
-                      <i class="pi pi-bolt"></i>
-                    }
-                    {{ getPriorityMeta(ticket.priority).label }}
-                  </span>
+                    <span class="tl-row__id">
+                      {{ ticket.id | slice: 0 : 8 }}…
+                    </span>
 
-                  <span
-                    class="tl-badge"
-                    [style.color]="getStatusMeta(ticket.status).color"
-                    [style.background]="getStatusMeta(ticket.status).bg"
-                  >
-                    {{ getStatusMeta(ticket.status).label }}
-                  </span>
+                    <span class="tl-row__title">
+                      {{ truncate(ticket.title) }}
+                    </span>
 
-                  <span class="tl-row__date">
-                    {{ formatDate(ticket.createdAt) }}
-                  </span>
+                    <span class="tl-row__category">
+                      {{ getCategoryLabel(ticket.category) }}
+                    </span>
 
-                  <button
-                    class="tl-row__action"
-                    type="button"
-                    aria-label="Voir le détail"
-                    (click)="$event.stopPropagation(); goToDetail(ticket)"
-                  >
-                    <i class="pi pi-eye"></i>
-                  </button>
-                </div>
-              }
+                    <span
+                      class="tl-badge"
+                      [style.color]="getPriorityMeta(ticket.priority).color"
+                      [style.background]="getPriorityMeta(ticket.priority).bg"
+                    >
+                      @if (ticket.priority === 'URGENT') {
+                        <i class="pi pi-bolt"></i>
+                      }
+                      {{ getPriorityMeta(ticket.priority).label }}
+                    </span>
+
+                    <span
+                      class="tl-badge"
+                      [style.color]="getStatusMeta(ticket.status).color"
+                      [style.background]="getStatusMeta(ticket.status).bg"
+                    >
+                      {{ getStatusMeta(ticket.status).label }}
+                    </span>
+
+                    <span class="tl-row__date">
+                      {{ formatDate(ticket.createdAt) }}
+                    </span>
+
+                    <button
+                      class="tl-row__action"
+                      type="button"
+                      aria-label="Voir le détail"
+                      (click)="$event.stopPropagation(); goToDetail(ticket)"
+                    >
+                      <i class="pi pi-eye"></i>
+                    </button>
+                  </div>
+                }
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Footer pagination -->
-        <footer class="tl-footer">
-          <p class="tl-footer__results">{{ resultsLabel() }}</p>
-          <ubax-paginator
-            [(currentPage)]="currentPage"
-            [totalPages]="totalPages()"
-          />
-        </footer>
+          <footer class="tl-footer">
+            <p class="tl-footer__results">{{ resultsLabel() }}</p>
+            <ubax-paginator
+              [(currentPage)]="currentPage"
+              [totalPages]="totalPages()"
+            />
+          </footer>
+        }
       }
     }
   </section>

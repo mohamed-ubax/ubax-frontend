@@ -148,12 +148,38 @@
           </div>
         </div>
 
-        <button type="button" class="tech-detail__edit-button">
+        <button
+          type="button"
+          class="tech-detail__edit-button"
+          (click)="openEditTech(technicianDetail)"
+        >
           <span>Modifier</span>
 
           <span class="tech-detail__edit-button-icon" aria-hidden="true">
             <img [src]="detailIcons.edit" alt="" />
           </span>
+        </button>
+
+        <button
+          type="button"
+          class="tech-detail__edit-button"
+          (click)="toggleSelectedTechnicianAvailability()"
+        >
+          <span>
+            {{
+              technicianDetail.available
+                ? 'Marquer indisponible'
+                : 'Marquer disponible'
+            }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="tech-detail__edit-button"
+          (click)="archiveSelectedTechnician()"
+        >
+          <span>Archiver</span>
         </button>
       </article>
 
@@ -737,18 +763,23 @@
           <header class="technicians-card__header">
             <h2>Technicien en activité</h2>
 
-            @if (canToggleTechnicians()) {
+            @if (!showAllTechnicians()) {
               <button
                 type="button"
                 class="technicians-card__toggle"
                 (click)="toggleTechnicians()"
               >
-                {{ technicianToggleLabel() }}
+                Voir plus
               </button>
             }
           </header>
 
-          <div class="technicians-card__grid">
+          <div
+            class="technicians-card__grid"
+            [class.technicians-card__grid--empty]="
+              !displayedTechnicians().length
+            "
+          >
             @if (displayedTechnicians().length) {
               @for (
                 technician of displayedTechnicians();
@@ -853,7 +884,7 @@
       <div class="at-header">
         <span aria-hidden="true"></span>
         <h2 id="dashboard-sav-add-tech-title" class="at-title">
-          Ajouter un technicien
+          {{ addTechModalTitle() }}
         </h2>
         <button
           class="at-close"
@@ -953,7 +984,7 @@
             <ubax-ui-form-select
               class="at-field-shell"
               label="Domaine de compétence"
-              [options]="specialties"
+              [options]="specialtyOptions()"
               [value]="newSpecialty()"
               (valueChange)="newSpecialty.set($event)"
             />
@@ -981,7 +1012,7 @@
             type="submit"
             [disabled]="!canSaveTech()"
           >
-            Enregistrer
+            {{ addTechSaveLabel() }}
           </button>
         </div>
       </form>

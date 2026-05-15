@@ -1158,15 +1158,25 @@ label.toolbar-pill {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 19px;
     align-content: start;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &__grid--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__empty {
     margin: 0;
+    max-width: 320px;
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 300;
     line-height: 1.5;
     color: var(--ubax-text-muted);
+    text-align: center;
   }
 }
 

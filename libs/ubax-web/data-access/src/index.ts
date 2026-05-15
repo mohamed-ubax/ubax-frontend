@@ -62,6 +62,12 @@ export type {
   TicketStatus,
   Ticket as TicketSav,
 } from './lib/store/ticketing/ticketing.store';
+export { TechniciansStore } from './lib/store/technicians/technicians.store';
+export type {
+  Technician,
+  TechnicianProfession,
+  TechnicianProfessionOption,
+} from './lib/store/technicians/technicians.store';
 
 // ─── Espaces hôteliers ────────────────────────────────────────────────────────
 export { MesEspacesStore } from './lib/store/espaces/mes-espaces.store';
@@ -71,7 +77,10 @@ export { EspaceCreationStore } from './lib/store/espaces/espace-creation.store';
 
 // ─── Contrats & Baux ──────────────────────────────────────────────────────────
 export { ContratsStore } from './lib/store/contrats/contrats.store';
-export type { ContractResponse, ContractStatus } from './lib/store/contrats/contrats.store';
+export type {
+  ContractResponse,
+  ContractStatus,
+} from './lib/store/contrats/contrats.store';
 export type { EspaceCreationState } from './lib/store/espaces/espace-creation.store';
 export { EspaceEditStore } from './lib/store/espaces/espace-edit.store';
 

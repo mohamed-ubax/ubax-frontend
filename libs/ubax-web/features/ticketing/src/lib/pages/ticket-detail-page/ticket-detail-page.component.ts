@@ -7,19 +7,21 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { DatePickerModule } from 'primeng/datepicker';
+import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import {
+  AgencyStore,
+  AuthStore,
   TicketingStore,
   TicketMessage,
+  TechniciansStore,
+  UbaxSubRole,
+  readResolvedTeamMemberRoles,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
   CATEGORY_LABELS,
@@ -56,6 +58,11 @@ const STATUS_FLOW: TicketStatus[] = [
 
 type DrawerMode = 'intervention' | null;
 
+type SelectOption = {
+  label: string;
+  value: string;
+};
+
 @Component({
   selector: 'ubax-ticket-detail-page',
   standalone: true,
@@ -68,7 +75,12 @@ export class TicketDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly messageService = inject(MessageService);
+  private readonly authStore = inject(AuthStore);
+  private readonly agencyStore = inject(AgencyStore);
+  readonly techniciansStore = inject(TechniciansStore);
   readonly store = inject(TicketingStore);
+  private lastNotifiedError: string | null = null;
 
   // ── Route param ─────────────────────────────────────────────────────────────
   private readonly ticketId = toSignal(
@@ -85,10 +97,12 @@ export class TicketDetailPageComponent {
 
   // ── Intervention form ───────────────────────────────────────────────────────
   readonly interventionForm = this.fb.group({
-    assignedToId: ['', Validators.required],
+    assignedToId: [''],
+    technicienId: [''],
     technicianName: [''],
     technicianPhone: [''],
-    interventionDate: [null as Date | null, Validators.required],
+    interventionDate: [null as Date | null],
+    interventionPrice: [null as number | null],
     repairCost: [null as number | null],
     costImputedTo: ['OWNER' as 'OWNER' | 'TENANT' | 'SHARED'],
     resolutionNote: [''],
@@ -132,6 +146,49 @@ export class TicketDetailPageComponent {
   // ── Messages ────────────────────────────────────────────────────────────────
   readonly messages = computed(() => this.store.messages());
 
+  readonly savAgentOptions = computed<SelectOption[]>(() => {
+    const cachedSubRoles = this.agencyStore.memberSubRoles();
+
+    return this.agencyStore
+      .entities()
+      .filter((member) =>
+        readResolvedTeamMemberRoles(member, cachedSubRoles).includes(
+          UbaxSubRole.AGENT_SAV,
+        ),
+      )
+      .map((member) => {
+        const id = member.userId ?? member.keycloakId ?? member.email ?? '';
+        const label =
+          `${member.firstName ?? ''} ${member.lastName ?? ''}`.trim();
+
+        return {
+          value: id,
+          label: label || member.email || id,
+        };
+      })
+      .filter((option) => option.value.length > 0);
+  });
+
+  readonly availableTechnicianOptions = computed<SelectOption[]>(() =>
+    this.techniciansStore.availableTechnicians().map((technician) => {
+      const fullName = [technician.firstName, technician.lastName]
+        .filter((part): part is string => Boolean(part))
+        .join(' ')
+        .trim();
+      const professionLabel =
+        this.techniciansStore
+          .professionOptions()
+          .find((option) => option.value === technician.profession)?.label ??
+        technician.profession ??
+        'Technicien';
+
+      return {
+        value: technician.id,
+        label: `${fullName || technician.id} - ${professionLabel}`,
+      };
+    }),
+  );
+
   // ── Info blocks ─────────────────────────────────────────────────────────────
   readonly infoBlocks = computed(() => {
     const t = this.ticket();
@@ -171,6 +228,14 @@ export class TicketDetailPageComponent {
           : '—',
       },
       {
+        label: 'Prix intervention',
+        value:
+          t.interventionPrice != null
+            ? new Intl.NumberFormat('fr-FR').format(t.interventionPrice) +
+              ' FCFA'
+            : 'Non défini',
+      },
+      {
         label: 'Coût de réparation',
         value:
           t.repairCost != null
@@ -189,11 +254,27 @@ export class TicketDetailPageComponent {
       this.store.loadTicketCategories();
     }
 
+    if (
+      this.techniciansStore.entities().length === 0 &&
+      !this.techniciansStore.loading()
+    ) {
+      this.techniciansStore.load?.(
+        this.techniciansStore.defaultListParams(true),
+      );
+    }
+
+    if (
+      this.techniciansStore.professionOptions().length === 0 &&
+      !this.techniciansStore.professionCodeListLoading()
+    ) {
+      this.techniciansStore.loadProfessions();
+    }
+
     // Charger le ticket quand l'id change
     effect(() => {
       const id = this.ticketId();
       if (id) {
-        this.store.loadOne!(id);
+        this.store.loadOne?.(id);
         this.store.chargerMessages(id);
       }
     });
@@ -202,6 +283,30 @@ export class TicketDetailPageComponent {
     effect(() => {
       if (!this.store.loading() && !this.hasLoaded()) {
         this.hasLoaded.set(true);
+      }
+    });
+
+    effect(() => {
+      const scope = this.authStore.user()?.scope;
+
+      if (!scope) {
+        return;
+      }
+
+      this.agencyStore.load({ scope });
+    });
+
+    effect(() => {
+      const error = this.store.error();
+
+      if (error && error !== this.lastNotifiedError) {
+        this.showToast('error', error);
+        this.lastNotifiedError = error;
+        return;
+      }
+
+      if (!error) {
+        this.lastNotifiedError = null;
       }
     });
   }
@@ -236,11 +341,13 @@ export class TicketDetailPageComponent {
     if (t) {
       this.interventionForm.patchValue({
         assignedToId: t.assignedToId ?? '',
+        technicienId: t.technicienId ?? '',
         technicianName: t.technicianName ?? '',
         technicianPhone: t.technicianPhone ?? '',
         interventionDate: t.interventionScheduledAt
           ? new Date(t.interventionScheduledAt)
           : null,
+        interventionPrice: t.interventionPrice ?? null,
         repairCost: t.repairCost ?? null,
         costImputedTo:
           (t.costImputedTo as 'OWNER' | 'TENANT' | 'SHARED') ?? 'OWNER',
@@ -255,36 +362,88 @@ export class TicketDetailPageComponent {
   }
 
   saveIntervention(): void {
-    if (this.interventionForm.invalid) {
-      this.interventionForm.markAllAsTouched();
-      return;
-    }
     const id = this.ticketId();
     if (!id) return;
 
     const {
       assignedToId,
+      technicienId,
       technicianName,
       technicianPhone,
       interventionDate,
+      interventionPrice,
       repairCost,
       costImputedTo,
       resolutionNote,
     } = this.interventionForm.getRawValue();
+    const normalizedAssignedToId = assignedToId.trim();
+    const normalizedTechnicienId = technicienId.trim();
+    const normalizedTechnicianName = technicianName.trim();
+    const normalizedTechnicianPhone = technicianPhone.trim();
+    const wantsSchedule = Boolean(
+      interventionDate ||
+        normalizedTechnicienId ||
+        normalizedTechnicianName ||
+        normalizedTechnicianPhone ||
+        interventionPrice != null,
+    );
 
-    if (assignedToId) {
-      this.store.assignerAgent({ ticketId: id, body: { assignedToId } });
+    if (normalizedAssignedToId) {
+      this.store.assignerAgent({
+        ticketId: id,
+        body: { assignedToId: normalizedAssignedToId },
+      });
+      this.showToast('success', 'Assignation de l agent SAV enregistree.');
     }
 
-    if (interventionDate) {
+    if (wantsSchedule && !interventionDate) {
+      this.showToast(
+        'error',
+        'La date et l heure d intervention sont obligatoires pour planifier.',
+      );
+      return;
+    }
+
+    if (
+      wantsSchedule &&
+      !normalizedTechnicienId &&
+      (!normalizedTechnicianName || !normalizedTechnicianPhone)
+    ) {
+      this.showToast(
+        'error',
+        'Choisissez un technicien enregistre ou renseignez un nom et un telephone.',
+      );
+      return;
+    }
+
+    if (interventionPrice != null && interventionPrice < 0) {
+      this.showToast('error', 'Le prix d intervention doit etre positif.');
+      return;
+    }
+
+    if (wantsSchedule && interventionDate) {
       this.store.planifierIntervention({
         ticketId: id,
         body: {
           interventionScheduledAt: interventionDate.toISOString(),
-          technicianName: technicianName || undefined,
-          technicianPhone: technicianPhone || undefined,
+          technicienId: normalizedTechnicienId || undefined,
+          technicianName:
+            normalizedTechnicienId.length > 0
+              ? undefined
+              : normalizedTechnicianName || undefined,
+          technicianPhone:
+            normalizedTechnicienId.length > 0
+              ? undefined
+              : normalizedTechnicianPhone || undefined,
+          interventionPrice: interventionPrice ?? undefined,
         },
       });
+      this.showToast('success', 'Planification de l intervention enregistree.');
+    }
+
+    if (repairCost != null && repairCost <= 0) {
+      this.showToast('error', 'Le cout de reparation doit etre superieur a 0.');
+      return;
     }
 
     if (repairCost != null && repairCost > 0) {
@@ -296,6 +455,16 @@ export class TicketDetailPageComponent {
           resolutionNote: resolutionNote || undefined,
         },
       });
+      this.showToast('success', 'Cout de reparation enregistre.');
+    }
+
+    if (
+      !normalizedAssignedToId &&
+      !wantsSchedule &&
+      !(repairCost != null && repairCost > 0)
+    ) {
+      this.showToast('info', 'Aucune modification a enregistrer.');
+      return;
     }
 
     this.closeDrawer();
@@ -391,7 +560,9 @@ export class TicketDetailPageComponent {
   retryLoad(): void {
     this.hasLoaded.set(false);
     const id = this.ticketId();
-    if (id) this.store.loadOne!(id);
+    if (id) {
+      this.store.loadOne?.(id);
+    }
   }
 
   getMessageInitials(msg: TicketMessage): string {
@@ -402,5 +573,26 @@ export class TicketDetailPageComponent {
   // Template helper: cast AllowedNextStatus[] for statusMeta lookup
   asTicketStatus(s: AllowedNextStatus): TicketStatus {
     return s as TicketStatus;
+  }
+
+  private showToast(
+    severity: 'success' | 'error' | 'info',
+    detail: string,
+  ): void {
+    this.messageService.add({
+      severity,
+      summary:
+        severity === 'success'
+          ? 'Operation reussie'
+          : severity === 'error'
+            ? 'Action impossible'
+            : 'Information',
+      detail,
+      life: severity === 'error' ? 6200 : 4200,
+      closable: true,
+      styleClass: `ubax-toast-message ubax-toast-message--${severity}`,
+      contentStyleClass: 'ubax-toast-content',
+      closeIcon: 'pi-times',
+    });
   }
 }

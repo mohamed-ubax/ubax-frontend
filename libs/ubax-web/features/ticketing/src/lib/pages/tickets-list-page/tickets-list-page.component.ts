@@ -184,39 +184,60 @@ export class TicketsListPageComponent {
 
   // ── KPI cards ───────────────────────────────────────────────────────────────
   readonly kpiCards = computed<KpiCard[]>(() => {
-    const all = this.store.entities();
+    const counts = this.ticketCounts();
+
     return [
       {
         label: 'Tickets ouverts',
-        value: all.filter((t) => t.status === 'OPEN').length,
+        value: counts.open,
         accent: 'var(--ubax-info)',
         bg: 'var(--ubax-blue-soft)',
         icon: 'pi pi-inbox',
       },
       {
         label: 'En cours',
-        value: all.filter(
-          (t) => t.status === 'IN_ANALYSIS' || t.status === 'TECHNICIAN_SENT',
-        ).length,
+        value: counts.inProgress,
         accent: 'var(--ubax-lilac)',
         bg: 'var(--ubax-lilac-soft)',
         icon: 'pi pi-wrench',
       },
       {
         label: 'Résolus',
-        value: all.filter((t) => t.status === 'RESOLVED').length,
+        value: counts.resolved,
         accent: 'var(--ubax-success)',
         bg: 'var(--ubax-success-soft)',
         icon: 'pi pi-check-circle',
       },
       {
         label: 'Urgents',
-        value: all.filter((t) => t.priority === 'URGENT').length,
+        value: counts.urgent,
         accent: 'var(--ubax-danger)',
         bg: 'var(--ubax-danger-soft)',
         icon: 'pi pi-bolt',
       },
     ];
+  });
+
+  readonly ticketCounts = computed(() => {
+    const tickets = this.store.entities();
+
+    return {
+      total: tickets.length,
+      open: tickets.filter((ticket) => ticket.status === 'OPEN').length,
+      inAnalysis: tickets.filter((ticket) => ticket.status === 'IN_ANALYSIS')
+        .length,
+      technicianSent: tickets.filter(
+        (ticket) => ticket.status === 'TECHNICIAN_SENT',
+      ).length,
+      resolved: tickets.filter((ticket) => ticket.status === 'RESOLVED').length,
+      closed: tickets.filter((ticket) => ticket.status === 'CLOSED').length,
+      urgent: tickets.filter((ticket) => ticket.priority === 'URGENT').length,
+      inProgress: tickets.filter(
+        (ticket) =>
+          ticket.status === 'IN_ANALYSIS' ||
+          ticket.status === 'TECHNICIAN_SENT',
+      ).length,
+    };
   });
 
   // ── Filtrage ────────────────────────────────────────────────────────────────

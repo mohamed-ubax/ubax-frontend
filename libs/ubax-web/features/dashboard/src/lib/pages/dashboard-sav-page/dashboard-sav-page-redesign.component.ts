@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   HostListener,
   inject,
   OnDestroy,
@@ -11,6 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { DatePickerModule } from 'primeng/datepicker';
+import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import {
   LazyChartComponent,
@@ -18,7 +20,11 @@ import {
   UiFormSelectComponent,
   UbaxPaginatorComponent,
 } from '@ubax-workspace/shared-ui';
-import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
+import {
+  AuthStore,
+  Technician,
+  TechniciansStore,
+} from '@ubax-workspace/ubax-web-data-access';
 
 type DashboardSavStatusTone = 'open' | 'progress' | 'success';
 type DashboardSavPriorityTone = 'urgent' | 'normal';
@@ -30,13 +36,15 @@ type DashboardSavStarTone = 'full' | 'half';
 
 type DashboardSavSelectOption<TValue> = {
   readonly label: string;
-  readonly value: TValue;};
+  readonly value: TValue;
+};
 
 type DashboardSavTicketFilterState = {
   readonly status: DashboardSavTicketStatusFilter;
   readonly priority: DashboardSavTicketPriorityFilter;
   readonly issue: string;
-  readonly createdAt: Date | null;};
+  readonly createdAt: Date | null;
+};
 
 type DashboardSavTicket = {
   readonly id: string;
@@ -50,7 +58,8 @@ type DashboardSavTicket = {
   readonly createdAtLabel: string;
   readonly createdAtDate: Date;
   readonly status: string;
-  readonly statusTone: DashboardSavStatusTone;};
+  readonly statusTone: DashboardSavStatusTone;
+};
 
 type DashboardSavSummaryMetric = {
   readonly label: string;
@@ -58,7 +67,8 @@ type DashboardSavSummaryMetric = {
   readonly background: string;
   readonly accent: string;
   readonly orbSrc: string;
-  readonly iconSrc: string;};
+  readonly iconSrc: string;
+};
 
 type DashboardSavNotificationItem = {
   readonly id: string;
@@ -70,23 +80,31 @@ type DashboardSavNotificationItem = {
   readonly tone: DashboardSavNotificationTone;
   readonly iconBackground: string;
   readonly iconSrc: string;
-  readonly accent: string;};
+  readonly accent: string;
+};
 
 type DashboardSavInterventionSnapshot = {
   readonly pending: number;
   readonly progress: number;
-  readonly completed: number;};
+  readonly completed: number;
+};
 
 type DashboardSavTechnician = {
   readonly id: string;
   readonly name: string;
   readonly initials: string;
   readonly specialty: string;
+  readonly professionCode?: string;
   readonly rating: number;
   readonly tickets: number;
   readonly phone: string;
+  readonly email?: string;
+  readonly address?: string;
+  readonly available?: boolean;
+  readonly createdAt?: string;
   readonly color: string;
-  readonly image: string;};
+  readonly image: string;
+};
 
 type DashboardSavTechIntervention = {
   readonly id: string;
@@ -96,7 +114,8 @@ type DashboardSavTechIntervention = {
   readonly city: string;
   readonly issue: string;
   readonly status: string;
-  readonly date: string;};
+  readonly date: string;
+};
 
 type DashboardSavTechnicianDetail = {
   readonly joinedOn: string;
@@ -104,15 +123,19 @@ type DashboardSavTechnicianDetail = {
   readonly employeeCode: string;
   readonly resolvedTickets: string;
   readonly totalPaid: string;
-  readonly history: readonly DashboardSavTechIntervention[];};
+  readonly history: readonly DashboardSavTechIntervention[];
+};
 
-type DashboardSavSelectedTechnicianDetail = DashboardSavTechnician & DashboardSavTechnicianDetail & {
-  readonly profileImage: string;};
+type DashboardSavSelectedTechnicianDetail = DashboardSavTechnician &
+  DashboardSavTechnicianDetail & {
+    readonly profileImage: string;
+  };
 
 type DashboardSavCountryCodeOption = {
   readonly iso: string;
   readonly dialCode: string;
-  readonly display: string;};
+  readonly display: string;
+};
 
 type DashboardSavScrollLockState = {
   readonly htmlOverflow: string;
@@ -122,11 +145,11 @@ type DashboardSavScrollLockState = {
   readonly bodyTop: string;
   readonly bodyWidth: string;
   readonly bodyHadOverlayClass: boolean;
-  readonly scrollY: number;};
+  readonly scrollY: number;
+};
 
 const SHARED_ASSET_ROOT = '/shared/demandes';
 const DASHBOARD_SAV_ASSET_ROOT = '/dashboard-sav';
-const TECHNICIAN_AVATAR_COUNT = 8;
 const DEFAULT_VISIBLE_TECHNICIANS = 5;
 const DEFAULT_VISIBLE_NOTIFICATIONS = 5;
 const TICKETS_PER_PAGE = 4;
@@ -717,9 +740,12 @@ const ALL_TICKETS: readonly DashboardSavTicket[] = [
 })
 export class DashboardSavPageComponent implements OnDestroy {
   readonly authStore = inject(AuthStore);
+  readonly techniciansStore = inject(TechniciansStore);
   private readonly document = inject(DOCUMENT);
+  private readonly messageService = inject(MessageService);
   private closeAddTechTimeout: ReturnType<typeof setTimeout> | null = null;
   private scrollLockState: DashboardSavScrollLockState | null = null;
+  private lastTechnicianError: string | null = null;
 
   readonly sharedIcons = {
     search: `${SHARED_ASSET_ROOT}/filter-search.webp`,
@@ -754,6 +780,7 @@ export class DashboardSavPageComponent implements OnDestroy {
   readonly showAllNotifications = signal(false);
   readonly showAllTechnicians = signal(false);
   readonly selectedTechnicianId = signal<string | null>(null);
+  readonly editingTechnicianId = signal<string | null>(null);
   readonly transitioningTechnicianId = signal<string | null>(null);
   readonly transitionPhase = signal<
     'idle' | 'to-directory' | 'to-dashboard' | 'to-detail' | 'from-detail'
@@ -770,9 +797,13 @@ export class DashboardSavPageComponent implements OnDestroy {
     createDefaultTicketFilters(),
   );
 
-  readonly technicians = signal<DashboardSavTechnician[]>([
-    ...BASE_TECHNICIANS,
-  ]);
+  readonly technicians = computed<DashboardSavTechnician[]>(() =>
+    this.techniciansStore
+      .entities()
+      .map((technician, index) =>
+        this.toDashboardTechnician(technician, index),
+      ),
+  );
 
   readonly selectedTechnician = computed(() => {
     const technicianId = this.selectedTechnicianId();
@@ -798,7 +829,12 @@ export class DashboardSavPageComponent implements OnDestroy {
       return {
         ...technician,
         ...DEFAULT_TECHNICIAN_DETAIL,
-        profileImage: dashboardSavAsset('detail/profile-avatar.webp'),
+        joinedOn: technician.createdAt
+          ? DATE_FORMATTER.format(new Date(technician.createdAt))
+          : DEFAULT_TECHNICIAN_DETAIL.joinedOn,
+        contractStatus: technician.available ? 'Disponible' : 'Indisponible',
+        employeeCode: technician.id,
+        profileImage: technician.image,
       };
     });
 
@@ -844,16 +880,34 @@ export class DashboardSavPageComponent implements OnDestroy {
 
   readonly countryCodeOptions = [...COUNTRY_CODE_OPTIONS];
 
-  readonly specialties = [
-    'Plomberie & sanitaires',
-    'Électricité bâtiment',
-    'Maintenance générale',
-    'Peinture',
-    'Menuiserie',
-    'Climatisation',
-  ];
+  readonly specialtyOptions = computed(() => {
+    const options = this.techniciansStore
+      .professionOptions()
+      .map((option) => option.label);
+
+    return options.length > 0
+      ? options
+      : [
+          'Plomberie & sanitaires',
+          'Électricité bâtiment',
+          'Maintenance générale',
+          'Peinture',
+          'Menuiserie',
+          'Climatisation',
+        ];
+  });
 
   readonly paymentMethods = ['Espèces', 'Virement', 'Mobile Money', 'Chèque'];
+
+  readonly addTechModalTitle = computed(() =>
+    this.editingTechnicianId()
+      ? 'Modifier un technicien'
+      : 'Ajouter un technicien',
+  );
+
+  readonly addTechSaveLabel = computed(() =>
+    this.editingTechnicianId() ? 'Mettre à jour' : 'Enregistrer',
+  );
 
   readonly addTechModalVisible = computed(
     () => this.addTechOpen() || this.addTechClosing(),
@@ -870,6 +924,49 @@ export class DashboardSavPageComponent implements OnDestroy {
       this.newPrenom().trim() && this.newNom().trim() && this.newPhone().trim(),
     );
   });
+
+  constructor() {
+    if (
+      this.techniciansStore.entities().length === 0 &&
+      !this.techniciansStore.loading()
+    ) {
+      this.techniciansStore.load?.(this.techniciansStore.defaultListParams());
+    }
+
+    if (
+      this.techniciansStore.professionOptions().length === 0 &&
+      !this.techniciansStore.professionCodeListLoading()
+    ) {
+      this.techniciansStore.loadProfessions();
+    }
+
+    effect(() => {
+      const selectedTechnicianId = this.selectedTechnicianId();
+
+      if (
+        selectedTechnicianId &&
+        !this.technicians().some(
+          (technician) => technician.id === selectedTechnicianId,
+        )
+      ) {
+        this.selectedTechnicianId.set(null);
+      }
+    });
+
+    effect(() => {
+      const error = this.techniciansStore.error();
+
+      if (error && error !== this.lastTechnicianError) {
+        this.showToast('error', error);
+        this.lastTechnicianError = error;
+        return;
+      }
+
+      if (!error) {
+        this.lastTechnicianError = null;
+      }
+    });
+  }
 
   readonly userFullName = computed(() => {
     const user = this.authStore.user();
@@ -1206,6 +1303,8 @@ export class DashboardSavPageComponent implements OnDestroy {
   readonly starIcons = computed(() => STAR_ASSET_BY_TONE);
 
   openAddTech(): void {
+    this.editingTechnicianId.set(null);
+    this.resetAddTechDraft();
     this.clearAddTechCloseTimeout();
 
     if (this.addTechOpen() && !this.addTechClosing()) {
@@ -1290,38 +1389,98 @@ export class DashboardSavPageComponent implements OnDestroy {
     const prenom = this.newPrenom().trim();
     const nom = this.newNom().trim();
     const phone = this.formatPhoneValue(this.newPhone());
+    const profession = this.resolveProfessionCode(this.newSpecialty());
+    const photoUrl = this.newPhotoUrl();
+    const avatarUrl =
+      photoUrl && !photoUrl.startsWith('blob:') ? photoUrl : undefined;
 
     if (!prenom || !nom || !phone) {
       return;
     }
 
-    const nextIndex = this.technicians().length + 1;
-    const avatarIndex = ((nextIndex - 1) % TECHNICIAN_AVATAR_COUNT) + 1;
-    const id = `UBX-TECH-${String(nextIndex).padStart(3, '0')}`;
-    const name = `${prenom} ${nom}`;
-    const initials = `${prenom[0] ?? ''}${nom[0] ?? ''}`.toUpperCase();
-    const image =
-      this.newPhotoUrl() ??
-      dashboardSavAsset(
-        `technicians/avatar-${String(avatarIndex).padStart(2, '0')}.webp`,
-      );
+    const body = {
+      firstName: prenom,
+      lastName: nom,
+      phone,
+      profession: profession || undefined,
+      avatarUrl,
+    };
 
-    this.technicians.update((technicians) => [
-      {
-        id,
-        name,
-        initials,
-        specialty: this.newSpecialty(),
-        rating: 4.5,
-        tickets: 0,
-        phone,
-        color: 'var(--ubax-navy)',
-        image,
-      },
-      ...technicians,
-    ]);
+    const editingTechnicianId = this.editingTechnicianId();
+
+    if (editingTechnicianId) {
+      this.techniciansStore.updateTechnician({
+        id: editingTechnicianId,
+        body,
+      });
+      this.showToast('success', 'Technicien mis à jour.');
+    } else {
+      this.techniciansStore.createTechnician(body);
+      this.showToast('success', 'Technicien ajouté.');
+    }
 
     this.closeAddTech();
+  }
+
+  openEditTech(technician: DashboardSavTechnician): void {
+    this.editingTechnicianId.set(technician.id);
+    const [firstName = '', ...rest] = technician.name.split(' ');
+
+    this.newPrenom.set(firstName);
+    this.newNom.set(rest.join(' ').trim());
+    this.newSpecialty.set(technician.specialty);
+    this.newPhotoUrl.set(
+      technician.image.startsWith('blob:')
+        ? technician.image
+        : technician.image,
+    );
+    this.populatePhoneDraft(technician.phone);
+    this.clearAddTechCloseTimeout();
+
+    if (this.addTechOpen() && !this.addTechClosing()) {
+      return;
+    }
+
+    this.lockPageScroll();
+    this.addTechClosing.set(false);
+    this.addTechOpen.set(true);
+  }
+
+  toggleSelectedTechnicianAvailability(): void {
+    const technician = this.selectedTechnician();
+
+    if (!technician) {
+      return;
+    }
+
+    this.techniciansStore.toggleTechnicianAvailability(technician.id);
+    this.showToast(
+      'success',
+      technician.available
+        ? 'Technicien marqué indisponible.'
+        : 'Technicien marqué disponible.',
+    );
+  }
+
+  archiveSelectedTechnician(): void {
+    const technician = this.selectedTechnician();
+
+    if (!technician) {
+      return;
+    }
+
+    const confirmed =
+      this.document.defaultView?.confirm(
+        `Archiver ${technician.name} ? Cette action retirera le technicien de la liste active.`,
+      ) ?? false;
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.techniciansStore.archiveTechnician(technician.id);
+    this.selectedTechnicianId.set(null);
+    this.showToast('success', 'Technicien archivé.');
   }
 
   private resetPhotoState(): void {
@@ -1690,13 +1849,119 @@ export class DashboardSavPageComponent implements OnDestroy {
   }
 
   private resetAddTechDraft(): void {
+    this.editingTechnicianId.set(null);
     this.newPrenom.set('');
     this.newNom.set('');
     this.newPhone.set('');
-    this.newSpecialty.set('Plomberie & sanitaires');
+    this.newSpecialty.set(
+      this.specialtyOptions()[0] ?? 'Plomberie & sanitaires',
+    );
     this.newPayment.set('Espèces');
     this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
     this.resetPhotoState();
+  }
+
+  private populatePhoneDraft(phone: string | undefined): void {
+    if (!phone) {
+      this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
+      this.newPhone.set('');
+      return;
+    }
+
+    const normalizedPhone = phone.replace(/\s+/g, ' ').trim();
+    const matchingCountry = COUNTRY_CODE_OPTIONS.find((country) =>
+      normalizedPhone.startsWith(`+${country.dialCode}`),
+    );
+
+    if (!matchingCountry) {
+      this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
+      this.newPhone.set(normalizedPhone);
+      return;
+    }
+
+    this.selectedCountryCode.set(matchingCountry);
+    this.newPhone.set(
+      normalizedPhone.replace(
+        new RegExp(String.raw`^\+${matchingCountry.dialCode}\s*`),
+        '',
+      ),
+    );
+  }
+
+  private resolveProfessionCode(label: string): string | null {
+    const match = this.techniciansStore
+      .professionOptions()
+      .find((option) => option.label === label || option.value === label);
+
+    return match?.value ?? null;
+  }
+
+  private resolveProfessionLabel(profession: string | undefined): string {
+    if (!profession) {
+      return 'Technicien polyvalent';
+    }
+
+    return (
+      this.techniciansStore
+        .professionOptions()
+        .find((option) => option.value === profession)?.label ?? profession
+    );
+  }
+
+  private toDashboardTechnician(
+    technician: Technician,
+    index: number,
+  ): DashboardSavTechnician {
+    const fallback = BASE_TECHNICIANS[index % BASE_TECHNICIANS.length];
+    const firstName = technician.firstName?.trim() ?? '';
+    const lastName = technician.lastName?.trim() ?? '';
+    const name = `${firstName} ${lastName}`.trim() || technician.id;
+    const initials =
+      `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.toUpperCase() ||
+      name.slice(0, 2).toUpperCase();
+
+    return {
+      id: technician.id,
+      name,
+      initials,
+      specialty: this.resolveProfessionLabel(technician.profession),
+      professionCode: technician.profession,
+      rating: fallback?.rating ?? 4.5,
+      tickets: 0,
+      phone: technician.phone ?? 'Non renseigné',
+      email: technician.email,
+      address: technician.address,
+      available: technician.available,
+      createdAt: technician.createdAt,
+      color: technician.available
+        ? (fallback?.color ?? 'var(--ubax-navy)')
+        : 'var(--ubax-text-muted)',
+      image:
+        technician.avatarUrl ||
+        fallback?.image ||
+        dashboardSavAsset('detail/profile-avatar.webp'),
+    };
+  }
+
+  private showToast(
+    severity: 'success' | 'error' | 'info',
+    detail: string,
+  ): void {
+    this.messageService.add({
+      severity,
+      summary:
+        severity === 'success'
+          ? 'Operation reussie'
+          : severity === 'error'
+            ? 'Action impossible'
+            : 'Information',
+      detail,
+      life: severity === 'error' ? 6200 : 4200,
+      closable: true,
+      styleClass: `ubax-toast-message ubax-toast-message--${severity}`,
+      contentStyleClass: 'ubax-toast-content',
+      closeIcon: 'pi-times',
+    });
   }
 
   private formatPhoneValue(value: string): string {
