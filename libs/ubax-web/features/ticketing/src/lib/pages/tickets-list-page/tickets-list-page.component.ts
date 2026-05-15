@@ -149,13 +149,15 @@ export class TicketsListPageComponent {
     { label: 'Clôturé', value: 'CLOSED' },
   ];
 
-  readonly priorityOptions: SelectOption<TicketPriority | 'all'>[] = [
-    { label: 'Toutes priorités', value: 'all' },
-    { label: 'Faible', value: 'LOW' },
-    { label: 'Normale', value: 'NORMAL' },
-    { label: 'Haute', value: 'HIGH' },
-    { label: '⚡ Urgente', value: 'URGENT' },
-  ];
+  readonly priorityOptions = computed<SelectOption<TicketPriority | 'all'>[]>(
+    () => [
+      { label: 'Toutes priorités', value: 'all' },
+      ...this.store.ticketPriorityOptions().map((option) => ({
+        label: option.label,
+        value: option.value,
+      })),
+    ],
+  );
 
   readonly categoryOptions = computed<SelectOption<TicketCategory | 'all'>[]>(
     () => [
@@ -289,6 +291,13 @@ export class TicketsListPageComponent {
       !this.store.categoryCodeListLoading()
     ) {
       this.store.loadTicketCategories();
+    }
+
+    if (
+      this.store.ticketPriorityOptions().length === 0 &&
+      !this.store.priorityCodeListLoading()
+    ) {
+      this.store.loadTicketPriorities();
     }
 
     // Chargement initial

@@ -58,6 +58,12 @@ export type TicketCategoryOption = {
   description: string;
 };
 
+export type TicketPriorityOption = {
+  value: TicketPriority;
+  label: string;
+  description: string;
+};
+
 export type TicketAttachment = {
   id: string;
   fileUrl: string;
@@ -110,6 +116,9 @@ type TicketingState = {
   categoryCodeList: LaCodeListDto[];
   categoryCodeListLoading: boolean;
   categoryCodeListError: string | null;
+  priorityCodeList: LaCodeListDto[];
+  priorityCodeListLoading: boolean;
+  priorityCodeListError: string | null;
 };
 
 const initialTicketingState: TicketingState = {
@@ -122,6 +131,18 @@ const initialTicketingState: TicketingState = {
   categoryCodeList: [],
   categoryCodeListLoading: false,
   categoryCodeListError: null,
+  priorityCodeList: [],
+  priorityCodeListLoading: false,
+  priorityCodeListError: null,
+};
+
+const TICKET_PRIORITY_VALUES = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
+
+const DEFAULT_PRIORITY_LABELS: Record<TicketPriority, string> = {
+  LOW: 'Faible',
+  NORMAL: 'Normale',
+  HIGH: 'Haute',
+  URGENT: 'Urgente',
 };
 
 function extractCodeListFromResponse(body: unknown): LaCodeListDto[] {
@@ -158,6 +179,31 @@ function readCategoryCodeListValue(item: LaCodeListDto): TicketCategory | null {
 function readCategoryCodeListLabel(item: LaCodeListDto): string {
   return (
     item.description?.trim() || item.value?.trim() || item.id?.trim() || 'Autre'
+  );
+}
+
+function readPriorityCodeListValue(item: LaCodeListDto): TicketPriority | null {
+  const candidate = item.value?.trim() || item.id?.trim() || '';
+
+  if (
+    TICKET_PRIORITY_VALUES.includes(
+      candidate as (typeof TICKET_PRIORITY_VALUES)[number],
+    )
+  ) {
+    return candidate as TicketPriority;
+  }
+
+  return null;
+}
+
+function readPriorityCodeListLabel(item: LaCodeListDto): string {
+  const value = readPriorityCodeListValue(item);
+
+  return (
+    item.description?.trim() ||
+    item.value?.trim() ||
+    (value ? DEFAULT_PRIORITY_LABELS[value] : '') ||
+    'Normale'
   );
 }
 
@@ -220,6 +266,7 @@ export const TicketingStore = signalStore(
       filterPriority,
       filterCategory,
       categoryCodeList,
+      priorityCodeList,
     }) => ({
       ticketsOuverts: computed(() =>
         entities().filter((t) => t.status === 'OPEN'),
@@ -262,6 +309,23 @@ export const TicketingStore = signalStore(
             } satisfies TicketCategoryOption;
           })
           .filter((item): item is TicketCategoryOption => item !== null),
+      ),
+      ticketPriorityOptions: computed<readonly TicketPriorityOption[]>(() =>
+        priorityCodeList()
+          .map((item) => {
+            const value = readPriorityCodeListValue(item);
+
+            if (!value) {
+              return null;
+            }
+
+            return {
+              value,
+              label: readPriorityCodeListLabel(item),
+              description: readPriorityCodeListLabel(item),
+            } satisfies TicketPriorityOption;
+          })
+          .filter((item): item is TicketPriorityOption => item !== null),
       ),
     }),
   ),
@@ -309,6 +373,40 @@ export const TicketingStore = signalStore(
                     categoryCodeListError: resolveHttpErrorMessage(
                       err,
                       'Erreur lors du chargement des catégories SAV',
+                    ),
+                  }),
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      loadTicketPriorities: rxMethod<void>(
+        pipe(
+          tap(() =>
+            patchState(store, {
+              priorityCodeListLoading: true,
+              priorityCodeListError: null,
+            }),
+          ),
+          exhaustMap(() =>
+            findAllByType(http, apiConfig.rootUrl, {
+              type: 'TICKET_PRIORITY',
+            }).pipe(
+              map((response) => extractCodeListFromResponse(response.body)),
+              tapResponse({
+                next: (priorityCodeList: LaCodeListDto[]) =>
+                  patchState(store, {
+                    priorityCodeList,
+                    priorityCodeListLoading: false,
+                    priorityCodeListError: null,
+                  }),
+                error: (err: HttpErrorResponse) =>
+                  patchState(store, {
+                    priorityCodeListLoading: false,
+                    priorityCodeListError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement des priorités SAV',
                     ),
                   }),
               }),

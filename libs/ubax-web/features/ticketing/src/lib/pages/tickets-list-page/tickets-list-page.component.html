@@ -67,7 +67,7 @@
       />
 
       <p-select
-        [options]="priorityOptions"
+        [options]="priorityOptions()"
         [ngModel]="filterPriority()"
         (ngModelChange)="filterPriority.set($event)"
         optionLabel="label"

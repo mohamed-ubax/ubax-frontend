@@ -33,36 +33,35 @@ type CategoryOption = {
   icon: string;
 };
 
-const PRIORITY_OPTIONS: PriorityOption[] = [
-  {
-    value: 'LOW',
-    label: 'Faible',
+const PRIORITY_STYLE_MAP: Record<
+  TicketPriority,
+  Omit<PriorityOption, 'value' | 'label'> & { defaultLabel: string }
+> = {
+  LOW: {
+    defaultLabel: 'Faible',
     color: 'var(--ubax-text-muted)',
     bg: '#f0f2f6',
     icon: 'pi pi-arrow-down',
   },
-  {
-    value: 'NORMAL',
-    label: 'Normale',
+  NORMAL: {
+    defaultLabel: 'Normale',
     color: 'var(--ubax-info)',
     bg: 'var(--ubax-blue-soft)',
     icon: 'pi pi-minus',
   },
-  {
-    value: 'HIGH',
-    label: 'Haute',
+  HIGH: {
+    defaultLabel: 'Haute',
     color: 'var(--ubax-accent)',
     bg: 'var(--ubax-peach-soft)',
     icon: 'pi pi-arrow-up',
   },
-  {
-    value: 'URGENT',
-    label: 'Urgente',
+  URGENT: {
+    defaultLabel: 'Urgente',
     color: 'var(--ubax-danger)',
     bg: 'var(--ubax-danger-soft)',
     icon: 'pi pi-bolt',
   },
-];
+};
 
 const CATEGORY_ICON_MAP = {
   PLUMBING: 'pi pi-wrench',
@@ -83,6 +82,21 @@ function resolveCategoryIcon(category: TicketCategory): string {
   );
 }
 
+function resolvePriorityOption(
+  priority: TicketPriority,
+  label?: string,
+): PriorityOption {
+  const style = PRIORITY_STYLE_MAP[priority];
+
+  return {
+    value: priority,
+    label: label || style.defaultLabel,
+    color: style.color,
+    bg: style.bg,
+    icon: style.icon,
+  };
+}
+
 @Component({
   selector: 'ubax-ticket-create-page',
   standalone: true,
@@ -96,7 +110,11 @@ export class TicketCreatePageComponent {
   private readonly router = inject(Router);
   readonly store = inject(TicketingStore);
 
-  readonly priorityOptions = PRIORITY_OPTIONS;
+  readonly priorityOptions = computed<readonly PriorityOption[]>(() =>
+    this.store
+      .ticketPriorityOptions()
+      .map((option) => resolvePriorityOption(option.value, option.label)),
+  );
   readonly categoryOptions = computed<readonly CategoryOption[]>(() =>
     this.store.ticketCategoryOptions().map((option) => ({
       ...option,
@@ -119,12 +137,14 @@ export class TicketCreatePageComponent {
     contractId: ['', Validators.required],
   });
 
-  readonly selectedPriority = computed(
-    () =>
-      PRIORITY_OPTIONS.find(
-        (p) => p.value === this.form.get('priority')?.value,
-      ) ?? PRIORITY_OPTIONS[1],
-  );
+  readonly selectedPriority = computed(() => {
+    const selectedValue = this.form.get('priority')?.value ?? 'NORMAL';
+
+    return (
+      this.priorityOptions().find((p) => p.value === selectedValue) ??
+      resolvePriorityOption(selectedValue)
+    );
+  });
 
   readonly isFormValid = computed(() => this.form.valid);
 
@@ -167,6 +187,13 @@ export class TicketCreatePageComponent {
       !this.store.categoryCodeListLoading()
     ) {
       this.store.loadTicketCategories();
+    }
+
+    if (
+      this.store.ticketPriorityOptions().length === 0 &&
+      !this.store.priorityCodeListLoading()
+    ) {
+      this.store.loadTicketPriorities();
     }
   }
 

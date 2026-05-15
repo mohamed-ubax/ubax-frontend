@@ -36,7 +36,16 @@ type TicketingStoreContract = {
     label: string;
     description: string;
   }[];
+  priorityCodeList(): LaCodeListDto[];
+  priorityCodeListLoading(): boolean;
+  priorityCodeListError(): string | null;
+  ticketPriorityOptions(): readonly {
+    value: string;
+    label: string;
+    description: string;
+  }[];
   loadTicketCategories(): void;
+  loadTicketPriorities(): void;
 };
 
 describe('TicketingStore', () => {
@@ -49,20 +58,31 @@ describe('TicketingStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(apiTypes.findAllByType).mockImplementation(
-      () =>
+      (_http, _rootUrl, params) =>
         of(
           toStrictResponse({
-            data: [
-              { value: 'PLOMBIER', description: 'Plomberie et sanitaire' },
-              {
-                value: 'ELECTRICIEN',
-                description: 'Electricite generale et domotique',
-              },
-              {
-                value: 'SERRURIER',
-                description: "Serrurerie, blindage et controle d'acces",
-              },
-            ],
+            data:
+              params.type === 'TICKET_PRIORITY'
+                ? [
+                    { value: 'LOW', description: 'Faible' },
+                    { value: 'NORMAL', description: 'Normale' },
+                    { value: 'HIGH', description: 'Haute' },
+                    { value: 'URGENT', description: 'Urgente' },
+                  ]
+                : [
+                    {
+                      value: 'PLOMBIER',
+                      description: 'Plomberie et sanitaire',
+                    },
+                    {
+                      value: 'ELECTRICIEN',
+                      description: 'Electricite generale et domotique',
+                    },
+                    {
+                      value: 'SERRURIER',
+                      description: "Serrurerie, blindage et controle d'acces",
+                    },
+                  ],
           }),
         ) as any,
     );
@@ -110,6 +130,40 @@ describe('TicketingStore', () => {
     ]);
   });
 
+  it('charge les priorites SAV depuis le codelist TICKET_PRIORITY', () => {
+    store.loadTicketPriorities();
+
+    expect(apiTypes.findAllByType).toHaveBeenCalledWith(
+      {},
+      'https://test.local',
+      { type: 'TICKET_PRIORITY' },
+    );
+    expect(store.priorityCodeListLoading()).toBe(false);
+    expect(store.priorityCodeListError()).toBeNull();
+    expect(store.ticketPriorityOptions()).toEqual([
+      {
+        value: 'LOW',
+        label: 'Faible',
+        description: 'Faible',
+      },
+      {
+        value: 'NORMAL',
+        label: 'Normale',
+        description: 'Normale',
+      },
+      {
+        value: 'HIGH',
+        label: 'Haute',
+        description: 'Haute',
+      },
+      {
+        value: 'URGENT',
+        label: 'Urgente',
+        description: 'Urgente',
+      },
+    ]);
+  });
+
   it('capture une erreur de chargement sans exposer de categories mockees', () => {
     vi.mocked(apiTypes.findAllByType).mockReturnValueOnce(
       throwError(
@@ -126,5 +180,23 @@ describe('TicketingStore', () => {
     expect(store.categoryCodeListLoading()).toBe(false);
     expect(store.ticketCategoryOptions()).toEqual([]);
     expect(store.categoryCodeListError()).toMatch(/503|maintenance/i);
+  });
+
+  it('capture une erreur de chargement sans exposer de priorites mockees', () => {
+    vi.mocked(apiTypes.findAllByType).mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 503,
+            url: '/v1/code-lists/TICKET_PRIORITY',
+          }),
+      ) as any,
+    );
+
+    store.loadTicketPriorities();
+
+    expect(store.priorityCodeListLoading()).toBe(false);
+    expect(store.ticketPriorityOptions()).toEqual([]);
+    expect(store.priorityCodeListError()).toMatch(/503|maintenance/i);
   });
 });
