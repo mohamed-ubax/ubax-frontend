@@ -15,7 +15,7 @@ import {
   StatusBadgeComponent,
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { TableModule } from 'primeng/table';
 import { AdminClientsService } from '../../services/admin-clients.service';
 
@@ -99,8 +99,8 @@ export class ClientsPageComponent implements OnInit {
     this.loading.set(true);
     try {
       this.clients.set(await firstValueFrom(this.svc.listClients()));
-    } catch {
-      this.notif.error('Impossible de charger la liste des clients.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des clients.'));
     } finally {
       this.loading.set(false);
     }

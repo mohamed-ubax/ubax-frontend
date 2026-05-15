@@ -9,12 +9,14 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface GetInactiveTeamMembers$Params {
+export interface GetSubRoles$Params {
+  userId: string;
 }
 
-export function getInactiveTeamMembers(http: HttpClient, rootUrl: string, params?: GetInactiveTeamMembers$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, getInactiveTeamMembers.PATH, 'get');
+export function getSubRoles(http: HttpClient, rootUrl: string, params: GetSubRoles$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, getSubRoles.PATH, 'get');
   if (params) {
+    rb.path('userId', params.userId, {});
   }
 
   return http.request(
@@ -27,4 +29,4 @@ export function getInactiveTeamMembers(http: HttpClient, rootUrl: string, params
   );
 }
 
-getInactiveTeamMembers.PATH = '/v1/agency/team/inactive';
+getSubRoles.PATH = '/v1/hotel/team/{userId}/sub-roles';

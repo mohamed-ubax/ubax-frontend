@@ -7,12 +7,11 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { AssignSubRolesRequest } from '../../models/assign-sub-roles-request';
 import { CustomResponse } from '../../models/custom-response';
 
 export interface AssignSubRoles1$Params {
   userId: string;
-      body: AssignSubRolesRequest
+      body: Array<string>
 }
 
 export function assignSubRoles1(http: HttpClient, rootUrl: string, params: AssignSubRoles1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
@@ -32,4 +31,4 @@ export function assignSubRoles1(http: HttpClient, rootUrl: string, params: Assig
   );
 }
 
-assignSubRoles1.PATH = '/v1/admin/users/{userId}/sub-roles';
+assignSubRoles1.PATH = '/v1/agency/team/{userId}/sub-roles';

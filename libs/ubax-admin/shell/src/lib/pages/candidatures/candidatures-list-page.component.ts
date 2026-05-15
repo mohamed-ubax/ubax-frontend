@@ -17,7 +17,7 @@ import {
   StatusBadgeComponent,
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { TableModule } from 'primeng/table';
 import { AdminCandidaturesService } from '../../services/admin-candidatures.service';
 
@@ -125,8 +125,8 @@ export class CandidaturesListPageComponent {
     this.loading.set(true);
     try {
       this.applications.set(await firstValueFrom(this.svc.listApplications()));
-    } catch {
-      this.notif.error('Impossible de charger la liste des candidatures.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des candidatures.'));
     } finally {
       this.loading.set(false);
     }

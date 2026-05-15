@@ -17,7 +17,7 @@ import {
   StatusBadgeComponent,
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { TableModule } from 'primeng/table';
 import { AdminPropertiesService } from '../../services/admin-properties.service';
 
@@ -124,8 +124,8 @@ export class ProprietesListPageComponent {
       this.properties.set(result.items);
       this.totalElements.set(result.totalElements);
       this.totalPages.set(result.totalPages);
-    } catch {
-      this.notif.error('Impossible de charger la liste des biens en attente.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des biens en attente.'));
     } finally {
       this.loading.set(false);
     }

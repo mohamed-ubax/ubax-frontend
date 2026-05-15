@@ -31,7 +31,7 @@ import {
   SectionCardComponent,
   StatusBadgeComponent,
 } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
 import {
@@ -211,8 +211,8 @@ export class CandidaturesDetailPageComponent {
     this.loading.set(true);
     try {
       this.application.set(await firstValueFrom(this.svc.getApplication(id)));
-    } catch {
-      this.notif.error('Impossible de charger la candidature.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la candidature.'));
     } finally {
       this.loading.set(false);
     }
@@ -276,8 +276,8 @@ export class CandidaturesDetailPageComponent {
         INCOMPLETE: 'Demande de compléments envoyée.',
       };
       this.notif.success(messages[newStatus]);
-    } catch {
-      this.notif.error("L'opération a échoué. Veuillez réessayer.");
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, "L'opération a échoué. Veuillez réessayer."));
     } finally {
       this.saving.set(false);
     }

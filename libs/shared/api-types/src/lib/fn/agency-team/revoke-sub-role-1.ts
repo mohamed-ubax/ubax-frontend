@@ -9,20 +9,16 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface GetSubRoles1$Params {
+export interface RevokeSubRole1$Params {
   userId: string;
-
-/**
- * Filtre par scope (optionnel)
- */
-  scope?: 'UBAX_INTERNAL' | 'AGENCE' | 'HOTEL';
+  role: string;
 }
 
-export function getSubRoles1(http: HttpClient, rootUrl: string, params: GetSubRoles1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, getSubRoles1.PATH, 'get');
+export function revokeSubRole1(http: HttpClient, rootUrl: string, params: RevokeSubRole1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, revokeSubRole1.PATH, 'delete');
   if (params) {
     rb.path('userId', params.userId, {});
-    rb.query('scope', params.scope, {});
+    rb.path('role', params.role, {});
   }
 
   return http.request(
@@ -35,4 +31,4 @@ export function getSubRoles1(http: HttpClient, rootUrl: string, params: GetSubRo
   );
 }
 
-getSubRoles1.PATH = '/v1/admin/users/{userId}/sub-roles';
+revokeSubRole1.PATH = '/v1/agency/team/{userId}/sub-roles/{role}';

@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
+import { resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { ForgotPasswordService } from '../../../services/forgot-password.service';
 
 // Regex robuste — accepte tous les TLDs valides (.io, .africa, .com, etc.)
@@ -162,6 +163,6 @@ export class ForgotPasswordPageComponent implements OnDestroy {
     if (error instanceof HttpErrorResponse && error.status === 0) {
       return 'Le serveur est inaccessible. Vérifie ta connexion et réessaie.';
     }
-    return 'Une erreur est survenue. Réessaie dans un instant.';
+    return resolveHttpErrorMessage(error, 'Une erreur est survenue. Réessaie dans un instant.');
   }
 }

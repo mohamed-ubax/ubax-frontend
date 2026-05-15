@@ -169,12 +169,14 @@ const HTTP_STATUS_MESSAGES: Record<number, string> = {
 };
 
 /**
- * Traduit une HttpErrorResponse en message utilisateur lisible.
+ * Traduit une erreur HTTP en message utilisateur lisible.
+ * Accepte `unknown` pour simplifier l'usage dans les blocs catch.
  * Priorité : code HTTP connu > fallback spécifique à l'opération.
  */
 export function resolveHttpErrorMessage(
-  err: HttpErrorResponse,
+  err: unknown,
   fallback: string,
 ): string {
+  if (!(err instanceof HttpErrorResponse)) return fallback;
   return HTTP_STATUS_MESSAGES[err.status] ?? fallback;
 }

@@ -10,12 +10,12 @@ import { RequestBuilder } from '../../request-builder';
 import { AddTeamMemberRequest } from '../../models/add-team-member-request';
 import { CustomResponse } from '../../models/custom-response';
 
-export interface AddMember$Params {
+export interface AddMember1$Params {
       body: AddTeamMemberRequest
 }
 
-export function addMember(http: HttpClient, rootUrl: string, params: AddMember$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, addMember.PATH, 'post');
+export function addMember1(http: HttpClient, rootUrl: string, params: AddMember1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, addMember1.PATH, 'post');
   if (params) {
     rb.body(params.body, 'application/json');
   }
@@ -30,4 +30,4 @@ export function addMember(http: HttpClient, rootUrl: string, params: AddMember$P
   );
 }
 
-addMember.PATH = '/v1/agency/team';
+addMember1.PATH = '/v1/agency/team';

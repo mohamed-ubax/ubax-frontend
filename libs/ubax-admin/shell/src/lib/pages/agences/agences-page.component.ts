@@ -18,7 +18,7 @@ import {
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { AvatarModule } from 'primeng/avatar';
 import { TableModule } from 'primeng/table';
 import { AdminPartnersService } from '../../services/admin-partners.service';
@@ -96,8 +96,8 @@ export class AgencesPageComponent implements OnInit {
     this.loading.set(true);
     try {
       this.agencies.set(await firstValueFrom(this.svc.listAgencies()));
-    } catch {
-      this.notif.error('Impossible de charger la liste des agences.');
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des agences.'));
     } finally {
       this.loading.set(false);
     }
@@ -144,8 +144,8 @@ export class AgencesPageComponent implements OnInit {
         action === 'activate' ? 'Agence activée.' : 'Agence suspendue.',
       );
       this.showConfirm.set(false);
-    } catch {
-      this.notif.error("L'opération a échoué.");
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, "L'opération a échoué."));
     } finally {
       this.actionLoading.set(false);
     }

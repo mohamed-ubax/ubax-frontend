@@ -9,14 +9,12 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface ActivateMember$Params {
-  userId: string;
+export interface GetInactiveTeamMembers1$Params {
 }
 
-export function activateMember(http: HttpClient, rootUrl: string, params: ActivateMember$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, activateMember.PATH, 'patch');
+export function getInactiveTeamMembers1(http: HttpClient, rootUrl: string, params?: GetInactiveTeamMembers1$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, getInactiveTeamMembers1.PATH, 'get');
   if (params) {
-    rb.path('userId', params.userId, {});
   }
 
   return http.request(
@@ -29,4 +27,4 @@ export function activateMember(http: HttpClient, rootUrl: string, params: Activa
   );
 }
 
-activateMember.PATH = '/v1/agency/team/{userId}/activate';
+getInactiveTeamMembers1.PATH = '/v1/agency/team/inactive';

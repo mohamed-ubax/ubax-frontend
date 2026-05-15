@@ -25,7 +25,7 @@ import {
 } from '@ubax-workspace/shared-api-types';
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
 // shared-design-system components not used in this template (uses bien-detail-page pattern directly)
-import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
 import {
@@ -365,11 +365,12 @@ export class ProprietesDetailPageComponent {
       this.propertyDetail.set(detail);
       this.hasLoadedDetail.set(true);
       this.activeImageIndex.set(0);
-    } catch {
+    } catch (err) {
       this.propertyDetail.set(null);
       this.hasLoadedDetail.set(true);
-      this.detailError.set('Impossible de charger les détails de ce bien.');
-      this.notif.error(this.detailErrorMessage());
+      const msg = resolveHttpErrorMessage(err, 'Impossible de charger les détails de ce bien.');
+      this.detailError.set(msg);
+      this.notif.error(msg);
     } finally {
       this.loadingDetail.set(false);
     }
@@ -499,8 +500,8 @@ export class ProprietesDetailPageComponent {
         this.notif.success('Bien rejeté. Le propriétaire sera notifié.');
       }
       setTimeout(() => void this.router.navigate(['/proprietes']), 1500);
-    } catch {
-      this.notif.error("L'opération a échoué. Veuillez réessayer.");
+    } catch (err) {
+      this.notif.error(resolveHttpErrorMessage(err, "L'opération a échoué. Veuillez réessayer."));
     } finally {
       this.saving.set(false);
     }

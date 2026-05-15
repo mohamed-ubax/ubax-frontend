@@ -9,14 +9,20 @@ import { RequestBuilder } from '../../request-builder';
 
 import { CustomResponse } from '../../models/custom-response';
 
-export interface GetSubRoles$Params {
+export interface GetSubRoles2$Params {
   userId: string;
+
+/**
+ * Filtre par scope (optionnel)
+ */
+  scope?: 'UBAX_INTERNAL' | 'AGENCE' | 'HOTEL';
 }
 
-export function getSubRoles(http: HttpClient, rootUrl: string, params: GetSubRoles$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
-  const rb = new RequestBuilder(rootUrl, getSubRoles.PATH, 'get');
+export function getSubRoles2(http: HttpClient, rootUrl: string, params: GetSubRoles2$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, getSubRoles2.PATH, 'get');
   if (params) {
     rb.path('userId', params.userId, {});
+    rb.query('scope', params.scope, {});
   }
 
   return http.request(
@@ -29,4 +35,4 @@ export function getSubRoles(http: HttpClient, rootUrl: string, params: GetSubRol
   );
 }
 
-getSubRoles.PATH = '/v1/agency/team/{userId}/sub-roles';
+getSubRoles2.PATH = '/v1/admin/users/{userId}/sub-roles';
