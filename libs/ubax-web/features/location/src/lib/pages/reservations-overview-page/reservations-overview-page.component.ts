@@ -10,20 +10,24 @@ import { RouterLink } from '@angular/router';
 import { ChartData, ChartOptions, Plugin } from 'chart.js';
 import { ChartModule } from 'primeng/chart';
 import {
-  CommercialReservation,
   COMMERCIAL_ACTIVE_DATE,
   COMMERCIAL_ICON_ASSETS,
   COMMERCIAL_PROPERTY_CARDS,
   COMMERCIAL_RESERVATIONS,
   COMMERCIAL_REVENUE_SERIES,
+  buildCommercialReservationKpis,
+  resolveCommercialOverviewSnapshot,
+} from '../../constants/reservation-commercial.constants';
+import type {
+  CommercialReservation,
   ReservationAvailabilityMetric,
   ReservationPropertyCard,
-  buildCommercialReservationKpis,
+} from '../../types/reservation.types';
+import {
   filterReservations,
   formatDateRange,
   formatFcfa,
-  resolveCommercialOverviewSnapshot,
-} from '../../reservation-commercial.data';
+} from '../../utils/reservation.utils';
 import { DateRange, DateRangePickerComponent } from '@ubax-workspace/shared-ui';
 import { ReservationKpiStripComponent } from '../../components/reservation-kpi-strip/reservation-kpi-strip.component';
 import { ReservationMiniCalendarComponent } from '../../components/reservation-mini-calendar/reservation-mini-calendar.component';

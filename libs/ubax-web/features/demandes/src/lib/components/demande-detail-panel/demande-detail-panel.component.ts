@@ -5,18 +5,8 @@ import {
   input,
   output,
 } from '@angular/core';
-
-export type CommercialRequestDetail = {
-  readonly firstName: string;
-  readonly lastName: string;
-  readonly phone: string;
-  readonly property: string;
-  readonly requestType: string;
-  readonly date: string;
-  readonly requestTitle: string;
-  readonly requestMessage: readonly string[];
-  readonly replyTitle: string;
-  readonly replyMessage: string;};
+import type { CommercialRequestDetail } from '../../types/demandes.types';
+export type { CommercialRequestDetail };
 
 @Component({
   selector: 'ubax-demande-detail-panel',

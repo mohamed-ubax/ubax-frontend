@@ -15,12 +15,14 @@ import { TooltipModule } from 'primeng/tooltip';
 import {
   ARCHIVAGE_ICONS,
   ARCHIVAGE_TAB_DEFINITIONS,
-  type ArchivageFilterField,
-  type ArchivageFieldId,
-  type ArchivageRow,
-  type ArchivageTabDefinition,
-  type ArchivageTabId,
-} from './archivage-page.data';
+} from '../../constants/archivage-page.constants';
+import type {
+  ArchivageFilterField,
+  ArchivageFieldId,
+  ArchivageRow,
+  ArchivageTabDefinition,
+  ArchivageTabId,
+} from '../../types/archivage.types';
 
 type ArchivageFiltersState = {
   readonly keyword: string;

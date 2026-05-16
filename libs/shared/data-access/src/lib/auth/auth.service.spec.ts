@@ -4,12 +4,12 @@ import { Injector } from '@angular/core';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
 import * as apiTypes from '@ubax-workspace/shared-api-types';
+import { persistAuthSession } from './auth-session';
 import {
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
   AUTH_TOKEN_STORAGE_KEY,
-  persistAuthSession,
-} from './auth-session';
-import { UbaxRole } from './user.model';
+} from './constants/auth-session.constants';
+import { UbaxRole } from './enums/auth-roles.enums';
 import { AuthService, type LoginResponse } from './auth.service';
 
 vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {

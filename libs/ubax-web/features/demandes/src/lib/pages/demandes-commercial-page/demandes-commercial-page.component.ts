@@ -7,10 +7,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import {
-  CommercialRequestDetail,
-  DemandeDetailPanelComponent,
-} from '../../components/demande-detail-panel/demande-detail-panel.component';
+import type { CommercialRequestDetail } from '../../types/demandes.types';
+import { DemandeDetailPanelComponent } from '../../components/demande-detail-panel/demande-detail-panel.component';
 
 type SummaryMetric = {
   readonly label: string;

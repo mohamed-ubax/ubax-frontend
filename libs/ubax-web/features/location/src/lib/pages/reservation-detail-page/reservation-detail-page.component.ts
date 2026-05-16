@@ -11,7 +11,7 @@ import { map } from 'rxjs';
 import {
   COMMERCIAL_ICON_ASSETS,
   getReservationById,
-} from '../../reservation-commercial.data';
+} from '../../constants/reservation-commercial.constants';
 
 type ReservationContactItem = {
   readonly label: string;

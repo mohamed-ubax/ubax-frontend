@@ -12,8 +12,8 @@ import { map } from 'rxjs';
 import {
   CLIENT_DETAILS,
   DEFAULT_CLIENT_ID,
-  type ClientDetailData,
-} from './client-detail.data';
+} from '../../constants/client-detail.constants';
+import type { ClientDetailData } from '../../types/client-detail.types';
 
 type ReservationHistoryTone = 'active' | 'completed' | 'cancelled';
 type ReservationHistorySortKey =

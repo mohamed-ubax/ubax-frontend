@@ -17,9 +17,11 @@ import {
   COMMERCIAL_ICON_ASSETS,
   COMMERCIAL_RESERVATION_KPIS,
   COMMERCIAL_RESERVATIONS,
+} from '../../constants/reservation-commercial.constants';
+import {
   filterReservations,
   formatDateRange,
-} from '../../reservation-commercial.data';
+} from '../../utils/reservation.utils';
 import { ReservationKpiStripComponent } from '../../components/reservation-kpi-strip/reservation-kpi-strip.component';
 
 const PAGE_SIZE = 10;

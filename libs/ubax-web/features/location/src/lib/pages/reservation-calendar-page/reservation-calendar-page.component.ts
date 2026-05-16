@@ -14,11 +14,13 @@ import {
   COMMERCIAL_DISPLAY_MONTH,
   COMMERCIAL_ICON_ASSETS,
   COMMERCIAL_RESERVATIONS,
+} from '../../constants/reservation-commercial.constants';
+import {
   filterReservations,
   formatDateRange,
   formatMonthLabel,
   startOfDay,
-} from '../../reservation-commercial.data';
+} from '../../utils/reservation.utils';
 import { ReservationMiniCalendarComponent } from '../../components/reservation-mini-calendar/reservation-mini-calendar.component';
 
 type CalendarDay = {

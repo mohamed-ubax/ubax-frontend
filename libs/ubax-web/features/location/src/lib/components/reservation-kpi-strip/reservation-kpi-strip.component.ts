@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { ReservationKpiCard } from '../../reservation-commercial.data';
+import type { ReservationKpiCard } from '../../types/reservation.types';
 
 @Component({
   selector: 'ubax-reservation-kpi-strip',

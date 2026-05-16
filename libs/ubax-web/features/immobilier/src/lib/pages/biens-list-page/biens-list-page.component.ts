@@ -13,15 +13,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import {
-  MesBiensStore,
-  resolvePropertyCardImage,
-} from '@ubax-workspace/ubax-web-data-access';
-import {
-  LaCodeListDto,
-  ListMine1$Params,
-  PropertyResponse,
-} from '@ubax-workspace/shared-api-types';
+import { MesBiensStore } from '@ubax-workspace/ubax-web-data-access';
+import type { ListMine1$Params } from '@ubax-workspace/shared-api-types';
 import {
   UbaxMorphTabsDirective,
   UbaxPaginatorComponent,
@@ -34,182 +27,27 @@ import {
 } from '@ubax-workspace/shared-data-access';
 import { BiensListSkeletonComponent } from './biens-list-skeleton/biens-list-skeleton.component';
 import { BiensCardsSkeletonComponent } from './biens-cards-skeleton/biens-cards-skeleton.component';
-
-type BienViewMode = 'grid' | 'list';
-type FilterDropdownKey = 'type' | 'category' | 'status';
-
-type BienSummaryCard = {
-  readonly label: string;
-  readonly value: string;
-  readonly trend?: string;
-  readonly orbKey: string;
-  readonly iconKey: string;
-  readonly iconAlt: string;
-};
-
-type FilterOption = {
-  readonly label: string;
-  readonly value: string;
-  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';
-};
-
-type GridBienCard = {
-  readonly id: string;
-  readonly title: string;
-  readonly location: string;
-  readonly tenant: string;
-  readonly tenantRole: string;
-  readonly price: string;
-  readonly image: string;
-  readonly avatar: string | null;
-  readonly type: string;
-  readonly category: string;
-  readonly statusRaw: PropertyMineStatus;
-  readonly status: string;
-  readonly boosted: boolean;
-  readonly rejectionReason: string | null;
-};
-
-type ListBienCard = {
-  readonly id: string;
-  readonly title: string;
-  readonly location: string;
-  readonly tenant: string;
-  readonly tenantRole: string;
-  readonly price: string;
-  readonly image: string;
-  readonly avatar: string | null;
-  readonly type: string;
-  readonly category: string;
-  readonly statusRaw: PropertyMineStatus;
-  readonly status: string;
-  readonly boosted: boolean;
-  readonly rejectionReason: string | null;
-};
-
-type PropertyMineStatus = NonNullable<ListMine1$Params['status']>;
-
-const DEFAULT_TYPE_OPTIONS: readonly FilterOption[] = [
-  { label: 'Type de bien', value: 'all', tone: 'neutral' },
-  { label: 'Appartement', value: 'APARTMENT', tone: 'accent' },
-  { label: 'Villa', value: 'VILLA', tone: 'accent' },
-  { label: 'Bureau', value: 'OFFICE', tone: 'accent' },
-];
-
-const DEFAULT_CATEGORY_OPTIONS: readonly FilterOption[] = [
-  { label: 'Catégorie', value: 'all', tone: 'neutral' },
-  { label: 'Location', value: 'RENT', tone: 'success' },
-  { label: 'Vente', value: 'SALE', tone: 'warning' },
-];
-
-const DEFAULT_STATUS_OPTIONS: readonly FilterOption[] = [
-  { label: 'Statut', value: 'all', tone: 'neutral' },
-  { label: 'Brouillon', value: 'DRAFT', tone: 'neutral' },
-  { label: 'En attente', value: 'PENDING', tone: 'warning' },
-  { label: 'Publié', value: 'PUBLISHED', tone: 'success' },
-  { label: 'Rejeté', value: 'REJECTED', tone: 'accent' },
-  { label: 'Archivé', value: 'ARCHIVED', tone: 'neutral' },
-];
-
-const IMAGE_POOL = [
-  'shared/rooms/room-photo-01.webp',
-  'biens/list/grid-property-02.webp',
-  'hotel-dashboard/properties/property-kevin.webp',
-  'biens/list/grid-property-04.webp',
-  'biens/list/grid-property-05.webp',
-  'biens/list/grid-property-06.webp',
-  'biens/list/list-property-02.webp',
-  'biens/list/list-property-06.webp',
-  'biens/list/list-property-07.webp',
-];
-
-const STATUS_LABEL_MAP: Record<PropertyMineStatus, string> = {
-  DRAFT: 'Brouillon',
-  PENDING: 'En attente',
-  PUBLISHED: 'Publié',
-  RESERVED: 'Réservé',
-  SOLD: 'Vendu',
-  ARCHIVED: 'Archivé',
-  REJECTED: 'Rejeté',
-};
-
-const TRANSACTION_LABEL_MAP: Record<string, string> = {
-  RENT: 'Location',
-  SALE: 'Vente',
-  RENT_FURNISHED: 'Location meublée',
-  SHORT_STAY: 'Court séjour',
-};
-
-const TRANSACTION_TONE_MAP: Record<string, FilterOption['tone']> = {
-  RENT: 'success',
-  SALE: 'warning',
-  RENT_FURNISHED: 'success',
-  SHORT_STAY: 'accent',
-};
-
-const STATUS_TONE_MAP: Record<string, FilterOption['tone']> = {
-  DRAFT: 'neutral',
-  PENDING: 'warning',
-  PUBLISHED: 'success',
-  RESERVED: 'success',
-  SOLD: 'accent',
-  ARCHIVED: 'neutral',
-  REJECTED: 'accent',
-};
-
-function capitalizeWords(value: string): string {
-  return value
-    .toLowerCase()
-    .split(/[_\s-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function codeListLabel(item: LaCodeListDto): string {
-  if (item.description && item.description.trim().length > 0) {
-    return item.description;
-  }
-
-  if (item.value && item.value.trim().length > 0) {
-    return capitalizeWords(item.value);
-  }
-
-  return '';
-}
-
-function formatPrice(price?: number): string {
-  if (typeof price !== 'number' || Number.isNaN(price)) {
-    return 'N/A';
-  }
-
-  return `${new Intl.NumberFormat('fr-FR').format(price)} FCFA`;
-}
-
-function toDisplayLocation(property: PropertyResponse): string {
-  const parts = [property.city, property.district].filter(
-    (part): part is string =>
-      typeof part === 'string' && part.trim().length > 0,
-  );
-
-  return parts.length > 0 ? parts.join(', ') : 'Ville non renseignée';
-}
-
-function asPropertyStatus(value: string): PropertyMineStatus | undefined {
-  if (
-    value === 'DRAFT' ||
-    value === 'PENDING' ||
-    value === 'PUBLISHED' ||
-    value === 'RESERVED' ||
-    value === 'SOLD' ||
-    value === 'ARCHIVED' ||
-    value === 'REJECTED'
-  ) {
-    return value;
-  }
-
-  return undefined;
-}
+import type {
+  BienSummaryCard,
+  BienViewMode,
+  FilterDropdownKey,
+  FilterOption,
+  GridBienCard,
+  ListBienCard,
+  PropertyMineStatus,
+} from '../../types/immobilier.types';
+import {
+  DEFAULT_CATEGORY_OPTIONS,
+  DEFAULT_STATUS_OPTIONS,
+  DEFAULT_TYPE_OPTIONS,
+  STATUS_LABEL_MAP,
+  STATUS_TONE_MAP,
+  TRANSACTION_LABEL_MAP,
+  TRANSACTION_TONE_MAP,
+  asPropertyStatus,
+  codeListLabel,
+  toBienCard,
+} from '../../constants/immobilier.constants';
 
 @Component({
   selector: 'ubax-biens-list-page',
@@ -243,7 +81,6 @@ export class BiensListPageComponent implements OnDestroy {
     title: string;
     statusRaw: PropertyMineStatus;
   } | null>(null);
-  /** true pendant les ~220 ms de l'animation de fermeture */
   protected readonly archiveDialogClosing = signal(false);
 
   protected readonly submitDialogTarget = signal<{
@@ -266,24 +103,16 @@ export class BiensListPageComponent implements OnDestroy {
   private readonly hasLoaded = signal(false);
   readonly isLeavingSkeleton = signal(false);
   readonly contentEntering = signal(false);
-  /**
-   * true pendant un rechargement (filtre, pagination) une fois le premier
-   * chargement terminé. Seule la zone cards est remplacée par un skeleton ;
-   * le header, les summary cards et la toolbar restent visibles.
-   */
   readonly isReloading = signal(false);
 
   readonly viewState = computed<ViewState>(() =>
     deriveViewState(
-      // Pendant un rechargement partiel, on ne veut pas basculer en 'loading'
-      // → on masque le loading au niveau viewState, isReloading gère l'UI
       this.store.loading() && !this.isReloading(),
       this.store.error(),
       this.store.entities().length === 0,
       this.hasLoaded(),
     ),
   );
-  // ────────────────────────────────────────────────────────────────────────
 
   protected readonly pageSize = computed(() =>
     this.viewMode() === 'grid' ? 12 : 8,
@@ -432,13 +261,13 @@ export class BiensListPageComponent implements OnDestroy {
 
   protected readonly filteredGridCards = computed<readonly GridBienCard[]>(() =>
     this.filteredProperties().map((property, index) =>
-      this.toCard(property, index),
+      toBienCard(property, index),
     ),
   );
 
   protected readonly filteredListCards = computed<readonly ListBienCard[]>(() =>
     this.filteredProperties().map((property, index) =>
-      this.toCard(property, index),
+      toBienCard(property, index),
     ),
   );
 
@@ -458,7 +287,6 @@ export class BiensListPageComponent implements OnDestroy {
       return Math.max(1, Math.ceil(totalElements / pageSize));
     }
 
-    // Fallback: if we received a full page of items, assume more pages may exist
     const currentItems = this.store.entities();
     if (currentItems && currentItems.length >= pageSize && pageSize > 0) {
       return Math.max(
@@ -493,7 +321,6 @@ export class BiensListPageComponent implements OnDestroy {
   );
 
   protected readonly visibleGridCards = this.filteredGridCards;
-
   protected readonly visibleListCards = this.filteredListCards;
 
   protected readonly archiveDialogTitle = computed(
@@ -517,7 +344,6 @@ export class BiensListPageComponent implements OnDestroy {
 
     this.store.load?.(toObservable(this.loadParams).pipe(takeUntilDestroyed()));
 
-    // ── ViewState effect ─────────────────────────────────────────────────
     let wasLoading = false;
     let hadEntitiesWhenLoadingStarted = false;
 
@@ -533,20 +359,15 @@ export class BiensListPageComponent implements OnDestroy {
         }
 
         if (this.hasLoaded()) {
-          // Rechargement partiel (filtre / pagination) : skeleton cards uniquement
           this.isReloading.set(true);
         } else if (hasEntities) {
-          // Navigation retour avec cache : afficher immédiatement
           this.hasLoaded.set(true);
           this.triggerContentEnter();
         }
         return;
       }
 
-      // loading vient de passer à false ─────────────────────────────────
-
       if (this.isReloading()) {
-        // Fin d'un rechargement partiel : retirer le skeleton cards
         this.isReloading.set(false);
         return;
       }
@@ -555,7 +376,6 @@ export class BiensListPageComponent implements OnDestroy {
 
       if (wasLoading) {
         if (!hadEntitiesWhenLoadingStarted) {
-          // Premier chargement réseau : fade-out skeleton pleine page → fade-in contenu
           this.isLeavingSkeleton.set(true);
           setTimeout(() => {
             this.hasLoaded.set(true);
@@ -564,12 +384,10 @@ export class BiensListPageComponent implements OnDestroy {
           }, 320);
         }
       } else if (hasEntities || hasError) {
-        // Cache hit immédiat
         this.hasLoaded.set(true);
         this.triggerContentEnter();
       }
     });
-    // ────────────────────────────────────────────────────────────────────
 
     effect(() => {
       const totalPages = this.totalPages();
@@ -662,7 +480,6 @@ export class BiensListPageComponent implements OnDestroy {
       });
     });
 
-    // ── Archive Overlay Portal Effect ────────────────────────────────────
     effect(() => {
       const target = this.archiveDialogTarget();
       if (target && !this.archiveOverlayElement) {
@@ -672,7 +489,6 @@ export class BiensListPageComponent implements OnDestroy {
       }
     });
 
-    // ── Submit Overlay Portal Effect ─────────────────────────────────────
     effect(() => {
       const target = this.submitDialogTarget();
       if (target && !this.submitOverlayElement) {
@@ -1051,36 +867,5 @@ export class BiensListPageComponent implements OnDestroy {
     value: string,
   ): string {
     return options.find((o) => o.value === value)?.label ?? options[0].label;
-  }
-
-  private toCard(
-    property: PropertyResponse,
-    index: number,
-  ): GridBienCard & ListBienCard {
-    const status = (property.status ?? 'DRAFT') as PropertyMineStatus;
-    const transactionValue = property.transactionType ?? '';
-    const transactionLabel =
-      TRANSACTION_LABEL_MAP[transactionValue] ||
-      capitalizeWords(transactionValue || 'TRANSACTION');
-
-    return {
-      id: property.id ?? `property-${index + 1}`,
-      title: property.title?.trim() || 'Bien sans titre',
-      location: toDisplayLocation(property),
-      tenant: property.ownerName?.trim() || 'Propriétaire non renseigné',
-      tenantRole: 'Propriétaire',
-      price: formatPrice(property.price),
-      image: resolvePropertyCardImage(
-        property,
-        IMAGE_POOL[index % IMAGE_POOL.length],
-      ),
-      avatar: null,
-      type: property.propertyType || 'N/A',
-      category: transactionLabel,
-      statusRaw: status,
-      status: STATUS_LABEL_MAP[status] ?? status,
-      boosted: Boolean(property.boosted),
-      rejectionReason: property.rejectionReason?.trim() || null,
-    };
   }
 }

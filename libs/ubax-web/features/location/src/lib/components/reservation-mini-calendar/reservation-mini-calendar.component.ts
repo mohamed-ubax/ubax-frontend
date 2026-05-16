@@ -11,8 +11,8 @@ import {
   COMMERCIAL_ACTIVE_DATE,
   COMMERCIAL_DISPLAY_MONTH,
   COMMERCIAL_ICON_ASSETS,
-  formatMonthLabel,
-} from '../../reservation-commercial.data';
+} from '../../constants/reservation-commercial.constants';
+import { formatMonthLabel } from '../../utils/reservation.utils';
 
 type MiniCalendarCell = {
   readonly label: string;

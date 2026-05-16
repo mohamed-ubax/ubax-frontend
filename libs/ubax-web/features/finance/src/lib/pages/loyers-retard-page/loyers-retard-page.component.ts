@@ -11,8 +11,8 @@ import {
   FINANCE_ASSETS,
   FINANCE_OVERDUE_ROWS,
   FINANCE_SUMMARY_CARDS,
-  FinanceOverdueRow,
-} from '../../finance-ui.data';
+} from '../../constants/finance-ui.constants';
+import type { FinanceOverdueRow } from '../../types/finance.types';
 
 type OverdueItem = FinanceOverdueRow & { readonly uid: string };
 

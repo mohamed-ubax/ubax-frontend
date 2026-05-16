@@ -18,8 +18,8 @@ import {
   FINANCE_SUMMARY_CARDS,
   FINANCE_TRANSACTION_TYPE_OPTIONS,
   FINANCE_Y_AXIS_LABELS,
-  FinanceTransactionFilterValue,
-} from '../../finance-ui.data';
+} from '../../constants/finance-ui.constants';
+import type { FinanceTransactionFilterValue } from '../../types/finance.types';
 
 const ACTIVE_REVENUE_INDEX = FINANCE_REVENUE_SERIES.findIndex(
   (point) => point.highlighted,

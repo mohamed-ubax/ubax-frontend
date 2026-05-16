@@ -11,9 +11,11 @@ import {
   FINANCE_SUMMARY_CARDS,
   FINANCE_TRANSACTION_HISTORY,
   FINANCE_TRANSACTION_TYPE_OPTIONS,
+} from '../../constants/finance-ui.constants';
+import type {
   FinanceTransactionFilterValue,
   FinanceTransactionRow,
-} from '../../finance-ui.data';
+} from '../../types/finance.types';
 
 type TransactionHistoryItem = FinanceTransactionRow & { readonly uid: string };
 
