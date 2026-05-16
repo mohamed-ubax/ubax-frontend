@@ -9,7 +9,7 @@ import {
   type LoginResponse,
   type LogoutRequest,
   type UserResponse,
-} from '@ubax-workspace/shared-api-types';
+} from '@ubax-workspace/shared-api-types/auth-api';
 import {
   catchError,
   map,

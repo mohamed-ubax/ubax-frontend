@@ -28,6 +28,9 @@
       "@ubax-workspace/shared-api-types": [
         "libs/shared/api-types/src/index.ts"
       ],
+      "@ubax-workspace/shared-api-types/auth-api": [
+        "libs/shared/api-types/src/auth-api.ts"
+      ],
       "@ubax-workspace/shared-data-access": [
         "libs/shared/data-access/src/index.ts"
       ],
