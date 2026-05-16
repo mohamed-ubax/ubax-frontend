@@ -73,6 +73,8 @@ export type { Terminate$Params as Terminate$Params } from './fn/contracts/termin
 export { terminate as terminate } from './fn/contracts/terminate';
 export type { Submit1$Params as Submit1$Params } from './fn/contracts/submit-1';
 export { submit1 as submit1 } from './fn/contracts/submit-1';
+export type { RegeneratePdf$Params as RegeneratePdf$Params } from './fn/contracts/regenerate-pdf';
+export { regeneratePdf as regeneratePdf } from './fn/contracts/regenerate-pdf';
 export type { Cancel$Params as Cancel$Params } from './fn/contracts/cancel';
 export { cancel as cancel } from './fn/contracts/cancel';
 export type { Activate$Params as Activate$Params } from './fn/contracts/activate';

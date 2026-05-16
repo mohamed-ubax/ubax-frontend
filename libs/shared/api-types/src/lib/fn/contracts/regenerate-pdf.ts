@@ -7,17 +7,16 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { AdminAgencyResponse } from '../../models/admin-agency-response';
-import { Pageable } from '../../models/pageable';
+import { CustomResponse } from '../../models/custom-response';
 
-export interface ListAgencies$Params {
-  pageable: Pageable;
+export interface RegeneratePdf$Params {
+  id: string;
 }
 
-export function listAgencies(http: HttpClient, rootUrl: string, params: ListAgencies$Params, context?: HttpContext): Observable<StrictHttpResponse<AdminAgencyResponse>> {
-  const rb = new RequestBuilder(rootUrl, listAgencies.PATH, 'get');
+export function regeneratePdf(http: HttpClient, rootUrl: string, params: RegeneratePdf$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+  const rb = new RequestBuilder(rootUrl, regeneratePdf.PATH, 'patch');
   if (params) {
-    rb.query('pageable', params.pageable, {});
+    rb.path('id', params.id, {});
   }
 
   return http.request(
@@ -25,9 +24,9 @@ export function listAgencies(http: HttpClient, rootUrl: string, params: ListAgen
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<AdminAgencyResponse>;
+      return r as StrictHttpResponse<CustomResponse>;
     })
   );
 }
 
-listAgencies.PATH = '/v1/admin/partners/agencies';
+regeneratePdf.PATH = '/v1/contracts/{id}/generate-pdf';
