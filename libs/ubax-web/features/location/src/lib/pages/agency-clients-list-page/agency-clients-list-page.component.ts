@@ -11,33 +11,16 @@ import { FormsModule } from '@angular/forms';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { AgencyClientsStore } from '@ubax-workspace/ubax-web-data-access';
 import { SelectModule } from 'primeng/select';
-
-type StatusFilter = 'all' | 'active' | 'inactive';
-type VerifFilter = 'all' | 'verified' | 'unverified';
-
-type KpiCard = {
-  label: string;
-  value: number;
-  accent: string;
-  bg: string;
-  icon: string;
-};
-
-const PAGE_SIZE = 10;
-
-function normalizeText(v: string): string {
-  return v
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-function initials(firstName?: string, lastName?: string): string {
-  const f = firstName?.[0]?.toUpperCase() ?? '';
-  const l = lastName?.[0]?.toUpperCase() ?? '';
-  return f + l || '?';
-}
+import type {
+  StatusFilter,
+  VerifFilter,
+  AgencyClientKpiCard,
+} from '../../types/agency-clients-list.types';
+import {
+  AGENCY_CLIENTS_PAGE_SIZE,
+  normalizeAgencyClientText,
+  getClientInitials,
+} from '../../constants/agency-clients-list.constants';
 
 @Component({
   selector: 'ubax-agency-clients-list-page',
@@ -75,7 +58,7 @@ export class AgencyClientsListPageComponent {
     return 'success';
   });
 
-  readonly kpiCards = computed<KpiCard[]>(() => {
+  readonly kpiCards = computed<AgencyClientKpiCard[]>(() => {
     const all = this.store.entities();
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -117,7 +100,7 @@ export class AgencyClientsListPageComponent {
   readonly clientsVerifies = computed(() => this.store.entities().filter((c) => c.identityVerified));
 
   readonly filteredClients = computed(() => {
-    const query = normalizeText(this.searchTerm());
+    const query = normalizeAgencyClientText(this.searchTerm());
     const status = this.filterStatus();
     const verif = this.filterVerif();
 
@@ -128,7 +111,7 @@ export class AgencyClientsListPageComponent {
       if (verif === 'unverified' && c.identityVerified) return false;
 
       if (query) {
-        const text = normalizeText(
+        const text = normalizeAgencyClientText(
           [c.firstName, c.lastName, c.email, c.phone, c.city].filter(Boolean).join(' '),
         );
         if (!text.includes(query)) return false;
@@ -138,21 +121,21 @@ export class AgencyClientsListPageComponent {
   });
 
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredClients().length / PAGE_SIZE)),
+    Math.max(1, Math.ceil(this.filteredClients().length / AGENCY_CLIENTS_PAGE_SIZE)),
   );
 
   readonly pagedClients = computed(() => {
     const page = Math.min(this.currentPage(), this.totalPages());
-    const start = (page - 1) * PAGE_SIZE;
-    return this.filteredClients().slice(start, start + PAGE_SIZE);
+    const start = (page - 1) * AGENCY_CLIENTS_PAGE_SIZE;
+    return this.filteredClients().slice(start, start + AGENCY_CLIENTS_PAGE_SIZE);
   });
 
   readonly resultsLabel = computed(() => {
     const total = this.filteredClients().length;
     if (!total) return 'Aucun résultat';
     const page = Math.min(this.currentPage(), this.totalPages());
-    const start = (page - 1) * PAGE_SIZE + 1;
-    const end = Math.min(start + PAGE_SIZE - 1, total);
+    const start = (page - 1) * AGENCY_CLIENTS_PAGE_SIZE + 1;
+    const end = Math.min(start + AGENCY_CLIENTS_PAGE_SIZE - 1, total);
     return `${start}–${end} sur ${total} client${total > 1 ? 's' : ''}`;
   });
 
@@ -176,7 +159,7 @@ export class AgencyClientsListPageComponent {
   }
 
   getInitials(firstName?: string, lastName?: string): string {
-    return initials(firstName, lastName);
+    return getClientInitials(firstName, lastName);
   }
 
   formatDate(dateStr?: string): string {

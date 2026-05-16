@@ -12,17 +12,10 @@ import {
   COMMERCIAL_ICON_ASSETS,
   getReservationById,
 } from '../../constants/reservation-commercial.constants';
-
-type ReservationContactItem = {
-  readonly label: string;
-  readonly value: string;
-  readonly icon: string;
-  readonly href?: string;
-  readonly external?: boolean;};
-
-type ReservationPricingRow = {
-  readonly label: string;
-  readonly value: string;};
+import type {
+  ReservationContactItem,
+  ReservationPricingRow,
+} from '../../types/reservation-detail.types';
 
 @Component({
   selector: 'ubax-reservation-detail-page',

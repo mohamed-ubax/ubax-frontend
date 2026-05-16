@@ -43,179 +43,35 @@ import {
 } from '@ubax-workspace/ubax-web-data-access';
 import { SelectModule } from 'primeng/select';
 import { firstValueFrom } from 'rxjs';
-
-// ── Wizard steps ──────────────────────────────────────────────────────────────
-const WIZARD_STEPS = [
-  { label: 'Identité' },
-  { label: 'Capacité' },
-  { label: 'Localisation' },
-  { label: 'Équipements & Prix' },
-  { label: 'Médias' },
-  { label: 'Finalisation' },
-] as const;
-
-type PropertyTypeOption = {
-  readonly value: string;
-  readonly label: string;
-  readonly icon: string;
-  readonly description: string;
-};
-
-type SelectOption = {
-  readonly value: string;
-  readonly label: string;
-};
-
-type UploadTimelineStep = {
-  key: 'presigning' | 'uploading' | 'registering';
-  label: string;
-  description: string;
-  status: 'done' | 'active' | 'pending';
-};
-
-type EditFinalAction = 'save' | 'submit' | 'finish';
-
-const DEFAULT_DOC_TYPE_LABELS: Readonly<Record<string, string>> = {
-  TITLE_DEED: 'Titre foncier',
-  BUILDING_PERMIT: 'Permis de construire',
-  DIAGNOSTIC: 'Diagnostic',
-  CADASTRAL_PLAN: 'Plan cadastral',
-  INSURANCE: 'Assurance',
-  CONFORMITY_CERTIFICATE: 'Certificat de conformite',
-  OTHER: 'Autre',
-};
-const DEFAULT_PROPERTY_TYPE_ICON = 'space-add/icons/bed-double.svg';
-const PROPERTY_TYPE_SKELETON_ITEMS = [1, 2, 3, 4] as const;
-const PROPERTY_TYPE_SUPPORTING_TEXT: Readonly<Record<string, string>> = {
-  APARTMENT: 'Logement independant',
-  STUDIO: 'Format compact et autonome',
-  LOFT: 'Volume ouvert et moderne',
-  ROOM: 'Hebergement individuel',
-  HOTEL_ROOM: 'Hebergement individuel',
-  SUITE: 'Hebergement premium',
-  CONFERENCE_ROOM: 'Usage evenementiel',
-  VILLA: 'Hebergement privatif',
-  HOUSE: 'Hebergement privatif',
-  LAND: 'Espace a amenager',
-};
-
-function humanizePropertyTypeValue(value: string): string {
-  return value
-    .toLowerCase()
-    .split('_')
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function resolvePropertyTypeSupportingText(value: string): string {
-  return (
-    PROPERTY_TYPE_SUPPORTING_TEXT[value] ??
-    `Format ${humanizePropertyTypeValue(value)}`
-  );
-}
-
-type TimeoutHandle = ReturnType<typeof setTimeout>;
-
-function isEditableEspaceStatus(
-  status: EspaceStatus | null | undefined,
-): boolean {
-  return status === 'DRAFT' || status === 'REJECTED';
-}
-
-// ── Floor options ─────────────────────────────────────────────────────────────
-const FLOOR_OPTIONS = [
-  'RDC',
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9',
-  '10+',
-];
-
-// ── Equipment items (mapped to amenity codes) ─────────────────────────────────
-type EquipmentItem = {
-  readonly id: string;
-  readonly label: string;
-  readonly icon: string;
-  readonly code: string;
-};
-
-const DEFAULT_AMENITY_ICON = 'space-add/icons/mode-cool.svg';
-const AMENITY_ICON_BY_CODE: Readonly<Record<string, string>> = {
-  AC: 'space-add/icons/mode-cool.svg',
-  WIFI: 'space-add/icons/mode-cool.svg',
-  TV: 'space-add/icons/mode-cool.svg',
-  POOL: 'space-add/icons/mode-cool.svg',
-  PARKING: 'space-add/icons/mode-cool.svg',
-  GENERATOR: 'space-add/icons/mode-cool.svg',
-  SECURITY: 'space-add/icons/mode-cool.svg',
-  ELEVATOR: 'space-add/icons/mode-cool.svg',
-  GARDEN: 'space-add/icons/mode-cool.svg',
-  FURNISHED: 'space-add/icons/mode-cool.svg',
-  PETS_ALLOWED: 'space-add/icons/mode-cool.svg',
-  PMR: 'space-add/icons/mode-cool.svg',
-};
-
-// ── Form step interfaces ──────────────────────────────────────────────────────
-
-interface EspaceStep1 {
-  title: string;
-  propertyType: string;
-  transactionType: string;
-  condition: string;
-}
-
-interface EspaceStep2 {
-  rooms: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  balconies: number | null;
-  surfaceTotal: number | null;
-  surfaceLiving: number | null;
-  floor: string;
-  totalFloors: number | null;
-  bedType: string;
-  maxOccupancy: number | null;
-}
-
-interface EspaceStep3 {
-  city: string;
-  district: string;
-  address: string;
-  street: string;
-  latitude: number | null;
-  longitude: number | null;
-}
-
-interface EspaceStep4 {
-  price: number;
-  description: string;
-  mealPlan: string;
-  paymentFrequency: string;
-  amenities: string[];
-}
-
-const ACCEPTED_MEDIA =
-  'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/mpeg';
-const ACCEPTED_DOCS = 'application/pdf,image/jpeg,image/png,image/webp';
-const MAX_IMAGE_MB = 10;
-const MAX_VIDEO_MB = 100;
-const MAX_DOC_SIZE_MB = 20;
-
-function resolveTimelineStatus(
-  activeIndex: number,
-  stepIndex: number,
-): UploadTimelineStep['status'] {
-  if (activeIndex > stepIndex) return 'done';
-  if (activeIndex === stepIndex) return 'active';
-  return 'pending';
-}
+import type {
+  PropertyTypeOption,
+  SelectOption,
+  UploadTimelineStep,
+  EditFinalAction,
+  EquipmentItem,
+  EspaceStep1,
+  EspaceStep2,
+  EspaceStep3,
+  EspaceStep4,
+  TimeoutHandle,
+} from '../../types/espace-add.types';
+import {
+  WIZARD_STEPS,
+  DEFAULT_DOC_TYPE_LABELS,
+  DEFAULT_PROPERTY_TYPE_ICON,
+  PROPERTY_TYPE_SKELETON_ITEMS,
+  FLOOR_OPTIONS,
+  AMENITY_ICON_BY_CODE,
+  DEFAULT_AMENITY_ICON,
+  ACCEPTED_MEDIA,
+  ACCEPTED_DOCS,
+  MAX_IMAGE_MB,
+  MAX_VIDEO_MB,
+  MAX_DOC_SIZE_MB,
+  resolvePropertyTypeSupportingText,
+  resolveTimelineStatus,
+  isEditableEspaceStatus,
+} from '../../constants/espace-add.constants';
 
 @Component({
   selector: 'ubax-espace-add-page',
@@ -347,7 +203,7 @@ export class EspaceAddPageComponent implements OnInit {
         {
           key: 'presigning',
           label: 'Generation URL signee',
-          description: 'Preparation de l URL presignee pour le document',
+          description: "Preparation de l URL presignee pour le document",
           status: resolveTimelineStatus(activeIndex, 0),
         },
         {
@@ -359,7 +215,7 @@ export class EspaceAddPageComponent implements OnInit {
         {
           key: 'registering',
           label: 'Rattachement legal',
-          description: 'Association du document a l espace',
+          description: "Association du document a l espace",
           status: resolveTimelineStatus(activeIndex, 2),
         },
       ];

@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
@@ -38,119 +38,26 @@ import {
   BienEditStore,
 } from '@ubax-workspace/ubax-web-data-access';
 import { firstValueFrom } from 'rxjs';
-
-const WIZARD_STEPS = [
-  { label: 'Informations' },
-  { label: 'Surfaces & pièces' },
-  { label: 'Localisation' },
-  { label: 'Équipements & Prix' },
-  { label: 'Médias' },
-  { label: 'Finalisation' },
-] as const;
-
-const DEFAULT_DOC_TYPE_LABELS: Record<string, string> = {
-  TITRE_FONCIER: 'Titre foncier',
-  PERMIS_CONSTRUIRE: 'Permis de construire',
-  DIAGNOSTIC: 'Diagnostic',
-  CONTRAT_BAIL: 'Contrat de bail',
-  AUTRE: 'Autre',
-};
-
-const ACCEPTED_MEDIA =
-  'image/jpeg,image/png,image/webp,video/mp4,video/quicktime';
-const ACCEPTED_DOCS = 'application/pdf,image/jpeg,image/png,image/webp';
-const MAX_DOC_SIZE_MB = 20;
-
-const PROPERTY_STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Brouillon',
-  PENDING: 'En attente',
-  PUBLISHED: 'Publié',
-  RESERVED: 'Réservé',
-  SOLD: 'Vendu',
-  ARCHIVED: 'Archivé',
-  REJECTED: 'Rejeté',
-};
-
-const AMENITY_ICON_BY_CODE: Record<string, string> = {
-  AC: 'pi-wind',
-  PARKING: 'pi-car',
-  POOL: 'pi-circle',
-  GENERATOR: 'pi-bolt',
-  SECURITY: 'pi-shield',
-  ELEVATOR: 'pi-arrow-up',
-  WATER_TANK: 'pi-filter',
-  GARDEN: 'pi-sun',
-  FURNISHED: 'pi-home',
-  PETS_ALLOWED: 'pi-heart',
-  PMR: 'pi-user',
-};
-
-type AmenityOption = { code: string; label: string; icon: string };
-type DocTypeOption = { value: string; label: string };
-type UploadTimelineStep = {
-  key: 'presigning' | 'uploading' | 'registering';
-  label: string;
-  description: string;
-  status: 'done' | 'active' | 'pending';
-};
-
-function resolveTimelineStatus(
-  activeIndex: number,
-  stepIndex: number,
-): UploadTimelineStep['status'] {
-  if (activeIndex > stepIndex) {
-    return 'done';
-  }
-
-  if (activeIndex === stepIndex) {
-    return 'active';
-  }
-
-  return 'pending';
-}
-
-function isEditablePropertyStatus(status: string | null | undefined): boolean {
-  return status === 'DRAFT' || status === 'REJECTED';
-}
-
-// ── Form models (one interface per wizard step) ─────────────────────────────
-
-interface BienStep1 {
-  title: string;
-  propertyType: string;
-  transactionType: string;
-  condition: string;
-  yearBuilt: number | null;
-  /** Optional – falls back to the current user id when not provided. */
-  ownerId: string;
-}
-
-interface BienStep2 {
-  rooms: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  balconies: number | null;
-  surfaceTotal: number | null;
-  surfaceLiving: number | null;
-  floor: number | null;
-  totalFloors: number | null;
-}
-
-interface BienStep3 {
-  city: string;
-  district: string;
-  street: string;
-  address: string;
-  latitude: number | null;
-  longitude: number | null;
-}
-
-interface BienStep4 {
-  price: number;
-  description: string;
-  /** Codes des commodités standard sélectionnées (ex: 'AC', 'PARKING'). */
-  amenities: string[];
-}
+import type {
+  AmenityOption,
+  BienStep1,
+  BienStep2,
+  BienStep3,
+  BienStep4,
+  DocTypeOption,
+  UploadTimelineStep,
+} from '../../types/bien-add.types';
+import {
+  ACCEPTED_DOCS,
+  ACCEPTED_MEDIA,
+  AMENITY_ICON_BY_CODE,
+  DEFAULT_DOC_TYPE_LABELS,
+  isEditablePropertyStatus,
+  MAX_DOC_SIZE_MB,
+  PROPERTY_STATUS_LABELS,
+  resolveTimelineStatus,
+  WIZARD_STEPS,
+} from '../../constants/bien-add.constants';
 
 @Component({
   selector: 'ubax-bien-add-page',

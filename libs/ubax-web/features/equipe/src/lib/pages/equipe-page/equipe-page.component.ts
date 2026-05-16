@@ -12,11 +12,9 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import {
-  AbstractControl,
   FormsModule,
   NonNullableFormBuilder,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
@@ -48,144 +46,24 @@ import {
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
 import { EquipeSkeletonPromoComponent } from './equipe-skeleton-promo/equipe-skeleton-promo.component';
 import { EquipeSkeletonTableComponent } from './equipe-skeleton-table/equipe-skeleton-table.component';
-
-type AgencyMemberTableRow = {
-  readonly id: string;
-  readonly memberId: string;
-  readonly firstName: string;
-  readonly lastName: string;
-  readonly email: string;
-  readonly phone: string;
-  readonly roleLabel: string;
-  readonly roleKeys: readonly string[];
-  readonly rolesLoading: boolean;
-  readonly rolesError: string | null;
-  readonly avatarSrc: string;
-};
-
-type RoleOption = {
-  readonly key: UbaxSubRole;
-  readonly label: string;
-};
-
-type MemberPanelMode = 'view' | 'edit';
-type ConfirmDialogAction = 'revoke-role' | 'deactivate-member' | null;
-
-const MEMBER_PAGE_SIZE = 6;
-
-const MEMBER_AVATAR_FALLBACK = '/equipe/avatar-fallback.svg';
-
-function normalizeSearchText(value: string): string {
-  return value.toLowerCase().normalize('NFD').replaceAll(/[̀-ͯ]/g, '');
-}
-
-function readMemberId(member: AdminUserResponse): string {
-  return member.userId ?? member.keycloakId ?? member.email ?? '';
-}
-
-function formatRoleLabel(
-  roleKeys: readonly string[],
-  loading: boolean,
-  error: string | null,
-): string {
-  if (loading) {
-    return 'Chargement...';
-  }
-
-  if (error) {
-    return 'Sous-rôles indisponibles';
-  }
-
-  if (!roleKeys.length) {
-    return 'Aucun sous-rôle';
-  }
-
-  const primaryRole = pickPrimarySubRole(roleKeys);
-
-  if (primaryRole) {
-    return SUB_ROLE_LABELS[primaryRole] ?? primaryRole;
-  }
-
-  return roleKeys.join(', ');
-}
-
-function toggleArrayValue(values: readonly string[], role: string): string[] {
-  return values.includes(role)
-    ? values.filter((item) => item !== role)
-    : [...values, role];
-}
-
-function composeE164Phone(dialCode: string, nationalDigits: string): string {
-  const digits = nationalDigits.replaceAll(/\D/g, '');
-  if (!digits.length) {
-    return '';
-  }
-  if (dialCode === '225') {
-    const body = digits.startsWith('0') ? digits.slice(1) : digits;
-    if (body.length !== 9 || !/^[1-9]\d{8}$/.test(body)) {
-      return '';
-    }
-    return `+225${body}`;
-  }
-  const body = digits.startsWith('0') ? digits.slice(1) : digits;
-  if (body.length < 6 || body.length > 14 || !/^\d+$/.test(body)) {
-    return '';
-  }
-  return `+${dialCode}${body}`;
-}
-
-function parseE164ToCountryAndNational(e164: string): {
-  country: CountryDialCode;
-  nationalDigits: string;
-} {
-  const trimmed = (e164 ?? '').trim();
-  if (!trimmed.startsWith('+')) {
-    return { country: readDefaultPhoneCountry(), nationalDigits: '' };
-  }
-  const withoutPlus = trimmed.slice(1).replaceAll(/\D/g, '');
-  if (!withoutPlus.length) {
-    return { country: readDefaultPhoneCountry(), nationalDigits: '' };
-  }
-  const sorted = [...COUNTRY_CODES].sort(
-    (a, b) => b.dialCode.length - a.dialCode.length,
-  );
-  for (const country of sorted) {
-    if (withoutPlus.startsWith(country.dialCode)) {
-      return {
-        country,
-        nationalDigits: withoutPlus.slice(country.dialCode.length),
-      };
-    }
-  }
-  return { country: readDefaultPhoneCountry(), nationalDigits: withoutPlus };
-}
-
-function addMemberPhoneValidator(
-  control: AbstractControl,
-): ValidationErrors | null {
-  const raw = (control.value as string) ?? '';
-  if (!raw.trim()) {
-    return null;
-  }
-  return /^\+[1-9]\d{6,14}$/.test(raw) ? null : { phoneFormat: true };
-}
-
-function readDefaultPhoneCountry(): CountryDialCode {
-  const ci = COUNTRY_CODES.find((c) => c.iso2 === 'CI');
-  if (ci) {
-    return ci;
-  }
-  const first = COUNTRY_CODES[0];
-  if (first) {
-    return first;
-  }
-  return {
-    name: "Cote d'Ivoire",
-    iso2: 'CI',
-    dialCode: '225',
-    flagUrl: 'https://flagcdn.com/w80/ci.png',
-  };
-}
+import type {
+  AgencyMemberTableRow,
+  ConfirmDialogAction,
+  MemberPanelMode,
+  RoleOption,
+} from '../../types/equipe-page.types';
+import {
+  addMemberPhoneValidator,
+  composeE164Phone,
+  formatRoleLabel,
+  MEMBER_AVATAR_FALLBACK,
+  MEMBER_PAGE_SIZE,
+  normalizeSearchText,
+  parseE164ToCountryAndNational,
+  readDefaultPhoneCountry,
+  readMemberId,
+  toggleArrayValue,
+} from '../../constants/equipe-page.constants';
 
 @Component({
   selector: 'ubax-equipe-page',
@@ -683,7 +561,7 @@ export class EquipePageComponent {
 
     // Subroles are now loaded directly from the team endpoint, no need for individual loading
 
-    // Sous-rôles édition : synchroniser avec l’API quand le cache se remplit
+    // Sous-rôles édition : synchroniser avec l'API quand le cache se remplit
     effect(() => {
       const memberId = this.selectedMemberId();
       const panelMode = this.activeMemberPanelMode();

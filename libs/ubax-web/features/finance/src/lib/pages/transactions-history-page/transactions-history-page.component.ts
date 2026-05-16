@@ -12,12 +12,8 @@ import {
   FINANCE_TRANSACTION_HISTORY,
   FINANCE_TRANSACTION_TYPE_OPTIONS,
 } from '../../constants/finance-ui.constants';
-import type {
-  FinanceTransactionFilterValue,
-  FinanceTransactionRow,
-} from '../../types/finance.types';
-
-type TransactionHistoryItem = FinanceTransactionRow & { readonly uid: string };
+import type { FinanceTransactionFilterValue } from '../../types/finance.types';
+import type { TransactionHistoryItem } from '../../types/transactions-history.types';
 
 const HISTORY_PAGE_SIZE = 8;
 

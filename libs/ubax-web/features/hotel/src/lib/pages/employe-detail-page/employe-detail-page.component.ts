@@ -1,36 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
-type CalendarView = 'jour' | 'semaine' | 'mois' | 'annee';
-
-type Document = {
-  nom: string;};
-
-type SalaryPayment = {
-  label: string;
-  date: string;
-  mois: string;
-  montant: string;};
-
-type CalendarDay = {
-  date: number;
-  isGhost: boolean; // days from prev/next month
-  events: CalendarEvent[];};
-
-type CalendarEvent = {
-  type: 'shift' | 'conge';
-  label: string;};
-
-type EmployePageAction = {
-  readonly label: string;
-  readonly iconSrc: string;
-  readonly variant: 'edit' | 'archive';};
-
-type EmployeProfileContact = {
-  readonly label: string;
-  readonly value: string;
-  readonly iconSrc: string;
-  readonly hasFramedIcon?: boolean;};
+import type {
+  CalendarView,
+  EmployeDocument,
+  SalaryPayment,
+  CalendarDay,
+  EmployePageAction,
+  EmployeProfileContact,
+} from '../../types/employe-detail.types';
 
 @Component({
   selector: 'ubax-employe-detail-page',
@@ -93,14 +70,14 @@ export class EmployeDetailPageComponent {
       iconSrc: '/employe-detail/icons/contract.svg',
     },
     {
-      label: 'Date d’embauche',
+      label: "Date d'embauche",
       value: this.employe.dateEmbauche,
       iconSrc: '/employe-detail/icons/hire-date.svg',
       hasFramedIcon: true,
     },
   ];
 
-  readonly documents: Document[] = [
+  readonly documents: EmployeDocument[] = [
     { nom: 'CNI' },
     { nom: 'Contrat de travail' },
     { nom: 'Fiche de paie' },

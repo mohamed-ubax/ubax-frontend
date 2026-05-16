@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-
-type Category = {
-  label: string;
-  color: string;};
+import type { DepenseCategory } from '../../types/ajouter-depense.types';
 
 @Component({
   standalone: true,
@@ -15,7 +12,7 @@ export class AjouterDepensePageComponent {
   activeStep = 1;
   activeStatus = 'Payés';
 
-  readonly categories: Category[] = [
+  readonly categories: DepenseCategory[] = [
     { label: 'Maintenance', color: '#ffae00' },
     { label: 'Restauration', color: '#ff6b35' },
     { label: 'Charge', color: '#008bff' },

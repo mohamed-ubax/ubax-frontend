@@ -12,9 +12,7 @@ import {
   FINANCE_OVERDUE_ROWS,
   FINANCE_SUMMARY_CARDS,
 } from '../../constants/finance-ui.constants';
-import type { FinanceOverdueRow } from '../../types/finance.types';
-
-type OverdueItem = FinanceOverdueRow & { readonly uid: string };
+import type { OverdueItem } from '../../types/loyers-retard.types';
 
 const PERIOD_OPTIONS = [
   'Avril 2025',

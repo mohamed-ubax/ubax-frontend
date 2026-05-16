@@ -6,13 +6,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-type Role = 'administrateur' | 'concierge' | 'employe';
-
-type DayToggle = {
-  id: string;
-  label: string;
-  selected: boolean;};
+import type { Role, DayToggle } from '../../types/employe-add.types';
 
 @Component({
   selector: 'ubax-employe-add-page',

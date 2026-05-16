@@ -23,18 +23,10 @@ import type {
   ArchivageTabDefinition,
   ArchivageTabId,
 } from '../../types/archivage.types';
-
-type ArchivageFiltersState = {
-  readonly keyword: string;
-  readonly startDate: Date | null;
-  readonly endDate: Date | null;
-  readonly owner: string;
-  readonly archivedBy: string;
-  readonly type: string;};
-
-type ArchivageSelectOption = {
-  readonly label: string;
-  readonly value: string;};
+import type {
+  ArchivageFiltersState,
+  ArchivageSelectOption,
+} from '../../types/archivage-page.types';
 
 const FRENCH_MONTH_NAMES = [
   'Janvier',
@@ -186,7 +178,7 @@ function areFiltersEqual(
 function normalizeText(value: string): string {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .trim();
 }

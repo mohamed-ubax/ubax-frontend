@@ -16,9 +16,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { LocationStore } from '@ubax-workspace/ubax-web-data-access';
-import { STATUS_META } from '../locataires-kyc-list-page/locataires-kyc-list-page.component';
-
-type DialogMode = 'qualify' | 'reject' | null;
+import { STATUS_META } from '../../constants/locataires-kyc-list.constants';
+import type { DialogMode } from '../../types/locataire-kyc-detail.types';
 
 @Component({
   selector: 'ubax-locataire-kyc-detail-page',

@@ -40,3 +40,27 @@ export type ClientDetailData = {
   readonly stay: ClientStayDetails;
   readonly summary: ClientReservationSummary;
 };
+
+export type ReservationHistoryTone = 'active' | 'completed' | 'cancelled';
+export type ReservationHistorySortKey =
+  | 'space'
+  | 'bookingDate'
+  | 'stayPeriod'
+  | 'amount'
+  | 'status';
+export type ReservationHistorySortDirection = 'asc' | 'desc';
+
+export type ReservationHistoryEntry = {
+  readonly id: string;
+  readonly spaceId: string;
+  readonly thumbnail: string;
+  readonly title: string;
+  readonly subtitle: string;
+  readonly bookingDate: string;
+  readonly stayPeriod: string;
+  readonly amount: string;
+  readonly amountValue: number;
+  readonly createdAt: number;
+  readonly status: string;
+  readonly tone: ReservationHistoryTone;
+};

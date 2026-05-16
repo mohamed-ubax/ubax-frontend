@@ -23,90 +23,21 @@ import {
   NOTIFICATION_HANDLER,
   NotificationHandler,
 } from '@ubax-workspace/shared-data-access';
-
-type BienDocument = {
-  readonly id: string;
-  readonly name: string;
-  readonly fileUrl: string;
-};
-
-type BienMetric = {
-  readonly label: string;
-  readonly value: string;
-};
-
-type BienGalleryItem = {
-  readonly key: string;
-  readonly src: string | null;
-  readonly alt: string;
-  readonly isPlaceholder: boolean;
-};
-
-type BienComment = {
-  readonly author: string;
-  readonly avatar: string;
-  readonly rating: number;
-  readonly review: string;
-};
-
-type BienVideo = {
-  readonly key: string;
-  readonly fileUrl: string;
-  readonly playbackUrl: string;
-  readonly fileName?: string;
-  readonly mimeType?: string;
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Brouillon',
-  PENDING: 'En attente',
-  PUBLISHED: 'Publie',
-  RESERVED: 'Reserve',
-  SOLD: 'Vendu',
-  ARCHIVED: 'Archive',
-  REJECTED: 'Rejete',
-};
-
-const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  APARTMENT: 'Appartement',
-  VILLA: 'Villa',
-  HOUSE: 'Maison',
-  LAND: 'Terrain',
-  OFFICE: 'Bureau',
-  HOTEL_ROOM: 'Chambre hotel',
-};
-
-const TRANSACTION_TYPE_LABELS: Record<string, string> = {
-  SALE: 'Vente',
-  RENT: 'Location',
-  RENT_FURNISHED: 'Location meublee',
-  SHORT_STAY: 'Court sejour',
-};
-
-const CONDITION_LABELS: Record<string, string> = {
-  NEW: 'Neuf',
-  GOOD: 'Bon etat',
-  RENOVATE: 'A renover',
-};
-
-const MIN_GALLERY_SLOTS = 4;
-
-function readAmenityPayloadLabel(item: {
-  readonly code?: string;
-  readonly customDescription?: string;
-  readonly customValue?: string;
-  readonly description?: string;
-  readonly value?: string;
-}): string {
-  return (
-    item.description?.trim() ||
-    item.value?.trim() ||
-    item.customDescription?.trim() ||
-    item.customValue?.trim() ||
-    item.code?.trim() ||
-    ''
-  );
-}
+import type {
+  BienComment,
+  BienDocument,
+  BienGalleryItem,
+  BienMetric,
+  BienVideo,
+} from '../../types/bien-detail.types';
+import {
+  CONDITION_LABELS,
+  MIN_GALLERY_SLOTS,
+  PROPERTY_TYPE_LABELS,
+  readAmenityPayloadLabel,
+  STATUS_LABELS,
+  TRANSACTION_TYPE_LABELS,
+} from '../../constants/bien-detail.constants';
 
 @Component({
   selector: 'ubax-bien-detail-page',

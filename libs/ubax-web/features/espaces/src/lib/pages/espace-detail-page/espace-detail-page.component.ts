@@ -22,83 +22,20 @@ import {
   NOTIFICATION_HANDLER,
   type NotificationHandler,
 } from '@ubax-workspace/shared-data-access';
-
-type GuestProfile = {
-  readonly clientId: string;
-  readonly name: string;
-  readonly code: string;
-  readonly avatar: string;
-};
-
-type ReservationDetail = {
-  readonly title: string;
-  readonly type: string;
-  readonly capacity: string;
-  readonly bookingDate: string;
-  readonly bookingTime: string;
-  readonly stayDuration: string;
-  readonly facilities: readonly string[];
-};
-
-type GalleryPhoto = {
-  readonly key: string;
-  readonly src: string | null;
-  readonly alt: string;
-  readonly isPlaceholder: boolean;
-  readonly previewCount?: number;
-};
-
-type HistoryRow = {
-  readonly id: number;
-  readonly clientId: string;
-  readonly guestName: string;
-  readonly property: string;
-  readonly duration: string;
-  readonly period: string;
-  readonly status: 'Confirme';
-  readonly avatar: string;
-};
-
-type LegalDocument = {
-  readonly id: string;
-  readonly name: string;
-  readonly fileUrl: string;
-  readonly extension: string;
-  readonly kindLabel: string;
-};
-
-const MIN_GALLERY_SLOTS = 4;
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Brouillon',
-  PENDING: 'En attente',
-  PUBLISHED: 'Publié',
-  RESERVED: 'Réservé',
-  SOLD: 'Vendu',
-  ARCHIVED: 'Archivé',
-  REJECTED: 'Rejeté',
-};
-
-function isEditableEspaceStatus(status: string | null | undefined): boolean {
-  return status === 'DRAFT' || status === 'REJECTED';
-}
-
-function extractFileExtension(name: string, fileUrl: string): string {
-  const source = name || fileUrl;
-  const match = /\.([a-z0-9]{2,5})(?:$|\?)/i.exec(source);
-  return (match?.[1] ?? 'doc').toUpperCase();
-}
-
-function resolveDocumentKindLabel(extension: string): string {
-  if (extension === 'PDF') {
-    return 'Dossier PDF';
-  }
-
-  if (['PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'BMP', 'SVG'].includes(extension)) {
-    return 'Justificatif image';
-  }
-
-  return 'Pièce légale';
-}
+import type {
+  GalleryPhoto,
+  GuestProfile,
+  HistoryRow,
+  LegalDocument,
+  ReservationDetail,
+} from '../../types/espace-detail.types';
+import {
+  extractFileExtension,
+  isEditableEspaceStatus,
+  MIN_GALLERY_SLOTS,
+  resolveDocumentKindLabel,
+  STATUS_LABELS,
+} from '../../constants/espace-detail.constants';
 
 @Component({
   selector: 'ubax-espace-detail-page',

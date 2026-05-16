@@ -13,13 +13,10 @@ import {
   COMMERCIAL_ICON_ASSETS,
 } from '../../constants/reservation-commercial.constants';
 import { formatMonthLabel } from '../../utils/reservation.utils';
-
-type MiniCalendarCell = {
-  readonly label: string;
-  readonly muted: boolean;
-  readonly active: boolean;};
-
-type MiniCalendarWeek = readonly MiniCalendarCell[];
+import type {
+  MiniCalendarCell,
+  MiniCalendarWeek,
+} from '../../types/reservation-mini-calendar.types';
 
 @Component({
   selector: 'ubax-reservation-mini-calendar',

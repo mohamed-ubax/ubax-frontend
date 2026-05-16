@@ -406,7 +406,7 @@ export const FINANCE_TENANT_INFO: readonly FinanceTenantInfoCard[] = [
   },
   {
     items: [
-      { icon: 'pi pi-calendar', text: 'Date d’entrée : 12 Janvier 2025' },
+      { icon: 'pi pi-calendar', text: "Date d'entrée : 12 Janvier 2025" },
       { icon: 'pi pi-calendar', text: 'Fin du bail : 12 Janvier 2026' },
       { icon: 'pi pi-calendar', text: 'Durée du bail : 12 mois' },
     ],
@@ -415,7 +415,7 @@ export const FINANCE_TENANT_INFO: readonly FinanceTenantInfoCard[] = [
 
 export const FINANCE_TENANT_DOCUMENTS: readonly FinanceTenantDocument[] = [
   { name: 'Contrat de bail signé' },
-  { name: 'État des lieux d’entrée' },
+  { name: "État des lieux d'entrée" },
   { name: 'Reçu de caution' },
   { name: 'Reçu avance' },
   { name: 'CNI ivoirienne' },

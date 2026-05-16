@@ -21,7 +21,7 @@ export type { CommercialRequestDetail };
 })
 export class DemandeDetailPanelComponent {
   readonly request = input.required<CommercialRequestDetail>();
-  readonly title = input<string>('Détails demande d’information');
+  readonly title = input<string>("Détails demande d'information");
   readonly closeIconSrc = input.required<string>();
 
   readonly close = output<void>();

@@ -12,69 +12,16 @@ import { Router } from '@angular/router';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { LocationStore } from '@ubax-workspace/ubax-web-data-access';
 import { SelectModule } from 'primeng/select';
-
-type TenantStatus =
-  | 'INCOMPLETE'
-  | 'PENDING_REVIEW'
-  | 'QUALIFIED'
-  | 'REJECTED'
-  | 'BLACKLISTED';
-
-type SelectOption<T> = { label: string; value: T };
-
-type KpiCard = {
-  label: string;
-  value: number;
-  accent: string;
-  bg: string;
-  icon: string;
-};
-
-export const STATUS_META: Record<
+import type {
   TenantStatus,
-  { label: string; color: string; bg: string; dot: string }
-> = {
-  INCOMPLETE: {
-    label: 'Incomplet',
-    color: 'var(--ubax-text-muted)',
-    bg: '#f0f2f6',
-    dot: '#9ca3af',
-  },
-  PENDING_REVIEW: {
-    label: 'En attente',
-    color: 'var(--ubax-accent)',
-    bg: 'var(--ubax-peach-soft)',
-    dot: 'var(--ubax-accent)',
-  },
-  QUALIFIED: {
-    label: 'Qualifié',
-    color: 'var(--ubax-success)',
-    bg: 'var(--ubax-success-soft)',
-    dot: 'var(--ubax-success)',
-  },
-  REJECTED: {
-    label: 'Rejeté',
-    color: 'var(--ubax-danger)',
-    bg: 'var(--ubax-danger-soft)',
-    dot: 'var(--ubax-danger)',
-  },
-  BLACKLISTED: {
-    label: 'Blacklisté',
-    color: '#fff',
-    bg: 'var(--ubax-navy)',
-    dot: 'var(--ubax-navy)',
-  },
-};
-
-const PAGE_SIZE = 10;
-
-function normalizeText(v: string): string {
-  return v
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
-}
+  SelectOption,
+  KycKpiCard,
+} from '../../types/locataires-kyc-list.types';
+import {
+  STATUS_META,
+  KYC_PAGE_SIZE,
+  normalizeKycText,
+} from '../../constants/locataires-kyc-list.constants';
 
 @Component({
   selector: 'ubax-locataires-kyc-list-page',
@@ -115,7 +62,7 @@ export class LocatairesKycListPageComponent {
     return 'success';
   });
 
-  readonly kpiCards = computed<KpiCard[]>(() => {
+  readonly kpiCards = computed<KycKpiCard[]>(() => {
     const all = this.store.entities();
     return [
       {
@@ -150,13 +97,13 @@ export class LocatairesKycListPageComponent {
   });
 
   readonly filteredTenants = computed(() => {
-    const query = normalizeText(this.searchTerm());
+    const query = normalizeKycText(this.searchTerm());
     const status = this.filterStatus();
 
     return this.store.entities().filter((t) => {
       if (status !== 'all' && t.status !== status) return false;
       if (query) {
-        const text = normalizeText(
+        const text = normalizeKycText(
           [t.fullName, t.email, t.employerName, t.id].join(' '),
         );
         if (!text.includes(query)) return false;
@@ -166,21 +113,21 @@ export class LocatairesKycListPageComponent {
   });
 
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredTenants().length / PAGE_SIZE)),
+    Math.max(1, Math.ceil(this.filteredTenants().length / KYC_PAGE_SIZE)),
   );
 
   readonly pagedTenants = computed(() => {
     const page = Math.min(this.currentPage(), this.totalPages());
-    const start = (page - 1) * PAGE_SIZE;
-    return this.filteredTenants().slice(start, start + PAGE_SIZE);
+    const start = (page - 1) * KYC_PAGE_SIZE;
+    return this.filteredTenants().slice(start, start + KYC_PAGE_SIZE);
   });
 
   readonly resultsLabel = computed(() => {
     const total = this.filteredTenants().length;
     if (!total) return 'Aucun résultat';
     const page = Math.min(this.currentPage(), this.totalPages());
-    const start = (page - 1) * PAGE_SIZE + 1;
-    const end = Math.min(start + PAGE_SIZE - 1, total);
+    const start = (page - 1) * KYC_PAGE_SIZE + 1;
+    const end = Math.min(start + KYC_PAGE_SIZE - 1, total);
     return `${start}–${end} sur ${total} dossiers`;
   });
 

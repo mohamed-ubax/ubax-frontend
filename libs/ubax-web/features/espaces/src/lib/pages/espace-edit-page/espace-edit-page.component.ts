@@ -22,46 +22,14 @@ import {
   AuthStore,
   EspaceEditStore,
 } from '@ubax-workspace/ubax-web-data-access';
-
-type SelectOption = {
-  readonly value: string;
-  readonly label: string;
-};
-
-type EspaceStep1Form = {
-  title: FormControl<string>;
-  propertyType: FormControl<string>;
-  condition: FormControl<string>;
-};
-
-type EspaceStep2Form = {
-  bedrooms: FormControl<number | null>;
-  bathrooms: FormControl<number | null>;
-  maxOccupancy: FormControl<number | null>;
-  bedType: FormControl<string>;
-  surfaceTotal: FormControl<number | null>;
-};
-
-type EspaceStep3Form = {
-  city: FormControl<string>;
-  district: FormControl<string>;
-  address: FormControl<string>;
-};
-
-type EspaceStep4Form = {
-  price: FormControl<number>;
-  mealPlan: FormControl<string>;
-  paymentFrequency: FormControl<string>;
-  description: FormControl<string>;
-  amenities: FormControl<string[]>;
-};
-
-const WIZARD_STEPS = [
-  { label: 'Identite' },
-  { label: 'Capacite' },
-  { label: 'Localisation' },
-  { label: 'Equipements & Prix' },
-] as const;
+import type {
+  EspaceStep1Form,
+  EspaceStep2Form,
+  EspaceStep3Form,
+  EspaceStep4Form,
+  SelectOption,
+} from '../../types/espace-edit.types';
+import { WIZARD_STEPS } from '../../constants/espace-edit.constants';
 
 @Component({
   selector: 'ubax-espace-edit-page',

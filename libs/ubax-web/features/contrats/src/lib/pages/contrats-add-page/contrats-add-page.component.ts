@@ -19,13 +19,8 @@ import {
   DetailInfoBlockComponent,
   type InfoItem,
 } from '@ubax-workspace/shared-design-system';
-
-interface StepConfig {
-  readonly step: number;
-  readonly icon: string;
-  readonly title: string;
-  readonly desc: string;
-}
+import type { StepConfig } from '../../types/contrats-add.types';
+import { CONTRATS_ADD_STEP_CONFIG } from '../../constants/contrats-add.constants';
 
 @Component({
   selector: 'ubax-contrats-add-page',
@@ -50,12 +45,7 @@ export class ContratsAddPageComponent {
   readonly totalSteps = 4;
   readonly openEnded = signal(false);
 
-  readonly stepConfig: StepConfig[] = [
-    { step: 1, icon: 'pi-home', title: 'Sélection du bien', desc: 'Choisissez le bien immobilier.' },
-    { step: 2, icon: 'pi-user', title: 'Sélection du locataire', desc: 'Locataire qualifié uniquement.' },
-    { step: 3, icon: 'pi-calendar', title: 'Conditions du bail', desc: 'Montants et dates.' },
-    { step: 4, icon: 'pi-check-circle', title: 'Récapitulatif', desc: 'Vérifiez et confirmez.' },
-  ];
+  readonly stepConfig: readonly StepConfig[] = CONTRATS_ADD_STEP_CONFIG;
 
   readonly currentStepConfig = computed(() =>
     this.stepConfig[this.currentStep() - 1],

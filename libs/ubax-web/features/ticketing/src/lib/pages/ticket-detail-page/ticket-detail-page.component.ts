@@ -22,46 +22,24 @@ import {
   TechniciansStore,
   UbaxSubRole,
   readResolvedTeamMemberRoles,
+  TicketSav as Ticket,
+  TicketPriority,
+  TicketStatus,
 } from '@ubax-workspace/ubax-web-data-access';
+import type {
+  AllowedNextStatus,
+  DrawerMode,
+  SelectOption,
+} from '../../types/ticket-detail-page.types';
+import {
+  ALLOWED_TRANSITIONS,
+  STATUS_FLOW,
+} from '../../constants/ticket-detail-page.constants';
 import {
   CATEGORY_LABELS,
   PRIORITY_META,
   STATUS_META,
-  Ticket,
-  TicketPriority,
-  TicketStatus,
-} from '../tickets-list-page/tickets-list-page.component';
-
-// UpdateTicketStatusRequest does not include 'OPEN' — only these are valid next statuses
-type AllowedNextStatus =
-  | 'IN_ANALYSIS'
-  | 'TECHNICIAN_SENT'
-  | 'RESOLVED'
-  | 'CLOSED'
-  | 'CANCELLED';
-
-const ALLOWED_TRANSITIONS: Partial<Record<TicketStatus, AllowedNextStatus[]>> =
-  {
-    OPEN: ['IN_ANALYSIS'],
-    IN_ANALYSIS: ['TECHNICIAN_SENT', 'RESOLVED'],
-    TECHNICIAN_SENT: ['RESOLVED'],
-    RESOLVED: ['CLOSED'],
-  };
-
-const STATUS_FLOW: TicketStatus[] = [
-  'OPEN',
-  'IN_ANALYSIS',
-  'TECHNICIAN_SENT',
-  'RESOLVED',
-  'CLOSED',
-];
-
-type DrawerMode = 'intervention' | null;
-
-type SelectOption = {
-  label: string;
-  value: string;
-};
+} from '../../constants/tickets-list-page.constants';
 
 @Component({
   selector: 'ubax-ticket-detail-page',
@@ -82,20 +60,17 @@ export class TicketDetailPageComponent {
   readonly store = inject(TicketingStore);
   private lastNotifiedError: string | null = null;
 
-  // ── Route param ─────────────────────────────────────────────────────────────
   private readonly ticketId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
     { initialValue: '' },
   );
 
-  // ── UI state ────────────────────────────────────────────────────────────────
   readonly drawerOpen = signal<DrawerMode>(null);
   readonly showCloseConfirm = signal(false);
   readonly messageInput = signal('');
   readonly messageType = signal<'PUBLIC' | 'INTERNAL'>('PUBLIC');
   readonly hasLoaded = signal(false);
 
-  // ── Intervention form ───────────────────────────────────────────────────────
   readonly interventionForm = this.fb.group({
     assignedToId: [''],
     technicienId: [''],
@@ -108,12 +83,10 @@ export class TicketDetailPageComponent {
     resolutionNote: [''],
   });
 
-  // ── Ticket courant ──────────────────────────────────────────────────────────
   readonly ticket = computed<Ticket | undefined>(() =>
     this.store.entities().find((t) => t.id === this.ticketId()),
   );
 
-  // ── ViewState ───────────────────────────────────────────────────────────────
   readonly viewState = computed(() => {
     if (this.store.loading() && !this.hasLoaded()) return 'loading';
     if (this.store.error()) return 'error';
@@ -122,7 +95,6 @@ export class TicketDetailPageComponent {
     return 'loading';
   });
 
-  // ── Statut helpers ──────────────────────────────────────────────────────────
   readonly statusMeta = STATUS_META;
   readonly priorityMeta = PRIORITY_META;
   readonly categoryLabels = CATEGORY_LABELS;
@@ -143,7 +115,6 @@ export class TicketDetailPageComponent {
       this.ticket()?.status === 'CANCELLED',
   );
 
-  // ── Messages ────────────────────────────────────────────────────────────────
   readonly messages = computed(() => this.store.messages());
 
   readonly savAgentOptions = computed<SelectOption[]>(() => {
@@ -189,7 +160,6 @@ export class TicketDetailPageComponent {
     }),
   );
 
-  // ── Info blocks ─────────────────────────────────────────────────────────────
   readonly infoBlocks = computed(() => {
     const t = this.ticket();
     if (!t) return [];
@@ -270,7 +240,6 @@ export class TicketDetailPageComponent {
       this.techniciansStore.loadProfessions();
     }
 
-    // Charger le ticket quand l'id change
     effect(() => {
       const id = this.ticketId();
       if (id) {
@@ -279,7 +248,6 @@ export class TicketDetailPageComponent {
       }
     });
 
-    // Marquer hasLoaded
     effect(() => {
       if (!this.store.loading() && !this.hasLoaded()) {
         this.hasLoaded.set(true);
@@ -311,7 +279,6 @@ export class TicketDetailPageComponent {
     });
   }
 
-  // ── Actions statut ──────────────────────────────────────────────────────────
   advanceStatus(nextStatus: AllowedNextStatus): void {
     if (nextStatus === 'CLOSED') {
       this.showCloseConfirm.set(true);
@@ -335,7 +302,6 @@ export class TicketDetailPageComponent {
     this.store.changerStatut({ ticketId: id, body: { status } });
   }
 
-  // ── Drawer intervention ─────────────────────────────────────────────────────
   openInterventionDrawer(): void {
     const t = this.ticket();
     if (t) {
@@ -470,7 +436,6 @@ export class TicketDetailPageComponent {
     this.closeDrawer();
   }
 
-  // ── Messagerie ──────────────────────────────────────────────────────────────
   sendMessage(): void {
     const content = this.messageInput().trim();
     if (!content) return;
@@ -491,7 +456,6 @@ export class TicketDetailPageComponent {
     }
   }
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
   formatDate(dateStr: string | undefined): string {
     if (!dateStr) return '—';
     return new Intl.DateTimeFormat('fr-FR', {
@@ -570,7 +534,6 @@ export class TicketDetailPageComponent {
     return name.slice(0, 2).toUpperCase();
   }
 
-  // Template helper: cast AllowedNextStatus[] for statusMeta lookup
   asTicketStatus(s: AllowedNextStatus): TicketStatus {
     return s as TicketStatus;
   }
