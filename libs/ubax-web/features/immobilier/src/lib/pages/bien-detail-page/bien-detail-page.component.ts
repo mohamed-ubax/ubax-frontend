@@ -14,7 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   ApiConfiguration,
   generateReadUrl,
-  getById,
+  getById1 as getPropertyById,
   PropertyDetailResponse,
 } from '@ubax-workspace/shared-api-types';
 import { deriveViewState, ViewState } from '@ubax-workspace/shared-ui';
@@ -624,7 +624,7 @@ export class BienDetailPageComponent {
       this.detailError.set(null);
       this.resolvedVideoUrls.set({});
       const response = await firstValueFrom(
-        getById(this.http, this.apiConfig.rootUrl, { id }),
+        getPropertyById(this.http, this.apiConfig.rootUrl, { id }),
       );
       const detail = this.extractDetailFromResponse(response.body);
       this.propertyDetail.set(detail);

@@ -7,9 +7,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
@@ -28,7 +27,7 @@ import {
 import {
   ApiConfiguration,
   generateReadUrl,
-  getById,
+  getById1 as getPropertyById,
   LaCodeListDto,
   PropertyCreateRequest,
   PropertyDetailResponse,
@@ -1272,7 +1271,7 @@ export class EspaceAddPageComponent implements OnInit {
   private async prefillFromProperty(id: string): Promise<void> {
     try {
       const response = await firstValueFrom(
-        getById(this.http, this.apiConfig.rootUrl, { id }),
+        getPropertyById(this.http, this.apiConfig.rootUrl, { id }),
       );
       const detail = this.extractDetailFromResponse(response.body);
       this.applyPropertyDetail(detail, id);

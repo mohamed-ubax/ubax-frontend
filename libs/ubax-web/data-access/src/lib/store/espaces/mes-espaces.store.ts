@@ -4,12 +4,15 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   archive,
   ApiConfiguration,
   findAllByType,
-  getById,
+  getById1 as getPropertyById,
   LaCodeListDto,
   listMine1,
   ListMine1$Params,
@@ -144,13 +147,13 @@ export const MesEspacesStore = signalStore(
   withApiResource<
     PropertyResponse,
     typeof listMine1,
-    typeof getById,
+    typeof getPropertyById,
     undefined,
     undefined,
     typeof archive
   >({
     list: listMine1,
-    getById: getById,
+    getById: getPropertyById,
     delete: archive,
     idSelector: selectEspaceId,
     mapList: (raw: unknown) =>
@@ -215,7 +218,13 @@ export const MesEspacesStore = signalStore(
                   );
                 },
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { loading: false, error: resolveHttpErrorMessage(err, 'Erreur lors du chargement') }),
+                  patchState(store, {
+                    loading: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement',
+                    ),
+                  }),
               }),
             );
           }),
@@ -265,7 +274,10 @@ export const MesEspacesStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     archivingEspaceIds: withoutId(state.archivingEspaceIds, id),
-                    archiveError: resolveHttpErrorMessage(err, 'Erreur lors de l\'archivage de l\'espace'),
+                    archiveError: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de l'archivage de l'espace",
+                    ),
                   })),
               }),
             ),
@@ -318,7 +330,10 @@ export const MesEspacesStore = signalStore(
                       state.submittingEspaceIds,
                       id,
                     ),
-                    submitError: resolveHttpErrorMessage(err, 'Erreur lors de la soumission de l\'espace'),
+                    submitError: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de la soumission de l'espace",
+                    ),
                   })),
               }),
             ),

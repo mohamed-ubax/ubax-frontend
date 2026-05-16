@@ -28,7 +28,7 @@ import {
 import {
   ApiConfiguration,
   generateReadUrl,
-  getById,
+  getById1 as getPropertyById,
   PropertyDetailResponse,
   PropertyAmenityRequest,
 } from '@ubax-workspace/shared-api-types';
@@ -963,7 +963,7 @@ export class BienAddPageComponent implements OnInit {
   private async prefillFromProperty(id: string): Promise<void> {
     try {
       const response = await firstValueFrom(
-        getById(this.http, this.apiConfig.rootUrl, { id }),
+        getPropertyById(this.http, this.apiConfig.rootUrl, { id }),
       );
       const detail = this.extractDetailFromResponse(response.body);
       const property = detail?.property;

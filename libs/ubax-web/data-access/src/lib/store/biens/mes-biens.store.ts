@@ -4,11 +4,14 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   archive,
   ApiConfiguration,
-  getById,
+  getById1 as getPropertyById,
   findAllByType,
   LaCodeListDto,
   listMine1,
@@ -249,13 +252,13 @@ export const MesBiensStore = signalStore(
   withApiResource<
     PropertyResponse,
     typeof listMine1,
-    typeof getById,
+    typeof getPropertyById,
     undefined,
     undefined,
     typeof archive
   >({
     list: listMine1,
-    getById: getById,
+    getById: getPropertyById,
     delete: archive,
     idSelector: selectPropertyId,
     mapList: (raw: unknown) =>
@@ -312,7 +315,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     codeListsLoading: false,
-                    codeListsError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des listes de codes'),
+                    codeListsError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement des listes de codes',
+                    ),
                   }),
               }),
             ),
@@ -345,7 +351,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     overviewLoading: false,
-                    overviewError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des statistiques'),
+                    overviewError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement des statistiques',
+                    ),
                   }),
               }),
             ),
@@ -392,7 +401,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     archivingPropertyIds: withoutArchivingId(state, id),
-                    archiveError: resolveHttpErrorMessage(err, 'Erreur lors de l\'archivage du bien'),
+                    archiveError: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de l'archivage du bien",
+                    ),
                   })),
               }),
             ),
@@ -435,7 +447,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     submittingPropertyIds: withoutSubmittingId(state, id),
-                    submitError: resolveHttpErrorMessage(err, 'Erreur lors de la soumission du bien'),
+                    submitError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la soumission du bien',
+                    ),
                   })),
               }),
             ),

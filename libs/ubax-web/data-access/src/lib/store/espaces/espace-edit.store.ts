@@ -6,7 +6,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   ApiConfiguration,
   findAllByType,
-  getById,
+  getById1 as getPropertyById,
   LaCodeListDto,
   update,
 } from '@ubax-workspace/shared-api-types';
@@ -66,7 +66,6 @@ function extractEntity(body: unknown): Record<string, unknown> | null {
     : null;
 }
 
-
 export const EspaceEditStore = signalStore(
   withState(initialState),
   withMethods(
@@ -105,7 +104,7 @@ export const EspaceEditStore = signalStore(
               return EMPTY;
             }
 
-            return getById(http, apiConfig.rootUrl, { id }).pipe(
+            return getPropertyById(http, apiConfig.rootUrl, { id }).pipe(
               tapResponse({
                 next: (resp) =>
                   patchState(store, {
@@ -115,7 +114,10 @@ export const EspaceEditStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     loading: false,
-                    error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour de l\'espace'),
+                    error: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de la mise à jour de l'espace",
+                    ),
                   }),
               }),
             );
@@ -173,7 +175,10 @@ export const EspaceEditStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     loading: false,
-                    error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour de l\'espace'),
+                    error: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de la mise à jour de l'espace",
+                    ),
                   }),
               }),
             ),
@@ -208,7 +213,10 @@ export const EspaceEditStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     saving: false,
-                    error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour de l\'espace'),
+                    error: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de la mise à jour de l'espace",
+                    ),
                   }),
               }),
             );

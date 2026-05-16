@@ -13,7 +13,7 @@ import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import {
   ApiConfiguration,
   generateReadUrl,
-  getById,
+  getById1 as getPropertyById,
   PropertyDetailResponse,
 } from '@ubax-workspace/shared-api-types';
 import { firstValueFrom } from 'rxjs';
@@ -564,7 +564,7 @@ export class EspaceDetailPageComponent {
       this.loadingDetail.set(true);
       this.detailError.set(null);
       const response = await firstValueFrom(
-        getById(this.http, this.apiConfig.rootUrl, {
+        getPropertyById(this.http, this.apiConfig.rootUrl, {
           id,
         }),
       );

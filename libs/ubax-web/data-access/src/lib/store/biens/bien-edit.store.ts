@@ -3,11 +3,14 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
   findAllByType,
-  getById,
+  getById1 as getPropertyById,
   LaCodeListDto,
   PropertyResponse,
   update,
@@ -76,12 +79,12 @@ export const BienEditStore = signalStore(
   withApiResource<
     PropertyResponse,
     undefined,
-    typeof getById,
+    typeof getPropertyById,
     undefined,
     undefined,
     undefined
   >({
-    getById: getById,
+    getById: getPropertyById,
     idSelector: selectPropertyId,
     mapGetById: (raw: unknown) => extractProperty(raw),
   }),
@@ -133,7 +136,12 @@ export const BienEditStore = signalStore(
                     codeListDocumentTypes: documentTypes,
                   }),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { error: resolveHttpErrorMessage(err, 'Erreur lors du chargement') }),
+                  patchState(store, {
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement',
+                    ),
+                  }),
               }),
             ),
           ),
@@ -157,7 +165,10 @@ export const BienEditStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     saving: false,
-                    error: resolveHttpErrorMessage(err, 'Erreur lors de la modification'),
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la modification',
+                    ),
                   }),
               }),
             ),
