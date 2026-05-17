@@ -130,6 +130,54 @@
 :host ::ng-deep .td-datepicker { width: 100%; }
 :host ::ng-deep .td-datepicker .p-inputtext { width: 100%; padding: 10px 14px; border: 1.5px solid var(--ubax-border-card); border-radius: 10px; background: var(--ubax-page-bg); font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; color: var(--ubax-text-primary); }
 
+:host ::ng-deep .td-pselect {
+  width: 100%;
+  border: 1.5px solid var(--ubax-border-card);
+  border-radius: 10px;
+  background: var(--ubax-page-bg);
+  box-shadow: none;
+  transition: border-color 0.15s;
+
+  &:hover { border-color: var(--ubax-navy); }
+  &.p-focus { border-color: var(--ubax-accent); outline: none; box-shadow: none; }
+
+  .p-select-label {
+    padding: 10px 14px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-primary);
+    line-height: 1.4;
+  }
+
+  .p-select-label.p-placeholder {
+    color: var(--ubax-text-muted);
+  }
+
+  .p-select-dropdown {
+    width: 36px;
+    color: var(--ubax-text-muted);
+  }
+}
+
+:host ::ng-deep .p-select-overlay {
+  border-radius: 10px;
+  border: 1px solid var(--ubax-border-card);
+  box-shadow: 0 8px 24px rgb(26 48 71 / 0.12);
+  background: var(--ubax-surface);
+}
+
+:host ::ng-deep .p-select-option {
+  padding: 10px 14px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ubax-text-primary);
+
+  &.p-select-option-selected { background: color-mix(in srgb, var(--ubax-accent) 10%, transparent); color: var(--ubax-accent); font-weight: 500; }
+  &:not(.p-disabled):hover { background: var(--ubax-page-bg); }
+}
+
 .td-skeleton-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; }
 .td-skeleton-main, .td-skeleton-side { display: flex; flex-direction: column; gap: 16px; }
 .td-skeleton { border-radius: 16px; background: linear-gradient(90deg, #f0f2f6 25%, #e4e8ef 50%, #f0f2f6 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }

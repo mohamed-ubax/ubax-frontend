@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -56,6 +56,7 @@ export class TicketDetailPageComponent {
   private readonly messageService = inject(MessageService);
   private readonly authStore = inject(AuthStore);
   private readonly agencyStore = inject(AgencyStore);
+  private readonly document = inject(DOCUMENT);
   readonly techniciansStore = inject(TechniciansStore);
   readonly store = inject(TicketingStore);
   private lastNotifiedError: string | null = null;
@@ -140,6 +141,12 @@ export class TicketDetailPageComponent {
       .filter((option) => option.value.length > 0);
   });
 
+  readonly imputationOptions: SelectOption[] = [
+    { value: 'OWNER', label: 'Propriétaire' },
+    { value: 'TENANT', label: 'Locataire' },
+    { value: 'SHARED', label: 'Partagé' },
+  ];
+
   readonly availableTechnicianOptions = computed<SelectOption[]>(() =>
     this.techniciansStore.availableTechnicians().map((technician) => {
       const fullName = [technician.firstName, technician.lastName]
@@ -159,6 +166,11 @@ export class TicketDetailPageComponent {
       };
     }),
   );
+
+  readonly technicianSelectOptions = computed<SelectOption[]>(() => [
+    { value: '', label: 'Saisie manuelle' },
+    ...this.availableTechnicianOptions(),
+  ]);
 
   readonly infoBlocks = computed(() => {
     const t = this.ticket();
@@ -321,10 +333,12 @@ export class TicketDetailPageComponent {
       });
     }
     this.drawerOpen.set('intervention');
+    this.document.body.classList.add('ubax-overlay-open');
   }
 
   closeDrawer(): void {
     this.drawerOpen.set(null);
+    this.document.body.classList.remove('ubax-overlay-open');
   }
 
   saveIntervention(): void {

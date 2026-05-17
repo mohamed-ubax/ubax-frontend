@@ -355,57 +355,60 @@
     }
   }
 
-  <!-- ── Dialog confirmation clôture ───────────────────────────────────── -->
-  @if (showCloseConfirm()) {
-    <div
-      class="td-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="close-dialog-title"
-    >
-      <div class="td-dialog">
-        <div class="td-dialog__icon">
-          <i class="pi pi-lock"></i>
-        </div>
-        <h3 id="close-dialog-title" class="td-dialog__title">
-          Clôturer ce ticket ?
-        </h3>
-        <p class="td-dialog__desc">
-          Une fois clôturé, le ticket ne pourra plus être modifié. Assurez-vous
-          que l'intervention est terminée et le locataire satisfait.
-        </p>
-        <div class="td-dialog__actions">
-          <button
-            class="td-btn td-btn--ghost"
-            type="button"
-            (click)="cancelClose()"
-          >
-            Annuler
-          </button>
-          <button
-            class="td-btn td-btn--danger"
-            type="button"
-            [disabled]="store.saving()"
-            (click)="confirmClose()"
-          >
-            @if (store.saving()) {
-              <i class="pi pi-spin pi-spinner"></i>
-            }
-            Confirmer la clôture
-          </button>
-        </div>
+
+</div>
+
+<!-- ── Dialog confirmation clôture ───────────────────────────────────────── -->
+@if (showCloseConfirm()) {
+  <div
+    class="td-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="close-dialog-title"
+  >
+    <div class="td-dialog">
+      <div class="td-dialog__icon">
+        <i class="pi pi-lock"></i>
+      </div>
+      <h3 id="close-dialog-title" class="td-dialog__title">
+        Clôturer ce ticket ?
+      </h3>
+      <p class="td-dialog__desc">
+        Une fois clôturé, le ticket ne pourra plus être modifié. Assurez-vous
+        que l'intervention est terminée et le locataire satisfait.
+      </p>
+      <div class="td-dialog__actions">
+        <button
+          class="td-btn td-btn--ghost"
+          type="button"
+          (click)="cancelClose()"
+        >
+          Annuler
+        </button>
+        <button
+          class="td-btn td-btn--danger"
+          type="button"
+          [disabled]="store.saving()"
+          (click)="confirmClose()"
+        >
+          @if (store.saving()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          }
+          Confirmer la clôture
+        </button>
       </div>
     </div>
-  }
+  </div>
+}
 
-  <!-- ── Drawer intervention ────────────────────────────────────────────── -->
-  @if (drawerOpen() === 'intervention') {
-    <div class="td-drawer-backdrop" (click)="closeDrawer()"></div>
-    <aside
-      class="td-drawer"
-      role="complementary"
-      aria-label="Gestion de l'intervention"
-    >
+<!-- ── Drawer intervention ─────────────────────────────────────────────── -->
+@if (drawerOpen() === 'intervention') {
+  <div class="td-drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside
+    class="td-drawer"
+    role="complementary"
+    aria-label="Gestion de l'intervention"
+  >
       <div class="td-drawer__header">
         <h2 class="td-drawer__title">
           <i class="pi pi-cog"></i>
@@ -429,16 +432,16 @@
           </h3>
           <div class="td-field">
             <label class="td-label" for="dr-agent">ID de l'agent SAV</label>
-            <select
-              id="dr-agent"
-              class="td-select-native"
+            <p-select
+              inputId="dr-agent"
+              [options]="savAgentOptions()"
               formControlName="assignedToId"
-            >
-              <option value="">Sélectionner un agent SAV</option>
-              @for (agent of savAgentOptions(); track agent.value) {
-                <option [value]="agent.value">{{ agent.label }}</option>
-              }
-            </select>
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner un agent SAV"
+              styleClass="td-pselect"
+              appendTo="body"
+            />
           </div>
         </div>
 
@@ -451,21 +454,15 @@
             <label class="td-label" for="dr-tech-id"
               >Technicien enregistré</label
             >
-            <select
-              id="dr-tech-id"
-              class="td-select-native"
+            <p-select
+              inputId="dr-tech-id"
+              [options]="technicianSelectOptions()"
               formControlName="technicienId"
-            >
-              <option value="">Saisie manuelle</option>
-              @for (
-                technician of availableTechnicianOptions();
-                track technician.value
-              ) {
-                <option [value]="technician.value">
-                  {{ technician.label }}
-                </option>
-              }
-            </select>
+              optionLabel="label"
+              optionValue="value"
+              styleClass="td-pselect"
+              appendTo="body"
+            />
           </div>
 
           @if (!interventionForm.controls.technicienId.value) {
@@ -554,15 +551,15 @@
           </div>
           <div class="td-field">
             <label class="td-label" for="dr-imputation">Imputation</label>
-            <select
-              id="dr-imputation"
-              class="td-select-native"
+            <p-select
+              inputId="dr-imputation"
+              [options]="imputationOptions"
               formControlName="costImputedTo"
-            >
-              <option value="OWNER">Propriétaire</option>
-              <option value="TENANT">Locataire</option>
-              <option value="SHARED">Partagé</option>
-            </select>
+              optionLabel="label"
+              optionValue="value"
+              styleClass="td-pselect"
+              appendTo="body"
+            />
           </div>
           <div class="td-field">
             <label class="td-label" for="dr-note">Note de résolution</label>
@@ -597,6 +594,5 @@
           Enregistrer
         </button>
       </div>
-    </aside>
-  }
-</div>
+  </aside>
+}
