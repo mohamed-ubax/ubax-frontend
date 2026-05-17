@@ -150,7 +150,7 @@ export const LocationStore = signalStore(
           switchMap(() =>
             http
               .get<unknown>(`${apiConfig.rootUrl}/v1/tenants`, {
-                params: { withoutContract: 'true', status: 'PENDING_REVIEW' },
+                params: { withoutContract: 'true', status: 'QUALIFIED' },
               })
               .pipe(
                 tapResponse({

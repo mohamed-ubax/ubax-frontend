@@ -555,6 +555,10 @@
                     card.typeLabel
                   }}</span>
 
+                  <span class="espace-card__price-badge">
+                    {{ card.price }} <small>FCFA/nuit</small>
+                  </span>
+
                   <span
                     class="espace-card__status-badge"
                     [class.espace-card__status-badge--draft]="
@@ -583,41 +587,22 @@
                     <div class="espace-card__heading">
                       <h2 class="espace-card__title">{{ card.title }}</h2>
                       <div class="espace-card__actions">
-                        <button
-                          class="archive-chip"
-                          type="button"
-                          [disabled]="!canArchive(card.statusRaw, card.id)"
-                          (click)="
-                            $event.preventDefault();
-                            $event.stopPropagation();
-                            openArchiveDialog(card)
-                          "
-                        >
-                          @if (isArchiving(card.id)) {
-                            Archivage...
-                          } @else if (card.statusRaw === 'ARCHIVED') {
-                            Archivé
-                          } @else {
-                            Archiver
-                          }
-                        </button>
-
-                        @if (card.canSubmit) {
+                        @if (card.statusRaw !== 'ARCHIVED') {
                           <button
-                            class="submit-chip"
+                            class="archive-chip"
                             type="button"
-                            [disabled]="isSubmitting(card.id)"
+                            [disabled]="!canArchive(card.statusRaw, card.id)"
                             (click)="
                               $event.preventDefault();
                               $event.stopPropagation();
-                              openSubmitDialog(card)
+                              openArchiveDialog(card)
                             "
                           >
-                            {{
-                              isSubmitting(card.id)
-                                ? 'Soumission…'
-                                : 'Soumettre'
-                            }}
+                            @if (isArchiving(card.id)) {
+                              Archivage...
+                            } @else {
+                              Archiver
+                            }
                           </button>
                         }
 
@@ -666,9 +651,22 @@
                       <span>{{ card.city }}</span>
                     </p>
 
-                    <p class="espace-card__price">
-                      {{ card.price }} <small>FCFA/nuit</small>
-                    </p>
+                    @if (card.canSubmit) {
+                      <button
+                        class="submit-chip"
+                        type="button"
+                        [disabled]="isSubmitting(card.id)"
+                        (click)="
+                          $event.preventDefault();
+                          $event.stopPropagation();
+                          openSubmitDialog(card)
+                        "
+                      >
+                        {{
+                          isSubmitting(card.id) ? 'Soumission…' : 'Soumettre'
+                        }}
+                      </button>
+                    }
                   </div>
                 </a>
               </div>
@@ -693,14 +691,30 @@
                     <span class="espace-list-card__type-badge">{{
                       card.typeLabel
                     }}</span>
+                    <span class="espace-list-card__price-badge">
+                      {{ card.price }} <small>FCFA/nuit</small>
+                    </span>
                   </div>
 
                   <div class="espace-list-card__content">
                     <div class="espace-list-card__top">
                       <h2 class="espace-list-card__title">{{ card.title }}</h2>
-                      <p class="espace-list-card__price">
-                        {{ card.price }} <small>FCFA/nuit</small>
-                      </p>
+                      @if (card.canSubmit) {
+                        <button
+                          class="submit-chip submit-chip--compact"
+                          type="button"
+                          [disabled]="isSubmitting(card.id)"
+                          (click)="
+                            $event.preventDefault();
+                            $event.stopPropagation();
+                            openSubmitDialog(card)
+                          "
+                        >
+                          {{
+                            isSubmitting(card.id) ? 'Soumission…' : 'Soumettre'
+                          }}
+                        </button>
+                      }
                     </div>
 
                     <p class="espace-list-card__location">
@@ -764,41 +778,22 @@
                       </span>
 
                       <div class="espace-list-card__actions">
-                        <button
-                          class="archive-chip archive-chip--compact"
-                          type="button"
-                          [disabled]="!canArchive(card.statusRaw, card.id)"
-                          (click)="
-                            $event.preventDefault();
-                            $event.stopPropagation();
-                            openArchiveDialog(card)
-                          "
-                        >
-                          @if (isArchiving(card.id)) {
-                            Archivage...
-                          } @else if (card.statusRaw === 'ARCHIVED') {
-                            Archivé
-                          } @else {
-                            Archiver
-                          }
-                        </button>
-
-                        @if (card.canSubmit) {
+                        @if (card.statusRaw !== 'ARCHIVED') {
                           <button
-                            class="submit-chip submit-chip--compact"
+                            class="archive-chip archive-chip--compact"
                             type="button"
-                            [disabled]="isSubmitting(card.id)"
+                            [disabled]="!canArchive(card.statusRaw, card.id)"
                             (click)="
                               $event.preventDefault();
                               $event.stopPropagation();
-                              openSubmitDialog(card)
+                              openArchiveDialog(card)
                             "
                           >
-                            {{
-                              isSubmitting(card.id)
-                                ? 'Soumission…'
-                                : 'Soumettre'
-                            }}
+                            @if (isArchiving(card.id)) {
+                              Archivage...
+                            } @else {
+                              Archiver
+                            }
                           </button>
                         }
 

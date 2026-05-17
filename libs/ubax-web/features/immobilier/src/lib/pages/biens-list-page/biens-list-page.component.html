@@ -585,6 +585,8 @@
                       : bien.category
                 }}</span>
 
+                <span class="bien-card__price-badge">{{ bien.price }}</span>
+
                 <div class="bien-card__panel">
                   <div class="bien-card__heading">
                     <h2 class="bien-card__title">{{ bien.title }}</h2>
@@ -594,23 +596,6 @@
                         canSubmit(bien.statusRaw, bien.id) ||
                         isSubmitting(bien.id)
                       ) {
-                        <button
-                          class="submit-chip"
-                          type="button"
-                          [disabled]="!canSubmit(bien.statusRaw, bien.id)"
-                          (click)="
-                            $event.preventDefault();
-                            $event.stopPropagation();
-                            soumettreProperty(bien)
-                          "
-                        >
-                          @if (isSubmitting(bien.id)) {
-                            Soumission...
-                          } @else {
-                            Soumettre
-                          }
-                        </button>
-
                         <button
                           class="action-icon-btn"
                           type="button"
@@ -638,7 +623,7 @@
                             />
                           </svg>
                         </button>
-                      } @else {
+                      } @else if (bien.statusRaw !== 'ARCHIVED') {
                         <button
                           class="archive-chip"
                           type="button"
@@ -651,8 +636,6 @@
                         >
                           @if (isArchiving(bien.id)) {
                             Archivage...
-                          } @else if (bien.statusRaw === 'ARCHIVED') {
-                            Archivé
                           } @else {
                             Archiver
                           }
@@ -721,7 +704,27 @@
                       </div>
                     </div>
 
-                    <p class="bien-card__price">{{ bien.price }}</p>
+                    @if (
+                      canSubmit(bien.statusRaw, bien.id) ||
+                      isSubmitting(bien.id)
+                    ) {
+                      <button
+                        class="submit-chip"
+                        type="button"
+                        [disabled]="!canSubmit(bien.statusRaw, bien.id)"
+                        (click)="
+                          $event.preventDefault();
+                          $event.stopPropagation();
+                          soumettreProperty(bien)
+                        "
+                      >
+                        @if (isSubmitting(bien.id)) {
+                          Soumission...
+                        } @else {
+                          Soumettre
+                        }
+                      </button>
+                    }
                   </div>
                 </div>
               </a>
@@ -756,12 +759,34 @@
                         ? 'ARCHIVÉ'
                         : bien.category
                   }}</span>
+
+                  <span class="bien-list-card__price-badge">{{ bien.price }}</span>
                 </div>
 
                 <div class="bien-list-card__content">
                   <div class="bien-list-card__top">
                     <h2 class="bien-list-card__title">{{ bien.title }}</h2>
-                    <p class="bien-list-card__price">{{ bien.price }}</p>
+                    @if (
+                      canSubmit(bien.statusRaw, bien.id) ||
+                      isSubmitting(bien.id)
+                    ) {
+                      <button
+                        class="submit-chip submit-chip--compact"
+                        type="button"
+                        [disabled]="!canSubmit(bien.statusRaw, bien.id)"
+                        (click)="
+                          $event.preventDefault();
+                          $event.stopPropagation();
+                          soumettreProperty(bien)
+                        "
+                      >
+                        @if (isSubmitting(bien.id)) {
+                          Soumission...
+                        } @else {
+                          Soumettre
+                        }
+                      </button>
+                    }
                   </div>
 
                   <p class="bien-list-card__location">
@@ -819,23 +844,6 @@
                         isSubmitting(bien.id)
                       ) {
                         <button
-                          class="submit-chip submit-chip--compact"
-                          type="button"
-                          [disabled]="!canSubmit(bien.statusRaw, bien.id)"
-                          (click)="
-                            $event.preventDefault();
-                            $event.stopPropagation();
-                            soumettreProperty(bien)
-                          "
-                        >
-                          @if (isSubmitting(bien.id)) {
-                            Soumission...
-                          } @else {
-                            Soumettre
-                          }
-                        </button>
-
-                        <button
                           class="action-icon-btn action-icon-btn--compact"
                           type="button"
                           title="Archiver"
@@ -862,7 +870,7 @@
                             />
                           </svg>
                         </button>
-                      } @else {
+                      } @else if (bien.statusRaw !== 'ARCHIVED') {
                         <button
                           class="archive-chip archive-chip--compact"
                           type="button"
@@ -875,8 +883,6 @@
                         >
                           @if (isArchiving(bien.id)) {
                             Archivage...
-                          } @else if (bien.statusRaw === 'ARCHIVED') {
-                            Archivé
                           } @else {
                             Archiver
                           }
