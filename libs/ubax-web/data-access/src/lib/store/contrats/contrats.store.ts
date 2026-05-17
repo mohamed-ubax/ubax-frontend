@@ -63,6 +63,7 @@ export interface ContractResponse {
   paymentDay?: number;
   specialClauses?: string;
   terminationConditions?: string;
+  fileUrl?: string | null;
   signedFileUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
@@ -130,6 +131,9 @@ function normalizeContract(contract: ContractResponse): ContractResponse {
   const propertyAddress =
     readNonEmptyString(contract.propertyAddress) ??
     (fallbackPropertyAddress || undefined);
+  const documentUrl =
+    readNonEmptyString(contract.signedFileUrl) ??
+    readNonEmptyString(contract.fileUrl);
 
   return {
     ...contract,
@@ -137,6 +141,8 @@ function normalizeContract(contract: ContractResponse): ContractResponse {
     ownerName,
     agencyName,
     propertyAddress,
+    fileUrl: documentUrl,
+    signedFileUrl: documentUrl,
   };
 }
 

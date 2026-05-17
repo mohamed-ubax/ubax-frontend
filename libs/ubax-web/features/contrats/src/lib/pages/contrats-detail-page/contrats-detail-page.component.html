@@ -334,13 +334,24 @@
                         </p>
                       </div>
                       <div class="cd-doc__actions">
-                        <a
-                          [href]="c.signedFileUrl"
-                          target="_blank"
+                        <button
+                          type="button"
                           class="cd-btn cd-btn--primary"
+                          [disabled]="documentOpening()"
+                          (click)="openDocument(c.signedFileUrl)"
                         >
-                          <i class="pi pi-download"></i> Télécharger le PDF
-                        </a>
+                          <i
+                            class="pi"
+                            [class.pi-eye]="!documentOpening()"
+                            [class.pi-spin]="documentOpening()"
+                            [class.pi-spinner]="documentOpening()"
+                          ></i>
+                          {{
+                            documentOpening()
+                              ? 'Ouverture…'
+                              : 'Prévisualiser le PDF'
+                          }}
+                        </button>
                       </div>
                     </div>
                   } @else {
@@ -470,6 +481,75 @@
     (confirm)="onSubmitConfirm()"
     (cancel)="showSubmitDialog.set(false)"
   />
+}
+
+@if (previewUrl()) {
+  <div
+    class="cd-preview-backdrop ubax-modal-overlay"
+    (click)="closePreview()"
+  ></div>
+  <div class="cd-preview" [class.cd-preview--fullscreen]="previewFullscreen()">
+    <header class="cd-preview__header">
+      <div class="cd-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file-pdf]="!previewIsImage()"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+
+      <div class="cd-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cd-preview__action"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="cd-preview__action"
+          (click)="togglePreviewFullscreen()"
+          [title]="
+            previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+          "
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="cd-preview__action cd-preview__action--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="cd-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="cd-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="cd-preview__iframe"
+          title="Prévisualisation du document contractuel"
+        ></iframe>
+      }
+    </div>
+  </div>
 }
 @if (showTerminateDialog()) {
   <ubax-contrat-terminate-dialog

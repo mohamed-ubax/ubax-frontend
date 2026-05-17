@@ -1,3 +1,6 @@
+import { DOCUMENT } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,7 +11,11 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
+import {
+  ApiConfiguration,
+  generateReadUrl,
+} from '@ubax-workspace/shared-api-types';
 import {
   ContratsStore,
   type ContractResponse,
@@ -19,6 +26,10 @@ import {
   StatusBadgeComponent,
   type StatusVariant,
 } from '@ubax-workspace/shared-design-system';
+import {
+  NOTIFICATION_HANDLER,
+  type NotificationHandler,
+} from '@ubax-workspace/shared-data-access';
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
 import { ContratsSkeletonComponent } from '../../components/contrats-skeleton/contrats-skeleton.component';
 import { ContratSubmitDialogComponent } from '../../components/contrat-submit-dialog/contrat-submit-dialog.component';
@@ -59,8 +70,17 @@ type SummaryRow = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContratsDetailPageComponent {
+  private static readonly DOCUMENT_READ_URL_TTL_MS = 240_000;
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly notifications = inject(NOTIFICATION_HANDLER, {
+    optional: true,
+  }) as NotificationHandler | null;
   readonly store = inject(ContratsStore);
 
   private readonly contractId = toSignal(
@@ -73,6 +93,11 @@ export class ContratsDetailPageComponent {
   readonly showSubmitDialog = signal(false);
   readonly showTerminateDialog = signal(false);
   readonly showCancelDialog = signal(false);
+  readonly documentOpening = signal(false);
+  readonly previewUrl = signal<string | null>(null);
+  readonly previewName = signal('Contrat signé');
+  readonly previewFullscreen = signal(false);
+  readonly previewIsImage = signal(false);
 
   readonly viewState = computed<ViewState>(() =>
     deriveViewState(
@@ -84,6 +109,16 @@ export class ContratsDetailPageComponent {
   );
 
   readonly contrat = computed(() => this.store.selectedItem());
+
+  readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
+
+  private prefetchedDocumentSource: string | null = null;
+  private prefetchedDocumentUrl: string | null = null;
+  private prefetchedDocumentAt: number | null = null;
+  private prefetchedDocumentPromise: Promise<string | null> | null = null;
 
   readonly STATUS_LABELS: Record<ContractStatus, string> = {
     DRAFT: 'Brouillon',
@@ -415,6 +450,35 @@ export class ContratsDetailPageComponent {
         this.router.navigate(['/contrats']);
       }
     });
+
+    effect((onCleanup) => {
+      const hasOverlay = !!this.previewUrl();
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+
+      onCleanup(() => {
+        if (hasOverlay) {
+          this.document.body.classList.remove('ubax-overlay-open');
+        }
+      });
+    });
+
+    effect(() => {
+      const fileUrl = this.contrat()?.signedFileUrl ?? null;
+
+      if (!fileUrl) {
+        this.clearPrefetchedDocumentUrl();
+        return;
+      }
+
+      if (
+        this.getFreshPrefetchedDocumentUrl(fileUrl) ||
+        this.prefetchedDocumentPromise
+      ) {
+        return;
+      }
+
+      void this.prefetchDocumentUrl(fileUrl);
+    });
   }
 
   onSubmitConfirm(): void {
@@ -430,6 +494,50 @@ export class ContratsDetailPageComponent {
   onCancelConfirm(): void {
     const id = this.contractId();
     if (id) this.store.annuler(id);
+  }
+
+  async openDocument(fileUrl: string | null | undefined): Promise<void> {
+    if (!fileUrl || this.documentOpening()) {
+      return;
+    }
+
+    const prefetchedUrl = this.getFreshPrefetchedDocumentUrl(fileUrl);
+    if (prefetchedUrl) {
+      this.openPreview(prefetchedUrl);
+      return;
+    }
+
+    this.documentOpening.set(true);
+
+    try {
+      const resolvedUrl = this.prefetchedDocumentPromise
+        ? await this.prefetchedDocumentPromise
+        : await this.resolveDocumentReadUrl(fileUrl);
+
+      if (!resolvedUrl) {
+        throw new Error('Missing read url');
+      }
+
+      this.cachePrefetchedDocumentUrl(fileUrl, resolvedUrl);
+      this.openPreview(resolvedUrl);
+    } catch {
+      this.notifications?.error(
+        'Impossible d’ouvrir le document contractuel pour le moment.',
+      );
+    } finally {
+      this.documentOpening.set(false);
+    }
+  }
+
+  closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewName.set('Contrat signé');
+    this.previewIsImage.set(false);
+    this.previewFullscreen.set(false);
+  }
+
+  togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((value) => !value);
   }
 
   formatAmount(amount: number | undefined): string {
@@ -572,5 +680,104 @@ export class ContratsDetailPageComponent {
   shortId(id: string | undefined): string {
     if (!id) return '—';
     return id.substring(0, 8).toUpperCase();
+  }
+
+  private extractReadUrlFromResponse(body: unknown): string | null {
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const direct = body as { readUrl?: unknown };
+    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) {
+      return direct.readUrl;
+    }
+
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      const nested = wrapped.data as { readUrl?: unknown };
+      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) {
+        return nested.readUrl;
+      }
+    }
+
+    return null;
+  }
+
+  private async prefetchDocumentUrl(fileUrl: string): Promise<string | null> {
+    if (this.prefetchedDocumentPromise) {
+      return this.prefetchedDocumentPromise;
+    }
+
+    this.prefetchedDocumentPromise = this.resolveDocumentReadUrl(fileUrl)
+      .then((resolvedUrl) => {
+        if (resolvedUrl) {
+          this.cachePrefetchedDocumentUrl(fileUrl, resolvedUrl);
+        }
+
+        return resolvedUrl;
+      })
+      .catch(() => null)
+      .finally(() => {
+        this.prefetchedDocumentPromise = null;
+      });
+
+    return this.prefetchedDocumentPromise;
+  }
+
+  private async resolveDocumentReadUrl(
+    fileUrl: string,
+  ): Promise<string | null> {
+    const response = await firstValueFrom(
+      generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+    );
+
+    return this.extractReadUrlFromResponse(response.body);
+  }
+
+  private openPreview(resolvedUrl: string): void {
+    this.previewName.set('Contrat signé');
+    this.previewIsImage.set(this.isPreviewImage(resolvedUrl));
+    this.previewUrl.set(resolvedUrl);
+    this.previewFullscreen.set(false);
+  }
+
+  private cachePrefetchedDocumentUrl(
+    fileUrl: string,
+    resolvedUrl: string,
+  ): void {
+    this.prefetchedDocumentSource = fileUrl;
+    this.prefetchedDocumentUrl = resolvedUrl;
+    this.prefetchedDocumentAt = Date.now();
+  }
+
+  private clearPrefetchedDocumentUrl(): void {
+    this.prefetchedDocumentSource = null;
+    this.prefetchedDocumentUrl = null;
+    this.prefetchedDocumentAt = null;
+    this.prefetchedDocumentPromise = null;
+  }
+
+  private getFreshPrefetchedDocumentUrl(fileUrl: string): string | null {
+    if (
+      this.prefetchedDocumentSource !== fileUrl ||
+      !this.prefetchedDocumentUrl ||
+      this.prefetchedDocumentAt == null
+    ) {
+      return null;
+    }
+
+    if (
+      Date.now() - this.prefetchedDocumentAt >
+      ContratsDetailPageComponent.DOCUMENT_READ_URL_TTL_MS
+    ) {
+      this.clearPrefetchedDocumentUrl();
+      return null;
+    }
+
+    return this.prefetchedDocumentUrl;
+  }
+
+  private isPreviewImage(url: string): boolean {
+    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/i.test(url);
   }
 }
