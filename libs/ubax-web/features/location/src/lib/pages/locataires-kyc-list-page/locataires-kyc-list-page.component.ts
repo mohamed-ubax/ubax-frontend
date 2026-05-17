@@ -104,7 +104,9 @@ export class LocatairesKycListPageComponent {
       if (status !== 'all' && t.status !== status) return false;
       if (query) {
         const text = normalizeKycText(
-          [t.fullName, t.email, t.employerName, t.id].join(' '),
+          [t.fullName, t.email, t.employerName, t.id, t.rejectionReason].join(
+            ' ',
+          ),
         );
         if (!text.includes(query)) return false;
       }
@@ -135,7 +137,7 @@ export class LocatairesKycListPageComponent {
 
   constructor() {
     effect(() => {
-      this.store.load!({ pageable: {} });
+      this.store.load?.({ pageable: {} });
     });
 
     effect(() => {
@@ -195,8 +197,13 @@ export class LocatairesKycListPageComponent {
     if (id) this.router.navigate(['/locataires', id]);
   }
 
+  getRejectedReasonPreview(reason: string | undefined): string | null {
+    const normalizedReason = reason?.trim();
+    return normalizedReason || null;
+  }
+
   retryLoad(): void {
     this.hasLoaded.set(false);
-    this.store.load!({ pageable: {} });
+    this.store.load?.({ pageable: {} });
   }
 }

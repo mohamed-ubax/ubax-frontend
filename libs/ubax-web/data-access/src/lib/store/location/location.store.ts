@@ -26,11 +26,24 @@ import { exhaustMap, map, pipe, tap } from 'rxjs';
 
 type Tenant = TenantResponse & { id: string };
 
+const normalizeTenantStatus = (
+  status: TenantResponse['status'] | 'PENDING' | undefined,
+): TenantResponse['status'] => {
+  if (status === 'PENDING') {
+    return 'PENDING_REVIEW';
+  }
+
+  return status;
+};
+
 const normalizeTenant = (
   tenant: TenantResponse,
   fallbackId?: string,
 ): Tenant => ({
   ...tenant,
+  status: normalizeTenantStatus(
+    (tenant as TenantResponse & { status?: 'PENDING' }).status,
+  ),
   id: tenant.id ?? tenant.userId ?? fallbackId ?? '',
 });
 

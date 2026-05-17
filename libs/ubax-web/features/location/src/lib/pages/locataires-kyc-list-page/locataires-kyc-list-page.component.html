@@ -1,5 +1,4 @@
 <div class="kl-page" data-ubax-motion="page">
-
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="kl-header">
     <div class="kl-header__left">
@@ -8,13 +7,20 @@
         <span>KYC · Portail Agence</span>
       </div>
       <h1 class="kl-header__title">Dossiers Locataires</h1>
-      <p class="kl-header__subtitle">Vérification et qualification des dossiers</p>
+      <p class="kl-header__subtitle">
+        Vérification et qualification des dossiers
+      </p>
     </div>
 
     <div class="kl-header__actions">
-      <div class="kl-pending-alert" *ngIf="store.locatairesEnAttente().length > 0">
+      <div
+        class="kl-pending-alert"
+        *ngIf="store.locatairesEnAttente().length > 0"
+      >
         <span class="kl-pending-alert__dot"></span>
-        <span>{{ store.locatairesEnAttente().length }} dossier(s) à traiter</span>
+        <span
+          >{{ store.locatairesEnAttente().length }} dossier(s) à traiter</span
+        >
       </div>
     </div>
   </header>
@@ -41,7 +47,6 @@
 
   <!-- ── Tableau + filtres ──────────────────────────────────────────────── -->
   <section class="kl-card" data-ubax-motion="surface">
-
     <!-- Barre de filtres -->
     <div class="kl-filters">
       <label class="kl-search" aria-label="Rechercher un dossier">
@@ -85,7 +90,9 @@
       >
         <span class="kl-status-tab__dot"></span>
         En attente
-        <span class="kl-status-tab__count">{{ store.locatairesEnAttente().length }}</span>
+        <span class="kl-status-tab__count">{{
+          store.locatairesEnAttente().length
+        }}</span>
       </button>
       <button
         class="kl-status-tab kl-status-tab--qualified"
@@ -94,7 +101,9 @@
       >
         <span class="kl-status-tab__dot"></span>
         Qualifiés
-        <span class="kl-status-tab__count">{{ store.locatairesActifs().length }}</span>
+        <span class="kl-status-tab__count">{{
+          store.locatairesActifs().length
+        }}</span>
       </button>
       <button
         class="kl-status-tab kl-status-tab--rejected"
@@ -103,16 +112,17 @@
       >
         <span class="kl-status-tab__dot"></span>
         Rejetés
-        <span class="kl-status-tab__count">{{ store.locatairesRejetes().length }}</span>
+        <span class="kl-status-tab__count">{{
+          store.locatairesRejetes().length
+        }}</span>
       </button>
     </div>
 
     <!-- ViewState -->
     @switch (viewState()) {
-
       @case ('loading') {
         <div class="kl-skeleton-wrap">
-          @for (i of [1,2,3,4,5,6,7]; track i) {
+          @for (i of [1, 2, 3, 4, 5, 6, 7]; track i) {
             <div class="kl-skeleton-row">
               <div class="kl-skeleton-avatar"></div>
               <span class="kl-skeleton kl-skeleton--lg"></span>
@@ -129,7 +139,9 @@
         <div class="kl-state-box kl-state-box--error">
           <i class="pi pi-exclamation-triangle kl-state-box__icon"></i>
           <p class="kl-state-box__title">Erreur de chargement</p>
-          <p class="kl-state-box__desc">Impossible de récupérer les dossiers.</p>
+          <p class="kl-state-box__desc">
+            Impossible de récupérer les dossiers.
+          </p>
           <button class="kl-btn kl-btn--primary" (click)="retryLoad()">
             <i class="pi pi-refresh"></i> Réessayer
           </button>
@@ -140,14 +152,15 @@
         <div class="kl-state-box">
           <i class="pi pi-folder-open kl-state-box__icon"></i>
           <p class="kl-state-box__title">Aucun dossier locataire</p>
-          <p class="kl-state-box__desc">Aucun dossier KYC soumis pour le moment.</p>
+          <p class="kl-state-box__desc">
+            Aucun dossier KYC soumis pour le moment.
+          </p>
         </div>
       }
 
       @case ('success') {
         <div class="kl-table-wrap">
           <div class="kl-table">
-
             <div class="kl-table__head">
               <span></span>
               <span>Locataire</span>
@@ -166,29 +179,31 @@
               }
 
               @for (tenant of pagedTenants(); track tenant.id) {
-                <div
-                  class="kl-row"
-                  role="button"
-                  tabindex="0"
-                  [attr.aria-label]="'Voir le dossier de ' + (tenant.fullName ?? 'Locataire')"
-                  (click)="goToDetail(tenant.id)"
-                  (keydown.enter)="goToDetail(tenant.id)"
-                >
+                <div class="kl-row" (click)="goToDetail(tenant.id)">
                   <!-- Avatar -->
-                  <div class="kl-row__avatar" [attr.data-status]="tenant.status">
+                  <div
+                    class="kl-row__avatar"
+                    [attr.data-status]="tenant.status"
+                  >
                     {{ getInitials(tenant.fullName) }}
                   </div>
 
                   <!-- Identité -->
                   <div class="kl-row__identity">
-                    <span class="kl-row__name">{{ tenant.fullName ?? '—' }}</span>
+                    <span class="kl-row__name">{{
+                      tenant.fullName ?? '—'
+                    }}</span>
                     <span class="kl-row__email">{{ tenant.email ?? '—' }}</span>
                   </div>
 
                   <!-- Emploi -->
                   <div class="kl-row__employment">
-                    <span class="kl-row__employer">{{ tenant.employerName ?? '—' }}</span>
-                    <span class="kl-row__status-job">{{ tenant.employmentStatus ?? '—' }}</span>
+                    <span class="kl-row__employer">{{
+                      tenant.employerName ?? '—'
+                    }}</span>
+                    <span class="kl-row__status-job">{{
+                      tenant.employmentStatus ?? '—'
+                    }}</span>
                   </div>
 
                   <!-- Revenu -->
@@ -197,17 +212,31 @@
                   </span>
 
                   <!-- Badge statut -->
-                  <span
-                    class="kl-badge"
-                    [style.color]="getStatusMeta(tenant.status).color"
-                    [style.background]="getStatusMeta(tenant.status).bg"
-                  >
+                  <div class="kl-row__status">
                     <span
-                      class="kl-badge__dot"
-                      [style.background]="getStatusMeta(tenant.status).dot"
-                    ></span>
-                    {{ getStatusMeta(tenant.status).label }}
-                  </span>
+                      class="kl-badge"
+                      [style.color]="getStatusMeta(tenant.status).color"
+                      [style.background]="getStatusMeta(tenant.status).bg"
+                    >
+                      <span
+                        class="kl-badge__dot"
+                        [style.background]="getStatusMeta(tenant.status).dot"
+                      ></span>
+                      {{ getStatusMeta(tenant.status).label }}
+                    </span>
+                    @if (
+                      tenant.status === 'REJECTED' &&
+                        getRejectedReasonPreview(tenant.rejectionReason);
+                      as rejectionReason
+                    ) {
+                      <span
+                        class="kl-row__rejection-reason"
+                        [title]="rejectionReason"
+                      >
+                        {{ rejectionReason }}
+                      </span>
+                    }
+                  </div>
 
                   <!-- Date -->
                   <span class="kl-row__date">
