@@ -317,35 +317,33 @@
           </section>
 
           <!-- Pièces jointes -->
-          @if (ticket()?.attachments?.length) {
+          @if (resolvedAttachmentUrls().length) {
             <section class="td-card" data-ubax-motion="surface">
               <h2 class="td-card__title">
                 <i class="pi pi-paperclip"></i>
                 Pièces jointes
+                <span class="td-card__count">{{ resolvedAttachmentUrls().length }}</span>
               </h2>
               <div class="td-attachments">
-                @for (att of ticket()!.attachments!; track att.id) {
-                  <a
+                @for (url of resolvedAttachmentUrls(); track url; let i = $index) {
+                  <button
                     class="td-attachment"
-                    [href]="att.fileUrl"
-                    target="_blank"
-                    rel="noopener"
+                    type="button"
+                    (click)="openAttachmentPreview(url, i)"
+                    [title]="'Prévisualiser la pièce jointe ' + (i + 1)"
                   >
-                    @if (att.type === 'PHOTO') {
+                    @if (isImageUrl(url)) {
                       <img
-                        [src]="att.fileUrl"
-                        alt="Photo"
+                        [src]="url"
+                        alt="Pièce jointe"
                         class="td-attachment__img"
                       />
                     } @else {
                       <div class="td-attachment__file">
-                        <i class="pi pi-file-pdf"></i>
+                        <i class="pi pi-file"></i>
                       </div>
                     }
-                    <span class="td-attachment__date">{{
-                      formatDate(att.createdAt)
-                    }}</span>
-                  </a>
+                  </button>
                 }
               </div>
             </section>
@@ -357,6 +355,72 @@
 
 
 </div>
+
+<!-- ── Prévisualisation pièce jointe ──────────────────────────────────────── -->
+@if (previewUrl()) {
+  <div
+    class="td-preview-backdrop"
+    (click)="closePreview()"
+  ></div>
+  <div class="td-preview" [class.td-preview--fullscreen]="previewFullscreen()">
+    <header class="td-preview__header">
+      <div class="td-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file]="!previewIsImage()"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+      <div class="td-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="td-preview__action"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="td-preview__action"
+          (click)="togglePreviewFullscreen()"
+          [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="td-preview__action td-preview__action--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+    <div class="td-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="td-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="td-preview__iframe"
+          title="Prévisualisation du document"
+        ></iframe>
+      }
+    </div>
+  </div>
+}
 
 <!-- ── Dialog confirmation clôture ───────────────────────────────────────── -->
 @if (showCloseConfirm()) {
@@ -403,9 +467,10 @@
 
 <!-- ── Drawer intervention ─────────────────────────────────────────────── -->
 @if (drawerOpen() === 'intervention') {
-  <div class="td-drawer-backdrop" (click)="closeDrawer()"></div>
+  <div class="td-drawer-backdrop" [class.is-closing]="drawerClosing()" (click)="closeDrawer()"></div>
   <aside
     class="td-drawer"
+    [class.is-closing]="drawerClosing()"
     role="complementary"
     aria-label="Gestion de l'intervention"
   >

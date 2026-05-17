@@ -93,6 +93,8 @@ export type Ticket = {
   propertyId?: string;
   agencyId?: string;
   createdBy?: string;
+  reporterId?: string;
+  reporterName?: string;
   assignedToId?: string;
   assignedToName?: string;
   technicienId?: string;
@@ -105,6 +107,7 @@ export type Ticket = {
   costImputedTo?: 'OWNER' | 'TENANT' | 'SHARED';
   resolutionNote?: string;
   attachments?: TicketAttachment[];
+  attachmentUrls?: string[];
   createdAt?: string;
   updatedAt?: string;
 };

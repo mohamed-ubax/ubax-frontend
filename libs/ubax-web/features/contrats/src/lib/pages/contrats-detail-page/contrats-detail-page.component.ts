@@ -146,6 +146,7 @@ export class ContratsDetailPageComponent {
   > = {
     LEASE: 'Contrat de bail',
     SALE: 'Contrat de vente',
+    RENT_TO_OWN: 'Location-vente',
     RESERVATION: 'Réservation',
     MANDATE: 'Mandat',
   };

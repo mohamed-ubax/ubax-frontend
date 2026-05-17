@@ -7,10 +7,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
+import { ApiConfiguration, generateReadUrl } from '@ubax-workspace/shared-api-types';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
@@ -57,6 +60,9 @@ export class TicketDetailPageComponent {
   private readonly authStore = inject(AuthStore);
   private readonly agencyStore = inject(AgencyStore);
   private readonly document = inject(DOCUMENT);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
+  private readonly sanitizer = inject(DomSanitizer);
   readonly techniciansStore = inject(TechniciansStore);
   readonly store = inject(TicketingStore);
   private lastNotifiedError: string | null = null;
@@ -67,7 +73,19 @@ export class TicketDetailPageComponent {
   );
 
   readonly drawerOpen = signal<DrawerMode>(null);
+  readonly drawerClosing = signal(false);
   readonly showCloseConfirm = signal(false);
+  readonly resolvedAttachmentUrls = signal<string[]>([]);
+
+  readonly previewUrl = signal<string | null>(null);
+  readonly previewIsImage = signal(false);
+  readonly previewFullscreen = signal(false);
+  readonly previewName = signal('Pièce jointe');
+
+  readonly previewSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.previewUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
   readonly messageInput = signal('');
   readonly messageType = signal<'PUBLIC' | 'INTERNAL'>('PUBLIC');
   readonly hasLoaded = signal(false);
@@ -289,6 +307,67 @@ export class TicketDetailPageComponent {
         this.lastNotifiedError = null;
       }
     });
+
+    effect(() => {
+      const urls = this.ticket()?.attachmentUrls ?? [];
+      if (urls.length === 0) {
+        this.resolvedAttachmentUrls.set([]);
+        return;
+      }
+      void this.resolveAttachmentUrls(urls);
+    });
+  }
+
+  private async resolveAttachmentUrls(urls: string[]): Promise<void> {
+    const resolved = await Promise.all(
+      urls.map(async (fileUrl) => {
+        try {
+          const response = await firstValueFrom(
+            generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
+          );
+          return this.extractReadUrl(response.body) ?? fileUrl;
+        } catch {
+          return fileUrl;
+        }
+      }),
+    );
+    this.resolvedAttachmentUrls.set(resolved);
+  }
+
+  private extractReadUrl(body: unknown): string | null {
+    if (!body || typeof body !== 'object') return null;
+    const direct = body as { readUrl?: unknown };
+    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) return direct.readUrl;
+    const wrapped = body as { data?: unknown };
+    if (wrapped.data && typeof wrapped.data === 'object') {
+      const nested = wrapped.data as { readUrl?: unknown };
+      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) return nested.readUrl;
+    }
+    return null;
+  }
+
+  openAttachmentPreview(url: string, index: number): void {
+    this.previewName.set(`Pièce jointe ${index + 1}`);
+    this.previewIsImage.set(this.isImageUrl(url));
+    this.previewUrl.set(url);
+    this.previewFullscreen.set(false);
+    this.document.body.classList.add('ubax-overlay-open');
+  }
+
+  closePreview(): void {
+    this.previewUrl.set(null);
+    this.previewIsImage.set(false);
+    this.previewFullscreen.set(false);
+    this.previewName.set('Pièce jointe');
+    this.document.body.classList.remove('ubax-overlay-open');
+  }
+
+  togglePreviewFullscreen(): void {
+    this.previewFullscreen.update((v) => !v);
+  }
+
+  isImageUrl(url: string): boolean {
+    return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
   }
 
   advanceStatus(nextStatus: AllowedNextStatus): void {
@@ -337,8 +416,12 @@ export class TicketDetailPageComponent {
   }
 
   closeDrawer(): void {
-    this.drawerOpen.set(null);
+    this.drawerClosing.set(true);
     this.document.body.classList.remove('ubax-overlay-open');
+    setTimeout(() => {
+      this.drawerOpen.set(null);
+      this.drawerClosing.set(false);
+    }, 280);
   }
 
   saveIntervention(): void {

@@ -53,7 +53,7 @@ export interface ContractResponse {
   createdById?: string;
   createdByFullName?: string;
   status?: ContractStatus;
-  contractType?: 'LEASE' | 'SALE' | 'RESERVATION' | 'MANDATE';
+  contractType?: 'LEASE' | 'SALE' | 'RENT_TO_OWN' | 'RESERVATION' | 'MANDATE';
   startDate?: string;
   endDate?: string | null;
   monthlyRent?: number;

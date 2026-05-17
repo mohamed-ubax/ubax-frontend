@@ -748,3 +748,94 @@
     transform: none;
   }
 }
+
+// ─── Champ pleine largeur ─────────────────────────────────────────────────────
+.ca-field--full {
+  grid-column: 1 / -1;
+}
+
+// ─── Textarea ─────────────────────────────────────────────────────────────────
+.ca-textarea {
+  padding: 12px 14px;
+  border: 1.5px solid var(--ubax-border-card);
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ubax-text-primary);
+  background: var(--ubax-page-bg);
+  resize: vertical;
+  min-height: 96px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: var(--ubax-accent);
+    box-shadow: 0 0 0 3px rgba(232, 125, 30, 0.12);
+    background: var(--ubax-surface);
+  }
+
+  &::placeholder {
+    color: var(--ubax-text-muted);
+  }
+}
+
+// ─── Récapitulatif RENT_TO_OWN ────────────────────────────────────────────────
+.ca-rto-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(232, 125, 30, 0.06) 0%, rgba(255, 247, 237, 0.8) 100%);
+  border: 1px solid rgba(232, 125, 30, 0.22);
+  border-radius: 14px;
+  padding: 16px 18px;
+
+  &__icon {
+    font-size: 20px;
+    color: var(--ubax-accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ubax-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__formula {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  &__warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    color: #b45309;
+    margin-top: 4px;
+
+    i {
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+  }
+}

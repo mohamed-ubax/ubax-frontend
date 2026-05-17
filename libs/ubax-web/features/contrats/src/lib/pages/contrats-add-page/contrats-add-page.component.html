@@ -262,18 +262,20 @@
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Conditions du bail</h2>
               <p class="ca-step-header__sub">
-                Renseignez les montants et les dates du bail.
+                Renseignez les montants et les dates selon le type de contrat.
               </p>
             </div>
             <form [formGroup]="step3Form" class="ca-form">
+
+              <!-- Type de contrat -->
               <div class="ca-form-row">
-                <div class="ca-field">
-                  <label class="ca-label" for="contract-add-type"
-                    >Type de contrat <span class="req">*</span></label
-                  >
+                <div class="ca-field ca-field--full">
+                  <label class="ca-label" for="contract-add-type">
+                    Type de contrat <span class="req">*</span>
+                  </label>
                   <p-select
                     inputId="contract-add-type"
-                    [options]="contractTypeOptions"
+                    [options]="contractTypeOptions()"
                     formControlName="contractType"
                     optionLabel="label"
                     optionValue="value"
@@ -281,22 +283,16 @@
                     styleClass="ca-rich-select ca-rich-select--compact"
                     panelStyleClass="ca-rich-select-panel"
                     ariaLabel="Type de contrat"
+                    [placeholder]="contractTypeCodeListLoading() ? 'Chargement...' : 'Sélectionnez un type'"
                   >
                     <ng-template #selectedItem let-option>
                       <div class="ca-select-trigger ca-select-trigger--compact">
-                        <span
-                          class="ca-select-trigger__icon"
-                          aria-hidden="true"
-                        >
+                        <span class="ca-select-trigger__icon" aria-hidden="true">
                           <i [class]="'pi ' + (option?.icon || 'pi-file')"></i>
                         </span>
                         <span class="ca-select-trigger__text">
-                          <span class="ca-select-trigger__label">{{
-                            option?.label || 'Type de contrat'
-                          }}</span>
-                          <span class="ca-select-trigger__meta">{{
-                            option?.meta || 'Choisissez la nature du contrat'
-                          }}</span>
+                          <span class="ca-select-trigger__label">{{ option?.label || 'Type de contrat' }}</span>
+                          <span class="ca-select-trigger__meta">{{ option?.meta || 'Choisissez la nature du contrat' }}</span>
                         </span>
                       </div>
                     </ng-template>
@@ -306,12 +302,8 @@
                           <i [class]="'pi ' + option.icon"></i>
                         </span>
                         <span class="ca-option-card__text">
-                          <span class="ca-option-card__label">{{
-                            option.label
-                          }}</span>
-                          <span class="ca-option-card__meta">{{
-                            option.meta
-                          }}</span>
+                          <span class="ca-option-card__label">{{ option.label }}</span>
+                          <span class="ca-option-card__meta">{{ option.meta }}</span>
                         </span>
                       </div>
                     </ng-template>
@@ -319,82 +311,18 @@
                       <i class="pi pi-chevron-down" aria-hidden="true"></i>
                     </ng-template>
                   </p-select>
-                </div>
-                <div class="ca-field">
-                  <label class="ca-label" for="contract-add-payment-day"
-                    >Jour de prelevement mensuel
-                    <span class="req">*</span></label
-                  >
-                  <input
-                    class="ca-input"
-                    id="contract-add-payment-day"
-                    type="number"
-                    min="1"
-                    max="28"
-                    formControlName="paymentDay"
-                  />
-                  @if (
-                    step3Form.get('paymentDay')?.invalid &&
-                    step3Form.get('paymentDay')?.touched
-                  ) {
-                    <span class="ca-error"
-                      ><i class="pi pi-exclamation-circle"></i> Valeur attendue
-                      entre 1 et 28</span
-                    >
+                  @if (step3Form.get('contractType')?.invalid && step3Form.get('contractType')?.touched) {
+                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le type de contrat est requis</span>
                   }
                 </div>
               </div>
+
+              <!-- Date de début (toujours visible) -->
               <div class="ca-form-row">
                 <div class="ca-field">
-                  <label class="ca-label" for="contract-add-rent"
-                    >Loyer mensuel (FCFA) <span class="req">*</span></label
-                  >
-                  <input
-                    class="ca-input"
-                    id="contract-add-rent"
-                    type="number"
-                    placeholder="Ex : 150 000"
-                    formControlName="monthlyRent"
-                    min="1"
-                  />
-                  @if (
-                    step3Form.get('monthlyRent')?.invalid &&
-                    step3Form.get('monthlyRent')?.touched
-                  ) {
-                    <span class="ca-error"
-                      ><i class="pi pi-exclamation-circle"></i> Loyer requis et
-                      doit être &gt; 0</span
-                    >
-                  }
-                </div>
-                <div class="ca-field">
-                  <label class="ca-label" for="contract-add-deposit"
-                    >Caution (FCFA) <span class="req">*</span></label
-                  >
-                  <input
-                    class="ca-input"
-                    id="contract-add-deposit"
-                    type="number"
-                    placeholder="Ex : 300 000"
-                    formControlName="depositAmount"
-                    min="0"
-                  />
-                  @if (
-                    step3Form.get('depositAmount')?.invalid &&
-                    step3Form.get('depositAmount')?.touched
-                  ) {
-                    <span class="ca-error"
-                      ><i class="pi pi-exclamation-circle"></i> Caution requise
-                      (≥ 0)</span
-                    >
-                  }
-                </div>
-              </div>
-              <div class="ca-form-row">
-                <div class="ca-field">
-                  <label class="ca-label" for="contract-add-start-date"
-                    >Date de début <span class="req">*</span></label
-                  >
+                  <label class="ca-label" for="contract-add-start-date">
+                    Date de début <span class="req">*</span>
+                  </label>
                   <p-datepicker
                     inputId="contract-add-start-date"
                     formControlName="startDate"
@@ -409,60 +337,326 @@
                     panelStyleClass="ca-rich-datepicker-panel"
                     todayButtonStyleClass="ca-rich-datepicker-panel__today"
                     clearButtonStyleClass="ca-rich-datepicker-panel__clear"
-                    placeholder="Selectionnez une date de debut"
+                    placeholder="Sélectionnez une date de début"
                     ariaLabel="Date de début"
                   >
                     <ng-template #triggericon>
                       <i class="pi pi-calendar" aria-hidden="true"></i>
                     </ng-template>
                   </p-datepicker>
-                  @if (
-                    step3Form.get('startDate')?.invalid &&
-                    step3Form.get('startDate')?.touched
-                  ) {
-                    <span class="ca-error"
-                      ><i class="pi pi-exclamation-circle"></i> Date de début
-                      requise</span
-                    >
+                  @if (step3Form.get('startDate')?.invalid && step3Form.get('startDate')?.touched) {
+                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de début requise</span>
                   }
                 </div>
-                <div class="ca-field">
-                  <label class="ca-label" for="contract-add-end-date"
-                    >Date de fin</label
-                  >
-                  <p-datepicker
-                    inputId="contract-add-end-date"
-                    formControlName="endDate"
-                    [showIcon]="true"
-                    [showButtonBar]="true"
-                    [readonlyInput]="true"
-                    iconDisplay="button"
-                    dateFormat="dd/mm/yy"
-                    appendTo="body"
-                    styleClass="ca-rich-datepicker"
-                    inputStyleClass="ca-rich-datepicker__input"
-                    panelStyleClass="ca-rich-datepicker-panel"
-                    todayButtonStyleClass="ca-rich-datepicker-panel__today"
-                    clearButtonStyleClass="ca-rich-datepicker-panel__clear"
-                    placeholder="Selectionnez une date de fin"
-                    ariaLabel="Date de fin"
-                    [disabled]="openEnded()"
-                  >
-                    <ng-template #triggericon>
-                      <i class="pi pi-calendar" aria-hidden="true"></i>
-                    </ng-template>
-                  </p-datepicker>
-                  <label class="ca-checkbox-row">
-                    <input
-                      type="checkbox"
-                      [ngModel]="openEnded()"
-                      (ngModelChange)="openEnded.set($event)"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                    <span>Bail à durée indéterminée</span>
-                  </label>
-                </div>
+
+                <!-- Date de fin (LEASE, RENT_TO_OWN, MANDATE) -->
+                @if (contractTypeFields().showEndDate) {
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-end-date">
+                      Date de fin
+                      @if (contractTypeFields().endDateRequired) {
+                        <span class="req">*</span>
+                      }
+                    </label>
+                    <p-datepicker
+                      inputId="contract-add-end-date"
+                      formControlName="endDate"
+                      [showIcon]="true"
+                      [showButtonBar]="true"
+                      [readonlyInput]="true"
+                      iconDisplay="button"
+                      dateFormat="dd/mm/yy"
+                      appendTo="body"
+                      styleClass="ca-rich-datepicker"
+                      inputStyleClass="ca-rich-datepicker__input"
+                      panelStyleClass="ca-rich-datepicker-panel"
+                      todayButtonStyleClass="ca-rich-datepicker-panel__today"
+                      clearButtonStyleClass="ca-rich-datepicker-panel__clear"
+                      placeholder="Sélectionnez une date de fin"
+                      ariaLabel="Date de fin"
+                      [disabled]="openEnded()"
+                    >
+                      <ng-template #triggericon>
+                        <i class="pi pi-calendar" aria-hidden="true"></i>
+                      </ng-template>
+                    </p-datepicker>
+                    @if (step3Form.get('endDate')?.invalid && step3Form.get('endDate')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de fin requise</span>
+                    }
+                    <!-- Checkbox durée indéterminée uniquement pour LEASE -->
+                    @if (!contractTypeFields().endDateRequired) {
+                      <label class="ca-checkbox-row">
+                        <input
+                          type="checkbox"
+                          [ngModel]="openEnded()"
+                          (ngModelChange)="openEnded.set($event)"
+                          [ngModelOptions]="{ standalone: true }"
+                        />
+                        <span>Bail à durée indéterminée</span>
+                      </label>
+                    }
+                  </div>
+                }
               </div>
+
+              <!-- LEASE : loyer + caution -->
+              @if (contractTypeFields().showMonthlyRent) {
+                <div class="ca-form-row">
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-rent">
+                      Loyer mensuel (FCFA) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-rent"
+                      type="number"
+                      placeholder="Ex : 150 000"
+                      formControlName="monthlyRent"
+                      min="1"
+                    />
+                    @if (step3Form.get('monthlyRent')?.invalid && step3Form.get('monthlyRent')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Loyer requis et doit être &gt; 0</span>
+                    }
+                  </div>
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-deposit">
+                      Caution (FCFA) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-deposit"
+                      type="number"
+                      placeholder="Ex : 300 000"
+                      formControlName="depositAmount"
+                      min="0"
+                    />
+                    @if (step3Form.get('depositAmount')?.invalid && step3Form.get('depositAmount')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Caution requise (≥ 0)</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- SALE : prix de vente uniquement -->
+              @if (contractTypeFields().showSalePrice && !contractTypeFields().showMonthlyInstallment) {
+                <div class="ca-form-row">
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-sale-price">
+                      Prix de vente (FCFA) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-sale-price"
+                      type="number"
+                      placeholder="Ex : 25 000 000"
+                      formControlName="salePrice"
+                      min="1"
+                    />
+                    @if (step3Form.get('salePrice')?.invalid && step3Form.get('salePrice')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Prix de vente requis et doit être &gt; 0</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- RENT_TO_OWN : prix total + mensualité + apport -->
+              @if (contractTypeFields().showMonthlyInstallment) {
+                <div class="ca-form-row">
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-rto-price">
+                      Prix total du bien (FCFA) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-rto-price"
+                      type="number"
+                      placeholder="Ex : 12 000 000"
+                      formControlName="salePrice"
+                      min="1"
+                    />
+                    @if (step3Form.get('salePrice')?.invalid && step3Form.get('salePrice')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Prix total requis et doit être &gt; 0</span>
+                    }
+                  </div>
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-installment">
+                      Mensualité (FCFA) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-installment"
+                      type="number"
+                      placeholder="Ex : 200 000"
+                      formControlName="monthlyInstallment"
+                      min="1"
+                    />
+                    @if (step3Form.get('monthlyInstallment')?.invalid && step3Form.get('monthlyInstallment')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Mensualité requise et doit être &gt; 0</span>
+                    }
+                  </div>
+                </div>
+                <div class="ca-form-row">
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-rto-deposit">
+                      Apport initial (FCFA) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-rto-deposit"
+                      type="number"
+                      placeholder="Ex : 1 200 000"
+                      formControlName="depositAmount"
+                      min="0"
+                    />
+                    @if (step3Form.get('depositAmount')?.invalid && step3Form.get('depositAmount')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Apport requis (≥ 0)</span>
+                    }
+                  </div>
+                </div>
+                <!-- Récapitulatif indicatif RENT_TO_OWN -->
+                @if (rentToOwnSummary(); as summary) {
+                  <div class="ca-rto-summary" role="note" aria-label="Récapitulatif location-vente">
+                    <i class="pi pi-calculator ca-rto-summary__icon" aria-hidden="true"></i>
+                    <div class="ca-rto-summary__content">
+                      <span class="ca-rto-summary__label">Récapitulatif indicatif</span>
+                      <span class="ca-rto-summary__formula">
+                        {{ summary.installment }} × {{ summary.months }} mois = {{ summary.total }}
+                      </span>
+                      @if (!summary.balanced) {
+                        <span class="ca-rto-summary__warning">
+                          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+                          Le total des mensualités ({{ summary.total }}) diffère du prix total ({{ summary.salePrice }}).
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              }
+
+              <!-- Jour d'échéance (LEASE + RENT_TO_OWN) -->
+              @if (contractTypeFields().showPaymentDay) {
+                <div class="ca-form-row">
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-payment-day">
+                      Jour de prélèvement mensuel <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-payment-day"
+                      type="number"
+                      min="1"
+                      max="28"
+                      placeholder="Ex : 5"
+                      formControlName="paymentDay"
+                    />
+                    @if (step3Form.get('paymentDay')?.invalid && step3Form.get('paymentDay')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Valeur attendue entre 1 et 28</span>
+                    }
+                    <span class="ca-hint"><i class="pi pi-info-circle"></i> Jour du mois auquel le loyer est prélevé (1–28).</span>
+                  </div>
+                </div>
+              }
+
+              <!-- RESERVATION : acompte + durée -->
+              @if (contractTypeFields().showReservationDeposit) {
+                <div class="ca-form-row">
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-reservation-deposit">
+                      Acompte de réservation (FCFA) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-reservation-deposit"
+                      type="number"
+                      placeholder="Ex : 500 000"
+                      formControlName="reservationDeposit"
+                      min="1"
+                    />
+                    @if (step3Form.get('reservationDeposit')?.invalid && step3Form.get('reservationDeposit')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Acompte requis et doit être &gt; 0</span>
+                    }
+                  </div>
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-reservation-days">
+                      Durée de réservation (jours) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-reservation-days"
+                      type="number"
+                      placeholder="Ex : 30"
+                      formControlName="reservationDurationDays"
+                      min="1"
+                    />
+                    @if (step3Form.get('reservationDurationDays')?.invalid && step3Form.get('reservationDurationDays')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Durée requise (≥ 1 jour)</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- MANDATE : commission + clauses + conditions de résiliation -->
+              @if (contractTypeFields().showAgencyCommissionRate) {
+                <div class="ca-form-row">
+                  <div class="ca-field">
+                    <label class="ca-label" for="contract-add-commission">
+                      Taux de commission agence (%) <span class="req">*</span>
+                    </label>
+                    <input
+                      class="ca-input"
+                      id="contract-add-commission"
+                      type="number"
+                      placeholder="Ex : 10"
+                      formControlName="agencyCommissionRate"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                    />
+                    @if (step3Form.get('agencyCommissionRate')?.invalid && step3Form.get('agencyCommissionRate')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Taux requis (0–100 %)</span>
+                    }
+                  </div>
+                </div>
+              }
+              @if (contractTypeFields().showSpecialClauses) {
+                <div class="ca-form-row">
+                  <div class="ca-field ca-field--full">
+                    <label class="ca-label" for="contract-add-clauses">
+                      Clauses particulières <span class="req">*</span>
+                    </label>
+                    <textarea
+                      class="ca-textarea"
+                      id="contract-add-clauses"
+                      rows="4"
+                      placeholder="Ex : L'agence est autorisée à signer les baux au nom du propriétaire..."
+                      formControlName="specialClauses"
+                    ></textarea>
+                    @if (step3Form.get('specialClauses')?.invalid && step3Form.get('specialClauses')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Clauses particulières requises</span>
+                    }
+                  </div>
+                </div>
+              }
+              @if (contractTypeFields().showTerminationConditions) {
+                <div class="ca-form-row">
+                  <div class="ca-field ca-field--full">
+                    <label class="ca-label" for="contract-add-termination">
+                      Conditions de résiliation <span class="req">*</span>
+                    </label>
+                    <textarea
+                      class="ca-textarea"
+                      id="contract-add-termination"
+                      rows="3"
+                      placeholder="Ex : Résiliable avec préavis de 30 jours..."
+                      formControlName="terminationConditions"
+                    ></textarea>
+                    @if (step3Form.get('terminationConditions')?.invalid && step3Form.get('terminationConditions')?.touched) {
+                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Conditions de résiliation requises</span>
+                    }
+                  </div>
+                </div>
+              }
+
             </form>
           }
 
