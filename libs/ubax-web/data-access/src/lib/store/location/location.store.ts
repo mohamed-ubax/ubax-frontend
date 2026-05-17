@@ -8,7 +8,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { updateEntity } from '@ngrx/signals/entities';
+import { setAllEntities, updateEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   withApiResource,
@@ -22,9 +22,9 @@ import {
   reject,
   TenantResponse,
 } from '@ubax-workspace/shared-api-types';
-import { exhaustMap, map, pipe, tap } from 'rxjs';
+import { exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
 
-type Tenant = TenantResponse & { id: string };
+type Tenant = TenantResponse & { id: string; propertyId?: string };
 
 const normalizeTenantStatus = (
   status: TenantResponse['status'] | 'PENDING' | undefined,
@@ -45,6 +45,9 @@ const normalizeTenant = (
     (tenant as TenantResponse & { status?: 'PENDING' }).status,
   ),
   id: tenant.id ?? tenant.userId ?? fallbackId ?? '',
+  propertyId:
+    (tenant as TenantResponse & { propertyId?: string }).propertyId ??
+    undefined,
 });
 
 const mapPaginated = (raw: unknown): Tenant[] => {
@@ -140,6 +143,38 @@ export const LocationStore = signalStore(
       setFilterStatut(statut: Tenant['status'] | null): void {
         patchState(store, { filterStatut: statut });
       },
+
+      loadSansContrat: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { loading: true, error: null })),
+          switchMap(() =>
+            http
+              .get<unknown>(`${apiConfig.rootUrl}/v1/tenants`, {
+                params: { withoutContract: 'true', status: 'PENDING_REVIEW' },
+              })
+              .pipe(
+                tapResponse({
+                  next: (raw) => {
+                    const items = mapPaginated(raw);
+                    patchState(
+                      store,
+                      setAllEntities(items, { selectId: (t: Tenant) => t.id }),
+                      { loading: false },
+                    );
+                  },
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, {
+                      loading: false,
+                      error: resolveHttpErrorMessage(
+                        err,
+                        'Erreur lors du chargement des locataires',
+                      ),
+                    }),
+                }),
+              ),
+          ),
+        ),
+      ),
 
       qualifier: rxMethod<string>(
         pipe(

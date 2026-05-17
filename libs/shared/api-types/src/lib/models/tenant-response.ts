@@ -19,6 +19,7 @@ export interface TenantResponse {
   idDocumentUrl?: string;
   incomeProofUrl?: string;
   monthlyIncome?: number;
+  propertyId?: string;
   qualified?: boolean;
   qualifiedAt?: string;
   rejectionReason?: string;

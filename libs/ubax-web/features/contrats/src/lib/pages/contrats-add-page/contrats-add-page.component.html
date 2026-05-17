@@ -71,12 +71,94 @@
         @switch (currentStep()) {
           @case (1) {
             <div class="ca-step-header">
-              <h2 class="ca-step-header__title">Sélection du bien</h2>
+              <h2 class="ca-step-header__title">Sélection du locataire</h2>
               <p class="ca-step-header__sub">
-                Choisissez le bien immobilier concerné par ce contrat.
+                Seuls les locataires qualifiés sans contrat actif peuvent être sélectionnés.
               </p>
             </div>
             <form [formGroup]="step1Form" class="ca-form">
+              <div class="ca-field">
+                <label class="ca-label" for="contract-add-tenant"
+                  >Locataire <span class="req">*</span></label
+                >
+                <p-select
+                  inputId="contract-add-tenant"
+                  [options]="tenantOptions()"
+                  formControlName="tenantId"
+                  optionLabel="label"
+                  optionValue="value"
+                  [filter]="true"
+                  filterBy="label,meta"
+                  filterPlaceholder="Rechercher un locataire..."
+                  [placeholder]="
+                    locationStore.loading()
+                      ? 'Chargement des locataires...'
+                      : 'Selectionnez un locataire qualifie'
+                  "
+                  appendTo="body"
+                  styleClass="ca-rich-select"
+                  panelStyleClass="ca-rich-select-panel"
+                  ariaLabel="Locataire"
+                >
+                  <ng-template #selectedItem let-option>
+                    <div class="ca-select-trigger">
+                      <span class="ca-select-trigger__icon" aria-hidden="true">
+                        <i [class]="'pi ' + (option?.icon || 'pi-user')"></i>
+                      </span>
+                      <span class="ca-select-trigger__text">
+                        <span class="ca-select-trigger__label">{{
+                          option?.label || 'Selectionnez un locataire qualifie'
+                        }}</span>
+                        <span class="ca-select-trigger__meta">{{
+                          option?.meta || 'Dossiers KYC qualifies sans contrat actif'
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #item let-option>
+                    <div class="ca-option-card">
+                      <span class="ca-option-card__icon" aria-hidden="true">
+                        <i [class]="'pi ' + option.icon"></i>
+                      </span>
+                      <span class="ca-option-card__text">
+                        <span class="ca-option-card__label">{{
+                          option.label
+                        }}</span>
+                        <span class="ca-option-card__meta">{{
+                          option.meta
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </ng-template>
+                </p-select>
+                @if (
+                  step1Form.get('tenantId')?.invalid &&
+                  step1Form.get('tenantId')?.touched
+                ) {
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le locataire est
+                    requis</span
+                  >
+                }
+                <span class="ca-hint"
+                  ><i class="pi pi-info-circle"></i> Seuls les dossiers
+                  qualifiés (statut QUALIFIED) sans contrat en cours sont affichés.</span
+                >
+              </div>
+            </form>
+          }
+
+          @case (2) {
+            <div class="ca-step-header">
+              <h2 class="ca-step-header__title">Sélection du bien</h2>
+              <p class="ca-step-header__sub">
+                Le bien est pré-rempli depuis le dossier du locataire.
+              </p>
+            </div>
+            <form [formGroup]="step2Form" class="ca-form">
               <div class="ca-field">
                 <label class="ca-label" for="contract-add-property"
                   >Bien <span class="req">*</span></label
@@ -135,8 +217,8 @@
                   </ng-template>
                 </p-select>
                 @if (
-                  step1Form.get('propertyId')?.invalid &&
-                  step1Form.get('propertyId')?.touched
+                  step2Form.get('propertyId')?.invalid &&
+                  step2Form.get('propertyId')?.touched
                 ) {
                   <span class="ca-error"
                     ><i class="pi pi-exclamation-circle"></i> Le bien est
@@ -144,8 +226,7 @@
                   >
                 }
                 <span class="ca-hint"
-                  ><i class="pi pi-info-circle"></i> Seuls les biens sans
-                  contrat ACTIVE en cours sont éligibles.</span
+                  ><i class="pi pi-info-circle"></i> Pré-rempli depuis le dossier du locataire. Modifiable si nécessaire.</span
                 >
               </div>
               <div class="ca-field">
@@ -160,8 +241,8 @@
                   readonly
                 />
                 @if (
-                  step1Form.get('ownerId')?.invalid &&
-                  step1Form.get('ownerId')?.touched
+                  step2Form.get('ownerId')?.invalid &&
+                  step2Form.get('ownerId')?.touched
                 ) {
                   <span class="ca-error"
                     ><i class="pi pi-exclamation-circle"></i> Le propriétaire
@@ -172,88 +253,6 @@
                   ><i class="pi pi-info-circle"></i> Prérempli avec
                   l'utilisateur connecté. Son identifiant est envoyé
                   automatiquement.</span
-                >
-              </div>
-            </form>
-          }
-
-          @case (2) {
-            <div class="ca-step-header">
-              <h2 class="ca-step-header__title">Sélection du locataire</h2>
-              <p class="ca-step-header__sub">
-                Seuls les locataires qualifiés peuvent être sélectionnés.
-              </p>
-            </div>
-            <form [formGroup]="step2Form" class="ca-form">
-              <div class="ca-field">
-                <label class="ca-label" for="contract-add-tenant"
-                  >Locataire <span class="req">*</span></label
-                >
-                <p-select
-                  inputId="contract-add-tenant"
-                  [options]="tenantOptions()"
-                  formControlName="tenantId"
-                  optionLabel="label"
-                  optionValue="value"
-                  [filter]="true"
-                  filterBy="label,meta"
-                  filterPlaceholder="Rechercher un locataire..."
-                  [placeholder]="
-                    locationStore.loading()
-                      ? 'Chargement des locataires...'
-                      : 'Selectionnez un locataire qualifie'
-                  "
-                  appendTo="body"
-                  styleClass="ca-rich-select"
-                  panelStyleClass="ca-rich-select-panel"
-                  ariaLabel="Locataire"
-                >
-                  <ng-template #selectedItem let-option>
-                    <div class="ca-select-trigger">
-                      <span class="ca-select-trigger__icon" aria-hidden="true">
-                        <i [class]="'pi ' + (option?.icon || 'pi-user')"></i>
-                      </span>
-                      <span class="ca-select-trigger__text">
-                        <span class="ca-select-trigger__label">{{
-                          option?.label || 'Selectionnez un locataire qualifie'
-                        }}</span>
-                        <span class="ca-select-trigger__meta">{{
-                          option?.meta || 'Dossiers KYC qualifies uniquement'
-                        }}</span>
-                      </span>
-                    </div>
-                  </ng-template>
-                  <ng-template #item let-option>
-                    <div class="ca-option-card">
-                      <span class="ca-option-card__icon" aria-hidden="true">
-                        <i [class]="'pi ' + option.icon"></i>
-                      </span>
-                      <span class="ca-option-card__text">
-                        <span class="ca-option-card__label">{{
-                          option.label
-                        }}</span>
-                        <span class="ca-option-card__meta">{{
-                          option.meta
-                        }}</span>
-                      </span>
-                    </div>
-                  </ng-template>
-                  <ng-template #dropdownicon>
-                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
-                  </ng-template>
-                </p-select>
-                @if (
-                  step2Form.get('tenantId')?.invalid &&
-                  step2Form.get('tenantId')?.touched
-                ) {
-                  <span class="ca-error"
-                    ><i class="pi pi-exclamation-circle"></i> Le locataire est
-                    requis</span
-                  >
-                }
-                <span class="ca-hint"
-                  ><i class="pi pi-info-circle"></i> Seuls les dossiers
-                  qualifiés (statut QUALIFIED) sont acceptés.</span
                 >
               </div>
             </form>

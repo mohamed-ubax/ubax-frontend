@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -113,14 +114,14 @@ export class ContratsAddPageComponent {
   );
 
   readonly tenantOptions = computed<RichSelectOption[]>(() => {
-    const selectedTenantId = this.step2Form.controls.tenantId.value;
+    const currentId = this.selectedTenantId();
 
     return this.locationStore
       .entities()
       .filter(
         (tenant) =>
           Boolean(tenant.id) &&
-          (tenant.status === 'QUALIFIED' || tenant.id === selectedTenantId),
+          (tenant.status === 'QUALIFIED' || tenant.id === currentId),
       )
       .map((tenant) => ({
         value: tenant.id,
@@ -131,7 +132,7 @@ export class ContratsAddPageComponent {
   });
 
   readonly selectedPropertyLabel = computed(() => {
-    const propertyId = this.step1Form.controls.propertyId.value;
+    const propertyId = this.step2Form.controls.propertyId.value;
     if (!propertyId) return '—';
 
     return (
@@ -141,7 +142,7 @@ export class ContratsAddPageComponent {
   });
 
   readonly selectedTenantLabel = computed(() => {
-    const tenantId = this.step2Form.controls.tenantId.value;
+    const tenantId = this.selectedTenantId();
     if (!tenantId) return '—';
 
     return (
@@ -159,19 +160,24 @@ export class ContratsAddPageComponent {
     const selectedProperty = this.biensStore
       .entities()
       .find(
-        (property) => property.id === this.step1Form.controls.propertyId.value,
+        (property) => property.id === this.step2Form.controls.propertyId.value,
       );
 
     return selectedProperty?.ownerName ?? 'Utilisateur connecté';
   });
 
   readonly step1Form = this.fb.group({
-    propertyId: ['', Validators.required],
-    ownerId: ['', Validators.required],
+    tenantId: ['', Validators.required],
   });
 
+  private readonly selectedTenantId = toSignal(
+    this.step1Form.controls.tenantId.valueChanges,
+    { initialValue: '' },
+  );
+
   readonly step2Form = this.fb.group({
-    tenantId: ['', Validators.required],
+    propertyId: ['', Validators.required],
+    ownerId: ['', Validators.required],
   });
 
   readonly step3Form = this.fb.group({
@@ -233,10 +239,41 @@ export class ContratsAddPageComponent {
 
   constructor() {
     this.biensStore.load?.({ pageable: {} });
-    this.locationStore.load?.({ pageable: {} });
+    this.locationStore.loadSansContrat();
 
     effect(() => {
-      const currentOwnerId = this.step1Form.controls.ownerId.value.trim();
+      const tenantId = this.selectedTenantId();
+      if (!tenantId) return;
+
+      const tenant = this.locationStore.entities().find((t) => t.id === tenantId);
+      if (!tenant?.propertyId) return;
+
+      this.step2Form.controls.propertyId.setValue(tenant.propertyId);
+
+      const property = this.biensStore
+        .entities()
+        .find((p) => p.id === tenant.propertyId);
+      if (!property) return;
+
+      if (property.price) {
+        this.step3Form.controls.monthlyRent.setValue(property.price);
+      }
+
+      type PropertyExtended = typeof property & {
+        depositAmount?: number;
+        paymentDay?: number;
+      };
+      const ext = property as PropertyExtended;
+      if (ext.depositAmount != null) {
+        this.step3Form.controls.depositAmount.setValue(ext.depositAmount);
+      }
+      if (ext.paymentDay != null) {
+        this.step3Form.controls.paymentDay.setValue(ext.paymentDay);
+      }
+    });
+
+    effect(() => {
+      const currentOwnerId = this.step2Form.controls.ownerId.value.trim();
       if (currentOwnerId) {
         return;
       }
@@ -247,13 +284,13 @@ export class ContratsAddPageComponent {
           .entities()
           .find(
             (property) =>
-              property.id === this.step1Form.controls.propertyId.value,
+              property.id === this.step2Form.controls.propertyId.value,
           )
           ?.ownerId?.trim() ?? '';
       const nextOwnerId = authUserId || selectedPropertyOwnerId;
 
       if (nextOwnerId) {
-        this.step1Form.controls.ownerId.setValue(nextOwnerId);
+        this.step2Form.controls.ownerId.setValue(nextOwnerId);
       }
     });
 
@@ -296,6 +333,7 @@ export class ContratsAddPageComponent {
     } else if (this.currentStep() >= 3) {
       form = this.step3Form;
     }
+
 
     if (form.invalid) {
       form.markAllAsTouched();
@@ -348,9 +386,9 @@ export class ContratsAddPageComponent {
 
     createContract({
       body: {
-        propertyId: v1.propertyId,
-        ownerId: v1.ownerId,
-        tenantId: v2.tenantId,
+        tenantId: v1.tenantId,
+        propertyId: v2.propertyId,
+        ownerId: v2.ownerId,
         contractType: v3.contractType,
         monthlyRent: v3.monthlyRent,
         depositAmount: v3.depositAmount,
