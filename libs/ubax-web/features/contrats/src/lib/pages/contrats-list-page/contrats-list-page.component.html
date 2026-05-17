@@ -1,5 +1,4 @@
 <div class="cl-page" data-ubax-motion="page">
-
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="cl-header">
     <div class="cl-header__left">
@@ -8,10 +7,12 @@
         <span>Agence · Contrats</span>
       </div>
       <h1 class="cl-header__title">Contrats de bail</h1>
-      <p class="cl-header__subtitle">Gestion du cycle de vie des baux locatifs</p>
+      <p class="cl-header__subtitle">
+        Gestion du cycle de vie des baux locatifs
+      </p>
     </div>
     <div class="cl-header__actions">
-      <a class="cl-btn cl-btn--primary" routerLink="nouveau">
+      <a class="cl-btn cl-btn--primary" [routerLink]="['/contrats', 'nouveau']">
         <i class="pi pi-plus"></i> Nouveau contrat
       </a>
     </div>
@@ -37,7 +38,6 @@
 
   <!-- ── Main card ─────────────────────────────────────────────────────── -->
   <section class="cl-card" data-ubax-motion="surface">
-
     <!-- Filters -->
     <div class="cl-filters">
       <label class="cl-search" aria-label="Rechercher un contrat">
@@ -85,7 +85,9 @@
       >
         <span class="cl-tab__dot cl-tab__dot--draft"></span>
         Brouillons
-        <span class="cl-tab__count">{{ store.contratsBrouillons().length }}</span>
+        <span class="cl-tab__count">{{
+          store.contratsBrouillons().length
+        }}</span>
       </button>
       <button
         class="cl-tab"
@@ -96,7 +98,9 @@
       >
         <span class="cl-tab__dot cl-tab__dot--pending"></span>
         En attente
-        <span class="cl-tab__count">{{ store.contratsEnAttente().length }}</span>
+        <span class="cl-tab__count">{{
+          store.contratsEnAttente().length
+        }}</span>
       </button>
       <button
         class="cl-tab"
@@ -124,7 +128,6 @@
 
     <!-- ViewState -->
     @switch (viewState()) {
-
       @case ('loading') {
         <ubax-contrats-skeleton />
       }
@@ -133,8 +136,14 @@
         <div class="cl-state-box cl-state-box--error">
           <i class="pi pi-exclamation-triangle cl-state-box__icon"></i>
           <p class="cl-state-box__title">Erreur de chargement</p>
-          <p class="cl-state-box__desc">Impossible de charger les contrats. Vérifiez votre connexion.</p>
-          <button class="cl-btn cl-btn--primary" type="button" (click)="retryLoad()">
+          <p class="cl-state-box__desc">
+            Impossible de charger les contrats. Vérifiez votre connexion.
+          </p>
+          <button
+            class="cl-btn cl-btn--primary"
+            type="button"
+            (click)="retryLoad()"
+          >
             <i class="pi pi-refresh"></i> Réessayer
           </button>
         </div>
@@ -144,8 +153,13 @@
         <div class="cl-state-box">
           <i class="pi pi-file-edit cl-state-box__icon"></i>
           <p class="cl-state-box__title">Aucun contrat créé pour le moment</p>
-          <p class="cl-state-box__desc">Commencez par créer votre premier contrat de bail.</p>
-          <a class="cl-btn cl-btn--primary" routerLink="nouveau">
+          <p class="cl-state-box__desc">
+            Commencez par créer votre premier contrat de bail.
+          </p>
+          <a
+            class="cl-btn cl-btn--primary"
+            [routerLink]="['/contrats', 'nouveau']"
+          >
             <i class="pi pi-plus"></i> Créer un contrat
           </a>
         </div>
@@ -156,7 +170,9 @@
           <div class="cl-state-box">
             <i class="pi pi-search cl-state-box__icon"></i>
             <p class="cl-state-box__title">Aucun résultat</p>
-            <p class="cl-state-box__desc">Aucun contrat ne correspond à votre recherche.</p>
+            <p class="cl-state-box__desc">
+              Aucun contrat ne correspond à votre recherche.
+            </p>
           </div>
         } @else {
           <div class="cl-table-wrap">
@@ -175,25 +191,57 @@
               </thead>
               <tbody class="cl-table__body">
                 @for (contrat of pagedRows(); track contrat.id) {
-                  <tr [class.row--active]="contrat.status === 'ACTIVE'" [routerLink]="[contrat.id]">
+                  <tr
+                    [class.row--active]="contrat.status === 'ACTIVE'"
+                    [routerLink]="[contrat.id]"
+                  >
                     <td>
                       <div class="cl-tenant-cell">
-                        <div class="cl-avatar">{{ (contrat.tenantName ?? 'T')[0].toUpperCase() }}</div>
+                        <div class="cl-avatar">
+                          {{ (contrat.tenantName ?? 'T')[0].toUpperCase() }}
+                        </div>
                         <span>{{ contrat.tenantName ?? '—' }}</span>
                       </div>
                     </td>
-                    <td><span class="cl-property-cell">{{ contrat.propertyAddress ?? '—' }}</span></td>
-                    <td><span class="cl-amount">{{ formatAmount(contrat.monthlyRent) }}</span></td>
-                    <td><span class="cl-amount">{{ formatAmount(contrat.depositAmount) }}</span></td>
                     <td>
-                      <ubax-status-badge [variant]="getStatusVariant(contrat.status)">
+                      <span class="cl-property-cell">{{
+                        contrat.propertyAddress ?? '—'
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="cl-amount">{{
+                        formatAmount(contrat.monthlyRent)
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="cl-amount">{{
+                        formatAmount(contrat.depositAmount)
+                      }}</span>
+                    </td>
+                    <td>
+                      <ubax-status-badge
+                        [variant]="getStatusVariant(contrat.status)"
+                      >
                         {{ getStatusLabel(contrat.status) }}
                       </ubax-status-badge>
                     </td>
-                    <td><span class="cl-date">{{ formatDate(contrat.startDate) }}</span></td>
-                    <td><span class="cl-date">{{ formatDate(contrat.endDate) }}</span></td>
                     <td>
-                      <a class="cl-row__action" [routerLink]="[contrat.id]" (click)="$event.stopPropagation()" title="Voir le détail">
+                      <span class="cl-date">{{
+                        formatDate(contrat.startDate)
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="cl-date">{{
+                        formatDate(contrat.endDate)
+                      }}</span>
+                    </td>
+                    <td>
+                      <a
+                        class="cl-row__action"
+                        [routerLink]="[contrat.id]"
+                        (click)="$event.stopPropagation()"
+                        title="Voir le détail"
+                      >
                         <i class="pi pi-arrow-right"></i>
                       </a>
                     </td>
@@ -205,7 +253,10 @@
 
           <footer class="cl-footer">
             <p class="cl-footer__results">{{ resultsLabel() }}</p>
-            <ubax-paginator [(currentPage)]="currentPage" [totalPages]="totalPages()" />
+            <ubax-paginator
+              [(currentPage)]="currentPage"
+              [totalPages]="totalPages()"
+            />
           </footer>
         }
       }

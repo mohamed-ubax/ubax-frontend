@@ -10,11 +10,14 @@ import {
 } from '@ngrx/signals';
 import { updateEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
-  getById3,
-  list5,
+  getById4,
+  list6,
   qualify,
   reject,
   TenantResponse,
@@ -37,14 +40,25 @@ const mapPaginated = (raw: unknown): Tenant[] => {
   if (Array.isArray(raw)) {
     items = raw;
   } else if (raw && typeof raw === 'object') {
-    const record = raw as { content?: unknown; data?: unknown };
+    const record = raw as {
+      content?: unknown;
+      results?: unknown;
+      data?: unknown;
+    };
 
     if (Array.isArray(record.content)) {
       items = record.content;
+    } else if (Array.isArray(record.results)) {
+      items = record.results;
     } else if (record.data && typeof record.data === 'object') {
-      const nested = (record.data as { content?: unknown }).content;
-      if (Array.isArray(nested)) {
-        items = nested;
+      const nestedRecord = record.data as {
+        content?: unknown;
+        results?: unknown;
+      };
+      if (Array.isArray(nestedRecord.content)) {
+        items = nestedRecord.content;
+      } else if (Array.isArray(nestedRecord.results)) {
+        items = nestedRecord.results;
       }
     } else if (Array.isArray(record.data)) {
       items = record.data;
@@ -69,20 +83,20 @@ const mapPaginated = (raw: unknown): Tenant[] => {
  */
 export const LocationStore = signalStore(
   { providedIn: 'root' },
-  withApiResource<Tenant, typeof list5, typeof getById3>({
-    list: list5,
-    getById: getById3,
+  withApiResource<Tenant, typeof list6, typeof getById4>({
+    list: list6,
+    getById: getById4,
     idSelector: (tenant) => tenant.id,
     mapList: mapPaginated,
     mapGetById: (raw, requestedId) => {
       if (raw && typeof raw === 'object') {
         const data = (raw as { data?: unknown }).data;
         if (data && typeof data === 'object') {
-          return normalizeTenant(data as TenantResponse, requestedId);
+          return normalizeTenant(data, requestedId);
         }
       }
 
-      return normalizeTenant(raw as TenantResponse, requestedId);
+      return normalizeTenant(raw, requestedId);
     },
   }),
   withState({
@@ -128,7 +142,13 @@ export const LocationStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour du dossier') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la mise à jour du dossier',
+                    ),
+                  }),
               }),
             ),
           ),
@@ -149,7 +169,13 @@ export const LocationStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour du dossier') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la mise à jour du dossier',
+                    ),
+                  }),
               }),
             ),
           ),

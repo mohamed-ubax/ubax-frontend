@@ -44,11 +44,13 @@ export class ContratsAddPageComponent {
   readonly currentStep = signal(1);
   readonly totalSteps = 4;
   readonly openEnded = signal(false);
+  private readonly awaitingCreation = signal(false);
+  private readonly knownContractIds = signal<string[]>([]);
 
   readonly stepConfig: readonly StepConfig[] = CONTRATS_ADD_STEP_CONFIG;
 
-  readonly currentStepConfig = computed(() =>
-    this.stepConfig[this.currentStep() - 1],
+  readonly currentStepConfig = computed(
+    () => this.stepConfig[this.currentStep() - 1],
   );
 
   readonly step1Form = this.fb.group({
@@ -68,34 +70,74 @@ export class ContratsAddPageComponent {
   });
 
   readonly summaryItems = computed<InfoItem[]>(() => [
-    { label: 'Bien (ID)', value: this.step1Form.getRawValue().propertyId || '—' },
-    { label: 'Propriétaire (ID)', value: this.step1Form.getRawValue().ownerId || '—' },
-    { label: 'Locataire (ID)', value: this.step2Form.getRawValue().tenantId || '—' },
-    { label: 'Loyer mensuel', value: this.formatAmount(this.step3Form.getRawValue().monthlyRent) },
-    { label: 'Caution', value: this.formatAmount(this.step3Form.getRawValue().depositAmount) },
-    { label: 'Date de début', value: this.step3Form.getRawValue().startDate || '—' },
-    { label: 'Date de fin', value: this.openEnded() ? 'Durée indéterminée' : (this.step3Form.getRawValue().endDate || '—') },
+    {
+      label: 'Bien (ID)',
+      value: this.step1Form.getRawValue().propertyId || '—',
+    },
+    {
+      label: 'Propriétaire (ID)',
+      value: this.step1Form.getRawValue().ownerId || '—',
+    },
+    {
+      label: 'Locataire (ID)',
+      value: this.step2Form.getRawValue().tenantId || '—',
+    },
+    {
+      label: 'Loyer mensuel',
+      value: this.formatAmount(this.step3Form.getRawValue().monthlyRent),
+    },
+    {
+      label: 'Caution',
+      value: this.formatAmount(this.step3Form.getRawValue().depositAmount),
+    },
+    {
+      label: 'Date de début',
+      value: this.step3Form.getRawValue().startDate || '—',
+    },
+    {
+      label: 'Date de fin',
+      value: this.openEnded()
+        ? 'Durée indéterminée'
+        : this.step3Form.getRawValue().endDate || '—',
+    },
   ]);
 
   constructor() {
-    // Redirect after successful creation
     effect(() => {
+      const awaitingCreation = this.awaitingCreation();
+      const saving = this.store.saving();
+      const error = this.store.error();
       const entities = this.store.entities();
-      if (!this.store.saving() && entities.length > 0) {
-        const last = entities[entities.length - 1];
-        if (last?.id) {
-          this.router.navigate(['/contrats', last.id]);
-        }
+
+      if (!awaitingCreation || saving) {
+        return;
+      }
+
+      if (error) {
+        this.awaitingCreation.set(false);
+        return;
+      }
+
+      const previousIds = new Set(this.knownContractIds());
+      const createdContract = entities.find(
+        (entity) => entity.id && !previousIds.has(entity.id),
+      );
+
+      if (createdContract?.id) {
+        this.awaitingCreation.set(false);
+        void this.router.navigate(['/contrats', createdContract.id]);
       }
     });
   }
 
   nextStep(): void {
-    const form = this.currentStep() === 1
-      ? this.step1Form
-      : this.currentStep() === 2
-        ? this.step2Form
-        : this.step3Form;
+    let form: { invalid: boolean; markAllAsTouched(): void } = this.step1Form;
+
+    if (this.currentStep() === 2) {
+      form = this.step2Form;
+    } else if (this.currentStep() >= 3) {
+      form = this.step3Form;
+    }
 
     if (form.invalid) {
       form.markAllAsTouched();
@@ -111,7 +153,11 @@ export class ContratsAddPageComponent {
   }
 
   submit(): void {
-    if (this.step1Form.invalid || this.step2Form.invalid || this.step3Form.invalid) {
+    if (
+      this.step1Form.invalid ||
+      this.step2Form.invalid ||
+      this.step3Form.invalid
+    ) {
       this.step1Form.markAllAsTouched();
       this.step2Form.markAllAsTouched();
       this.step3Form.markAllAsTouched();
@@ -122,7 +168,21 @@ export class ContratsAddPageComponent {
     const v2 = this.step2Form.getRawValue();
     const v3 = this.step3Form.getRawValue();
 
-    this.store.create!({
+    this.knownContractIds.set(
+      this.store
+        .entities()
+        .map((contract) => contract.id)
+        .filter((id): id is string => Boolean(id)),
+    );
+    this.awaitingCreation.set(true);
+
+    const createContract = this.store.create;
+    if (!createContract) {
+      this.awaitingCreation.set(false);
+      return;
+    }
+
+    createContract({
       body: {
         propertyId: v1.propertyId,
         ownerId: v1.ownerId,
@@ -131,7 +191,7 @@ export class ContratsAddPageComponent {
         monthlyRent: v3.monthlyRent,
         depositAmount: v3.depositAmount,
         startDate: v3.startDate,
-        endDate: this.openEnded() ? undefined : (v3.endDate || undefined),
+        endDate: this.openEnded() ? undefined : v3.endDate || undefined,
       },
     });
   }

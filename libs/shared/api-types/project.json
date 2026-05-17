@@ -12,6 +12,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
+          "node scripts/sanitize-openapi-spec.mjs",
           "node scripts/prepare-api-types-output.mjs",
           "ng-openapi-gen --config ng-openapi-gen.json"
         ],
