@@ -17,7 +17,7 @@ export class ContratSubmitDialogComponent {
   readonly contrat = input.required<ContractResponse>();
   readonly loading = input<boolean>(false);
   readonly confirm = output<void>();
-  readonly cancel = output<void>();
+  readonly dismissed = output<void>();
 
   formatAmount(amount: number | undefined): string {
     if (!amount) return '—';

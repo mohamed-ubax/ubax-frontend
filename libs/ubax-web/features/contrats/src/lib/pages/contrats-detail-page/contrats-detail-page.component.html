@@ -19,14 +19,22 @@
       @let c = contrat();
       @if (c) {
         <div class="cd-shell">
-          <ubax-breadcrumb-nav
-            [items]="[
-              { label: 'Contrats de bail', routerLink: '/contrats' },
-              {
-                label: (c.tenantName ?? 'Contrat') + ' · ' + propertyHeadline(),
-              },
-            ]"
-          />
+          <nav class="cd-breadcrumb" aria-label="Fil d'Ariane">
+            <button
+              class="cd-breadcrumb__back"
+              type="button"
+              (click)="backToContracts()"
+            >
+              <i class="pi pi-arrow-left"></i>
+            </button>
+            <a class="cd-breadcrumb__item" routerLink="/contrats"
+              >Contrats de bail</a
+            >
+            <i class="pi pi-chevron-right cd-breadcrumb__sep"></i>
+            <span class="cd-breadcrumb__item cd-breadcrumb__item--active">{{
+              (c.tenantName ?? 'Contrat') + ' · ' + propertyHeadline()
+            }}</span>
+          </nav>
 
           @if (c.status === 'TERMINATED') {
             <div class="cd-banner cd-banner--terminated">
@@ -146,6 +154,17 @@
                     </button>
                   }
                   @if (c.status === 'PENDING_SIGNATURE') {
+                    <button
+                      class="cd-btn cd-btn--primary"
+                      [disabled]="!!store.activatingId()"
+                      (click)="onActivateRequest()"
+                    >
+                      @if (store.activatingId()) {
+                        <i class="pi pi-spin pi-spinner"></i> Activation…
+                      } @else {
+                        <i class="pi pi-check-circle"></i> Activer le contrat
+                      }
+                    </button>
                     <button
                       class="cd-btn cd-btn--danger"
                       (click)="showCancelDialog.set(true)"
@@ -479,7 +498,7 @@
     [contrat]="contrat()!"
     [loading]="!!store.submittingId()"
     (confirm)="onSubmitConfirm()"
-    (cancel)="showSubmitDialog.set(false)"
+    (dismissed)="showSubmitDialog.set(false)"
   />
 }
 
@@ -555,13 +574,13 @@
   <ubax-contrat-terminate-dialog
     [loading]="!!store.terminatingId()"
     (confirm)="onTerminateConfirm($event)"
-    (cancel)="showTerminateDialog.set(false)"
+    (dismissed)="showTerminateDialog.set(false)"
   />
 }
 @if (showCancelDialog()) {
   <ubax-contrat-cancel-dialog
     [loading]="!!store.cancellingId()"
     (confirm)="onCancelConfirm()"
-    (cancel)="showCancelDialog.set(false)"
+    (dismissed)="showCancelDialog.set(false)"
   />
 }

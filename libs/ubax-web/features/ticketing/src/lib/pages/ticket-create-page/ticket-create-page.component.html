@@ -4,13 +4,9 @@
     <button class="tc-breadcrumb__back" type="button" (click)="cancel()">
       <i class="pi pi-arrow-left"></i>
     </button>
-    <span
-      class="tc-breadcrumb__item"
-      (click)="cancel()"
-      role="button"
-      tabindex="0"
-      >Tickets SAV</span
-    >
+    <button class="tc-breadcrumb__link" type="button" (click)="cancel()">
+      Tickets SAV
+    </button>
     <i class="pi pi-chevron-right tc-breadcrumb__sep"></i>
     <span class="tc-breadcrumb__item tc-breadcrumb__item--active"
       >Créer un ticket</span
@@ -120,9 +116,9 @@
 
         <!-- Catégorie -->
         <div class="tc-field">
-          <label class="tc-label">
+          <span class="tc-label">
             Catégorie <span class="tc-label__required">*</span>
-          </label>
+          </span>
           @if (store.categoryCodeListLoading()) {
             <span class="tc-field__hint">Chargement des catégories...</span>
           } @else if (store.categoryCodeListError()) {
@@ -188,20 +184,71 @@
           }
         </div>
 
-        <!-- ID Contrat -->
+        <!-- Contrat -->
         <div class="tc-field">
-          <label class="tc-label" for="tc-contract">
-            Identifiant du contrat <span class="tc-label__required">*</span>
+          <label class="tc-label" id="tc-contract-label" for="tc-contract">
+            Contrat <span class="tc-label__required">*</span>
           </label>
-          <input
-            id="tc-contract"
-            class="tc-input"
-            [class.tc-input--error]="contractError()"
-            type="text"
-            placeholder="Ex. : CTR-2025-0042"
+          <p-select
+            inputId="tc-contract"
+            [options]="contractOptions()"
             formControlName="contractId"
-            autocomplete="off"
-          />
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label,meta"
+            filterPlaceholder="Rechercher un contrat..."
+            [placeholder]="
+              contractsStore.loading()
+                ? 'Chargement des contrats...'
+                : 'Selectionnez un contrat'
+            "
+            appendTo="body"
+            styleClass="tc-rich-select"
+            panelStyleClass="tc-rich-select-panel"
+            ariaLabelledBy="tc-contract-label"
+          >
+            <ng-template #selectedItem let-option>
+              <div class="tc-select-trigger">
+                <span class="tc-select-trigger__icon" aria-hidden="true">
+                  <i [class]="'pi ' + (option?.icon || 'pi-file-contract')"></i>
+                </span>
+                <span class="tc-select-trigger__text">
+                  <span class="tc-select-trigger__label">{{
+                    option?.label || 'Selectionnez un contrat'
+                  }}</span>
+                  <span class="tc-select-trigger__meta">{{
+                    option?.meta || 'Contrats disponibles pour votre agence'
+                  }}</span>
+                </span>
+              </div>
+            </ng-template>
+            <ng-template #item let-option>
+              <div class="tc-option-card">
+                <span class="tc-option-card__icon" aria-hidden="true">
+                  <i [class]="'pi ' + option.icon"></i>
+                </span>
+                <span class="tc-option-card__text">
+                  <span class="tc-option-card__label">{{ option.label }}</span>
+                  <span class="tc-option-card__meta">{{ option.meta }}</span>
+                </span>
+              </div>
+            </ng-template>
+            <ng-template #dropdownicon>
+              <i class="pi pi-chevron-down" aria-hidden="true"></i>
+            </ng-template>
+          </p-select>
+          @if (contractsStore.error()) {
+            <span class="tc-field__error">
+              <i class="pi pi-exclamation-circle"></i>
+              {{ contractsStore.error() }}
+            </span>
+          } @else {
+            <span class="tc-field__hint">
+              Sélectionnez un contrat lié à votre agence pour préremplir son
+              identifiant.
+            </span>
+          }
           @if (contractError()) {
             <span class="tc-field__error">
               <i class="pi pi-exclamation-circle"></i>

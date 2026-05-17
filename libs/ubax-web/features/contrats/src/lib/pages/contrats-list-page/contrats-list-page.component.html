@@ -21,10 +21,12 @@
   <!-- ── KPI Cards ─────────────────────────────────────────────────────── -->
   <section class="cl-kpi-grid" aria-label="Statistiques contrats">
     @for (card of kpiCards(); track card.label) {
-      <article
+      <button
+        type="button"
         class="cl-kpi-card"
         [style.--kpi-accent]="card.accent"
         [style.--kpi-bg]="card.bg"
+        (click)="onKpiClick(card.tab)"
       >
         <span class="cl-kpi-card__icon"><i [class]="card.icon"></i></span>
         <div class="cl-kpi-card__body">
@@ -32,7 +34,7 @@
           <p class="cl-kpi-card__label">{{ card.label }}</p>
         </div>
         <span class="cl-kpi-card__orb"></span>
-      </article>
+      </button>
     }
   </section>
 

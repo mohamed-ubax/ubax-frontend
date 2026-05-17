@@ -9,6 +9,47 @@
   padding-bottom: 48px;
 }
 
+.cd-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__back {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--ubax-border-card);
+    border-radius: 8px;
+    background: var(--ubax-surface);
+    color: var(--ubax-navy);
+    cursor: pointer;
+    transition: background 0.12s;
+
+    &:hover {
+      background: var(--ubax-page-bg);
+    }
+  }
+
+  &__item {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+    text-decoration: none;
+
+    &--active {
+      font-weight: 500;
+      color: var(--ubax-navy);
+    }
+  }
+
+  &__sep {
+    font-size: 11px;
+    color: var(--ubax-text-muted);
+  }
+}
+
 .cd-shell {
   position: relative;
   display: flex;

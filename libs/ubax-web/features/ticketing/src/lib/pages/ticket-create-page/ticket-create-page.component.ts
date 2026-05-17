@@ -12,8 +12,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Select } from 'primeng/select';
 import { type CreateTicketRequest } from '@ubax-workspace/shared-api-types';
 import {
+  ContratsStore,
+  type ContractResponse,
   TicketCategory,
   TicketingStore,
   TicketPriority,
@@ -27,10 +30,17 @@ import {
   resolvePriorityOption,
 } from '../../constants/ticket-create-page.constants';
 
+type ContractOption = {
+  value: string;
+  label: string;
+  meta: string;
+  icon: string;
+};
+
 @Component({
   selector: 'ubax-ticket-create-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Select],
   templateUrl: './ticket-create-page.component.html',
   styleUrl: './ticket-create-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +49,7 @@ export class TicketCreatePageComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly router = inject(Router);
   readonly store = inject(TicketingStore);
+  readonly contractsStore = inject(ContratsStore);
 
   readonly priorityOptions = computed<readonly PriorityOption[]>(() =>
     this.store
@@ -50,6 +61,17 @@ export class TicketCreatePageComponent {
       ...option,
       icon: resolveCategoryIcon(option.value, option.label),
     })),
+  );
+  readonly contractOptions = computed<ContractOption[]>(() =>
+    this.contractsStore
+      .entities()
+      .filter((contract) => Boolean(contract.id))
+      .map((contract) => ({
+        value: contract.id,
+        label: this.resolveContractLabel(contract),
+        meta: this.resolveContractMeta(contract),
+        icon: 'pi-file-contract',
+      })),
   );
 
   readonly submitted = signal(false);
@@ -106,8 +128,7 @@ export class TicketCreatePageComponent {
   readonly contractError = computed(() => {
     const ctrl = this.form.get('contractId');
     if (!ctrl?.touched && !this.submitted()) return null;
-    if (ctrl?.hasError('required'))
-      return "L'identifiant du contrat est obligatoire.";
+    if (ctrl?.hasError('required')) return 'Veuillez sélectionner un contrat.';
     return null;
   });
 
@@ -124,6 +145,13 @@ export class TicketCreatePageComponent {
       !this.store.priorityCodeListLoading()
     ) {
       this.store.loadTicketPriorities();
+    }
+
+    if (
+      this.contractsStore.entities().length === 0 &&
+      !this.contractsStore.loading()
+    ) {
+      this.contractsStore.load?.({ pageable: {} });
     }
   }
 
@@ -198,5 +226,26 @@ export class TicketCreatePageComponent {
 
   cancel(): void {
     this.router.navigate(['/tickets']);
+  }
+
+  private resolveContractLabel(contract: ContractResponse): string {
+    return (
+      contract.referenceNumber?.trim() ||
+      contract.propertyTitle?.trim() ||
+      contract.tenantName?.trim() ||
+      contract.id
+    );
+  }
+
+  private resolveContractMeta(contract: ContractResponse): string {
+    const segments = [
+      contract.propertyAddress,
+      contract.propertyType,
+      contract.status,
+    ]
+      .filter((value): value is string => Boolean(value?.trim()))
+      .map((value) => value.trim());
+
+    return segments.join(' · ') || 'Contrat rattache a votre agence';
   }
 }

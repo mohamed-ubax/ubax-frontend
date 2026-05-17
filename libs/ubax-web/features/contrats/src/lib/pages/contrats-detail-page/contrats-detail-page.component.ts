@@ -22,7 +22,6 @@ import {
   ContractStatus,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
-  BreadcrumbNavComponent,
   StatusBadgeComponent,
   type StatusVariant,
 } from '@ubax-workspace/shared-design-system';
@@ -58,7 +57,6 @@ type SummaryRow = {
   standalone: true,
   imports: [
     RouterLink,
-    BreadcrumbNavComponent,
     StatusBadgeComponent,
     ContratsSkeletonComponent,
     ContratSubmitDialogComponent,
@@ -107,6 +105,10 @@ export class ContratsDetailPageComponent {
       this.hasLoaded(),
     ),
   );
+
+  backToContracts(): void {
+    void this.router.navigate(['/contrats']);
+  }
 
   readonly contrat = computed(() => this.store.selectedItem());
 
@@ -425,11 +427,11 @@ export class ContratsDetailPageComponent {
         this.hasLoaded.set(true);
       }
     });
-
     // After submit — close dialog, show success feedback
     effect(() => {
       if (this.store.lastSubmittedId()) {
         this.showSubmitDialog.set(false);
+        this.notifications?.success('Contrat soumis a signature avec succes');
         this.store.clearActionFeedback();
       }
     });
@@ -438,6 +440,7 @@ export class ContratsDetailPageComponent {
     effect(() => {
       if (this.store.lastTerminatedId()) {
         this.showTerminateDialog.set(false);
+        this.notifications?.success('Contrat resilie avec succes');
         this.store.clearActionFeedback();
       }
     });
@@ -446,8 +449,16 @@ export class ContratsDetailPageComponent {
     effect(() => {
       if (this.store.lastCancelledId()) {
         this.showCancelDialog.set(false);
+        this.notifications?.success('Contrat annule avec succes');
         this.store.clearActionFeedback();
         this.router.navigate(['/contrats']);
+      }
+    });
+
+    effect(() => {
+      if (this.store.lastActivatedId()) {
+        this.notifications?.success('Contrat activé avec succès');
+        this.store.clearActionFeedback();
       }
     });
 
@@ -484,6 +495,18 @@ export class ContratsDetailPageComponent {
   onSubmitConfirm(): void {
     const id = this.contractId();
     if (id) this.store.soumettre(id);
+  }
+
+  onActivateRequest(): void {
+    const id = this.contractId();
+    const confirmed =
+      this.document.defaultView?.confirm(
+        'Activer le contrat créera automatiquement le premier paiement de loyer. Continuer ? ',
+      ) ?? false;
+
+    if (id && confirmed) {
+      this.store.activer(id);
+    }
   }
 
   onTerminateConfirm(reason: string): void {

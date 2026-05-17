@@ -7,13 +7,19 @@ import {
   type StrictHttpResponse,
 } from '@ubax-workspace/shared-api-types';
 import * as apiTypes from '@ubax-workspace/shared-api-types';
-import { type ContractResponse, ContratsStore } from './contrats.store';
+import {
+  type ContractResponse,
+  type ContractStats,
+  ContratsStore,
+} from './contrats.store';
 
 vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
   const actual =
     await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
   return {
     ...actual,
+    activate: vi.fn(),
+    getStats: vi.fn(),
     list5: vi.fn(),
   };
 });
@@ -25,6 +31,13 @@ function toStrictResponse<T>(body: T): StrictHttpResponse<T> {
 type ContratsStoreContract = {
   entities(): ContractResponse[];
   load(params?: unknown): void;
+  loadStats(): void;
+  stats(): ContractStats;
+  statsLoaded(): boolean;
+  activer(id: string): void;
+  activatingId(): string | null;
+  lastActivatedId(): string | null;
+  activateError(): string | null;
 };
 
 describe('ContratsStore', () => {
@@ -35,6 +48,8 @@ describe('ContratsStore', () => {
   let store: ContratsStoreContract;
 
   beforeEach(() => {
+    vi.mocked(apiTypes.activate).mockReset();
+    vi.mocked(apiTypes.getStats).mockReset();
     vi.mocked(apiTypes.list5).mockImplementation(() =>
       of(
         toStrictResponse({
@@ -76,6 +91,38 @@ describe('ContratsStore', () => {
       ),
     );
 
+    vi.mocked(apiTypes.getStats).mockImplementation(() =>
+      of(
+        toStrictResponse({
+          status: 'SUCCESS',
+          statusCode: 200,
+          message: 'CONTRACT_GET_STATS_SUCCESS',
+          data: {
+            total: 45,
+            active: 32,
+            pendingSignature: 5,
+            terminated: 6,
+            cancelled: 2,
+            draft: 0,
+          },
+        }),
+      ),
+    );
+
+    vi.mocked(apiTypes.activate).mockImplementation(() =>
+      of(
+        toStrictResponse({
+          status: 'SUCCESS',
+          statusCode: 200,
+          message: 'CONTRACT_UPDATE_SUCCESS',
+          data: {
+            id: '1abf05cb-71a1-4be8-9a2e-a952ddd36e4d',
+            status: 'ACTIVE',
+          },
+        }),
+      ),
+    );
+
     const injector = Injector.create({
       providers: [
         { provide: HttpClient, useValue: {} },
@@ -88,6 +135,62 @@ describe('ContratsStore', () => {
     });
 
     store = injector.get(storeToken);
+  });
+
+  it('charge les statistiques contrats depuis la réponse dédiée', () => {
+    store.loadStats();
+
+    expect(store.statsLoaded()).toBe(true);
+    expect(store.stats()).toEqual({
+      total: 45,
+      active: 32,
+      pendingSignature: 5,
+      terminated: 6,
+      cancelled: 2,
+      draft: 0,
+    });
+  });
+
+  it('active un contrat en attente et met à jour le statut local', () => {
+    vi.mocked(apiTypes.list5).mockReturnValueOnce(
+      of(
+        toStrictResponse({
+          status: 'SUCCESS',
+          statusCode: 200,
+          message: 'CONTRACT_GET_LIST_SUCCESS',
+          data: {
+            results: [
+              {
+                id: 'contract-pending',
+                propertyId: 'property-1',
+                ownerId: 'owner-1',
+                tenantId: 'tenant-1',
+                status: 'PENDING_SIGNATURE',
+              },
+            ],
+          },
+        }),
+      ),
+    );
+
+    vi.mocked(apiTypes.activate).mockReturnValueOnce(
+      of(
+        toStrictResponse({
+          status: 'SUCCESS',
+          statusCode: 200,
+          message: 'CONTRACT_UPDATE_SUCCESS',
+          data: { id: 'contract-pending', status: 'ACTIVE' },
+        }),
+      ),
+    );
+
+    store.load({ pageable: { page: 0, size: 100, sort: [] } });
+    store.activer('contract-pending');
+
+    expect(store.activatingId()).toBeNull();
+    expect(store.lastActivatedId()).toBe('contract-pending');
+    expect(store.activateError()).toBeNull();
+    expect(store.entities()[0]?.status).toBe('ACTIVE');
   });
 
   it('charge les contrats depuis data.results et normalise les champs attendus par l UI', () => {

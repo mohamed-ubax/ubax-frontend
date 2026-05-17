@@ -1,16 +1,26 @@
 <div class="ca-page">
-
-  <ubax-breadcrumb-nav [items]="[
-    { label: 'Contrats de bail', routerLink: '/contrats' },
-    { label: 'Nouveau contrat' }
-  ]" />
+  <nav class="ca-breadcrumb" aria-label="Fil d'Ariane">
+    <button
+      class="ca-breadcrumb__back"
+      type="button"
+      (click)="backToContracts()"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <a class="ca-breadcrumb__item" routerLink="/contrats">Contrats de bail</a>
+    <i class="pi pi-chevron-right ca-breadcrumb__sep"></i>
+    <span class="ca-breadcrumb__item ca-breadcrumb__item--active"
+      >Nouveau contrat</span
+    >
+  </nav>
 
   <div class="ca-layout">
-
     <!-- Sidebar -->
     <aside class="ca-sidebar">
       <div class="ca-sidebar-brand">
-        <div class="ca-sidebar-brand__icon"><i class="pi pi-file-edit"></i></div>
+        <div class="ca-sidebar-brand__icon">
+          <i class="pi pi-file-edit"></i>
+        </div>
         <div>
           <div class="ca-sidebar-brand__title">Nouveau contrat</div>
           <div class="ca-sidebar-brand__sub">Bail de location</div>
@@ -19,9 +29,11 @@
 
       <div class="ca-stepper">
         @for (step of stepConfig; track step.step; let i = $index) {
-          <div class="ca-step"
+          <div
+            class="ca-step"
             [class.ca-step--active]="currentStep() === step.step"
-            [class.ca-step--done]="currentStep() > step.step">
+            [class.ca-step--done]="currentStep() > step.step"
+          >
             <div class="ca-step__circle">
               @if (currentStep() > step.step) {
                 <i class="pi pi-check"></i>
@@ -43,8 +55,12 @@
       <div class="ca-sidebar-hint">
         <i [class]="'pi ' + currentStepConfig().icon"></i>
         <div>
-          <div class="ca-sidebar-hint__title">{{ currentStepConfig().title }}</div>
-          <div class="ca-sidebar-hint__desc">{{ currentStepConfig().desc }}</div>
+          <div class="ca-sidebar-hint__title">
+            {{ currentStepConfig().title }}
+          </div>
+          <div class="ca-sidebar-hint__desc">
+            {{ currentStepConfig().desc }}
+          </div>
         </div>
       </div>
     </aside>
@@ -52,29 +68,111 @@
     <!-- Main -->
     <main>
       <div class="ca-card">
-
         @switch (currentStep()) {
-
           @case (1) {
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Sélection du bien</h2>
-              <p class="ca-step-header__sub">Choisissez le bien immobilier concerné par ce contrat.</p>
+              <p class="ca-step-header__sub">
+                Choisissez le bien immobilier concerné par ce contrat.
+              </p>
             </div>
             <form [formGroup]="step1Form" class="ca-form">
               <div class="ca-field">
-                <label class="ca-label">Identifiant du bien <span class="req">*</span></label>
-                <input class="ca-input" type="text" placeholder="UUID du bien (ex: 3fa85f64-…)" formControlName="propertyId" />
-                @if (step1Form.get('propertyId')?.invalid && step1Form.get('propertyId')?.touched) {
-                  <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le bien est requis</span>
+                <label class="ca-label" for="contract-add-property"
+                  >Bien <span class="req">*</span></label
+                >
+                <p-select
+                  inputId="contract-add-property"
+                  [options]="propertyOptions()"
+                  formControlName="propertyId"
+                  optionLabel="label"
+                  optionValue="value"
+                  [filter]="true"
+                  filterBy="label,meta"
+                  filterPlaceholder="Rechercher un bien..."
+                  [placeholder]="
+                    biensStore.loading()
+                      ? 'Chargement des biens...'
+                      : 'Selectionnez un bien'
+                  "
+                  appendTo="body"
+                  styleClass="ca-rich-select"
+                  panelStyleClass="ca-rich-select-panel"
+                  ariaLabel="Bien"
+                >
+                  <ng-template #selectedItem let-option>
+                    <div class="ca-select-trigger">
+                      <span class="ca-select-trigger__icon" aria-hidden="true">
+                        <i [class]="'pi ' + (option?.icon || 'pi-home')"></i>
+                      </span>
+                      <span class="ca-select-trigger__text">
+                        <span class="ca-select-trigger__label">{{
+                          option?.label || 'Selectionnez un bien'
+                        }}</span>
+                        <span class="ca-select-trigger__meta">{{
+                          option?.meta || 'Biens eligibles sans contrat actif'
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #item let-option>
+                    <div class="ca-option-card">
+                      <span class="ca-option-card__icon" aria-hidden="true">
+                        <i [class]="'pi ' + option.icon"></i>
+                      </span>
+                      <span class="ca-option-card__text">
+                        <span class="ca-option-card__label">{{
+                          option.label
+                        }}</span>
+                        <span class="ca-option-card__meta">{{
+                          option.meta
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </ng-template>
+                </p-select>
+                @if (
+                  step1Form.get('propertyId')?.invalid &&
+                  step1Form.get('propertyId')?.touched
+                ) {
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le bien est
+                    requis</span
+                  >
                 }
-                <span class="ca-hint"><i class="pi pi-info-circle"></i> Seuls les biens sans contrat ACTIVE en cours sont éligibles.</span>
+                <span class="ca-hint"
+                  ><i class="pi pi-info-circle"></i> Seuls les biens sans
+                  contrat ACTIVE en cours sont éligibles.</span
+                >
               </div>
               <div class="ca-field">
-                <label class="ca-label">Identifiant du propriétaire <span class="req">*</span></label>
-                <input class="ca-input" type="text" placeholder="UUID du propriétaire" formControlName="ownerId" />
-                @if (step1Form.get('ownerId')?.invalid && step1Form.get('ownerId')?.touched) {
-                  <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le propriétaire est requis</span>
+                <label class="ca-label" for="contract-add-owner"
+                  >Propriétaire <span class="req">*</span></label
+                >
+                <input
+                  class="ca-input"
+                  id="contract-add-owner"
+                  type="text"
+                  [value]="ownerDisplayName()"
+                  readonly
+                />
+                @if (
+                  step1Form.get('ownerId')?.invalid &&
+                  step1Form.get('ownerId')?.touched
+                ) {
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le propriétaire
+                    est requis</span
+                  >
                 }
+                <span class="ca-hint"
+                  ><i class="pi pi-info-circle"></i> Prérempli avec
+                  l'utilisateur connecté. Son identifiant est envoyé
+                  automatiquement.</span
+                >
               </div>
             </form>
           }
@@ -82,16 +180,81 @@
           @case (2) {
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Sélection du locataire</h2>
-              <p class="ca-step-header__sub">Seuls les locataires qualifiés peuvent être sélectionnés.</p>
+              <p class="ca-step-header__sub">
+                Seuls les locataires qualifiés peuvent être sélectionnés.
+              </p>
             </div>
             <form [formGroup]="step2Form" class="ca-form">
               <div class="ca-field">
-                <label class="ca-label">Identifiant du locataire <span class="req">*</span></label>
-                <input class="ca-input" type="text" placeholder="UUID du locataire (statut QUALIFIED)" formControlName="tenantId" />
-                @if (step2Form.get('tenantId')?.invalid && step2Form.get('tenantId')?.touched) {
-                  <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le locataire est requis</span>
+                <label class="ca-label" for="contract-add-tenant"
+                  >Locataire <span class="req">*</span></label
+                >
+                <p-select
+                  inputId="contract-add-tenant"
+                  [options]="tenantOptions()"
+                  formControlName="tenantId"
+                  optionLabel="label"
+                  optionValue="value"
+                  [filter]="true"
+                  filterBy="label,meta"
+                  filterPlaceholder="Rechercher un locataire..."
+                  [placeholder]="
+                    locationStore.loading()
+                      ? 'Chargement des locataires...'
+                      : 'Selectionnez un locataire qualifie'
+                  "
+                  appendTo="body"
+                  styleClass="ca-rich-select"
+                  panelStyleClass="ca-rich-select-panel"
+                  ariaLabel="Locataire"
+                >
+                  <ng-template #selectedItem let-option>
+                    <div class="ca-select-trigger">
+                      <span class="ca-select-trigger__icon" aria-hidden="true">
+                        <i [class]="'pi ' + (option?.icon || 'pi-user')"></i>
+                      </span>
+                      <span class="ca-select-trigger__text">
+                        <span class="ca-select-trigger__label">{{
+                          option?.label || 'Selectionnez un locataire qualifie'
+                        }}</span>
+                        <span class="ca-select-trigger__meta">{{
+                          option?.meta || 'Dossiers KYC qualifies uniquement'
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #item let-option>
+                    <div class="ca-option-card">
+                      <span class="ca-option-card__icon" aria-hidden="true">
+                        <i [class]="'pi ' + option.icon"></i>
+                      </span>
+                      <span class="ca-option-card__text">
+                        <span class="ca-option-card__label">{{
+                          option.label
+                        }}</span>
+                        <span class="ca-option-card__meta">{{
+                          option.meta
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </ng-template>
+                </p-select>
+                @if (
+                  step2Form.get('tenantId')?.invalid &&
+                  step2Form.get('tenantId')?.touched
+                ) {
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le locataire est
+                    requis</span
+                  >
                 }
-                <span class="ca-hint"><i class="pi pi-info-circle"></i> Seuls les dossiers qualifiés (statut QUALIFIED) sont acceptés.</span>
+                <span class="ca-hint"
+                  ><i class="pi pi-info-circle"></i> Seuls les dossiers
+                  qualifiés (statut QUALIFIED) sont acceptés.</span
+                >
               </div>
             </form>
           }
@@ -99,38 +262,204 @@
           @case (3) {
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Conditions du bail</h2>
-              <p class="ca-step-header__sub">Renseignez les montants et les dates du bail.</p>
+              <p class="ca-step-header__sub">
+                Renseignez les montants et les dates du bail.
+              </p>
             </div>
             <form [formGroup]="step3Form" class="ca-form">
               <div class="ca-form-row">
                 <div class="ca-field">
-                  <label class="ca-label">Loyer mensuel (FCFA) <span class="req">*</span></label>
-                  <input class="ca-input" type="number" placeholder="Ex : 150 000" formControlName="monthlyRent" min="1" />
-                  @if (step3Form.get('monthlyRent')?.invalid && step3Form.get('monthlyRent')?.touched) {
-                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Loyer requis et doit être &gt; 0</span>
-                  }
+                  <label class="ca-label" for="contract-add-type"
+                    >Type de contrat <span class="req">*</span></label
+                  >
+                  <p-select
+                    inputId="contract-add-type"
+                    [options]="contractTypeOptions"
+                    formControlName="contractType"
+                    optionLabel="label"
+                    optionValue="value"
+                    appendTo="body"
+                    styleClass="ca-rich-select ca-rich-select--compact"
+                    panelStyleClass="ca-rich-select-panel"
+                    ariaLabel="Type de contrat"
+                  >
+                    <ng-template #selectedItem let-option>
+                      <div class="ca-select-trigger ca-select-trigger--compact">
+                        <span
+                          class="ca-select-trigger__icon"
+                          aria-hidden="true"
+                        >
+                          <i [class]="'pi ' + (option?.icon || 'pi-file')"></i>
+                        </span>
+                        <span class="ca-select-trigger__text">
+                          <span class="ca-select-trigger__label">{{
+                            option?.label || 'Type de contrat'
+                          }}</span>
+                          <span class="ca-select-trigger__meta">{{
+                            option?.meta || 'Choisissez la nature du contrat'
+                          }}</span>
+                        </span>
+                      </div>
+                    </ng-template>
+                    <ng-template #item let-option>
+                      <div class="ca-option-card">
+                        <span class="ca-option-card__icon" aria-hidden="true">
+                          <i [class]="'pi ' + option.icon"></i>
+                        </span>
+                        <span class="ca-option-card__text">
+                          <span class="ca-option-card__label">{{
+                            option.label
+                          }}</span>
+                          <span class="ca-option-card__meta">{{
+                            option.meta
+                          }}</span>
+                        </span>
+                      </div>
+                    </ng-template>
+                    <ng-template #dropdownicon>
+                      <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                    </ng-template>
+                  </p-select>
                 </div>
                 <div class="ca-field">
-                  <label class="ca-label">Caution (FCFA) <span class="req">*</span></label>
-                  <input class="ca-input" type="number" placeholder="Ex : 300 000" formControlName="depositAmount" min="0" />
-                  @if (step3Form.get('depositAmount')?.invalid && step3Form.get('depositAmount')?.touched) {
-                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Caution requise (≥ 0)</span>
+                  <label class="ca-label" for="contract-add-payment-day"
+                    >Jour de prelevement mensuel
+                    <span class="req">*</span></label
+                  >
+                  <input
+                    class="ca-input"
+                    id="contract-add-payment-day"
+                    type="number"
+                    min="1"
+                    max="28"
+                    formControlName="paymentDay"
+                  />
+                  @if (
+                    step3Form.get('paymentDay')?.invalid &&
+                    step3Form.get('paymentDay')?.touched
+                  ) {
+                    <span class="ca-error"
+                      ><i class="pi pi-exclamation-circle"></i> Valeur attendue
+                      entre 1 et 28</span
+                    >
                   }
                 </div>
               </div>
               <div class="ca-form-row">
                 <div class="ca-field">
-                  <label class="ca-label">Date de début <span class="req">*</span></label>
-                  <input class="ca-input" type="date" formControlName="startDate" />
-                  @if (step3Form.get('startDate')?.invalid && step3Form.get('startDate')?.touched) {
-                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de début requise</span>
+                  <label class="ca-label" for="contract-add-rent"
+                    >Loyer mensuel (FCFA) <span class="req">*</span></label
+                  >
+                  <input
+                    class="ca-input"
+                    id="contract-add-rent"
+                    type="number"
+                    placeholder="Ex : 150 000"
+                    formControlName="monthlyRent"
+                    min="1"
+                  />
+                  @if (
+                    step3Form.get('monthlyRent')?.invalid &&
+                    step3Form.get('monthlyRent')?.touched
+                  ) {
+                    <span class="ca-error"
+                      ><i class="pi pi-exclamation-circle"></i> Loyer requis et
+                      doit être &gt; 0</span
+                    >
                   }
                 </div>
                 <div class="ca-field">
-                  <label class="ca-label">Date de fin</label>
-                  <input class="ca-input" type="date" formControlName="endDate" [attr.disabled]="openEnded() ? true : null" />
+                  <label class="ca-label" for="contract-add-deposit"
+                    >Caution (FCFA) <span class="req">*</span></label
+                  >
+                  <input
+                    class="ca-input"
+                    id="contract-add-deposit"
+                    type="number"
+                    placeholder="Ex : 300 000"
+                    formControlName="depositAmount"
+                    min="0"
+                  />
+                  @if (
+                    step3Form.get('depositAmount')?.invalid &&
+                    step3Form.get('depositAmount')?.touched
+                  ) {
+                    <span class="ca-error"
+                      ><i class="pi pi-exclamation-circle"></i> Caution requise
+                      (≥ 0)</span
+                    >
+                  }
+                </div>
+              </div>
+              <div class="ca-form-row">
+                <div class="ca-field">
+                  <label class="ca-label" for="contract-add-start-date"
+                    >Date de début <span class="req">*</span></label
+                  >
+                  <p-datepicker
+                    inputId="contract-add-start-date"
+                    formControlName="startDate"
+                    [showIcon]="true"
+                    [showButtonBar]="true"
+                    [readonlyInput]="true"
+                    iconDisplay="button"
+                    dateFormat="dd/mm/yy"
+                    appendTo="body"
+                    styleClass="ca-rich-datepicker"
+                    inputStyleClass="ca-rich-datepicker__input"
+                    panelStyleClass="ca-rich-datepicker-panel"
+                    todayButtonStyleClass="ca-rich-datepicker-panel__today"
+                    clearButtonStyleClass="ca-rich-datepicker-panel__clear"
+                    placeholder="Selectionnez une date de debut"
+                    ariaLabel="Date de début"
+                  >
+                    <ng-template #triggericon>
+                      <i class="pi pi-calendar" aria-hidden="true"></i>
+                    </ng-template>
+                  </p-datepicker>
+                  @if (
+                    step3Form.get('startDate')?.invalid &&
+                    step3Form.get('startDate')?.touched
+                  ) {
+                    <span class="ca-error"
+                      ><i class="pi pi-exclamation-circle"></i> Date de début
+                      requise</span
+                    >
+                  }
+                </div>
+                <div class="ca-field">
+                  <label class="ca-label" for="contract-add-end-date"
+                    >Date de fin</label
+                  >
+                  <p-datepicker
+                    inputId="contract-add-end-date"
+                    formControlName="endDate"
+                    [showIcon]="true"
+                    [showButtonBar]="true"
+                    [readonlyInput]="true"
+                    iconDisplay="button"
+                    dateFormat="dd/mm/yy"
+                    appendTo="body"
+                    styleClass="ca-rich-datepicker"
+                    inputStyleClass="ca-rich-datepicker__input"
+                    panelStyleClass="ca-rich-datepicker-panel"
+                    todayButtonStyleClass="ca-rich-datepicker-panel__today"
+                    clearButtonStyleClass="ca-rich-datepicker-panel__clear"
+                    placeholder="Selectionnez une date de fin"
+                    ariaLabel="Date de fin"
+                    [disabled]="openEnded()"
+                  >
+                    <ng-template #triggericon>
+                      <i class="pi pi-calendar" aria-hidden="true"></i>
+                    </ng-template>
+                  </p-datepicker>
                   <label class="ca-checkbox-row">
-                    <input type="checkbox" [ngModel]="openEnded()" (ngModelChange)="openEnded.set($event)" [ngModelOptions]="{standalone: true}" />
+                    <input
+                      type="checkbox"
+                      [ngModel]="openEnded()"
+                      (ngModelChange)="openEnded.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
                     <span>Bail à durée indéterminée</span>
                   </label>
                 </div>
@@ -141,7 +470,9 @@
           @case (4) {
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Récapitulatif</h2>
-              <p class="ca-step-header__sub">Vérifiez les informations avant de créer le brouillon.</p>
+              <p class="ca-step-header__sub">
+                Vérifiez les informations avant de créer le brouillon.
+              </p>
             </div>
             <ubax-detail-info-block [items]="summaryItems()" [columns]="2" />
             @if (store.error()) {
@@ -168,7 +499,11 @@
               Suivant <i class="pi pi-arrow-right"></i>
             </button>
           } @else {
-            <button class="ca-btn ca-btn--primary" (click)="submit()" [disabled]="store.saving()">
+            <button
+              class="ca-btn ca-btn--primary"
+              (click)="submit()"
+              [disabled]="store.saving()"
+            >
               @if (store.saving()) {
                 <i class="pi pi-spin pi-spinner"></i> Création…
               } @else {
@@ -177,7 +512,6 @@
             </button>
           }
         </div>
-
       </div>
     </main>
   </div>
