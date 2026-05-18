@@ -22,15 +22,15 @@
     }
 
     .p-datatable-thead > tr > th {
-      background:    c.$color-neutral-100;
-      color:         c.$color-neutral-950;
-      font-family:   t.$font-family-primary;
-      font-size:     t.$text-xl;
-      font-weight:   t.$font-weight-medium;
-      padding:       s.$space-3 s.$space-4;
+      background: c.$color-neutral-100;
+      color: c.$color-neutral-950;
+      font-family: t.$font-family-primary;
+      font-size: t.$text-xl;
+      font-weight: t.$font-weight-medium;
+      padding: s.$space-3 s.$space-4;
       border-bottom: 1px solid c.$color-neutral-300;
-      border-right:  none;
-      white-space:   nowrap;
+      border-right: none;
+      white-space: nowrap;
     }
 
     .p-datatable-tbody > tr {
@@ -46,19 +46,19 @@
       }
 
       > td {
-        color:       c.$color-neutral-950;
+        color: c.$color-neutral-950;
         font-family: t.$font-family-primary;
-        font-size:   t.$text-md;
+        font-size: t.$text-md;
         font-weight: t.$font-weight-regular;
-        padding:     s.$space-3 s.$space-4;
+        padding: s.$space-3 s.$space-4;
         border-right: none;
       }
     }
 
     .p-datatable-tfoot > tr > td {
-      background:    c.$color-surface-card;
-      border-top:    1px solid c.$color-neutral-300;
-      padding:       s.$space-3 s.$space-4;
+      background: c.$color-surface-card;
+      border-top: 1px solid c.$color-neutral-300;
+      padding: s.$space-3 s.$space-4;
     }
   }
 }
@@ -66,35 +66,37 @@
 // ── PrimeNG Paginator ─────────────────────────────────────────
 .ubax-paginator {
   &.p-paginator {
-    background:   transparent;
-    border:       none;
-    padding:      0;
-    gap:          s.$space-1;
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: s.$space-1;
 
     .p-paginator-page,
     .p-paginator-prev,
     .p-paginator-next,
     .p-paginator-first,
     .p-paginator-last {
-      min-width:     36px;
-      height:        36px;
+      min-width: 36px;
+      height: 36px;
       border-radius: r.$radius-md;
-      border:        1px solid c.$color-neutral-300;
-      color:         c.$color-neutral-900;
-      font-family:   t.$font-family-primary;
-      font-size:     t.$text-md;
-      transition:    background-color 150ms ease, color 150ms ease;
+      border: 1px solid c.$color-neutral-300;
+      color: c.$color-neutral-900;
+      font-family: t.$font-family-primary;
+      font-size: t.$text-md;
+      transition:
+        background-color 150ms ease,
+        color 150ms ease;
 
       &:hover {
         background: c.$color-neutral-50;
-        color:      c.$color-brand-blue;
+        color: c.$color-brand-blue;
         border-color: c.$color-brand-blue;
       }
 
       &.p-highlight {
-        background:   c.$color-brand-blue;
+        background: c.$color-brand-blue;
         border-color: c.$color-brand-blue;
-        color:        #fff;
+        color: #fff;
       }
     }
   }
@@ -104,15 +106,15 @@
 .ubax-select {
   &.p-select {
     border-radius: r.$radius-md;
-    border-color:  c.$color-neutral-300;
-    background:    c.$color-surface-card;
-    box-shadow:    sh.$shadow-01;
+    border-color: c.$color-neutral-300;
+    background: c.$color-surface-card;
+    box-shadow: sh.$shadow-01;
 
     .p-select-label {
       font-family: t.$font-family-primary;
-      font-size:   t.$text-md;
-      color:       c.$color-neutral-900;
-      padding:     s.$space-2 s.$space-3;
+      font-size: t.$text-md;
+      color: c.$color-neutral-900;
+      padding: s.$space-2 s.$space-3;
     }
 
     &:hover {
@@ -121,20 +123,20 @@
 
     &.p-focus {
       border-color: c.$color-brand-blue;
-      box-shadow:   0 0 0 2px rgba(43, 127, 255, 0.2);
+      box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.2);
     }
   }
 
   .p-select-overlay {
     border-radius: r.$radius-xl;
-    border-color:  c.$color-neutral-300;
-    box-shadow:    sh.$shadow-02;
+    border-color: c.$color-neutral-300;
+    box-shadow: sh.$shadow-02;
 
     .p-select-option {
       font-family: t.$font-family-primary;
-      font-size:   t.$text-md;
-      color:       c.$color-neutral-900;
-      padding:     s.$space-2 s.$space-3;
+      font-size: t.$text-md;
+      color: c.$color-neutral-900;
+      padding: s.$space-2 s.$space-3;
 
       &:hover,
       &.p-focus {
@@ -143,7 +145,7 @@
 
       &.p-selected {
         background: c.$color-info-bg;
-        color:      c.$color-brand-blue;
+        color: c.$color-brand-blue;
       }
     }
   }
@@ -151,53 +153,54 @@
 
 // ── PrimeNG Button ────────────────────────────────────────────
 .p-button {
-  font-family:   t.$font-family-primary !important;
-  font-size:     t.$text-lg !important;
-  font-weight:   t.$font-weight-medium !important;
+  font-family: t.$font-family-primary !important;
+  font-size: t.$text-lg !important;
+  font-weight: t.$font-weight-medium !important;
   border-radius: r.$radius-sm !important;
-  transition:    background-color 150ms ease,
-                 border-color 150ms ease,
-                 box-shadow 150ms ease !important;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease !important;
 
   &.p-button-secondary {
-    background:   c.$color-neutral-50 !important;
+    background: c.$color-neutral-50 !important;
     border-color: c.$color-neutral-300 !important;
-    color:        c.$color-neutral-900 !important;
+    color: c.$color-neutral-900 !important;
 
     &:hover {
-      background:   c.$color-info-bg !important;
+      background: c.$color-info-bg !important;
       border-color: c.$color-brand-blue !important;
-      color:        c.$color-brand-blue !important;
+      color: c.$color-brand-blue !important;
     }
   }
 
   &.p-button-danger {
-    background:   c.$color-danger !important;
+    background: c.$color-danger !important;
     border-color: c.$color-danger !important;
-    color:        #fff !important;
+    color: #fff !important;
   }
 
   &.p-button-success {
-    background:   c.$color-success !important;
+    background: c.$color-success !important;
     border-color: c.$color-success !important;
-    color:        #fff !important;
+    color: #fff !important;
   }
 
   &.p-button-warn {
-    background:   c.$color-warning !important;
+    background: c.$color-warning !important;
     border-color: c.$color-warning !important;
-    color:        #fff !important;
+    color: #fff !important;
   }
 }
 
 // ── PrimeNG InputText ─────────────────────────────────────────
 .p-inputtext {
-  font-family:   t.$font-family-primary !important;
-  font-size:     t.$text-md !important;
+  font-family: t.$font-family-primary !important;
+  font-size: t.$text-md !important;
   border-radius: r.$radius-md !important;
-  border-color:  c.$color-neutral-300 !important;
-  color:         c.$color-neutral-900 !important;
-  box-shadow:    sh.$shadow-01 !important;
+  border-color: c.$color-neutral-300 !important;
+  color: c.$color-neutral-900 !important;
+  box-shadow: sh.$shadow-01 !important;
 
   &::placeholder {
     color: c.$color-neutral-500 !important;
@@ -209,27 +212,27 @@
 
   &:focus {
     border-color: c.$color-brand-blue !important;
-    box-shadow:   0 0 0 2px rgba(43, 127, 255, 0.2) !important;
+    box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.2) !important;
   }
 }
 
 // ── PrimeNG Card ──────────────────────────────────────────────
 .p-card {
   border-radius: r.$radius-xl !important;
-  box-shadow:    sh.$shadow-01 !important;
-  background:    c.$color-surface-card !important;
+  box-shadow: sh.$shadow-01 !important;
+  background: c.$color-surface-card !important;
 
   .p-card-title {
     font-family: t.$font-family-primary !important;
-    font-size:   t.$text-2xl !important;
+    font-size: t.$text-2xl !important;
     font-weight: t.$font-weight-semibold !important;
-    color:       c.$color-brand-navy !important;
+    color: c.$color-brand-navy !important;
   }
 
   .p-card-subtitle {
     font-family: t.$font-family-primary !important;
-    font-size:   t.$text-md !important;
-    color:       c.$color-neutral-500 !important;
+    font-size: t.$text-md !important;
+    color: c.$color-neutral-500 !important;
   }
 
   .p-card-body {
@@ -240,37 +243,47 @@
 // ── PrimeNG Dialog ────────────────────────────────────────────
 .p-dialog {
   border-radius: r.$radius-3xl !important;
-  box-shadow:    sh.$shadow-04 !important;
+  box-shadow: sh.$shadow-04 !important;
+  overflow: hidden;
+  background: c.$color-surface-card !important;
 
   .p-dialog-header {
     border-radius: r.$radius-3xl r.$radius-3xl 0 0 !important;
-    padding:       s.$space-6 s.$space-6 s.$space-4 !important;
+    padding: s.$space-6 s.$space-6 s.$space-4 !important;
+    background: c.$color-surface-card;
 
     .p-dialog-title {
       font-family: t.$font-family-primary !important;
-      font-size:   t.$text-3xl !important;
+      font-size: t.$text-3xl !important;
       font-weight: t.$font-weight-semibold !important;
-      color:       c.$color-brand-navy !important;
+      color: c.$color-brand-navy !important;
     }
   }
 
   .p-dialog-content {
     padding: 0 s.$space-6 s.$space-6 !important;
+    background: c.$color-surface-card;
   }
 
   .p-dialog-footer {
-    padding:       s.$space-4 s.$space-6 s.$space-6 !important;
+    padding: s.$space-4 s.$space-6 s.$space-6 !important;
     border-radius: 0 0 r.$radius-3xl r.$radius-3xl !important;
-    gap:           s.$space-3 !important;
+    gap: s.$space-3 !important;
+    background: c.$color-surface-card;
   }
+}
+
+.p-dialog-mask {
+  background: rgba(15, 23, 42, 0.42) !important;
+  backdrop-filter: blur(6px);
 }
 
 // ── PrimeNG Toast ─────────────────────────────────────────────
 .p-toast {
   .p-toast-message {
     border-radius: r.$radius-xl !important;
-    box-shadow:    sh.$shadow-03 !important;
-    font-family:   t.$font-family-primary !important;
+    box-shadow: sh.$shadow-03 !important;
+    font-family: t.$font-family-primary !important;
 
     .p-toast-message-text {
       font-size: t.$text-md !important;
@@ -278,7 +291,7 @@
 
     .p-toast-summary {
       font-weight: t.$font-weight-semibold !important;
-      font-size:   t.$text-lg !important;
+      font-size: t.$text-lg !important;
     }
   }
 }
@@ -286,16 +299,16 @@
 // ── PrimeNG Badge / Tag ───────────────────────────────────────
 .p-badge,
 .p-tag {
-  font-family:   t.$font-family-primary !important;
-  font-size:     t.$text-base !important;
-  font-weight:   t.$font-weight-regular !important;
+  font-family: t.$font-family-primary !important;
+  font-size: t.$text-base !important;
+  font-weight: t.$font-weight-regular !important;
   border-radius: r.$radius-xs !important;
-  padding:       3px s.$space-2 !important;
+  padding: 3px s.$space-2 !important;
 }
 
 // ── PrimeNG Skeleton ──────────────────────────────────────────
 .p-skeleton {
-  background:    c.$color-neutral-100 !important;
+  background: c.$color-neutral-100 !important;
   border-radius: r.$radius-md !important;
 
   &::after {
@@ -310,9 +323,9 @@
 
 // ── PrimeNG ProgressBar ───────────────────────────────────────
 .p-progressbar {
-  background:    c.$color-neutral-100 !important;
+  background: c.$color-neutral-100 !important;
   border-radius: r.$radius-full !important;
-  height:        10px !important;
+  height: 10px !important;
 
   .p-progressbar-value {
     border-radius: r.$radius-full !important;
@@ -321,9 +334,9 @@
 
 // ── PrimeNG Chip ──────────────────────────────────────────────
 .p-chip {
-  font-family:   t.$font-family-primary !important;
-  font-size:     t.$text-base !important;
+  font-family: t.$font-family-primary !important;
+  font-size: t.$text-base !important;
   border-radius: r.$radius-full !important;
-  background:    c.$color-neutral-100 !important;
-  color:         c.$color-neutral-900 !important;
+  background: c.$color-neutral-100 !important;
+  color: c.$color-neutral-900 !important;
 }

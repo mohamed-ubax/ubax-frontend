@@ -4,6 +4,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
+      '@ubax-workspace/shared-api-types/auth-api': resolve(
+        __dirname,
+        '../../shared/api-types/src/auth-api.ts',
+      ),
       '@ubax-workspace/shared-api-types': resolve(
         __dirname,
         '../../shared/api-types/src/index.ts',

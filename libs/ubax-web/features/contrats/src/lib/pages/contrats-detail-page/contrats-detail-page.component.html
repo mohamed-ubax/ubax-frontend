@@ -1,6 +1,5 @@
 <div class="cd-page">
   @switch (viewState()) {
-
     @case ('loading') {
       <ubax-contrats-skeleton />
     }
@@ -19,110 +18,474 @@
     @case ('success') {
       @let c = contrat();
       @if (c) {
+        <div class="cd-shell">
+          <nav class="cd-breadcrumb" aria-label="Fil d'Ariane">
+            <button
+              class="cd-breadcrumb__back"
+              type="button"
+              (click)="backToContracts()"
+            >
+              <i class="pi pi-arrow-left"></i>
+            </button>
+            <a class="cd-breadcrumb__item" routerLink="/contrats"
+              >Contrats de bail</a
+            >
+            <i class="pi pi-chevron-right cd-breadcrumb__sep"></i>
+            <span class="cd-breadcrumb__item cd-breadcrumb__item--active">{{
+              (c.tenantName ?? 'Contrat') + ' · ' + propertyHeadline()
+            }}</span>
+          </nav>
 
-        <!-- Breadcrumb -->
-        <ubax-breadcrumb-nav [items]="[
-          { label: 'Contrats de bail', routerLink: '/contrats' },
-          { label: (c.tenantName ?? 'Contrat') + ' — ' + (c.propertyAddress ?? '') }
-        ]" />
-
-        <!-- Status banners -->
-        @if (c.status === 'TERMINATED') {
-          <div class="cd-banner cd-banner--terminated">
-            <i class="pi pi-times-circle"></i>
-            Ce contrat a été résilié.
-          </div>
-        }
-        @if (c.status === 'CANCELLED') {
-          <div class="cd-banner cd-banner--cancelled">
-            <i class="pi pi-ban"></i>
-            Ce contrat a été annulé.
-          </div>
-        }
-
-        <!-- Header -->
-        <div class="cd-header">
-          <div class="cd-header__left">
-            <span class="cd-header__id">Contrat #{{ shortId(c.id) }}</span>
-            <h1 class="cd-header__title">
-              {{ c.tenantName ?? '—' }}
-              <span class="cd-header__sep">·</span>
-              {{ c.propertyAddress ?? '—' }}
-            </h1>
-            <ubax-status-badge [variant]="getStatusVariant(c.status)">
-              {{ getStatusLabel(c.status) }}
-            </ubax-status-badge>
-          </div>
-
-          <div class="cd-header__actions">
-            @if (c.status === 'DRAFT') {
-              <a class="cd-btn cd-btn--ghost" [routerLink]="['modifier']">
-                <i class="pi pi-pencil"></i> Modifier
-              </a>
-              <button class="cd-btn cd-btn--primary" (click)="showSubmitDialog.set(true)">
-                <i class="pi pi-send"></i> Soumettre à signature
-              </button>
-              <button class="cd-btn cd-btn--danger" (click)="showCancelDialog.set(true)">
-                <i class="pi pi-ban"></i> Annuler
-              </button>
-            }
-            @if (c.status === 'PENDING_SIGNATURE') {
-              <button class="cd-btn cd-btn--danger" (click)="showCancelDialog.set(true)">
-                <i class="pi pi-ban"></i> Annuler
-              </button>
-            }
-            @if (c.status === 'ACTIVE') {
-              <button class="cd-btn cd-btn--danger" (click)="showTerminateDialog.set(true)">
-                <i class="pi pi-times-circle"></i> Résilier
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Sections -->
-        <div class="cd-sections">
-
-          <ubax-section-card title="Parties du contrat">
-            <ubax-detail-info-block [items]="partiesItems()" [columns]="3" />
-          </ubax-section-card>
-
-          <ubax-section-card title="Conditions financières">
-            <ubax-detail-info-block [items]="financialItems()" [columns]="2" />
-          </ubax-section-card>
-
-          @if (c.status === 'PENDING_SIGNATURE' || c.status === 'ACTIVE' || c.status === 'TERMINATED') {
-            <ubax-section-card title="Document contractuel">
-              @if (c.signedFileUrl) {
-                <div class="cd-doc">
-                  <div class="cd-doc__icon"><i class="pi pi-file-pdf"></i></div>
-                  <div class="cd-doc__info">
-                    <span class="cd-doc__name">Contrat signé — PDF</span>
-                    <span class="cd-doc__hint">Cliquez pour télécharger</span>
-                  </div>
-                  <a [href]="c.signedFileUrl" target="_blank" class="cd-btn cd-btn--primary">
-                    <i class="pi pi-download"></i> Télécharger
-                  </a>
-                </div>
-              } @else {
-                <div class="cd-doc-generating">
-                  <i class="pi pi-spin pi-spinner"></i>
-                  <span>Document en cours de génération…</span>
-                </div>
-              }
-            </ubax-section-card>
+          @if (c.status === 'TERMINATED') {
+            <div class="cd-banner cd-banner--terminated">
+              <i class="pi pi-times-circle"></i>
+              Ce contrat a été résilié. Les prochaines échéances locatives ne
+              seront plus générées.
+            </div>
+          }
+          @if (c.status === 'CANCELLED') {
+            <div class="cd-banner cd-banner--cancelled">
+              <i class="pi pi-ban"></i>
+              Ce contrat a été annulé avant sa mise en application.
+            </div>
           }
 
-          @if (c.status === 'ACTIVE') {
-            <ubax-section-card title="Historique des paiements">
-              <div class="cd-payments">
-                <p class="cd-payments__hint">Consultez tous les paiements liés à ce contrat.</p>
-                <a class="cd-btn cd-btn--ghost" [routerLink]="['/finances']" [queryParams]="{ contractId: c.id }">
-                  <i class="pi pi-credit-card"></i> Voir les paiements
-                </a>
+          <section class="cd-hero" data-ubax-motion="surface">
+            <div class="cd-hero__main">
+              <div class="cd-hero__content">
+                <div class="cd-hero__eyebrow">
+                  <span class="cd-pill cd-pill--accent">
+                    <i class="pi pi-file"></i>
+                    {{ getContractTypeLabel(c.contractType) }}
+                  </span>
+                  <span class="cd-pill cd-pill--soft">
+                    <i class="pi pi-tag"></i>
+                    {{ c.referenceNumber ?? shortId(c.id) }}
+                  </span>
+                  @if (c.paymentDay != null) {
+                    <span class="cd-pill cd-pill--soft">
+                      <i class="pi pi-calendar"></i>
+                      {{ formatPaymentDay(c.paymentDay) }}
+                    </span>
+                  }
+                </div>
+
+                <span class="cd-hero__id">Contrat #{{ shortId(c.id) }}</span>
+                <h1 class="cd-hero__title">
+                  {{ c.tenantName ?? 'Contrat de bail' }}
+                </h1>
+                <p class="cd-hero__property">{{ propertyHeadline() }}</p>
+
+                <div class="cd-hero__status-row">
+                  <ubax-status-badge [variant]="getStatusVariant(c.status)">
+                    {{ getStatusLabel(c.status) }}
+                  </ubax-status-badge>
+                  <span class="cd-hero__status-note"
+                    >Dossier contractuel et financier centralisé</span
+                  >
+                </div>
+
+                <p class="cd-hero__summary">{{ getStatusContext(c.status) }}</p>
+
+                <div class="cd-hero__meta">
+                  <span
+                    ><i class="pi pi-calendar"></i> Début
+                    {{ formatDate(c.startDate) }}</span
+                  >
+                  <span
+                    ><i class="pi pi-calendar"></i> Fin
+                    {{ formatDate(c.endDate) }}</span
+                  >
+                  <span
+                    ><i class="pi pi-user"></i>
+                    {{ c.ownerName ?? 'Propriétaire non renseigné' }}</span
+                  >
+                </div>
               </div>
-            </ubax-section-card>
-          }
 
+              <section class="cd-hero__spotlight">
+                <span class="cd-hero__spotlight-kicker">Pilotage du bail</span>
+                <h2 class="cd-hero__spotlight-title">
+                  {{ getStatusLabel(c.status) }}
+                </h2>
+                <p class="cd-hero__spotlight-desc">{{ heroSummary() }}</p>
+
+                <div class="cd-hero__spotlight-grid">
+                  <div class="cd-hero__spotlight-item">
+                    <span>Référence</span>
+                    <strong>{{ c.referenceNumber ?? shortId(c.id) }}</strong>
+                  </div>
+                  <div class="cd-hero__spotlight-item">
+                    <span>Agence</span>
+                    <strong>{{
+                      c.agencyName ?? c.createdByFullName ?? '—'
+                    }}</strong>
+                  </div>
+                  <div class="cd-hero__spotlight-item">
+                    <span>Document</span>
+                    <strong>{{
+                      c.signedFileUrl ? 'PDF disponible' : 'Génération en cours'
+                    }}</strong>
+                  </div>
+                  <div class="cd-hero__spotlight-item">
+                    <span>Préavis</span>
+                    <strong>{{
+                      c.terminationConditions ?? 'Non renseigné'
+                    }}</strong>
+                  </div>
+                </div>
+
+                <div class="cd-hero__actions">
+                  @if (c.status === 'DRAFT') {
+                    <a class="cd-btn cd-btn--ghost" [routerLink]="['modifier']">
+                      <i class="pi pi-pencil"></i> Modifier
+                    </a>
+                    <button
+                      class="cd-btn cd-btn--primary"
+                      (click)="showSubmitDialog.set(true)"
+                    >
+                      <i class="pi pi-send"></i> Soumettre à signature
+                    </button>
+                    <button
+                      class="cd-btn cd-btn--danger"
+                      (click)="showCancelDialog.set(true)"
+                    >
+                      <i class="pi pi-ban"></i> Annuler
+                    </button>
+                  }
+                  @if (c.status === 'PENDING_SIGNATURE') {
+                    <button
+                      class="cd-btn cd-btn--primary"
+                      [disabled]="!!store.activatingId()"
+                      (click)="onActivateRequest()"
+                    >
+                      @if (store.activatingId()) {
+                        <i class="pi pi-spin pi-spinner"></i> Activation…
+                      } @else {
+                        <i class="pi pi-check-circle"></i> Activer le contrat
+                      }
+                    </button>
+                    <button
+                      class="cd-btn cd-btn--danger"
+                      (click)="showCancelDialog.set(true)"
+                    >
+                      <i class="pi pi-ban"></i> Annuler
+                    </button>
+                  }
+                  @if (c.status === 'ACTIVE') {
+                    <button
+                      class="cd-btn cd-btn--danger"
+                      (click)="showTerminateDialog.set(true)"
+                    >
+                      <i class="pi pi-times-circle"></i> Résilier
+                    </button>
+                  }
+                </div>
+              </section>
+            </div>
+
+            <div class="cd-hero__metrics">
+              @for (metric of heroMetrics(); track metric.label) {
+                <article
+                  class="cd-metric"
+                  [attr.data-tone]="metric.tone ?? 'neutral'"
+                >
+                  <div class="cd-metric__icon">
+                    <i [class]="'pi ' + metric.icon"></i>
+                  </div>
+                  <div class="cd-metric__body">
+                    <span class="cd-metric__label">{{ metric.label }}</span>
+                    <strong class="cd-metric__value">{{ metric.value }}</strong>
+                    @if (metric.hint) {
+                      <span class="cd-metric__hint">{{ metric.hint }}</span>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          </section>
+
+          <div class="cd-layout">
+            <div class="cd-main">
+              <section class="cd-card" data-ubax-motion="surface">
+                <div class="cd-section-heading">
+                  <div>
+                    <span class="cd-section-heading__eyebrow">Parties</span>
+                    <h2 class="cd-section-heading__title">
+                      Parties et bien concerné
+                    </h2>
+                  </div>
+                  <p class="cd-section-heading__desc">
+                    Tous les acteurs du bail et les repères essentiels du bien
+                    regroupés au même endroit.
+                  </p>
+                </div>
+
+                <div class="cd-tile-grid cd-tile-grid--parties">
+                  @for (item of partiesItems(); track item.label) {
+                    <article
+                      class="cd-tile"
+                      [attr.data-tone]="item.tone ?? 'neutral'"
+                    >
+                      <div class="cd-tile__icon">
+                        <i [class]="'pi ' + item.icon"></i>
+                      </div>
+                      <div class="cd-tile__body">
+                        <span class="cd-tile__label">{{ item.label }}</span>
+                        <strong class="cd-tile__value">{{ item.value }}</strong>
+                        @if (item.hint) {
+                          <span class="cd-tile__hint">{{ item.hint }}</span>
+                        }
+                      </div>
+                    </article>
+                  }
+                </div>
+              </section>
+
+              <section class="cd-card" data-ubax-motion="surface">
+                <div class="cd-section-heading">
+                  <div>
+                    <span class="cd-section-heading__eyebrow">Finance</span>
+                    <h2 class="cd-section-heading__title">
+                      Structure financière du bail
+                    </h2>
+                  </div>
+                  <p class="cd-section-heading__desc">
+                    Vision instantanée du loyer, des charges, de la caution et
+                    du niveau d'engagement financier.
+                  </p>
+                </div>
+
+                <div class="cd-tile-grid cd-tile-grid--money">
+                  @for (item of financialItems(); track item.label) {
+                    <article
+                      class="cd-tile cd-tile--money"
+                      [class.cd-tile--featured]="item.featured"
+                      [attr.data-tone]="item.tone ?? 'neutral'"
+                    >
+                      <div class="cd-tile__icon">
+                        <i [class]="'pi ' + item.icon"></i>
+                      </div>
+                      <div class="cd-tile__body">
+                        <span class="cd-tile__label">{{ item.label }}</span>
+                        <strong class="cd-tile__value">{{ item.value }}</strong>
+                        @if (item.hint) {
+                          <span class="cd-tile__hint">{{ item.hint }}</span>
+                        }
+                      </div>
+                    </article>
+                  }
+                </div>
+              </section>
+
+              <section class="cd-card" data-ubax-motion="surface">
+                <div class="cd-section-heading">
+                  <div>
+                    <span class="cd-section-heading__eyebrow">Clauses</span>
+                    <h2 class="cd-section-heading__title">
+                      Clauses et échéances sensibles
+                    </h2>
+                  </div>
+                  <p class="cd-section-heading__desc">
+                    Les informations contractuelles qui impactent la vie du bail
+                    et sa sortie éventuelle.
+                  </p>
+                </div>
+
+                <div class="cd-note-grid">
+                  @for (item of clauseItems(); track item.label) {
+                    <article
+                      class="cd-note"
+                      [attr.data-tone]="item.tone ?? 'neutral'"
+                    >
+                      <div class="cd-note__icon">
+                        <i [class]="'pi ' + item.icon"></i>
+                      </div>
+                      <div class="cd-note__body">
+                        <span class="cd-note__label">{{ item.label }}</span>
+                        <p class="cd-note__value">{{ item.value }}</p>
+                        @if (item.hint) {
+                          <span class="cd-note__hint">{{ item.hint }}</span>
+                        }
+                      </div>
+                    </article>
+                  }
+                </div>
+              </section>
+
+              @if (
+                c.status === 'PENDING_SIGNATURE' ||
+                c.status === 'ACTIVE' ||
+                c.status === 'TERMINATED'
+              ) {
+                <section
+                  class="cd-card cd-card--document"
+                  data-ubax-motion="surface"
+                >
+                  <div class="cd-section-heading">
+                    <div>
+                      <span class="cd-section-heading__eyebrow">Document</span>
+                      <h2 class="cd-section-heading__title">
+                        Document contractuel
+                      </h2>
+                    </div>
+                    <p class="cd-section-heading__desc">
+                      Version exécutoire du bail et état de disponibilité du PDF
+                      contractuel.
+                    </p>
+                  </div>
+
+                  @if (c.signedFileUrl) {
+                    <div class="cd-doc">
+                      <div class="cd-doc__icon">
+                        <i class="pi pi-file-pdf"></i>
+                      </div>
+                      <div class="cd-doc__content">
+                        <span class="cd-doc__badge"
+                          >Version finale disponible</span
+                        >
+                        <h3 class="cd-doc__title">
+                          Contrat signé prêt à être consulté
+                        </h3>
+                        <p class="cd-doc__text">
+                          Le PDF officiel peut être ouvert ou partagé pour le
+                          suivi administratif du bail.
+                        </p>
+                      </div>
+                      <div class="cd-doc__actions">
+                        <button
+                          type="button"
+                          class="cd-btn cd-btn--primary"
+                          [disabled]="documentOpening()"
+                          (click)="openDocument(c.signedFileUrl)"
+                        >
+                          <i
+                            class="pi"
+                            [class.pi-eye]="!documentOpening()"
+                            [class.pi-spin]="documentOpening()"
+                            [class.pi-spinner]="documentOpening()"
+                          ></i>
+                          {{
+                            documentOpening()
+                              ? 'Ouverture…'
+                              : 'Prévisualiser le PDF'
+                          }}
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="cd-doc cd-doc--pending">
+                      <div class="cd-doc__icon">
+                        <i class="pi pi-spin pi-spinner"></i>
+                      </div>
+                      <div class="cd-doc__content">
+                        <span class="cd-doc__badge cd-doc__badge--pending"
+                          >Synchronisation en cours</span
+                        >
+                        <h3 class="cd-doc__title">
+                          Le document est en préparation
+                        </h3>
+                        <p class="cd-doc__text">
+                          Le PDF du bail sera attaché automatiquement dès que la
+                          génération sera terminée.
+                        </p>
+                      </div>
+                    </div>
+                  }
+                </section>
+              }
+
+              @if (c.status === 'ACTIVE') {
+                <section
+                  class="cd-card cd-card--payments"
+                  data-ubax-motion="surface"
+                >
+                  <div class="cd-payments">
+                    <div class="cd-payments__copy">
+                      <span class="cd-section-heading__eyebrow">Paiements</span>
+                      <h2 class="cd-section-heading__title">
+                        Historique des paiements
+                      </h2>
+                      <p class="cd-payments__hint">
+                        Accédez aux loyers, règlements et éventuels retards
+                        rattachés à ce contrat actif.
+                      </p>
+                    </div>
+
+                    <a
+                      class="cd-btn cd-btn--ghost"
+                      [routerLink]="['/finances']"
+                      [queryParams]="{ contractId: c.id }"
+                    >
+                      <i class="pi pi-credit-card"></i> Voir les paiements
+                    </a>
+                  </div>
+                </section>
+              }
+            </div>
+
+            <div class="cd-side">
+              <section class="cd-card cd-card--side" data-ubax-motion="surface">
+                <div class="cd-section-heading cd-section-heading--compact">
+                  <div>
+                    <span class="cd-section-heading__eyebrow">Synthèse</span>
+                    <h2 class="cd-section-heading__title">
+                      Vue d'ensemble du bail
+                    </h2>
+                  </div>
+                </div>
+
+                <div class="cd-summary-list">
+                  @for (row of summaryRows(); track row.label) {
+                    <div class="cd-summary-row">
+                      <span class="cd-summary-row__label">{{ row.label }}</span>
+                      <strong class="cd-summary-row__value">{{
+                        row.value
+                      }}</strong>
+                      @if (row.hint) {
+                        <span class="cd-summary-row__hint">{{ row.hint }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </section>
+
+              <section class="cd-card cd-card--side" data-ubax-motion="surface">
+                <div class="cd-section-heading cd-section-heading--compact">
+                  <div>
+                    <span class="cd-section-heading__eyebrow">Pilotage</span>
+                    <h2 class="cd-section-heading__title">État du dossier</h2>
+                  </div>
+                </div>
+
+                <div class="cd-compact-grid">
+                  @for (item of dossierItems(); track item.label) {
+                    <article
+                      class="cd-compact-tile"
+                      [attr.data-tone]="item.tone ?? 'neutral'"
+                    >
+                      <div class="cd-compact-tile__icon">
+                        <i [class]="'pi ' + item.icon"></i>
+                      </div>
+                      <div class="cd-compact-tile__body">
+                        <span class="cd-compact-tile__label">{{
+                          item.label
+                        }}</span>
+                        <strong class="cd-compact-tile__value">{{
+                          item.value
+                        }}</strong>
+                        @if (item.hint) {
+                          <span class="cd-compact-tile__hint">{{
+                            item.hint
+                          }}</span>
+                        }
+                      </div>
+                    </article>
+                  }
+                </div>
+              </section>
+            </div>
+          </div>
         </div>
       }
     }
@@ -135,20 +498,89 @@
     [contrat]="contrat()!"
     [loading]="!!store.submittingId()"
     (confirm)="onSubmitConfirm()"
-    (cancel)="showSubmitDialog.set(false)"
+    (dismissed)="showSubmitDialog.set(false)"
   />
+}
+
+@if (previewUrl()) {
+  <div
+    class="cd-preview-backdrop ubax-modal-overlay"
+    (click)="closePreview()"
+  ></div>
+  <div class="cd-preview" [class.cd-preview--fullscreen]="previewFullscreen()">
+    <header class="cd-preview__header">
+      <div class="cd-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file-pdf]="!previewIsImage()"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+
+      <div class="cd-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cd-preview__action"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="cd-preview__action"
+          (click)="togglePreviewFullscreen()"
+          [title]="
+            previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+          "
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="cd-preview__action cd-preview__action--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="cd-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="cd-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="cd-preview__iframe"
+          title="Prévisualisation du document contractuel"
+        ></iframe>
+      }
+    </div>
+  </div>
 }
 @if (showTerminateDialog()) {
   <ubax-contrat-terminate-dialog
     [loading]="!!store.terminatingId()"
     (confirm)="onTerminateConfirm($event)"
-    (cancel)="showTerminateDialog.set(false)"
+    (dismissed)="showTerminateDialog.set(false)"
   />
 }
 @if (showCancelDialog()) {
   <ubax-contrat-cancel-dialog
     [loading]="!!store.cancellingId()"
     (confirm)="onCancelConfirm()"
-    (cancel)="showCancelDialog.set(false)"
+    (dismissed)="showCancelDialog.set(false)"
   />
 }

@@ -9,12 +9,19 @@ import {
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
-import { ContratsStore, ContractStatus } from '@ubax-workspace/ubax-web-data-access';
+import {
+  ContratsStore,
+  ContractStatus,
+} from '@ubax-workspace/ubax-web-data-access';
 import {
   StatusBadgeComponent,
   type StatusVariant,
 } from '@ubax-workspace/shared-design-system';
-import { UbaxPaginatorComponent, deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
+import {
+  UbaxPaginatorComponent,
+  deriveViewState,
+  type ViewState,
+} from '@ubax-workspace/shared-ui';
 import { ContratsSkeletonComponent } from '../../components/contrats-skeleton/contrats-skeleton.component';
 
 const PAGE_SIZE = 10;
@@ -80,31 +87,43 @@ export class ContratsListPageComponent {
   readonly kpiCards = computed(() => [
     {
       label: 'Total contrats',
-      value: this.store.entities().length,
+      value: this.store.statsLoaded()
+        ? this.store.stats().total
+        : this.store.entities().length,
       icon: 'pi pi-file',
       accent: 'var(--ubax-info)',
       bg: 'var(--ubax-blue-soft)',
+      tab: 'all' as const,
     },
     {
       label: 'Actifs',
-      value: this.store.contratsActifs().length,
+      value: this.store.statsLoaded()
+        ? this.store.stats().active
+        : this.store.contratsActifs().length,
       icon: 'pi pi-check-circle',
       accent: 'var(--ubax-success)',
       bg: 'var(--ubax-success-soft)',
+      tab: 'ACTIVE' as const,
     },
     {
       label: 'En attente',
-      value: this.store.contratsEnAttente().length,
+      value: this.store.statsLoaded()
+        ? this.store.stats().pendingSignature
+        : this.store.contratsEnAttente().length,
       icon: 'pi pi-clock',
       accent: '#f97316',
       bg: '#fff7ed',
+      tab: 'PENDING_SIGNATURE' as const,
     },
     {
       label: 'Résiliés / Annulés',
-      value: this.store.contratsTermines().length,
+      value: this.store.statsLoaded()
+        ? this.store.stats().terminated + this.store.stats().cancelled
+        : this.store.contratsTermines().length,
       icon: 'pi pi-times-circle',
       accent: 'var(--ubax-danger)',
       bg: '#fef2f2',
+      tab: 'TERMINATED' as const,
     },
   ]);
 
@@ -116,7 +135,8 @@ export class ContratsListPageComponent {
       .entities()
       .filter((c) => {
         if (tab === 'all') return true;
-        if (tab === 'TERMINATED') return c.status === 'TERMINATED' || c.status === 'CANCELLED';
+        if (tab === 'TERMINATED')
+          return c.status === 'TERMINATED' || c.status === 'CANCELLED';
         return c.status === tab;
       })
       .filter((c) => {
@@ -147,9 +167,13 @@ export class ContratsListPageComponent {
   });
 
   constructor() {
-    effect(() => {
-      this.store.load!({ pageable: { page: 0, size: 100, sort: [] } });
-    }, { allowSignalWrites: true });
+    effect(
+      () => {
+        this.store.load!({ pageable: { page: 0, size: 100, sort: [] } });
+        this.store.loadStats();
+      },
+      { allowSignalWrites: true },
+    );
 
     effect(() => {
       if (!this.store.loading() && !this.hasLoaded()) {
@@ -164,9 +188,20 @@ export class ContratsListPageComponent {
     });
   }
 
-  onSearch(value: string): void { this.searchValue.set(value); }
-  onTabChange(tab: string): void { this.activeTab.set(tab as ContractStatus | 'all'); }
-  retryLoad(): void { this.hasLoaded.set(false); this.store.load!({ pageable: { page: 0, size: 100, sort: [] } }); }
+  onSearch(value: string): void {
+    this.searchValue.set(value);
+  }
+  onTabChange(tab: string): void {
+    this.activeTab.set(tab as ContractStatus | 'all');
+  }
+  onKpiClick(tab: ContractStatus | 'all'): void {
+    this.activeTab.set(tab);
+  }
+  retryLoad(): void {
+    this.hasLoaded.set(false);
+    this.store.load!({ pageable: { page: 0, size: 100, sort: [] } });
+    this.store.loadStats();
+  }
 
   getStatusLabel(status: ContractStatus | undefined): string {
     return status ? STATUS_LABELS[status] : '—';
@@ -183,6 +218,10 @@ export class ContratsListPageComponent {
 
   formatDate(date: string | null | undefined): string {
     if (!date) return 'Indéterminée';
-    return new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
   }
 }

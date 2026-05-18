@@ -11,18 +11,11 @@ import { map } from 'rxjs';
 import {
   COMMERCIAL_ICON_ASSETS,
   getReservationById,
-} from '../../reservation-commercial.data';
-
-type ReservationContactItem = {
-  readonly label: string;
-  readonly value: string;
-  readonly icon: string;
-  readonly href?: string;
-  readonly external?: boolean;};
-
-type ReservationPricingRow = {
-  readonly label: string;
-  readonly value: string;};
+} from '../../constants/reservation-commercial.constants';
+import type {
+  ReservationContactItem,
+  ReservationPricingRow,
+} from '../../types/reservation-detail.types';
 
 @Component({
   selector: 'ubax-reservation-detail-page',

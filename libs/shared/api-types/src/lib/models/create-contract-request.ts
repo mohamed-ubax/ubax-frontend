@@ -9,17 +9,32 @@ export interface CreateContractRequest {
   agencyCommissionRate?: number;
 
   /**
-   * Type de contrat
+   * Type de contrat :
+   * - `LEASE` — Bail de location (monthlyRent requis)
+   * - `SALE` — Acte de vente (salePrice requis)
+   * - `RENT_TO_OWN` — Location-vente : le locataire verse une mensualité (monthlyInstallment) qui s'impute sur le prix total du bien (salePrice) jusqu'au terme fixé par endDate
+   * - `RESERVATION` — Contrat de réservation (reservationDeposit requis)
+   * - `MANDATE` — Mandat de gestion locative
    */
-  contractType?: 'LEASE' | 'SALE' | 'RESERVATION' | 'MANDATE';
+  contractType?: 'LEASE' | 'SALE' | 'RENT_TO_OWN' | 'RESERVATION' | 'MANDATE';
 
   /**
-   * Montant de la caution (XOF)
+   * Montant de la caution (XOF) — LEASE et RENT_TO_OWN
    */
   depositAmount?: number;
 
   /**
-   * Date de fin du contrat (null = durée indéterminée)
+   * Durée du programme RENT_TO_OWN en années (1-30).
+   * Alternative à `endDate` : si les deux sont fournis, `endDate` est prioritaire.
+   * Exemple : 5 ans → endDate calculée à startDate + 5 ans
+   */
+  durationYears?: number;
+
+  /**
+   * Date de fin du contrat.
+   * - `LEASE` : null = durée indéterminée
+   * - `RENT_TO_OWN` : optionnel si `durationYears` est fourni
+   * - `SALE` / `MANDATE` : optionnel
    */
   endDate?: string;
 
@@ -27,6 +42,12 @@ export interface CreateContractRequest {
    * Charges mensuelles (XOF) — LEASE uniquement
    */
   monthlyCharges?: number;
+
+  /**
+   * Mensualité versée vers l'acquisition du bien (XOF) — **RENT_TO_OWN uniquement**.
+   * Exemple : bien à 12 000 000 XOF sur 60 mois → monthlyInstallment = 200 000 XOF
+   */
+  monthlyInstallment?: number;
 
   /**
    * Loyer mensuel hors charges (XOF) — LEASE uniquement
@@ -59,7 +80,9 @@ export interface CreateContractRequest {
   reservationDurationDays?: number;
 
   /**
-   * Prix de vente (XOF) — SALE uniquement
+   * Prix total du bien (XOF).
+   * - `SALE` : prix de cession
+   * - `RENT_TO_OWN` : valeur totale à acquérir (monthlyInstallment × durée = salePrice idéalement)
    */
   salePrice?: number;
 
@@ -74,7 +97,7 @@ export interface CreateContractRequest {
   startDate: string;
 
   /**
-   * Identifiant du dossier locataire (requis pour LEASE)
+   * Identifiant du dossier locataire (requis pour LEASE et RENT_TO_OWN)
    */
   tenantId?: string;
 

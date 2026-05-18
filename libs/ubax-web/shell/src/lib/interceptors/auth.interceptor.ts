@@ -5,7 +5,7 @@ import {
   HttpInterceptorFn,
   HttpRequest,
 } from '@angular/common/http';
-import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import {
   AuthService,
   readStoredAuthToken,

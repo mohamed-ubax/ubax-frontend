@@ -1,6 +1,6 @@
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { StrictHttpResponse } from '@ubax-workspace/shared-api-types';
+import { StrictHttpResponse } from '@ubax-workspace/shared-api-types/auth-api';
 
 // Signature générique d'une fonction ng-openapi-gen avec params obligatoires
 export type ApiHttpFn<P, R> = (

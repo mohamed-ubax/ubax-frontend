@@ -93,15 +93,21 @@ export type Ticket = {
   propertyId?: string;
   agencyId?: string;
   createdBy?: string;
+  reporterId?: string;
+  reporterName?: string;
   assignedToId?: string;
   assignedToName?: string;
+  technicienId?: string;
+  technicienProfession?: string;
   technicianName?: string;
   technicianPhone?: string;
   interventionScheduledAt?: string;
+  interventionPrice?: number;
   repairCost?: number;
   costImputedTo?: 'OWNER' | 'TENANT' | 'SHARED';
   resolutionNote?: string;
   attachments?: TicketAttachment[];
+  attachmentUrls?: string[];
   createdAt?: string;
   updatedAt?: string;
 };
@@ -225,8 +231,11 @@ function extractListFromResponse(raw: unknown): Ticket[] {
     const data = (raw as Record<string, unknown>)['data'];
     if (Array.isArray(data)) return data as Ticket[];
     if (data && typeof data === 'object') {
-      const nested = (data as Record<string, unknown>)['content'];
-      if (Array.isArray(nested)) return nested as Ticket[];
+      const dataObj = data as Record<string, unknown>;
+      const results = dataObj['results'];
+      if (Array.isArray(results)) return results as Ticket[];
+      const content = dataObj['content'];
+      if (Array.isArray(content)) return content as Ticket[];
     }
   }
   return [];

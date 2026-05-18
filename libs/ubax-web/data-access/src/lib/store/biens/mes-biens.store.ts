@@ -4,22 +4,25 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   archive,
   ApiConfiguration,
-  getById,
+  getById1 as getPropertyById,
   findAllByType,
   LaCodeListDto,
-  listMine,
-  ListMine$Params,
+  listMine1,
+  ListMine1$Params,
   Pageable,
   PropertyResponse,
   submit,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, forkJoin, map, pipe, switchMap, tap } from 'rxjs';
 
-type PropertyMineStatus = NonNullable<ListMine$Params['status']>;
+type PropertyMineStatus = NonNullable<ListMine1$Params['status']>;
 
 type BiensOverview = {
   total: number;
@@ -238,7 +241,7 @@ function countByStatus(
   rootUrl: string,
   status?: PropertyMineStatus,
 ) {
-  return listMine(http, rootUrl, {
+  return listMine1(http, rootUrl, {
     status,
     pageable: pageRequest(0, 1),
   }).pipe(map((response) => extractTotalElements(response.body)));
@@ -248,14 +251,14 @@ export const MesBiensStore = signalStore(
   { providedIn: 'root' },
   withApiResource<
     PropertyResponse,
-    typeof listMine,
-    typeof getById,
+    typeof listMine1,
+    typeof getPropertyById,
     undefined,
     undefined,
     typeof archive
   >({
-    list: listMine,
-    getById: getById,
+    list: listMine1,
+    getById: getPropertyById,
     delete: archive,
     idSelector: selectPropertyId,
     mapList: (raw: unknown) =>
@@ -312,7 +315,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     codeListsLoading: false,
-                    codeListsError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des listes de codes'),
+                    codeListsError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement des listes de codes',
+                    ),
                   }),
               }),
             ),
@@ -345,7 +351,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     overviewLoading: false,
-                    overviewError: resolveHttpErrorMessage(err, 'Erreur lors du chargement des statistiques'),
+                    overviewError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement des statistiques',
+                    ),
                   }),
               }),
             ),
@@ -392,7 +401,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     archivingPropertyIds: withoutArchivingId(state, id),
-                    archiveError: resolveHttpErrorMessage(err, 'Erreur lors de l\'archivage du bien'),
+                    archiveError: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de l'archivage du bien",
+                    ),
                   })),
               }),
             ),
@@ -435,7 +447,10 @@ export const MesBiensStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     submittingPropertyIds: withoutSubmittingId(state, id),
-                    submitError: resolveHttpErrorMessage(err, 'Erreur lors de la soumission du bien'),
+                    submitError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la soumission du bien',
+                    ),
                   })),
               }),
             ),

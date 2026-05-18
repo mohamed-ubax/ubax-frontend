@@ -15,4 +15,5 @@ export interface TenantUpdateRequest {
   idDocumentUrl?: string;
   incomeProofUrl?: string;
   monthlyIncome?: number;
+  propertyId?: string;
 }

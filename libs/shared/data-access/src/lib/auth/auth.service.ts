@@ -9,7 +9,7 @@ import {
   type LoginResponse,
   type LogoutRequest,
   type UserResponse,
-} from '@ubax-workspace/shared-api-types';
+} from '@ubax-workspace/shared-api-types/auth-api';
 import {
   catchError,
   map,
@@ -19,25 +19,11 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { UbaxRole, type UbaxScope } from './user.model';
+import { UbaxRole } from './enums/auth-roles.enums';
+import type { UbaxScope, MySubRolesResponse, ResolvedUserProfile } from './types/auth.types';
 import { persistAuthSession, readStoredRefreshToken } from './auth-session';
 
 export type { LoginRequest, LoginResponse };
-
-/**
- * Réponse de GET /sub-roles pour l'utilisateur courant.
- * Le frontend sélectionne le sous-rôle primaire via pickPrimarySubRole().
- */
-export type MySubRolesResponse = {
-  scope: UbaxScope;
-  subRoles: string[];
-};
-
-export type ResolvedUserProfile = {
-  userId: string | null;
-  scope: UbaxScope | null;
-  avatarUrl: string | null;
-};
 
 type RefreshApiResponse = LoginResponse & {
   data?: {

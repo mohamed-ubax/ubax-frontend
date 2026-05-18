@@ -11,26 +11,8 @@ import {
   DateRangePickerComponent,
   LazyChartComponent,
 } from '@ubax-workspace/shared-ui';
-
-export type Technician = {
-  id: string;
-  name: string;
-  initials: string;
-  specialty: string;
-  rating: number;
-  tickets: number;
-  phone: string;
-  color: string;};
-
-export type Ticket = {
-  id: string;
-  client: string;
-  initials: string;
-  bien: string;
-  probleme: string;
-  priorite: 'Urgent' | 'Normal';
-  date: string;
-  statut: 'Résolu' | 'En cours' | 'En attente';};
+import type { Technician, Ticket } from '../../types/dashboard-sav.types';
+export type { Technician, Ticket };
 
 @Component({
   selector: 'ubax-dashboard-sav-page',

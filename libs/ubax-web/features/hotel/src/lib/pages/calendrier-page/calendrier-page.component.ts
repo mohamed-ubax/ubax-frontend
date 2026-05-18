@@ -6,45 +6,13 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
-
-type CalReservation = {
-  id: string;
-  guest: string;
-  property: string;
-  amount: string;
-  dateRange: string;
-  start: Date;
-  end: Date;
-  image: string;
-  color: 'green' | 'blue' | 'orange';};
-
-type CalReservationTemplate = {
-  id: string;
-  guest: string;
-  property: string;
-  amount: string;
-  startDay: number;
-  durationDays: number;
-  image: string;
-  color: 'green' | 'blue' | 'orange';};
-
-type CalendarDay = {
-  date: Date;
-  dayNumber: number;
-  isCurrentMonth: boolean;
-  isToday: boolean;};
-
-type CalendarWeekEvent = CalReservation & {
-  startCol: number;
-  endCol: number;
-  row: number;
-  spanDays: number;};
-
-type WeekWithEvents = {
-  days: CalendarDay[];
-  events: CalendarWeekEvent[];
-  rowCount: number;
-  minHeight: number;};
+import type {
+  CalReservation,
+  CalReservationTemplate,
+  CalendarDay,
+  CalendarWeekEvent,
+  WeekWithEvents,
+} from '../../types/calendrier.types';
 
 @Component({
   selector: 'ubax-calendrier-page',

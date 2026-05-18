@@ -19,97 +19,14 @@ import {
   TicketPriority,
   TicketStatus,
 } from '@ubax-workspace/ubax-web-data-access';
-
-// re-export so detail page can import from here
-export type { Ticket, TicketCategory, TicketPriority, TicketStatus };
-
-// ─── Types locaux ─────────────────────────────────────────────────────────────
-
-type SelectOption<T> = { label: string; value: T };
-
-type KpiCard = {
-  label: string;
-  value: number;
-  accent: string;
-  bg: string;
-  icon: string;
-};
-
-const PAGE_SIZE = 10;
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-export const STATUS_META: Record<
-  TicketStatus,
-  { label: string; color: string; bg: string }
-> = {
-  OPEN: { label: 'Ouvert', color: 'var(--ubax-text-muted)', bg: '#f0f2f6' },
-  IN_ANALYSIS: {
-    label: 'En analyse',
-    color: 'var(--ubax-info)',
-    bg: 'var(--ubax-blue-soft)',
-  },
-  TECHNICIAN_SENT: {
-    label: 'Technicien envoyé',
-    color: 'var(--ubax-lilac)',
-    bg: 'var(--ubax-lilac-soft)',
-  },
-  RESOLVED: {
-    label: 'Résolu',
-    color: 'var(--ubax-success)',
-    bg: 'var(--ubax-success-soft)',
-  },
-  CLOSED: { label: 'Clôturé', color: '#fff', bg: '#1a3047' },
-  CANCELLED: {
-    label: 'Annulé',
-    color: 'var(--ubax-danger)',
-    bg: 'var(--ubax-danger-soft)',
-  },
-};
-
-export const PRIORITY_META: Record<
-  TicketPriority,
-  { label: string; color: string; bg: string }
-> = {
-  LOW: { label: 'Faible', color: 'var(--ubax-text-muted)', bg: '#f0f2f6' },
-  NORMAL: {
-    label: 'Normale',
-    color: 'var(--ubax-info)',
-    bg: 'var(--ubax-blue-soft)',
-  },
-  HIGH: {
-    label: 'Haute',
-    color: 'var(--ubax-accent)',
-    bg: 'var(--ubax-peach-soft)',
-  },
-  URGENT: {
-    label: 'Urgente',
-    color: 'var(--ubax-danger)',
-    bg: 'var(--ubax-danger-soft)',
-  },
-};
-
-export const CATEGORY_LABELS = {
-  LEAK: 'Fuite',
-  ELECTRICAL: 'Électricité',
-  LOCK: 'Serrurerie',
-  PLUMBING: 'Plomberie',
-  APPLIANCE: 'Électroménager',
-  STRUCTURE: 'Structure',
-  PEST: 'Nuisibles',
-  COMMON_AREA: 'Parties communes',
-  OTHER: 'Autre',
-} as const;
-
-function normalizeText(v: string): string {
-  return v
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-// ─── Composant ────────────────────────────────────────────────────────────────
+import type { KpiCard, SelectOption } from '../../types/tickets-list-page.types';
+import {
+  CATEGORY_LABELS,
+  normalizeText,
+  PAGE_SIZE,
+  PRIORITY_META,
+  STATUS_META,
+} from '../../constants/tickets-list-page.constants';
 
 @Component({
   selector: 'ubax-tickets-list-page',
@@ -130,7 +47,6 @@ export class TicketsListPageComponent {
   private readonly document = inject(DOCUMENT);
   readonly store = inject(TicketingStore);
 
-  // ── Signaux UI ──────────────────────────────────────────────────────────────
   readonly searchTerm = signal('');
   readonly filterStatus = signal<TicketStatus | 'all'>('all');
   readonly filterPriority = signal<TicketPriority | 'all'>('all');
@@ -139,7 +55,6 @@ export class TicketsListPageComponent {
   readonly currentPage = signal(1);
   private readonly hasLoaded = signal(false);
 
-  // ── Options de filtres ──────────────────────────────────────────────────────
   readonly statusOptions: SelectOption<TicketStatus | 'all'>[] = [
     { label: 'Tous les statuts', value: 'all' },
     { label: 'Ouvert', value: 'OPEN' },
@@ -169,7 +84,6 @@ export class TicketsListPageComponent {
     ],
   );
 
-  // ── ViewState ───────────────────────────────────────────────────────────────
   readonly viewState = computed(() => {
     if (this.store.loading() && !this.hasLoaded()) return 'loading';
     if (this.store.error()) return 'error';
@@ -182,36 +96,34 @@ export class TicketsListPageComponent {
     return 'success';
   });
 
-  // ── KPI cards ───────────────────────────────────────────────────────────────
   readonly kpiCards = computed<KpiCard[]>(() => {
-    const all = this.store.entities();
+    const counts = this.ticketCounts();
+
     return [
       {
         label: 'Tickets ouverts',
-        value: all.filter((t) => t.status === 'OPEN').length,
+        value: counts.open,
         accent: 'var(--ubax-info)',
         bg: 'var(--ubax-blue-soft)',
         icon: 'pi pi-inbox',
       },
       {
         label: 'En cours',
-        value: all.filter(
-          (t) => t.status === 'IN_ANALYSIS' || t.status === 'TECHNICIAN_SENT',
-        ).length,
+        value: counts.inProgress,
         accent: 'var(--ubax-lilac)',
         bg: 'var(--ubax-lilac-soft)',
         icon: 'pi pi-wrench',
       },
       {
         label: 'Résolus',
-        value: all.filter((t) => t.status === 'RESOLVED').length,
+        value: counts.resolved,
         accent: 'var(--ubax-success)',
         bg: 'var(--ubax-success-soft)',
         icon: 'pi pi-check-circle',
       },
       {
         label: 'Urgents',
-        value: all.filter((t) => t.priority === 'URGENT').length,
+        value: counts.urgent,
         accent: 'var(--ubax-danger)',
         bg: 'var(--ubax-danger-soft)',
         icon: 'pi pi-bolt',
@@ -219,7 +131,28 @@ export class TicketsListPageComponent {
     ];
   });
 
-  // ── Filtrage ────────────────────────────────────────────────────────────────
+  readonly ticketCounts = computed(() => {
+    const tickets = this.store.entities();
+
+    return {
+      total: tickets.length,
+      open: tickets.filter((ticket) => ticket.status === 'OPEN').length,
+      inAnalysis: tickets.filter((ticket) => ticket.status === 'IN_ANALYSIS')
+        .length,
+      technicianSent: tickets.filter(
+        (ticket) => ticket.status === 'TECHNICIAN_SENT',
+      ).length,
+      resolved: tickets.filter((ticket) => ticket.status === 'RESOLVED').length,
+      closed: tickets.filter((ticket) => ticket.status === 'CLOSED').length,
+      urgent: tickets.filter((ticket) => ticket.priority === 'URGENT').length,
+      inProgress: tickets.filter(
+        (ticket) =>
+          ticket.status === 'IN_ANALYSIS' ||
+          ticket.status === 'TECHNICIAN_SENT',
+      ).length,
+    };
+  });
+
   readonly filteredTickets = computed<Ticket[]>(() => {
     const query = normalizeText(this.searchTerm());
     const status = this.filterStatus();
@@ -280,7 +213,6 @@ export class TicketsListPageComponent {
     return `${start}–${end} sur ${total} tickets`;
   });
 
-  // ── Helpers template ────────────────────────────────────────────────────────
   readonly statusMeta = STATUS_META;
   readonly priorityMeta = PRIORITY_META;
   readonly categoryLabels = CATEGORY_LABELS;
@@ -300,19 +232,16 @@ export class TicketsListPageComponent {
       this.store.loadTicketPriorities();
     }
 
-    // Chargement initial
     effect(() => {
       this.loadTickets();
     });
 
-    // Marquer hasLoaded
     effect(() => {
       if (!this.store.loading() && !this.hasLoaded()) {
         this.hasLoaded.set(true);
       }
     });
 
-    // Reset page sur changement de filtre
     effect(() => {
       this.searchTerm();
       this.filterStatus();
@@ -381,10 +310,6 @@ export class TicketsListPageComponent {
     this.router.navigate(['/tickets', ticket.id]);
   }
 
-  goToCreate(): void {
-    this.router.navigate(['/tickets/creer']);
-  }
-
   exportCsv(): void {
     const tickets = this.filteredTickets();
     if (!tickets.length) return;
@@ -407,7 +332,7 @@ export class TicketsListPageComponent {
       )
       .join('\n');
 
-    const blob = new Blob([`\uFEFF${rows}`], {
+    const blob = new Blob(['﻿' + rows], {
       type: 'text/csv;charset=utf-8;',
     });
     const url = win.URL.createObjectURL(blob);

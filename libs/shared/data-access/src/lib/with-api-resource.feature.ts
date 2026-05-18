@@ -13,11 +13,12 @@ import {
   addEntity,
   removeEntity,
   setAllEntities,
+  setEntity,
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
+import { ApiConfiguration } from '@ubax-workspace/shared-api-types/auth-api';
 import { exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
 import {
   API_ERROR_MESSAGES,
@@ -341,7 +342,7 @@ export function withApiResource<
                     ),
                     tapResponse({
                       next: (item: TItem) =>
-                        patchState(store, addEntity(item, entityOpts), {
+                        patchState(store, setEntity(item, entityOpts), {
                           loading: false,
                           selectedId: selectId(item),
                         }),

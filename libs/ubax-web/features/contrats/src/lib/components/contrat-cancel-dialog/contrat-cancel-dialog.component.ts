@@ -15,5 +15,5 @@ import {
 export class ContratCancelDialogComponent {
   readonly loading = input<boolean>(false);
   readonly confirm = output<void>();
-  readonly cancel = output<void>();
+  readonly dismissed = output<void>();
 }

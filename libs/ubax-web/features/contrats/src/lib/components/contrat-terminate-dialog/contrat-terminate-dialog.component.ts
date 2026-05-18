@@ -18,7 +18,7 @@ import { FormsModule } from '@angular/forms';
 export class ContratTerminateDialogComponent {
   readonly loading = input<boolean>(false);
   readonly confirm = output<string>();
-  readonly cancel = output<void>();
+  readonly dismissed = output<void>();
 
   readonly reason = signal('');
 

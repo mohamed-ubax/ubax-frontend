@@ -9,67 +9,20 @@ import { RouterLink } from '@angular/router';
 import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
-
-type RoomType = 'chambre' | 'conference' | 'evenement';
-type DiscountType = 'none' | '5' | '10' | '15' | '30' | 'promo';
-type ExtraOption = {
-  id: string;
-  label: string;
-  selected: boolean;
-  custom?: boolean;
-};
-type PaymentMethod = {
-  label: string;
-  value: string;
-  logoSrc?: string;
-  badge?: string;
-};
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
-const MONTH_NAMES = [
-  'Janvier',
-  'Fevrier',
-  'Mars',
-  'Avril',
-  'Mai',
-  'Juin',
-  'Juillet',
-  'Aout',
-  'Septembre',
-  'Octobre',
-  'Novembre',
-  'Decembre',
-];
-const DEFAULT_EXTRA_OPTIONS = [
-  'Petit dejeuner inclus',
-  'Navette aeroport',
-  'Lit supplementaire',
-  'Room service',
-  'Coffre-fort',
-  'Television ecran plat',
-  'Bureau de travail',
-  'Service de menage quotidien',
-  'Piscine',
-  'Mini-bar',
-  'Check in anticipe',
-  'Salle de bain privee',
-  'Baignoire',
-  'Parking gratuit',
-];
-
-function createDate(year: number, month: number, day: number): Date {
-  return new Date(year, month - 1, day);
-}
-
-function startOfDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function addDays(date: Date, days: number): Date {
-  const next = startOfDay(date);
-  next.setDate(next.getDate() + days);
-  return next;
-}
+import type {
+  RoomType,
+  DiscountType,
+  ExtraOption,
+  PaymentMethod,
+} from '../../types/ajouter-reservation.types';
+import {
+  DAY_IN_MS,
+  MONTH_NAMES,
+  DEFAULT_EXTRA_OPTIONS,
+  createDate,
+  startOfDay,
+  addDays,
+} from '../../constants/ajouter-reservation.constants';
 
 @Component({
   selector: 'ubax-ajouter-reservation-page',

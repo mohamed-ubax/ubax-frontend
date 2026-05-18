@@ -11,33 +11,12 @@ import { FormsModule } from '@angular/forms';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { HotelClientsStore } from '@ubax-workspace/ubax-web-data-access';
 import { SelectModule } from 'primeng/select';
-
-type StatusFilter = 'all' | 'active' | 'inactive';
-type VerifFilter = 'all' | 'verified' | 'unverified';
-
-type KpiCard = {
-  label: string;
-  value: number;
-  accent: string;
-  bg: string;
-  icon: string;
-};
-
-const PAGE_SIZE = 10;
-
-function normalizeText(v: string): string {
-  return v
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-function initials(firstName?: string, lastName?: string): string {
-  const f = firstName?.[0]?.toUpperCase() ?? '';
-  const l = lastName?.[0]?.toUpperCase() ?? '';
-  return f + l || '?';
-}
+import type { StatusFilter, VerifFilter, KpiCard } from '../../types/clients-list.types';
+import {
+  PAGE_SIZE,
+  normalizeText,
+  initials,
+} from '../../constants/clients-list.constants';
 
 @Component({
   selector: 'ubax-clients-list-page',

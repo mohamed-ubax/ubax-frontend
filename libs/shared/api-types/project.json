@@ -8,27 +8,21 @@
     "type:api-types"
   ],
   "targets": {
-    "fetch-swagger": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node scripts/fetch-swagger.mjs",
-        "cwd": "{workspaceRoot}"
-      }
-    },
     "generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "ng-openapi-gen --config ng-openapi-gen.json",
+        "commands": [
+          "node scripts/sanitize-openapi-spec.mjs",
+          "node scripts/prepare-api-types-output.mjs",
+          "ng-openapi-gen --config ng-openapi-gen.json"
+        ],
         "cwd": "{workspaceRoot}"
       }
     },
     "sync": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "node scripts/fetch-swagger.mjs",
-          "ng-openapi-gen --config ng-openapi-gen.json"
-        ],
+        "command": "node scripts/sync-api-types.mjs",
         "cwd": "{workspaceRoot}"
       }
     },

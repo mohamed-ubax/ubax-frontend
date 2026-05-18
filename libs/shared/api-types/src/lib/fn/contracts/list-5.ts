@@ -12,6 +12,7 @@ import { Pageable } from '../../models/pageable';
 
 export interface List5$Params {
   status?: 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'TERMINATED' | 'EXPIRED' | 'CANCELLED';
+  search?: string;
   pageable: Pageable;
 }
 
@@ -19,6 +20,7 @@ export function list5(http: HttpClient, rootUrl: string, params: List5$Params, c
   const rb = new RequestBuilder(rootUrl, list5.PATH, 'get');
   if (params) {
     rb.query('status', params.status, {});
+    rb.query('search', params.search, {});
     rb.query('pageable', params.pageable, {});
   }
 

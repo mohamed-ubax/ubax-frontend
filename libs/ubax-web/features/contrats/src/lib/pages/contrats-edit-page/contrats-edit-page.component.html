@@ -1,12 +1,20 @@
 <div class="ce-page">
-
-  <ubax-breadcrumb-nav [items]="[
-    { label: 'Contrats de bail', routerLink: '/contrats' },
-    { label: 'Modifier le contrat' }
-  ]" />
+  <nav class="ce-breadcrumb" aria-label="Fil d'Ariane">
+    <button
+      class="ce-breadcrumb__back"
+      type="button"
+      (click)="backToContracts()"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <a class="ce-breadcrumb__item" routerLink="/contrats">Contrats de bail</a>
+    <i class="pi pi-chevron-right ce-breadcrumb__sep"></i>
+    <span class="ce-breadcrumb__item ce-breadcrumb__item--active"
+      >Modifier le contrat</span
+    >
+  </nav>
 
   @switch (viewState()) {
-
     @case ('loading') {
       <ubax-contrats-skeleton />
     }
@@ -15,8 +23,12 @@
       <div class="ce-state">
         <i class="pi pi-exclamation-triangle ce-state__icon"></i>
         <p class="ce-state__title">Contrat introuvable</p>
-        <p class="ce-state__desc">Ce contrat n'existe pas ou ne peut pas être modifié.</p>
-        <a class="ce-btn ce-btn--ghost" routerLink="/contrats">Retour à la liste</a>
+        <p class="ce-state__desc">
+          Ce contrat n'existe pas ou ne peut pas être modifié.
+        </p>
+        <a class="ce-btn ce-btn--ghost" routerLink="/contrats"
+          >Retour à la liste</a
+        >
       </div>
     }
 
@@ -36,23 +48,100 @@
 
       <div class="ce-card">
         <form [formGroup]="editForm">
-
           <div class="ce-section">
             <h3 class="ce-section__title">Bien &amp; Propriétaire</h3>
             <div class="ce-form-row">
               <div class="ce-field">
-                <label class="ce-label">Identifiant du bien <span class="req">*</span></label>
-                <input class="ce-input" type="text" formControlName="propertyId" placeholder="UUID du bien" />
-                @if (editForm.get('propertyId')?.invalid && editForm.get('propertyId')?.touched) {
-                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Requis</span>
+                <span class="ce-label" id="contract-edit-property-label"
+                  >Bien <span class="req">*</span></span
+                >
+                <p-select
+                  inputId="contract-edit-property"
+                  [options]="propertyOptions()"
+                  formControlName="propertyId"
+                  optionLabel="label"
+                  optionValue="value"
+                  [filter]="true"
+                  filterBy="label,meta"
+                  filterPlaceholder="Rechercher un bien..."
+                  [placeholder]="
+                    biensStore.loading()
+                      ? 'Chargement des biens...'
+                      : 'Selectionnez un bien'
+                  "
+                  appendTo="body"
+                  styleClass="ce-rich-select"
+                  panelStyleClass="ce-rich-select-panel"
+                  ariaLabel="Bien"
+                >
+                  <ng-template #selectedItem let-option>
+                    <div class="ce-select-trigger">
+                      <span class="ce-select-trigger__icon" aria-hidden="true">
+                        <i [class]="'pi ' + (option?.icon || 'pi-home')"></i>
+                      </span>
+                      <span class="ce-select-trigger__text">
+                        <span class="ce-select-trigger__label">{{
+                          option?.label || 'Selectionnez un bien'
+                        }}</span>
+                        <span class="ce-select-trigger__meta">{{
+                          option?.meta || 'Biens eligibles sans contrat actif'
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #item let-option>
+                    <div class="ce-option-card">
+                      <span class="ce-option-card__icon" aria-hidden="true">
+                        <i [class]="'pi ' + option.icon"></i>
+                      </span>
+                      <span class="ce-option-card__text">
+                        <span class="ce-option-card__label">{{
+                          option.label
+                        }}</span>
+                        <span class="ce-option-card__meta">{{
+                          option.meta
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </ng-template>
+                </p-select>
+                @if (
+                  editForm.get('propertyId')?.invalid &&
+                  editForm.get('propertyId')?.touched
+                ) {
+                  <span class="ce-error"
+                    ><i class="pi pi-exclamation-circle"></i> Requis</span
+                  >
                 }
               </div>
               <div class="ce-field">
-                <label class="ce-label">Identifiant du propriétaire <span class="req">*</span></label>
-                <input class="ce-input" type="text" formControlName="ownerId" placeholder="UUID du propriétaire" />
-                @if (editForm.get('ownerId')?.invalid && editForm.get('ownerId')?.touched) {
-                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Requis</span>
+                <span class="ce-label"
+                  >Propriétaire <span class="req">*</span></span
+                >
+                <input
+                  class="ce-input"
+                  id="contract-edit-owner"
+                  type="text"
+                  [value]="ownerDisplayName()"
+                  aria-label="Propriétaire"
+                  readonly
+                />
+                @if (
+                  editForm.get('ownerId')?.invalid &&
+                  editForm.get('ownerId')?.touched
+                ) {
+                  <span class="ce-error"
+                    ><i class="pi pi-exclamation-circle"></i> Requis</span
+                  >
                 }
+                <span class="ce-hint"
+                  ><i class="pi pi-info-circle"></i> Prérempli avec
+                  l'utilisateur connecté. Son identifiant est conservé dans le
+                  payload.</span
+                >
               </div>
             </div>
           </div>
@@ -60,9 +149,66 @@
           <div class="ce-section">
             <h3 class="ce-section__title">Locataire</h3>
             <div class="ce-field">
-              <label class="ce-label">Identifiant du locataire</label>
-              <input class="ce-input" type="text" formControlName="tenantId" placeholder="UUID du locataire (QUALIFIED)" />
-              <span class="ce-hint"><i class="pi pi-info-circle"></i> Seuls les locataires qualifiés sont acceptés.</span>
+              <span class="ce-label" id="contract-edit-tenant-label"
+                >Locataire</span
+              >
+              <p-select
+                inputId="contract-edit-tenant"
+                [options]="tenantOptions()"
+                formControlName="tenantId"
+                optionLabel="label"
+                optionValue="value"
+                [filter]="true"
+                filterBy="label,meta"
+                filterPlaceholder="Rechercher un locataire..."
+                [placeholder]="
+                  locationStore.loading()
+                    ? 'Chargement des locataires...'
+                    : 'Selectionnez un locataire qualifie'
+                "
+                appendTo="body"
+                styleClass="ce-rich-select"
+                panelStyleClass="ce-rich-select-panel"
+                ariaLabel="Locataire"
+              >
+                <ng-template #selectedItem let-option>
+                  <div class="ce-select-trigger">
+                    <span class="ce-select-trigger__icon" aria-hidden="true">
+                      <i [class]="'pi ' + (option?.icon || 'pi-user')"></i>
+                    </span>
+                    <span class="ce-select-trigger__text">
+                      <span class="ce-select-trigger__label">{{
+                        option?.label || 'Selectionnez un locataire qualifie'
+                      }}</span>
+                      <span class="ce-select-trigger__meta">{{
+                        option?.meta || 'Dossiers KYC qualifies uniquement'
+                      }}</span>
+                    </span>
+                  </div>
+                </ng-template>
+                <ng-template #item let-option>
+                  <div class="ce-option-card">
+                    <span class="ce-option-card__icon" aria-hidden="true">
+                      <i [class]="'pi ' + option.icon"></i>
+                    </span>
+                    <span class="ce-option-card__text">
+                      <span class="ce-option-card__label">{{
+                        option.label
+                      }}</span>
+                      <span class="ce-option-card__meta">{{
+                        option.meta
+                      }}</span>
+                    </span>
+                  </div>
+                </ng-template>
+                <ng-template #dropdownicon>
+                  <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                </ng-template>
+              </p-select>
+              <span class="ce-hint"
+                ><i class="pi pi-info-circle"></i> Seuls les locataires
+                qualifiés sont acceptés.</span
+              >
             </div>
           </div>
 
@@ -70,33 +216,192 @@
             <h3 class="ce-section__title">Conditions financières</h3>
             <div class="ce-form-row">
               <div class="ce-field">
-                <label class="ce-label">Loyer mensuel (FCFA) <span class="req">*</span></label>
-                <input class="ce-input" type="number" formControlName="monthlyRent" min="1" />
-                @if (editForm.get('monthlyRent')?.invalid && editForm.get('monthlyRent')?.touched) {
-                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Loyer requis &gt; 0</span>
-                }
+                <span class="ce-label" id="contract-edit-type-label"
+                  >Type de contrat <span class="req">*</span></span
+                >
+                <p-select
+                  inputId="contract-edit-type"
+                  [options]="contractTypeOptions"
+                  formControlName="contractType"
+                  optionLabel="label"
+                  optionValue="value"
+                  appendTo="body"
+                  styleClass="ce-rich-select ce-rich-select--compact"
+                  panelStyleClass="ce-rich-select-panel"
+                  ariaLabel="Type de contrat"
+                >
+                  <ng-template #selectedItem let-option>
+                    <div class="ce-select-trigger ce-select-trigger--compact">
+                      <span class="ce-select-trigger__icon" aria-hidden="true">
+                        <i [class]="'pi ' + (option?.icon || 'pi-file')"></i>
+                      </span>
+                      <span class="ce-select-trigger__text">
+                        <span class="ce-select-trigger__label">{{
+                          option?.label || 'Type de contrat'
+                        }}</span>
+                        <span class="ce-select-trigger__meta">{{
+                          option?.meta || 'Choisissez la nature du contrat'
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #item let-option>
+                    <div class="ce-option-card">
+                      <span class="ce-option-card__icon" aria-hidden="true">
+                        <i [class]="'pi ' + option.icon"></i>
+                      </span>
+                      <span class="ce-option-card__text">
+                        <span class="ce-option-card__label">{{
+                          option.label
+                        }}</span>
+                        <span class="ce-option-card__meta">{{
+                          option.meta
+                        }}</span>
+                      </span>
+                    </div>
+                  </ng-template>
+                  <ng-template #dropdownicon>
+                    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                  </ng-template>
+                </p-select>
               </div>
               <div class="ce-field">
-                <label class="ce-label">Caution (FCFA) <span class="req">*</span></label>
-                <input class="ce-input" type="number" formControlName="depositAmount" min="0" />
-                @if (editForm.get('depositAmount')?.invalid && editForm.get('depositAmount')?.touched) {
-                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Caution requise ≥ 0</span>
+                <span class="ce-label"
+                  >Jour de prelevement mensuel <span class="req">*</span></span
+                >
+                <input
+                  class="ce-input"
+                  type="number"
+                  min="1"
+                  max="28"
+                  formControlName="paymentDay"
+                  aria-label="Jour de prelevement mensuel"
+                />
+                @if (
+                  editForm.get('paymentDay')?.invalid &&
+                  editForm.get('paymentDay')?.touched
+                ) {
+                  <span class="ce-error"
+                    ><i class="pi pi-exclamation-circle"></i> Valeur attendue
+                    entre 1 et 28</span
+                  >
                 }
               </div>
             </div>
             <div class="ce-form-row">
               <div class="ce-field">
-                <label class="ce-label">Date de début <span class="req">*</span></label>
-                <input class="ce-input" type="date" formControlName="startDate" />
-                @if (editForm.get('startDate')?.invalid && editForm.get('startDate')?.touched) {
-                  <span class="ce-error"><i class="pi pi-exclamation-circle"></i> Requis</span>
+                <span class="ce-label"
+                  >Loyer mensuel (FCFA) <span class="req">*</span></span
+                >
+                <input
+                  class="ce-input"
+                  id="contract-edit-rent"
+                  type="number"
+                  formControlName="monthlyRent"
+                  min="1"
+                  aria-label="Loyer mensuel (FCFA)"
+                />
+                @if (
+                  editForm.get('monthlyRent')?.invalid &&
+                  editForm.get('monthlyRent')?.touched
+                ) {
+                  <span class="ce-error"
+                    ><i class="pi pi-exclamation-circle"></i> Loyer requis &gt;
+                    0</span
+                  >
                 }
               </div>
               <div class="ce-field">
-                <label class="ce-label">Date de fin</label>
-                <input class="ce-input" type="date" formControlName="endDate" [attr.disabled]="openEnded() ? true : null" />
+                <span class="ce-label"
+                  >Caution (FCFA) <span class="req">*</span></span
+                >
+                <input
+                  class="ce-input"
+                  id="contract-edit-deposit"
+                  type="number"
+                  formControlName="depositAmount"
+                  min="0"
+                  aria-label="Caution (FCFA)"
+                />
+                @if (
+                  editForm.get('depositAmount')?.invalid &&
+                  editForm.get('depositAmount')?.touched
+                ) {
+                  <span class="ce-error"
+                    ><i class="pi pi-exclamation-circle"></i> Caution requise ≥
+                    0</span
+                  >
+                }
+              </div>
+            </div>
+            <div class="ce-form-row">
+              <div class="ce-field">
+                <label class="ce-label" for="contract-edit-start-date"
+                  >Date de début <span class="req">*</span></label
+                >
+                <p-datepicker
+                  inputId="contract-edit-start-date"
+                  formControlName="startDate"
+                  [showIcon]="true"
+                  [showButtonBar]="true"
+                  [readonlyInput]="true"
+                  iconDisplay="button"
+                  dateFormat="dd/mm/yy"
+                  appendTo="body"
+                  styleClass="ce-rich-datepicker"
+                  inputStyleClass="ce-rich-datepicker__input"
+                  panelStyleClass="ce-rich-datepicker-panel"
+                  todayButtonStyleClass="ce-rich-datepicker-panel__today"
+                  clearButtonStyleClass="ce-rich-datepicker-panel__clear"
+                  placeholder="Selectionnez une date de debut"
+                  ariaLabel="Date de début"
+                >
+                  <ng-template #triggericon>
+                    <i class="pi pi-calendar" aria-hidden="true"></i>
+                  </ng-template>
+                </p-datepicker>
+                @if (
+                  editForm.get('startDate')?.invalid &&
+                  editForm.get('startDate')?.touched
+                ) {
+                  <span class="ce-error"
+                    ><i class="pi pi-exclamation-circle"></i> Requis</span
+                  >
+                }
+              </div>
+              <div class="ce-field">
+                <label class="ce-label" for="contract-edit-end-date"
+                  >Date de fin</label
+                >
+                <p-datepicker
+                  inputId="contract-edit-end-date"
+                  formControlName="endDate"
+                  [showIcon]="true"
+                  [showButtonBar]="true"
+                  [readonlyInput]="true"
+                  iconDisplay="button"
+                  dateFormat="dd/mm/yy"
+                  appendTo="body"
+                  styleClass="ce-rich-datepicker"
+                  inputStyleClass="ce-rich-datepicker__input"
+                  panelStyleClass="ce-rich-datepicker-panel"
+                  todayButtonStyleClass="ce-rich-datepicker-panel__today"
+                  clearButtonStyleClass="ce-rich-datepicker-panel__clear"
+                  placeholder="Selectionnez une date de fin"
+                  ariaLabel="Date de fin"
+                  [disabled]="openEnded()"
+                >
+                  <ng-template #triggericon>
+                    <i class="pi pi-calendar" aria-hidden="true"></i>
+                  </ng-template>
+                </p-datepicker>
                 <label class="ce-checkbox-row">
-                  <input type="checkbox" [ngModel]="openEnded()" (ngModelChange)="openEnded.set($event)" [ngModelOptions]="{standalone: true}" />
+                  <input
+                    type="checkbox"
+                    [ngModel]="openEnded()"
+                    (ngModelChange)="openEnded.set($event)"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
                   <span>Bail à durée indéterminée</span>
                 </label>
               </div>
@@ -114,7 +419,11 @@
             <a class="ce-btn ce-btn--ghost" [routerLink]="['..']">
               <i class="pi pi-times"></i> Annuler
             </a>
-            <button class="ce-btn ce-btn--primary" (click)="save()" [disabled]="store.saving()">
+            <button
+              class="ce-btn ce-btn--primary"
+              (click)="save()"
+              [disabled]="store.saving()"
+            >
               @if (store.saving()) {
                 <i class="pi pi-spin pi-spinner"></i> Enregistrement…
               } @else {
@@ -122,7 +431,6 @@
               }
             </button>
           </div>
-
         </form>
       </div>
     }

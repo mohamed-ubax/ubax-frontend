@@ -14,7 +14,7 @@ export interface CreateTechnicienRequest {
   phone?: string;
 
   /**
-   * Valeur de la code-list TICKET_CATEGORY
+   * Valeur de la code-list TECHNICIEN_PROFESSION
    */
   profession?: string;
 }

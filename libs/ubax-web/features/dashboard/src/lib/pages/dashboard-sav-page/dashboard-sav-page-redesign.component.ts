@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   HostListener,
   inject,
   OnDestroy,
@@ -11,6 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { DatePickerModule } from 'primeng/datepicker';
+import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import {
   LazyChartComponent,
@@ -18,685 +20,56 @@ import {
   UiFormSelectComponent,
   UbaxPaginatorComponent,
 } from '@ubax-workspace/shared-ui';
-import { AuthStore } from '@ubax-workspace/ubax-web-data-access';
-
-type DashboardSavStatusTone = 'open' | 'progress' | 'success';
-type DashboardSavPriorityTone = 'urgent' | 'normal';
-type DashboardSavNotificationTone = 'alert' | 'ticket' | 'success' | 'water';
-type DashboardSavTicketStatusFilter = 'all' | DashboardSavStatusTone;
-type DashboardSavTicketPriorityFilter = 'all' | DashboardSavPriorityTone;
-type DashboardSavInterventionPeriod = 'current-month' | 'quarter' | 'year';
-type DashboardSavStarTone = 'full' | 'half';
-
-type DashboardSavSelectOption<TValue> = {
-  readonly label: string;
-  readonly value: TValue;};
-
-type DashboardSavTicketFilterState = {
-  readonly status: DashboardSavTicketStatusFilter;
-  readonly priority: DashboardSavTicketPriorityFilter;
-  readonly issue: string;
-  readonly createdAt: Date | null;};
-
-type DashboardSavTicket = {
-  readonly id: string;
-  readonly client: string;
-  readonly avatar: string;
-  readonly property: string;
-  readonly issue: string;
-  readonly issueKey: string;
-  readonly priority: string;
-  readonly priorityTone: DashboardSavPriorityTone;
-  readonly createdAtLabel: string;
-  readonly createdAtDate: Date;
-  readonly status: string;
-  readonly statusTone: DashboardSavStatusTone;};
-
-type DashboardSavSummaryMetric = {
-  readonly label: string;
-  readonly value: number;
-  readonly background: string;
-  readonly accent: string;
-  readonly orbSrc: string;
-  readonly iconSrc: string;};
-
-type DashboardSavNotificationItem = {
-  readonly id: string;
-  readonly title: string;
-  readonly property: string;
-  readonly ticketId: string;
-  readonly time: string;
-  readonly createdAt: Date;
-  readonly tone: DashboardSavNotificationTone;
-  readonly iconBackground: string;
-  readonly iconSrc: string;
-  readonly accent: string;};
-
-type DashboardSavInterventionSnapshot = {
-  readonly pending: number;
-  readonly progress: number;
-  readonly completed: number;};
-
-type DashboardSavTechnician = {
-  readonly id: string;
-  readonly name: string;
-  readonly initials: string;
-  readonly specialty: string;
-  readonly rating: number;
-  readonly tickets: number;
-  readonly phone: string;
-  readonly color: string;
-  readonly image: string;};
-
-type DashboardSavTechIntervention = {
-  readonly id: string;
-  readonly client: string;
-  readonly avatar: string;
-  readonly property: string;
-  readonly city: string;
-  readonly issue: string;
-  readonly status: string;
-  readonly date: string;};
-
-type DashboardSavTechnicianDetail = {
-  readonly joinedOn: string;
-  readonly contractStatus: string;
-  readonly employeeCode: string;
-  readonly resolvedTickets: string;
-  readonly totalPaid: string;
-  readonly history: readonly DashboardSavTechIntervention[];};
-
-type DashboardSavSelectedTechnicianDetail = DashboardSavTechnician & DashboardSavTechnicianDetail & {
-  readonly profileImage: string;};
-
-type DashboardSavCountryCodeOption = {
-  readonly iso: string;
-  readonly dialCode: string;
-  readonly display: string;};
-
-type DashboardSavScrollLockState = {
-  readonly htmlOverflow: string;
-  readonly bodyOverflow: string;
-  readonly bodyTouchAction: string;
-  readonly bodyPosition: string;
-  readonly bodyTop: string;
-  readonly bodyWidth: string;
-  readonly bodyHadOverlayClass: boolean;
-  readonly scrollY: number;};
-
-const SHARED_ASSET_ROOT = '/shared/demandes';
-const DASHBOARD_SAV_ASSET_ROOT = '/dashboard-sav';
-const TECHNICIAN_AVATAR_COUNT = 8;
-const DEFAULT_VISIBLE_TECHNICIANS = 5;
-const DEFAULT_VISIBLE_NOTIFICATIONS = 5;
-const TICKETS_PER_PAGE = 4;
-const PHASE_TRANSITION_DURATION_MS = 260;
-const ADD_TECH_CLOSE_DURATION_MS = 220;
-
-const DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
-
-const replaceText = (
-  value: string,
-  pattern: RegExp,
-  replacement: string,
-): string =>
-  (
-    String.prototype.replace as (
-      this: string,
-      searchValue: RegExp,
-      replaceValue: string,
-    ) => string
-  ).call(value, pattern, replacement);
-
-const STATUS_LABELS: Record<DashboardSavStatusTone, string> = {
-  open: 'Ouvert',
-  progress: 'en cours',
-  success: 'Résolu',
-};
-
-const KPI_TONES = {
-  open: {
-    accent: 'var(--ubax-info)',
-    background: 'var(--ubax-info-soft-card)',
-    orbSrc: dashboardSavAsset('kpi/orb-open.webp'),
-    iconSrc: dashboardSavAsset('kpi/icon-open.webp'),
-  },
-  progress: {
-    accent: 'var(--ubax-accent)',
-    background: 'var(--ubax-accent-soft-card)',
-    orbSrc: dashboardSavAsset('kpi/orb-progress.webp'),
-    iconSrc: dashboardSavAsset('kpi/icon-progress.webp'),
-  },
-  success: {
-    accent: 'var(--ubax-success)',
-    background: 'var(--ubax-success-soft-card)',
-    orbSrc: dashboardSavAsset('kpi/orb-done.webp'),
-    iconSrc: dashboardSavAsset('kpi/icon-done.webp'),
-  },
-  urgent: {
-    accent: 'var(--ubax-danger)',
-    background: 'var(--ubax-danger-soft-card)',
-    orbSrc: dashboardSavAsset('kpi/orb-urgent.webp'),
-    iconSrc: dashboardSavAsset('kpi/icon-urgent.webp'),
-  },
-} as const;
-
-const INTERVENTION_SNAPSHOTS: Record<
+import {
+  AuthStore,
+  Technician,
+  TechniciansStore,
+} from '@ubax-workspace/ubax-web-data-access';
+import type {
+  DashboardSavCountryCodeOption,
   DashboardSavInterventionPeriod,
-  DashboardSavInterventionSnapshot
-> = {
-  'current-month': {
-    pending: 12,
-    progress: 21,
-    completed: 15,
-  },
-  quarter: {
-    pending: 18,
-    progress: 27,
-    completed: 24,
-  },
-  year: {
-    pending: 41,
-    progress: 66,
-    completed: 58,
-  },
-};
-
-const STAR_ASSET_BY_TONE: Record<DashboardSavStarTone, string> = {
-  full: dashboardSavAsset('technicians/star-full.webp'),
-  half: dashboardSavAsset('technicians/star-half.webp'),
-};
-
-const COUNTRY_CODE_OPTIONS: readonly DashboardSavCountryCodeOption[] = [
-  { iso: 'CI', dialCode: '225', display: 'CI +225' },
-  { iso: 'SN', dialCode: '221', display: 'SN +221' },
-  { iso: 'BJ', dialCode: '229', display: 'BJ +229' },
-  { iso: 'TG', dialCode: '228', display: 'TG +228' },
-  { iso: 'ML', dialCode: '223', display: 'ML +223' },
-];
-
-const TICKET_CLIENTS = [
-  {
-    name: 'Konan Olivier',
-    avatar: dashboardSavAsset('tickets/avatar-01.webp'),
-  },
-  {
-    name: 'Awa Bakayoko',
-    avatar: dashboardSavAsset('tickets/avatar-02.webp'),
-  },
-  {
-    name: 'Moussa Traoré',
-    avatar: dashboardSavAsset('tickets/avatar-03.webp'),
-  },
-  {
-    name: 'Mariam Coulibaly',
-    avatar: dashboardSavAsset('tickets/avatar-04.webp'),
-  },
-] as const;
-
-const TICKET_PROPERTIES = [
-  'résidence Plateau - App 12',
-  'Résidence Plateau - App 22',
-  'Immeuble kalia',
-  'Villa Riviera',
-  'Les Jardins de Cocody',
-  'Résidence Palm Club - App 06',
-] as const;
-
-const TICKET_ISSUES = [
-  'Fuite d’eau',
-  'Problème électrique',
-  'Porte cassée',
-  'Climatisation défaillante',
-  'Serrure bloquée',
-  'Panne ascenseur',
-] as const;
-
-const BASE_TECHNICIANS: readonly DashboardSavTechnician[] = [
-  {
-    id: 'UBX-TECH-001',
-    name: 'Mamadou Diallo',
-    initials: 'MD',
-    specialty: 'Électricité bâtiment',
-    rating: 4.5,
-    tickets: 2,
-    phone: '+225 07 58 42 19 63',
-    color: '#1a3047',
-    image: dashboardSavAsset('technicians/avatar-05.webp'),
-  },
-  {
-    id: 'UBX-TECH-002',
-    name: 'Serge Kouamé',
-    initials: 'SK',
-    specialty: 'Plomberie & sanitaires',
-    rating: 4.5,
-    tickets: 0,
-    phone: '+225 07 58 42 19 63',
-    color: '#e87d1e',
-    image: dashboardSavAsset('technicians/avatar-03.webp'),
-  },
-  {
-    id: 'UBX-TECH-003',
-    name: 'Alain Yao',
-    initials: 'AY',
-    specialty: 'Maintenance générale',
-    rating: 4.5,
-    tickets: 2,
-    phone: '+225 07 58 42 19 63',
-    color: '#16b55b',
-    image: dashboardSavAsset('technicians/avatar-04.webp'),
-  },
-  {
-    id: 'UBX-TECH-004',
-    name: 'Patrick N’Guessan',
-    initials: 'PN',
-    specialty: 'Peintre',
-    rating: 4.5,
-    tickets: 1,
-    phone: '+225 07 58 42 19 63',
-    color: '#e87d1e',
-    image: dashboardSavAsset('technicians/avatar-02.webp'),
-  },
-  {
-    id: 'UBX-TECH-005',
-    name: 'Moussa Ba',
-    initials: 'MB',
-    specialty: 'Électricité bâtiment',
-    rating: 4.5,
-    tickets: 2,
-    phone: '+225 07 58 42 19 63',
-    color: '#1a3047',
-    image: dashboardSavAsset('technicians/avatar-06.webp'),
-  },
-  {
-    id: 'UBX-TECH-006',
-    name: 'Kofi Mensah',
-    initials: 'KM',
-    specialty: 'Climatisation',
-    rating: 4,
-    tickets: 3,
-    phone: '+225 07 58 42 19 63',
-    color: '#e87d1e',
-    image: dashboardSavAsset('technicians/avatar-07.webp'),
-  },
-  {
-    id: 'UBX-TECH-007',
-    name: 'Adjoua Traoré',
-    initials: 'AT',
-    specialty: 'Menuiserie',
-    rating: 4.5,
-    tickets: 1,
-    phone: '+225 07 58 42 19 63',
-    color: '#16b55b',
-    image: dashboardSavAsset('technicians/avatar-08.webp'),
-  },
-  {
-    id: 'UBX-TECH-008',
-    name: 'Boubacar Diallo',
-    initials: 'BD',
-    specialty: 'Maintenance générale',
-    rating: 4,
-    tickets: 2,
-    phone: '+225 07 58 42 19 63',
-    color: '#1a3047',
-    image: dashboardSavAsset('technicians/avatar-01.webp'),
-  },
-] as const;
-
-const TECH_HISTORY: readonly DashboardSavTechIntervention[] = [
-  {
-    id: 'UBX-TK-0012',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-01.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-30',
-    client: 'Kouamé Patrick',
-    avatar: dashboardSavAsset('detail/history-avatar-02.webp'),
-    property: 'résidence Plateau - App 13',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-0014',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-03.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-0028',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-04.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-0056',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-05.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-0072',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-06.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-0072',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-07.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-0082',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-08.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-  {
-    id: 'UBX-TK-0012',
-    client: 'Koffi Didier',
-    avatar: dashboardSavAsset('detail/history-avatar-09.webp'),
-    property: 'résidence Plateau - App 12',
-    city: 'Abidjan, Riviera',
-    issue: 'Problème électrique',
-    status: 'Résolu',
-    date: '05/03/2026',
-  },
-];
-
-const DEFAULT_TECHNICIAN_DETAIL: DashboardSavTechnicianDetail = {
-  joinedOn: '12 Janvier 2025',
-  contractStatus: 'Actif',
-  employeeCode: 'UBX-LOC-0245',
-  resolvedTickets: '09',
-  totalPaid: '178 000 FCFA',
-  history: TECH_HISTORY,
-};
-
-const BASE_NOTIFICATIONS: readonly DashboardSavNotificationItem[] = [
-  {
-    id: 'notification-01',
-    title: 'Fuite d’eau',
-    property: 'Résidence Plateau - App 12',
-    ticketId: 'UBX-TK-0012',
-    time: 'Il y’a 5 minutes',
-    createdAt: createMockDate(5),
-    tone: 'alert',
-    iconBackground: dashboardSavAsset('notifications/bg-alert.webp'),
-    iconSrc: dashboardSavAsset('notifications/icon-alert.webp'),
-    accent: 'var(--ubax-danger)',
-  },
-  {
-    id: 'notification-02',
-    title: 'Porte cassée',
-    property: 'Villa Riviera',
-    ticketId: 'UBX-TK-0052',
-    time: 'Il y’a 12 minutes',
-    createdAt: createMockDate(5),
-    tone: 'ticket',
-    iconBackground: dashboardSavAsset('notifications/bg-ticket.webp'),
-    iconSrc: dashboardSavAsset('notifications/icon-ticket.webp'),
-    accent: 'var(--ubax-info)',
-  },
-  {
-    id: 'notification-03',
-    title: 'Problème électrique',
-    property: 'Immeuble kalia',
-    ticketId: 'UBX-TK-0015',
-    time: 'Il y’a 15 minutes',
-    createdAt: createMockDate(6),
-    tone: 'success',
-    iconBackground: dashboardSavAsset('notifications/bg-success.webp'),
-    iconSrc: dashboardSavAsset('notifications/icon-success.webp'),
-    accent: 'var(--ubax-success-emphasis)',
-  },
-  {
-    id: 'notification-04',
-    title: 'Fuite d’eau',
-    property: 'Résidence Plateau - App 22',
-    ticketId: 'UBX-TK-0172',
-    time: 'Il y’a 17 minutes',
-    createdAt: createMockDate(7),
-    tone: 'water',
-    iconBackground: dashboardSavAsset('notifications/bg-water.webp'),
-    iconSrc: dashboardSavAsset('notifications/icon-ticket.webp'),
-    accent: 'var(--ubax-info)',
-  },
-  {
-    id: 'notification-05',
-    title: 'Problème électrique',
-    property: 'Immeuble kalia',
-    ticketId: 'UBX-TK-0015',
-    time: 'Il y’a 25 minutes',
-    createdAt: createMockDate(8),
-    tone: 'success',
-    iconBackground: dashboardSavAsset('notifications/bg-success.webp'),
-    iconSrc: dashboardSavAsset('notifications/icon-success.webp'),
-    accent: 'var(--ubax-success-emphasis)',
-  },
-  {
-    id: 'notification-06',
-    title: 'Fuite d’eau',
-    property: 'Résidence Palm Club - App 06',
-    ticketId: 'UBX-TK-0111',
-    time: 'Il y’a 39 minutes',
-    createdAt: createMockDate(9),
-    tone: 'alert',
-    iconBackground: dashboardSavAsset('notifications/bg-alert.webp'),
-    iconSrc: dashboardSavAsset('notifications/icon-alert.webp'),
-    accent: 'var(--ubax-danger)',
-  },
-];
-
-function dashboardSavAsset(file: string): string {
-  return `${DASHBOARD_SAV_ASSET_ROOT}/${file}`;
-}
-
-function createMockDate(day: number): Date {
-  return new Date(2026, 2, day, 9, 0, 0, 0);
-}
-
-function formatMockDate(date: Date): string {
-  return DATE_FORMATTER.format(date);
-}
-
-function normalizeText(value: string): string {
-  return replaceText(value.normalize('NFD'), /[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-function isSameCalendarDay(left: Date, right: Date): boolean {
-  return (
-    left.getFullYear() === right.getFullYear() &&
-    left.getMonth() === right.getMonth() &&
-    left.getDate() === right.getDate()
-  );
-}
-
-function cloneDate(date: Date | null): Date | null {
-  return date ? new Date(date) : null;
-}
-
-function createDefaultTicketFilters(): DashboardSavTicketFilterState {
-  return {
-    status: 'all',
-    priority: 'all',
-    issue: 'all',
-    createdAt: null,
-  };
-}
-
-function buildTicket(
-  sequence: number,
-  statusTone: DashboardSavStatusTone,
-  priorityTone: DashboardSavPriorityTone,
-  issue: string,
-  client: (typeof TICKET_CLIENTS)[number],
-  property: string,
-  day: number,
-): DashboardSavTicket {
-  const createdAtDate = createMockDate(day);
-
-  return {
-    id: `UBX-TK-${String(sequence).padStart(4, '0')}`,
-    client: client.name,
-    avatar: client.avatar,
-    property,
-    issue,
-    issueKey: issue,
-    priority: priorityTone === 'urgent' ? 'Urgent' : 'normal',
-    priorityTone,
-    createdAtLabel: formatMockDate(createdAtDate),
-    createdAtDate,
-    status: STATUS_LABELS[statusTone],
-    statusTone,
-  };
-}
-
-const BASE_TICKETS: readonly DashboardSavTicket[] = [
-  {
-    id: 'UBX-TK-0012',
-    client: 'Konan Olivier',
-    avatar: dashboardSavAsset('tickets/avatar-01.webp'),
-    property: 'résidence Plateau - App 12',
-    issue: 'Fuite d’eau',
-    issueKey: 'Fuite d’eau',
-    priority: 'Urgent',
-    priorityTone: 'urgent',
-    createdAtLabel: '05/03/2026',
-    createdAtDate: createMockDate(5),
-    status: 'Résolu',
-    statusTone: 'success',
-  },
-  {
-    id: 'UBX-TK-0012-B',
-    client: 'Awa Bakayoko',
-    avatar: dashboardSavAsset('tickets/avatar-02.webp'),
-    property: 'résidence Plateau - App 12',
-    issue: 'Problème électrique',
-    issueKey: 'Problème électrique',
-    priority: 'Urgent',
-    priorityTone: 'urgent',
-    createdAtLabel: '05/03/2026',
-    createdAtDate: createMockDate(5),
-    status: 'Résolu',
-    statusTone: 'success',
-  },
-  {
-    id: 'UBX-TK-0012-C',
-    client: 'Moussa Traoré',
-    avatar: dashboardSavAsset('tickets/avatar-03.webp'),
-    property: 'résidence Plateau - App 12',
-    issue: 'Fuite d’eau',
-    issueKey: 'Fuite d’eau',
-    priority: 'normal',
-    priorityTone: 'normal',
-    createdAtLabel: '05/03/2026',
-    createdAtDate: createMockDate(5),
-    status: 'en cours',
-    statusTone: 'progress',
-  },
-  {
-    id: 'UBX-TK-0012-D',
-    client: 'Mariam Coulibaly',
-    avatar: dashboardSavAsset('tickets/avatar-04.webp'),
-    property: 'résidence Plateau - App 12',
-    issue: 'Porte cassée',
-    issueKey: 'Porte cassée',
-    priority: 'Urgent',
-    priorityTone: 'urgent',
-    createdAtLabel: '05/03/2026',
-    createdAtDate: createMockDate(5),
-    status: 'Résolu',
-    statusTone: 'success',
-  },
-];
-
-const OPEN_TICKETS: readonly DashboardSavTicket[] = Array.from(
-  { length: 22 },
-  (_, index) =>
-    buildTicket(
-      100 + index,
-      'open',
-      index < 2 ? 'urgent' : 'normal',
-      TICKET_ISSUES[index % TICKET_ISSUES.length],
-      TICKET_CLIENTS[index % TICKET_CLIENTS.length],
-      TICKET_PROPERTIES[index % TICKET_PROPERTIES.length],
-      6 + (index % 12),
-    ),
-);
-
-const PROGRESS_TICKETS: readonly DashboardSavTicket[] = Array.from(
-  { length: 4 },
-  (_, index) =>
-    buildTicket(
-      200 + index,
-      'progress',
-      'normal',
-      TICKET_ISSUES[(index + 2) % TICKET_ISSUES.length],
-      TICKET_CLIENTS[index % TICKET_CLIENTS.length],
-      TICKET_PROPERTIES[(index + 1) % TICKET_PROPERTIES.length],
-      10 + index,
-    ),
-);
-
-const SUCCESS_TICKETS: readonly DashboardSavTicket[] = Array.from(
-  { length: 12 },
-  (_, index) =>
-    buildTicket(
-      300 + index,
-      'success',
-      index % 3 === 0 ? 'urgent' : 'normal',
-      TICKET_ISSUES[(index + 1) % TICKET_ISSUES.length],
-      TICKET_CLIENTS[(index + 1) % TICKET_CLIENTS.length],
-      TICKET_PROPERTIES[(index + 2) % TICKET_PROPERTIES.length],
-      2 + (index % 11),
-    ),
-);
-
-const ALL_TICKETS: readonly DashboardSavTicket[] = [
-  ...BASE_TICKETS,
-  ...OPEN_TICKETS,
-  ...PROGRESS_TICKETS,
-  ...SUCCESS_TICKETS,
-];
+  DashboardSavNotificationItem,
+  DashboardSavScrollLockState,
+  DashboardSavSelectedTechnicianDetail,
+  DashboardSavSelectOption,
+  DashboardSavStarTone,
+  DashboardSavStatusTone,
+  DashboardSavSummaryMetric,
+  DashboardSavTechIntervention,
+  DashboardSavTechnician,
+  DashboardSavTechMutationKind,
+  DashboardSavTicket,
+  DashboardSavTicketFilterState,
+  DashboardSavTicketPriorityFilter,
+  DashboardSavTicketStatusFilter,
+} from '../../types/dashboard-sav-redesign.types';
+import {
+  ADD_TECH_CLOSE_DURATION_MS,
+  ALL_TICKETS,
+  BASE_NOTIFICATIONS,
+  BASE_TECHNICIANS,
+  cloneDate,
+  composeSavE164Phone,
+  COUNTRY_CODE_OPTIONS,
+  createDefaultTicketFilters,
+  DATE_FORMATTER,
+  DEFAULT_TECHNICIAN_DETAIL,
+  DEFAULT_VISIBLE_NOTIFICATIONS,
+  DEFAULT_VISIBLE_TECHNICIANS,
+  DASHBOARD_SAV_ASSET_ROOT,
+  EMAIL_PATTERN,
+  getDashboardSavAsset,
+  isSameCalendarDay,
+  INTERVENTION_SNAPSHOTS,
+  KPI_TONES,
+  normalizeText,
+  PHASE_TRANSITION_DURATION_MS,
+  sanitizeSavPhoneDraft,
+  SHARED_ASSET_ROOT,
+  STAR_ASSET_BY_TONE,
+  TICKET_ISSUES,
+  TICKETS_PER_PAGE,
+} from '../../constants/dashboard-sav-redesign.constants';
 
 @Component({
   selector: 'ubax-dashboard-sav-page',
@@ -717,9 +90,12 @@ const ALL_TICKETS: readonly DashboardSavTicket[] = [
 })
 export class DashboardSavPageComponent implements OnDestroy {
   readonly authStore = inject(AuthStore);
+  readonly techniciansStore = inject(TechniciansStore);
   private readonly document = inject(DOCUMENT);
+  private readonly messageService = inject(MessageService);
   private closeAddTechTimeout: ReturnType<typeof setTimeout> | null = null;
   private scrollLockState: DashboardSavScrollLockState | null = null;
+  private lastTechnicianError: string | null = null;
 
   readonly sharedIcons = {
     search: `${SHARED_ASSET_ROOT}/filter-search.webp`,
@@ -728,21 +104,19 @@ export class DashboardSavPageComponent implements OnDestroy {
     chevron: `${SHARED_ASSET_ROOT}/select-chevron.webp`,
   };
 
-  readonly heroAddTechnicianIcon = dashboardSavAsset(
-    'hero/add-technician.webp',
-  );
-  readonly technicianTicketIcon = dashboardSavAsset('technicians/ticket.webp');
-  readonly technicianPhoneIcon = dashboardSavAsset('technicians/phone.webp');
+  readonly heroAddTechnicianIcon = getDashboardSavAsset('hero/add-technician.webp');
+  readonly technicianTicketIcon = getDashboardSavAsset('technicians/ticket.webp');
+  readonly technicianPhoneIcon = getDashboardSavAsset('technicians/phone.webp');
   readonly detailIcons = {
-    back: dashboardSavAsset('detail/back-arrow.webp'),
-    phone: dashboardSavAsset('detail/phone.webp'),
-    identifier: dashboardSavAsset('detail/id-card.webp'),
-    date: dashboardSavAsset('detail/date.webp'),
-    edit: dashboardSavAsset('detail/edit.webp'),
-    historySearch: dashboardSavAsset('detail/history-search.webp'),
-    historyStatus: dashboardSavAsset('detail/history-status.webp'),
-    resolved: dashboardSavAsset('detail/stat-resolved.webp'),
-    paid: dashboardSavAsset('detail/stat-paid.webp'),
+    back: getDashboardSavAsset('detail/back-arrow.webp'),
+    phone: getDashboardSavAsset('detail/phone.webp'),
+    identifier: getDashboardSavAsset('detail/id-card.webp'),
+    date: getDashboardSavAsset('detail/date.webp'),
+    edit: getDashboardSavAsset('detail/edit.webp'),
+    historySearch: getDashboardSavAsset('detail/history-search.webp'),
+    historyStatus: getDashboardSavAsset('detail/history-status.webp'),
+    resolved: getDashboardSavAsset('detail/stat-resolved.webp'),
+    paid: getDashboardSavAsset('detail/stat-paid.webp'),
   } as const;
 
   readonly toolbarSearchTerm = signal('');
@@ -754,6 +128,7 @@ export class DashboardSavPageComponent implements OnDestroy {
   readonly showAllNotifications = signal(false);
   readonly showAllTechnicians = signal(false);
   readonly selectedTechnicianId = signal<string | null>(null);
+  readonly editingTechnicianId = signal<string | null>(null);
   readonly transitioningTechnicianId = signal<string | null>(null);
   readonly transitionPhase = signal<
     'idle' | 'to-directory' | 'to-dashboard' | 'to-detail' | 'from-detail'
@@ -770,9 +145,13 @@ export class DashboardSavPageComponent implements OnDestroy {
     createDefaultTicketFilters(),
   );
 
-  readonly technicians = signal<DashboardSavTechnician[]>([
-    ...BASE_TECHNICIANS,
-  ]);
+  readonly technicians = computed<DashboardSavTechnician[]>(() =>
+    this.techniciansStore
+      .entities()
+      .map((technician, index) =>
+        this.toDashboardTechnician(technician, index),
+      ),
+  );
 
   readonly selectedTechnician = computed(() => {
     const technicianId = this.selectedTechnicianId();
@@ -798,7 +177,12 @@ export class DashboardSavPageComponent implements OnDestroy {
       return {
         ...technician,
         ...DEFAULT_TECHNICIAN_DETAIL,
-        profileImage: dashboardSavAsset('detail/profile-avatar.webp'),
+        joinedOn: technician.createdAt
+          ? DATE_FORMATTER.format(new Date(technician.createdAt))
+          : DEFAULT_TECHNICIAN_DETAIL.joinedOn,
+        contractStatus: technician.available ? 'Disponible' : 'Indisponible',
+        employeeCode: technician.id,
+        profileImage: technician.image,
       };
     });
 
@@ -834,26 +218,56 @@ export class DashboardSavPageComponent implements OnDestroy {
   readonly newPrenom = signal('');
   readonly newNom = signal('');
   readonly newPhone = signal('');
+  readonly newEmail = signal('');
+  readonly newAddress = signal('');
   readonly newSpecialty = signal('Plomberie & sanitaires');
-  readonly newPayment = signal('Espèces');
   readonly newPhotoUrl = signal<string | null>(null);
+  readonly newAvatarFile = signal<File | null>(null);
+  readonly pendingTechMutation = signal<DashboardSavTechMutationKind | null>(
+    null,
+  );
   readonly selectedCountryCode = signal<DashboardSavCountryCodeOption>(
     COUNTRY_CODE_OPTIONS[0],
   );
   private photoObjectUrl: string | null = null;
+  private techMutationRequestStarted = false;
 
   readonly countryCodeOptions = [...COUNTRY_CODE_OPTIONS];
 
-  readonly specialties = [
-    'Plomberie & sanitaires',
-    'Électricité bâtiment',
-    'Maintenance générale',
-    'Peinture',
-    'Menuiserie',
-    'Climatisation',
-  ];
+  readonly specialtyOptions = computed(() => {
+    const options = this.techniciansStore
+      .professionOptions()
+      .map((option) => option.label);
 
-  readonly paymentMethods = ['Espèces', 'Virement', 'Mobile Money', 'Chèque'];
+    return options.length > 0
+      ? options
+      : [
+          'Plomberie & sanitaires',
+          'Électricité bâtiment',
+          'Maintenance générale',
+          'Peinture',
+          'Menuiserie',
+          'Climatisation',
+        ];
+  });
+
+  readonly addTechModalTitle = computed(() =>
+    this.editingTechnicianId()
+      ? 'Modifier un technicien'
+      : 'Ajouter un technicien',
+  );
+
+  readonly addTechSaveLabel = computed(() =>
+    this.editingTechnicianId() ? 'Mettre à jour' : 'Enregistrer',
+  );
+
+  readonly addTechSubmitLabel = computed(() => {
+    if (!this.techniciansStore.saving()) {
+      return this.addTechSaveLabel();
+    }
+
+    return this.editingTechnicianId() ? 'Mise à jour...' : 'Enregistrement...';
+  });
 
   readonly addTechModalVisible = computed(
     () => this.addTechOpen() || this.addTechClosing(),
@@ -865,11 +279,127 @@ export class DashboardSavPageComponent implements OnDestroy {
     return `${prenomInitial}${nomInitial}`.trim().toUpperCase() || 'T';
   });
 
+  readonly addTechPhotoHint = computed(() => {
+    return this.newAvatarFile()
+      ? 'Photo prête à être envoyée.'
+      : 'Photo facultative.';
+  });
+
+  readonly phonePlaceholder = computed(
+    () => this.selectedCountryCode().sampleNational,
+  );
+
+  readonly phoneError = computed(() => {
+    const phoneDraft = this.newPhone().trim();
+
+    if (!phoneDraft) {
+      return null;
+    }
+
+    return this.formatPhoneValue(phoneDraft)
+      ? null
+      : `Numéro invalide. Exemple attendu: ${this.selectedCountryCode().sampleE164}`;
+  });
+
+  readonly emailError = computed(() => {
+    const email = this.newEmail().trim();
+
+    if (!email) {
+      return null;
+    }
+
+    return EMAIL_PATTERN.test(email)
+      ? null
+      : 'Renseignez une adresse e-mail valide.';
+  });
+
   readonly canSaveTech = computed(() => {
     return Boolean(
-      this.newPrenom().trim() && this.newNom().trim() && this.newPhone().trim(),
+      this.newPrenom().trim() &&
+        this.newNom().trim() &&
+        this.newPhone().trim() &&
+        !this.phoneError() &&
+        !this.emailError(),
     );
   });
+
+  constructor() {
+    if (
+      this.techniciansStore.entities().length === 0 &&
+      !this.techniciansStore.loading()
+    ) {
+      this.techniciansStore.load?.(this.techniciansStore.defaultListParams());
+    }
+
+    if (
+      this.techniciansStore.professionOptions().length === 0 &&
+      !this.techniciansStore.professionCodeListLoading()
+    ) {
+      this.techniciansStore.loadProfessions();
+    }
+
+    effect(() => {
+      const selectedTechnicianId = this.selectedTechnicianId();
+
+      if (
+        selectedTechnicianId &&
+        !this.technicians().some(
+          (technician) => technician.id === selectedTechnicianId,
+        )
+      ) {
+        this.selectedTechnicianId.set(null);
+      }
+    });
+
+    effect(() => {
+      const error = this.techniciansStore.error();
+
+      if (error && error !== this.lastTechnicianError) {
+        this.showToast('error', error);
+        this.lastTechnicianError = error;
+        return;
+      }
+
+      if (!error) {
+        this.lastTechnicianError = null;
+      }
+    });
+
+    effect(() => {
+      const pendingMutation = this.pendingTechMutation();
+      const saving = this.techniciansStore.saving();
+      const error = this.techniciansStore.error();
+
+      if (!pendingMutation) {
+        this.techMutationRequestStarted = false;
+        return;
+      }
+
+      if (saving) {
+        this.techMutationRequestStarted = true;
+        return;
+      }
+
+      if (!this.techMutationRequestStarted) {
+        return;
+      }
+
+      this.techMutationRequestStarted = false;
+      this.pendingTechMutation.set(null);
+
+      if (error) {
+        return;
+      }
+
+      this.showToast(
+        'success',
+        pendingMutation === 'update'
+          ? 'Technicien mis à jour.'
+          : 'Technicien ajouté.',
+      );
+      this.closeAddTech();
+    });
+  }
 
   readonly userFullName = computed(() => {
     const user = this.authStore.user();
@@ -1043,7 +573,7 @@ export class DashboardSavPageComponent implements OnDestroy {
         ...KPI_TONES.open,
       },
       {
-        label: 'En cours d’intervention',
+        label: "En cours d'intervention",
         value: tickets.filter((ticket) => ticket.statusTone === 'progress')
           .length,
         ...KPI_TONES.progress,
@@ -1206,6 +736,8 @@ export class DashboardSavPageComponent implements OnDestroy {
   readonly starIcons = computed(() => STAR_ASSET_BY_TONE);
 
   openAddTech(): void {
+    this.editingTechnicianId.set(null);
+    this.resetAddTechDraft();
     this.clearAddTechCloseTimeout();
 
     if (this.addTechOpen() && !this.addTechClosing()) {
@@ -1233,7 +765,7 @@ export class DashboardSavPageComponent implements OnDestroy {
   }
 
   closeAddTech(): void {
-    if (!this.addTechOpen()) {
+    if (!this.addTechOpen() || this.techniciansStore.saving()) {
       return;
     }
 
@@ -1283,45 +815,210 @@ export class DashboardSavPageComponent implements OnDestroy {
     }
 
     this.photoObjectUrl = defaultView.URL.createObjectURL(file);
+    this.newAvatarFile.set(file);
     this.newPhotoUrl.set(this.photoObjectUrl);
+  }
+
+  onPhoneDraftChange(value: string): void {
+    this.newPhone.set(
+      sanitizeSavPhoneDraft(value, this.selectedCountryCode().dialCode),
+    );
+  }
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const nextValue = input?.value ?? '';
+
+    this.onPhoneDraftChange(nextValue);
+
+    if (input && input.value !== this.newPhone()) {
+      input.value = this.newPhone();
+    }
+  }
+
+  onPhoneBeforeInput(event: InputEvent): void {
+    if (event.isComposing) {
+      return;
+    }
+
+    const inputType = event.inputType ?? '';
+
+    if (
+      inputType.startsWith('delete') ||
+      inputType === 'insertFromPaste' ||
+      inputType === 'insertReplacementText'
+    ) {
+      return;
+    }
+
+    if (event.data && /\D/.test(event.data)) {
+      event.preventDefault();
+    }
+  }
+
+  onPhoneKeyDown(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
+    const allowedKeys = new Set([
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowUp',
+      'ArrowDown',
+      'Tab',
+      'Home',
+      'End',
+      'Enter',
+    ]);
+
+    if (allowedKeys.has(event.key)) {
+      return;
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  onPhonePaste(event: ClipboardEvent): void {
+    event.preventDefault();
+
+    const pastedText = event.clipboardData?.getData('text') ?? '';
+    const input = event.target as HTMLInputElement | null;
+    const currentValue = this.newPhone();
+    const selectionStart = input?.selectionStart ?? currentValue.length;
+    const selectionEnd = input?.selectionEnd ?? selectionStart;
+    const mergedValue = `${currentValue.slice(0, selectionStart)}${pastedText}${currentValue.slice(selectionEnd)}`;
+    const sanitizedValue = sanitizeSavPhoneDraft(
+      mergedValue,
+      this.selectedCountryCode().dialCode,
+    );
+
+    this.newPhone.set(sanitizedValue);
+
+    if (!input) {
+      return;
+    }
+
+    input.value = sanitizedValue;
+
+    const pastedDigitsLength = pastedText.replaceAll(/\D/g, '').length;
+    const nextCursor = Math.min(
+      selectionStart + pastedDigitsLength,
+      sanitizedValue.length,
+    );
+
+    queueMicrotask(() => {
+      input.setSelectionRange(nextCursor, nextCursor);
+    });
+  }
+
+  onCountryCodeChange(country: DashboardSavCountryCodeOption): void {
+    this.selectedCountryCode.set(country);
+    this.newPhone.set(sanitizeSavPhoneDraft(this.newPhone(), country.dialCode));
   }
 
   saveTech(): void {
     const prenom = this.newPrenom().trim();
     const nom = this.newNom().trim();
     const phone = this.formatPhoneValue(this.newPhone());
+    const email = this.newEmail().trim();
+    const address = this.newAddress().trim();
+    const profession = this.resolveProfessionCode(this.newSpecialty());
+    const photoUrl = this.newPhotoUrl();
+    const avatarUrl =
+      photoUrl && !photoUrl.startsWith('blob:') ? photoUrl : undefined;
 
-    if (!prenom || !nom || !phone) {
+    if (!prenom || !nom || !phone || this.phoneError() || this.emailError()) {
       return;
     }
 
-    const nextIndex = this.technicians().length + 1;
-    const avatarIndex = ((nextIndex - 1) % TECHNICIAN_AVATAR_COUNT) + 1;
-    const id = `UBX-TECH-${String(nextIndex).padStart(3, '0')}`;
-    const name = `${prenom} ${nom}`;
-    const initials = `${prenom[0] ?? ''}${nom[0] ?? ''}`.toUpperCase();
-    const image =
-      this.newPhotoUrl() ??
-      dashboardSavAsset(
-        `technicians/avatar-${String(avatarIndex).padStart(2, '0')}.webp`,
-      );
+    const body = {
+      firstName: prenom,
+      lastName: nom,
+      phone,
+      email: email || undefined,
+      address: address || undefined,
+      profession: profession || undefined,
+      avatarUrl,
+      avatarFile: this.newAvatarFile() ?? undefined,
+    };
 
-    this.technicians.update((technicians) => [
-      {
-        id,
-        name,
-        initials,
-        specialty: this.newSpecialty(),
-        rating: 4.5,
-        tickets: 0,
-        phone,
-        color: 'var(--ubax-navy)',
-        image,
-      },
-      ...technicians,
-    ]);
+    const editingTechnicianId = this.editingTechnicianId();
 
-    this.closeAddTech();
+    if (editingTechnicianId) {
+      this.pendingTechMutation.set('update');
+      this.techniciansStore.updateTechnician({
+        id: editingTechnicianId,
+        body,
+      });
+    } else {
+      this.pendingTechMutation.set('create');
+      this.techniciansStore.createTechnician(body);
+    }
+  }
+
+  openEditTech(technician: DashboardSavTechnician): void {
+    this.editingTechnicianId.set(technician.id);
+    const [firstName = '', ...rest] = technician.name.split(' ');
+
+    this.newPrenom.set(firstName);
+    this.newNom.set(rest.join(' ').trim());
+    this.newEmail.set(technician.email ?? '');
+    this.newAddress.set(technician.address ?? '');
+    this.newSpecialty.set(technician.specialty);
+    this.newAvatarFile.set(null);
+    this.newPhotoUrl.set(technician.image);
+    this.populatePhoneDraft(technician.phone);
+    this.clearAddTechCloseTimeout();
+
+    if (this.addTechOpen() && !this.addTechClosing()) {
+      return;
+    }
+
+    this.lockPageScroll();
+    this.addTechClosing.set(false);
+    this.addTechOpen.set(true);
+  }
+
+  toggleSelectedTechnicianAvailability(): void {
+    const technician = this.selectedTechnician();
+
+    if (!technician) {
+      return;
+    }
+
+    this.techniciansStore.toggleTechnicianAvailability(technician.id);
+    this.showToast(
+      'success',
+      technician.available
+        ? 'Technicien marqué indisponible.'
+        : 'Technicien marqué disponible.',
+    );
+  }
+
+  archiveSelectedTechnician(): void {
+    const technician = this.selectedTechnician();
+
+    if (!technician) {
+      return;
+    }
+
+    const confirmed =
+      this.document.defaultView?.confirm(
+        `Archiver ${technician.name} ? Cette action retirera le technicien de la liste active.`,
+      ) ?? false;
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.techniciansStore.archiveTechnician(technician.id);
+    this.selectedTechnicianId.set(null);
+    this.showToast('success', 'Technicien archivé.');
   }
 
   private resetPhotoState(): void {
@@ -1332,6 +1029,7 @@ export class DashboardSavPageComponent implements OnDestroy {
     }
 
     this.photoObjectUrl = null;
+    this.newAvatarFile.set(null);
     this.newPhotoUrl.set(null);
   }
 
@@ -1690,29 +1388,128 @@ export class DashboardSavPageComponent implements OnDestroy {
   }
 
   private resetAddTechDraft(): void {
+    this.editingTechnicianId.set(null);
+    this.pendingTechMutation.set(null);
     this.newPrenom.set('');
     this.newNom.set('');
     this.newPhone.set('');
-    this.newSpecialty.set('Plomberie & sanitaires');
-    this.newPayment.set('Espèces');
+    this.newEmail.set('');
+    this.newAddress.set('');
+    this.newSpecialty.set(
+      this.specialtyOptions()[0] ?? 'Plomberie & sanitaires',
+    );
     this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
     this.resetPhotoState();
   }
 
-  private formatPhoneValue(value: string): string {
-    const compactValue = value.replace(/\s+/g, ' ').trim();
-
-    if (!compactValue) {
-      return '';
+  private populatePhoneDraft(phone: string | undefined): void {
+    if (!phone) {
+      this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
+      this.newPhone.set('');
+      return;
     }
 
-    const dialCode = this.selectedCountryCode().dialCode;
-    const withoutCountryCode = compactValue.replace(
-      new RegExp(String.raw`^\+?${dialCode}\s*`),
-      '',
+    const normalizedPhone = phone.replaceAll(/\s+/g, '').trim();
+    const matchingCountry = COUNTRY_CODE_OPTIONS.find((country) =>
+      normalizedPhone.startsWith(`+${country.dialCode}`),
     );
 
-    return `+${dialCode} ${withoutCountryCode}`.trim();
+    if (!matchingCountry) {
+      this.selectedCountryCode.set(COUNTRY_CODE_OPTIONS[0]);
+      this.newPhone.set(normalizedPhone.replaceAll(/\D/g, ''));
+      return;
+    }
+
+    this.selectedCountryCode.set(matchingCountry);
+    this.newPhone.set(
+      normalizedPhone.replace(
+        new RegExp(String.raw`^\+${matchingCountry.dialCode}`),
+        '',
+      ),
+    );
+  }
+
+  private resolveProfessionCode(label: string): string | null {
+    const match = this.techniciansStore
+      .professionOptions()
+      .find((option) => option.label === label || option.value === label);
+
+    return match?.value ?? null;
+  }
+
+  private resolveProfessionLabel(profession: string | undefined): string {
+    if (!profession) {
+      return 'Technicien polyvalent';
+    }
+
+    return (
+      this.techniciansStore
+        .professionOptions()
+        .find((option) => option.value === profession)?.label ?? profession
+    );
+  }
+
+  private toDashboardTechnician(
+    technician: Technician,
+    index: number,
+  ): DashboardSavTechnician {
+    const fallback = BASE_TECHNICIANS[index % BASE_TECHNICIANS.length];
+    const firstName = technician.firstName?.trim() ?? '';
+    const lastName = technician.lastName?.trim() ?? '';
+    const name = `${firstName} ${lastName}`.trim() || technician.id;
+    const initials =
+      `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.toUpperCase() ||
+      name.slice(0, 2).toUpperCase();
+
+    return {
+      id: technician.id,
+      name,
+      initials,
+      specialty: this.resolveProfessionLabel(technician.profession),
+      professionCode: technician.profession,
+      rating: fallback?.rating ?? 4.5,
+      tickets: 0,
+      phone: technician.phone ?? 'Non renseigné',
+      email: technician.email,
+      address: technician.address,
+      available: technician.available,
+      createdAt: technician.createdAt,
+      color: technician.available
+        ? (fallback?.color ?? 'var(--ubax-navy)')
+        : 'var(--ubax-text-muted)',
+      image:
+        technician.avatarUrl ||
+        fallback?.image ||
+        getDashboardSavAsset('detail/profile-avatar.webp'),
+    };
+  }
+
+  private showToast(
+    severity: 'success' | 'error' | 'info',
+    detail: string,
+  ): void {
+    let summary = 'Information';
+
+    if (severity === 'success') {
+      summary = 'Operation reussie';
+    } else if (severity === 'error') {
+      summary = 'Action impossible';
+    }
+
+    this.messageService.add({
+      severity,
+      summary,
+      detail,
+      life: severity === 'error' ? 6200 : 4200,
+      closable: true,
+      styleClass: `ubax-toast-message ubax-toast-message--${severity}`,
+      contentStyleClass: 'ubax-toast-content',
+      closeIcon: 'pi-times',
+    });
+  }
+
+  private formatPhoneValue(value: string): string {
+    return composeSavE164Phone(this.selectedCountryCode().dialCode, value);
   }
 
   private lockPageScroll(): void {
@@ -1788,7 +1585,7 @@ export class DashboardSavPageComponent implements OnDestroy {
     const csvRows = rows
       .map((row) =>
         row
-          .map((cell) => `"${replaceText(String(cell), /"/g, '""')}"`)
+          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
           .join(','),
       )
       .join('\n');

@@ -1,14 +1,11 @@
-import { UbaxRole, UbaxScope, UbaxSubRole, User } from './user.model';
-
-export const AUTH_TOKEN_STORAGE_KEY = 'ubax_token';
-export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'ubax_refresh_token';
-export const DEFAULT_UBAX_WEB_HOME_PATH = '/app/tableau-de-bord';
-export const DEFAULT_UBAX_ADMIN_HOME_PATH = '/admin/tableau-de-bord';
-
-export type StoredAuthSession = {
-  accessToken: string;
-  refreshToken: string;
-};
+import { UbaxRole, UbaxSubRole } from './enums/auth-roles.enums';
+import type { UbaxScope, User, StoredAuthSession } from './types/auth.types';
+import {
+  AUTH_TOKEN_STORAGE_KEY,
+  AUTH_REFRESH_TOKEN_STORAGE_KEY,
+  DEFAULT_UBAX_WEB_HOME_PATH,
+  DEFAULT_UBAX_ADMIN_HOME_PATH,
+} from './constants/auth-session.constants';
 
 type JwtPayload = Record<string, unknown>;
 

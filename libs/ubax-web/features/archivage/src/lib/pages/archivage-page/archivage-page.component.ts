@@ -15,24 +15,18 @@ import { TooltipModule } from 'primeng/tooltip';
 import {
   ARCHIVAGE_ICONS,
   ARCHIVAGE_TAB_DEFINITIONS,
-  type ArchivageFilterField,
-  type ArchivageFieldId,
-  type ArchivageRow,
-  type ArchivageTabDefinition,
-  type ArchivageTabId,
-} from './archivage-page.data';
-
-type ArchivageFiltersState = {
-  readonly keyword: string;
-  readonly startDate: Date | null;
-  readonly endDate: Date | null;
-  readonly owner: string;
-  readonly archivedBy: string;
-  readonly type: string;};
-
-type ArchivageSelectOption = {
-  readonly label: string;
-  readonly value: string;};
+} from '../../constants/archivage-page.constants';
+import type {
+  ArchivageFilterField,
+  ArchivageFieldId,
+  ArchivageRow,
+  ArchivageTabDefinition,
+  ArchivageTabId,
+} from '../../types/archivage.types';
+import type {
+  ArchivageFiltersState,
+  ArchivageSelectOption,
+} from '../../types/archivage-page.types';
 
 const FRENCH_MONTH_NAMES = [
   'Janvier',
@@ -184,7 +178,7 @@ function areFiltersEqual(
 function normalizeText(value: string): string {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .trim();
 }

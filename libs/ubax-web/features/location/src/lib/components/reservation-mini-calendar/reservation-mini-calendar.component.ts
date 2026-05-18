@@ -11,15 +11,12 @@ import {
   COMMERCIAL_ACTIVE_DATE,
   COMMERCIAL_DISPLAY_MONTH,
   COMMERCIAL_ICON_ASSETS,
-  formatMonthLabel,
-} from '../../reservation-commercial.data';
-
-type MiniCalendarCell = {
-  readonly label: string;
-  readonly muted: boolean;
-  readonly active: boolean;};
-
-type MiniCalendarWeek = readonly MiniCalendarCell[];
+} from '../../constants/reservation-commercial.constants';
+import { formatMonthLabel } from '../../utils/reservation.utils';
+import type {
+  MiniCalendarCell,
+  MiniCalendarWeek,
+} from '../../types/reservation-mini-calendar.types';
 
 @Component({
   selector: 'ubax-reservation-mini-calendar',

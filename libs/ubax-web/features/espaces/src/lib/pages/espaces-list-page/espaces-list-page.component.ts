@@ -23,97 +23,18 @@ import {
 import {
   MesEspacesStore,
   EspaceStatus,
-  ESPACE_STATUS_LABELS,
-  resolvePropertyCardImage,
 } from '@ubax-workspace/ubax-web-data-access';
-import {
-  LaCodeListDto,
-  PropertyResponse,
-} from '@ubax-workspace/shared-api-types';
 import { EspacesListSkeletonComponent } from './espaces-list-skeleton/espaces-list-skeleton.component';
 import { EspacesCardsSkeletonComponent } from './espaces-cards-skeleton/espaces-cards-skeleton.component';
-
-type RoomViewMode = 'grid' | 'list';
-type FilterDropdownKey = 'type' | 'status';
-
-type FilterOption = {
-  readonly label: string;
-  readonly value: string;
-  readonly tone: 'neutral' | 'accent' | 'success' | 'warning';
-};
-
-type EspaceCard = {
-  readonly id: string;
-  readonly title: string;
-  readonly image: string;
-  readonly city: string;
-  readonly typeLabel: string;
-  readonly typeRaw: string;
-  readonly statusRaw: EspaceStatus;
-  readonly statusLabel: string;
-  readonly price: string;
-  readonly boosted: boolean;
-  readonly rejectionReason: string | null;
-  readonly createdAt: string | null;
-  readonly canEdit: boolean;
-  readonly canSubmit: boolean;
-  readonly canArchive: boolean;
-};
-
-const PAGE_SIZE_GRID = 12;
-const PAGE_SIZE_LIST = 10;
-const DEFAULT_ESPACE_IMAGE = 'shared/rooms/room-photo-01.webp';
-
-const STATUS_TONE_MAP: Record<EspaceStatus, FilterOption['tone']> = {
-  DRAFT: 'neutral',
-  PENDING: 'warning',
-  PUBLISHED: 'success',
-  RESERVED: 'accent',
-  SOLD: 'accent',
-  ARCHIVED: 'neutral',
-  REJECTED: 'accent',
-};
-
-function formatPrice(price: number | null | undefined): string {
-  if (price == null) return '—';
-  return new Intl.NumberFormat('fr-FR').format(price);
-}
-
-function readCodeListValue(item: LaCodeListDto): string {
-  return item.value ?? '';
-}
-
-function readCodeListLabel(item: LaCodeListDto): string {
-  return item.description ?? item.value ?? '';
-}
-
-function mapToEspaceCard(
-  property: PropertyResponse,
-  index: number,
-  propertyTypeLabels: ReadonlyMap<string, string>,
-): EspaceCard {
-  const statusRaw = (property.status ?? 'DRAFT') as EspaceStatus;
-  const typeRaw = property.propertyType ?? '';
-  const typeLabel = propertyTypeLabels.get(typeRaw) ?? typeRaw;
-
-  return {
-    id: property.id ?? `espace-${index}`,
-    title: property.title?.trim() || 'Espace sans titre',
-    image: resolvePropertyCardImage(property, DEFAULT_ESPACE_IMAGE),
-    city: property.city ?? '—',
-    typeLabel,
-    typeRaw,
-    statusRaw,
-    statusLabel: ESPACE_STATUS_LABELS[statusRaw] ?? statusRaw,
-    price: formatPrice(property.price),
-    boosted: Boolean(property.boosted),
-    rejectionReason: property.rejectionReason?.trim() || null,
-    createdAt: property.createdAt ?? null,
-    canEdit: statusRaw === 'DRAFT' || statusRaw === 'REJECTED',
-    canSubmit: statusRaw === 'DRAFT',
-    canArchive: statusRaw === 'PUBLISHED' || statusRaw === 'DRAFT',
-  };
-}
+import type { EspaceCard, FilterDropdownKey, FilterOption, RoomViewMode } from '../../types/espaces.types';
+import {
+  PAGE_SIZE_GRID,
+  PAGE_SIZE_LIST,
+  STATUS_TONE_MAP,
+  mapToEspaceCard,
+  readCodeListLabel,
+  readCodeListValue,
+} from '../../constants/espaces.constants';
 
 @Component({
   selector: 'ubax-espaces-list-page',
@@ -161,10 +82,6 @@ export class EspacesListPageComponent {
   private readonly hasLoaded = signal(false);
   readonly isLeavingSkeleton = signal(false);
   readonly contentEntering = signal(false);
-  /**
-   * true pendant un rechargement (filtre, pagination) une fois le premier
-   * chargement terminé. Seule la zone cards est remplacée par un skeleton.
-   */
   readonly isReloading = signal(false);
 
   readonly viewState = computed<ViewState>(() =>
@@ -175,7 +92,6 @@ export class EspacesListPageComponent {
       this.hasLoaded(),
     ),
   );
-  // ─────────────────────────────────────────────────────────────────────────
 
   // ── Filter options ────────────────────────────────────────────────────────
   readonly typeOptions = computed<readonly FilterOption[]>(() => {
@@ -289,10 +205,8 @@ export class EspacesListPageComponent {
   );
 
   constructor() {
-    // Initial load
     this.store.chargerEspaces({ page: 0, size: 200 });
 
-    // ── ViewState effect ──────────────────────────────────────────────────
     let wasLoading = false;
     let hadEntitiesWhenLoadingStarted = false;
 
@@ -308,17 +222,13 @@ export class EspacesListPageComponent {
         }
 
         if (this.hasLoaded()) {
-          // Rechargement partiel : skeleton cards uniquement
           this.isReloading.set(true);
         } else if (hasEntities) {
-          // Navigation retour avec cache : afficher immédiatement
           this.hasLoaded.set(true);
           this.triggerContentEnter();
         }
         return;
       }
-
-      // loading vient de passer à false ─────────────────────────────────
 
       if (this.isReloading()) {
         this.isReloading.set(false);
@@ -329,7 +239,6 @@ export class EspacesListPageComponent {
 
       if (wasLoading) {
         if (!hadEntitiesWhenLoadingStarted) {
-          // Premier chargement réseau : fade-out skeleton → fade-in contenu
           this.isLeavingSkeleton.set(true);
           setTimeout(() => {
             this.hasLoaded.set(true);
@@ -338,12 +247,10 @@ export class EspacesListPageComponent {
           }, 320);
         }
       } else if (hasEntities || hasError) {
-        // Cache hit immédiat
         this.hasLoaded.set(true);
         this.triggerContentEnter();
       }
     });
-    // ─────────────────────────────────────────────────────────────────────
 
     effect(() => {
       const totalPages = this.totalPages();
@@ -353,7 +260,6 @@ export class EspacesListPageComponent {
       }
     });
 
-    // Archive feedback
     effect(() => {
       const archivedId = this.store.lastArchivedEspaceId();
       const pendingId = this.archivePendingId();
@@ -380,7 +286,6 @@ export class EspacesListPageComponent {
       this.archivePendingTitle.set('');
     });
 
-    // Submit feedback
     effect(() => {
       const lastId = this.store.lastSubmittedEspaceId();
       if (!lastId) return;
@@ -398,7 +303,6 @@ export class EspacesListPageComponent {
       this.store.clearSubmitFeedback();
     });
 
-    // Scroll lock when modal open
     effect((onCleanup) => {
       const hasOverlay =
         this.archiveDialogTarget() !== null ||

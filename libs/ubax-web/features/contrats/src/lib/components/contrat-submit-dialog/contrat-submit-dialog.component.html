@@ -1,6 +1,5 @@
-<div class="dlg-overlay" (click)="cancel.emit()">
+<div class="dlg-overlay" (click)="dismissed.emit()">
   <div class="dlg" (click)="$event.stopPropagation()">
-
     <div class="dlg__icon">
       <i class="pi pi-send"></i>
     </div>
@@ -8,34 +7,51 @@
     <h2 class="dlg__title">Soumettre ce contrat à signature ?</h2>
 
     <p class="dlg__message">
-      Le contrat sera transmis pour signature. Un document PDF sera généré automatiquement.
+      Le contrat sera transmis pour signature. Un document PDF sera généré
+      automatiquement.
       <strong>Une fois soumis, le contrat ne pourra plus être modifié.</strong>
     </p>
 
     <div class="dlg__recap">
       <div class="dlg-recap-row">
         <span class="dlg-recap-label">Locataire</span>
-        <span class="dlg-recap-value">{{ contrat().tenantName ?? contrat().tenantId ?? '—' }}</span>
+        <span class="dlg-recap-value">{{
+          contrat().tenantName ?? contrat().tenantId ?? '—'
+        }}</span>
       </div>
       <div class="dlg-recap-row">
         <span class="dlg-recap-label">Bien</span>
-        <span class="dlg-recap-value">{{ contrat().propertyAddress ?? contrat().propertyId ?? '—' }}</span>
+        <span class="dlg-recap-value">{{
+          contrat().propertyAddress ?? contrat().propertyId ?? '—'
+        }}</span>
       </div>
       <div class="dlg-recap-row">
         <span class="dlg-recap-label">Loyer mensuel</span>
-        <span class="dlg-recap-value">{{ formatAmount(contrat().monthlyRent) }}</span>
+        <span class="dlg-recap-value">{{
+          formatAmount(contrat().monthlyRent)
+        }}</span>
       </div>
       <div class="dlg-recap-row">
         <span class="dlg-recap-label">Caution</span>
-        <span class="dlg-recap-value">{{ formatAmount(contrat().depositAmount) }}</span>
+        <span class="dlg-recap-value">{{
+          formatAmount(contrat().depositAmount)
+        }}</span>
       </div>
     </div>
 
     <div class="dlg__actions">
-      <button class="dlg-btn dlg-btn--ghost" (click)="cancel.emit()" [disabled]="loading()">
+      <button
+        class="dlg-btn dlg-btn--ghost"
+        (click)="dismissed.emit()"
+        [disabled]="loading()"
+      >
         Annuler
       </button>
-      <button class="dlg-btn dlg-btn--primary" (click)="confirm.emit()" [disabled]="loading()">
+      <button
+        class="dlg-btn dlg-btn--primary"
+        (click)="confirm.emit()"
+        [disabled]="loading()"
+      >
         @if (loading()) {
           <i class="pi pi-spin pi-spinner"></i> Soumission…
         } @else {
@@ -43,6 +59,5 @@
         }
       </button>
     </div>
-
   </div>
 </div>

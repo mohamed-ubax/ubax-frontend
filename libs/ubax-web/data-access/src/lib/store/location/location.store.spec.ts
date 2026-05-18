@@ -19,8 +19,8 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
   return {
     ...actual,
-    list5: vi.fn(),
-    getById3: vi.fn(),
+    list6: vi.fn(),
+    getById4: vi.fn(),
     qualify: vi.fn(),
     reject: vi.fn(),
   };
@@ -70,6 +70,26 @@ const TENANTS: Tenant[] = [
   },
 ];
 
+const TENANT_LIST_RESPONSE = {
+  status: 'SUCCESS',
+  statusCode: 200,
+  message: 'TENANT_GET_LIST_SUCCESS',
+  data: {
+    'total-items': TENANTS.length,
+    isFirst: true,
+    perPage: 20,
+    isLast: true,
+    'total-pages': 1,
+    page: 0,
+    sortDir: {
+      sorted: true,
+      unsorted: false,
+      empty: false,
+    },
+    results: TENANTS,
+  },
+};
+
 type LocationStoreContract = {
   entities(): Tenant[];
   isLoading(): boolean;
@@ -95,8 +115,8 @@ describe('LocationStore', () => {
   let store: LocationStoreContract;
 
   beforeEach(() => {
-    vi.mocked(apiTypes.list5).mockImplementation(() =>
-      of(toStrictResponse(TENANTS)),
+    vi.mocked(apiTypes.list6).mockImplementation(() =>
+      of(toStrictResponse(TENANT_LIST_RESPONSE)),
     );
     vi.mocked(apiTypes.qualify).mockImplementation(
       (_http, _rootUrl, params: any) =>
@@ -136,6 +156,11 @@ describe('LocationStore', () => {
   describe('computed selectors', () => {
     beforeEach(() => {
       store.load();
+    });
+
+    it('mappe les résultats contenus dans data.results', () => {
+      expect(store.entities()).toHaveLength(TENANTS.length);
+      expect(store.entities()[0]?.id).toBe('loc-1');
     });
 
     it('expose le bon nombre total de locataires', () => {

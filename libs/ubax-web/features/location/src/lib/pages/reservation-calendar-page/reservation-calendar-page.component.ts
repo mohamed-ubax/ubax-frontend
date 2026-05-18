@@ -14,54 +14,25 @@ import {
   COMMERCIAL_DISPLAY_MONTH,
   COMMERCIAL_ICON_ASSETS,
   COMMERCIAL_RESERVATIONS,
+} from '../../constants/reservation-commercial.constants';
+import {
   filterReservations,
   formatDateRange,
   formatMonthLabel,
   startOfDay,
-} from '../../reservation-commercial.data';
+} from '../../utils/reservation.utils';
 import { ReservationMiniCalendarComponent } from '../../components/reservation-mini-calendar/reservation-mini-calendar.component';
-
-type CalendarDay = {
-  readonly date: Date;
-  readonly label: number;
-  readonly isCurrentMonth: boolean;
-  readonly isActive: boolean;};
-
-type CalendarReservationEvent = {
-  readonly id: string;
-  readonly guest: string;
-  readonly property: string;
-  readonly amount: string;
-  readonly image: string;
-  readonly start: Date;
-  readonly end: Date;
-  readonly tone: 'green' | 'orange' | 'blue';
-  readonly dateRange: string;
-  readonly startCol: number;
-  readonly endCol: number;
-  readonly row: number;
-  readonly spanDays: number;};
-
-type CalendarWeek = {
-  readonly days: readonly CalendarDay[];
-  readonly events: readonly CalendarReservationEvent[];
-  readonly rowCount: number;};
-
-type LegendEntry = {
-  readonly property: string;
-  readonly tone: 'green' | 'orange' | 'blue';};
-
-type PropertyFilterOption = {
-  readonly value: string;
-  readonly label: string;
-  readonly tone: 'neutral' | 'green' | 'orange' | 'blue';};
-
-const PROPERTY_FILTER_ORDER = ['Résidence', 'Villa', 'Appartement'] as const;
-const PROPERTY_FILTER_TONES: Record<string, PropertyFilterOption['tone']> = {
-  Résidence: 'green',
-  Appartement: 'orange',
-  Villa: 'blue',
-};
+import type {
+  CalendarDay,
+  CalendarReservationEvent,
+  CalendarWeek,
+  LegendEntry,
+  PropertyFilterOption,
+} from '../../types/reservation-calendar.types';
+import {
+  PROPERTY_FILTER_ORDER,
+  PROPERTY_FILTER_TONES,
+} from '../../constants/reservation-calendar.constants';
 
 @Component({
   selector: 'ubax-reservation-calendar-page',

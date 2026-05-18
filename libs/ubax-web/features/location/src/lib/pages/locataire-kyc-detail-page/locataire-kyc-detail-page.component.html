@@ -1,13 +1,12 @@
 <div class="kd-page" data-ubax-motion="page">
-
   <!-- ── Breadcrumb ────────────────────────────────────────────────────────── -->
   <nav class="kd-breadcrumb" aria-label="Fil d'Ariane">
     <button class="kd-breadcrumb__back" type="button" (click)="goBack()">
       <i class="pi pi-arrow-left"></i>
     </button>
-    <span class="kd-breadcrumb__item" role="button" tabindex="0" (click)="goBack()" (keydown.enter)="goBack()">
+    <button class="kd-breadcrumb__item" type="button" (click)="goBack()">
       Dossiers Locataires
-    </span>
+    </button>
     <i class="pi pi-chevron-right kd-breadcrumb__sep"></i>
     <span class="kd-breadcrumb__item kd-breadcrumb__item--active">
       {{ tenant()?.fullName ?? 'Détail du dossier' }}
@@ -16,16 +15,17 @@
 
   <!-- ── ViewState ────────────────────────────────────────────────────────── -->
   @switch (viewState()) {
-
     @case ('loading') {
       <div class="kd-skeleton-layout">
         <div class="kd-skeleton-main">
-          @for (i of [1,2,3]; track i) {
+          @for (i of [1, 2, 3]; track i) {
             <div class="kd-skeleton-card">
               <div class="kd-skeleton kd-skeleton--title"></div>
               <div class="kd-skeleton kd-skeleton--row"></div>
               <div class="kd-skeleton kd-skeleton--row"></div>
-              <div class="kd-skeleton kd-skeleton--row kd-skeleton--short"></div>
+              <div
+                class="kd-skeleton kd-skeleton--row kd-skeleton--short"
+              ></div>
             </div>
           }
         </div>
@@ -54,17 +54,19 @@
       <div class="kd-state-box">
         <i class="pi pi-search kd-state-box__icon"></i>
         <p class="kd-state-box__title">Dossier introuvable</p>
-        <p class="kd-state-box__desc">Ce dossier n'existe pas ou a été supprimé.</p>
-        <button class="kd-btn kd-btn--ghost" (click)="goBack()">Retour à la liste</button>
+        <p class="kd-state-box__desc">
+          Ce dossier n'existe pas ou a été supprimé.
+        </p>
+        <button class="kd-btn kd-btn--ghost" (click)="goBack()">
+          Retour à la liste
+        </button>
       </div>
     }
 
     @case ('success') {
       <div class="kd-layout">
-
         <!-- ══ Colonne principale (65%) ═══════════════════════════════════════ -->
         <div class="kd-main">
-
           <!-- Hero identité -->
           <section class="kd-card kd-hero" data-ubax-motion="surface">
             <div class="kd-hero__avatar" [attr.data-status]="tenant()?.status">
@@ -88,12 +90,16 @@
             <div class="kd-hero__meta">
               <div class="kd-meta-item">
                 <span class="kd-meta-item__label">Soumis le</span>
-                <span class="kd-meta-item__value">{{ formatDate(tenant()?.createdAt) }}</span>
+                <span class="kd-meta-item__value">{{
+                  formatDate(tenant()?.createdAt)
+                }}</span>
               </div>
               @if (tenant()?.qualifiedAt) {
                 <div class="kd-meta-item">
                   <span class="kd-meta-item__label">Qualifié le</span>
-                  <span class="kd-meta-item__value">{{ formatDate(tenant()?.qualifiedAt) }}</span>
+                  <span class="kd-meta-item__value">{{
+                    formatDate(tenant()?.qualifiedAt)
+                  }}</span>
                 </div>
               }
             </div>
@@ -155,12 +161,17 @@
               </div>
               <div>
                 <h3 class="kd-card__title">Pièces justificatives</h3>
-                <p class="kd-card__subtitle">Documents soumis par le locataire</p>
+                <p class="kd-card__subtitle">
+                  Documents soumis par le locataire
+                </p>
               </div>
             </div>
             <div class="kd-docs-grid">
-              @for (doc of documents(); track doc.label) {
-                <div class="kd-doc-item" [class.kd-doc-item--available]="doc.available">
+              @for (doc of documents(); track doc.id) {
+                <div
+                  class="kd-doc-item"
+                  [class.kd-doc-item--available]="doc.available"
+                >
                   <div class="kd-doc-item__icon">
                     <i [class]="doc.icon"></i>
                   </div>
@@ -171,21 +182,28 @@
                         <i class="pi pi-check"></i> Disponible
                       </span>
                     } @else {
-                      <span class="kd-doc-item__status kd-doc-item__status--missing">
+                      <span
+                        class="kd-doc-item__status kd-doc-item__status--missing"
+                      >
                         <i class="pi pi-times"></i> Non fourni
                       </span>
                     }
                   </div>
-                  @if (doc.available && doc.url) {
-                    <a
+                  @if (doc.available && doc.fileUrl) {
+                    <button
                       class="kd-doc-item__action"
-                      [href]="doc.url"
-                      target="_blank"
-                      rel="noopener"
+                      type="button"
+                      [disabled]="documentOpeningId() === doc.id"
+                      (click)="openDocument(doc.fileUrl, doc.label, doc.id)"
                       aria-label="Voir le document"
                     >
-                      <i class="pi pi-external-link"></i>
-                    </a>
+                      <i
+                        class="pi"
+                        [class.pi-eye]="documentOpeningId() !== doc.id"
+                        [class.pi-spin]="documentOpeningId() === doc.id"
+                        [class.pi-spinner]="documentOpeningId() === doc.id"
+                      ></i>
+                    </button>
                   }
                 </div>
               }
@@ -221,15 +239,14 @@
 
         <!-- ══ Colonne latérale (35%) ═════════════════════════════════════════ -->
         <aside class="kd-side">
-
           <!-- Décision -->
           <div class="kd-card kd-decision-card" data-ubax-motion="surface">
             <h3 class="kd-decision-card__title">Décision KYC</h3>
 
             @if (isPending()) {
               <p class="kd-decision-card__desc">
-                Ce dossier est en attente de traitement. Examinez les informations
-                et les documents avant de prendre une décision.
+                Ce dossier est en attente de traitement. Examinez les
+                informations et les documents avant de prendre une décision.
               </p>
               <div class="kd-decision-actions">
                 <button
@@ -280,7 +297,9 @@
                   <p class="kd-decision-result__label">
                     Statut : {{ getStatusMeta(tenant()?.status).label }}
                   </p>
-                  <p class="kd-decision-result__date">Aucune action disponible</p>
+                  <p class="kd-decision-result__date">
+                    Aucune action disponible
+                  </p>
                 </div>
               </div>
             }
@@ -293,13 +312,13 @@
               <div class="kd-summary-row">
                 <span class="kd-summary-row__label">ID Dossier</span>
                 <span class="kd-summary-row__value kd-summary-row__value--mono">
-                  {{ (tenant()?.id ?? '—') | slice:0:12 }}…
+                  {{ tenant()?.id ?? '—' | slice: 0 : 12 }}…
                 </span>
               </div>
               <div class="kd-summary-row">
                 <span class="kd-summary-row__label">User ID</span>
                 <span class="kd-summary-row__value kd-summary-row__value--mono">
-                  {{ (tenant()?.userId ?? '—') | slice:0:12 }}…
+                  {{ tenant()?.userId ?? '—' | slice: 0 : 12 }}…
                 </span>
               </div>
               <div class="kd-summary-row">
@@ -327,16 +346,43 @@
           <div class="kd-card kd-docs-summary">
             <h3 class="kd-docs-summary__title">Checklist documents</h3>
             <div class="kd-check-rows">
-              <div class="kd-check-row" [class.kd-check-row--ok]="!!tenant()?.idDocumentUrl">
-                <i [class]="tenant()?.idDocumentUrl ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+              <div
+                class="kd-check-row"
+                [class.kd-check-row--ok]="!!tenant()?.idDocumentUrl"
+              >
+                <i
+                  [class]="
+                    tenant()?.idDocumentUrl
+                      ? 'pi pi-check-circle'
+                      : 'pi pi-circle'
+                  "
+                ></i>
                 <span>Pièce d'identité</span>
               </div>
-              <div class="kd-check-row" [class.kd-check-row--ok]="!!tenant()?.addressProofUrl">
-                <i [class]="tenant()?.addressProofUrl ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+              <div
+                class="kd-check-row"
+                [class.kd-check-row--ok]="!!tenant()?.addressProofUrl"
+              >
+                <i
+                  [class]="
+                    tenant()?.addressProofUrl
+                      ? 'pi pi-check-circle'
+                      : 'pi pi-circle'
+                  "
+                ></i>
                 <span>Justificatif domicile</span>
               </div>
-              <div class="kd-check-row" [class.kd-check-row--ok]="!!tenant()?.incomeProofUrl">
-                <i [class]="tenant()?.incomeProofUrl ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+              <div
+                class="kd-check-row"
+                [class.kd-check-row--ok]="!!tenant()?.incomeProofUrl"
+              >
+                <i
+                  [class]="
+                    tenant()?.incomeProofUrl
+                      ? 'pi pi-check-circle'
+                      : 'pi pi-circle'
+                  "
+                ></i>
                 <span>Justificatif revenus</span>
               </div>
             </div>
@@ -349,16 +395,25 @@
 
 <!-- ══ Dialog : Qualifier ════════════════════════════════════════════════════ -->
 @if (dialogMode() === 'qualify') {
-  <div class="kd-overlay" (click)="closeDialog()" role="dialog" aria-modal="true" aria-label="Qualifier le dossier">
-    <div class="kd-dialog kd-dialog--qualify" (click)="$event.stopPropagation()">
+  <div
+    class="kd-overlay"
+    (click)="closeDialog()"
+    aria-label="Qualifier le dossier"
+  >
+    <div
+      class="kd-dialog kd-dialog--qualify"
+      (click)="$event.stopPropagation()"
+    >
       <div class="kd-dialog__icon kd-dialog__icon--qualify">
         <i class="pi pi-check-circle"></i>
       </div>
-      <h2 class="kd-dialog__title">Qualifier ce dossier ?</h2>
+      <h2 class="kd-dialog__title">
+        Confirmer la qualification de ce dossier ?
+      </h2>
       <p class="kd-dialog__desc">
         Vous vous apprêtez à valider le dossier de
-        <strong>{{ tenant()?.fullName ?? 'ce locataire' }}</strong>.
-        Cette action confirme que le dossier est complet et conforme.
+        <strong>{{ tenant()?.fullName ?? 'ce locataire' }}</strong
+        >. Cette action confirme que le dossier est complet et conforme.
       </p>
       <div class="kd-dialog__actions">
         <button class="kd-btn kd-btn--ghost" (click)="closeDialog()">
@@ -381,17 +436,94 @@
   </div>
 }
 
+@if (previewUrl()) {
+  <div
+    class="kd-preview-backdrop ubax-modal-overlay"
+    (click)="closePreview()"
+  ></div>
+  <div class="kd-preview" [class.kd-preview--fullscreen]="previewFullscreen()">
+    <header class="kd-preview__header">
+      <div class="kd-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file-pdf]="!previewIsImage()"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+
+      <div class="kd-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="kd-preview__action"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="kd-preview__action"
+          (click)="togglePreviewFullscreen()"
+          [title]="
+            previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+          "
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="kd-preview__action kd-preview__action--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="kd-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="kd-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="kd-preview__iframe"
+          title="Prévisualisation du document"
+        ></iframe>
+      }
+    </div>
+  </div>
+}
+
 <!-- ══ Dialog : Rejeter ══════════════════════════════════════════════════════ -->
 @if (dialogMode() === 'reject') {
-  <div class="kd-overlay" (click)="closeDialog()" role="dialog" aria-modal="true" aria-label="Rejeter le dossier">
-    <div class="kd-dialog kd-dialog--reject" (click)="$event.stopPropagation()" [formGroup]="rejectForm">
+  <div
+    class="kd-overlay"
+    (click)="closeDialog()"
+    aria-label="Rejeter le dossier"
+  >
+    <div
+      class="kd-dialog kd-dialog--reject"
+      (click)="$event.stopPropagation()"
+      [formGroup]="rejectForm"
+    >
       <div class="kd-dialog__icon kd-dialog__icon--reject">
         <i class="pi pi-times-circle"></i>
       </div>
       <h2 class="kd-dialog__title">Rejeter ce dossier ?</h2>
       <p class="kd-dialog__desc">
-        Indiquez le motif de rejet. Le locataire pourra être informé de
-        cette décision.
+        Indiquez le motif de rejet. Le locataire pourra être informé de cette
+        décision.
       </p>
 
       <div class="kd-field">
@@ -401,7 +533,9 @@
         <textarea
           id="reject-reason"
           class="kd-field__textarea"
-          [class.kd-field__textarea--error]="reasonControl.invalid && reasonControl.touched"
+          [class.kd-field__textarea--error]="
+            reasonControl.invalid && reasonControl.touched
+          "
           formControlName="reason"
           placeholder="Décrivez la raison du rejet (10 caractères minimum)…"
           rows="4"

@@ -148,13 +148,96 @@
           </div>
         </div>
 
-        <button type="button" class="tech-detail__edit-button">
-          <span>Modifier</span>
+        <div class="tech-detail__actions">
+          <button
+            type="button"
+            class="tech-detail__action tech-detail__action--edit"
+            (click)="openEditTech(technicianDetail)"
+          >
+            <span class="tech-detail__action-copy">
+              <span class="tech-detail__action-label">Modifier</span>
+              <span class="tech-detail__action-hint">Profil & coordonnees</span>
+            </span>
 
-          <span class="tech-detail__edit-button-icon" aria-hidden="true">
-            <img [src]="detailIcons.edit" alt="" />
-          </span>
-        </button>
+            <span class="tech-detail__action-icon" aria-hidden="true">
+              <img [src]="detailIcons.edit" alt="" />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="tech-detail__action tech-detail__action--toggle"
+            [class.tech-detail__action--available]="technicianDetail.available"
+            [class.tech-detail__action--unavailable]="
+              !technicianDetail.available
+            "
+            (click)="toggleSelectedTechnicianAvailability()"
+          >
+            <span class="tech-detail__action-copy">
+              <span class="tech-detail__action-label">
+                {{
+                  technicianDetail.available
+                    ? 'Marquer indisponible'
+                    : 'Marquer disponible'
+                }}
+              </span>
+              <span class="tech-detail__action-hint">Disponibilite</span>
+            </span>
+
+            <span class="tech-detail__action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 3v9l5.5 3"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="8.25"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="tech-detail__action tech-detail__action--archive"
+            (click)="archiveSelectedTechnician()"
+          >
+            <span class="tech-detail__action-copy">
+              <span class="tech-detail__action-label">Archiver</span>
+              <span class="tech-detail__action-hint">Retirer de la liste</span>
+            </span>
+
+            <span class="tech-detail__action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M4 8.5h16"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M6.75 8.5h10.5v8.25A2.25 2.25 0 0 1 15 19H9a2.25 2.25 0 0 1-2.25-2.25V8.5Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M8.5 5h7l.5 3.5H8L8.5 5Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+          </button>
+        </div>
       </article>
 
       <div class="tech-detail__main">
@@ -398,7 +481,7 @@
 
                 <div class="dashboard-tech-card__meta">
                   <img [src]="technicianTicketIcon" alt="" />
-                  <span>Ticket en cour : {{ technician.tickets }}</span>
+                  <span>Ticket en cours : {{ technician.tickets }}</span>
                 </div>
 
                 <div class="dashboard-tech-card__footer">
@@ -737,18 +820,23 @@
           <header class="technicians-card__header">
             <h2>Technicien en activité</h2>
 
-            @if (canToggleTechnicians()) {
+            @if (!showAllTechnicians()) {
               <button
                 type="button"
                 class="technicians-card__toggle"
                 (click)="toggleTechnicians()"
               >
-                {{ technicianToggleLabel() }}
+                Voir plus
               </button>
             }
           </header>
 
-          <div class="technicians-card__grid">
+          <div
+            class="technicians-card__grid"
+            [class.technicians-card__grid--empty]="
+              !displayedTechnicians().length
+            "
+          >
             @if (displayedTechnicians().length) {
               @for (
                 technician of displayedTechnicians();
@@ -802,7 +890,7 @@
 
                   <div class="dashboard-tech-card__meta">
                     <img [src]="technicianTicketIcon" alt="" />
-                    <span>Ticket en cour : {{ technician.tickets }}</span>
+                    <span>Ticket en cours : {{ technician.tickets }}</span>
                   </div>
 
                   <div class="dashboard-tech-card__footer">
@@ -838,6 +926,7 @@
     <button
       class="at-modal-backdrop"
       type="button"
+      [disabled]="techniciansStore.saving()"
       aria-label="Fermer l'overlay d'ajout de technicien"
       (click)="closeAddTech()"
     ></button>
@@ -853,11 +942,12 @@
       <div class="at-header">
         <span aria-hidden="true"></span>
         <h2 id="dashboard-sav-add-tech-title" class="at-title">
-          Ajouter un technicien
+          {{ addTechModalTitle() }}
         </h2>
         <button
           class="at-close"
           type="button"
+          [disabled]="techniciansStore.saving()"
           aria-label="Fermer le formulaire d'ajout de technicien"
           (click)="closeAddTech()"
         >
@@ -884,11 +974,13 @@
               class="at-photo__input"
               type="file"
               accept="image/*"
+              [disabled]="techniciansStore.saving()"
               (change)="handlePhotoChange($event)"
             />
             <label class="at-photo__link" for="at-photo-input"
               >Modifier la photo</label
             >
+            <p class="at-photo__hint">{{ addTechPhotoHint() }}</p>
           </div>
 
           <div class="at-form">
@@ -909,61 +1001,118 @@
             />
 
             <div class="at-field-shell at-field-shell--phone">
-              <ubax-ui-form-input
-                label="Numéro de téléphone"
-                type="tel"
-                inputMode="tel"
-                placeholder="07 XX XX XX XX"
-                [value]="newPhone()"
-                (valueChange)="newPhone.set($event)"
-              />
+              <div class="at-native-field">
+                <label class="at-native-field__label" for="dashboard-sav-phone">
+                  Numéro de téléphone
+                </label>
 
-              <p-select
-                [options]="countryCodeOptions"
-                [ngModel]="selectedCountryCode()"
-                (ngModelChange)="selectedCountryCode.set($event)"
-                name="countryCode"
-                optionLabel="display"
-                appendTo="body"
-                styleClass="at-phone-code"
-                panelStyleClass="at-phone-code-panel"
-                inputId="dashboard-sav-phone-code"
-                ariaLabel="Choisir un indicatif téléphonique"
-              >
-                <ng-template #selectedItem let-country>
-                  <span class="at-phone-code__selected">
-                    <span class="at-phone-code__iso">{{ country?.iso }}</span>
-                    <span class="at-phone-code__dial"
-                      >+{{ country?.dialCode }}</span
-                    >
-                  </span>
-                </ng-template>
+                <div class="at-phone-field" [class.is-invalid]="!!phoneError()">
+                  <input
+                    id="dashboard-sav-phone"
+                    class="at-phone-field__input"
+                    type="tel"
+                    inputmode="numeric"
+                    autocomplete="tel-national"
+                    [placeholder]="phonePlaceholder()"
+                    [value]="newPhone()"
+                    [attr.aria-invalid]="phoneError() ? 'true' : null"
+                    [attr.aria-describedby]="
+                      phoneError() ? 'dashboard-sav-phone-error' : null
+                    "
+                    (input)="onPhoneInput($event)"
+                    (beforeinput)="onPhoneBeforeInput($event)"
+                    (keydown)="onPhoneKeyDown($event)"
+                    (paste)="onPhonePaste($event)"
+                  />
 
-                <ng-template #item let-country>
-                  <span class="at-phone-code__option">
-                    <span class="at-phone-code__iso">{{ country.iso }}</span>
-                    <span class="at-phone-code__dial"
-                      >+{{ country.dialCode }}</span
-                    >
-                  </span>
-                </ng-template>
-              </p-select>
+                  <p-select
+                    [options]="countryCodeOptions"
+                    [ngModel]="selectedCountryCode()"
+                    (ngModelChange)="onCountryCodeChange($event)"
+                    name="countryCode"
+                    optionLabel="name"
+                    appendTo="body"
+                    styleClass="at-phone-code"
+                    panelStyleClass="at-phone-code-panel"
+                    inputId="dashboard-sav-phone-code"
+                    ariaLabel="Choisir un indicatif téléphonique"
+                    dataKey="iso2"
+                  >
+                    <ng-template #selectedItem let-country>
+                      <span class="at-phone-code__selected">
+                        <img
+                          class="at-phone-code__flag"
+                          [src]="country?.flagUrl"
+                          [alt]="country?.name ?? ''"
+                        />
+                        <span class="at-phone-code__dial"
+                          >+{{ country?.dialCode }}</span
+                        >
+                      </span>
+                    </ng-template>
+
+                    <ng-template #item let-country>
+                      <span class="at-phone-code__option">
+                        <span class="at-phone-code__meta">
+                          <img
+                            class="at-phone-code__flag"
+                            [src]="country.flagUrl"
+                            [alt]="country.name"
+                          />
+                          <span class="at-phone-code__name">{{
+                            country.name
+                          }}</span>
+                        </span>
+                        <span class="at-phone-code__dial"
+                          >+{{ country.dialCode }}</span
+                        >
+                      </span>
+                    </ng-template>
+                  </p-select>
+                </div>
+              </div>
+
+              @if (phoneError()) {
+                <p
+                  id="dashboard-sav-phone-error"
+                  class="at-field-note at-field-note--error"
+                >
+                  {{ phoneError() }}
+                </p>
+              }
             </div>
 
             <ubax-ui-form-select
               class="at-field-shell"
               label="Domaine de compétence"
-              [options]="specialties"
+              [options]="specialtyOptions()"
               [value]="newSpecialty()"
               (valueChange)="newSpecialty.set($event)"
             />
 
-            <ubax-ui-form-select
-              class="at-field-shell at-field-shell--payment"
-              label="Moyen de paiement souhaité"
-              [options]="paymentMethods"
-              [value]="newPayment()"
-              (valueChange)="newPayment.set($event)"
+            <div class="at-field-shell at-field-shell--full">
+              <ubax-ui-form-input
+                label="Adresse e-mail"
+                type="email"
+                placeholder="prenom.nom@ubax.ci"
+                [value]="newEmail()"
+                [invalid]="!!emailError()"
+                (valueChange)="newEmail.set($event)"
+              />
+
+              @if (emailError()) {
+                <p class="at-field-note at-field-note--error">
+                  {{ emailError() }}
+                </p>
+              }
+            </div>
+
+            <ubax-ui-form-input
+              class="at-field-shell at-field-shell--full"
+              label="Adresse"
+              placeholder="Commune, quartier, rue, point de repère"
+              [value]="newAddress()"
+              (valueChange)="newAddress.set($event)"
             />
           </div>
         </div>
@@ -972,6 +1121,7 @@
           <button
             class="at-btn at-btn--cancel"
             type="button"
+            [disabled]="techniciansStore.saving()"
             (click)="closeAddTech()"
           >
             Annuler
@@ -979,9 +1129,9 @@
           <button
             class="at-btn at-btn--save"
             type="submit"
-            [disabled]="!canSaveTech()"
+            [disabled]="!canSaveTech() || techniciansStore.saving()"
           >
-            Enregistrer
+            {{ addTechSubmitLabel() }}
           </button>
         </div>
       </form>

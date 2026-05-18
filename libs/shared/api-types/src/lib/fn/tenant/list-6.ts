@@ -16,6 +16,16 @@ export interface List6$Params {
  * Filtre par statut du dossier. Omis = tous les statuts.
  */
   status?: 'INCOMPLETE' | 'PENDING_REVIEW' | 'QUALIFIED' | 'REJECTED' | 'BLACKLISTED';
+
+/**
+ * Filtre par bien immobilier (UUID). Omis = tous les biens.
+ */
+  propertyId?: string;
+
+/**
+ * Si `true` et `propertyId` fourni : retourne uniquement les dossiers sans contrat pour ce bien.
+ */
+  withoutContract?: boolean;
   pageable: Pageable;
 }
 
@@ -23,6 +33,8 @@ export function list6(http: HttpClient, rootUrl: string, params: List6$Params, c
   const rb = new RequestBuilder(rootUrl, list6.PATH, 'get');
   if (params) {
     rb.query('status', params.status, {});
+    rb.query('propertyId', params.propertyId, {});
+    rb.query('withoutContract', params.withoutContract, {});
     rb.query('pageable', params.pageable, {});
   }
 

@@ -4,46 +4,15 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ChartData, ChartOptions, Plugin, ScriptableContext } from 'chart.js';
 import { LazyChartComponent } from '@ubax-workspace/shared-ui';
-
-type TrendRangeKey = 'jan-jun' | 'apr-sep' | 'jul-dec';
-
-type ReservationMonth = {
-  label: string;
-  active?: boolean;};
-
-type TrendRangeOption = {
-  label: string;
-  value: TrendRangeKey;};
-
-type TrendRangeConfig = {
-  months: string[];
-  values: number[];
-  activeIndex: number;
-  count: number;
-  growth: string;};
-
-type NotificationItem = {
-  id: number;
-  type: 'new' | 'cancel' | 'confirm';
-  title: string;
-  subtitle: string;
-  time: string;};
-
-type ReservationRow = {
-  id: number;
-  image: string;
-  guest: string;
-  room: string;
-  duration: string;
-  dates: string;
-  status: string;};
-
-type PropertyCard = {
-  id: number;
-  image: string;
-  tenantAvatar: string;
-  tenantName: string;
-  price: string;};
+import type {
+  TrendRangeKey,
+  ReservationMonth,
+  TrendRangeOption,
+  TrendRangeConfig,
+  NotificationItem,
+  ReservationRow,
+  PropertyCard,
+} from '../../types/hotel-overview.types';
 
 @Component({
   selector: 'ubax-hotel-overview-page',
@@ -294,35 +263,35 @@ export class HotelOverviewPageComponent {
       type: 'new',
       title: 'Nouvelle réservation',
       subtitle: 'Résidence Plateau - App 12',
-      time: 'Il y’a 5 minutes',
+      time: "Il y'a 5 minutes",
     },
     {
       id: 2,
       type: 'cancel',
       title: 'Réservation Annulée',
       subtitle: 'Résidence Plateau - App 12',
-      time: 'Il y’a 15 minutes',
+      time: "Il y'a 15 minutes",
     },
     {
       id: 3,
       type: 'confirm',
       title: 'Paiement confirmé',
       subtitle: 'Résidence Plateau - App 12',
-      time: 'Il y’a 35 minutes',
+      time: "Il y'a 35 minutes",
     },
     {
       id: 4,
       type: 'new',
       title: 'Nouvelle réservation',
       subtitle: 'Résidence Plateau - App 12',
-      time: 'Il y’a 5 minutes',
+      time: "Il y'a 5 minutes",
     },
     {
       id: 5,
       type: 'confirm',
       title: 'Paiement confirmé',
       subtitle: 'Résidence Plateau - App 12',
-      time: 'Il y’a 35 minutes',
+      time: "Il y'a 35 minutes",
     },
   ];
 

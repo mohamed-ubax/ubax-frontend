@@ -1,11 +1,15 @@
 <div class="td-page" data-ubax-motion="page">
-
   <!-- ── Breadcrumb ─────────────────────────────────────────────────────── -->
   <nav class="td-breadcrumb" aria-label="Fil d'Ariane">
     <button class="td-breadcrumb__back" type="button" (click)="goBack()">
       <i class="pi pi-arrow-left"></i>
     </button>
-    <span class="td-breadcrumb__item" (click)="goBack()" role="button" tabindex="0">Tickets SAV</span>
+    <button
+      class="td-breadcrumb__item"
+      type="button"
+      (click)="goBack()"
+      >Tickets SAV</button
+    >
     <i class="pi pi-chevron-right td-breadcrumb__sep"></i>
     <span class="td-breadcrumb__item td-breadcrumb__item--active">
       {{ ticket()?.title ?? 'Détail du ticket' }}
@@ -14,7 +18,6 @@
 
   <!-- ── ViewState ──────────────────────────────────────────────────────── -->
   @switch (viewState()) {
-
     @case ('loading') {
       <div class="td-skeleton-layout">
         <div class="td-skeleton-main">
@@ -45,7 +48,9 @@
       <div class="td-state-box">
         <i class="pi pi-search td-state-box__icon"></i>
         <p class="td-state-box__title">Ticket introuvable</p>
-        <p class="td-state-box__desc">Ce ticket n'existe pas ou a été supprimé.</p>
+        <p class="td-state-box__desc">
+          Ce ticket n'existe pas ou a été supprimé.
+        </p>
         <button class="td-btn td-btn--ghost" (click)="goBack()">
           Retour à la liste
         </button>
@@ -54,10 +59,8 @@
 
     @case ('success') {
       <div class="td-layout">
-
         <!-- ── Colonne principale ──────────────────────────────────────── -->
         <div class="td-main">
-
           <!-- En-tête ticket -->
           <section class="td-card td-hero" data-ubax-motion="surface">
             <div class="td-hero__top">
@@ -106,11 +109,15 @@
             }
 
             <div class="td-hero__dates">
-              <span><i class="pi pi-calendar"></i> Créé le {{ formatDate(ticket()?.createdAt) }}</span>
+              <span
+                ><i class="pi pi-calendar"></i> Créé le
+                {{ formatDate(ticket()?.createdAt) }}</span
+              >
               @if (ticket()?.interventionScheduledAt) {
                 <span class="td-hero__scheduled">
                   <i class="pi pi-clock"></i>
-                  Intervention : {{ formatDateTime(ticket()!.interventionScheduledAt!) }}
+                  Intervention :
+                  {{ formatDateTime(ticket()!.interventionScheduledAt!) }}
                 </span>
               }
             </div>
@@ -134,13 +141,17 @@
                       <span>{{ i + 1 }}</span>
                     }
                   </div>
-                  <span class="td-step__label">{{ statusMeta[step].label }}</span>
+                  <span class="td-step__label">{{
+                    statusMeta[step].label
+                  }}</span>
                 </div>
 
                 @if (i < statusFlow.length - 1) {
                   <div
                     class="td-step__connector"
-                    [class.td-step__connector--done]="isStepCompleted(i + 1) || isStepActive(i + 1)"
+                    [class.td-step__connector--done]="
+                      isStepCompleted(i + 1) || isStepActive(i + 1)
+                    "
                   ></div>
                 }
               }
@@ -211,11 +222,15 @@
                   </div>
                   <div class="td-msg__body">
                     <div class="td-msg__header">
-                      <span class="td-msg__sender">{{ msg.senderName ?? msg.senderId }}</span>
+                      <span class="td-msg__sender">{{
+                        msg.senderName ?? msg.senderId
+                      }}</span>
                       @if (msg.messageType === 'INTERNAL') {
                         <span class="td-msg__internal-tag">Note interne</span>
                       }
-                      <span class="td-msg__time">{{ formatMessageTime(msg.createdAt) }}</span>
+                      <span class="td-msg__time">{{
+                        formatMessageTime(msg.createdAt)
+                      }}</span>
                     </div>
                     <p class="td-msg__content">{{ msg.message }}</p>
                   </div>
@@ -230,7 +245,9 @@
                   <button
                     type="button"
                     class="td-compose__type-btn"
-                    [class.td-compose__type-btn--active]="messageType() === 'PUBLIC'"
+                    [class.td-compose__type-btn--active]="
+                      messageType() === 'PUBLIC'
+                    "
                     (click)="messageType.set('PUBLIC')"
                   >
                     <i class="pi pi-globe"></i> Public
@@ -238,7 +255,9 @@
                   <button
                     type="button"
                     class="td-compose__type-btn"
-                    [class.td-compose__type-btn--active]="messageType() === 'INTERNAL'"
+                    [class.td-compose__type-btn--active]="
+                      messageType() === 'INTERNAL'
+                    "
                     (click)="messageType.set('INTERNAL')"
                   >
                     <i class="pi pi-eye-slash"></i> Interne
@@ -270,8 +289,7 @@
         </div>
 
         <!-- ── Colonne latérale ────────────────────────────────────────── -->
-        <aside class="td-side">
-
+        <aside class="td-side" aria-label="Informations complémentaires">
           <!-- Intervention -->
           <section class="td-card" data-ubax-motion="surface">
             <div class="td-card__header">
@@ -298,29 +316,33 @@
           </section>
 
           <!-- Pièces jointes -->
-          @if (ticket()?.attachments?.length) {
+          @if (resolvedAttachmentUrls().length) {
             <section class="td-card" data-ubax-motion="surface">
               <h2 class="td-card__title">
                 <i class="pi pi-paperclip"></i>
                 Pièces jointes
+                <span class="td-card__count">{{ resolvedAttachmentUrls().length }}</span>
               </h2>
               <div class="td-attachments">
-                @for (att of ticket()!.attachments!; track att.id) {
-                  <a
+                @for (url of resolvedAttachmentUrls(); track url; let i = $index) {
+                  <button
                     class="td-attachment"
-                    [href]="att.fileUrl"
-                    target="_blank"
-                    rel="noopener"
+                    type="button"
+                    (click)="openAttachmentPreview(url, i)"
+                    [title]="'Prévisualiser la pièce jointe ' + (i + 1)"
                   >
-                    @if (att.type === 'PHOTO') {
-                      <img [src]="att.fileUrl" alt="Photo" class="td-attachment__img" />
+                    @if (isImageUrl(url)) {
+                      <img
+                        [src]="url"
+                        alt="Pièce jointe"
+                        class="td-attachment__img"
+                      />
                     } @else {
                       <div class="td-attachment__file">
-                        <i class="pi pi-file-pdf"></i>
+                        <i class="pi pi-file"></i>
                       </div>
                     }
-                    <span class="td-attachment__date">{{ formatDate(att.createdAt) }}</span>
-                  </a>
+                  </button>
                 }
               </div>
             </section>
@@ -330,54 +352,171 @@
     }
   }
 
-  <!-- ── Dialog confirmation clôture ───────────────────────────────────── -->
-  @if (showCloseConfirm()) {
-    <div class="td-overlay" role="dialog" aria-modal="true" aria-labelledby="close-dialog-title">
-      <div class="td-dialog">
-        <div class="td-dialog__icon">
-          <i class="pi pi-lock"></i>
-        </div>
-        <h3 id="close-dialog-title" class="td-dialog__title">Clôturer ce ticket ?</h3>
-        <p class="td-dialog__desc">
-          Une fois clôturé, le ticket ne pourra plus être modifié.
-          Assurez-vous que l'intervention est terminée et le locataire satisfait.
-        </p>
-        <div class="td-dialog__actions">
-          <button class="td-btn td-btn--ghost" type="button" (click)="cancelClose()">
-            Annuler
-          </button>
-          <button
-            class="td-btn td-btn--danger"
-            type="button"
-            [disabled]="store.saving()"
-            (click)="confirmClose()"
-          >
-            @if (store.saving()) {
-              <i class="pi pi-spin pi-spinner"></i>
-            }
+
+</div>
+
+<!-- ── Prévisualisation pièce jointe ──────────────────────────────────────── -->
+@if (previewUrl()) {
+  <div
+    class="td-preview-backdrop"
+    (click)="closePreview()"
+  ></div>
+  <div class="td-preview" [class.td-preview--fullscreen]="previewFullscreen()">
+    <header class="td-preview__header">
+      <div class="td-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file]="!previewIsImage()"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+      <div class="td-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="td-preview__action"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link"></i>
+        </a>
+        <button
+          type="button"
+          class="td-preview__action"
+          (click)="togglePreviewFullscreen()"
+          [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="td-preview__action td-preview__action--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </header>
+    <div class="td-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="previewSafeUrl()"
+          [alt]="previewName()"
+          class="td-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="previewSafeUrl()"
+          class="td-preview__iframe"
+          title="Prévisualisation du document"
+        ></iframe>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Dialog résolution / clôture (avec note obligatoire) ───────────────── -->
+@if (showStatusNoteDialog()) {
+  <div
+    class="td-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="status-dialog-title"
+    (click)="cancelStatusChange()"
+  >
+    <div class="td-dialog td-dialog--wide" (click)="$event.stopPropagation()">
+      <div class="td-dialog__icon" [class.td-dialog__icon--resolve]="pendingStatus() === 'RESOLVED'">
+        <i class="pi" [class.pi-check-circle]="pendingStatus() === 'RESOLVED'" [class.pi-lock]="pendingStatus() === 'CLOSED'"></i>
+      </div>
+      <h3 id="status-dialog-title" class="td-dialog__title">
+        @if (pendingStatus() === 'RESOLVED') {
+          Marquer comme résolu ?
+        } @else {
+          Clôturer ce ticket ?
+        }
+      </h3>
+      <p class="td-dialog__desc">
+        @if (pendingStatus() === 'RESOLVED') {
+          Décrivez les travaux effectués. Cette note sera visible par le locataire.
+        } @else {
+          Une fois clôturé, le ticket ne pourra plus être modifié. Confirmez que l'intervention est terminée.
+        }
+      </p>
+
+      <div class="td-dialog__field">
+        <label class="td-label" for="status-note">
+          Note de résolution <span class="td-label__required">*</span>
+        </label>
+        <textarea
+          id="status-note"
+          class="td-textarea"
+          rows="4"
+          placeholder="Ex. : Joint remplacé, fuite colmatée. Pièces : 15 000 FCFA. Main d'œuvre : 60 000 FCFA."
+          [value]="pendingResolutionNote()"
+          (input)="pendingResolutionNote.set($any($event.target).value)"
+        ></textarea>
+      </div>
+
+      <div class="td-dialog__actions">
+        <button
+          class="td-btn td-btn--ghost"
+          type="button"
+          (click)="cancelStatusChange()"
+        >
+          Annuler
+        </button>
+        <button
+          class="td-btn"
+          [class.td-btn--success]="pendingStatus() === 'RESOLVED'"
+          [class.td-btn--danger]="pendingStatus() === 'CLOSED'"
+          type="button"
+          [disabled]="store.saving() || !pendingResolutionNote().trim()"
+          (click)="confirmStatusChange()"
+        >
+          @if (store.saving()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          }
+          @if (pendingStatus() === 'RESOLVED') {
+            Confirmer la résolution
+          } @else {
             Confirmer la clôture
-          </button>
-        </div>
+          }
+        </button>
       </div>
     </div>
-  }
+  </div>
+}
 
-  <!-- ── Drawer intervention ────────────────────────────────────────────── -->
-  @if (drawerOpen() === 'intervention') {
-    <div class="td-drawer-backdrop" (click)="closeDrawer()"></div>
-    <aside class="td-drawer" role="complementary" aria-label="Gestion de l'intervention">
+<!-- ── Drawer intervention ─────────────────────────────────────────────── -->
+@if (drawerOpen() === 'intervention') {
+  <div class="td-drawer-backdrop" [class.is-closing]="drawerClosing()" (click)="closeDrawer()"></div>
+  <aside
+    class="td-drawer"
+    [class.is-closing]="drawerClosing()"
+    aria-label="Gestion de l'intervention"
+  >
       <div class="td-drawer__header">
         <h2 class="td-drawer__title">
           <i class="pi pi-cog"></i>
           Gestion de l'intervention
         </h2>
-        <button class="td-drawer__close" type="button" (click)="closeDrawer()" aria-label="Fermer">
+        <button
+          class="td-drawer__close"
+          type="button"
+          (click)="closeDrawer()"
+          aria-label="Fermer"
+        >
           <i class="pi pi-times"></i>
         </button>
       </div>
 
       <div class="td-drawer__body" [formGroup]="interventionForm">
-
         <!-- Section : Assignation -->
         <div class="td-drawer__section">
           <h3 class="td-drawer__section-title">
@@ -385,12 +524,15 @@
           </h3>
           <div class="td-field">
             <label class="td-label" for="dr-agent">ID de l'agent SAV</label>
-            <input
-              id="dr-agent"
-              class="td-input"
-              type="text"
-              placeholder="UUID de l'agent SAV"
+            <p-select
+              inputId="dr-agent"
+              [options]="savAgentOptions()"
               formControlName="assignedToId"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner un agent SAV"
+              styleClass="td-pselect"
+              appendTo="body"
             />
           </div>
         </div>
@@ -400,64 +542,183 @@
           <h3 class="td-drawer__section-title">
             <i class="pi pi-wrench"></i> Technicien
           </h3>
-          <div class="td-field">
-            <label class="td-label" for="dr-tech-name">Nom du technicien</label>
-            <input
-              id="dr-tech-name"
-              class="td-input"
-              type="text"
-              placeholder="Ex. : Jean Kouassi"
-              formControlName="technicianName"
-            />
-          </div>
-          <div class="td-field">
-            <label class="td-label" for="dr-tech-phone">Téléphone</label>
-            <input
-              id="dr-tech-phone"
-              class="td-input"
-              type="tel"
-              placeholder="+225 07 00 00 00 00"
-              formControlName="technicianPhone"
-            />
-          </div>
+
+          @if (canSchedule()) {
+            <!-- Mode toggle (éditable uniquement avant TECHNICIAN_SENT) -->
+            <fieldset class="td-mode-toggle" aria-label="Mode technicien">
+              <button
+                type="button"
+                class="td-mode-toggle__btn"
+                [class.td-mode-toggle__btn--active]="technicianMode() === 'platform'"
+                (click)="setTechnicianMode('platform')"
+              >
+                <i class="pi pi-database"></i>
+                Enregistré
+              </button>
+              <button
+                type="button"
+                class="td-mode-toggle__btn"
+                [class.td-mode-toggle__btn--active]="technicianMode() === 'manual'"
+                (click)="setTechnicianMode('manual')"
+              >
+                <i class="pi pi-pencil"></i>
+                Saisie libre
+              </button>
+            </fieldset>
+
+            <!-- Mode plateforme -->
+            @if (technicianMode() === 'platform') {
+              <div class="td-field">
+                <label class="td-label" for="dr-tech-id">
+                  Technicien enregistré
+                  @if (availableTechnicianOptions().length === 0) {
+                    <span class="td-label__hint">— aucun disponible</span>
+                  }
+                </label>
+                <p-select
+                  inputId="dr-tech-id"
+                  [options]="availableTechnicianOptions()"
+                  formControlName="technicienId"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Sélectionner un technicien"
+                  styleClass="td-pselect"
+                  appendTo="body"
+                  [emptyMessage]="'Aucun technicien disponible'"
+                />
+              </div>
+            }
+
+            <!-- Mode libre -->
+            @if (technicianMode() === 'manual') {
+              <div class="td-field">
+                <label class="td-label" for="dr-tech-name">
+                  Nom du technicien <span class="td-label__required">*</span>
+                </label>
+                <input
+                  id="dr-tech-name"
+                  class="td-input"
+                  type="text"
+                  placeholder="Ex. : Ibrahima Sow"
+                  formControlName="technicianName"
+                />
+              </div>
+              <div class="td-field">
+                <label class="td-label" for="dr-tech-phone">
+                  Téléphone <span class="td-label__required">*</span>
+                </label>
+                <input
+                  id="dr-tech-phone"
+                  class="td-input"
+                  type="tel"
+                  placeholder="+221771234567"
+                  formControlName="technicianPhone"
+                />
+              </div>
+            }
+          } @else {
+            <!-- Technicien verrouillé — affichage lecture seule -->
+            <div class="td-drawer__readonly-info">
+              <i class="pi pi-lock"></i>
+              Technicien verrouillé — le ticket est déjà en cours d'intervention.
+            </div>
+            @if (ticket()?.technicianName) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Nom</span>
+                <span class="td-side-block__value">{{ ticket()!.technicianName }}</span>
+              </div>
+            }
+            @if (ticket()?.technicianPhone) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Téléphone</span>
+                <span class="td-side-block__value">{{ ticket()!.technicianPhone }}</span>
+              </div>
+            }
+          }
         </div>
 
-        <!-- Section : Planification -->
-        <div class="td-drawer__section">
-          <h3 class="td-drawer__section-title">
-            <i class="pi pi-calendar"></i> Date d'intervention
-          </h3>
-          <div class="td-field">
-            <label class="td-label" for="dr-date">Date et heure</label>
-            <p-datepicker
-              inputId="dr-date"
-              formControlName="interventionDate"
-              [showTime]="true"
-              [showIcon]="true"
-              [minDate]="$any(null)"
-              dateFormat="dd/mm/yy"
-              hourFormat="24"
-              appendTo="body"
-              styleClass="td-datepicker"
-              panelStyleClass="td-datepicker-panel"
-              placeholder="Sélectionner date et heure"
-            />
+        <!-- Section : Planification (disponible uniquement avant TECHNICIAN_SENT) -->
+        @if (canSchedule()) {
+          <div class="td-drawer__section">
+            <h3 class="td-drawer__section-title">
+              <i class="pi pi-calendar"></i> Planification de l'intervention
+            </h3>
+            <div class="td-field">
+              <label class="td-label" for="dr-date">
+                Date et heure <span class="td-label__required">*</span>
+              </label>
+              <p-datepicker
+                inputId="dr-date"
+                formControlName="interventionDate"
+                [showTime]="true"
+                [showIcon]="true"
+                [minDate]="$any(null)"
+                dateFormat="dd/mm/yy"
+                hourFormat="24"
+                appendTo="body"
+                styleClass="td-datepicker"
+                panelStyleClass="td-datepicker-panel"
+                placeholder="Sélectionner date et heure"
+              />
+            </div>
+            <div class="td-field">
+              <label class="td-label" for="dr-intervention-price">
+                Prix d'intervention (FCFA)
+              </label>
+              <div class="td-input-suffix">
+                <input
+                  id="dr-intervention-price"
+                  class="td-input"
+                  type="number"
+                  min="0"
+                  step="500"
+                  placeholder="Ex. : 75 000"
+                  formControlName="interventionPrice"
+                />
+                <span class="td-input-suffix__label">FCFA</span>
+              </div>
+            </div>
           </div>
-        </div>
+        } @else {
+          <div class="td-drawer__section">
+            <h3 class="td-drawer__section-title">
+              <i class="pi pi-calendar"></i> Planification de l'intervention
+            </h3>
+            <div class="td-drawer__readonly-info">
+              <i class="pi pi-info-circle"></i>
+              La planification est verrouillée — le technicien a été envoyé.
+            </div>
+            @if (ticket()?.interventionScheduledAt) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Date planifiée</span>
+                <span class="td-side-block__value">{{ formatDateTime(ticket()!.interventionScheduledAt!) }}</span>
+              </div>
+            }
+            @if (ticket()?.interventionPrice != null) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Prix d'intervention</span>
+                <span class="td-side-block__value">{{ ticket()!.interventionPrice | number:'1.0-0' }} FCFA</span>
+              </div>
+            }
+          </div>
+        }
 
-        <!-- Section : Coût -->
+        <!-- Section : Coût de réparation -->
         <div class="td-drawer__section">
           <h3 class="td-drawer__section-title">
             <i class="pi pi-wallet"></i> Coût de réparation
           </h3>
           <div class="td-field">
-            <label class="td-label" for="dr-cost">Montant (FCFA)</label>
+            <label class="td-label" for="dr-cost">
+              Montant (FCFA) <span class="td-label__required">*</span>
+            </label>
             <div class="td-input-suffix">
               <input
                 id="dr-cost"
                 class="td-input"
                 type="number"
                 min="0"
+                step="500"
                 placeholder="Ex. : 25 000"
                 formControlName="repairCost"
               />
@@ -466,11 +727,15 @@
           </div>
           <div class="td-field">
             <label class="td-label" for="dr-imputation">Imputation</label>
-            <select id="dr-imputation" class="td-select-native" formControlName="costImputedTo">
-              <option value="OWNER">Propriétaire</option>
-              <option value="TENANT">Locataire</option>
-              <option value="SHARED">Partagé</option>
-            </select>
+            <p-select
+              inputId="dr-imputation"
+              [options]="imputationOptions"
+              formControlName="costImputedTo"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="td-pselect"
+              appendTo="body"
+            />
           </div>
           <div class="td-field">
             <label class="td-label" for="dr-note">Note de résolution</label>
@@ -486,7 +751,11 @@
       </div>
 
       <div class="td-drawer__footer">
-        <button class="td-btn td-btn--ghost" type="button" (click)="closeDrawer()">
+        <button
+          class="td-btn td-btn--ghost"
+          type="button"
+          (click)="closeDrawer()"
+        >
           Annuler
         </button>
         <button
@@ -501,6 +770,5 @@
           Enregistrer
         </button>
       </div>
-    </aside>
-  }
-</div>
+  </aside>
+}

@@ -1,9 +1,5 @@
 import { Buffer } from 'node:buffer';
 import {
-  AUTH_REFRESH_TOKEN_STORAGE_KEY,
-  AUTH_TOKEN_STORAGE_KEY,
-  DEFAULT_UBAX_ADMIN_HOME_PATH,
-  DEFAULT_UBAX_WEB_HOME_PATH,
   buildPortalLoginUrl,
   clearStoredAuthSession,
   currentBrowserPath,
@@ -17,7 +13,13 @@ import {
   resolvePostLoginRedirectTarget,
   resolveUbaxWebRedirectTarget,
 } from './auth-session';
-import { UbaxRole, UbaxSubRole } from './user.model';
+import {
+  AUTH_REFRESH_TOKEN_STORAGE_KEY,
+  AUTH_TOKEN_STORAGE_KEY,
+  DEFAULT_UBAX_ADMIN_HOME_PATH,
+  DEFAULT_UBAX_WEB_HOME_PATH,
+} from './constants/auth-session.constants';
+import { UbaxRole, UbaxSubRole } from './enums/auth-roles.enums';
 
 function createJwt(payload: Record<string, unknown>): string {
   const encode = (value: Record<string, unknown>) =>

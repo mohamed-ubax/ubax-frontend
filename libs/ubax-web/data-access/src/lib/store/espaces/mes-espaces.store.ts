@@ -4,22 +4,25 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   archive,
   ApiConfiguration,
   findAllByType,
-  getById,
+  getById1 as getPropertyById,
   LaCodeListDto,
-  listMine,
-  ListMine$Params,
+  listMine1,
+  ListMine1$Params,
   Pageable,
   PropertyResponse,
   submit,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, forkJoin, map, of, pipe, tap } from 'rxjs';
 
-export type EspaceStatus = NonNullable<ListMine$Params['status']>;
+export type EspaceStatus = NonNullable<ListMine1$Params['status']>;
 
 export const ESPACE_STATUS_LABELS: Record<EspaceStatus, string> = {
   DRAFT: 'Brouillon',
@@ -143,14 +146,14 @@ export const MesEspacesStore = signalStore(
   { providedIn: 'root' },
   withApiResource<
     PropertyResponse,
-    typeof listMine,
-    typeof getById,
+    typeof listMine1,
+    typeof getPropertyById,
     undefined,
     undefined,
     typeof archive
   >({
-    list: listMine,
-    getById: getById,
+    list: listMine1,
+    getById: getPropertyById,
     delete: archive,
     idSelector: selectEspaceId,
     mapList: (raw: unknown) =>
@@ -169,7 +172,7 @@ export const MesEspacesStore = signalStore(
     ) => ({
       /**
        * Charge les espaces hôteliers paginés.
-       * Utilise listMine avec les paramètres fournis.
+       * Utilise listMine1 avec les paramètres fournis.
        */
       chargerEspaces: rxMethod<{
         status?: EspaceStatus;
@@ -188,7 +191,7 @@ export const MesEspacesStore = signalStore(
                 }).pipe(map((r) => extractList<LaCodeListDto>(r.body)));
 
             return forkJoin({
-              body: listMine(http, apiConfig.rootUrl, {
+              body: listMine1(http, apiConfig.rootUrl, {
                 status: params?.status,
                 pageable: pageRequest(page, size),
               }).pipe(map((r) => r.body)),
@@ -215,7 +218,13 @@ export const MesEspacesStore = signalStore(
                   );
                 },
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { loading: false, error: resolveHttpErrorMessage(err, 'Erreur lors du chargement') }),
+                  patchState(store, {
+                    loading: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors du chargement',
+                    ),
+                  }),
               }),
             );
           }),
@@ -265,7 +274,10 @@ export const MesEspacesStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, (state) => ({
                     archivingEspaceIds: withoutId(state.archivingEspaceIds, id),
-                    archiveError: resolveHttpErrorMessage(err, 'Erreur lors de l\'archivage de l\'espace'),
+                    archiveError: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de l'archivage de l'espace",
+                    ),
                   })),
               }),
             ),
@@ -318,7 +330,10 @@ export const MesEspacesStore = signalStore(
                       state.submittingEspaceIds,
                       id,
                     ),
-                    submitError: resolveHttpErrorMessage(err, 'Erreur lors de la soumission de l\'espace'),
+                    submitError: resolveHttpErrorMessage(
+                      err,
+                      "Erreur lors de la soumission de l'espace",
+                    ),
                   })),
               }),
             ),

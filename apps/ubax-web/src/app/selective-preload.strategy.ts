@@ -1,9 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { PreloadingStrategy, Route } from '@angular/router';
-import {
-  AuthStore,
-  type RouteAccess,
-} from '@ubax-workspace/ubax-web-data-access';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
+import type { RouteAccess } from '@ubax-workspace/ubax-web-data-access/role-access';
 import { Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })

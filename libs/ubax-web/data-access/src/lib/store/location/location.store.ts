@@ -8,27 +8,46 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { updateEntity } from '@ngrx/signals/entities';
+import { setAllEntities, updateEntity } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { withApiResource, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  withApiResource,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import {
   ApiConfiguration,
-  getById3,
-  list5,
+  getById4,
+  list6,
   qualify,
   reject,
   TenantResponse,
 } from '@ubax-workspace/shared-api-types';
-import { exhaustMap, map, pipe, tap } from 'rxjs';
+import { exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
 
-type Tenant = TenantResponse & { id: string };
+type Tenant = TenantResponse & { id: string; propertyId?: string };
+
+const normalizeTenantStatus = (
+  status: TenantResponse['status'] | 'PENDING' | undefined,
+): TenantResponse['status'] => {
+  if (status === 'PENDING') {
+    return 'PENDING_REVIEW';
+  }
+
+  return status;
+};
 
 const normalizeTenant = (
   tenant: TenantResponse,
   fallbackId?: string,
 ): Tenant => ({
   ...tenant,
+  status: normalizeTenantStatus(
+    (tenant as TenantResponse & { status?: 'PENDING' }).status,
+  ),
   id: tenant.id ?? tenant.userId ?? fallbackId ?? '',
+  propertyId:
+    (tenant as TenantResponse & { propertyId?: string }).propertyId ??
+    undefined,
 });
 
 const mapPaginated = (raw: unknown): Tenant[] => {
@@ -37,14 +56,25 @@ const mapPaginated = (raw: unknown): Tenant[] => {
   if (Array.isArray(raw)) {
     items = raw;
   } else if (raw && typeof raw === 'object') {
-    const record = raw as { content?: unknown; data?: unknown };
+    const record = raw as {
+      content?: unknown;
+      results?: unknown;
+      data?: unknown;
+    };
 
     if (Array.isArray(record.content)) {
       items = record.content;
+    } else if (Array.isArray(record.results)) {
+      items = record.results;
     } else if (record.data && typeof record.data === 'object') {
-      const nested = (record.data as { content?: unknown }).content;
-      if (Array.isArray(nested)) {
-        items = nested;
+      const nestedRecord = record.data as {
+        content?: unknown;
+        results?: unknown;
+      };
+      if (Array.isArray(nestedRecord.content)) {
+        items = nestedRecord.content;
+      } else if (Array.isArray(nestedRecord.results)) {
+        items = nestedRecord.results;
       }
     } else if (Array.isArray(record.data)) {
       items = record.data;
@@ -69,20 +99,20 @@ const mapPaginated = (raw: unknown): Tenant[] => {
  */
 export const LocationStore = signalStore(
   { providedIn: 'root' },
-  withApiResource<Tenant, typeof list5, typeof getById3>({
-    list: list5,
-    getById: getById3,
+  withApiResource<Tenant, typeof list6, typeof getById4>({
+    list: list6,
+    getById: getById4,
     idSelector: (tenant) => tenant.id,
     mapList: mapPaginated,
     mapGetById: (raw, requestedId) => {
       if (raw && typeof raw === 'object') {
         const data = (raw as { data?: unknown }).data;
         if (data && typeof data === 'object') {
-          return normalizeTenant(data as TenantResponse, requestedId);
+          return normalizeTenant(data, requestedId);
         }
       }
 
-      return normalizeTenant(raw as TenantResponse, requestedId);
+      return normalizeTenant(raw, requestedId);
     },
   }),
   withState({
@@ -114,6 +144,38 @@ export const LocationStore = signalStore(
         patchState(store, { filterStatut: statut });
       },
 
+      loadSansContrat: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { loading: true, error: null })),
+          switchMap(() =>
+            http
+              .get<unknown>(`${apiConfig.rootUrl}/v1/tenants`, {
+                params: { withoutContract: 'true', status: 'QUALIFIED' },
+              })
+              .pipe(
+                tapResponse({
+                  next: (raw) => {
+                    const items = mapPaginated(raw);
+                    patchState(
+                      store,
+                      setAllEntities(items, { selectId: (t: Tenant) => t.id }),
+                      { loading: false },
+                    );
+                  },
+                  error: (err: HttpErrorResponse) =>
+                    patchState(store, {
+                      loading: false,
+                      error: resolveHttpErrorMessage(
+                        err,
+                        'Erreur lors du chargement des locataires',
+                      ),
+                    }),
+                }),
+              ),
+          ),
+        ),
+      ),
+
       qualifier: rxMethod<string>(
         pipe(
           tap(() => patchState(store, { saving: true, error: null })),
@@ -128,7 +190,13 @@ export const LocationStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour du dossier') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la mise à jour du dossier',
+                    ),
+                  }),
               }),
             ),
           ),
@@ -149,7 +217,13 @@ export const LocationStore = signalStore(
                     { saving: false },
                   ),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la mise à jour du dossier') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la mise à jour du dossier',
+                    ),
+                  }),
               }),
             ),
           ),

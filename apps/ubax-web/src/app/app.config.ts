@@ -21,7 +21,7 @@ import localeFr from '@angular/common/locales/fr';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@ubax-workspace/ubax-web-shell/interceptors';
 import { UbaxPreset } from '@ubax-workspace/ubax-web-shell/theme';
-import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
+import { ApiConfiguration } from '@ubax-workspace/shared-api-types/auth-api';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
 import { NotificationService } from '@ubax-workspace/ubax-web-shell/notification-service';
 import { MessageService } from 'primeng/api';
