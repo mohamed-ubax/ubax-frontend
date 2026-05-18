@@ -73,7 +73,7 @@ type ConfirmDialogAction = 'revoke-role' | 'deactivate-member' | null;
 
 const MEMBER_PAGE_SIZE = 6;
 
-const MEMBER_AVATAR_FALLBACK = '/equipe/avatar-fallback.svg';
+const MEMBER_AVATAR_FALLBACK = 'equipe/avatar-fallback.svg';
 
 function normalizeSearchText(value: string): string {
   return value.toLowerCase().normalize('NFD').replaceAll(/[̀-ͯ]/g, '');
@@ -221,15 +221,15 @@ export class EquipePageComponent {
   private readonly document = inject(DOCUMENT);
   readonly subRoleLabels = SUB_ROLE_LABELS as Record<string, string>;
 
-  readonly paginationArrowLeftSrc  = '/equipe/pagination-arrow-left.webp';
-  readonly paginationArrowRightSrc = '/equipe/pagination-arrow-right.webp';
-  readonly promoBackdropSrc        = '/equipe/promo-backdrop.webp';
-  readonly promoImageSrc           = '/equipe/promo-image.webp';
-  readonly roleSortIconSrc         = '/equipe/role-sort-icon.webp';
+  readonly paginationArrowLeftSrc  = 'equipe/pagination-arrow-left.webp';
+  readonly paginationArrowRightSrc = 'equipe/pagination-arrow-right.webp';
+  readonly promoBackdropSrc        = 'equipe/promo-backdrop.webp';
+  readonly promoImageSrc           = 'equipe/promo-image.webp';
+  readonly roleSortIconSrc         = 'equipe/role-sort-icon.webp';
   /** Illustration « no records » (frame Liste des membres — Figma node 1217:3865). */
-  readonly membersEmptyIllustrationSrc = '/equipe/members-empty.webp';
+  readonly membersEmptyIllustrationSrc = 'equipe/members-empty.webp';
   /** Calque vitré du bouton fermer drawer (Figma node 1207:4881 — ellipse sous le close). */
-  readonly drawerCloseGlassTextureSrc  = '/equipe/drawer-close-texture.webp';
+  readonly drawerCloseGlassTextureSrc  = 'equipe/drawer-close-texture.webp';
 
   readonly currentPage = signal(1);
   readonly isRoleMenuOpen = signal(false);

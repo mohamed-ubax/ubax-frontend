@@ -13,7 +13,7 @@ import {
   uploadAvatar,
 } from '@ubax-workspace/shared-api-types';
 
-const AVATAR_FALLBACK = '/profil/avatar-placeholder.svg';
+const AVATAR_FALLBACK = 'profil/avatar-placeholder.svg';
 
 @Component({
   selector: 'ubax-profil-page',
