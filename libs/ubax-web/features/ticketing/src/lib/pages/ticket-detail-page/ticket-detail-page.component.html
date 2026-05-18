@@ -4,12 +4,11 @@
     <button class="td-breadcrumb__back" type="button" (click)="goBack()">
       <i class="pi pi-arrow-left"></i>
     </button>
-    <span
+    <button
       class="td-breadcrumb__item"
+      type="button"
       (click)="goBack()"
-      role="button"
-      tabindex="0"
-      >Tickets SAV</span
+      >Tickets SAV</button
     >
     <i class="pi pi-chevron-right td-breadcrumb__sep"></i>
     <span class="td-breadcrumb__item td-breadcrumb__item--active">
@@ -290,7 +289,7 @@
         </div>
 
         <!-- ── Colonne latérale ────────────────────────────────────────── -->
-        <aside class="td-side">
+        <aside class="td-side" aria-label="Informations complémentaires">
           <!-- Intervention -->
           <section class="td-card" data-ubax-motion="surface">
             <div class="td-card__header">
@@ -422,43 +421,72 @@
   </div>
 }
 
-<!-- ── Dialog confirmation clôture ───────────────────────────────────────── -->
-@if (showCloseConfirm()) {
+<!-- ── Dialog résolution / clôture (avec note obligatoire) ───────────────── -->
+@if (showStatusNoteDialog()) {
   <div
     class="td-overlay"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="close-dialog-title"
+    aria-labelledby="status-dialog-title"
+    (click)="cancelStatusChange()"
   >
-    <div class="td-dialog">
-      <div class="td-dialog__icon">
-        <i class="pi pi-lock"></i>
+    <div class="td-dialog td-dialog--wide" (click)="$event.stopPropagation()">
+      <div class="td-dialog__icon" [class.td-dialog__icon--resolve]="pendingStatus() === 'RESOLVED'">
+        <i class="pi" [class.pi-check-circle]="pendingStatus() === 'RESOLVED'" [class.pi-lock]="pendingStatus() === 'CLOSED'"></i>
       </div>
-      <h3 id="close-dialog-title" class="td-dialog__title">
-        Clôturer ce ticket ?
+      <h3 id="status-dialog-title" class="td-dialog__title">
+        @if (pendingStatus() === 'RESOLVED') {
+          Marquer comme résolu ?
+        } @else {
+          Clôturer ce ticket ?
+        }
       </h3>
       <p class="td-dialog__desc">
-        Une fois clôturé, le ticket ne pourra plus être modifié. Assurez-vous
-        que l'intervention est terminée et le locataire satisfait.
+        @if (pendingStatus() === 'RESOLVED') {
+          Décrivez les travaux effectués. Cette note sera visible par le locataire.
+        } @else {
+          Une fois clôturé, le ticket ne pourra plus être modifié. Confirmez que l'intervention est terminée.
+        }
       </p>
+
+      <div class="td-dialog__field">
+        <label class="td-label" for="status-note">
+          Note de résolution <span class="td-label__required">*</span>
+        </label>
+        <textarea
+          id="status-note"
+          class="td-textarea"
+          rows="4"
+          placeholder="Ex. : Joint remplacé, fuite colmatée. Pièces : 15 000 FCFA. Main d'œuvre : 60 000 FCFA."
+          [value]="pendingResolutionNote()"
+          (input)="pendingResolutionNote.set($any($event.target).value)"
+        ></textarea>
+      </div>
+
       <div class="td-dialog__actions">
         <button
           class="td-btn td-btn--ghost"
           type="button"
-          (click)="cancelClose()"
+          (click)="cancelStatusChange()"
         >
           Annuler
         </button>
         <button
-          class="td-btn td-btn--danger"
+          class="td-btn"
+          [class.td-btn--success]="pendingStatus() === 'RESOLVED'"
+          [class.td-btn--danger]="pendingStatus() === 'CLOSED'"
           type="button"
-          [disabled]="store.saving()"
-          (click)="confirmClose()"
+          [disabled]="store.saving() || !pendingResolutionNote().trim()"
+          (click)="confirmStatusChange()"
         >
           @if (store.saving()) {
             <i class="pi pi-spin pi-spinner"></i>
           }
-          Confirmer la clôture
+          @if (pendingStatus() === 'RESOLVED') {
+            Confirmer la résolution
+          } @else {
+            Confirmer la clôture
+          }
         </button>
       </div>
     </div>
@@ -471,7 +499,6 @@
   <aside
     class="td-drawer"
     [class.is-closing]="drawerClosing()"
-    role="complementary"
     aria-label="Gestion de l'intervention"
   >
       <div class="td-drawer__header">
@@ -515,99 +542,183 @@
           <h3 class="td-drawer__section-title">
             <i class="pi pi-wrench"></i> Technicien
           </h3>
-          <div class="td-field">
-            <label class="td-label" for="dr-tech-id"
-              >Technicien enregistré</label
-            >
-            <p-select
-              inputId="dr-tech-id"
-              [options]="technicianSelectOptions()"
-              formControlName="technicienId"
-              optionLabel="label"
-              optionValue="value"
-              styleClass="td-pselect"
-              appendTo="body"
-            />
-          </div>
 
-          @if (!interventionForm.controls.technicienId.value) {
-            <div class="td-field">
-              <label class="td-label" for="dr-tech-name"
-                >Nom du technicien</label
+          @if (canSchedule()) {
+            <!-- Mode toggle (éditable uniquement avant TECHNICIAN_SENT) -->
+            <fieldset class="td-mode-toggle" aria-label="Mode technicien">
+              <button
+                type="button"
+                class="td-mode-toggle__btn"
+                [class.td-mode-toggle__btn--active]="technicianMode() === 'platform'"
+                (click)="setTechnicianMode('platform')"
               >
-              <input
-                id="dr-tech-name"
-                class="td-input"
-                type="text"
-                placeholder="Ex. : Jean Kouassi"
-                formControlName="technicianName"
-              />
+                <i class="pi pi-database"></i>
+                Enregistré
+              </button>
+              <button
+                type="button"
+                class="td-mode-toggle__btn"
+                [class.td-mode-toggle__btn--active]="technicianMode() === 'manual'"
+                (click)="setTechnicianMode('manual')"
+              >
+                <i class="pi pi-pencil"></i>
+                Saisie libre
+              </button>
+            </fieldset>
+
+            <!-- Mode plateforme -->
+            @if (technicianMode() === 'platform') {
+              <div class="td-field">
+                <label class="td-label" for="dr-tech-id">
+                  Technicien enregistré
+                  @if (availableTechnicianOptions().length === 0) {
+                    <span class="td-label__hint">— aucun disponible</span>
+                  }
+                </label>
+                <p-select
+                  inputId="dr-tech-id"
+                  [options]="availableTechnicianOptions()"
+                  formControlName="technicienId"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Sélectionner un technicien"
+                  styleClass="td-pselect"
+                  appendTo="body"
+                  [emptyMessage]="'Aucun technicien disponible'"
+                />
+              </div>
+            }
+
+            <!-- Mode libre -->
+            @if (technicianMode() === 'manual') {
+              <div class="td-field">
+                <label class="td-label" for="dr-tech-name">
+                  Nom du technicien <span class="td-label__required">*</span>
+                </label>
+                <input
+                  id="dr-tech-name"
+                  class="td-input"
+                  type="text"
+                  placeholder="Ex. : Ibrahima Sow"
+                  formControlName="technicianName"
+                />
+              </div>
+              <div class="td-field">
+                <label class="td-label" for="dr-tech-phone">
+                  Téléphone <span class="td-label__required">*</span>
+                </label>
+                <input
+                  id="dr-tech-phone"
+                  class="td-input"
+                  type="tel"
+                  placeholder="+221771234567"
+                  formControlName="technicianPhone"
+                />
+              </div>
+            }
+          } @else {
+            <!-- Technicien verrouillé — affichage lecture seule -->
+            <div class="td-drawer__readonly-info">
+              <i class="pi pi-lock"></i>
+              Technicien verrouillé — le ticket est déjà en cours d'intervention.
             </div>
-            <div class="td-field">
-              <label class="td-label" for="dr-tech-phone">Téléphone</label>
-              <input
-                id="dr-tech-phone"
-                class="td-input"
-                type="tel"
-                placeholder="+2250700000000"
-                formControlName="technicianPhone"
-              />
-            </div>
+            @if (ticket()?.technicianName) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Nom</span>
+                <span class="td-side-block__value">{{ ticket()!.technicianName }}</span>
+              </div>
+            }
+            @if (ticket()?.technicianPhone) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Téléphone</span>
+                <span class="td-side-block__value">{{ ticket()!.technicianPhone }}</span>
+              </div>
+            }
           }
         </div>
 
-        <!-- Section : Planification -->
-        <div class="td-drawer__section">
-          <h3 class="td-drawer__section-title">
-            <i class="pi pi-calendar"></i> Date d'intervention
-          </h3>
-          <div class="td-field">
-            <label class="td-label" for="dr-date">Date et heure</label>
-            <p-datepicker
-              inputId="dr-date"
-              formControlName="interventionDate"
-              [showTime]="true"
-              [showIcon]="true"
-              [minDate]="$any(null)"
-              dateFormat="dd/mm/yy"
-              hourFormat="24"
-              appendTo="body"
-              styleClass="td-datepicker"
-              panelStyleClass="td-datepicker-panel"
-              placeholder="Sélectionner date et heure"
-            />
-          </div>
-          <div class="td-field">
-            <label class="td-label" for="dr-intervention-price"
-              >Prix d'intervention (FCFA)</label
-            >
-            <div class="td-input-suffix">
-              <input
-                id="dr-intervention-price"
-                class="td-input"
-                type="number"
-                min="0"
-                placeholder="Ex. : 75 000"
-                formControlName="interventionPrice"
+        <!-- Section : Planification (disponible uniquement avant TECHNICIAN_SENT) -->
+        @if (canSchedule()) {
+          <div class="td-drawer__section">
+            <h3 class="td-drawer__section-title">
+              <i class="pi pi-calendar"></i> Planification de l'intervention
+            </h3>
+            <div class="td-field">
+              <label class="td-label" for="dr-date">
+                Date et heure <span class="td-label__required">*</span>
+              </label>
+              <p-datepicker
+                inputId="dr-date"
+                formControlName="interventionDate"
+                [showTime]="true"
+                [showIcon]="true"
+                [minDate]="$any(null)"
+                dateFormat="dd/mm/yy"
+                hourFormat="24"
+                appendTo="body"
+                styleClass="td-datepicker"
+                panelStyleClass="td-datepicker-panel"
+                placeholder="Sélectionner date et heure"
               />
-              <span class="td-input-suffix__label">FCFA</span>
+            </div>
+            <div class="td-field">
+              <label class="td-label" for="dr-intervention-price">
+                Prix d'intervention (FCFA)
+              </label>
+              <div class="td-input-suffix">
+                <input
+                  id="dr-intervention-price"
+                  class="td-input"
+                  type="number"
+                  min="0"
+                  step="500"
+                  placeholder="Ex. : 75 000"
+                  formControlName="interventionPrice"
+                />
+                <span class="td-input-suffix__label">FCFA</span>
+              </div>
             </div>
           </div>
-        </div>
+        } @else {
+          <div class="td-drawer__section">
+            <h3 class="td-drawer__section-title">
+              <i class="pi pi-calendar"></i> Planification de l'intervention
+            </h3>
+            <div class="td-drawer__readonly-info">
+              <i class="pi pi-info-circle"></i>
+              La planification est verrouillée — le technicien a été envoyé.
+            </div>
+            @if (ticket()?.interventionScheduledAt) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Date planifiée</span>
+                <span class="td-side-block__value">{{ formatDateTime(ticket()!.interventionScheduledAt!) }}</span>
+              </div>
+            }
+            @if (ticket()?.interventionPrice != null) {
+              <div class="td-side-block">
+                <span class="td-side-block__label">Prix d'intervention</span>
+                <span class="td-side-block__value">{{ ticket()!.interventionPrice | number:'1.0-0' }} FCFA</span>
+              </div>
+            }
+          </div>
+        }
 
-        <!-- Section : Coût -->
+        <!-- Section : Coût de réparation -->
         <div class="td-drawer__section">
           <h3 class="td-drawer__section-title">
             <i class="pi pi-wallet"></i> Coût de réparation
           </h3>
           <div class="td-field">
-            <label class="td-label" for="dr-cost">Montant (FCFA)</label>
+            <label class="td-label" for="dr-cost">
+              Montant (FCFA) <span class="td-label__required">*</span>
+            </label>
             <div class="td-input-suffix">
               <input
                 id="dr-cost"
                 class="td-input"
                 type="number"
                 min="0"
+                step="500"
                 placeholder="Ex. : 25 000"
                 formControlName="repairCost"
               />

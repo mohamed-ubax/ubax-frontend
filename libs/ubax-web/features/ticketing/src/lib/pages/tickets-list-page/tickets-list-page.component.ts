@@ -336,7 +336,7 @@ export class TicketsListPageComponent {
       )
       .join('\n');
 
-    const blob = new Blob([`﻿${rows}`], {
+    const blob = new Blob(['﻿' + rows], {
       type: 'text/csv;charset=utf-8;',
     });
     const url = win.URL.createObjectURL(blob);

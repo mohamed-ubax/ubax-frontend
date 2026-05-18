@@ -1,4 +1,4 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule, DecimalPipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -33,6 +33,7 @@ import type {
   AllowedNextStatus,
   DrawerMode,
   SelectOption,
+  TechnicianMode,
 } from '../../types/ticket-detail-page.types';
 import {
   ALLOWED_TRANSITIONS,
@@ -47,7 +48,7 @@ import {
 @Component({
   selector: 'ubax-ticket-detail-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DatePickerModule, SelectModule],
+  imports: [CommonModule, DecimalPipe, ReactiveFormsModule, DatePickerModule, SelectModule],
   templateUrl: './ticket-detail-page.component.html',
   styleUrl: './ticket-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,8 +75,15 @@ export class TicketDetailPageComponent {
 
   readonly drawerOpen = signal<DrawerMode>(null);
   readonly drawerClosing = signal(false);
-  readonly showCloseConfirm = signal(false);
+  /** Statut en attente de confirmation (RESOLVED ou CLOSED nécessitent une note) */
+  readonly pendingStatus = signal<AllowedNextStatus | null>(null);
+  readonly pendingResolutionNote = signal('');
   readonly resolvedAttachmentUrls = signal<string[]>([]);
+  readonly technicianMode = signal<TechnicianMode>('platform');
+
+  readonly showStatusNoteDialog = computed(
+    () => this.pendingStatus() === 'RESOLVED' || this.pendingStatus() === 'CLOSED',
+  );
 
   readonly previewUrl = signal<string | null>(null);
   readonly previewIsImage = signal(false);
@@ -134,6 +142,12 @@ export class TicketDetailPageComponent {
       this.ticket()?.status === 'CANCELLED',
   );
 
+  /** L'endpoint /schedule auto-transite vers TECHNICIAN_SENT — interdit si déjà à ce statut ou plus loin */
+  readonly canSchedule = computed(() => {
+    const status = this.ticket()?.status;
+    return !status || ['OPEN', 'IN_ANALYSIS'].includes(status);
+  });
+
   readonly messages = computed(() => this.store.messages());
 
   readonly savAgentOptions = computed<SelectOption[]>(() => {
@@ -184,11 +198,6 @@ export class TicketDetailPageComponent {
       };
     }),
   );
-
-  readonly technicianSelectOptions = computed<SelectOption[]>(() => [
-    { value: '', label: 'Saisie manuelle' },
-    ...this.availableTechnicianOptions(),
-  ]);
 
   readonly infoBlocks = computed(() => {
     const t = this.ticket();
@@ -309,12 +318,15 @@ export class TicketDetailPageComponent {
     });
 
     effect(() => {
-      const urls = this.ticket()?.attachmentUrls ?? [];
-      if (urls.length === 0) {
+      const urlsFromTicket = this.ticket()?.attachmentUrls;
+      // undefined = réponse partielle (assign/schedule/status) sans la liste d'attachments
+      // On ne touche pas les URLs résolues dans ce cas pour éviter le clignotement
+      if (urlsFromTicket === undefined) return;
+      if (urlsFromTicket.length === 0) {
         this.resolvedAttachmentUrls.set([]);
         return;
       }
-      void this.resolveAttachmentUrls(urls);
+      void this.resolveAttachmentUrls(urlsFromTicket);
     });
   }
 
@@ -371,26 +383,42 @@ export class TicketDetailPageComponent {
   }
 
   advanceStatus(nextStatus: AllowedNextStatus): void {
-    if (nextStatus === 'CLOSED') {
-      this.showCloseConfirm.set(true);
+    if (nextStatus === 'RESOLVED' || nextStatus === 'CLOSED') {
+      this.pendingStatus.set(nextStatus);
+      this.pendingResolutionNote.set(this.ticket()?.resolutionNote ?? '');
+      this.document.body.classList.add('ubax-overlay-open');
       return;
     }
     this.doStatusChange(nextStatus);
   }
 
-  confirmClose(): void {
-    this.showCloseConfirm.set(false);
-    this.doStatusChange('CLOSED');
+  confirmStatusChange(): void {
+    const status = this.pendingStatus();
+    if (!status) return;
+    const note = this.pendingResolutionNote().trim();
+    if (!note) {
+      this.showToast('error', 'La note de résolution est obligatoire.');
+      return;
+    }
+    this.document.body.classList.remove('ubax-overlay-open');
+    this.doStatusChange(status, note);
+    this.pendingStatus.set(null);
+    this.pendingResolutionNote.set('');
   }
 
-  cancelClose(): void {
-    this.showCloseConfirm.set(false);
+  cancelStatusChange(): void {
+    this.document.body.classList.remove('ubax-overlay-open');
+    this.pendingStatus.set(null);
+    this.pendingResolutionNote.set('');
   }
 
-  private doStatusChange(status: AllowedNextStatus): void {
+  private doStatusChange(status: AllowedNextStatus, resolutionNote?: string): void {
     const id = this.ticketId();
     if (!id) return;
-    this.store.changerStatut({ ticketId: id, body: { status } });
+    this.store.changerStatut({
+      ticketId: id,
+      body: { status, resolutionNote: resolutionNote || undefined },
+    });
   }
 
   openInterventionDrawer(): void {
@@ -410,9 +438,22 @@ export class TicketDetailPageComponent {
           (t.costImputedTo as 'OWNER' | 'TENANT' | 'SHARED') ?? 'OWNER',
         resolutionNote: t.resolutionNote ?? '',
       });
+      // Infer mode from existing ticket data
+      this.technicianMode.set(t.technicienId ? 'platform' : 'manual');
+    } else {
+      this.technicianMode.set('platform');
     }
     this.drawerOpen.set('intervention');
     this.document.body.classList.add('ubax-overlay-open');
+  }
+
+  setTechnicianMode(mode: TechnicianMode): void {
+    this.technicianMode.set(mode);
+    if (mode === 'platform') {
+      this.interventionForm.patchValue({ technicianName: '', technicianPhone: '' });
+    } else {
+      this.interventionForm.patchValue({ technicienId: '' });
+    }
   }
 
   closeDrawer(): void {
@@ -439,77 +480,84 @@ export class TicketDetailPageComponent {
       costImputedTo,
       resolutionNote,
     } = this.interventionForm.getRawValue();
-    const normalizedAssignedToId = assignedToId.trim();
-    const normalizedTechnicienId = technicienId.trim();
-    const normalizedTechnicianName = technicianName.trim();
-    const normalizedTechnicianPhone = technicianPhone.trim();
-    const wantsSchedule = Boolean(
-      interventionDate ||
-        normalizedTechnicienId ||
-        normalizedTechnicianName ||
-        normalizedTechnicianPhone ||
-        interventionPrice != null,
-    );
 
+    const mode = this.technicianMode();
+    const normalizedAssignedToId = assignedToId.trim();
+    const normalizedTechnicienId = mode === 'platform' ? technicienId.trim() : '';
+    const normalizedTechnicianName = mode === 'manual' ? technicianName.trim() : '';
+    const normalizedTechnicianPhone = mode === 'manual' ? technicianPhone.trim() : '';
+
+    // Scheduling is only attempted when the ticket allows it and scheduling fields are filled
+    const wantsSchedule =
+      this.canSchedule() &&
+      Boolean(
+        interventionDate ||
+          normalizedTechnicienId ||
+          normalizedTechnicianName ||
+          normalizedTechnicianPhone,
+      );
+
+    let hasPendingAction = false;
+
+    // — Assign agent —
     if (normalizedAssignedToId) {
       this.store.assignerAgent({
         ticketId: id,
         body: { assignedToId: normalizedAssignedToId },
       });
-      this.showToast('success', 'Assignation de l agent SAV enregistree.');
+      hasPendingAction = true;
     }
 
-    if (wantsSchedule && !interventionDate) {
-      this.showToast(
-        'error',
-        'La date et l heure d intervention sont obligatoires pour planifier.',
-      );
-      return;
-    }
+    // — Schedule intervention —
+    if (wantsSchedule) {
+      if (!interventionDate) {
+        this.showToast(
+          'error',
+          'La date et l heure d intervention sont obligatoires.',
+        );
+        return;
+      }
 
-    if (
-      wantsSchedule &&
-      !normalizedTechnicienId &&
-      (!normalizedTechnicianName || !normalizedTechnicianPhone)
-    ) {
-      this.showToast(
-        'error',
-        'Choisissez un technicien enregistre ou renseignez un nom et un telephone.',
-      );
-      return;
-    }
+      if (mode === 'platform' && !normalizedTechnicienId) {
+        this.showToast('error', 'Sélectionnez un technicien enregistré.');
+        return;
+      }
 
-    if (interventionPrice != null && interventionPrice < 0) {
-      this.showToast('error', 'Le prix d intervention doit etre positif.');
-      return;
-    }
+      if (
+        mode === 'manual' &&
+        (!normalizedTechnicianName || !normalizedTechnicianPhone)
+      ) {
+        this.showToast(
+          'error',
+          'Le nom et le téléphone du technicien sont obligatoires en saisie libre.',
+        );
+        return;
+      }
 
-    if (wantsSchedule && interventionDate) {
+      if (interventionPrice != null && interventionPrice < 0) {
+        this.showToast('error', 'Le prix d intervention doit etre positif.');
+        return;
+      }
+
       this.store.planifierIntervention({
         ticketId: id,
         body: {
           interventionScheduledAt: interventionDate.toISOString(),
           technicienId: normalizedTechnicienId || undefined,
-          technicianName:
-            normalizedTechnicienId.length > 0
-              ? undefined
-              : normalizedTechnicianName || undefined,
-          technicianPhone:
-            normalizedTechnicienId.length > 0
-              ? undefined
-              : normalizedTechnicianPhone || undefined,
+          technicianName: normalizedTechnicianName || undefined,
+          technicianPhone: normalizedTechnicianPhone || undefined,
           interventionPrice: interventionPrice ?? undefined,
         },
       });
-      this.showToast('success', 'Planification de l intervention enregistree.');
+      hasPendingAction = true;
     }
 
-    if (repairCost != null && repairCost <= 0) {
-      this.showToast('error', 'Le cout de reparation doit etre superieur a 0.');
-      return;
-    }
-
-    if (repairCost != null && repairCost > 0) {
+    // — Repair cost —
+    if (repairCost != null) {
+      if (repairCost < 0) {
+        this.showToast('error', 'Le cout de reparation doit etre positif ou nul.');
+        return;
+      }
       this.store.mettreAJourCout({
         ticketId: id,
         body: {
@@ -518,14 +566,10 @@ export class TicketDetailPageComponent {
           resolutionNote: resolutionNote || undefined,
         },
       });
-      this.showToast('success', 'Cout de reparation enregistre.');
+      hasPendingAction = true;
     }
 
-    if (
-      !normalizedAssignedToId &&
-      !wantsSchedule &&
-      !(repairCost != null && repairCost > 0)
-    ) {
+    if (!hasPendingAction) {
       this.showToast('info', 'Aucune modification a enregistrer.');
       return;
     }

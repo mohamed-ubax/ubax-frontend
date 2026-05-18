@@ -9,6 +9,8 @@ export type AllowedNextStatus =
 
 export type DrawerMode = 'intervention' | null;
 
+export type TechnicianMode = 'platform' | 'manual';
+
 export type SelectOption = {
   label: string;
   value: string;

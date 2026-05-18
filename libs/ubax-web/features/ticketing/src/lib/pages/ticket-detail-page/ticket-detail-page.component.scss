@@ -6,7 +6,7 @@
 .td-breadcrumb { display: flex; align-items: center; gap: 8px; }
 .td-breadcrumb__back { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--ubax-border-card); border-radius: 8px; background: var(--ubax-surface); color: var(--ubax-navy); cursor: pointer; transition: background 0.12s; }
 .td-breadcrumb__back:hover { background: var(--ubax-page-bg); }
-.td-breadcrumb__item { font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; color: var(--ubax-text-muted); cursor: pointer; }
+.td-breadcrumb__item { font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; color: var(--ubax-text-muted); cursor: pointer; border: none; background: none; padding: 0; }
 .td-breadcrumb__item--active { font-weight: 500; color: var(--ubax-navy); cursor: default; }
 .td-breadcrumb__sep { font-size: 11px; color: var(--ubax-text-muted); }
 
@@ -171,12 +171,33 @@
 }
 
 .td-overlay { position: fixed; inset: 0; background: rgb(0 0 0 / 0.5); display: grid; place-items: center; z-index: 1000; padding: 24px; }
-.td-dialog { background: var(--ubax-surface); border-radius: 20px; padding: 32px; max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; box-shadow: 0 24px 60px rgb(0 0 0 / 0.2); }
+.td-dialog {
+  background: var(--ubax-surface); border-radius: 20px; padding: 32px;
+  max-width: 480px; width: 100%; display: flex; flex-direction: column;
+  align-items: center; gap: 16px; text-align: center;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.2);
+  &--wide { max-width: 560px; }
+}
 .td-dialog__icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; background: var(--ubax-danger-soft); }
 .td-dialog__icon i { font-size: 24px; color: var(--ubax-danger); }
+.td-dialog__icon--resolve { background: var(--ubax-success-soft, color-mix(in srgb, var(--ubax-success) 12%, transparent)); }
+.td-dialog__icon--resolve i { color: var(--ubax-success); }
 .td-dialog__title { margin: 0; font-family: 'Lexend', sans-serif; font-size: 20px; font-weight: 700; color: var(--ubax-navy); }
 .td-dialog__desc { margin: 0; font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; color: var(--ubax-text-muted); line-height: 1.6; }
+.td-dialog__field { width: 100%; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.td-dialog__field .td-label { font-size: 13px; }
+.td-dialog__field .td-textarea { font-size: 14px; }
 .td-dialog__actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.td-btn--success { background: var(--ubax-success); color: #fff; }
+
+.td-drawer__readonly-info {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 10px;
+  background: var(--ubax-blue-soft);
+  font-family: 'Lexend', sans-serif; font-size: 13px; font-weight: 300;
+  color: var(--ubax-info);
+  i { font-size: 14px; flex-shrink: 0; }
+}
 
 .td-drawer-backdrop {
   position: fixed;
@@ -235,7 +256,11 @@
 .td-drawer__footer { padding: 16px 24px; border-top: 1px solid var(--ubax-border-card); display: flex; gap: 12px; justify-content: flex-end; flex-shrink: 0; }
 
 .td-field { display: flex; flex-direction: column; gap: 6px; }
-.td-label { font-family: 'Lexend', sans-serif; font-size: 13px; font-weight: 500; color: var(--ubax-navy); }
+.td-label { font-family: 'Lexend', sans-serif; font-size: 13px; font-weight: 500; color: var(--ubax-navy); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.td-label__required { color: var(--ubax-danger); font-size: 13px; line-height: 1; }
+.td-label__hint { font-size: 11px; font-weight: 400; color: var(--ubax-text-muted); }
+.td-field__hint { display: flex; align-items: center; gap: 4px; font-family: 'Lexend', sans-serif; font-size: 11px; font-weight: 300; color: var(--ubax-text-muted); }
+.td-field__hint i { font-size: 10px; }
 .td-input, .td-textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--ubax-border-card); border-radius: 10px; background: var(--ubax-page-bg); font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; color: var(--ubax-text-primary); outline: none; transition: border-color 0.15s; box-sizing: border-box; }
 .td-input:focus, .td-textarea:focus { border-color: var(--ubax-accent); background: var(--ubax-surface); }
 .td-textarea { resize: vertical; min-height: 80px; }
@@ -243,6 +268,55 @@
 .td-input-suffix { display: flex; align-items: center; }
 .td-input-suffix .td-input { border-radius: 10px 0 0 10px; border-right: none; }
 .td-input-suffix__label { display: flex; align-items: center; height: 42px; padding: 0 12px; border: 1.5px solid var(--ubax-border-card); border-left: none; border-radius: 0 10px 10px 0; background: var(--ubax-page-bg); font-family: 'Lexend', sans-serif; font-size: 13px; font-weight: 400; color: var(--ubax-text-muted); white-space: nowrap; }
+
+// ── Mode toggle technicien ────────────────────────────────────────────────────
+.td-mode-toggle {
+  display: flex;
+  gap: 0;
+  border: 1.5px solid var(--ubax-border-card);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ubax-page-bg);
+  // Reset <fieldset> defaults
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  legend { display: none; }
+}
+
+.td-mode-toggle__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-right: 1px solid var(--ubax-border-card);
+  background: transparent;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ubax-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:last-child { border-right: none; }
+
+  i { font-size: 12px; }
+
+  &--active {
+    background: var(--ubax-navy);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  &:not(&--active):hover {
+    background: var(--ubax-blue-soft);
+    color: var(--ubax-info);
+  }
+}
 
 :host ::ng-deep .td-datepicker { width: 100%; }
 :host ::ng-deep .td-datepicker .p-inputtext { width: 100%; padding: 10px 14px; border: 1.5px solid var(--ubax-border-card); border-radius: 10px; background: var(--ubax-page-bg); font-family: 'Lexend', sans-serif; font-size: 14px; font-weight: 300; color: var(--ubax-text-primary); }
