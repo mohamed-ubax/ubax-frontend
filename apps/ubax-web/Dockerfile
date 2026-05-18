@@ -1,5 +1,5 @@
 # ===================================================================
-# ubax-web (admin) – Dockerfile multi-stage
+# ubax-web – Dockerfile multi-stage
 # ===================================================================
 
 # ─── Stage 1 : Build ─────────────────────────────────────────────
@@ -21,10 +21,10 @@ LABEL org.opencontainers.image.title="UBAX Web Admin Frontend"
 LABEL org.opencontainers.image.vendor="Spirit Tech Revolution"
 
 RUN rm /etc/nginx/conf.d/default.conf && \
-    mkdir -p /usr/share/nginx/html/app
+    mkdir -p /usr/share/nginx/html/tableau-de-bord
 
-# Copier les fichiers buildés dans le sous-dossier /app
-COPY --from=builder /app/dist/apps/ubax-web/browser /usr/share/nginx/html/app
+# Copier les fichiers buildés dans le sous-dossier /tableau-de-bord
+COPY --from=builder /app/dist/apps/ubax-web/browser /usr/share/nginx/html/tableau-de-bord
 
 # Copier la config Nginx
 COPY apps/ubax-web/nginx.conf /etc/nginx/conf.d/default.conf

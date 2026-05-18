@@ -96,5 +96,6 @@ jobs:
           path: |
             dist/apps/ubax-portal/
             dist/apps/ubax-web/
+            dist/apps/ubax-admin/
           if-no-files-found: ignore
           retention-days: 3
