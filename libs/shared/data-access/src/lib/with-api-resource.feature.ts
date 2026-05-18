@@ -13,6 +13,7 @@ import {
   addEntity,
   removeEntity,
   setAllEntities,
+  setEntity,
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
@@ -341,7 +342,7 @@ export function withApiResource<
                     ),
                     tapResponse({
                       next: (item: TItem) =>
-                        patchState(store, addEntity(item, entityOpts), {
+                        patchState(store, setEntity(item, entityOpts), {
                           loading: false,
                           selectedId: selectId(item),
                         }),
