@@ -25,9 +25,12 @@ jobs:
           - name: ubax-portail
             image: ubaxproject/ubax-portail
             dockerfile: apps/ubax-portal/Dockerfile
+          - name: ubax-web
+            image: ubaxproject/ubax-web
+            dockerfile: apps/ubax-web/Dockerfile
           - name: ubax-admin
             image: ubaxproject/ubax-admin
-            dockerfile: apps/ubax-web/Dockerfile
+            dockerfile: apps/ubax-admin/Dockerfile
 
     outputs:
       image-tag: ${{ steps.tag.outputs.value }}
@@ -118,6 +121,10 @@ jobs:
               && sed -i "s/^PORTAIL_TAG=.*/PORTAIL_TAG=$TAG/" .env \
               || echo "PORTAIL_TAG=$TAG" >> .env
 
+            grep -q "^WEB_TAG=" .env \
+              && sed -i "s/^WEB_TAG=.*/WEB_TAG=$TAG/" .env \
+              || echo "WEB_TAG=$TAG" >> .env
+
             grep -q "^ADMIN_TAG=" .env \
               && sed -i "s/^ADMIN_TAG=.*/ADMIN_TAG=$TAG/" .env \
               || echo "ADMIN_TAG=$TAG" >> .env
@@ -127,7 +134,7 @@ jobs:
               docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
             # Pull nouvelles images frontend (retry x3 en cas d'erreur réseau)
-            for IMAGE in ubaxproject/ubax-portail:$TAG ubaxproject/ubax-admin:$TAG; do
+            for IMAGE in ubaxproject/ubax-portail:$TAG ubaxproject/ubax-web:$TAG ubaxproject/ubax-admin:$TAG; do
               pulled=false
               for attempt in 1 2 3; do
                 echo "==> Pull $IMAGE tentative $attempt/3"
@@ -194,18 +201,34 @@ jobs:
             sleep 10
           done
 
-      - name: Health check – ubax-admin (/tableau-de-bord/)
+      - name: Health check – ubax-web (/tableau-de-bord/)
         run: |
-          echo "Vérification de l'admin (max 2 min)..."
+          echo "Vérification de ubax-web (max 2 min)..."
           for i in $(seq 1 12); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
               http://${{ secrets.VPS_HOST }}/tableau-de-bord/)
             echo "Attempt $i/12 – HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Admin web healthy"
+              echo "✅ ubax-web healthy"
               exit 0
             fi
             sleep 10
           done
-          echo "❌ Admin health check failed après 2 min"
+          echo "❌ ubax-web health check failed après 2 min"
+          exit 1
+
+      - name: Health check – ubax-admin (/admin/)
+        run: |
+          echo "Vérification de ubax-admin (max 2 min)..."
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
+              http://${{ secrets.VPS_HOST }}/admin/)
+            echo "Attempt $i/12 – HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ ubax-admin healthy"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "❌ ubax-admin health check failed après 2 min"
           exit 1
