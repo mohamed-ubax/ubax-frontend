@@ -342,7 +342,7 @@ export function formatFileSize(size: number): string {
 }
 
 export function formatFcfa(amount: number): string {
-  return `${new Intl.NumberFormat('fr-FR').format(amount).replace(/ /g, ' ')} FCFA`;
+  return `${new Intl.NumberFormat('fr-FR').format(amount).replace(/\u202f/g, ' ')} FCFA`;
 }
 
 export function formatShortDate(date: Date): string {

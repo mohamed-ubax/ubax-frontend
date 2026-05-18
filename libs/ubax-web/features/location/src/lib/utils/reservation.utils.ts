@@ -50,7 +50,7 @@ export function formatDateRange(
 export function formatFcfa(value: number): string {
   return `${new Intl.NumberFormat('fr-FR')
     .format(value)
-    .replaceAll(/ /g, ' ')} FCFA`;
+    .replaceAll(/\u202f/g, '\u00a0')} FCFA`;
 }
 
 export function filterReservations(

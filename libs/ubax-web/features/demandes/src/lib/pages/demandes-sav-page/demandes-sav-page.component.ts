@@ -344,7 +344,7 @@ export class DemandesSavPageComponent {
       )
       .join('\n');
 
-    const blob = new Blob([`﻿${csvRows}`], {
+    const blob = new Blob([`\uFEFF${csvRows}`], {
       type: 'text/csv;charset=utf-8;',
     });
     const url = defaultView.URL.createObjectURL(blob);
