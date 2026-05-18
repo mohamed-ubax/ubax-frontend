@@ -310,10 +310,6 @@ export class TicketsListPageComponent {
     this.router.navigate(['/tickets', ticket.id]);
   }
 
-  goToCreate(): void {
-    this.router.navigate(['/tickets/creer']);
-  }
-
   exportCsv(): void {
     const tickets = this.filteredTickets();
     if (!tickets.length) return;

@@ -9,13 +9,6 @@ export const ticketingRoutes: Route[] = [
       ),
   },
   {
-    path: 'creer',
-    loadComponent: () =>
-      import('./pages/ticket-create-page/ticket-create-page.component').then(
-        (m) => m.TicketCreatePageComponent,
-      ),
-  },
-  {
     path: ':id',
     loadComponent: () =>
       import('./pages/ticket-detail-page/ticket-detail-page.component').then(
