@@ -19,6 +19,7 @@ import {
 } from '@ubax-workspace/ubax-web-data-access/team-member';
 
 const COMPONENT_TS_PATH = resolve(__dirname, 'equipe-page.component.ts');
+const CONSTANTS_TS_PATH = resolve(__dirname, '../../constants/equipe-page.constants.ts');
 
 // ---------------------------------------------------------------------------
 // Helpers — extract logic from the component source (mirrors component code)
@@ -30,10 +31,12 @@ const COMPONENT_TS_PATH = resolve(__dirname, 'equipe-page.component.ts');
  * Returns the fallback value(s) as an array.
  */
 function readFallbackValues(source: string): string[] {
-  // After fix: single constant MEMBER_AVATAR_FALLBACK
-  const singleMatch = /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(
-    source,
-  );
+  // After fix: single constant MEMBER_AVATAR_FALLBACK (may be in component or constants file)
+  const singleMatch =
+    /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(source) ??
+    /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(
+      readFileSync(CONSTANTS_TS_PATH, 'utf-8'),
+    );
   if (singleMatch?.[1]) {
     return [singleMatch[1]];
   }

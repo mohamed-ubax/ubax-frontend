@@ -2,8 +2,8 @@ import '@angular/compiler';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injector } from '@angular/core';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { ApiConfiguration } from '@ubax-workspace/shared-api-types';
-import * as apiTypes from '@ubax-workspace/shared-api-types';
+import { ApiConfiguration } from '@ubax-workspace/shared-api-types/auth-api';
+import * as authApiTypes from '@ubax-workspace/shared-api-types/auth-api';
 import { persistAuthSession } from './auth-session';
 import {
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
@@ -12,9 +12,9 @@ import {
 import { UbaxRole } from './enums/auth-roles.enums';
 import { AuthService, type LoginResponse } from './auth.service';
 
-vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
+vi.mock('@ubax-workspace/shared-api-types/auth-api', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
+    await importOriginal<typeof import('@ubax-workspace/shared-api-types/auth-api')>();
   return {
     ...actual,
     login: vi.fn(),
@@ -76,10 +76,10 @@ describe('AuthService', () => {
 
     http = { get: vi.fn(), post: vi.fn(), request: vi.fn() };
 
-    vi.mocked(apiTypes.login).mockReturnValue(
+    vi.mocked(authApiTypes.login).mockReturnValue(
       of(new HttpResponse({ body: LOGIN_RESPONSE })) as any,
     );
-    vi.mocked(apiTypes.logout).mockReturnValue(
+    vi.mocked(authApiTypes.logout).mockReturnValue(
       of(new HttpResponse({ body: null })) as any,
     );
 
@@ -103,7 +103,7 @@ describe('AuthService', () => {
     );
 
     expect(result).toEqual(LOGIN_RESPONSE);
-    expect(apiTypes.login).toHaveBeenCalledWith(
+    expect(authApiTypes.login).toHaveBeenCalledWith(
       expect.anything(),
       'https://test.local',
       { body: { email: 'a@ubax.com', password: 'secret' } },
@@ -133,7 +133,7 @@ describe('AuthService', () => {
     const memberList = [
       { keycloakId: 'kc-123', userId: 'backend-42', email: 'a@ubax.com' },
     ];
-    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+    vi.mocked(authApiTypes.getByKeycloakId).mockReturnValue(
       of({ body: { partnerType: 'AGENCE_IMMOBILIERE' } }) as any,
     );
     http.get
@@ -159,7 +159,7 @@ describe('AuthService', () => {
   });
 
   it('getMyProfile hydrate scope, userId et avatar depuis le profil backend', async () => {
-    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+    vi.mocked(authApiTypes.getByKeycloakId).mockReturnValue(
       of({
         body: {
           data: {
@@ -178,7 +178,7 @@ describe('AuthService', () => {
       scope: 'HOTEL',
       avatarUrl: 'https://cdn.ubax.test/member.webp',
     });
-    expect(apiTypes.getByKeycloakId).toHaveBeenCalledWith(
+    expect(authApiTypes.getByKeycloakId).toHaveBeenCalledWith(
       expect.anything(),
       'https://test.local',
       { keycloakId: 'kc-123' },
@@ -186,7 +186,7 @@ describe('AuthService', () => {
   });
 
   it('getMyProfile retourne un profil vide si aucun keycloakId ne répond', async () => {
-    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+    vi.mocked(authApiTypes.getByKeycloakId).mockReturnValue(
       throwError(() => new Error('not-found')) as any,
     );
 
@@ -197,7 +197,7 @@ describe('AuthService', () => {
       scope: null,
       avatarUrl: null,
     });
-    expect(apiTypes.getByKeycloakId).toHaveBeenCalledWith(
+    expect(authApiTypes.getByKeycloakId).toHaveBeenCalledWith(
       expect.anything(),
       'https://test.local',
       { keycloakId: 'kc-missing' },
@@ -208,7 +208,7 @@ describe('AuthService', () => {
     const hotelMemberList = [
       { keycloakId: 'kc-123', userId: 'hotel-7', email: 'a@ubax.com' },
     ];
-    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+    vi.mocked(authApiTypes.getByKeycloakId).mockReturnValue(
       of({ body: { partnerType: 'HOTEL' } }) as any,
     );
     http.get
@@ -233,7 +233,7 @@ describe('AuthService', () => {
         email: 'partner@ubax.com',
       },
     ];
-    vi.mocked(apiTypes.getByKeycloakId).mockReturnValue(
+    vi.mocked(authApiTypes.getByKeycloakId).mockReturnValue(
       of({ body: { partnerType: 'AGENCE_IMMOBILIERE' } }) as any,
     );
     http.get
@@ -258,7 +258,7 @@ describe('AuthService', () => {
   it('logout envoie le refresh token dans le corps de la requête', async () => {
     await firstValueFrom(service.logout('my-refresh-token'));
 
-    expect(apiTypes.logout).toHaveBeenCalledWith(
+    expect(authApiTypes.logout).toHaveBeenCalledWith(
       expect.anything(),
       'https://test.local',
       { body: { refreshToken: 'my-refresh-token' } },

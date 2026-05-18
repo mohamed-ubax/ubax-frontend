@@ -99,15 +99,15 @@ export class EquipePageComponent {
   private readonly document = inject(DOCUMENT);
   readonly subRoleLabels = SUB_ROLE_LABELS as Record<string, string>;
 
-  readonly paginationArrowLeftSrc  = '/equipe/pagination-arrow-left.webp';
-  readonly paginationArrowRightSrc = '/equipe/pagination-arrow-right.webp';
-  readonly promoBackdropSrc        = '/equipe/promo-backdrop.webp';
-  readonly promoImageSrc           = '/equipe/promo-image.webp';
-  readonly roleSortIconSrc         = '/equipe/role-sort-icon.webp';
+  readonly paginationArrowLeftSrc = 'equipe/pagination-arrow-left.webp';
+  readonly paginationArrowRightSrc = 'equipe/pagination-arrow-right.webp';
+  readonly promoBackdropSrc = 'equipe/promo-backdrop.webp';
+  readonly promoImageSrc = 'equipe/promo-image.webp';
+  readonly roleSortIconSrc = 'equipe/role-sort-icon.webp';
   /** Illustration « no records » (frame Liste des membres — Figma node 1217:3865). */
-  readonly membersEmptyIllustrationSrc = '/equipe/members-empty.webp';
+  readonly membersEmptyIllustrationSrc = 'equipe/members-empty.webp';
   /** Calque vitré du bouton fermer drawer (Figma node 1207:4881 — ellipse sous le close). */
-  readonly drawerCloseGlassTextureSrc  = '/equipe/drawer-close-texture.webp';
+  readonly drawerCloseGlassTextureSrc = 'equipe/drawer-close-texture.webp';
 
   readonly currentPage = signal(1);
   readonly isRoleMenuOpen = signal(false);
@@ -259,7 +259,11 @@ export class EquipePageComponent {
     // authStore.scope() est la source de vérité — hydraté par loadSubRoles()
     // après le login. agencyStore.teamScope() n'est utilisé qu'en fallback
     // une fois que le store a déjà chargé (scope confirmé par l'API).
-    () => this.authStore.scope() ?? (this.agencyStore.entities().length > 0 ? this.agencyStore.teamScope() : null),
+    () =>
+      this.authStore.scope() ??
+      (this.agencyStore.entities().length > 0
+        ? this.agencyStore.teamScope()
+        : null),
   );
 
   readonly roleOptions = computed<readonly RoleOption[]>(() => {
@@ -493,7 +497,10 @@ export class EquipePageComponent {
         user.mainRole === UbaxRole.PARTNER_ADMIN;
 
       // Détecter un changement d'utilisateur → reset complet du store
-      if (this.loadedForUserId() !== null && this.loadedForUserId() !== user.id) {
+      if (
+        this.loadedForUserId() !== null &&
+        this.loadedForUserId() !== user.id
+      ) {
         this.agencyStore.reset();
         this.loadedTeamScope.set(null);
         this.loadedForUserId.set(null);
@@ -512,7 +519,10 @@ export class EquipePageComponent {
       const scopeToLoad = resolvedScope ?? 'AGENCE';
 
       // Ne recharger que si le scope a changé ou si c'est le premier chargement
-      if (this.loadedTeamScope() === scopeToLoad && this.loadedForUserId() === user.id) {
+      if (
+        this.loadedTeamScope() === scopeToLoad &&
+        this.loadedForUserId() === user.id
+      ) {
         return;
       }
 
@@ -633,7 +643,8 @@ export class EquipePageComponent {
     this.agencyStore.load({ scope });
   }
 
-  updateSearch(event: Event): void {    const target = event.target;
+  updateSearch(event: Event): void {
+    const target = event.target;
 
     if (target instanceof HTMLInputElement) {
       this.searchValue.set(target.value);

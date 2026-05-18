@@ -14,6 +14,7 @@ import { JSDOM } from "jsdom";
 
 const COMPONENT_TS_PATH = resolve(__dirname, "equipe-page.component.ts");
 const COMPONENT_HTML_PATH = resolve(__dirname, "equipe-page.component.html");
+const CONSTANTS_TS_PATH = resolve(__dirname, "../../constants/equipe-page.constants.ts");
 
 const FIGMA_ASSET_PREFIX = "https://www.figma.com/api/mcp/asset/";
 
@@ -119,8 +120,11 @@ describe("Cas 2 — MEMBER_AVATAR_FALLBACKS (comportement attendu apres correcti
 
   it("le fallback avatar doit etre un chemin local (commence par /equipe/)", () => {
     // Apres le correctif, MEMBER_AVATAR_FALLBACKS est remplace par MEMBER_AVATAR_FALLBACK = '/equipe/avatar-fallback.svg'
+    // La constante peut etre definie dans le component ou dans le fichier constants associe
+    const constantsSource = readFileSync(CONSTANTS_TS_PATH, "utf-8");
     const fallbackMatch =
-      /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(source);
+      /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(source) ??
+      /const MEMBER_AVATAR_FALLBACK\s*=\s*'([^']+)'/.exec(constantsSource);
     expect(
       fallbackMatch,
       "BUG DETECTE: La constante 'MEMBER_AVATAR_FALLBACK' (chemin local) est introuvable — le tableau MEMBER_AVATAR_FALLBACKS avec URLs Figma est encore present",
