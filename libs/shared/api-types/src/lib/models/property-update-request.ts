@@ -84,7 +84,7 @@ export interface PropertyUpdateRequest {
   mealPlan?: string;
 
   /**
-   * Fréquence de facturation (hôtel)
+   * Fréquence de facturation (hôtel) : NIGHTLY, WEEKLY, MONTHLY
    */
   paymentFrequency?: string;
 

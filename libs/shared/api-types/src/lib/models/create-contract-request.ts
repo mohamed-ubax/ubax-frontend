@@ -24,9 +24,16 @@ export interface CreateContractRequest {
   depositAmount?: number;
 
   /**
+   * Durée du programme RENT_TO_OWN en années (1-30).
+   * Alternative à `endDate` : si les deux sont fournis, `endDate` est prioritaire.
+   * Exemple : 5 ans → endDate calculée à startDate + 5 ans
+   */
+  durationYears?: number;
+
+  /**
    * Date de fin du contrat.
    * - `LEASE` : null = durée indéterminée
-   * - `RENT_TO_OWN` : **obligatoire** — détermine la durée du programme (ex. 2031-06-01 pour 5 ans)
+   * - `RENT_TO_OWN` : optionnel si `durationYears` est fourni
    * - `SALE` / `MANDATE` : optionnel
    */
   endDate?: string;

@@ -89,7 +89,7 @@ export interface PropertyCreateRequest {
   ownerId?: string;
 
   /**
-   * Fréquence de facturation (hôtel) : NIGHTLY, WEEKLY, MONTHLY
+   * Fréquence de facturation (hôtel) : NIGHTLY, WEEKLY, MONTHLY. Obligatoire pour un bien SHORT_STAY.
    */
   paymentFrequency?: string;
 
@@ -99,7 +99,7 @@ export interface PropertyCreateRequest {
   price: number;
 
   /**
-   * Type de bien (ex : APARTMENT, VILLA, HOTEL_ROOM…)
+   * Type de bien. Immobilier : APARTMENT, VILLA, HOUSE, LAND, OFFICE, WAREHOUSE, STORE. Hôtel : HOTEL_ROOM, HOTEL_SUITE, HOTEL_STUDIO, EVENT_SPACE, CONFERENCE_ROOM, RESTAURANT_SPACE.
    */
   propertyType?: string;
 
@@ -134,7 +134,7 @@ export interface PropertyCreateRequest {
   totalFloors?: number;
 
   /**
-   * Type de transaction (SALE, RENT, RENT_FURNISHED, SHORT_STAY)
+   * Type de transaction. Immobilier : SALE, RENT, RENT_FURNISHED. Hôtel : SHORT_STAY. Un bien hôtelier doit obligatoirement être en SHORT_STAY.
    */
   transactionType?: string;
 
