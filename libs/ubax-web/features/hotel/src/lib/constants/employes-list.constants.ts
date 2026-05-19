@@ -15,7 +15,7 @@ export const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 20:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/shared/people/profile-02.webp',
+    avatarSrc: 'shared/people/profile-02.webp',
     statusTone: 'active',
   },
   {
@@ -27,7 +27,7 @@ export const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/employes/images/employe-youssouf-traore.webp',
+    avatarSrc: 'employes/images/employe-youssouf-traore.webp',
     statusTone: 'active',
   },
   {
@@ -39,7 +39,7 @@ export const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/shared/people/billing-guest-03.webp',
+    avatarSrc: 'shared/people/billing-guest-03.webp',
     statusTone: 'active',
   },
   {
@@ -51,7 +51,7 @@ export const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/shared/people/profile-03.webp',
+    avatarSrc: 'shared/people/profile-03.webp',
     statusTone: 'inactive',
   },
   {
@@ -63,7 +63,7 @@ export const EMPLOYES_ALL_ROWS: readonly EmployeRow[] = [
     joursTravail: 'Lundi → Samedi',
     horaires: '08:00 - 15:00',
     telephone: '+225 07 00 00 01',
-    avatarSrc: '/shared/people/profile-01.webp',
+    avatarSrc: 'shared/people/profile-01.webp',
     statusTone: 'active',
   },
 ] as const;

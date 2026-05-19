@@ -7,7 +7,7 @@ import type {
   ArchivageTabDefinition,
 } from '../types/archivage.types';
 
-const ASSET_ROOT = '/archivages/commercial';
+const ASSET_ROOT = 'archivages/commercial';
 const ICON_ROOT = `${ASSET_ROOT}/icons`;
 const PEOPLE_ROOT = `${ASSET_ROOT}/people`;
 const ARCHIVED_BY = 'Aissatou Diallo';

@@ -64,12 +64,12 @@ const MONTHS = [
   'Décembre',
 ] as const;
 
-const ASSET_ROOT = '/reservations/commercial';
+const ASSET_ROOT = 'reservations/commercial';
 const PEOPLE_ROOT = `${ASSET_ROOT}/people`;
 const DETAIL_ROOT = `${ASSET_ROOT}/detail`;
 const OVERVIEW_ROOT = `${ASSET_ROOT}/overview`;
 const ICON_ROOT = `${ASSET_ROOT}/icons`;
-const CLIENT_ICON_ROOT = '/client-detail/icons';
+const CLIENT_ICON_ROOT = 'client-detail/icons';
 
 export const COMMERCIAL_ICON_ASSETS = {
   searchHeader: `${ICON_ROOT}/search-header.webp`,
@@ -87,13 +87,13 @@ export const COMMERCIAL_ICON_ASSETS = {
   check: `${ICON_ROOT}/check.webp`,
   calendar: `${CLIENT_ICON_ROOT}/calendar.svg`,
   export: `${ICON_ROOT}/export.webp`,
-  toolbarCalendar: '/archivages/commercial/icons/calendar-toolbar.webp',
-  selectChevron: '/archivages/commercial/icons/chevron-down.webp',
+  toolbarCalendar: 'archivages/commercial/icons/calendar-toolbar.webp',
+  selectChevron: 'archivages/commercial/icons/chevron-down.webp',
   phone: `${CLIENT_ICON_ROOT}/phone.svg`,
   mail: `${CLIENT_ICON_ROOT}/mail.svg`,
   wave: `${CLIENT_ICON_ROOT}/wave-logo.webp`,
-  chevronLeft: '/calendar/icons/raphael_arrow_left.webp',
-  chevronRight: '/calendar/icons/raphael_arrow_right.webp',
+  chevronLeft: 'calendar/icons/raphael_arrow_left.webp',
+  chevronRight: 'calendar/icons/raphael_arrow_right.webp',
 } as const;
 
 function createDate(year: number, month: number, day: number): Date {

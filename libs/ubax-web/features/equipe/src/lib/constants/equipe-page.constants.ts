@@ -14,7 +14,7 @@ import type { AdminUserResponse } from '@ubax-workspace/shared-api-types';
 
 export const MEMBER_PAGE_SIZE = 6;
 
-export const MEMBER_AVATAR_FALLBACK = '/equipe/avatar-fallback.svg';
+export const MEMBER_AVATAR_FALLBACK = 'equipe/avatar-fallback.svg';
 
 export function normalizeSearchText(value: string): string {
   return value.toLowerCase().normalize('NFD').replaceAll(/[̀-ͯ]/g, '');

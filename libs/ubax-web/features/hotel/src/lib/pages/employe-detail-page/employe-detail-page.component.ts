@@ -31,7 +31,7 @@ export class EmployeDetailPageComponent {
   readonly employe = {
     nom: 'Youssouf Traoré',
     role: 'Responsable Sécurité',
-    avatarSrc: '/employes/images/employe-youssouf-traore.webp',
+    avatarSrc: 'employes/images/employe-youssouf-traore.webp',
     telephone: '+225 07 00 00 01',
     email: 'keanurepes@mail.com',
     contrat: 'Contrat : CDD',
@@ -43,12 +43,12 @@ export class EmployeDetailPageComponent {
   readonly pageActions: readonly EmployePageAction[] = [
     {
       label: 'Editer',
-      iconSrc: '/employe-detail/icons/edit.svg',
+      iconSrc: 'employe-detail/icons/edit.svg',
       variant: 'edit',
     },
     {
       label: 'Archiver',
-      iconSrc: '/employe-detail/icons/archive.svg',
+      iconSrc: 'employe-detail/icons/archive.svg',
       variant: 'archive',
     },
   ];
@@ -57,22 +57,22 @@ export class EmployeDetailPageComponent {
     {
       label: 'Téléphone',
       value: this.employe.telephone,
-      iconSrc: '/employe-detail/icons/phone.svg',
+      iconSrc: 'employe-detail/icons/phone.svg',
     },
     {
       label: 'Email',
       value: this.employe.email,
-      iconSrc: '/employe-detail/icons/mail.svg',
+      iconSrc: 'employe-detail/icons/mail.svg',
     },
     {
       label: 'Type de contrat',
       value: this.employe.contrat,
-      iconSrc: '/employe-detail/icons/contract.svg',
+      iconSrc: 'employe-detail/icons/contract.svg',
     },
     {
       label: "Date d'embauche",
       value: this.employe.dateEmbauche,
-      iconSrc: '/employe-detail/icons/hire-date.svg',
+      iconSrc: 'employe-detail/icons/hire-date.svg',
       hasFramedIcon: true,
     },
   ];
