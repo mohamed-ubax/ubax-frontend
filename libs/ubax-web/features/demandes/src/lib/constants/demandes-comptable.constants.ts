@@ -18,8 +18,8 @@ export const COMPTABLE_ICONS = {
   summaryOpen: `${SHARED_ASSET_ROOT}/summary-open.webp`,
   summaryProgress: `${SHARED_ASSET_ROOT}/summary-progress.webp`,
   summaryDone: `${SHARED_ASSET_ROOT}/summary-done.webp`,
-  calendarPrev: '/demandes/commercial/calendar-chevron-left.webp',
-  calendarNext: '/demandes/commercial/calendar-chevron-right.webp',
+  calendarPrev: 'demandes/commercial/calendar-chevron-left.webp',
+  calendarNext: 'demandes/commercial/calendar-chevron-right.webp',
 } as const;
 
 export const COMPTABLE_TOOLBAR_FIELDS: readonly ComptableToolbarField[] = [
