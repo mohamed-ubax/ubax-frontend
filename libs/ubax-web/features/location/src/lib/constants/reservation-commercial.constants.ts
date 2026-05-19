@@ -64,12 +64,12 @@ const MONTHS = [
   'Décembre',
 ] as const;
 
-const ASSET_ROOT = '/reservations/commercial';
+const ASSET_ROOT = 'reservations/commercial';
 const PEOPLE_ROOT = `${ASSET_ROOT}/people`;
 const DETAIL_ROOT = `${ASSET_ROOT}/detail`;
 const OVERVIEW_ROOT = `${ASSET_ROOT}/overview`;
 const ICON_ROOT = `${ASSET_ROOT}/icons`;
-const CLIENT_ICON_ROOT = '/client-detail/icons';
+const CLIENT_ICON_ROOT = 'client-detail/icons';
 
 export const COMMERCIAL_ICON_ASSETS = {
   searchHeader: `${ICON_ROOT}/search-header.webp`,

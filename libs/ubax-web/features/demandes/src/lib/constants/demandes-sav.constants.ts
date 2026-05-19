@@ -7,8 +7,8 @@ import type {
   SavTicketRow,
 } from '../types/demandes-sav.types';
 
-export const SHARED_ASSET_ROOT = '/shared/demandes';
-export const SAV_ASSET_ROOT = '/demandes/sav';
+export const SHARED_ASSET_ROOT = 'shared/demandes';
+export const SAV_ASSET_ROOT = 'demandes/sav';
 export const TICKETS_PER_PAGE = 8;
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
