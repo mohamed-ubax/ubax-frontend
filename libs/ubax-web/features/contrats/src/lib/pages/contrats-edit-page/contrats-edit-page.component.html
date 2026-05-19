@@ -23,35 +23,58 @@
     }
 
     @case ('success') {
-      <div class="ce-header">
-        <div class="ce-header__left">
-          <h1 class="ce-header__title">Modifier le contrat</h1>
-          <div class="ce-header__meta">
-            <ubax-status-badge variant="neutral">Brouillon</ubax-status-badge>
-            <span class="ce-header__warning">
-              <i class="pi pi-lock"></i>
-              Modification possible uniquement en statut Brouillon
-            </span>
-          </div>
-        </div>
-      </div>
+      <div class="ce-layout">
 
-      <div class="ce-card">
+        <!-- ── Sidebar ── -->
+        <aside class="ce-sidebar">
+          <div class="ce-sidebar-brand">
+            <div class="ce-sidebar-brand__icon" aria-hidden="true">
+              <i class="pi pi-file-edit"></i>
+            </div>
+            <div>
+              <div class="ce-sidebar-brand__title">Modifier le contrat</div>
+              <div class="ce-sidebar-brand__sub">Brouillon en cours d'édition</div>
+            </div>
+          </div>
 
-        <!-- ── Property summary banner ── -->
-        <div class="ce-property-banner">
-          <div class="ce-property-banner__icon" aria-hidden="true">
-            <i class="pi pi-home"></i>
+          <div class="ce-sidebar-info">
+            <div class="ce-sidebar-info__item">
+              <span class="ce-sidebar-info__icon" aria-hidden="true">
+                <i class="pi pi-building"></i>
+              </span>
+              <span class="ce-sidebar-info__text">
+                <span class="ce-sidebar-info__label">Bien</span>
+                <span class="ce-sidebar-info__value">{{ selectedPropertyLabel() }}</span>
+              </span>
+            </div>
+            <div class="ce-sidebar-info__item">
+              <span class="ce-sidebar-info__icon" aria-hidden="true">
+                <i class="pi pi-user"></i>
+              </span>
+              <span class="ce-sidebar-info__text">
+                <span class="ce-sidebar-info__label">Propriétaire</span>
+                <span class="ce-sidebar-info__value">{{ ownerDisplayName() }}</span>
+              </span>
+            </div>
           </div>
-          <div class="ce-property-banner__body">
-            <span class="ce-property-banner__eyebrow">Bien concerné</span>
-            <span class="ce-property-banner__name">{{ selectedPropertyLabel() }}</span>
+
+          <div class="ce-sidebar-hint">
+            <i class="pi pi-lock" aria-hidden="true"></i>
+            <div>
+              <div class="ce-sidebar-hint__title">Brouillon uniquement</div>
+              <div class="ce-sidebar-hint__desc">Les modifications ne sont autorisées qu'en statut Brouillon. Une fois soumis, le contrat ne peut plus être édité.</div>
+            </div>
           </div>
-          <div class="ce-property-banner__owner">
-            <i class="pi pi-user" aria-hidden="true"></i>
-            <span>{{ ownerDisplayName() }}</span>
-          </div>
-        </div>
+        </aside>
+
+        <!-- ── Main ── -->
+        <main>
+          <div class="ce-card">
+
+            <div class="ce-step-header">
+              <h2 class="ce-step-header__title">Modifier le contrat</h2>
+              <p class="ce-step-header__sub">Modifiez les champs ci-dessous. Un brouillon peut être réédité autant de fois que nécessaire avant soumission.</p>
+            </div>
 
         <form [formGroup]="editForm">
 
@@ -388,6 +411,8 @@
             </button>
           </div>
         </form>
+          </div>
+        </main>
       </div>
     }
   }
