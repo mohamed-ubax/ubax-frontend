@@ -6,12 +6,12 @@ import {
   type AssignAdminRoleRequest,
   type CreateAdminRequest,
   assignAdminRole,
-  assignSubRoles1,
+  assignSubRoles2,
   createAdmin,
   deleteAdmin,
-  getSubRoles1,
+  getSubRoles2,
   listAdmins,
-  revokeSubRole1,
+  revokeSubRole2,
 } from '@ubax-workspace/shared-api-types';
 import { HttpClient } from '@angular/common/http';
 import { from, map, Observable, of, switchMap } from 'rxjs';
@@ -42,9 +42,11 @@ export function normalizeSubRoleStrings(
   subRoles: MemberResponse['subRoles'],
 ): string[] {
   if (!subRoles?.length) return [];
-  return subRoles.map((sr) =>
-    typeof sr === 'string' ? sr : (sr as { role: string }).role ?? '',
-  ).filter(Boolean);
+  return subRoles
+    .map((sr) =>
+      typeof sr === 'string' ? sr : ((sr as { role: string }).role ?? ''),
+    )
+    .filter(Boolean);
 }
 
 const COLLECTION_KEYS = [
@@ -289,15 +291,20 @@ export class AdminUsersService {
 
   getSubRoles(userId: string): Observable<AdminSubRole[]> {
     return from(
-      this.api.invoke(getSubRoles1, { userId, scope: 'UBAX_INTERNAL' }),
+      this.api.invoke(getSubRoles2, { userId, scope: 'UBAX_INTERNAL' }),
     ).pipe(
       // getSubRoles2 uses responseType:'blob' — parse the Blob as JSON first
       switchMap((raw) => {
         if (raw instanceof Blob) {
-          return from(raw.text()).pipe(map((text) => {
-            try { return normalizeAdminSubRoles(JSON.parse(text)); }
-            catch { return []; }
-          }));
+          return from(raw.text()).pipe(
+            map((text) => {
+              try {
+                return normalizeAdminSubRoles(JSON.parse(text));
+              } catch {
+                return [];
+              }
+            }),
+          );
         }
         return of(normalizeAdminSubRoles(raw));
       }),
@@ -306,17 +313,22 @@ export class AdminUsersService {
 
   assignSubRoles(userId: string, roles: string[]): Observable<AdminSubRole[]> {
     return from(
-      this.api.invoke(assignSubRoles1, {
+      this.api.invoke(assignSubRoles2, {
         userId,
-        body: roles,
+        body: { roles, scope: 'UBAX_INTERNAL' },
       }),
     ).pipe(
       switchMap((raw) => {
         if (raw instanceof Blob) {
-          return from(raw.text()).pipe(map((text) => {
-            try { return normalizeAdminSubRoles(JSON.parse(text)); }
-            catch { return []; }
-          }));
+          return from(raw.text()).pipe(
+            map((text) => {
+              try {
+                return normalizeAdminSubRoles(JSON.parse(text));
+              } catch {
+                return [];
+              }
+            }),
+          );
         }
         return of(normalizeAdminSubRoles(raw));
       }),
@@ -325,14 +337,23 @@ export class AdminUsersService {
 
   revokeSubRole(userId: string, role: string): Observable<AdminSubRole[]> {
     return from(
-      this.api.invoke(revokeSubRole1, { userId, role, scope: 'UBAX_INTERNAL' }),
+      this.api.invoke(revokeSubRole2, {
+        userId,
+        role,
+        scope: 'UBAX_INTERNAL',
+      }),
     ).pipe(
       switchMap((raw) => {
         if (raw instanceof Blob) {
-          return from(raw.text()).pipe(map((text) => {
-            try { return normalizeAdminSubRoles(JSON.parse(text)); }
-            catch { return []; }
-          }));
+          return from(raw.text()).pipe(
+            map((text) => {
+              try {
+                return normalizeAdminSubRoles(JSON.parse(text));
+              } catch {
+                return [];
+              }
+            }),
+          );
         }
         return of(normalizeAdminSubRoles(raw));
       }),
@@ -349,9 +370,7 @@ export class AdminUsersService {
 
   getHotelMembers(hotelId: string): Observable<MemberResponse[]> {
     return this.http
-      .get<unknown>(
-        `${this.config.rootUrl}/v1/admin/hotels/${hotelId}/members`,
-      )
+      .get<unknown>(`${this.config.rootUrl}/v1/admin/hotels/${hotelId}/members`)
       .pipe(map(normalizeMemberCollection));
   }
 }
