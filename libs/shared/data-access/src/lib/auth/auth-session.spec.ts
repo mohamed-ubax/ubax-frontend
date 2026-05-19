@@ -175,7 +175,7 @@ describe('auth-session helpers', () => {
     );
     expect(currentBrowserPath()).toBe('/app/reservations?page=2#details');
     expect(buildPortalLoginUrl('/evil')).toBe(
-      '/connexion?redirect=%2Fapp%2Ftableau-de-bord',
+      '/connexion?redirect=%2Fapp%2F',
     );
 
     expect(redirectBrowserToPortalLogin()).toBe(true);
