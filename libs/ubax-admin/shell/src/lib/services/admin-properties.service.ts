@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import {
   ApiConfiguration,
-  getById,
+  getById1,
   list2,
   updateStatus1,
   type PropertyDetailResponse,
@@ -134,7 +134,7 @@ export class AdminPropertiesService {
   }
 
   getDetail(id: string): Observable<PropertyDetailResponse> {
-    return getById(this.http, this.rootUrl, { id }).pipe(
+    return getById1(this.http, this.rootUrl, { id }).pipe(
       map((r) => {
         // API response shape:
         // { status, statusCode, message, data: { property: {...}, media: [...], documents: [...] } }
