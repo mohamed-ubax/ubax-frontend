@@ -19,7 +19,7 @@
         "browser": "apps/ubax-web/src/main.ts",
         "tsConfig": "apps/ubax-web/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
-        "baseHref": "/tableau-de-bord/",
+        "baseHref": "/app/",
         "assets": [
           {
             "glob": "**/*",
