@@ -21,4 +21,9 @@ export interface PropertyAmenityRequest {
    * Libellé d'une commodité non présente dans la liste standard. Null si code renseigné.
    */
   customValue?: string;
+
+  /**
+   * Description de la commodité telle qu'affichée dans la code list. Pour une commodité standard : valeur issue de PROPERTY_AMENITY dans la_code_list. Pour une commodité personnalisée : identique à customDescription.
+   */
+  description?: string;
 }
