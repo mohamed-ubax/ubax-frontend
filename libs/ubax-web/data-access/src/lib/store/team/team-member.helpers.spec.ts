@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { extractAvatarUrlsFromTeamResponse } from './team-member.helpers';
 
 describe('extractAvatarUrlsFromTeamResponse', () => {
