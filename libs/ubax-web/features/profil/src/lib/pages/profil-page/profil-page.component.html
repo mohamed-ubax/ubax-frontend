@@ -22,14 +22,14 @@
 
           <div
             class="profil-avatar-circle"
-            [class.profil-avatar-circle--has-image]="currentAvatarSrc() !== '/profil/avatar-placeholder.svg'"
+            [class.profil-avatar-circle--has-image]="currentAvatarSrc() !== 'profil/avatar-placeholder.svg'"
             role="button"
             tabindex="0"
             aria-label="Modifier la photo de profil"
             (click)="onAvatarClick()"
             (keydown.enter)="onAvatarClick()"
           >
-            @if (currentAvatarSrc() !== '/profil/avatar-placeholder.svg') {
+            @if (currentAvatarSrc() !== 'profil/avatar-placeholder.svg') {
               <img
                 [src]="currentAvatarSrc()"
                 alt="Photo de profil"
