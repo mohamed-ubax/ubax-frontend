@@ -84,7 +84,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 2,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-04.webp',
+      image: 'hotel-dashboard/reservations/guest-04.webp',
       color: 'orange',
     },
     {
@@ -94,7 +94,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 6,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-02.webp',
+      image: 'hotel-dashboard/reservations/guest-02.webp',
       color: 'green',
     },
     {
@@ -104,7 +104,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 9,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-03.webp',
+      image: 'hotel-dashboard/reservations/guest-03.webp',
       color: 'blue',
     },
     {
@@ -114,7 +114,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 12,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-01.webp',
+      image: 'hotel-dashboard/reservations/guest-01.webp',
       color: 'blue',
     },
     {
@@ -124,7 +124,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 15,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-04.webp',
+      image: 'hotel-dashboard/reservations/guest-04.webp',
       color: 'orange',
     },
     {
@@ -134,7 +134,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 20,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-05.webp',
+      image: 'hotel-dashboard/reservations/guest-05.webp',
       color: 'green',
     },
     {
@@ -144,7 +144,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 23,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-02.webp',
+      image: 'hotel-dashboard/reservations/guest-02.webp',
       color: 'blue',
     },
     {
@@ -154,7 +154,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 26,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-04.webp',
+      image: 'hotel-dashboard/reservations/guest-04.webp',
       color: 'orange',
     },
     {
@@ -164,7 +164,7 @@ export class CalendrierPageComponent {
       amount: '150 000 FCFA',
       startDay: 29,
       durationDays: 2,
-      image: '/hotel-dashboard/reservations/guest-01.webp',
+      image: 'hotel-dashboard/reservations/guest-01.webp',
       color: 'blue',
     },
   ];
