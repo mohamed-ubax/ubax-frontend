@@ -4,25 +4,31 @@ export const CONTRATS_ADD_STEP_CONFIG: readonly StepConfig[] = [
   {
     step: 1,
     icon: 'pi-user',
-    title: 'Sélection du locataire',
+    title: 'Locataire',
     desc: 'Locataire qualifié sans contrat actif.',
   },
   {
     step: 2,
     icon: 'pi-home',
     title: 'Sélection du bien',
-    desc: 'Bien pré-rempli depuis le dossier.',
+    desc: 'Pré-rempli depuis le dossier locataire.',
   },
   {
     step: 3,
-    icon: 'pi-calendar',
-    title: 'Conditions du bail',
-    desc: 'Montants et dates.',
+    icon: 'pi-file-edit',
+    title: 'Type de contrat',
+    desc: 'Définissez la nature du contrat.',
   },
   {
     step: 4,
+    icon: 'pi-calendar',
+    title: 'Conditions',
+    desc: 'Montants, dates et clauses.',
+  },
+  {
+    step: 5,
     icon: 'pi-check-circle',
-    title: "Récapitulatif",
-    desc: "Vérifiez et confirmez.",
+    title: 'Récapitulatif',
+    desc: 'Vérifiez et confirmez.',
   },
 ];
