@@ -6,13 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-  FormsModule,
-} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -117,7 +111,7 @@ const CONTRACT_TYPE_FIELDS: Record<
     showDepositAmount: true,
     showPaymentDay: true,
     showEndDate: true,
-    endDateRequired: false, // endDate OU durationYears — l'un des deux est obligatoire
+    endDateRequired: false,
     showDurationYears: true,
     showReservationDeposit: false,
     showReservationDurationDays: false,
@@ -205,7 +199,6 @@ const STATIC_CONTRACT_TYPE_OPTIONS: RichSelectOption<ContractType>[] = [
     Select,
     InputNumberModule,
     RouterLink,
-    ReactiveFormsModule,
     FormsModule,
     DetailInfoBlockComponent,
   ],
@@ -215,7 +208,6 @@ const STATIC_CONTRACT_TYPE_OPTIONS: RichSelectOption<ContractType>[] = [
 })
 export class ContratsAddPageComponent {
   // ─── Injections ─────────────────────────────────────────────────────────────
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
   readonly store = inject(ContratsStore);
@@ -228,7 +220,47 @@ export class ContratsAddPageComponent {
   readonly contractTypeCodeList = signal<LaCodeListDto[]>([]);
   readonly contractTypeCodeListLoading = signal(false);
 
-  /** Options du sélecteur de type de contrat (depuis codelist ou fallback statique) */
+  // ─── État UI ─────────────────────────────────────────────────────────────────
+  readonly currentStep = signal(1);
+  readonly totalSteps = 5;
+  readonly openEnded = signal(false);
+  readonly rentToOwnDurationMode = signal<'years' | 'date'>('years');
+  private readonly awaitingCreation = signal(false);
+  private readonly knownContractIds = signal<string[]>([]);
+  private readonly userEditedFields = signal<Set<string>>(new Set());
+  private readonly touchedFields = signal<Set<string>>(new Set());
+
+  readonly stepConfig: readonly StepConfig[] = CONTRATS_ADD_STEP_CONFIG;
+  readonly Math = Math;
+
+  // ─── Champs de formulaire (signals) ─────────────────────────────────────────
+
+  // Étape 1 — Locataire
+  readonly tenantId = signal('');
+
+  // Étape 2 — Sélection du bien
+  readonly propertyId = signal('');
+  readonly ownerId = signal('');
+
+  // Étape 3 — Type de contrat
+  readonly contractType = signal<ContractType>('LEASE');
+
+  // Étape 4 — Conditions financières et dates
+  readonly monthlyRent = signal<number | null>(null);
+  readonly depositAmount = signal<number | null>(null);
+  readonly paymentDay = signal<number | null>(5);
+  readonly salePrice = signal<number | null>(null);
+  readonly monthlyInstallment = signal<number | null>(null);
+  readonly durationYears = signal<number | null>(5);
+  readonly reservationDeposit = signal<number | null>(null);
+  readonly reservationDurationDays = signal<number | null>(null);
+  readonly agencyCommissionRate = signal<number | null>(null);
+  readonly specialClauses = signal('');
+  readonly terminationConditions = signal('');
+  readonly startDate = signal<ContractDateValue>(null);
+  readonly endDate = signal<ContractDateValue>(null);
+
+  // ─── Computed: codelist options ──────────────────────────────────────────────
   readonly contractTypeOptions = computed<RichSelectOption<ContractType>[]>(() => {
     const items = this.contractTypeCodeList();
     if (items.length > 0) {
@@ -243,30 +275,8 @@ export class ContratsAddPageComponent {
           icon: this.contractTypeIconInternal(item.value as ContractType),
         }));
     }
-    // Fallback statique si le codelist n'est pas encore chargé
     return STATIC_CONTRACT_TYPE_OPTIONS;
   });
-
-  // ─── État UI ─────────────────────────────────────────────────────────────────
-  readonly currentStep = signal(1);
-  readonly totalSteps = 5;
-  readonly openEnded = signal(false);
-  /** Mode de saisie durée RENT_TO_OWN : 'years' = sélecteur N années, 'date' = date-picker */
-  readonly rentToOwnDurationMode = signal<'years' | 'date'>('years');
-  private readonly awaitingCreation = signal(false);
-  private readonly knownContractIds = signal<string[]>([]);
-
-  /**
-   * Flag userEdited par champ : une fois qu'un champ a été modifié manuellement,
-   * il ne sera plus écrasé lors d'un changement de type de contrat.
-   */
-  private readonly userEditedFields = signal<Set<string>>(new Set());
-
-  readonly stepConfig: readonly StepConfig[] = CONTRATS_ADD_STEP_CONFIG;
-
-  readonly currentStepConfig = computed(
-    () => this.stepConfig[this.currentStep() - 1],
-  );
 
   readonly propertyOptions = computed<RichSelectOption[]>(() =>
     this.biensStore
@@ -280,50 +290,59 @@ export class ContratsAddPageComponent {
       })),
   );
 
-  readonly tenantOptions = computed<RichSelectOption[]>(() => {
-    const currentId = this.selectedTenantId();
-
-    return this.locationStore
+  /** Seuls les locataires QUALIFIED — stable, aucune dépendance sur la sélection */
+  readonly tenantOptions = computed<RichSelectOption[]>(() =>
+    this.locationStore
       .entities()
-      .filter(
-        (tenant) =>
-          Boolean(tenant.id) &&
-          (tenant.status === 'QUALIFIED' || tenant.id === currentId),
-      )
+      .filter((tenant) => Boolean(tenant.id) && tenant.status === 'QUALIFIED')
       .map((tenant) => ({
         value: tenant.id,
         label: tenant.fullName?.trim() || 'Locataire sans nom',
         meta: this.formatTenantMeta(tenant),
         icon: 'pi-user',
-      }));
+      })),
+  );
+
+  // ─── Computed: dérivés du formulaire ────────────────────────────────────────
+  readonly contractTypeFields = computed(
+    () => CONTRACT_TYPE_FIELDS[this.contractType()],
+  );
+
+  readonly tenantStepRequired = computed(
+    () => CONTRACT_TYPE_FIELDS[this.contractType()].requiresTenant,
+  );
+
+  readonly visibleTotalSteps = computed(() => (this.tenantStepRequired() ? 5 : 4));
+
+  readonly visibleStepConfig = computed(() => {
+    if (this.tenantStepRequired()) return this.stepConfig;
+    return this.stepConfig.filter((s) => s.step !== 1);
   });
 
-  readonly selectedPropertyLabel = computed(() => {
-    const propertyId = this.step2Form.controls.propertyId.value;
-    if (!propertyId) return '—';
+  readonly currentStepConfig = computed(
+    () => this.stepConfig[this.currentStep() - 1],
+  );
 
+  readonly selectedPropertyLabel = computed(() => {
+    const propertyId = this.propertyId();
+    if (!propertyId) return '—';
     return (
-      this.propertyOptions().find((option) => option.value === propertyId)
-        ?.label ?? propertyId
+      this.propertyOptions().find((o) => o.value === propertyId)?.label ?? propertyId
     );
   });
 
   readonly selectedTenantLabel = computed(() => {
-    const tenantId = this.selectedTenantId();
+    const tenantId = this.tenantId();
     if (!tenantId) return '—';
-
     return (
-      this.tenantOptions().find((option) => option.value === tenantId)?.label ??
-      tenantId
+      this.tenantOptions().find((o) => o.value === tenantId)?.label ?? tenantId
     );
   });
 
   readonly ownerDisplayName = computed(() => {
     const selectedProperty = this.biensStore
       .entities()
-      .find(
-        (property) => property.id === this.step2Form.controls.propertyId.value,
-      );
+      .find((property) => property.id === this.propertyId());
 
     if (selectedProperty?.ownerName) return selectedProperty.ownerName;
 
@@ -332,90 +351,70 @@ export class ContratsAddPageComponent {
     return fullName || 'Utilisateur connecté';
   });
 
-  // ─── Formulaires ─────────────────────────────────────────────────────────────
-  /** Étape 1 : Locataire (conditionnel selon contractType) */
-  readonly step1Form = this.fb.group({
-    tenantId: [''],
-  });
+  // ─── Computed: validation ─────────────────────────────────────────────────────
+  readonly step1Errors = computed(() => ({
+    tenantRequired: this.tenantStepRequired() && !this.tenantId(),
+  }));
+  readonly step1Valid = computed(() => !this.step1Errors().tenantRequired);
 
-  private readonly selectedTenantId = toSignal(
-    this.step1Form.controls.tenantId.valueChanges,
-    { initialValue: '' },
+  readonly step2Errors = computed(() => ({
+    propertyRequired: !this.propertyId(),
+    ownerRequired: !this.ownerId(),
+  }));
+  readonly step2Valid = computed(
+    () => !this.step2Errors().propertyRequired && !this.step2Errors().ownerRequired,
   );
 
-  /** Étape 2 : Sélection du bien + propriétaire */
-  readonly step2Form = this.fb.group({
-    propertyId: ['', Validators.required],
-    ownerId: ['', Validators.required],
-  });
+  readonly step3Valid = computed(() => !!this.contractType());
 
-  /** Étape 3 : Type de contrat */
-  readonly step3Form = this.fb.group({
-    contractType: this.fb.control<ContractType>('LEASE', Validators.required),
+  readonly step4Errors = computed(() => {
+    const fields = this.contractTypeFields();
+    const mode = this.rentToOwnDurationMode();
+    const needEndDate =
+      fields.endDateRequired || (fields.showDurationYears && mode === 'date');
+    return {
+      startDate: !this.startDate(),
+      monthlyRent: fields.showMonthlyRent && (!this.monthlyRent() || this.monthlyRent()! < 1),
+      salePrice: fields.showSalePrice && (!this.salePrice() || this.salePrice()! < 1),
+      monthlyInstallment:
+        fields.showMonthlyInstallment &&
+        (!this.monthlyInstallment() || this.monthlyInstallment()! < 1),
+      depositAmount: fields.showDepositAmount && this.depositAmount() == null,
+      paymentDay:
+        fields.showPaymentDay &&
+        (!this.paymentDay() || this.paymentDay()! < 1 || this.paymentDay()! > 28),
+      durationYears:
+        fields.showDurationYears &&
+        mode === 'years' &&
+        (!this.durationYears() || this.durationYears()! < 1),
+      endDate: needEndDate && !this.openEnded() && !this.endDate(),
+      reservationDeposit:
+        fields.showReservationDeposit &&
+        (!this.reservationDeposit() || this.reservationDeposit()! < 1),
+      reservationDurationDays:
+        fields.showReservationDurationDays &&
+        (!this.reservationDurationDays() || this.reservationDurationDays()! < 1),
+      agencyCommissionRate:
+        fields.showAgencyCommissionRate && this.agencyCommissionRate() == null,
+    };
   });
-
-  /** Étape 4 : Conditions financières et dates */
-  readonly step4Form = this.fb.group({
-    // LEASE / RENT_TO_OWN
-    monthlyRent: this.fb.control<number | null>(null),
-    depositAmount: this.fb.control<number | null>(null),
-    paymentDay: this.fb.control<number | null>(5, [Validators.min(1), Validators.max(28)]),
-    // SALE / RENT_TO_OWN
-    salePrice: this.fb.control<number | null>(null),
-    // RENT_TO_OWN
-    monthlyInstallment: this.fb.control<number | null>(null),
-    durationYears: this.fb.control<number | null>(5, [Validators.min(1), Validators.max(30)]),
-    // RESERVATION
-    reservationDeposit: this.fb.control<number | null>(null),
-    reservationDurationDays: this.fb.control<number | null>(null, [Validators.min(1)]),
-    // MANDATE
-    agencyCommissionRate: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(100)]),
-    specialClauses: this.fb.control<string>(''),
-    terminationConditions: this.fb.control<string>(''),
-    // Dates
-    startDate: this.fb.control<ContractDateValue>(null, Validators.required),
-    endDate: this.fb.control<ContractDateValue>(null),
-  });
-
-  /** Signal sur le type de contrat sélectionné */
-  private readonly selectedContractType = toSignal(
-    this.step3Form.controls.contractType.valueChanges,
-    { initialValue: 'LEASE' as ContractType },
+  readonly step4Valid = computed(
+    () => !Object.values(this.step4Errors()).some(Boolean),
   );
 
-  /** Règles de visibilité/validation pour le type courant */
-  readonly contractTypeFields = computed(
-    () => CONTRACT_TYPE_FIELDS[this.selectedContractType()],
-  );
-
-  /** Indique si l'étape locataire est requise pour le type courant */
-  readonly tenantStepRequired = computed(
-    () => CONTRACT_TYPE_FIELDS[this.selectedContractType()].requiresTenant,
-  );
-
-  /** Nombre réel d'étapes visibles (5 si locataire requis, 4 sinon) */
-  readonly visibleTotalSteps = computed(() => (this.tenantStepRequired() ? 5 : 4));
-
-  /** Étapes visibles dans le stepper (masquer étape 1 si locataire non requis) */
-  readonly visibleStepConfig = computed(() => {
-    if (this.tenantStepRequired()) return this.stepConfig;
-    return this.stepConfig.filter((s) => s.step !== 1);
-  });
-
-  /** Récapitulatif indicatif pour RENT_TO_OWN */
+  // ─── Computed: récapitulatif RENT_TO_OWN ────────────────────────────────────
   readonly rentToOwnSummary = computed(() => {
-    const v = this.step4Form.getRawValue();
-    const installment = v.monthlyInstallment ?? 0;
-    const salePrice = v.salePrice ?? 0;
-    const start = v.startDate;
+    const installment = this.monthlyInstallment() ?? 0;
+    const salePrice = this.salePrice() ?? 0;
+    const start = this.startDate();
 
     if (!installment || !salePrice) return null;
 
     let months = 0;
     if (this.rentToOwnDurationMode() === 'years') {
-      months = (v.durationYears ?? 5) * 12;
+      months = (this.durationYears() ?? 5) * 12;
     } else {
-      const end = v.endDate;
+      const end = this.endDate();
       if (!start || !end) return null;
       months = this.monthsBetween(start, end);
     }
@@ -433,9 +432,7 @@ export class ContratsAddPageComponent {
   });
 
   readonly summaryItems = computed<InfoItem[]>(() => {
-    const v3 = this.step3Form.getRawValue();
-    const v4 = this.step4Form.getRawValue();
-    const contractType = v3.contractType;
+    const contractType = this.contractType();
     const fields = CONTRACT_TYPE_FIELDS[contractType];
     const typeLabel =
       this.contractTypeOptions().find((o) => o.value === contractType)?.label ??
@@ -453,56 +450,52 @@ export class ContratsAddPageComponent {
     items.push({ label: 'Type de contrat', value: typeLabel });
     items.push({
       label: 'Date de début',
-      value: this.formatDisplayDate(v4.startDate),
+      value: this.formatDisplayDate(this.startDate()),
     });
 
     if (fields.showEndDate) {
       if (contractType === 'RENT_TO_OWN' && this.rentToOwnDurationMode() === 'years') {
-        items.push({
-          label: 'Durée',
-          value: `${v4.durationYears ?? 5} an(s)`,
-        });
+        items.push({ label: 'Durée', value: `${this.durationYears() ?? 5} an(s)` });
       } else {
         items.push({
           label: 'Date de fin',
           value:
             contractType === 'LEASE' && this.openEnded()
               ? 'Durée indéterminée'
-              : this.formatDisplayDate(v4.endDate),
+              : this.formatDisplayDate(this.endDate()),
         });
       }
     }
 
-    if (fields.showMonthlyRent && v4.monthlyRent != null) {
-      items.push({ label: 'Loyer mensuel', value: this.formatAmount(v4.monthlyRent) });
-    }
-    if (fields.showSalePrice && v4.salePrice != null) {
-      items.push({ label: 'Prix total', value: this.formatAmount(v4.salePrice) });
-    }
-    if (fields.showMonthlyInstallment && v4.monthlyInstallment != null) {
-      items.push({ label: 'Mensualité', value: this.formatAmount(v4.monthlyInstallment) });
-    }
-    if (fields.showDepositAmount && v4.depositAmount != null) {
-      items.push({ label: 'Caution / Apport', value: this.formatAmount(v4.depositAmount) });
-    }
-    if (fields.showPaymentDay && v4.paymentDay != null) {
-      items.push({ label: "Jour d'échéance", value: String(v4.paymentDay) });
-    }
-    if (fields.showReservationDeposit && v4.reservationDeposit != null) {
-      items.push({ label: 'Acompte de réservation', value: this.formatAmount(v4.reservationDeposit) });
-    }
-    if (fields.showReservationDurationDays && v4.reservationDurationDays != null) {
-      items.push({ label: 'Durée de réservation', value: `${v4.reservationDurationDays} jours` });
-    }
-    if (fields.showAgencyCommissionRate && v4.agencyCommissionRate != null) {
-      items.push({ label: 'Commission agence', value: `${v4.agencyCommissionRate} %` });
-    }
-    if (fields.showSpecialClauses && v4.specialClauses) {
-      items.push({ label: 'Clauses particulières', value: v4.specialClauses });
-    }
-    if (fields.showTerminationConditions && v4.terminationConditions) {
-      items.push({ label: 'Conditions de résiliation', value: v4.terminationConditions });
-    }
+    if (fields.showMonthlyRent && this.monthlyRent() != null)
+      items.push({ label: 'Loyer mensuel', value: this.formatAmount(this.monthlyRent()) });
+    if (fields.showSalePrice && this.salePrice() != null)
+      items.push({ label: 'Prix total', value: this.formatAmount(this.salePrice()) });
+    if (fields.showMonthlyInstallment && this.monthlyInstallment() != null)
+      items.push({ label: 'Mensualité', value: this.formatAmount(this.monthlyInstallment()) });
+    if (fields.showDepositAmount && this.depositAmount() != null)
+      items.push({ label: 'Caution / Apport', value: this.formatAmount(this.depositAmount()) });
+    if (fields.showPaymentDay && this.paymentDay() != null)
+      items.push({ label: "Jour d'échéance", value: String(this.paymentDay()) });
+    if (fields.showReservationDeposit && this.reservationDeposit() != null)
+      items.push({
+        label: 'Acompte de réservation',
+        value: this.formatAmount(this.reservationDeposit()),
+      });
+    if (fields.showReservationDurationDays && this.reservationDurationDays() != null)
+      items.push({
+        label: 'Durée de réservation',
+        value: `${this.reservationDurationDays()} jours`,
+      });
+    if (fields.showAgencyCommissionRate && this.agencyCommissionRate() != null)
+      items.push({ label: 'Commission agence', value: `${this.agencyCommissionRate()} %` });
+    if (fields.showSpecialClauses && this.specialClauses())
+      items.push({ label: 'Clauses particulières', value: this.specialClauses() });
+    if (fields.showTerminationConditions && this.terminationConditions())
+      items.push({
+        label: 'Conditions de résiliation',
+        value: this.terminationConditions(),
+      });
 
     return items;
   });
@@ -510,70 +503,70 @@ export class ContratsAddPageComponent {
   constructor() {
     this.biensStore.load?.({ pageable: {} });
     this.locationStore.loadSansContrat();
+
     // Chargement du codelist CONTRACT_TYPE
     this.contractTypeCodeListLoading.set(true);
     findAllByType(this.http, this.apiConfig.rootUrl, { type: 'CONTRACT_TYPE' })
-      .pipe(map((response) => {
-        const body = response.body as unknown;
-        if (Array.isArray(body)) return body as LaCodeListDto[];
-        if (body && typeof body === 'object') {
-          const r = body as Record<string, unknown>;
-          if (Array.isArray(r['data'])) return r['data'] as LaCodeListDto[];
-          if (Array.isArray(r['content'])) return r['content'] as LaCodeListDto[];
-        }
-        return [] as LaCodeListDto[];
-      }))
+      .pipe(
+        map((response) => {
+          const body = response.body as unknown;
+          if (Array.isArray(body)) return body as LaCodeListDto[];
+          if (body && typeof body === 'object') {
+            const r = body as Record<string, unknown>;
+            if (Array.isArray(r['data'])) return r['data'] as LaCodeListDto[];
+            if (Array.isArray(r['content'])) return r['content'] as LaCodeListDto[];
+          }
+          return [] as LaCodeListDto[];
+        }),
+      )
       .subscribe({
         next: (items) => {
           this.contractTypeCodeList.set(items);
           this.contractTypeCodeListLoading.set(false);
         },
         error: () => {
-          // Fallback silencieux : les options statiques seront utilisées
           this.contractTypeCodeListLoading.set(false);
         },
       });
 
     // ── Étape 1 : Pré-remplissage du bien depuis le dossier locataire ─────────
     effect(() => {
-      const tenantId = this.selectedTenantId();
+      const tenantId = this.tenantId();
       if (!tenantId) return;
 
       const tenant = this.locationStore.entities().find((t) => t.id === tenantId);
       if (!tenant?.propertyId) return;
 
-      // Pré-remplir le bien depuis le dossier KYC du locataire
       if (!this.userEditedFields().has('propertyId')) {
-        this.step2Form.controls.propertyId.setValue(tenant.propertyId);
+        this.propertyId.set(tenant.propertyId);
       }
     });
 
     // ── Étape 2 : Auto-remplissage depuis le bien sélectionné ─────────────────
     effect(() => {
-      const propertyId = this.step2Form.controls.propertyId.value;
+      const propertyId = this.propertyId();
       if (!propertyId) return;
 
       const property = this.biensStore.entities().find((p) => p.id === propertyId);
       if (!property) return;
 
-      // ownerId depuis property.ownerId (verrouillé, non modifiable)
-      const ownerId = (property as Record<string, unknown>)['ownerId'] as string | undefined;
+      // ownerId depuis property.ownerId, fallback sur l'utilisateur connecté
+      const ownerId = property.ownerId ?? this.authStore.user()?.id;
       if (ownerId) {
-        this.step2Form.controls.ownerId.setValue(ownerId);
+        this.ownerId.set(ownerId);
       }
 
       // Suggérer le contractType recommandé selon transactionType
-      const transactionType = property.transactionType ?? '';
-      const suggestedType = TRANSACTION_TO_CONTRACT_TYPE[transactionType];
+      const suggestedType = TRANSACTION_TO_CONTRACT_TYPE[property.transactionType ?? ''];
       if (suggestedType) {
-        this.step3Form.controls.contractType.setValue(suggestedType);
+        this.contractType.set(suggestedType);
       }
     });
 
     // ── Étape 3 : Pré-remplissage des montants selon le type de contrat ────────
     effect(() => {
-      const contractType = this.selectedContractType();
-      const propertyId = this.step2Form.controls.propertyId.value;
+      const contractType = this.contractType();
+      const propertyId = this.propertyId();
       if (!propertyId) return;
 
       const property = this.biensStore.entities().find((p) => p.id === propertyId);
@@ -581,158 +574,51 @@ export class ContratsAddPageComponent {
 
       const price = property.price ?? 0;
       const today = new Date();
-      const edited = this.userEditedFields();
-      const ctrl = this.step4Form.controls;
-
-      // Helper : ne pas écraser si l'utilisateur a déjà modifié le champ
-      const setIfNotEdited = (fieldName: string, value: unknown) => {
-        if (!edited.has(fieldName)) {
-          (ctrl as Record<string, { setValue(v: unknown): void }>)[fieldName]?.setValue(value);
-        }
-      };
-
-      // startDate = aujourd'hui (toujours)
-      setIfNotEdited('startDate', today);
 
       switch (contractType) {
         case 'LEASE': {
-          setIfNotEdited('monthlyRent', price || null);
-          setIfNotEdited('depositAmount', price ? price * 2 : null);
-          setIfNotEdited('paymentDay', 5);
+          this.setIfNotEdited('monthlyRent', price || null);
+          this.setIfNotEdited('depositAmount', price ? price * 2 : null);
+          this.setIfNotEdited('paymentDay', 5);
+          this.setIfNotEdited('startDate', today);
           const endDateLease = new Date(today);
           endDateLease.setFullYear(endDateLease.getFullYear() + 1);
-          setIfNotEdited('endDate', endDateLease);
+          this.setIfNotEdited('endDate', endDateLease);
           break;
         }
         case 'SALE': {
-          setIfNotEdited('salePrice', price || null);
+          this.setIfNotEdited('salePrice', price || null);
+          this.setIfNotEdited('startDate', today);
           break;
         }
         case 'RENT_TO_OWN': {
           const installment = price ? Math.round(price / 60) : null;
-          setIfNotEdited('salePrice', price || null);
-          setIfNotEdited('monthlyInstallment', installment);
-          setIfNotEdited('depositAmount', installment ? installment * 6 : null);
-          setIfNotEdited('durationYears', 5);
-          setIfNotEdited('paymentDay', 5);
+          this.setIfNotEdited('salePrice', price || null);
+          this.setIfNotEdited('monthlyInstallment', installment);
+          this.setIfNotEdited('depositAmount', installment ? installment * 6 : null);
+          this.setIfNotEdited('durationYears', 5);
+          this.setIfNotEdited('paymentDay', 5);
+          this.setIfNotEdited('startDate', today);
           const endDateRto = new Date(today);
           endDateRto.setFullYear(endDateRto.getFullYear() + 5);
-          setIfNotEdited('endDate', endDateRto);
+          this.setIfNotEdited('endDate', endDateRto);
           break;
         }
         case 'RESERVATION': {
-          setIfNotEdited('reservationDeposit', price ? Math.round(price * 0.05) : null);
-          setIfNotEdited('reservationDurationDays', 30);
+          this.setIfNotEdited('reservationDeposit', price ? Math.round(price * 0.05) : null);
+          this.setIfNotEdited('reservationDurationDays', 30);
+          this.setIfNotEdited('startDate', today);
           break;
         }
         case 'MANDATE': {
-          setIfNotEdited('agencyCommissionRate', 10);
+          this.setIfNotEdited('agencyCommissionRate', 10);
+          this.setIfNotEdited('startDate', today);
           const endDateMandate = new Date(today);
           endDateMandate.setFullYear(endDateMandate.getFullYear() + 1);
-          setIfNotEdited('endDate', endDateMandate);
+          this.setIfNotEdited('endDate', endDateMandate);
           break;
         }
       }
-    });
-
-    // ── Mise à jour dynamique des validateurs selon le type de contrat ─────────
-    effect(() => {
-      const fields = this.contractTypeFields();
-      const ctrl = this.step4Form.controls;
-
-      // tenantId (étape 1)
-      if (fields.requiresTenant) {
-        this.step1Form.controls.tenantId.setValidators(Validators.required);
-      } else {
-        this.step1Form.controls.tenantId.clearValidators();
-        this.step1Form.controls.tenantId.setValue('');
-      }
-      this.step1Form.controls.tenantId.updateValueAndValidity({ emitEvent: false });
-
-      // monthlyRent
-      if (fields.showMonthlyRent) {
-        ctrl.monthlyRent.setValidators([Validators.required, Validators.min(1)]);
-      } else {
-        ctrl.monthlyRent.clearValidators();
-        ctrl.monthlyRent.setValue(null);
-      }
-
-      // salePrice
-      if (fields.showSalePrice) {
-        ctrl.salePrice.setValidators([Validators.required, Validators.min(1)]);
-      } else {
-        ctrl.salePrice.clearValidators();
-        ctrl.salePrice.setValue(null);
-      }
-
-      // monthlyInstallment
-      if (fields.showMonthlyInstallment) {
-        ctrl.monthlyInstallment.setValidators([Validators.required, Validators.min(1)]);
-      } else {
-        ctrl.monthlyInstallment.clearValidators();
-        ctrl.monthlyInstallment.setValue(null);
-      }
-
-      // depositAmount
-      if (fields.showDepositAmount) {
-        ctrl.depositAmount.setValidators([Validators.required, Validators.min(0)]);
-      } else {
-        ctrl.depositAmount.clearValidators();
-        ctrl.depositAmount.setValue(null);
-      }
-
-      // paymentDay
-      if (fields.showPaymentDay) {
-        ctrl.paymentDay.setValidators([Validators.required, Validators.min(1), Validators.max(28)]);
-      } else {
-        ctrl.paymentDay.clearValidators();
-        ctrl.paymentDay.setValue(null);
-      }
-
-      // endDate / durationYears pour RENT_TO_OWN
-      if (fields.showDurationYears) {
-        if (this.rentToOwnDurationMode() === 'years') {
-          ctrl.durationYears.setValidators([Validators.required, Validators.min(1), Validators.max(30)]);
-          ctrl.endDate.clearValidators();
-        } else {
-          ctrl.endDate.setValidators(Validators.required);
-          ctrl.durationYears.clearValidators();
-        }
-      } else if (fields.endDateRequired) {
-        ctrl.endDate.setValidators(Validators.required);
-        ctrl.durationYears.clearValidators();
-        this.openEnded.set(false);
-      } else {
-        ctrl.endDate.clearValidators();
-        ctrl.durationYears.clearValidators();
-      }
-
-      // reservationDeposit
-      if (fields.showReservationDeposit) {
-        ctrl.reservationDeposit.setValidators([Validators.required, Validators.min(1)]);
-      } else {
-        ctrl.reservationDeposit.clearValidators();
-        ctrl.reservationDeposit.setValue(null);
-      }
-
-      // reservationDurationDays
-      if (fields.showReservationDurationDays) {
-        ctrl.reservationDurationDays.setValidators([Validators.required, Validators.min(1)]);
-      } else {
-        ctrl.reservationDurationDays.clearValidators();
-        ctrl.reservationDurationDays.setValue(null);
-      }
-
-      // agencyCommissionRate
-      if (fields.showAgencyCommissionRate) {
-        ctrl.agencyCommissionRate.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
-      } else {
-        ctrl.agencyCommissionRate.clearValidators();
-        ctrl.agencyCommissionRate.setValue(null);
-      }
-
-      // Mise à jour de l'état de validation
-      Object.values(ctrl).forEach((c) => c.updateValueAndValidity({ emitEvent: false }));
     });
 
     // Redirection après création
@@ -767,109 +653,115 @@ export class ContratsAddPageComponent {
     void this.router.navigate(['/contrats']);
   }
 
-  /** Marquer un champ comme édité manuellement (ne plus l'écraser) */
-  markFieldEdited(fieldName: string): void {
-    const current = new Set(this.userEditedFields());
-    current.add(fieldName);
-    this.userEditedFields.set(current);
+  // ─── Gestion du touch ────────────────────────────────────────────────────────
+
+  touchField(name: string): void {
+    this.touchedFields.update((s) => {
+      const n = new Set(s);
+      n.add(name);
+      return n;
+    });
   }
 
-  /** Basculer le mode de saisie durée RENT_TO_OWN */
+  isTouched(name: string): boolean {
+    return this.touchedFields().has(name);
+  }
+
+  private touchStep(step: number): void {
+    const stepFields: Record<number, string[]> = {
+      1: ['tenantId'],
+      2: ['propertyId', 'ownerId'],
+      3: ['contractType'],
+      4: [
+        'startDate',
+        'monthlyRent',
+        'salePrice',
+        'monthlyInstallment',
+        'depositAmount',
+        'paymentDay',
+        'durationYears',
+        'endDate',
+        'reservationDeposit',
+        'reservationDurationDays',
+        'agencyCommissionRate',
+      ],
+    };
+    const fields = stepFields[step] ?? [];
+    this.touchedFields.update((s) => {
+      const n = new Set(s);
+      fields.forEach((f) => n.add(f));
+      return n;
+    });
+  }
+
+  // ─── Gestion des champs édités manuellement ──────────────────────────────────
+
+  markFieldEdited(fieldName: string): void {
+    this.userEditedFields.update((s) => {
+      const n = new Set(s);
+      n.add(fieldName);
+      return n;
+    });
+  }
+
+  // ─── Navigation ──────────────────────────────────────────────────────────────
+
   toggleRentToOwnDurationMode(mode: 'years' | 'date'): void {
     this.rentToOwnDurationMode.set(mode);
-    const ctrl = this.step4Form.controls;
-    if (mode === 'years') {
-      ctrl.durationYears.setValidators([Validators.required, Validators.min(1), Validators.max(30)]);
-      ctrl.endDate.clearValidators();
-    } else {
-      ctrl.endDate.setValidators(Validators.required);
-      ctrl.durationYears.clearValidators();
-    }
-    ctrl.durationYears.updateValueAndValidity({ emitEvent: false });
-    ctrl.endDate.updateValueAndValidity({ emitEvent: false });
   }
 
   nextStep(): void {
     const step = this.currentStep();
+    this.touchStep(step);
 
-    if (step === 1) {
-      // Étape 1 : locataire (requis seulement si le type le demande — mais on ne connaît pas encore le type)
-      // On valide uniquement si le champ a un validateur required (posé dynamiquement)
-      if (this.step1Form.invalid) {
-        this.step1Form.markAllAsTouched();
-        return;
-      }
-    } else if (step === 2) {
-      if (this.step2Form.invalid) {
-        this.step2Form.markAllAsTouched();
-        return;
-      }
-    } else if (step === 3) {
-      if (this.step3Form.invalid) {
-        this.step3Form.markAllAsTouched();
-        return;
-      }
-      // Si le type ne requiert pas de locataire, sauter l'étape 1 au retour
-      // Ici on avance normalement vers l'étape 4
-    } else if (step === 4) {
-      if (this.step4Form.invalid) {
-        this.step4Form.markAllAsTouched();
-        return;
-      }
-    }
+    const valid =
+      step === 1
+        ? this.step1Valid()
+        : step === 2
+          ? this.step2Valid()
+          : step === 3
+            ? this.step3Valid()
+            : step === 4
+              ? this.step4Valid()
+              : true;
 
-    if (this.currentStep() < this.totalSteps) {
+    if (!valid) return;
+    if (step < this.totalSteps) {
       this.currentStep.update((s) => s + 1);
     }
   }
 
   prevStep(): void {
-    const step = this.currentStep();
-    if (step > 1) {
+    if (this.currentStep() > 1) {
       this.currentStep.update((s) => s - 1);
     }
   }
 
+  // ─── Soumission ──────────────────────────────────────────────────────────────
+
   submit(): void {
-    const allFormsValid =
-      this.step1Form.valid &&
-      this.step2Form.valid &&
-      (!this.tenantStepRequired() || this.step3Form.valid) &&
-      this.step4Form.valid;
+    [1, 2, 3, 4].forEach((s) => this.touchStep(s));
 
-    if (!allFormsValid) {
-      this.step1Form.markAllAsTouched();
-      this.step2Form.markAllAsTouched();
-      this.step3Form.markAllAsTouched();
-      this.step4Form.markAllAsTouched();
-      return;
-    }
+    const allValid =
+      this.step1Valid() && this.step2Valid() && this.step3Valid() && this.step4Valid();
 
-    const v1 = this.step1Form.getRawValue(); // tenantId
-    const v2 = this.step2Form.getRawValue(); // propertyId, ownerId
-    const v3 = this.step3Form.getRawValue(); // contractType
-    const v4 = this.step4Form.getRawValue(); // conditions
-    const startDate = this.serializeDate(v4.startDate);
+    if (!allValid) return;
 
-    if (!startDate) {
-      this.step4Form.controls.startDate.markAsTouched();
-      return;
-    }
+    const startDate = this.serializeDate(this.startDate());
+    if (!startDate) return;
 
-    const fields = CONTRACT_TYPE_FIELDS[v3.contractType];
-
-    // Calcul endDate / durationYears pour RENT_TO_OWN
+    const fields = CONTRACT_TYPE_FIELDS[this.contractType()];
     let endDate: string | undefined;
     let durationYears: number | undefined;
 
     if (fields.showDurationYears) {
       if (this.rentToOwnDurationMode() === 'years') {
-        durationYears = v4.durationYears ?? 5;
+        durationYears = this.durationYears() ?? 5;
       } else {
-        endDate = this.serializeDate(v4.endDate);
+        endDate = this.serializeDate(this.endDate());
       }
     } else if (fields.endDateRequired || (!this.openEnded() && fields.showEndDate)) {
-      endDate = this.serializeDate(v4.endDate);
+      endDate = this.serializeDate(this.endDate());
     }
 
     this.knownContractIds.set(
@@ -887,29 +779,50 @@ export class ContratsAddPageComponent {
     }
 
     const body: CreateContractRequest = {
-      tenantId: fields.requiresTenant ? v1.tenantId : undefined,
-      propertyId: v2.propertyId,
-      ownerId: v2.ownerId,
-      contractType: v3.contractType,
+      tenantId: fields.requiresTenant ? this.tenantId() : undefined,
+      propertyId: this.propertyId(),
+      ownerId: this.ownerId(),
+      contractType: this.contractType(),
       startDate,
       endDate,
       ...(durationYears != null ? { durationYears } : {}),
-      ...(fields.showMonthlyRent && v4.monthlyRent != null ? { monthlyRent: v4.monthlyRent } : {}),
-      ...(fields.showSalePrice && v4.salePrice != null ? { salePrice: v4.salePrice } : {}),
-      ...(fields.showMonthlyInstallment && v4.monthlyInstallment != null ? { monthlyInstallment: v4.monthlyInstallment } : {}),
-      ...(fields.showDepositAmount && v4.depositAmount != null ? { depositAmount: v4.depositAmount } : {}),
-      ...(fields.showPaymentDay && v4.paymentDay != null ? { paymentDay: v4.paymentDay } : {}),
-      ...(fields.showReservationDeposit && v4.reservationDeposit != null ? { reservationDeposit: v4.reservationDeposit } : {}),
-      ...(fields.showReservationDurationDays && v4.reservationDurationDays != null ? { reservationDurationDays: v4.reservationDurationDays } : {}),
-      ...(fields.showAgencyCommissionRate && v4.agencyCommissionRate != null ? { agencyCommissionRate: v4.agencyCommissionRate } : {}),
-      ...(fields.showSpecialClauses && v4.specialClauses ? { specialClauses: v4.specialClauses } : {}),
-      ...(fields.showTerminationConditions && v4.terminationConditions ? { terminationConditions: v4.terminationConditions } : {}),
+      ...(fields.showMonthlyRent && this.monthlyRent() != null
+        ? { monthlyRent: this.monthlyRent()! }
+        : {}),
+      ...(fields.showSalePrice && this.salePrice() != null
+        ? { salePrice: this.salePrice()! }
+        : {}),
+      ...(fields.showMonthlyInstallment && this.monthlyInstallment() != null
+        ? { monthlyInstallment: this.monthlyInstallment()! }
+        : {}),
+      ...(fields.showDepositAmount && this.depositAmount() != null
+        ? { depositAmount: this.depositAmount()! }
+        : {}),
+      ...(fields.showPaymentDay && this.paymentDay() != null
+        ? { paymentDay: this.paymentDay()! }
+        : {}),
+      ...(fields.showReservationDeposit && this.reservationDeposit() != null
+        ? { reservationDeposit: this.reservationDeposit()! }
+        : {}),
+      ...(fields.showReservationDurationDays && this.reservationDurationDays() != null
+        ? { reservationDurationDays: this.reservationDurationDays()! }
+        : {}),
+      ...(fields.showAgencyCommissionRate && this.agencyCommissionRate() != null
+        ? { agencyCommissionRate: this.agencyCommissionRate()! }
+        : {}),
+      ...(fields.showSpecialClauses && this.specialClauses()
+        ? { specialClauses: this.specialClauses() }
+        : {}),
+      ...(fields.showTerminationConditions && this.terminationConditions()
+        ? { terminationConditions: this.terminationConditions() }
+        : {}),
     };
 
     createContract({ body });
   }
 
-  /** Exposé au template pour éviter un pipe custom */
+  // ─── Helpers exposés au template ────────────────────────────────────────────
+
   contractTypeIcon(type: ContractType | null | undefined): string {
     if (!type) return 'pi-file';
     return this.contractTypeIconInternal(type);
@@ -917,20 +830,66 @@ export class ContratsAddPageComponent {
 
   contractTypeLabelFor(type: ContractType | null | undefined): string {
     if (!type) return '';
-    return this.contractTypeOptions().find((o) => o.value === type)?.label ?? this.fallbackLabel(type);
+    return (
+      this.contractTypeOptions().find((o) => o.value === type)?.label ??
+      this.fallbackLabel(type)
+    );
   }
-
-  /** Exposé au template pour le stepper durée */
-  readonly Math = Math;
 
   formatAmount(amount: number | null | undefined): string {
     if (amount == null || amount === 0) return '—';
     return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
   }
 
+  // ─── Helpers privés ──────────────────────────────────────────────────────────
+
+  private setIfNotEdited(fieldName: string, value: unknown): void {
+    if (this.userEditedFields().has(fieldName)) return;
+    switch (fieldName) {
+      case 'startDate':
+        this.startDate.set(value as ContractDateValue);
+        break;
+      case 'endDate':
+        this.endDate.set(value as ContractDateValue);
+        break;
+      case 'monthlyRent':
+        this.monthlyRent.set(value as number | null);
+        break;
+      case 'depositAmount':
+        this.depositAmount.set(value as number | null);
+        break;
+      case 'paymentDay':
+        this.paymentDay.set(value as number | null);
+        break;
+      case 'salePrice':
+        this.salePrice.set(value as number | null);
+        break;
+      case 'monthlyInstallment':
+        this.monthlyInstallment.set(value as number | null);
+        break;
+      case 'durationYears':
+        this.durationYears.set(value as number | null);
+        break;
+      case 'reservationDeposit':
+        this.reservationDeposit.set(value as number | null);
+        break;
+      case 'reservationDurationDays':
+        this.reservationDurationDays.set(value as number | null);
+        break;
+      case 'agencyCommissionRate':
+        this.agencyCommissionRate.set(value as number | null);
+        break;
+      case 'specialClauses':
+        this.specialClauses.set(value as string);
+        break;
+      case 'terminationConditions':
+        this.terminationConditions.set(value as string);
+        break;
+    }
+  }
+
   private formatDisplayDate(value: ContractDateValue): string {
     if (!value) return '—';
-
     return new Intl.DateTimeFormat('fr-FR', {
       day: '2-digit',
       month: 'long',
@@ -940,11 +899,9 @@ export class ContratsAddPageComponent {
 
   private serializeDate(value: ContractDateValue): string | undefined {
     if (!value) return undefined;
-
     const year = value.getFullYear();
     const month = String(value.getMonth() + 1).padStart(2, '0');
     const day = String(value.getDate()).padStart(2, '0');
-
     return `${year}-${month}-${day}`;
   }
 
@@ -995,7 +952,6 @@ export class ContratsAddPageComponent {
     const segments = [property.city, property.propertyType]
       .filter((value): value is string => Boolean(value?.trim()))
       .map((value) => value.trim());
-
     return segments.join(' · ') || 'Information indisponible';
   }
 
@@ -1003,7 +959,6 @@ export class ContratsAddPageComponent {
     const segments = [tenant.email, `Ref ${tenant.id}`]
       .filter((value): value is string => Boolean(value?.trim()))
       .map((value) => value.trim());
-
     return segments.join(' · ');
   }
 }

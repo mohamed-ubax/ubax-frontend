@@ -121,6 +121,11 @@ export class ContratsEditPageComponent {
     endDate: this.fb.control<ContractDateValue>(null),
   });
 
+  private readonly tenantIdValue = toSignal(
+    this.editForm.controls.tenantId.valueChanges,
+    { initialValue: this.editForm.controls.tenantId.value },
+  );
+
   readonly propertyOptions = computed<RichSelectOption[]>(() =>
     this.biensStore
       .entities()
@@ -134,7 +139,7 @@ export class ContratsEditPageComponent {
   );
 
   readonly tenantOptions = computed<RichSelectOption[]>(() => {
-    const selectedTenantId = this.editForm.controls.tenantId.value;
+    const selectedTenantId = this.tenantIdValue();
 
     return this.locationStore
       .entities()
@@ -149,6 +154,15 @@ export class ContratsEditPageComponent {
         meta: this.formatTenantMeta(tenant),
         icon: 'pi-user',
       }));
+  });
+
+  readonly selectedPropertyLabel = computed(() => {
+    const contract = this.store.selectedItem();
+    if (!contract?.propertyId) return '—';
+    return (
+      this.propertyOptions().find((o) => o.value === contract.propertyId)?.label ??
+      contract.propertyId
+    );
   });
 
   readonly ownerDisplayName = computed(() => {
