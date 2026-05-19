@@ -6,8 +6,8 @@ import type {
   ComptableToolbarField,
 } from '../types/demandes-comptable.types';
 
-export const SHARED_ASSET_ROOT = '/shared/demandes';
-export const COMPTABLE_ASSET_ROOT = '/demandes/comptable';
+export const SHARED_ASSET_ROOT = 'shared/demandes';
+export const COMPTABLE_ASSET_ROOT = 'demandes/comptable';
 
 export const COMPTABLE_ICONS = {
   search: `${SHARED_ASSET_ROOT}/filter-search.webp`,

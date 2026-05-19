@@ -16,8 +16,8 @@ import type {
 
 // ─── Asset helpers ─────────────────────────────────────────────────────────────
 
-export const SHARED_ASSET_ROOT = '/shared/demandes';
-export const DASHBOARD_SAV_ASSET_ROOT = '/dashboard-sav';
+export const SHARED_ASSET_ROOT = 'shared/demandes';
+export const DASHBOARD_SAV_ASSET_ROOT = 'dashboard-sav';
 
 function dashboardSavAsset(file: string): string {
   return `${DASHBOARD_SAV_ASSET_ROOT}/${file}`;

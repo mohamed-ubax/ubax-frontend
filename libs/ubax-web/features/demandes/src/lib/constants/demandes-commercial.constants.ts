@@ -7,7 +7,7 @@ import type {
   SummaryMetric,
 } from '../types/demandes-commercial.types';
 
-export const COMMERCIAL_ASSET_ROOT = '/demandes/commercial';
+export const COMMERCIAL_ASSET_ROOT = 'demandes/commercial';
 
 export const COMMERCIAL_METRIC_CARDS: readonly SummaryMetric[] = [
   {
