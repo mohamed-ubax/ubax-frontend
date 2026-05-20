@@ -31,11 +31,20 @@ function readCollection(raw: unknown): unknown[] {
 export class AdminClientsService {
   private readonly api = inject(Api);
 
-  listClients(params?: { agencyId?: string; hotelId?: string }): Observable<ClientUserResponse[]> {
+  listClients(params?: {
+    agencyId?: string;
+    hotelId?: string;
+    active?: boolean;
+    emailVerified?: boolean;
+    identityVerified?: boolean;
+  }): Observable<ClientUserResponse[]> {
     return from(
       this.api.invoke(listClients1, {
         agencyId: params?.agencyId,
+        active: params?.active,
+        emailVerified: params?.emailVerified,
         hotelId: params?.hotelId,
+        identityVerified: params?.identityVerified,
         pageable: { page: 0, size: 500 },
       }),
     ).pipe(map((raw) => readCollection(raw) as ClientUserResponse[]));

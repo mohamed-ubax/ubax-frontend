@@ -12,13 +12,23 @@ import { firstValueFrom } from 'rxjs';
 import type { PartnerApplicationResponse } from '@ubax-workspace/shared-api-types';
 import {
   EmptyStateComponent,
+  KpiCardComponent,
   SearchFilterBarComponent,
   SectionCardComponent,
   StatusBadgeComponent,
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
-import { TableModule } from 'primeng/table';
+import {
+  NOTIFICATION_HANDLER,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
+import {
+  UiDataTableCellDefDirective,
+  type UiDataTableColumn,
+  UiDataTableComponent,
+  UiDataTableEmptyDefDirective,
+  UiPaginationComponent,
+} from '@ubax-workspace/shared-ui';
 import { AdminCandidaturesService } from '../../services/admin-candidatures.service';
 
 type StatusFilter =
@@ -32,7 +42,7 @@ type StatusFilter =
 const STATUS_FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
   { label: 'Tous les statuts', value: 'all' },
   { label: 'En attente', value: 'PENDING' },
-  { label: 'En cours d\'examen', value: 'UNDER_REVIEW' },
+  { label: "En cours d'examen", value: 'UNDER_REVIEW' },
   { label: 'Incomplet', value: 'INCOMPLETE' },
   { label: 'Approuvé', value: 'APPROVED' },
   { label: 'Rejeté', value: 'REJECTED' },
@@ -57,16 +67,28 @@ const STATUS_LABEL_MAP: Record<string, string> = {
   REJECTED: 'Rejeté',
 };
 
+interface CandidatureKpiCard {
+  iconClass: string;
+  label: string;
+  value: number;
+}
+
+const PAGE_SIZE = 15;
+
 @Component({
   selector: 'ubax-admin-candidatures-list-page',
   standalone: true,
   imports: [
-    TableModule,
     DatePipe,
+    KpiCardComponent,
     SearchFilterBarComponent,
     SectionCardComponent,
     StatusBadgeComponent,
     EmptyStateComponent,
+    UiDataTableComponent,
+    UiDataTableCellDefDirective,
+    UiDataTableEmptyDefDirective,
+    UiPaginationComponent,
   ],
   templateUrl: './candidatures-list-page.component.html',
   styleUrl: './candidatures-list-page.component.scss',
@@ -81,10 +103,24 @@ export class CandidaturesListPageComponent {
   protected readonly applications = signal<PartnerApplicationResponse[]>([]);
   protected readonly searchQuery = signal('');
   protected readonly statusFilter = signal<StatusFilter>('all');
+  protected readonly currentPage = signal(1);
 
-  protected readonly searchFilters: { label: string; options: FilterOption[] }[] = [
-    { label: 'Tous les statuts', options: STATUS_FILTER_OPTIONS },
-  ];
+  protected readonly tableColumns: readonly UiDataTableColumn<PartnerApplicationResponse>[] =
+    [
+      { key: 'company', header: 'Entreprise', width: '21%' },
+      { key: 'type', header: 'Type', width: '9%' },
+      { key: 'legalRep', header: 'Représentant légal', width: '16%' },
+      { key: 'email', header: 'Email', width: '16%' },
+      { key: 'city', header: 'Ville', width: '9%' },
+      { key: 'status', header: 'Statut', width: '11%' },
+      { key: 'submittedAt', header: 'Date soumission', width: '10%' },
+      { key: 'actions', header: 'Actions', width: '8%', align: 'end' },
+    ];
+
+  protected readonly searchFilters: {
+    label: string;
+    options: FilterOption[];
+  }[] = [{ label: 'Tous les statuts', options: STATUS_FILTER_OPTIONS }];
 
   protected readonly filteredApplications = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -102,6 +138,15 @@ export class CandidaturesListPageComponent {
     });
   });
 
+  protected readonly totalPages = computed(() =>
+    Math.ceil(this.filteredApplications().length / PAGE_SIZE),
+  );
+
+  protected readonly pagedRows = computed(() => {
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return this.filteredApplications().slice(start, start + PAGE_SIZE);
+  });
+
   protected readonly statusCounts = computed(() => {
     const apps = this.applications();
     return {
@@ -115,6 +160,38 @@ export class CandidaturesListPageComponent {
 
   protected readonly totalCount = computed(() => this.applications().length);
 
+  protected readonly kpiCards = computed<CandidatureKpiCard[]>(() => {
+    const counts = this.statusCounts();
+
+    return [
+      {
+        label: 'En attente',
+        value: counts.PENDING,
+        iconClass: 'pi pi-hourglass candidatures-kpi-card__icon--pending',
+      },
+      {
+        label: 'En examen',
+        value: counts.UNDER_REVIEW,
+        iconClass: 'pi pi-search candidatures-kpi-card__icon--review',
+      },
+      {
+        label: 'Incomplets',
+        value: counts.INCOMPLETE,
+        iconClass: 'pi pi-file-edit candidatures-kpi-card__icon--incomplete',
+      },
+      {
+        label: 'Approuvés',
+        value: counts.APPROVED,
+        iconClass: 'pi pi-check-circle candidatures-kpi-card__icon--approved',
+      },
+      {
+        label: 'Rejetés',
+        value: counts.REJECTED,
+        iconClass: 'pi pi-times-circle candidatures-kpi-card__icon--rejected',
+      },
+    ];
+  });
+
   constructor() {
     effect(() => {
       void this.loadApplications();
@@ -126,7 +203,12 @@ export class CandidaturesListPageComponent {
     try {
       this.applications.set(await firstValueFrom(this.svc.listApplications()));
     } catch (err) {
-      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des candidatures.'));
+      this.notif.error(
+        resolveHttpErrorMessage(
+          err,
+          'Impossible de charger la liste des candidatures.',
+        ),
+      );
     } finally {
       this.loading.set(false);
     }
@@ -134,10 +216,16 @@ export class CandidaturesListPageComponent {
 
   protected onSearchChange(value: string): void {
     this.searchQuery.set(value);
+    this.currentPage.set(1);
   }
 
   protected onFilterChange(event: { filter: string; value: unknown }): void {
     this.statusFilter.set((event.value as StatusFilter) ?? 'all');
+    this.currentPage.set(1);
+  }
+
+  protected onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   protected viewDetail(app: PartnerApplicationResponse): void {
@@ -151,7 +239,7 @@ export class CandidaturesListPageComponent {
   }
 
   protected getStatusLabel(status: string | undefined): string {
-    return STATUS_LABEL_MAP[status ?? ''] ?? (status ?? '—');
+    return STATUS_LABEL_MAP[status ?? ''] ?? status ?? '—';
   }
 
   protected getPartnerTypeLabel(type: string | undefined): string {
@@ -161,9 +249,7 @@ export class CandidaturesListPageComponent {
     return type;
   }
 
-  protected getPartnerTypeBadge(
-    type: string | undefined,
-  ): 'info' | 'neutral' {
+  protected getPartnerTypeBadge(type: string | undefined): 'info' | 'neutral' {
     if (!type) return 'neutral';
     if (type.includes('AGENCE') || type.includes('IMMOB')) return 'info';
     return 'neutral';

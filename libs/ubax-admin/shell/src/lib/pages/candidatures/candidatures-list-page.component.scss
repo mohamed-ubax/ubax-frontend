@@ -3,87 +3,88 @@
   flex-direction: column;
   gap: 1.5rem;
   padding: 2rem;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 255, 255, 0.78),
+      transparent 30%
+    ),
+    linear-gradient(180deg, rgba(236, 242, 247, 0.92), rgba(236, 242, 247, 1));
 
   &__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
   }
 
   &__eyebrow {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--color-brand-orange);
+    color: #6b7280;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0 0 0.25rem;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.35rem;
   }
 
   &__title-row {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   &__title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-brand-navy);
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1c1c1c;
     margin: 0;
   }
 
   &__count {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--color-neutral-500);
-    background: var(--color-neutral-200);
-    padding: 0.125rem 0.625rem;
+    color: #526071;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 0.25rem 0.75rem;
     border-radius: 9999px;
+    border: 1px solid rgba(26, 48, 71, 0.08);
   }
 
   &__subtitle {
-    font-size: 0.875rem;
-    color: var(--color-neutral-500);
-    margin: 0.25rem 0 0;
-  }
-
-  &__counters {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    max-width: 48rem;
+    font-size: 0.95rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0.65rem 0 0;
   }
 }
 
-// Compteurs de statut
-.status-counter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
-  background: var(--color-surface-card);
-  border: 1px solid var(--color-neutral-300);
-  min-width: 100px;
-  gap: 0.25rem;
+.candidatures-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
 
-  &__value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-  }
+.candidatures-kpi-card__icon--pending {
+  color: #d97706;
+}
 
-  &__label {
-    font-size: 0.75rem;
-    color: var(--color-neutral-500);
-    white-space: nowrap;
-  }
+.candidatures-kpi-card__icon--review {
+  color: #2563eb;
+}
 
-  &--pending .status-counter__value { color: var(--color-warning); }
-  &--review .status-counter__value { color: var(--color-brand-blue); }
-  &--incomplete .status-counter__value { color: var(--color-warning); }
-  &--approved .status-counter__value { color: var(--color-success); }
-  &--rejected .status-counter__value { color: var(--color-danger); }
+.candidatures-kpi-card__icon--incomplete {
+  color: #f59e0b;
+}
+
+.candidatures-kpi-card__icon--approved {
+  color: #059669;
+}
+
+.candidatures-kpi-card__icon--rejected {
+  color: #dc2626;
 }
 
 // Toolbar
@@ -94,24 +95,52 @@
 }
 
 // Table
-:host ::ng-deep .candidatures-table {
-  .p-datatable-thead > tr > th {
-    background: var(--color-neutral-200);
-    color: var(--color-brand-navy);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--color-neutral-300);
+.candidatures-table-stage {
+  display: grid;
+}
+
+.candidatures-table-wrap {
+  overflow-x: auto;
+}
+
+.candidatures-table-loading {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 1.25rem 1.35rem;
+}
+
+.candidatures-table-loading__row {
+  height: 4.75rem;
+  border-radius: 1rem;
+  background: #e2e8f0;
+  animation: candidaturesTablePulse 1.6s ease-in-out infinite;
+}
+
+.candidatures-data-table {
+  --ui-data-table-header-bg: #1a3047;
+  --ui-data-table-header-radius: 18px;
+  --ui-data-table-header-height: 64px;
+  --ui-data-table-header-padding-inline: 20px;
+  --ui-data-table-row-height: 78px;
+  --ui-data-table-row-padding-inline: 20px;
+  --ui-data-table-row-divider: rgba(207, 214, 220, 0.8);
+  --ui-data-table-cell-font-size: 14px;
+}
+
+.candidatures-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+@keyframes candidaturesTablePulse {
+  0%,
+  100% {
+    opacity: 1;
   }
 
-  .p-datatable-tbody > tr > td {
-    padding: 0.875rem 1rem;
-    border-bottom: 1px solid var(--color-neutral-300);
-    font-size: 0.8125rem;
-  }
-
-  .p-datatable-tbody > tr:hover {
-    background: var(--color-neutral-200);
+  50% {
+    opacity: 0.45;
   }
 }
 
@@ -120,6 +149,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 
   &__logo {
     width: 36px;
@@ -148,21 +178,37 @@
     color: var(--color-brand-navy);
     margin: 0;
     font-size: 0.8125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__sub {
     color: var(--color-neutral-500);
     margin: 0;
     font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+}
+
+.candidatures-user-cell__meta {
+  min-width: 0;
 }
 
 .candidatures-table {
   &__cell {
+    display: block;
     color: var(--color-brand-navy);
 
     &--muted {
       color: var(--color-neutral-500);
+    }
+
+    &--wrap {
+      overflow-wrap: anywhere;
+      line-height: 1.45;
     }
   }
 
@@ -172,6 +218,22 @@
 
   &__actions {
     text-align: center;
+  }
+}
+
+@media (max-width: 1200px) {
+  .candidatures-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .candidatures-page {
+    padding: 1.25rem;
+  }
+
+  .candidatures-kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -194,7 +256,9 @@
   background: transparent;
   color: var(--color-brand-navy);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 
   &:hover {
     background: var(--color-brand-navy);

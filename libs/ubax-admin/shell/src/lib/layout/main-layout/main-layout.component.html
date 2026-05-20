@@ -25,23 +25,25 @@
         <span class="flex-1 truncate">Tableau de bord</span>
       </a>
 
-      <a
-        routerLink="/hotels"
-        routerLinkActive="bg-brand-orange text-white"
-        class="sidebar-nav-item"
-      >
-        <i class="pi pi-building text-lg w-6 flex-shrink-0"></i>
-        <span class="flex-1 truncate">Hôtels</span>
-      </a>
+      @if (isSuperAdmin()) {
+        <a
+          routerLink="/hotels"
+          routerLinkActive="bg-brand-orange text-white"
+          class="sidebar-nav-item"
+        >
+          <i class="pi pi-building text-lg w-6 flex-shrink-0"></i>
+          <span class="flex-1 truncate">Hôtels</span>
+        </a>
 
-      <a
-        routerLink="/agences"
-        routerLinkActive="bg-brand-orange text-white"
-        class="sidebar-nav-item"
-      >
-        <i class="pi pi-home text-lg w-6 flex-shrink-0"></i>
-        <span class="flex-1 truncate">Agences</span>
-      </a>
+        <a
+          routerLink="/agences"
+          routerLinkActive="bg-brand-orange text-white"
+          class="sidebar-nav-item"
+        >
+          <i class="pi pi-home text-lg w-6 flex-shrink-0"></i>
+          <span class="flex-1 truncate">Agences</span>
+        </a>
+      }
 
       <a
         routerLink="/candidatures"
@@ -116,6 +118,15 @@
       >
         <i class="pi pi-users text-lg w-6 flex-shrink-0"></i>
         <span class="flex-1 truncate">Administrateurs</span>
+      </a>
+
+      <a
+        routerLink="/clients"
+        routerLinkActive="bg-brand-orange text-white"
+        class="sidebar-nav-item"
+      >
+        <i class="pi pi-user text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Clients</span>
       </a>
 
       <a

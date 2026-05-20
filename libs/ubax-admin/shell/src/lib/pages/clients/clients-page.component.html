@@ -1,6 +1,4 @@
 <div class="clients-page">
-
-  <!-- En-tête -->
   <div class="clients-page__header">
     <div class="clients-page__title-block">
       <p class="clients-page__eyebrow">Back-office UBAX</p>
@@ -14,111 +12,165 @@
     </div>
   </div>
 
-  <!-- Carte principale -->
+  <div class="clients-kpi-grid">
+    <ubax-kpi-card label="Clients actifs" [value]="kpis().active">
+      <i icon class="pi pi-users text-xl text-brand-blue"></i>
+    </ubax-kpi-card>
+    <ubax-kpi-card label="Emails vérifiés" [value]="kpis().emailVerified">
+      <i icon class="pi pi-envelope text-xl text-brand-orange"></i>
+    </ubax-kpi-card>
+    <ubax-kpi-card
+      label="Identités vérifiées"
+      [value]="kpis().identityVerified"
+    >
+      <i icon class="pi pi-id-card text-xl text-brand-teal"></i>
+    </ubax-kpi-card>
+  </div>
+
   <ubax-section-card bodyClass="p-0">
     <ubax-search-filter-bar
       class="clients-toolbar"
       placeholder="Rechercher un client..."
-      [filters]="searchFilters"
+      [filters]="searchFilters()"
       (searchChange)="onSearchChange($event)"
       (filterChange)="onFilterChange($event)"
     />
 
-    <p-table
-      [value]="filteredClients()"
-      [loading]="loading()"
-      [paginator]="filteredClients().length > 15"
-      [rows]="15"
-      styleClass="clients-table"
-      responsiveLayout="scroll"
-    >
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Client</th>
-          <th>Email</th>
-          <th>Téléphone</th>
-          <th>Ville</th>
-          <th>Vérifications</th>
-          <th>Statut</th>
-          <th>Dernière connexion</th>
-        </tr>
-      </ng-template>
+    <section class="clients-table-stage" aria-label="Liste des clients">
+      @if (loading()) {
+        <div class="clients-table-loading" aria-busy="true" aria-live="polite">
+          @for (_ of [0, 1, 2, 3, 4]; track $index) {
+            <div class="clients-table-loading__row" aria-hidden="true"></div>
+          }
+        </div>
+      } @else {
+        <div class="clients-table-wrap">
+          <ubax-ui-data-table
+            class="clients-table"
+            [columns]="tableColumns"
+            [rows]="pagedRows()"
+            rowIdKey="id"
+          >
+            <ng-template ubaxDataTableEmpty>
+              <ubax-empty-state
+                icon="pi pi-users"
+                title="Aucun client trouvé"
+                [description]="
+                  searchQuery()
+                    ? 'Aucun client ne correspond à votre recherche.'
+                    : 'Aucun client enregistré sur la plateforme.'
+                "
+              />
+            </ng-template>
 
-      <ng-template pTemplate="body" let-client>
-        <tr>
-          <!-- Client -->
-          <td>
-            <div class="clients-user-cell">
-              <div class="clients-user-cell__avatar" [class.clients-user-cell__avatar--active]="client.active">
-                {{ getInitials(client) }}
+            <ng-template ubaxDataTableCell="client" let-client>
+              <div class="clients-user-cell">
+                @if (client.avatarUrl) {
+                  <img
+                    [src]="client.avatarUrl"
+                    [alt]="client.firstName ?? 'Client UBAX'"
+                    class="clients-user-cell__image"
+                  />
+                } @else {
+                  <div
+                    class="clients-user-cell__avatar"
+                    [class.clients-user-cell__avatar--active]="client.active"
+                  >
+                    {{ getInitials(client) }}
+                  </div>
+                }
+                <div class="clients-user-cell__meta">
+                  <p class="clients-user-cell__name">
+                    {{
+                      (client.firstName ?? '') + ' ' + (client.lastName ?? '')
+                    }}
+                  </p>
+                  <p class="clients-user-cell__sub">
+                    {{ client.city ?? 'Ville non renseignée' }}
+                  </p>
+                </div>
               </div>
-              <div class="clients-user-cell__meta">
-                <p class="clients-user-cell__name">
-                  {{ (client.firstName ?? '') + ' ' + (client.lastName ?? '') }}
-                </p>
+            </ng-template>
+
+            <ng-template ubaxDataTableCell="email" let-client>
+              <span class="clients-table__cell">{{ client.email ?? '—' }}</span>
+            </ng-template>
+
+            <ng-template ubaxDataTableCell="phone" let-client>
+              <span class="clients-table__cell clients-table__cell--muted">
+                {{ client.phone ?? '—' }}
+              </span>
+            </ng-template>
+
+            <ng-template ubaxDataTableCell="city" let-client>
+              <span class="clients-table__cell clients-table__cell--muted">
+                {{ client.city ?? '—' }}
+              </span>
+            </ng-template>
+
+            <ng-template ubaxDataTableCell="verifications" let-client>
+              <div class="clients-verifs">
+                <span
+                  class="clients-verif"
+                  [class.clients-verif--ok]="client.emailVerified"
+                  [title]="
+                    client.emailVerified ? 'Email vérifié' : 'Email non vérifié'
+                  "
+                >
+                  <i class="pi pi-envelope"></i>
+                </span>
+                <span
+                  class="clients-verif"
+                  [class.clients-verif--ok]="client.phoneVerified"
+                  [title]="
+                    client.phoneVerified
+                      ? 'Téléphone vérifié'
+                      : 'Téléphone non vérifié'
+                  "
+                >
+                  <i class="pi pi-phone"></i>
+                </span>
+                <span
+                  class="clients-verif"
+                  [class.clients-verif--ok]="client.identityVerified"
+                  [title]="
+                    client.identityVerified
+                      ? 'Identité vérifiée'
+                      : 'Identité non vérifiée'
+                  "
+                >
+                  <i class="pi pi-id-card"></i>
+                </span>
               </div>
-            </div>
-          </td>
+            </ng-template>
 
-          <td class="clients-table__cell">{{ client.email ?? '—' }}</td>
-          <td class="clients-table__cell clients-table__cell--muted">{{ client.phone ?? '—' }}</td>
-          <td class="clients-table__cell clients-table__cell--muted">{{ client.city ?? '—' }}</td>
+            <ng-template ubaxDataTableCell="status" let-client>
+              @if (client.active) {
+                <ubax-status-badge variant="active">Actif</ubax-status-badge>
+              } @else {
+                <ubax-status-badge variant="neutral">Inactif</ubax-status-badge>
+              }
+            </ng-template>
 
-          <!-- Vérifications KYC -->
-          <td>
-            <div class="clients-verifs">
-              <span
-                class="clients-verif"
-                [class.clients-verif--ok]="client.emailVerified"
-                [title]="client.emailVerified ? 'Email vérifié' : 'Email non vérifié'"
-              >
-                <i class="pi pi-envelope"></i>
+            <ng-template ubaxDataTableCell="lastLogin" let-client>
+              <span class="clients-table__cell clients-table__cell--muted">
+                {{ formatLastLogin(client.lastLoginAt) }}
               </span>
-              <span
-                class="clients-verif"
-                [class.clients-verif--ok]="client.phoneVerified"
-                [title]="client.phoneVerified ? 'Téléphone vérifié' : 'Téléphone non vérifié'"
-              >
-                <i class="pi pi-phone"></i>
-              </span>
-              <span
-                class="clients-verif"
-                [class.clients-verif--ok]="client.identityVerified"
-                [title]="client.identityVerified ? 'Identité vérifiée' : 'Identité non vérifiée'"
-              >
-                <i class="pi pi-id-card"></i>
-              </span>
-            </div>
-          </td>
+            </ng-template>
+          </ubax-ui-data-table>
+        </div>
+      }
 
-          <!-- Statut -->
-          <td>
-            @if (client.active) {
-              <ubax-status-badge variant="active">Actif</ubax-status-badge>
-            } @else {
-              <ubax-status-badge variant="neutral">Inactif</ubax-status-badge>
-            }
-          </td>
-
-          <!-- Dernière connexion -->
-          <td class="clients-table__cell clients-table__cell--muted">
-            {{ formatLastLogin(client.lastLoginAt) }}
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="7">
-            <ubax-empty-state
-              icon="pi pi-users"
-              title="Aucun client trouvé"
-              [description]="searchQuery() ? 'Aucun client ne correspond à votre recherche.' : 'Aucun client enregistré sur la plateforme.'"
-            />
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
+      @if (!loading() && totalPages() > 1) {
+        <footer class="clients-pagination">
+          <ubax-ui-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            variant="members"
+            (pageChange)="onPageChange($event)"
+          />
+        </footer>
+      }
+    </section>
   </ubax-section-card>
-
 </div>

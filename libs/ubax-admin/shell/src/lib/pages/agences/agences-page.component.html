@@ -1,6 +1,4 @@
 <div class="partners-page">
-
-  <!-- En-tête -->
   <div class="partners-page__header">
     <div class="partners-page__title-block">
       <p class="partners-page__eyebrow">Back-office UBAX</p>
@@ -14,125 +12,188 @@
     </div>
   </div>
 
-  <!-- Carte principale -->
+  <div class="partners-kpi-grid">
+    <ubax-kpi-card label="Agences actives" [value]="kpis().active">
+      <i icon class="pi pi-home text-xl text-brand-blue"></i>
+    </ubax-kpi-card>
+    <ubax-kpi-card label="Abonnements actifs" [value]="kpis().subscribed">
+      <i icon class="pi pi-wallet text-xl text-brand-orange"></i>
+    </ubax-kpi-card>
+    <ubax-kpi-card label="Agences vérifiées" [value]="kpis().verified">
+      <i icon class="pi pi-shield text-xl text-brand-teal"></i>
+    </ubax-kpi-card>
+    <ubax-kpi-card label="Agences suspendues" [value]="kpis().suspended">
+      <i icon class="pi pi-ban text-xl text-danger"></i>
+    </ubax-kpi-card>
+  </div>
+
   <ubax-section-card bodyClass="p-0">
     <ubax-search-filter-bar
       class="partners-toolbar"
       placeholder="Rechercher une agence..."
-      [filters]="searchFilters"
+      [filters]="searchFilters()"
       (searchChange)="onSearchChange($event)"
       (filterChange)="onFilterChange($event)"
     />
 
-    <p-table
-      [value]="filteredAgencies()"
-      [loading]="loading()"
-      [paginator]="filteredAgencies().length > 15"
-      [rows]="15"
-      styleClass="partners-table"
-      responsiveLayout="scroll"
-    >
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Agence</th>
-          <th>Email</th>
-          <th>Téléphone</th>
-          <th>Ville</th>
-          <th>Abonnement</th>
-          <th>Statut</th>
-          <th class="partners-table__actions-head">Actions</th>
-        </tr>
-      </ng-template>
+    <section class="partners-table-stage" aria-label="Liste des agences">
+      @if (loading()) {
+        <div class="partners-table-loading" aria-busy="true" aria-live="polite">
+          @for (_ of [0, 1, 2, 3, 4]; track $index) {
+            <div class="partners-table-loading__row" aria-hidden="true"></div>
+          }
+        </div>
+      } @else {
+        <div class="partners-table-wrap">
+          <ubax-ui-data-table
+            class="partners-table"
+            [columns]="tableColumns"
+            [rows]="pagedRows()"
+            rowIdKey="id"
+          >
+            <ng-template ubaxDataTableEmpty>
+              <ubax-empty-state
+                icon="pi pi-home"
+                title="Aucune agence trouvée"
+                [description]="
+                  searchQuery()
+                    ? 'Aucune agence ne correspond à votre recherche.'
+                    : 'Aucune agence partenaire enregistrée.'
+                "
+              />
+            </ng-template>
 
-      <ng-template pTemplate="body" let-agency>
-        <tr>
-          <!-- Agence -->
-          <td>
-            <div class="partners-user-cell">
-              @if (agency.logoUrl) {
-                <img
-                  [src]="agency.logoUrl"
-                  [alt]="agency.name"
-                  class="partners-user-cell__logo"
-                />
-              } @else {
-                <p-avatar
-                  [label]="initials(agency)"
-                  shape="circle"
-                  size="normal"
-                  class="partners-user-cell__avatar"
-                />
-              }
-              <div class="partners-user-cell__meta">
-                <p class="partners-user-cell__name">{{ agency.name ?? '—' }}</p>
-                <p class="partners-user-cell__sub">{{ agency.city ?? '—' }}</p>
+            <ng-template ubaxDataTableCell="agency" let-agency>
+              <div class="partners-user-cell">
+                @if (agency.logoUrl) {
+                  <img
+                    [src]="agency.logoUrl"
+                    [alt]="agency.name"
+                    class="partners-user-cell__logo"
+                  />
+                } @else {
+                  <div class="partners-user-cell__avatar">
+                    {{ initials(agency) }}
+                  </div>
+                }
+                <div class="partners-user-cell__meta">
+                  <p class="partners-user-cell__name">
+                    {{ agency.name ?? '—' }}
+                  </p>
+                  <p class="partners-user-cell__sub">
+                    {{ agency.city ?? '—' }}
+                  </p>
+                </div>
               </div>
-            </div>
-          </td>
+            </ng-template>
 
-          <td class="partners-table__cell">{{ agency.email ?? '—' }}</td>
-          <td class="partners-table__cell partners-table__cell--muted">{{ agency.phone ?? '—' }}</td>
-          <td class="partners-table__cell partners-table__cell--muted">{{ agency.city ?? '—' }}</td>
+            <ng-template ubaxDataTableCell="email" let-agency>
+              <span class="partners-table__cell">{{
+                agency.email ?? '—'
+              }}</span>
+            </ng-template>
 
-          <!-- Abonnement -->
-          <td>
-            @if (agency.subscriptionActive) {
-              <ubax-status-badge variant="active">{{ agency.subscriptionPlan ?? 'Actif' }}</ubax-status-badge>
-            } @else {
-              <ubax-status-badge variant="neutral">Inactif</ubax-status-badge>
-            }
-          </td>
+            <ng-template ubaxDataTableCell="phone" let-agency>
+              <span class="partners-table__cell partners-table__cell--muted">
+                {{ agency.phone ?? '—' }}
+              </span>
+            </ng-template>
 
-          <!-- Statut -->
-          <td>
-            @if (agency.active) {
-              <ubax-status-badge variant="active">Active</ubax-status-badge>
-            } @else {
-              <ubax-status-badge variant="suspended">Suspendue</ubax-status-badge>
-            }
-          </td>
+            <ng-template ubaxDataTableCell="city" let-agency>
+              <span class="partners-table__cell partners-table__cell--muted">
+                {{ agency.city ?? '—' }}
+              </span>
+            </ng-template>
 
-          <!-- Actions -->
-          <td class="partners-table__actions">
-            <div class="partners-actions">
-              <button
-                type="button"
-                class="partners-action-btn"
-                title="Voir les membres"
-                (click)="viewMembers(agency)"
-              >
-                <i class="pi pi-users"></i>
-              </button>
+            <ng-template ubaxDataTableCell="verification" let-agency>
+              @if (agency.verified) {
+                <ubax-status-badge variant="success"
+                  >Vérifiée</ubax-status-badge
+                >
+              } @else {
+                <ubax-status-badge variant="warning"
+                  >En attente</ubax-status-badge
+                >
+              }
+            </ng-template>
 
-              @if (isSuperAdmin()) {
+            <ng-template ubaxDataTableCell="subscription" let-agency>
+              <div class="partners-subscription-cell">
+                <ubax-status-badge [variant]="subscriptionVariant(agency)">
+                  {{ subscriptionLabel(agency) }}
+                </ubax-status-badge>
+                <span class="partners-subscription-cell__meta">
+                  {{ agency.subscriptionActive ? 'En cours' : 'À renouveler' }}
+                </span>
+              </div>
+            </ng-template>
+
+            <ng-template ubaxDataTableCell="status" let-agency>
+              @if (agency.active) {
+                <ubax-status-badge variant="active">Active</ubax-status-badge>
+              } @else {
+                <ubax-status-badge variant="suspended"
+                  >Suspendue</ubax-status-badge
+                >
+              }
+            </ng-template>
+
+            <ng-template ubaxDataTableCell="actions" let-agency>
+              <div class="partners-actions">
                 <button
                   type="button"
-                  [class]="agency.active ? 'partners-action-btn partners-action-btn--warn' : 'partners-action-btn partners-action-btn--success'"
-                  [title]="agency.active ? 'Suspendre' : 'Activer'"
-                  (click)="promptToggle(agency)"
+                  class="partners-action-btn"
+                  title="Voir les membres"
+                  (click)="viewMembers(agency)"
                 >
-                  <i [class]="agency.active ? 'pi pi-ban' : 'pi pi-check-circle'"></i>
+                  <i class="pi pi-users"></i>
                 </button>
-              }
-            </div>
-          </td>
-        </tr>
-      </ng-template>
 
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="7">
-            <ubax-empty-state
-              icon="pi pi-home"
-              title="Aucune agence trouvée"
-              [description]="searchQuery() ? 'Aucune agence ne correspond à votre recherche.' : 'Aucune agence partenaire enregistrée.'"
-            />
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
+                @if (isSuperAdmin()) {
+                  <button
+                    type="button"
+                    class="partners-action-btn partners-action-btn--info"
+                    title="Mettre à jour l'abonnement"
+                    (click)="openSubscriptionDialog(agency)"
+                  >
+                    <i class="pi pi-wallet"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    [class]="
+                      agency.active
+                        ? 'partners-action-btn partners-action-btn--warn'
+                        : 'partners-action-btn partners-action-btn--success'
+                    "
+                    [title]="agency.active ? 'Suspendre' : 'Activer'"
+                    (click)="promptToggle(agency)"
+                  >
+                    <i
+                      [class]="
+                        agency.active ? 'pi pi-ban' : 'pi pi-check-circle'
+                      "
+                    ></i>
+                  </button>
+                }
+              </div>
+            </ng-template>
+          </ubax-ui-data-table>
+        </div>
+      }
+
+      @if (!loading() && totalPages() > 1) {
+        <footer class="partners-pagination">
+          <ubax-ui-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            variant="members"
+            (pageChange)="onPageChange($event)"
+          />
+        </footer>
+      }
+    </section>
   </ubax-section-card>
-
 </div>
 
 <ubax-confirm-dialog
@@ -146,3 +207,74 @@
   [loading]="actionLoading()"
   (confirmed)="confirmToggle()"
 />
+
+<p-dialog
+  [visible]="showSubscriptionDialog()"
+  (visibleChange)="$event ? null : closeSubscriptionDialog()"
+  [modal]="true"
+  [closable]="!subscriptionLoading()"
+  [dismissableMask]="!subscriptionLoading()"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '34rem', maxWidth: '94vw' }"
+  styleClass="partners-dialog"
+>
+  <ng-template pTemplate="header">
+    <div class="partners-dialog__header">
+      <div>
+        <p class="partners-page__eyebrow">Abonnement partenaire</p>
+        <h2 class="partners-dialog__title">
+          {{ selectedAgency()?.name ?? 'Agence' }}
+        </h2>
+      </div>
+      @if (selectedAgency(); as agency) {
+        <ubax-status-badge [variant]="subscriptionVariant(agency)">
+          {{ subscriptionLabel(agency) }}
+        </ubax-status-badge>
+      }
+    </div>
+  </ng-template>
+
+  <div class="partners-dialog__body">
+    <div class="partners-field">
+      <span class="partners-field__label">Plan d'abonnement</span>
+      <p-select
+        [options]="subscriptionPlanOptions().slice(1)"
+        [ngModel]="subscriptionPlanValue"
+        (ngModelChange)="subscriptionPlanValue = $event"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Choisir un plan"
+      />
+    </div>
+
+    <div class="partners-field">
+      <span class="partners-field__label">Date d'expiration</span>
+      <p-datepicker
+        [ngModel]="subscriptionExpiresAtValue"
+        (ngModelChange)="subscriptionExpiresAtValue = $event"
+        [showIcon]="true"
+        appendTo="body"
+        dateFormat="dd/mm/yy"
+        inputId="agency-subscription-expiry"
+      />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="partners-dialog__footer">
+      <p-button
+        label="Annuler"
+        severity="secondary"
+        [disabled]="subscriptionLoading()"
+        (onClick)="closeSubscriptionDialog()"
+      />
+      <p-button
+        label="Enregistrer"
+        [loading]="subscriptionLoading()"
+        [disabled]="subscriptionSaveDisabled"
+        (onClick)="saveSubscription()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

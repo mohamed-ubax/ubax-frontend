@@ -58,29 +58,52 @@
 }
 
 // Table
-:host ::ng-deep .proprietes-table {
-  .p-datatable-thead > tr > th {
-    background: var(--color-neutral-200);
-    color: var(--color-brand-navy);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--color-neutral-300);
+.proprietes-table-stage {
+  display: grid;
+}
+
+.proprietes-table-wrap {
+  overflow-x: auto;
+}
+
+.proprietes-table-loading {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 1.25rem 1.35rem;
+}
+
+.proprietes-table-loading__row {
+  height: 4.75rem;
+  border-radius: 1rem;
+  background: #e2e8f0;
+  animation: proprietesTablePulse 1.6s ease-in-out infinite;
+}
+
+.proprietes-data-table {
+  --ui-data-table-header-bg: #1a3047;
+  --ui-data-table-header-radius: 18px;
+  --ui-data-table-header-height: 64px;
+  --ui-data-table-header-padding-inline: 20px;
+  --ui-data-table-row-height: 78px;
+  --ui-data-table-row-padding-inline: 20px;
+  --ui-data-table-row-divider: rgba(207, 214, 220, 0.8);
+  --ui-data-table-cell-font-size: 14px;
+}
+
+.proprietes-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+@keyframes proprietesTablePulse {
+  0%,
+  100% {
+    opacity: 1;
   }
 
-  .p-datatable-tbody > tr > td {
-    padding: 0.875rem 1rem;
-    border-bottom: 1px solid var(--color-neutral-300);
-    font-size: 0.8125rem;
-    vertical-align: middle;
-  }
-
-  .p-datatable-tbody > tr:hover {
-    background: var(--color-neutral-200);
-  }
-
-  .p-datatable-tbody > tr:last-child > td {
-    border-bottom: none;
+  50% {
+    opacity: 0.45;
   }
 }
 
@@ -103,7 +126,11 @@
     width: 48px;
     height: 40px;
     border-radius: 0.5rem;
-    background: linear-gradient(135deg, var(--color-brand-navy) 0%, #1e3a5f 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-brand-navy) 0%,
+      #1e3a5f 100%
+    );
     display: flex;
     align-items: center;
     justify-content: center;
@@ -237,7 +264,10 @@
   border: 1px solid var(--color-neutral-300);
   background: transparent;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 
   i {
     font-size: 0.875rem;

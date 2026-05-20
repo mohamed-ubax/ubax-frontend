@@ -1,0 +1,16 @@
+{
+ "name": "ubax-admin-data-access",
+ "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+ "sourceRoot": "libs/ubax-admin/data-access/src",
+ "prefix": "ubax-admin",
+ "projectType": "library",
+ "tags": [
+  "scope:admin",
+  "type:data-access"
+ ],
+ "targets": {
+  "lint": {
+   "executor": "@nx/eslint:lint"
+  }
+ }
+}

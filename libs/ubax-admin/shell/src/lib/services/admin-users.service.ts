@@ -27,6 +27,8 @@ export interface AdminSubRole {
 }
 
 export interface MemberResponse {
+  active?: boolean;
+  deletedAt?: string;
   userId?: string;
   firstName?: string;
   lastName?: string;
@@ -80,6 +82,23 @@ function readString(
   return null;
 }
 
+function readStringArray(
+  record: Record<string, unknown>,
+  key: string,
+): string[] | undefined {
+  const value = record[key];
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const normalized = value.filter(
+    (item): item is string =>
+      typeof item === 'string' && item.trim().length > 0,
+  );
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 export function readCollection(raw: unknown): unknown[] {
   if (Array.isArray(raw)) {
     return raw;
@@ -108,18 +127,27 @@ export function readCollection(raw: unknown): unknown[] {
 }
 
 export function normalizeAdminUser(raw: unknown): AdminUserResponse | null {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+  const record = readRecord(raw);
+  if (!record) {
     return null;
   }
-
-  const record = raw as Record<string, unknown>;
   const nested = record['data'];
 
   if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
-    return nested as AdminUserResponse;
+    return normalizeAdminUser(nested);
   }
 
-  const candidate = raw as AdminUserResponse;
+  const candidate: AdminUserResponse = {
+    avatarUrl: readString(record, ['avatarUrl', 'avatar_url']) ?? undefined,
+    email: readString(record, ['email']) ?? undefined,
+    firstName: readString(record, ['firstName', 'first_name']) ?? undefined,
+    keycloakId: readString(record, ['keycloakId', 'keycloak_id']) ?? undefined,
+    lastName: readString(record, ['lastName', 'last_name']) ?? undefined,
+    phone: readString(record, ['phone']) ?? undefined,
+    roles: readStringArray(record, 'roles') as AdminUserResponse['roles'],
+    userId: readString(record, ['userId', 'user_id']) ?? undefined,
+  };
+
   if (
     candidate.userId ||
     candidate.email ||
@@ -192,10 +220,39 @@ export function normalizeAdminSubRoles(raw: unknown): AdminSubRole[] {
 }
 
 function normalizeMember(raw: unknown): MemberResponse | null {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+  const record = readRecord(raw);
+  if (!record) {
     return null;
   }
-  return raw as MemberResponse;
+
+  const objectSubRoles = Array.isArray(record['subRoles'])
+    ? record['subRoles'].filter(
+        (
+          item,
+        ): item is {
+          role: string;
+          scope: string;
+        } =>
+          Boolean(item) &&
+          typeof item === 'object' &&
+          !Array.isArray(item) &&
+          typeof (item as { role?: unknown }).role === 'string' &&
+          typeof (item as { scope?: unknown }).scope === 'string',
+      )
+    : undefined;
+
+  return {
+    active:
+      typeof record['active'] === 'boolean' ? record['active'] : undefined,
+    deletedAt: readString(record, ['deletedAt', 'deleted_at']) ?? undefined,
+    email: readString(record, ['email']) ?? undefined,
+    firstName: readString(record, ['firstName', 'first_name']) ?? undefined,
+    lastName: readString(record, ['lastName', 'last_name']) ?? undefined,
+    phone: readString(record, ['phone']) ?? undefined,
+    roles: readStringArray(record, 'roles'),
+    subRoles: objectSubRoles ?? readStringArray(record, 'subRoles'),
+    userId: readString(record, ['userId', 'user_id', 'id']) ?? undefined,
+  };
 }
 
 export function normalizeMemberCollection(raw: unknown): MemberResponse[] {
@@ -272,7 +329,7 @@ export class AdminUsersService {
 
   createAdmin(body: CreateAdminRequest): Observable<AdminUserResponse> {
     return from(this.api.invoke(createAdmin, { body })).pipe(
-      map((raw) => normalizeAdminUser(raw) ?? (raw as AdminUserResponse)),
+      map((raw) => normalizeAdminUser(raw) ?? {}),
     );
   }
 
@@ -282,7 +339,7 @@ export class AdminUsersService {
   ): Observable<AdminUserResponse> {
     return from(
       this.api.invoke(assignAdminRole, { userId, body: { role } }),
-    ).pipe(map((raw) => normalizeAdminUser(raw) ?? (raw as AdminUserResponse)));
+    ).pipe(map((raw) => normalizeAdminUser(raw) ?? {}));
   }
 
   deleteAdmin(userId: string): Observable<void> {
@@ -360,17 +417,37 @@ export class AdminUsersService {
     );
   }
 
-  getAgencyMembers(agencyId: string): Observable<MemberResponse[]> {
+  getAgencyMembers(
+    agencyId: string,
+    options?: { active?: boolean },
+  ): Observable<MemberResponse[]> {
     return this.http
       .get<unknown>(
         `${this.config.rootUrl}/v1/admin/agencies/${agencyId}/members`,
+        {
+          params:
+            options?.active === undefined
+              ? undefined
+              : { active: String(options.active) },
+        },
       )
       .pipe(map(normalizeMemberCollection));
   }
 
-  getHotelMembers(hotelId: string): Observable<MemberResponse[]> {
+  getHotelMembers(
+    hotelId: string,
+    options?: { active?: boolean },
+  ): Observable<MemberResponse[]> {
     return this.http
-      .get<unknown>(`${this.config.rootUrl}/v1/admin/hotels/${hotelId}/members`)
+      .get<unknown>(
+        `${this.config.rootUrl}/v1/admin/hotels/${hotelId}/members`,
+        {
+          params:
+            options?.active === undefined
+              ? undefined
+              : { active: String(options.active) },
+        },
+      )
       .pipe(map(normalizeMemberCollection));
   }
 }

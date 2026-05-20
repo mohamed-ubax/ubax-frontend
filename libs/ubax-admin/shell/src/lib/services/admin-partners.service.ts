@@ -5,13 +5,15 @@ import {
   Api,
   type AdminAgencyResponse,
   type AdminHotelResponse,
-  type AgencyResponse,
+  type UpdateSubscriptionRequest,
   activateAgency,
   activateHotel,
   listAgencies,
   listHotels,
   suspendAgency,
   suspendHotel,
+  updateAgencySubscription,
+  updateHotelSubscription,
 } from '@ubax-workspace/shared-api-types';
 import { from, map, Observable } from 'rxjs';
 
@@ -19,6 +21,22 @@ export interface PartnerFilterOption {
   id?: string;
   name?: string;
   city?: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isAdminAgencyResponse(value: unknown): value is AdminAgencyResponse {
+  return isRecord(value);
+}
+
+function isAdminHotelResponse(value: unknown): value is AdminHotelResponse {
+  return isRecord(value);
+}
+
+function isPartnerFilterOption(value: unknown): value is PartnerFilterOption {
+  return isRecord(value);
 }
 
 /**
@@ -68,13 +86,13 @@ export class AdminPartnersService {
   listAgencies(): Observable<AdminAgencyResponse[]> {
     return from(
       this.api.invoke(listAgencies, { pageable: { page: 0, size: 200 } }),
-    ).pipe(map((raw) => readCollection(raw) as AdminAgencyResponse[]));
+    ).pipe(map((raw) => readCollection(raw).filter(isAdminAgencyResponse)));
   }
 
   listHotels(): Observable<AdminHotelResponse[]> {
     return from(
       this.api.invoke(listHotels, { pageable: { page: 0, size: 200 } }),
-    ).pipe(map((raw) => readCollection(raw) as AdminHotelResponse[]));
+    ).pipe(map((raw) => readCollection(raw).filter(isAdminHotelResponse)));
   }
 
   listAgencyFilterOptions(): Observable<PartnerFilterOption[]> {
@@ -86,7 +104,7 @@ export class AdminPartnersService {
           sort: 'name,ASC',
         },
       })
-      .pipe(map((raw) => readCollection(raw) as AgencyResponse[]));
+      .pipe(map((raw) => readCollection(raw).filter(isPartnerFilterOption)));
   }
 
   listHotelFilterOptions(): Observable<PartnerFilterOption[]> {
@@ -98,30 +116,36 @@ export class AdminPartnersService {
           sort: 'name,ASC',
         },
       })
-      .pipe(map((raw) => readCollection(raw) as AdminHotelResponse[]));
+      .pipe(map((raw) => readCollection(raw).filter(isPartnerFilterOption)));
   }
 
   activateAgency(id: string): Observable<AdminAgencyResponse> {
-    return from(this.api.invoke(activateAgency, { id })).pipe(
-      map((raw) => raw as AdminAgencyResponse),
-    );
+    return from(this.api.invoke(activateAgency, { id }));
   }
 
   suspendAgency(id: string): Observable<AdminAgencyResponse> {
-    return from(this.api.invoke(suspendAgency, { id })).pipe(
-      map((raw) => raw as AdminAgencyResponse),
-    );
+    return from(this.api.invoke(suspendAgency, { id }));
   }
 
   activateHotel(id: string): Observable<AdminHotelResponse> {
-    return from(this.api.invoke(activateHotel, { id })).pipe(
-      map((raw) => raw as AdminHotelResponse),
-    );
+    return from(this.api.invoke(activateHotel, { id }));
   }
 
   suspendHotel(id: string): Observable<AdminHotelResponse> {
-    return from(this.api.invoke(suspendHotel, { id })).pipe(
-      map((raw) => raw as AdminHotelResponse),
-    );
+    return from(this.api.invoke(suspendHotel, { id }));
+  }
+
+  updateAgencySubscription(
+    id: string,
+    body: UpdateSubscriptionRequest,
+  ): Observable<AdminAgencyResponse> {
+    return from(this.api.invoke(updateAgencySubscription, { id, body }));
+  }
+
+  updateHotelSubscription(
+    id: string,
+    body: UpdateSubscriptionRequest,
+  ): Observable<AdminHotelResponse> {
+    return from(this.api.invoke(updateHotelSubscription, { id, body }));
   }
 }

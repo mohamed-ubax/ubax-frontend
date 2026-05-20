@@ -25,7 +25,10 @@ import {
 } from '@ubax-workspace/shared-api-types';
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
 // shared-design-system components not used in this template (uses bien-detail-page pattern directly)
-import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  NOTIFICATION_HANDLER,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
 import {
@@ -81,6 +84,23 @@ const CONDITION_LABELS: Record<string, string> = {
   GOOD: 'Bon état',
   RENOVATE: 'À rénover',
 };
+
+function readAmenityLabel(item: {
+  readonly code?: string;
+  readonly customDescription?: string;
+  readonly customValue?: string;
+  readonly description?: string;
+  readonly value?: string;
+}): string {
+  return (
+    item.description?.trim() ||
+    item.value?.trim() ||
+    item.customDescription?.trim() ||
+    item.customValue?.trim() ||
+    item.code?.trim() ||
+    ''
+  );
+}
 
 const STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Brouillon',
@@ -308,7 +328,7 @@ export class ProprietesDetailPageComponent {
   protected readonly amenityColumns = computed(() => {
     const source = this.property()?.amenities ?? [];
     const labels = source
-      .map((item) => item.customValue?.trim() || item.code?.trim() || '')
+      .map((item) => readAmenityLabel(item))
       .map((l) => this.normalizeCodeLabel(l))
       .filter(Boolean);
 
@@ -368,7 +388,10 @@ export class ProprietesDetailPageComponent {
     } catch (err) {
       this.propertyDetail.set(null);
       this.hasLoadedDetail.set(true);
-      const msg = resolveHttpErrorMessage(err, 'Impossible de charger les détails de ce bien.');
+      const msg = resolveHttpErrorMessage(
+        err,
+        'Impossible de charger les détails de ce bien.',
+      );
       this.detailError.set(msg);
       this.notif.error(msg);
     } finally {
@@ -501,7 +524,12 @@ export class ProprietesDetailPageComponent {
       }
       setTimeout(() => void this.router.navigate(['/proprietes']), 1500);
     } catch (err) {
-      this.notif.error(resolveHttpErrorMessage(err, "L'opération a échoué. Veuillez réessayer."));
+      this.notif.error(
+        resolveHttpErrorMessage(
+          err,
+          "L'opération a échoué. Veuillez réessayer.",
+        ),
+      );
     } finally {
       this.saving.set(false);
     }

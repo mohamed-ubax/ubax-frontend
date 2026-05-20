@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Toast } from 'primeng/toast';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
@@ -14,8 +19,9 @@ import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 export class MainLayoutComponent {
   private readonly authStore = inject(AuthStore);
 
-  protected readonly user     = this.authStore.user;
+  protected readonly user = this.authStore.user;
   protected readonly fullName = this.authStore.fullName;
+  protected readonly isSuperAdmin = this.authStore.isSuperAdmin;
 
   protected readonly proprietesExpanded = signal(false);
 
@@ -23,7 +29,7 @@ export class MainLayoutComponent {
   protected readonly navGroups = [];
 
   protected toggleProprietes(): void {
-    this.proprietesExpanded.update(v => !v);
+    this.proprietesExpanded.update((v) => !v);
   }
 
   protected logout(): void {
