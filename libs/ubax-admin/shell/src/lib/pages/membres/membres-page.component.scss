@@ -1,10 +1,10 @@
 // ── Variables (aligned with design system tokens) ──────────────────────────
-$navy:    #1a3047;
-$orange:  #e87d1e;
+$navy: #1a3047;
+$orange: #e87d1e;
 $surface: #ffffff;
-$border:  #e1e4ed;
-$text:    #1c1c1c;
-$muted:   #6b7280;
+$border: #e1e4ed;
+$text: #1c1c1c;
+$muted: #6b7280;
 
 :host {
   display: block;
@@ -97,39 +97,52 @@ $muted:   #6b7280;
 
 // ── Table ───────────────────────────────────────────────────────────────────
 
-:deep(.membres-table) {
-  .p-datatable-header-cell,
-  th {
-    background: $navy;
-    color: #fff;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    border: none;
-    padding: 1rem 1.25rem;
-    white-space: nowrap;
+.membres-table-stage {
+  display: grid;
+}
+
+.membres-table-wrap {
+  overflow-x: auto;
+}
+
+.membres-table-loading {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 1.25rem 1.35rem;
+}
+
+.membres-table-loading__row {
+  height: 4.75rem;
+  border-radius: 1rem;
+  background: #e2e8f0;
+  animation: membresTablePulse 1.6s ease-in-out infinite;
+}
+
+.membres-table {
+  --ui-data-table-header-bg: #1a3047;
+  --ui-data-table-header-radius: 18px;
+  --ui-data-table-header-height: 64px;
+  --ui-data-table-header-padding-inline: 20px;
+  --ui-data-table-row-height: 78px;
+  --ui-data-table-row-padding-inline: 20px;
+  --ui-data-table-row-divider: rgba(207, 214, 220, 0.8);
+  --ui-data-table-cell-font-size: 14px;
+}
+
+.membres-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+@keyframes membresTablePulse {
+  0%,
+  100% {
+    opacity: 1;
   }
 
-  .p-datatable-tbody > tr {
-    border-bottom: 1px solid $border;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    > td {
-      padding: 0.95rem 1.25rem;
-      vertical-align: middle;
-      color: $text;
-      font-size: 0.9375rem;
-    }
-
-    &:hover {
-      background: rgba(236, 242, 247, 0.65);
-    }
-  }
-
-  .p-datatable-loading-overlay {
-    background: rgba(255, 255, 255, 0.7);
+  50% {
+    opacity: 0.45;
   }
 }
 
@@ -150,16 +163,17 @@ $muted:   #6b7280;
 }
 
 .membres-user-cell__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 50%;
   flex-shrink: 0;
-
-  :deep(.p-avatar) {
-    width: 2.45rem;
-    height: 2.45rem;
-    background: $navy;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
+  background: $navy;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .membres-user-cell__meta {

@@ -6,24 +6,38 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import type { AdminHotelResponse } from '@ubax-workspace/shared-api-types';
+import { AdminHotelsStore } from '@ubax-workspace/ubax-admin-data-access';
+import type {
+  AdminHotelResponse,
+  UpdateSubscriptionRequest,
+} from '@ubax-workspace/shared-api-types';
 import {
   ConfirmDialogComponent,
   EmptyStateComponent,
+  KpiCardComponent,
   SearchFilterBarComponent,
   SectionCardComponent,
   StatusBadgeComponent,
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
+import {
+  UiDataTableCellDefDirective,
+  type UiDataTableColumn,
+  UiDataTableComponent,
+  UiDataTableEmptyDefDirective,
+  UiPaginationComponent,
+} from '@ubax-workspace/shared-ui';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
-import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
-import { AvatarModule } from 'primeng/avatar';
-import { TableModule } from 'primeng/table';
-import { AdminPartnersService } from '../../services/admin-partners.service';
+import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
 
 type StatusFilter = 'all' | 'active' | 'suspended';
+type StarsFilter = 'all' | '1' | '2' | '3' | '4' | '5';
 
 const STATUS_FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
   { label: 'Tous les statuts', value: 'all' },
@@ -31,47 +45,128 @@ const STATUS_FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
   { label: 'Suspendus', value: 'suspended' },
 ];
 
+const DEFAULT_SUBSCRIPTION_PLANS = ['FREE', 'PRO', 'PREMIUM'] as const;
+const PAGE_SIZE = 15;
+const STARS_FILTER_OPTIONS: { label: string; value: StarsFilter }[] = [
+  { label: 'Toutes les étoiles', value: 'all' },
+  { label: '1 étoile', value: '1' },
+  { label: '2 étoiles', value: '2' },
+  { label: '3 étoiles', value: '3' },
+  { label: '4 étoiles', value: '4' },
+  { label: '5 étoiles', value: '5' },
+];
+
 @Component({
   selector: 'ubax-admin-hotels-page',
   standalone: true,
   imports: [
-    TableModule,
-    AvatarModule,
+    FormsModule,
+    ButtonModule,
+    DatePickerModule,
+    DialogModule,
+    SelectModule,
+    KpiCardComponent,
     SearchFilterBarComponent,
     SectionCardComponent,
     StatusBadgeComponent,
     EmptyStateComponent,
     ConfirmDialogComponent,
+    UiDataTableComponent,
+    UiDataTableCellDefDirective,
+    UiDataTableEmptyDefDirective,
+    UiPaginationComponent,
   ],
   templateUrl: './hotels-page.component.html',
   styleUrl: './hotels-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HotelsPageComponent implements OnInit {
-  private readonly svc = inject(AdminPartnersService);
+  private readonly store = inject(AdminHotelsStore);
   private readonly authStore = inject(AuthStore);
   private readonly notif = inject(NOTIFICATION_HANDLER);
   private readonly router = inject(Router);
 
-  protected readonly loading = signal(false);
+  protected readonly loading = this.store.loading;
   protected readonly actionLoading = signal(false);
-  protected readonly hotels = signal<AdminHotelResponse[]>([]);
+  protected readonly hotels = this.store.hotels;
   protected readonly searchQuery = signal('');
   protected readonly statusFilter = signal<StatusFilter>('all');
+  protected readonly subscriptionFilter = signal<string>('all');
+  protected readonly starsFilter = signal<StarsFilter>('all');
+  protected readonly currentPage = signal(1);
 
   protected readonly isSuperAdmin = this.authStore.isSuperAdmin;
 
   protected readonly showConfirm = signal(false);
-  protected readonly confirmAction = signal<'activate' | 'suspend' | null>(null);
+  protected readonly confirmAction = signal<'activate' | 'suspend' | null>(
+    null,
+  );
   protected readonly selectedHotel = signal<AdminHotelResponse | null>(null);
+  protected readonly showSubscriptionDialog = signal(false);
+  protected readonly subscriptionLoading = signal(false);
 
-  protected readonly searchFilters: { label: string; options: FilterOption[] }[] = [
+  protected subscriptionPlanValue: string | null = null;
+  protected subscriptionExpiresAtValue: Date | null = null;
+
+  protected readonly subscriptionPlanOptions = computed<FilterOption[]>(() => {
+    const dynamicPlans = this.hotels()
+      .map((hotel) => hotel.subscriptionPlan?.trim().toUpperCase())
+      .filter((plan): plan is string => Boolean(plan));
+
+    const plans = [
+      ...new Set([...DEFAULT_SUBSCRIPTION_PLANS, ...dynamicPlans]),
+    ];
+    return [
+      { label: 'Tous les plans', value: 'all' },
+      ...plans.map((plan) => ({ label: plan, value: plan })),
+    ];
+  });
+
+  protected readonly searchFilters = computed<
+    {
+      label: string;
+      options: FilterOption[];
+    }[]
+  >(() => [
     { label: 'Tous les statuts', options: STATUS_FILTER_OPTIONS },
-  ];
+    { label: 'Tous les plans', options: this.subscriptionPlanOptions() },
+    { label: 'Toutes les étoiles', options: STARS_FILTER_OPTIONS },
+  ]);
+
+  protected readonly kpis = computed(() => {
+    const hotels = this.hotels();
+    const active = hotels.filter((hotel) => hotel.active).length;
+    const suspended = hotels.length - active;
+    const subscribed = hotels.filter(
+      (hotel) => hotel.subscriptionActive,
+    ).length;
+    const roomCount = hotels.reduce(
+      (sum, hotel) => sum + (hotel.totalRooms ?? 0),
+      0,
+    );
+
+    return { active, roomCount, subscribed, suspended };
+  });
+
+  protected readonly tableColumns: readonly UiDataTableColumn<AdminHotelResponse>[] =
+    [
+      { key: 'hotel', header: 'Hôtel', width: '19%' },
+      { key: 'email', header: 'Email', width: '16%' },
+      { key: 'phone', header: 'Téléphone', width: '13%' },
+      { key: 'city', header: 'Ville', width: '10%' },
+      { key: 'stars', header: 'Étoiles', width: '8%' },
+      { key: 'rooms', header: 'Chambres', width: '8%', align: 'center' },
+      { key: 'subscription', header: 'Abonnement', width: '10%' },
+      { key: 'status', header: 'Statut', width: '6%' },
+      { key: 'actions', header: 'Actions', width: '10%', align: 'end' },
+    ];
 
   protected readonly filteredHotels = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const status = this.statusFilter();
+    const subscription = this.subscriptionFilter();
+    const stars = this.starsFilter();
+
     return this.hotels().filter((h) => {
       const matchesQuery =
         !query ||
@@ -82,8 +177,24 @@ export class HotelsPageComponent implements OnInit {
         status === 'all' ||
         (status === 'active' && h.active) ||
         (status === 'suspended' && !h.active);
-      return matchesQuery && matchesStatus;
+      const matchesSubscription =
+        subscription === 'all' ||
+        (h.subscriptionPlan ?? '').trim().toUpperCase() === subscription;
+      const matchesStars = stars === 'all' || String(h.stars ?? '') === stars;
+
+      return (
+        matchesQuery && matchesStatus && matchesSubscription && matchesStars
+      );
     });
+  });
+
+  protected readonly totalPages = computed(() =>
+    Math.ceil(this.filteredHotels().length / PAGE_SIZE),
+  );
+
+  protected readonly pagedRows = computed(() => {
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return this.filteredHotels().slice(start, start + PAGE_SIZE);
   });
 
   protected readonly hotelCount = computed(() => this.hotels().length);
@@ -93,13 +204,12 @@ export class HotelsPageComponent implements OnInit {
   }
 
   private async loadHotels(): Promise<void> {
-    this.loading.set(true);
     try {
-      this.hotels.set(await firstValueFrom(this.svc.listHotels()));
-    } catch (err) {
-      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des hôtels.'));
-    } finally {
-      this.loading.set(false);
+      await this.store.load();
+    } catch {
+      this.notif.error(
+        this.store.error() ?? 'Impossible de charger la liste des hôtels.',
+      );
     }
   }
 
@@ -113,10 +223,27 @@ export class HotelsPageComponent implements OnInit {
 
   protected onSearchChange(value: string): void {
     this.searchQuery.set(value);
+    this.currentPage.set(1);
   }
 
   protected onFilterChange(event: { filter: string; value: unknown }): void {
-    this.statusFilter.set((event.value as StatusFilter) ?? 'all');
+    this.currentPage.set(1);
+
+    if (event.filter === 'Tous les statuts') {
+      this.statusFilter.set((event.value as StatusFilter) ?? 'all');
+      return;
+    }
+
+    if (event.filter === 'Tous les plans') {
+      this.subscriptionFilter.set((event.value as string) ?? 'all');
+      return;
+    }
+
+    this.starsFilter.set((event.value as StarsFilter) ?? 'all');
+  }
+
+  protected onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   protected viewMembers(hotel: AdminHotelResponse): void {
@@ -129,6 +256,55 @@ export class HotelsPageComponent implements OnInit {
     this.showConfirm.set(true);
   }
 
+  protected openSubscriptionDialog(hotel: AdminHotelResponse): void {
+    this.selectedHotel.set(hotel);
+    this.subscriptionPlanValue =
+      hotel.subscriptionPlan?.trim().toUpperCase() ?? null;
+    this.subscriptionExpiresAtValue = hotel.subscriptionExpiresAt
+      ? new Date(hotel.subscriptionExpiresAt)
+      : null;
+    this.showSubscriptionDialog.set(true);
+  }
+
+  protected closeSubscriptionDialog(): void {
+    this.showSubscriptionDialog.set(false);
+    this.subscriptionPlanValue = null;
+    this.subscriptionExpiresAtValue = null;
+  }
+
+  protected async saveSubscription(): Promise<void> {
+    const hotel = this.selectedHotel();
+    if (
+      !hotel?.id ||
+      !this.subscriptionPlanValue ||
+      !this.subscriptionExpiresAtValue
+    ) {
+      this.notif.error("Veuillez renseigner un plan et une date d'expiration.");
+      return;
+    }
+
+    this.subscriptionLoading.set(true);
+    const body: UpdateSubscriptionRequest = {
+      subscriptionExpiresAt: this.toIsoDateTime(
+        this.subscriptionExpiresAtValue,
+      ),
+      subscriptionPlan: this.subscriptionPlanValue,
+    };
+
+    try {
+      await this.store.updateSubscription(hotel.id, body);
+      this.notif.success("Abonnement de l'hôtel mis à jour.");
+      this.closeSubscriptionDialog();
+    } catch {
+      this.notif.error(
+        this.store.error() ??
+          "Impossible de mettre à jour l'abonnement de l'hôtel.",
+      );
+    } finally {
+      this.subscriptionLoading.set(false);
+    }
+  }
+
   protected async confirmToggle(): Promise<void> {
     const hotel = this.selectedHotel();
     if (!hotel?.id) return;
@@ -136,20 +312,17 @@ export class HotelsPageComponent implements OnInit {
     this.actionLoading.set(true);
     try {
       const action = this.confirmAction();
-      const updated =
-        action === 'activate'
-          ? await firstValueFrom(this.svc.activateHotel(hotel.id))
-          : await firstValueFrom(this.svc.suspendHotel(hotel.id));
-
-      this.hotels.update((list) =>
-        list.map((h) => (h.id === updated.id ? updated : h)),
-      );
+      if (action === 'activate') {
+        await this.store.activate(hotel.id);
+      } else {
+        await this.store.suspend(hotel.id);
+      }
       this.notif.success(
         action === 'activate' ? 'Hôtel activé.' : 'Hôtel suspendu.',
       );
       this.showConfirm.set(false);
-    } catch (err) {
-      this.notif.error(resolveHttpErrorMessage(err, "L'opération a échoué."));
+    } catch {
+      this.notif.error(this.store.error() ?? "L'opération a échoué.");
     } finally {
       this.actionLoading.set(false);
     }
@@ -174,5 +347,68 @@ export class HotelsPageComponent implements OnInit {
 
   protected get confirmSeverity(): 'success' | 'warn' {
     return this.confirmAction() === 'activate' ? 'success' : 'warn';
+  }
+
+  protected get subscriptionSaveDisabled(): boolean {
+    return (
+      this.subscriptionLoading() ||
+      !this.subscriptionPlanValue ||
+      !this.subscriptionExpiresAtValue
+    );
+  }
+
+  protected formatDate(value?: string | null): string {
+    if (!value) {
+      return '—';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '—';
+    }
+
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
+  }
+
+  protected subscriptionVariant(
+    hotel: AdminHotelResponse,
+  ): 'active' | 'warning' | 'neutral' {
+    if (!hotel.subscriptionActive) {
+      return 'neutral';
+    }
+
+    if (this.isExpired(hotel.subscriptionExpiresAt)) {
+      return 'warning';
+    }
+
+    return 'active';
+  }
+
+  protected subscriptionLabel(hotel: AdminHotelResponse): string {
+    return hotel.subscriptionPlan?.trim().toUpperCase() ?? 'Inactif';
+  }
+
+  private isExpired(value?: string | null): boolean {
+    if (!value) {
+      return false;
+    }
+
+    const expiry = new Date(value);
+    if (Number.isNaN(expiry.getTime())) {
+      return false;
+    }
+
+    return expiry.getTime() < Date.now();
+  }
+
+  private toIsoDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}T00:00:00`;
   }
 }

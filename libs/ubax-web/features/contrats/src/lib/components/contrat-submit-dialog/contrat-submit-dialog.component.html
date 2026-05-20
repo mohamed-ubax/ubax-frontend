@@ -1,63 +1,58 @@
 <div class="dlg-overlay" (click)="dismissed.emit()">
-  <div class="dlg" (click)="$event.stopPropagation()">
-    <div class="dlg__icon">
+  <dialog class="dlg" (click)="$event.stopPropagation()" aria-labelledby="dlg-submit-title" open>
+
+    <div class="dlg__icon dlg__icon--primary" aria-hidden="true">
       <i class="pi pi-send"></i>
     </div>
 
-    <h2 class="dlg__title">Soumettre ce contrat à signature ?</h2>
+    <h2 class="dlg__title" id="dlg-submit-title">Soumettre à signature&nbsp;?</h2>
 
     <p class="dlg__message">
-      Le contrat sera transmis pour signature. Un document PDF sera généré
-      automatiquement.
+      Un document PDF sera généré automatiquement.<br>
       <strong>Une fois soumis, le contrat ne pourra plus être modifié.</strong>
     </p>
 
-    <div class="dlg__recap">
+    <div class="dlg__recap" aria-label="Récapitulatif du contrat">
       <div class="dlg-recap-row">
+        <span class="dlg-recap-icon" aria-hidden="true"><i class="pi pi-user"></i></span>
         <span class="dlg-recap-label">Locataire</span>
-        <span class="dlg-recap-value">{{
-          contrat().tenantName ?? contrat().tenantId ?? '—'
-        }}</span>
+        <span class="dlg-recap-value">{{ contrat().tenantName ?? contrat().tenantId ?? '—' }}</span>
       </div>
       <div class="dlg-recap-row">
+        <span class="dlg-recap-icon" aria-hidden="true"><i class="pi pi-home"></i></span>
         <span class="dlg-recap-label">Bien</span>
-        <span class="dlg-recap-value">{{
-          contrat().propertyAddress ?? contrat().propertyId ?? '—'
-        }}</span>
+        <span class="dlg-recap-value">{{ contrat().propertyAddress ?? contrat().propertyId ?? '—' }}</span>
       </div>
-      <div class="dlg-recap-row">
-        <span class="dlg-recap-label">Loyer mensuel</span>
-        <span class="dlg-recap-value">{{
-          formatAmount(contrat().monthlyRent)
-        }}</span>
-      </div>
-      <div class="dlg-recap-row">
-        <span class="dlg-recap-label">Caution</span>
-        <span class="dlg-recap-value">{{
-          formatAmount(contrat().depositAmount)
-        }}</span>
-      </div>
+      @if (contrat().monthlyRent) {
+        <div class="dlg-recap-row">
+          <span class="dlg-recap-icon" aria-hidden="true"><i class="pi pi-wallet"></i></span>
+          <span class="dlg-recap-label">Loyer mensuel</span>
+          <span class="dlg-recap-value dlg-recap-value--amount">{{ formatAmount(contrat().monthlyRent) }}</span>
+        </div>
+      }
+      @if (contrat().depositAmount) {
+        <div class="dlg-recap-row">
+          <span class="dlg-recap-icon" aria-hidden="true"><i class="pi pi-shield"></i></span>
+          <span class="dlg-recap-label">Caution</span>
+          <span class="dlg-recap-value dlg-recap-value--amount">{{ formatAmount(contrat().depositAmount) }}</span>
+        </div>
+      }
     </div>
 
+    <div class="dlg__divider" aria-hidden="true"></div>
+
     <div class="dlg__actions">
-      <button
-        class="dlg-btn dlg-btn--ghost"
-        (click)="dismissed.emit()"
-        [disabled]="loading()"
-      >
+      <button class="dlg-btn dlg-btn--ghost" type="button" (click)="dismissed.emit()" [disabled]="loading()">
         Annuler
       </button>
-      <button
-        class="dlg-btn dlg-btn--primary"
-        (click)="confirm.emit()"
-        [disabled]="loading()"
-      >
+      <button class="dlg-btn dlg-btn--primary" type="button" (click)="confirm.emit()" [disabled]="loading()">
         @if (loading()) {
-          <i class="pi pi-spin pi-spinner"></i> Soumission…
+          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Soumission…
         } @else {
-          <i class="pi pi-send"></i> Soumettre
+          <i class="pi pi-send" aria-hidden="true"></i> Soumettre
         }
       </button>
     </div>
-  </div>
+
+  </dialog>
 </div>

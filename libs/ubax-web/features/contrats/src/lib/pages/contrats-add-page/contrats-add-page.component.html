@@ -7,7 +7,7 @@
     >
       <i class="pi pi-arrow-left"></i>
     </button>
-    <a class="ca-breadcrumb__item" routerLink="/contrats">Contrats de bail</a>
+    <a class="ca-breadcrumb__item" routerLink="/contrats">Contrats</a>
     <i class="pi pi-chevron-right ca-breadcrumb__sep"></i>
     <span class="ca-breadcrumb__item ca-breadcrumb__item--active"
       >Nouveau contrat</span
@@ -15,7 +15,7 @@
   </nav>
 
   <div class="ca-layout">
-    <!-- Sidebar -->
+    <!-- ── Sidebar ── -->
     <aside class="ca-sidebar">
       <div class="ca-sidebar-brand">
         <div class="ca-sidebar-brand__icon">
@@ -23,12 +23,12 @@
         </div>
         <div>
           <div class="ca-sidebar-brand__title">Nouveau contrat</div>
-          <div class="ca-sidebar-brand__sub">Bail de location</div>
+          <div class="ca-sidebar-brand__sub">Création en brouillon</div>
         </div>
       </div>
 
       <div class="ca-stepper">
-        @for (step of stepConfig; track step.step; let i = $index) {
+        @for (step of visibleStepConfig(); track step.step; let i = $index) {
           <div
             class="ca-step"
             [class.ca-step--active]="currentStep() === step.step"
@@ -38,14 +38,14 @@
               @if (currentStep() > step.step) {
                 <i class="pi pi-check"></i>
               } @else {
-                {{ step.step }}
+                {{ i + 1 }}
               }
             </div>
             <div class="ca-step__content">
               <div class="ca-step__label">{{ step.title }}</div>
               <div class="ca-step__desc">{{ step.desc }}</div>
             </div>
-            @if (i < stepConfig.length - 1) {
+            @if (i < visibleStepConfig().length - 1) {
               <div class="ca-step__line"></div>
             }
           </div>
@@ -65,26 +65,37 @@
       </div>
     </aside>
 
-    <!-- Main -->
+    <!-- ── Main ── -->
     <main>
       <div class="ca-card">
         @switch (currentStep()) {
+          <!-- ════════════════════════════════════════════════════════
+               ÉTAPE 1 — Locataire (conditionnel : LEASE, RENT_TO_OWN)
+          ════════════════════════════════════════════════════════ -->
           @case (1) {
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Sélection du locataire</h2>
               <p class="ca-step-header__sub">
-                Seuls les locataires qualifiés sans contrat actif peuvent être sélectionnés.
+                Seuls les locataires qualifiés (KYC validé) sans contrat actif
+                sont affichés. Pour les contrats sans locataire (Vente,
+                Réservation, Mandat), passez directement à l'étape suivante.
               </p>
             </div>
-            <form [formGroup]="step1Form" class="ca-form">
+
+            <form class="ca-form">
               <div class="ca-field">
-                <label class="ca-label" for="contract-add-tenant"
-                  >Locataire <span class="req">*</span></label
-                >
+                <label class="ca-label" for="ca-tenant">
+                  Locataire
+                  @if (tenantStepRequired()) {
+                    <span class="req">*</span>
+                  }
+                </label>
                 <p-select
-                  inputId="contract-add-tenant"
+                  inputId="ca-tenant"
                   [options]="tenantOptions()"
-                  formControlName="tenantId"
+                  [ngModel]="tenantId()"
+                  (ngModelChange)="tenantId.set($event)"
+                  [ngModelOptions]="{ standalone: true }"
                   optionLabel="label"
                   optionValue="value"
                   [filter]="true"
@@ -93,7 +104,7 @@
                   [placeholder]="
                     locationStore.loading()
                       ? 'Chargement des locataires...'
-                      : 'Selectionnez un locataire qualifie'
+                      : 'Sélectionnez un locataire qualifié'
                   "
                   appendTo="body"
                   styleClass="ca-rich-select"
@@ -107,10 +118,11 @@
                       </span>
                       <span class="ca-select-trigger__text">
                         <span class="ca-select-trigger__label">{{
-                          option?.label || 'Selectionnez un locataire qualifie'
+                          option?.label || 'Sélectionnez un locataire qualifié'
                         }}</span>
                         <span class="ca-select-trigger__meta">{{
-                          option?.meta || 'Dossiers KYC qualifies sans contrat actif'
+                          option?.meta ||
+                            'Dossiers KYC qualifiés sans contrat actif'
                         }}</span>
                       </span>
                     </div>
@@ -134,39 +146,45 @@
                     <i class="pi pi-chevron-down" aria-hidden="true"></i>
                   </ng-template>
                 </p-select>
-                @if (
-                  step1Form.get('tenantId')?.invalid &&
-                  step1Form.get('tenantId')?.touched
-                ) {
+                @if (isTouched('tenantId') && step1Errors().tenantRequired) {
                   <span class="ca-error"
                     ><i class="pi pi-exclamation-circle"></i> Le locataire est
-                    requis</span
+                    requis pour ce type de contrat</span
                   >
                 }
-                <span class="ca-hint"
-                  ><i class="pi pi-info-circle"></i> Seuls les dossiers
-                  qualifiés (statut QUALIFIED) sans contrat en cours sont affichés.</span
-                >
+                <span class="ca-hint">
+                  <i class="pi pi-info-circle"></i>
+                  Seuls les dossiers avec statut <strong>QUALIFIED</strong> et
+                  sans contrat en cours sont affichés. Le bien associé au
+                  dossier sera pré-sélectionné automatiquement.
+                </span>
               </div>
             </form>
           }
 
+          <!-- ════════════════════════════════════════════════════════
+               ÉTAPE 2 — Sélection du bien
+          ════════════════════════════════════════════════════════ -->
           @case (2) {
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Sélection du bien</h2>
               <p class="ca-step-header__sub">
                 Le bien est pré-rempli depuis le dossier du locataire.
+                Modifiable si nécessaire.
               </p>
             </div>
-            <form [formGroup]="step2Form" class="ca-form">
+
+            <form class="ca-form">
               <div class="ca-field">
-                <label class="ca-label" for="contract-add-property"
-                  >Bien <span class="req">*</span></label
-                >
+                <label class="ca-label" for="ca-property">
+                  Bien immobilier <span class="req">*</span>
+                </label>
                 <p-select
-                  inputId="contract-add-property"
+                  inputId="ca-property"
                   [options]="propertyOptions()"
-                  formControlName="propertyId"
+                  [ngModel]="propertyId()"
+                  (ngModelChange)="propertyId.set($event)"
+                  [ngModelOptions]="{ standalone: true }"
                   optionLabel="label"
                   optionValue="value"
                   [filter]="true"
@@ -175,12 +193,13 @@
                   [placeholder]="
                     biensStore.loading()
                       ? 'Chargement des biens...'
-                      : 'Selectionnez un bien'
+                      : 'Sélectionnez un bien'
                   "
                   appendTo="body"
                   styleClass="ca-rich-select"
                   panelStyleClass="ca-rich-select-panel"
-                  ariaLabel="Bien"
+                  ariaLabel="Bien immobilier"
+                  (onChange)="markFieldEdited('propertyId')"
                 >
                   <ng-template #selectedItem let-option>
                     <div class="ca-select-trigger">
@@ -189,10 +208,10 @@
                       </span>
                       <span class="ca-select-trigger__text">
                         <span class="ca-select-trigger__label">{{
-                          option?.label || 'Selectionnez un bien'
+                          option?.label || 'Sélectionnez un bien'
                         }}</span>
                         <span class="ca-select-trigger__meta">{{
-                          option?.meta || 'Biens eligibles sans contrat actif'
+                          option?.meta || 'Biens disponibles'
                         }}</span>
                       </span>
                     </div>
@@ -217,115 +236,174 @@
                   </ng-template>
                 </p-select>
                 @if (
-                  step2Form.get('propertyId')?.invalid &&
-                  step2Form.get('propertyId')?.touched
+                  isTouched('propertyId') && step2Errors().propertyRequired
                 ) {
                   <span class="ca-error"
                     ><i class="pi pi-exclamation-circle"></i> Le bien est
                     requis</span
                   >
                 }
-                <span class="ca-hint"
-                  ><i class="pi pi-info-circle"></i> Pré-rempli depuis le dossier du locataire. Modifiable si nécessaire.</span
-                >
+                <span class="ca-hint">
+                  <i class="pi pi-info-circle"></i>
+                  Pré-rempli depuis le dossier du locataire. Modifiable si
+                  nécessaire.
+                </span>
               </div>
-              <div class="ca-field">
-                <label class="ca-label" for="contract-add-owner"
-                  >Propriétaire <span class="req">*</span></label
-                >
-                <input
-                  class="ca-input"
-                  id="contract-add-owner"
-                  type="text"
-                  [value]="ownerDisplayName()"
-                  readonly
-                />
-                @if (
-                  step2Form.get('ownerId')?.invalid &&
-                  step2Form.get('ownerId')?.touched
-                ) {
-                  <span class="ca-error"
-                    ><i class="pi pi-exclamation-circle"></i> Le propriétaire
-                    est requis</span
-                  >
-                }
-                <span class="ca-hint"
-                  ><i class="pi pi-info-circle"></i> Prérempli avec
-                  l'utilisateur connecté. Son identifiant est envoyé
-                  automatiquement.</span
-                >
-              </div>
+
+              <!-- Propriétaire (auto-rempli depuis le bien, verrouillé) -->
+              @if (ownerId()) {
+                <div class="ca-field">
+                  <span class="ca-label">Propriétaire</span>
+                  <div class="ca-owner-badge">
+                    <span class="ca-owner-badge__icon" aria-hidden="true">
+                      <i class="pi pi-user"></i>
+                    </span>
+                    <span class="ca-owner-badge__name">{{
+                      ownerDisplayName()
+                    }}</span>
+                    <span
+                      class="ca-owner-badge__lock"
+                      aria-label="Champ verrouillé"
+                    >
+                      <i class="pi pi-lock"></i>
+                    </span>
+                  </div>
+                  <span class="ca-hint">
+                    <i class="pi pi-info-circle"></i>
+                    Renseigné automatiquement depuis le bien sélectionné. Non
+                    modifiable.
+                  </span>
+                </div>
+              } @else if (propertyId()) {
+                <div class="ca-field">
+                  <span class="ca-label">Propriétaire</span>
+                  <span class="ca-error">
+                    <i class="pi pi-exclamation-circle"></i>
+                    Impossible d'identifier le propriétaire de ce bien. Vérifiez
+                    la fiche bien avant de créer le contrat.
+                  </span>
+                </div>
+              }
             </form>
           }
 
+          <!-- ════════════════════════════════════════════════════════
+               ÉTAPE 3 — Type de contrat
+          ════════════════════════════════════════════════════════ -->
           @case (3) {
             <div class="ca-step-header">
-              <h2 class="ca-step-header__title">Conditions du bail</h2>
+              <h2 class="ca-step-header__title">Type de contrat</h2>
               <p class="ca-step-header__sub">
-                Renseignez les montants et les dates selon le type de contrat.
+                Sélectionnez la nature du contrat. Le formulaire s'adapte
+                automatiquement.
               </p>
             </div>
-            <form [formGroup]="step3Form" class="ca-form">
 
-              <!-- Type de contrat -->
-              <div class="ca-form-row">
-                <div class="ca-field ca-field--full">
-                  <label class="ca-label" for="contract-add-type">
-                    Type de contrat <span class="req">*</span>
-                  </label>
-                  <p-select
-                    inputId="contract-add-type"
-                    [options]="contractTypeOptions()"
-                    formControlName="contractType"
-                    optionLabel="label"
-                    optionValue="value"
-                    appendTo="body"
-                    styleClass="ca-rich-select ca-rich-select--compact"
-                    panelStyleClass="ca-rich-select-panel"
-                    ariaLabel="Type de contrat"
-                    [placeholder]="contractTypeCodeListLoading() ? 'Chargement...' : 'Sélectionnez un type'"
-                  >
-                    <ng-template #selectedItem let-option>
-                      <div class="ca-select-trigger ca-select-trigger--compact">
-                        <span class="ca-select-trigger__icon" aria-hidden="true">
-                          <i [class]="'pi ' + (option?.icon || 'pi-file')"></i>
+            <form class="ca-form">
+              <div class="ca-field">
+                <label class="ca-label" for="ca-contract-type">
+                  Type de contrat <span class="req">*</span>
+                </label>
+                <div class="ca-contract-type-grid">
+                  @for (option of contractTypeOptions(); track option.value) {
+                    <button
+                      type="button"
+                      class="ca-type-card"
+                      [class.ca-type-card--selected]="
+                        contractType() === option.value
+                      "
+                      (click)="contractType.set(option.value)"
+                      [attr.aria-pressed]="contractType() === option.value"
+                    >
+                      <span class="ca-type-card__icon" aria-hidden="true">
+                        <i [class]="'pi ' + option.icon"></i>
+                      </span>
+                      <span class="ca-type-card__label">{{
+                        option.label
+                      }}</span>
+                      <span class="ca-type-card__meta">{{ option.meta }}</span>
+                      @if (contractType() === option.value) {
+                        <span class="ca-type-card__check" aria-hidden="true">
+                          <i class="pi pi-check-circle"></i>
                         </span>
-                        <span class="ca-select-trigger__text">
-                          <span class="ca-select-trigger__label">{{ option?.label || 'Type de contrat' }}</span>
-                          <span class="ca-select-trigger__meta">{{ option?.meta || 'Choisissez la nature du contrat' }}</span>
-                        </span>
-                      </div>
-                    </ng-template>
-                    <ng-template #item let-option>
-                      <div class="ca-option-card">
-                        <span class="ca-option-card__icon" aria-hidden="true">
-                          <i [class]="'pi ' + option.icon"></i>
-                        </span>
-                        <span class="ca-option-card__text">
-                          <span class="ca-option-card__label">{{ option.label }}</span>
-                          <span class="ca-option-card__meta">{{ option.meta }}</span>
-                        </span>
-                      </div>
-                    </ng-template>
-                    <ng-template #dropdownicon>
-                      <i class="pi pi-chevron-down" aria-hidden="true"></i>
-                    </ng-template>
-                  </p-select>
-                  @if (step3Form.get('contractType')?.invalid && step3Form.get('contractType')?.touched) {
-                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le type de contrat est requis</span>
+                      }
+                    </button>
                   }
                 </div>
+                @if (isTouched('contractType') && !step3Valid()) {
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le type de contrat
+                    est requis</span
+                  >
+                }
               </div>
 
-              <!-- Date de début (toujours visible) -->
+              <!-- Bannière info selon le type sélectionné -->
+              @if (contractType()) {
+                <div class="ca-type-info-banner">
+                  <i
+                    [class]="'pi ' + contractTypeIcon(contractType())"
+                    aria-hidden="true"
+                  ></i>
+                  <div>
+                    <div class="ca-type-info-banner__title">
+                      {{ contractTypeLabelFor(contractType()) }}
+                    </div>
+                    <div class="ca-type-info-banner__desc">
+                      @switch (contractType()) {
+                        @case ('LEASE') {
+                          Loyer mensuel · Caution · Jour d'échéance · Dates de
+                          bail
+                        }
+                        @case ('SALE') {
+                          Prix de vente · Date de cession
+                        }
+                        @case ('RENT_TO_OWN') {
+                          Prix total · Mensualité · Apport · Durée (N ans ou
+                          date)
+                        }
+                        @case ('RESERVATION') {
+                          Acompte de réservation · Durée de blocage
+                        }
+                        @case ('MANDATE') {
+                          Commission agence · Clauses · Conditions de
+                          résiliation
+                        }
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </form>
+          }
+
+          <!-- ════════════════════════════════════════════════════════
+               ÉTAPE 4 — Conditions financières et dates
+          ════════════════════════════════════════════════════════ -->
+          @case (4) {
+            <div class="ca-step-header">
+              <h2 class="ca-step-header__title">Conditions du contrat</h2>
+              <p class="ca-step-header__sub">
+                Renseignez les montants et les dates. Les valeurs sont
+                pré-remplies depuis le bien sélectionné.
+              </p>
+            </div>
+
+            <form class="ca-form">
+              <!-- ── Dates ── -->
+              <div class="ca-section-title">
+                <i class="pi pi-calendar" aria-hidden="true"></i> Dates
+              </div>
               <div class="ca-form-row">
                 <div class="ca-field">
-                  <label class="ca-label" for="contract-add-start-date">
+                  <label class="ca-label" for="ca-start-date">
                     Date de début <span class="req">*</span>
                   </label>
                   <p-datepicker
-                    inputId="contract-add-start-date"
-                    formControlName="startDate"
+                    inputId="ca-start-date"
+                    [ngModel]="startDate()"
+                    (ngModelChange)="startDate.set($event)"
+                    [ngModelOptions]="{ standalone: true }"
                     [showIcon]="true"
                     [showButtonBar]="true"
                     [readonlyInput]="true"
@@ -335,32 +413,39 @@
                     styleClass="ca-rich-datepicker"
                     inputStyleClass="ca-rich-datepicker__input"
                     panelStyleClass="ca-rich-datepicker-panel"
-                    todayButtonStyleClass="ca-rich-datepicker-panel__today"
-                    clearButtonStyleClass="ca-rich-datepicker-panel__clear"
                     placeholder="Sélectionnez une date de début"
                     ariaLabel="Date de début"
+                    (onSelect)="markFieldEdited('startDate')"
                   >
                     <ng-template #triggericon>
                       <i class="pi pi-calendar" aria-hidden="true"></i>
                     </ng-template>
                   </p-datepicker>
-                  @if (step3Form.get('startDate')?.invalid && step3Form.get('startDate')?.touched) {
-                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de début requise</span>
+                  @if (isTouched('startDate') && step4Errors().startDate) {
+                    <span class="ca-error"
+                      ><i class="pi pi-exclamation-circle"></i> Date de début
+                      requise</span
+                    >
                   }
                 </div>
 
-                <!-- Date de fin (LEASE, RENT_TO_OWN, MANDATE) -->
-                @if (contractTypeFields().showEndDate) {
+                <!-- Date de fin (LEASE, MANDATE) — pas RENT_TO_OWN qui a son propre bloc -->
+                @if (
+                  contractTypeFields().showEndDate &&
+                  !contractTypeFields().showDurationYears
+                ) {
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-end-date">
+                    <label class="ca-label" for="ca-end-date">
                       Date de fin
                       @if (contractTypeFields().endDateRequired) {
                         <span class="req">*</span>
                       }
                     </label>
                     <p-datepicker
-                      inputId="contract-add-end-date"
-                      formControlName="endDate"
+                      inputId="ca-end-date"
+                      [ngModel]="endDate()"
+                      (ngModelChange)="endDate.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       [showIcon]="true"
                       [showButtonBar]="true"
                       [readonlyInput]="true"
@@ -370,20 +455,21 @@
                       styleClass="ca-rich-datepicker"
                       inputStyleClass="ca-rich-datepicker__input"
                       panelStyleClass="ca-rich-datepicker-panel"
-                      todayButtonStyleClass="ca-rich-datepicker-panel__today"
-                      clearButtonStyleClass="ca-rich-datepicker-panel__clear"
                       placeholder="Sélectionnez une date de fin"
                       ariaLabel="Date de fin"
                       [disabled]="openEnded()"
+                      (onSelect)="markFieldEdited('endDate')"
                     >
                       <ng-template #triggericon>
                         <i class="pi pi-calendar" aria-hidden="true"></i>
                       </ng-template>
                     </p-datepicker>
-                    @if (step3Form.get('endDate')?.invalid && step3Form.get('endDate')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de fin requise</span>
+                    @if (isTouched('endDate') && step4Errors().endDate) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Date de fin
+                        requise</span
+                      >
                     }
-                    <!-- Checkbox durée indéterminée uniquement pour LEASE -->
                     @if (!contractTypeFields().endDateRequired) {
                       <label class="ca-checkbox-row">
                         <input
@@ -392,140 +478,366 @@
                           (ngModelChange)="openEnded.set($event)"
                           [ngModelOptions]="{ standalone: true }"
                         />
-                        <span>Bail à durée indéterminée</span>
+                        <span>Durée indéterminée (reconduction tacite)</span>
                       </label>
                     }
                   </div>
                 }
               </div>
 
-              <!-- LEASE : loyer + caution -->
+              <!-- ── Durée RENT_TO_OWN : deux modes ── -->
+              @if (contractTypeFields().showDurationYears) {
+                <div class="ca-rto-duration-block">
+                  <div class="ca-rto-duration-block__header">
+                    <span class="ca-section-title" style="margin-bottom: 0">
+                      <i class="pi pi-clock" aria-hidden="true"></i> Durée du
+                      contrat
+                    </span>
+                    <fieldset class="ca-mode-toggle">
+                      <legend class="sr-only">
+                        Mode de saisie de la durée
+                      </legend>
+                      <button
+                        type="button"
+                        class="ca-mode-toggle__btn"
+                        [class.ca-mode-toggle__btn--active]="
+                          rentToOwnDurationMode() === 'years'
+                        "
+                        (click)="toggleRentToOwnDurationMode('years')"
+                      >
+                        <i class="pi pi-list-check"></i> N années
+                      </button>
+                      <button
+                        type="button"
+                        class="ca-mode-toggle__btn"
+                        [class.ca-mode-toggle__btn--active]="
+                          rentToOwnDurationMode() === 'date'
+                        "
+                        (click)="toggleRentToOwnDurationMode('date')"
+                      >
+                        <i class="pi pi-calendar"></i> Date précise
+                      </button>
+                    </fieldset>
+                  </div>
+
+                  @if (rentToOwnDurationMode() === 'years') {
+                    <div class="ca-form-row">
+                      <div class="ca-field">
+                        <label class="ca-label" for="ca-duration-years">
+                          Durée (années) <span class="req">*</span>
+                        </label>
+                        <div class="ca-duration-stepper">
+                          <button
+                            type="button"
+                            class="ca-duration-stepper__btn"
+                            (click)="
+                              durationYears.set(
+                                Math.max(1, (durationYears() ?? 5) - 1)
+                              );
+                              markFieldEdited('durationYears')
+                            "
+                            [disabled]="(durationYears() ?? 5) <= 1"
+                            aria-label="Diminuer la durée"
+                          >
+                            <i class="pi pi-minus"></i>
+                          </button>
+                          <input
+                            class="ca-input ca-input--center"
+                            id="ca-duration-years"
+                            type="number"
+                            min="1"
+                            max="30"
+                            [ngModel]="durationYears()"
+                            (ngModelChange)="durationYears.set($event)"
+                            [ngModelOptions]="{ standalone: true }"
+                            (input)="markFieldEdited('durationYears')"
+                            aria-label="Durée en années"
+                          />
+                          <button
+                            type="button"
+                            class="ca-duration-stepper__btn"
+                            (click)="
+                              durationYears.set(
+                                Math.min(30, (durationYears() ?? 5) + 1)
+                              );
+                              markFieldEdited('durationYears')
+                            "
+                            [disabled]="(durationYears() ?? 5) >= 30"
+                            aria-label="Augmenter la durée"
+                          >
+                            <i class="pi pi-plus"></i>
+                          </button>
+                          <span class="ca-duration-stepper__unit">ans</span>
+                        </div>
+                        @if (
+                          isTouched('durationYears') &&
+                          step4Errors().durationYears
+                        ) {
+                          <span class="ca-error"
+                            ><i class="pi pi-exclamation-circle"></i> Durée
+                            requise (1–30 ans)</span
+                          >
+                        }
+                        <span class="ca-hint"
+                          ><i class="pi pi-info-circle"></i> Le backend
+                          calculera la date de fin automatiquement.</span
+                        >
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="ca-form-row">
+                      <div class="ca-field">
+                        <label class="ca-label" for="ca-rto-end-date">
+                          Date de fin <span class="req">*</span>
+                        </label>
+                        <p-datepicker
+                          inputId="ca-rto-end-date"
+                          [ngModel]="endDate()"
+                          (ngModelChange)="endDate.set($event)"
+                          [ngModelOptions]="{ standalone: true }"
+                          [showIcon]="true"
+                          [showButtonBar]="true"
+                          [readonlyInput]="true"
+                          iconDisplay="button"
+                          dateFormat="dd/mm/yy"
+                          appendTo="body"
+                          styleClass="ca-rich-datepicker"
+                          inputStyleClass="ca-rich-datepicker__input"
+                          panelStyleClass="ca-rich-datepicker-panel"
+                          placeholder="Sélectionnez la date de fin"
+                          ariaLabel="Date de fin location-vente"
+                          (onSelect)="markFieldEdited('endDate')"
+                        >
+                          <ng-template #triggericon>
+                            <i class="pi pi-calendar" aria-hidden="true"></i>
+                          </ng-template>
+                        </p-datepicker>
+                        @if (isTouched('endDate') && step4Errors().endDate) {
+                          <span class="ca-error"
+                            ><i class="pi pi-exclamation-circle"></i> Date de
+                            fin requise</span
+                          >
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- ── LEASE : loyer + caution ── -->
               @if (contractTypeFields().showMonthlyRent) {
+                <div class="ca-section-title">
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions
+                  financières
+                </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-rent">
+                    <label class="ca-label" for="ca-monthly-rent">
                       Loyer mensuel (FCFA) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-rent"
+                      id="ca-monthly-rent"
                       type="number"
                       placeholder="Ex : 150 000"
-                      formControlName="monthlyRent"
+                      [ngModel]="monthlyRent()"
+                      (ngModelChange)="monthlyRent.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="1"
+                      (input)="markFieldEdited('monthlyRent')"
                     />
-                    @if (step3Form.get('monthlyRent')?.invalid && step3Form.get('monthlyRent')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Loyer requis et doit être &gt; 0</span>
+                    @if (
+                      isTouched('monthlyRent') && step4Errors().monthlyRent
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Loyer requis
+                        et doit être &gt; 0</span
+                      >
                     }
                   </div>
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-deposit">
+                    <label class="ca-label" for="ca-deposit">
                       Caution (FCFA) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-deposit"
+                      id="ca-deposit"
                       type="number"
                       placeholder="Ex : 300 000"
-                      formControlName="depositAmount"
+                      [ngModel]="depositAmount()"
+                      (ngModelChange)="depositAmount.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="0"
+                      (input)="markFieldEdited('depositAmount')"
                     />
-                    @if (step3Form.get('depositAmount')?.invalid && step3Form.get('depositAmount')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Caution requise (≥ 0)</span>
+                    @if (
+                      isTouched('depositAmount') && step4Errors().depositAmount
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Caution
+                        requise (≥ 0)</span
+                      >
                     }
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculée : loyer ×
+                      2</span
+                    >
                   </div>
                 </div>
               }
 
-              <!-- SALE : prix de vente uniquement -->
-              @if (contractTypeFields().showSalePrice && !contractTypeFields().showMonthlyInstallment) {
+              <!-- ── SALE : prix de vente ── -->
+              @if (
+                contractTypeFields().showSalePrice &&
+                !contractTypeFields().showMonthlyInstallment
+              ) {
+                <div class="ca-section-title">
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions
+                  financières
+                </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-sale-price">
+                    <label class="ca-label" for="ca-sale-price">
                       Prix de vente (FCFA) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-sale-price"
+                      id="ca-sale-price"
                       type="number"
                       placeholder="Ex : 25 000 000"
-                      formControlName="salePrice"
+                      [ngModel]="salePrice()"
+                      (ngModelChange)="salePrice.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="1"
+                      (input)="markFieldEdited('salePrice')"
                     />
-                    @if (step3Form.get('salePrice')?.invalid && step3Form.get('salePrice')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Prix de vente requis et doit être &gt; 0</span>
+                    @if (isTouched('salePrice') && step4Errors().salePrice) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Prix de vente
+                        requis et doit être &gt; 0</span
+                      >
                     }
                   </div>
                 </div>
               }
 
-              <!-- RENT_TO_OWN : prix total + mensualité + apport -->
+              <!-- ── RENT_TO_OWN : prix total + mensualité + apport ── -->
               @if (contractTypeFields().showMonthlyInstallment) {
+                <div class="ca-section-title">
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions
+                  financières
+                </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-rto-price">
+                    <label class="ca-label" for="ca-rto-price">
                       Prix total du bien (FCFA) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-rto-price"
+                      id="ca-rto-price"
                       type="number"
                       placeholder="Ex : 12 000 000"
-                      formControlName="salePrice"
+                      [ngModel]="salePrice()"
+                      (ngModelChange)="salePrice.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="1"
+                      (input)="markFieldEdited('salePrice')"
                     />
-                    @if (step3Form.get('salePrice')?.invalid && step3Form.get('salePrice')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Prix total requis et doit être &gt; 0</span>
+                    @if (isTouched('salePrice') && step4Errors().salePrice) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Prix total
+                        requis et doit être &gt; 0</span
+                      >
                     }
                   </div>
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-installment">
+                    <label class="ca-label" for="ca-installment">
                       Mensualité (FCFA) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-installment"
+                      id="ca-installment"
                       type="number"
                       placeholder="Ex : 200 000"
-                      formControlName="monthlyInstallment"
+                      [ngModel]="monthlyInstallment()"
+                      (ngModelChange)="monthlyInstallment.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="1"
+                      (input)="markFieldEdited('monthlyInstallment')"
                     />
-                    @if (step3Form.get('monthlyInstallment')?.invalid && step3Form.get('monthlyInstallment')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Mensualité requise et doit être &gt; 0</span>
+                    @if (
+                      isTouched('monthlyInstallment') &&
+                      step4Errors().monthlyInstallment
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Mensualité
+                        requise et doit être &gt; 0</span
+                      >
                     }
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculée : prix
+                      total ÷ 60 mois</span
+                    >
                   </div>
                 </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-rto-deposit">
+                    <label class="ca-label" for="ca-rto-deposit">
                       Apport initial (FCFA) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-rto-deposit"
+                      id="ca-rto-deposit"
                       type="number"
                       placeholder="Ex : 1 200 000"
-                      formControlName="depositAmount"
+                      [ngModel]="depositAmount()"
+                      (ngModelChange)="depositAmount.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="0"
+                      (input)="markFieldEdited('depositAmount')"
                     />
-                    @if (step3Form.get('depositAmount')?.invalid && step3Form.get('depositAmount')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Apport requis (≥ 0)</span>
+                    @if (
+                      isTouched('depositAmount') && step4Errors().depositAmount
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Apport requis
+                        (≥ 0)</span
+                      >
                     }
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculé :
+                      mensualité × 6</span
+                    >
                   </div>
                 </div>
+
                 <!-- Récapitulatif indicatif RENT_TO_OWN -->
                 @if (rentToOwnSummary(); as summary) {
-                  <div class="ca-rto-summary" role="note" aria-label="Récapitulatif location-vente">
-                    <i class="pi pi-calculator ca-rto-summary__icon" aria-hidden="true"></i>
+                  <div
+                    class="ca-rto-summary"
+                    role="note"
+                    aria-label="Récapitulatif location-vente"
+                  >
+                    <i
+                      class="pi pi-calculator ca-rto-summary__icon"
+                      aria-hidden="true"
+                    ></i>
                     <div class="ca-rto-summary__content">
-                      <span class="ca-rto-summary__label">Récapitulatif indicatif</span>
+                      <span class="ca-rto-summary__label"
+                        >Récapitulatif indicatif</span
+                      >
                       <span class="ca-rto-summary__formula">
-                        {{ summary.installment }} × {{ summary.months }} mois = {{ summary.total }}
+                        {{ summary.installment }} × {{ summary.months }} mois =
+                        {{ summary.total }}
                       </span>
                       @if (!summary.balanced) {
                         <span class="ca-rto-summary__warning">
-                          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-                          Le total des mensualités ({{ summary.total }}) diffère du prix total ({{ summary.salePrice }}).
+                          <i
+                            class="pi pi-exclamation-triangle"
+                            aria-hidden="true"
+                          ></i>
+                          Le total des mensualités ({{ summary.total }}) diffère
+                          du prix total ({{ summary.salePrice }}).
                         </span>
                       }
                     </div>
@@ -533,174 +845,307 @@
                 }
               }
 
-              <!-- Jour d'échéance (LEASE + RENT_TO_OWN) -->
+              <!-- ── Jour d'échéance (LEASE + RENT_TO_OWN) ── -->
               @if (contractTypeFields().showPaymentDay) {
                 <div class="ca-form-row">
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-payment-day">
+                    <label class="ca-label" for="ca-payment-day">
                       Jour de prélèvement mensuel <span class="req">*</span>
                     </label>
-                    <input
-                      class="ca-input"
-                      id="contract-add-payment-day"
-                      type="number"
-                      min="1"
-                      max="28"
-                      placeholder="Ex : 5"
-                      formControlName="paymentDay"
-                    />
-                    @if (step3Form.get('paymentDay')?.invalid && step3Form.get('paymentDay')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Valeur attendue entre 1 et 28</span>
+                    <div class="ca-payment-day-row">
+                      <input
+                        class="ca-input ca-input--sm"
+                        id="ca-payment-day"
+                        type="number"
+                        min="1"
+                        max="28"
+                        placeholder="5"
+                        [ngModel]="paymentDay()"
+                        (ngModelChange)="paymentDay.set($event)"
+                        [ngModelOptions]="{ standalone: true }"
+                        (input)="markFieldEdited('paymentDay')"
+                      />
+                      <span class="ca-payment-day-row__label">du mois</span>
+                    </div>
+                    @if (isTouched('paymentDay') && step4Errors().paymentDay) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Valeur
+                        attendue entre 1 et 28</span
+                      >
                     }
-                    <span class="ca-hint"><i class="pi pi-info-circle"></i> Jour du mois auquel le loyer est prélevé (1–28).</span>
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Jour du mois auquel le
+                      loyer est prélevé (1–28).</span
+                    >
                   </div>
                 </div>
               }
 
-              <!-- RESERVATION : acompte + durée -->
+              <!-- ── RESERVATION : acompte + durée ── -->
               @if (contractTypeFields().showReservationDeposit) {
+                <div class="ca-section-title">
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions de
+                  réservation
+                </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-reservation-deposit">
+                    <label class="ca-label" for="ca-reservation-deposit">
                       Acompte de réservation (FCFA) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-reservation-deposit"
+                      id="ca-reservation-deposit"
                       type="number"
                       placeholder="Ex : 500 000"
-                      formControlName="reservationDeposit"
+                      [ngModel]="reservationDeposit()"
+                      (ngModelChange)="reservationDeposit.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="1"
+                      (input)="markFieldEdited('reservationDeposit')"
                     />
-                    @if (step3Form.get('reservationDeposit')?.invalid && step3Form.get('reservationDeposit')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Acompte requis et doit être &gt; 0</span>
+                    @if (
+                      isTouched('reservationDeposit') &&
+                      step4Errors().reservationDeposit
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Acompte requis
+                        et doit être &gt; 0</span
+                      >
                     }
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculé : prix du
+                      bien × 5 %</span
+                    >
                   </div>
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-reservation-days">
+                    <label class="ca-label" for="ca-reservation-days">
                       Durée de réservation (jours) <span class="req">*</span>
                     </label>
                     <input
                       class="ca-input"
-                      id="contract-add-reservation-days"
+                      id="ca-reservation-days"
                       type="number"
                       placeholder="Ex : 30"
-                      formControlName="reservationDurationDays"
+                      [ngModel]="reservationDurationDays()"
+                      (ngModelChange)="reservationDurationDays.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
                       min="1"
+                      (input)="markFieldEdited('reservationDurationDays')"
                     />
-                    @if (step3Form.get('reservationDurationDays')?.invalid && step3Form.get('reservationDurationDays')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Durée requise (≥ 1 jour)</span>
+                    @if (
+                      isTouched('reservationDurationDays') &&
+                      step4Errors().reservationDurationDays
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Durée requise
+                        (≥ 1 jour)</span
+                      >
                     }
                   </div>
                 </div>
               }
 
-              <!-- MANDATE : commission + clauses + conditions de résiliation -->
+              <!-- ── MANDATE : commission + clauses + résiliation ── -->
               @if (contractTypeFields().showAgencyCommissionRate) {
+                <div class="ca-section-title">
+                  <i class="pi pi-percentage" aria-hidden="true"></i> Conditions
+                  du mandat
+                </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
-                    <label class="ca-label" for="contract-add-commission">
+                    <label class="ca-label" for="ca-commission">
                       Taux de commission agence (%) <span class="req">*</span>
                     </label>
-                    <input
-                      class="ca-input"
-                      id="contract-add-commission"
-                      type="number"
-                      placeholder="Ex : 10"
-                      formControlName="agencyCommissionRate"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                    />
-                    @if (step3Form.get('agencyCommissionRate')?.invalid && step3Form.get('agencyCommissionRate')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Taux requis (0–100 %)</span>
+                    <div class="ca-input-suffix-wrap">
+                      <input
+                        class="ca-input"
+                        id="ca-commission"
+                        type="number"
+                        placeholder="Ex : 10"
+                        [ngModel]="agencyCommissionRate()"
+                        (ngModelChange)="agencyCommissionRate.set($event)"
+                        [ngModelOptions]="{ standalone: true }"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        (input)="markFieldEdited('agencyCommissionRate')"
+                      />
+                      <span class="ca-input-suffix">%</span>
+                    </div>
+                    @if (
+                      isTouched('agencyCommissionRate') &&
+                      step4Errors().agencyCommissionRate
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Taux requis
+                        (0–100 %)</span
+                      >
                     }
                   </div>
                 </div>
               }
+
               @if (contractTypeFields().showSpecialClauses) {
                 <div class="ca-form-row">
                   <div class="ca-field ca-field--full">
-                    <label class="ca-label" for="contract-add-clauses">
-                      Clauses particulières <span class="req">*</span>
+                    <label class="ca-label" for="ca-clauses">
+                      Clauses particulières
                     </label>
                     <textarea
                       class="ca-textarea"
-                      id="contract-add-clauses"
+                      id="ca-clauses"
                       rows="4"
-                      placeholder="Ex : L'agence est autorisée à signer les baux au nom du propriétaire..."
-                      formControlName="specialClauses"
+                      placeholder="Ex : L'agence est autorisée à signer les baux au nom du propriétaire pour une durée maximale de 12 mois."
+                      [ngModel]="specialClauses()"
+                      (ngModelChange)="specialClauses.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
+                      (input)="markFieldEdited('specialClauses')"
                     ></textarea>
-                    @if (step3Form.get('specialClauses')?.invalid && step3Form.get('specialClauses')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Clauses particulières requises</span>
-                    }
                   </div>
                 </div>
               }
+
               @if (contractTypeFields().showTerminationConditions) {
                 <div class="ca-form-row">
                   <div class="ca-field ca-field--full">
-                    <label class="ca-label" for="contract-add-termination">
-                      Conditions de résiliation <span class="req">*</span>
+                    <label class="ca-label" for="ca-termination">
+                      Conditions de résiliation
                     </label>
                     <textarea
                       class="ca-textarea"
-                      id="contract-add-termination"
+                      id="ca-termination"
                       rows="3"
-                      placeholder="Ex : Résiliable avec préavis de 30 jours..."
-                      formControlName="terminationConditions"
+                      placeholder="Ex : Résiliable avec préavis de 30 jours par l'une ou l'autre des parties."
+                      [ngModel]="terminationConditions()"
+                      (ngModelChange)="terminationConditions.set($event)"
+                      [ngModelOptions]="{ standalone: true }"
+                      (input)="markFieldEdited('terminationConditions')"
                     ></textarea>
-                    @if (step3Form.get('terminationConditions')?.invalid && step3Form.get('terminationConditions')?.touched) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Conditions de résiliation requises</span>
-                    }
                   </div>
                 </div>
               }
-
             </form>
           }
 
-          @case (4) {
+          <!-- ════════════════════════════════════════════════════════
+               ÉTAPE 5 — Récapitulatif
+          ════════════════════════════════════════════════════════ -->
+          @case (5) {
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Récapitulatif</h2>
               <p class="ca-step-header__sub">
-                Vérifiez les informations avant de créer le brouillon.
+                Vérifiez les informations avant de créer le brouillon. Vous
+                pourrez le modifier avant signature.
               </p>
             </div>
+
+            <!-- Carte bien + propriétaire -->
+            <div class="ca-summary-property-card">
+              <div class="ca-summary-property-card__icon" aria-hidden="true">
+                <i class="pi pi-home"></i>
+              </div>
+              <div class="ca-summary-property-card__body">
+                <div class="ca-summary-property-card__title">
+                  {{ selectedPropertyLabel() }}
+                </div>
+                <div class="ca-summary-property-card__owner">
+                  <i class="pi pi-user" aria-hidden="true"></i>
+                  {{ ownerDisplayName() }}
+                </div>
+              </div>
+              <div class="ca-summary-property-card__badge">
+                <span class="ca-type-pill">
+                  <i
+                    [class]="'pi ' + contractTypeIcon(contractType())"
+                    aria-hidden="true"
+                  ></i>
+                  {{ contractTypeLabelFor(contractType()) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="ca-summary-glance">
+              @for (highlight of summaryHighlights(); track highlight.label) {
+                <div
+                  class="ca-summary-glance__card"
+                  [class.ca-summary-glance__card--accent]="
+                    highlight.tone === 'accent'
+                  "
+                >
+                  <span class="ca-summary-glance__icon" aria-hidden="true">
+                    <i [class]="'pi ' + highlight.icon"></i>
+                  </span>
+                  <span class="ca-summary-glance__content">
+                    <span class="ca-summary-glance__label">{{
+                      highlight.label
+                    }}</span>
+                    <span class="ca-summary-glance__value">{{
+                      highlight.value
+                    }}</span>
+                  </span>
+                </div>
+              }
+            </div>
+
             <ubax-detail-info-block [items]="summaryItems()" [columns]="2" />
+
+            <div class="ca-summary-note" role="note">
+              <i class="pi pi-info-circle" aria-hidden="true"></i>
+              <div>
+                <div class="ca-summary-note__title">Avant validation</div>
+                <div class="ca-summary-note__text">
+                  Le brouillon sera créé avec ces données préremplies. Vous
+                  pourrez encore le soumettre plus tard pour signature.
+                </div>
+              </div>
+            </div>
+
             @if (store.error()) {
-              <div class="ca-error-banner">
-                <i class="pi pi-exclamation-triangle"></i>
+              <div class="ca-error-banner" role="alert">
+                <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
                 {{ store.error() }}
               </div>
             }
           }
         }
 
-        <!-- Navigation -->
+        <!-- ── Navigation ── -->
         <div class="ca-nav">
           @if (currentStep() > 1) {
-            <button class="ca-btn ca-btn--ghost" (click)="prevStep()">
+            <button
+              class="ca-btn ca-btn--ghost"
+              type="button"
+              (click)="prevStep()"
+            >
               <i class="pi pi-arrow-left"></i> Précédent
             </button>
           } @else {
-            <a class="ca-btn ca-btn--ghost" routerLink="/contrats">Annuler</a>
+            <a class="ca-btn ca-btn--ghost" routerLink="/contrats">
+              <i class="pi pi-times"></i> Annuler
+            </a>
           }
 
           @if (currentStep() < totalSteps) {
-            <button class="ca-btn ca-btn--primary" (click)="nextStep()">
+            <button
+              class="ca-btn ca-btn--primary"
+              type="button"
+              (click)="nextStep()"
+            >
               Suivant <i class="pi pi-arrow-right"></i>
             </button>
           } @else {
             <button
               class="ca-btn ca-btn--primary"
+              type="button"
               (click)="submit()"
               [disabled]="store.saving()"
             >
               @if (store.saving()) {
-                <i class="pi pi-spin pi-spinner"></i> Création…
+                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                Création…
               } @else {
-                <i class="pi pi-check"></i> Créer le brouillon
+                <i class="pi pi-check" aria-hidden="true"></i> Créer le
+                brouillon
               }
             </button>
           }

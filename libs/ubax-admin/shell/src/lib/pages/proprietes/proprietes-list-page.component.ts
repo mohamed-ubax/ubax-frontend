@@ -17,8 +17,17 @@ import {
   StatusBadgeComponent,
   type FilterOption,
 } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
-import { TableModule } from 'primeng/table';
+import {
+  NOTIFICATION_HANDLER,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
+import {
+  UiDataTableCellDefDirective,
+  type UiDataTableColumn,
+  UiDataTableComponent,
+  UiDataTableEmptyDefDirective,
+  UiPaginationComponent,
+} from '@ubax-workspace/shared-ui';
 import { AdminPropertiesService } from '../../services/admin-properties.service';
 
 const PAGE_SIZE = 20;
@@ -46,12 +55,15 @@ const TRANSACTION_TYPE_LABELS: Record<string, string> = {
   selector: 'ubax-admin-proprietes-list-page',
   standalone: true,
   imports: [
-    TableModule,
     DatePipe,
     SearchFilterBarComponent,
     SectionCardComponent,
     StatusBadgeComponent,
     EmptyStateComponent,
+    UiDataTableComponent,
+    UiDataTableCellDefDirective,
+    UiDataTableEmptyDefDirective,
+    UiPaginationComponent,
   ],
   templateUrl: './proprietes-list-page.component.html',
   styleUrl: './proprietes-list-page.component.scss',
@@ -74,7 +86,22 @@ export class ProprietesListPageComponent {
   protected readonly typeFilter = signal('');
   protected readonly agencyFilter = signal('');
 
-  protected readonly searchFilters: { label: string; options: FilterOption[] }[] = [
+  protected readonly tableColumns: readonly UiDataTableColumn<PropertyResponse>[] =
+    [
+      { key: 'property', header: 'Bien', width: '24%' },
+      { key: 'type', header: 'Type', width: '10%' },
+      { key: 'transaction', header: 'Transaction', width: '12%' },
+      { key: 'city', header: 'Ville', width: '10%' },
+      { key: 'price', header: 'Prix', width: '12%', align: 'end' },
+      { key: 'owner', header: 'Agence / Propriétaire', width: '18%' },
+      { key: 'submittedAt', header: 'Soumis le', width: '8%' },
+      { key: 'actions', header: 'Actions', width: '6%', align: 'end' },
+    ];
+
+  protected readonly searchFilters: {
+    label: string;
+    options: FilterOption[];
+  }[] = [
     {
       label: 'Type de bien',
       options: [
@@ -103,6 +130,8 @@ export class ProprietesListPageComponent {
     );
   });
 
+  protected readonly pagedRows = computed(() => this.filteredProperties());
+
   constructor() {
     effect(() => {
       void this.loadProperties();
@@ -125,7 +154,12 @@ export class ProprietesListPageComponent {
       this.totalElements.set(result.totalElements);
       this.totalPages.set(result.totalPages);
     } catch (err) {
-      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la liste des biens en attente.'));
+      this.notif.error(
+        resolveHttpErrorMessage(
+          err,
+          'Impossible de charger la liste des biens en attente.',
+        ),
+      );
     } finally {
       this.loading.set(false);
     }
@@ -141,8 +175,12 @@ export class ProprietesListPageComponent {
     void this.loadProperties();
   }
 
-  protected onPageChange(event: { first: number; rows: number }): void {
-    this.currentPage.set(Math.floor(event.first / event.rows));
+  protected onPageChange(page: number | Event): void {
+    if (typeof page !== 'number') {
+      return;
+    }
+
+    this.currentPage.set(page - 1);
     void this.loadProperties();
   }
 
@@ -151,20 +189,27 @@ export class ProprietesListPageComponent {
   }
 
   protected getPropertyTypeLabel(type: string | undefined): string {
-    return PROPERTY_TYPE_LABELS[type ?? ''] ?? (type ?? '—');
+    return PROPERTY_TYPE_LABELS[type ?? ''] ?? type ?? '—';
   }
 
   protected getTransactionTypeLabel(type: string | undefined): string {
-    return TRANSACTION_TYPE_LABELS[type ?? ''] ?? (type ?? '—');
+    return TRANSACTION_TYPE_LABELS[type ?? ''] ?? type ?? '—';
   }
 
-  protected getTransactionBadge(type: string | undefined): 'info' | 'neutral' | 'active' | 'warning' {
+  protected getTransactionBadge(
+    type: string | undefined,
+  ): 'info' | 'neutral' | 'active' | 'warning' {
     switch (type) {
-      case 'SALE': return 'active';
-      case 'RENT': return 'info';
-      case 'RENT_FURNISHED': return 'info';
-      case 'SHORT_STAY': return 'warning';
-      default: return 'neutral';
+      case 'SALE':
+        return 'active';
+      case 'RENT':
+        return 'info';
+      case 'RENT_FURNISHED':
+        return 'info';
+      case 'SHORT_STAY':
+        return 'warning';
+      default:
+        return 'neutral';
     }
   }
 
@@ -178,11 +223,16 @@ export class ProprietesListPageComponent {
   }
 
   protected getPropertyInitials(property: PropertyResponse): string {
-    return (property.title ?? property.propertyType ?? 'BI').slice(0, 2).toUpperCase();
+    return (property.title ?? property.propertyType ?? 'BI')
+      .slice(0, 2)
+      .toUpperCase();
   }
 
   /** coverPhotoUrl est retourné par l'API mais absent du type généré */
   protected getCoverPhotoUrl(property: PropertyResponse): string | null {
-    return (property as PropertyResponse & { coverPhotoUrl?: string }).coverPhotoUrl ?? null;
+    return (
+      (property as PropertyResponse & { coverPhotoUrl?: string })
+        .coverPhotoUrl ?? null
+    );
   }
 }

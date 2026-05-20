@@ -98,6 +98,9 @@
       "@ubax-workspace/ubax-admin-shell": [
         "libs/ubax-admin/shell/src/index.ts"
       ],
+      "@ubax-workspace/ubax-admin-data-access": [
+        "libs/ubax-admin/data-access/src/index.ts"
+      ],
       "@ubax-workspace/ubax-admin-shell/admin-routes": [
         "libs/ubax-admin/shell/src/lib/admin.routes.ts"
       ],

@@ -789,7 +789,11 @@
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  background: linear-gradient(135deg, rgba(232, 125, 30, 0.06) 0%, rgba(255, 247, 237, 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(232, 125, 30, 0.06) 0%,
+    rgba(255, 247, 237, 0.8) 100%
+  );
   border: 1px solid rgba(232, 125, 30, 0.22);
   border-radius: 14px;
   padding: 16px 18px;
@@ -837,5 +841,543 @@
       font-size: 12px;
       flex-shrink: 0;
     }
+  }
+}
+
+// ─── Grille de sélection du type de contrat ───────────────────────────────────
+.ca-contract-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.ca-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border: 1.5px solid var(--ubax-border-card);
+  border-radius: 16px;
+  background: var(--ubax-surface);
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s,
+    transform 0.15s;
+
+  &:hover {
+    border-color: rgba(28, 52, 84, 0.22);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  &--selected {
+    border-color: var(--ubax-accent);
+    background: linear-gradient(
+      135deg,
+      rgba(232, 125, 30, 0.05) 0%,
+      rgba(255, 255, 255, 1) 100%
+    );
+    box-shadow: 0 0 0 3px rgba(232, 125, 30, 0.14);
+  }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(28, 52, 84, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 18px;
+      color: var(--ubax-navy);
+    }
+  }
+
+  &--selected &__icon {
+    background: rgba(232, 125, 30, 0.12);
+
+    i {
+      color: var(--ubax-accent);
+    }
+  }
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ubax-text-primary);
+    line-height: 1.3;
+  }
+
+  &__meta {
+    font-family: 'Lexend', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+    line-height: 1.4;
+  }
+
+  &__check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--ubax-accent);
+    font-size: 16px;
+  }
+}
+
+// ─── Bannière info type de contrat ────────────────────────────────────────────
+.ca-type-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 52, 84, 0.04) 0%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  border: 1px solid rgba(28, 52, 84, 0.1);
+  border-radius: 14px;
+  padding: 16px 18px;
+
+  > i {
+    font-size: 20px;
+    color: var(--ubax-navy);
+    flex-shrink: 0;
+    margin-top: 2px;
+    opacity: 0.7;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+    margin-bottom: 4px;
+  }
+
+  &__desc {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+    line-height: 1.5;
+  }
+}
+
+// ─── Badge propriétaire (verrouillé) ─────────────────────────────────────────
+.ca-owner-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 16px;
+  border: 1.5px solid var(--ubax-border-card);
+  border-radius: 12px;
+  background: rgba(28, 52, 84, 0.03);
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(28, 52, 84, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 14px;
+      color: var(--ubax-navy);
+    }
+  }
+
+  &__name {
+    flex: 1;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ubax-text-primary);
+  }
+
+  &__lock {
+    i {
+      font-size: 13px;
+      color: var(--ubax-text-muted);
+      opacity: 0.6;
+    }
+  }
+}
+
+// ─── Titre de section dans le formulaire ─────────────────────────────────────
+.ca-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ubax-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ubax-border-card);
+
+  i {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+}
+
+// ─── Bloc durée RENT_TO_OWN ───────────────────────────────────────────────────
+.ca-rto-duration-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 52, 84, 0.03) 0%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  border: 1px solid rgba(28, 52, 84, 0.1);
+  border-radius: 16px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+}
+
+// ─── Toggle mode durée ────────────────────────────────────────────────────────
+.ca-mode-toggle {
+  display: flex;
+  gap: 4px;
+  background: rgba(28, 52, 84, 0.06);
+  border-radius: 10px;
+  padding: 3px;
+  border: none;
+  margin: 0;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ubax-text-muted);
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      color 0.15s;
+
+    i {
+      font-size: 12px;
+    }
+
+    &--active {
+      background: var(--ubax-surface);
+      color: var(--ubax-navy);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &:hover:not(&--active) {
+      color: var(--ubax-navy);
+    }
+  }
+}
+
+// ─── Stepper durée (+ / -) ────────────────────────────────────────────────────
+.ca-duration-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__btn {
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid var(--ubax-border-card);
+    border-radius: 10px;
+    background: var(--ubax-surface);
+    color: var(--ubax-navy);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition:
+      background 0.12s,
+      border-color 0.12s;
+    flex-shrink: 0;
+
+    &:hover:not(:disabled) {
+      background: var(--ubax-page-bg);
+      border-color: var(--ubax-accent);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+
+  &__unit {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ubax-text-muted);
+    white-space: nowrap;
+  }
+
+  .ca-input--center {
+    text-align: center;
+    width: 80px;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Input petit + suffixe ────────────────────────────────────────────────────
+.ca-input--sm {
+  width: 100px;
+}
+
+.ca-payment-day-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    color: var(--ubax-text-muted);
+    white-space: nowrap;
+  }
+}
+
+.ca-input-suffix-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .ca-input {
+    padding-right: 36px;
+  }
+}
+
+.ca-input-suffix {
+  position: absolute;
+  right: 14px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ubax-text-muted);
+  pointer-events: none;
+}
+
+// ─── Carte récapitulatif bien ─────────────────────────────────────────────────
+.ca-summary-property-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 52, 84, 0.04) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  border: 1px solid rgba(28, 52, 84, 0.1);
+  border-radius: 16px;
+  margin-bottom: 4px;
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(28, 52, 84, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 22px;
+      color: var(--ubax-navy);
+    }
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__owner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+    margin-top: 3px;
+
+    i {
+      font-size: 11px;
+    }
+  }
+
+  &__badge {
+    flex-shrink: 0;
+  }
+}
+
+.ca-summary-glance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.ca-summary-glance__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(248, 250, 252, 0.96) 100%
+  );
+  border: 1px solid rgba(28, 52, 84, 0.1);
+
+  &--accent {
+    background: linear-gradient(
+      135deg,
+      rgba(232, 125, 30, 0.08) 0%,
+      rgba(255, 247, 237, 0.95) 100%
+    );
+    border-color: rgba(232, 125, 30, 0.18);
+  }
+}
+
+.ca-summary-glance__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(28, 52, 84, 0.08);
+  color: var(--ubax-navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 16px;
+  }
+}
+
+.ca-summary-glance__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ca-summary-glance__label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ubax-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ca-summary-glance__value {
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ubax-navy);
+  line-height: 1.4;
+}
+
+.ca-summary-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 52, 84, 0.04) 0%,
+    rgba(255, 255, 255, 0.92) 100%
+  );
+  border: 1px solid rgba(28, 52, 84, 0.1);
+
+  > i {
+    font-size: 18px;
+    color: var(--ubax-accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  &__text {
+    margin-top: 3px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+    line-height: 1.5;
+  }
+}
+
+// ─── Pill type de contrat ─────────────────────────────────────────────────────
+.ca-type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 20px;
+  background: rgba(232, 125, 30, 0.1);
+  color: var(--ubax-accent);
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+
+  i {
+    font-size: 12px;
   }
 }

@@ -1,3 +1,5 @@
+@use '../contrats-add-page/contrats-add-page.component';
+
 :host {
   display: block;
 }
@@ -101,6 +103,83 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+
+  > form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+}
+
+// ─── Property summary banner ──────────────────────────────────────────────────
+.ce-property-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 52, 84, 0.04) 0%,
+    rgba(28, 52, 84, 0.02) 100%
+  );
+  border: 1.5px solid var(--ubax-border-card);
+  border-radius: 16px;
+  flex-wrap: wrap;
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--ubax-navy);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__eyebrow {
+    font-family: 'Lexend', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ubax-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__name {
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__owner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ubax-text-muted);
+    flex-shrink: 0;
+
+    i {
+      font-size: 13px;
+      color: var(--ubax-accent);
+    }
+  }
 }
 
 .ce-section {
@@ -109,15 +188,30 @@
   gap: 16px;
 
   &__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin: 0;
     font-family: 'Lexend', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--ubax-navy);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding-bottom: 10px;
     border-bottom: 1.5px solid var(--ubax-border-card);
+  }
+
+  &__title-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(28, 52, 84, 0.08);
+    color: var(--ubax-navy);
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 13px;
   }
 }
 
@@ -145,6 +239,71 @@
 
   .req {
     color: var(--ubax-danger);
+  }
+
+  &--optional {
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--ubax-text-muted);
+    margin-left: 4px;
+  }
+}
+
+.ce-owner-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 14px;
+  border: 1.5px solid var(--ubax-border-card);
+  border-radius: 10px;
+  background: rgba(28, 52, 84, 0.03);
+
+  &__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(28, 52, 84, 0.08);
+    color: var(--ubax-navy);
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  &__name {
+    flex: 1;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ubax-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__lock {
+    color: var(--ubax-text-muted);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+}
+
+.ce-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .ce-input--sm {
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  &__suffix {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    color: var(--ubax-text-muted);
+    white-space: nowrap;
   }
 }
 
@@ -589,6 +748,170 @@
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+  }
+}
+
+// ─── Layout (sidebar + main) ──────────────────────────────────────────────────
+.ce-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ce-sidebar {
+  background: var(--ubax-navy);
+  border-radius: 20px;
+  padding: 28px 20px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 24px;
+}
+
+.ce-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 20px;
+      color: #fff;
+    }
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  &__sub {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    opacity: 0.55;
+    margin-top: 2px;
+  }
+}
+
+.ce-sidebar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  &__icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__value {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.ce-sidebar-hint {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 14px;
+
+  > i {
+    font-size: 18px;
+    opacity: 0.6;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-family: 'Lexend', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff;
+  }
+
+  &__desc {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+}
+
+// ─── Step header (mirrors ca-step-header from add page) ───────────────────────
+.ce-step-header {
+  &__title {
+    margin: 0 0 6px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ubax-navy);
+  }
+
+  &__sub {
+    margin: 0;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
   }
 }
 

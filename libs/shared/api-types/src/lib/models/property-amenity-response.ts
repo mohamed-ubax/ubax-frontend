@@ -23,6 +23,11 @@ export interface PropertyAmenityResponse {
   customValue?: string;
 
   /**
+   * Description affichée — issue de la_code_list pour les commodités standard, ou identique à customDescription pour les commodités personnalisées
+   */
+  description?: string;
+
+  /**
    * Identifiant unique de la commodité
    */
   id?: string;
