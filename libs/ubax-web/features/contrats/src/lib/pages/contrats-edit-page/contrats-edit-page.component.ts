@@ -867,9 +867,7 @@ export class ContratsEditPageComponent {
       body: {
         propertyId: this.propertyId(),
         ownerId: this.ownerId(),
-        tenantId: fields.requiresTenant
-          ? this.tenantId() || undefined
-          : undefined,
+        tenantId: this.tenantId() || undefined,
         contractType: this.contractType(),
         startDate,
         endDate,

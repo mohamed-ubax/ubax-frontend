@@ -929,7 +929,7 @@ export class ContratsAddPageComponent {
     }
 
     const body: CreateContractRequest = {
-      tenantId: fields.requiresTenant ? this.tenantId() : undefined,
+      tenantId: this.tenantId() || undefined,
       propertyId: this.propertyId(),
       ownerId: this.ownerId(),
       contractType: this.contractType(),
