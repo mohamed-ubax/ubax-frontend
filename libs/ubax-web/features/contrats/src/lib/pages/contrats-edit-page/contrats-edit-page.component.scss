@@ -1,3 +1,5 @@
+@use '../contrats-add-page/contrats-add-page.component';
+
 :host {
   display: block;
 }
@@ -115,7 +117,11 @@
   align-items: center;
   gap: 14px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, rgba(28, 52, 84, 0.04) 0%, rgba(28, 52, 84, 0.02) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(28, 52, 84, 0.04) 0%,
+    rgba(28, 52, 84, 0.02) 100%
+  );
   border: 1.5px solid var(--ubax-border-card);
   border-radius: 16px;
   flex-wrap: wrap;
@@ -784,7 +790,10 @@
     justify-content: center;
     flex-shrink: 0;
 
-    i { font-size: 20px; color: #fff; }
+    i {
+      font-size: 20px;
+      color: #fff;
+    }
   }
 
   &__title {
@@ -823,7 +832,10 @@
     justify-content: center;
     flex-shrink: 0;
 
-    i { font-size: 13px; color: rgba(255, 255, 255, 0.8); }
+    i {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+    }
   }
 
   &__text {

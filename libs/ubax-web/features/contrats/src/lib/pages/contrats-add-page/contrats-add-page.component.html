@@ -1,11 +1,17 @@
 <div class="ca-page">
   <nav class="ca-breadcrumb" aria-label="Fil d'Ariane">
-    <button class="ca-breadcrumb__back" type="button" (click)="backToContracts()">
+    <button
+      class="ca-breadcrumb__back"
+      type="button"
+      (click)="backToContracts()"
+    >
       <i class="pi pi-arrow-left"></i>
     </button>
     <a class="ca-breadcrumb__item" routerLink="/contrats">Contrats</a>
     <i class="pi pi-chevron-right ca-breadcrumb__sep"></i>
-    <span class="ca-breadcrumb__item ca-breadcrumb__item--active">Nouveau contrat</span>
+    <span class="ca-breadcrumb__item ca-breadcrumb__item--active"
+      >Nouveau contrat</span
+    >
   </nav>
 
   <div class="ca-layout">
@@ -49,8 +55,12 @@
       <div class="ca-sidebar-hint">
         <i [class]="'pi ' + currentStepConfig().icon"></i>
         <div>
-          <div class="ca-sidebar-hint__title">{{ currentStepConfig().title }}</div>
-          <div class="ca-sidebar-hint__desc">{{ currentStepConfig().desc }}</div>
+          <div class="ca-sidebar-hint__title">
+            {{ currentStepConfig().title }}
+          </div>
+          <div class="ca-sidebar-hint__desc">
+            {{ currentStepConfig().desc }}
+          </div>
         </div>
       </div>
     </aside>
@@ -59,7 +69,6 @@
     <main>
       <div class="ca-card">
         @switch (currentStep()) {
-
           <!-- ════════════════════════════════════════════════════════
                ÉTAPE 1 — Locataire (conditionnel : LEASE, RENT_TO_OWN)
           ════════════════════════════════════════════════════════ -->
@@ -67,8 +76,9 @@
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Sélection du locataire</h2>
               <p class="ca-step-header__sub">
-                Seuls les locataires qualifiés (KYC validé) sans contrat actif sont affichés.
-                Pour les contrats sans locataire (Vente, Réservation, Mandat), passez directement à l'étape suivante.
+                Seuls les locataires qualifiés (KYC validé) sans contrat actif
+                sont affichés. Pour les contrats sans locataire (Vente,
+                Réservation, Mandat), passez directement à l'étape suivante.
               </p>
             </div>
 
@@ -91,7 +101,11 @@
                   [filter]="true"
                   filterBy="label,meta"
                   filterPlaceholder="Rechercher un locataire..."
-                  [placeholder]="locationStore.loading() ? 'Chargement des locataires...' : 'Sélectionnez un locataire qualifié'"
+                  [placeholder]="
+                    locationStore.loading()
+                      ? 'Chargement des locataires...'
+                      : 'Sélectionnez un locataire qualifié'
+                  "
                   appendTo="body"
                   styleClass="ca-rich-select"
                   panelStyleClass="ca-rich-select-panel"
@@ -103,8 +117,13 @@
                         <i [class]="'pi ' + (option?.icon || 'pi-user')"></i>
                       </span>
                       <span class="ca-select-trigger__text">
-                        <span class="ca-select-trigger__label">{{ option?.label || 'Sélectionnez un locataire qualifié' }}</span>
-                        <span class="ca-select-trigger__meta">{{ option?.meta || 'Dossiers KYC qualifiés sans contrat actif' }}</span>
+                        <span class="ca-select-trigger__label">{{
+                          option?.label || 'Sélectionnez un locataire qualifié'
+                        }}</span>
+                        <span class="ca-select-trigger__meta">{{
+                          option?.meta ||
+                            'Dossiers KYC qualifiés sans contrat actif'
+                        }}</span>
                       </span>
                     </div>
                   </ng-template>
@@ -114,8 +133,12 @@
                         <i [class]="'pi ' + option.icon"></i>
                       </span>
                       <span class="ca-option-card__text">
-                        <span class="ca-option-card__label">{{ option.label }}</span>
-                        <span class="ca-option-card__meta">{{ option.meta }}</span>
+                        <span class="ca-option-card__label">{{
+                          option.label
+                        }}</span>
+                        <span class="ca-option-card__meta">{{
+                          option.meta
+                        }}</span>
                       </span>
                     </div>
                   </ng-template>
@@ -124,12 +147,16 @@
                   </ng-template>
                 </p-select>
                 @if (isTouched('tenantId') && step1Errors().tenantRequired) {
-                  <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le locataire est requis pour ce type de contrat</span>
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le locataire est
+                    requis pour ce type de contrat</span
+                  >
                 }
                 <span class="ca-hint">
                   <i class="pi pi-info-circle"></i>
-                  Seuls les dossiers avec statut <strong>QUALIFIED</strong> et sans contrat en cours sont affichés.
-                  Le bien associé au dossier sera pré-sélectionné automatiquement.
+                  Seuls les dossiers avec statut <strong>QUALIFIED</strong> et
+                  sans contrat en cours sont affichés. Le bien associé au
+                  dossier sera pré-sélectionné automatiquement.
                 </span>
               </div>
             </form>
@@ -142,7 +169,8 @@
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Sélection du bien</h2>
               <p class="ca-step-header__sub">
-                Le bien est pré-rempli depuis le dossier du locataire. Modifiable si nécessaire.
+                Le bien est pré-rempli depuis le dossier du locataire.
+                Modifiable si nécessaire.
               </p>
             </div>
 
@@ -162,7 +190,11 @@
                   [filter]="true"
                   filterBy="label,meta"
                   filterPlaceholder="Rechercher un bien..."
-                  [placeholder]="biensStore.loading() ? 'Chargement des biens...' : 'Sélectionnez un bien'"
+                  [placeholder]="
+                    biensStore.loading()
+                      ? 'Chargement des biens...'
+                      : 'Sélectionnez un bien'
+                  "
                   appendTo="body"
                   styleClass="ca-rich-select"
                   panelStyleClass="ca-rich-select-panel"
@@ -175,8 +207,12 @@
                         <i [class]="'pi ' + (option?.icon || 'pi-home')"></i>
                       </span>
                       <span class="ca-select-trigger__text">
-                        <span class="ca-select-trigger__label">{{ option?.label || 'Sélectionnez un bien' }}</span>
-                        <span class="ca-select-trigger__meta">{{ option?.meta || 'Biens disponibles' }}</span>
+                        <span class="ca-select-trigger__label">{{
+                          option?.label || 'Sélectionnez un bien'
+                        }}</span>
+                        <span class="ca-select-trigger__meta">{{
+                          option?.meta || 'Biens disponibles'
+                        }}</span>
                       </span>
                     </div>
                   </ng-template>
@@ -186,8 +222,12 @@
                         <i [class]="'pi ' + option.icon"></i>
                       </span>
                       <span class="ca-option-card__text">
-                        <span class="ca-option-card__label">{{ option.label }}</span>
-                        <span class="ca-option-card__meta">{{ option.meta }}</span>
+                        <span class="ca-option-card__label">{{
+                          option.label
+                        }}</span>
+                        <span class="ca-option-card__meta">{{
+                          option.meta
+                        }}</span>
                       </span>
                     </div>
                   </ng-template>
@@ -195,12 +235,18 @@
                     <i class="pi pi-chevron-down" aria-hidden="true"></i>
                   </ng-template>
                 </p-select>
-                @if (isTouched('propertyId') && step2Errors().propertyRequired) {
-                  <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le bien est requis</span>
+                @if (
+                  isTouched('propertyId') && step2Errors().propertyRequired
+                ) {
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le bien est
+                    requis</span
+                  >
                 }
                 <span class="ca-hint">
                   <i class="pi pi-info-circle"></i>
-                  Pré-rempli depuis le dossier du locataire. Modifiable si nécessaire.
+                  Pré-rempli depuis le dossier du locataire. Modifiable si
+                  nécessaire.
                 </span>
               </div>
 
@@ -212,14 +258,29 @@
                     <span class="ca-owner-badge__icon" aria-hidden="true">
                       <i class="pi pi-user"></i>
                     </span>
-                    <span class="ca-owner-badge__name">{{ ownerDisplayName() }}</span>
-                    <span class="ca-owner-badge__lock" aria-label="Champ verrouillé">
+                    <span class="ca-owner-badge__name">{{
+                      ownerDisplayName()
+                    }}</span>
+                    <span
+                      class="ca-owner-badge__lock"
+                      aria-label="Champ verrouillé"
+                    >
                       <i class="pi pi-lock"></i>
                     </span>
                   </div>
                   <span class="ca-hint">
                     <i class="pi pi-info-circle"></i>
-                    Renseigné automatiquement depuis le bien sélectionné. Non modifiable.
+                    Renseigné automatiquement depuis le bien sélectionné. Non
+                    modifiable.
+                  </span>
+                </div>
+              } @else if (propertyId()) {
+                <div class="ca-field">
+                  <span class="ca-label">Propriétaire</span>
+                  <span class="ca-error">
+                    <i class="pi pi-exclamation-circle"></i>
+                    Impossible d'identifier le propriétaire de ce bien. Vérifiez
+                    la fiche bien avant de créer le contrat.
                   </span>
                 </div>
               }
@@ -233,7 +294,8 @@
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Type de contrat</h2>
               <p class="ca-step-header__sub">
-                Sélectionnez la nature du contrat. Le formulaire s'adapte automatiquement.
+                Sélectionnez la nature du contrat. Le formulaire s'adapte
+                automatiquement.
               </p>
             </div>
 
@@ -247,14 +309,18 @@
                     <button
                       type="button"
                       class="ca-type-card"
-                      [class.ca-type-card--selected]="contractType() === option.value"
+                      [class.ca-type-card--selected]="
+                        contractType() === option.value
+                      "
                       (click)="contractType.set(option.value)"
                       [attr.aria-pressed]="contractType() === option.value"
                     >
                       <span class="ca-type-card__icon" aria-hidden="true">
                         <i [class]="'pi ' + option.icon"></i>
                       </span>
-                      <span class="ca-type-card__label">{{ option.label }}</span>
+                      <span class="ca-type-card__label">{{
+                        option.label
+                      }}</span>
                       <span class="ca-type-card__meta">{{ option.meta }}</span>
                       @if (contractType() === option.value) {
                         <span class="ca-type-card__check" aria-hidden="true">
@@ -265,25 +331,44 @@
                   }
                 </div>
                 @if (isTouched('contractType') && !step3Valid()) {
-                  <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Le type de contrat est requis</span>
+                  <span class="ca-error"
+                    ><i class="pi pi-exclamation-circle"></i> Le type de contrat
+                    est requis</span
+                  >
                 }
               </div>
 
               <!-- Bannière info selon le type sélectionné -->
               @if (contractType()) {
                 <div class="ca-type-info-banner">
-                  <i [class]="'pi ' + contractTypeIcon(contractType())" aria-hidden="true"></i>
+                  <i
+                    [class]="'pi ' + contractTypeIcon(contractType())"
+                    aria-hidden="true"
+                  ></i>
                   <div>
                     <div class="ca-type-info-banner__title">
                       {{ contractTypeLabelFor(contractType()) }}
                     </div>
                     <div class="ca-type-info-banner__desc">
                       @switch (contractType()) {
-                        @case ('LEASE') { Loyer mensuel · Caution · Jour d'échéance · Dates de bail }
-                        @case ('SALE') { Prix de vente · Date de cession }
-                        @case ('RENT_TO_OWN') { Prix total · Mensualité · Apport · Durée (N ans ou date) }
-                        @case ('RESERVATION') { Acompte de réservation · Durée de blocage }
-                        @case ('MANDATE') { Commission agence · Clauses · Conditions de résiliation }
+                        @case ('LEASE') {
+                          Loyer mensuel · Caution · Jour d'échéance · Dates de
+                          bail
+                        }
+                        @case ('SALE') {
+                          Prix de vente · Date de cession
+                        }
+                        @case ('RENT_TO_OWN') {
+                          Prix total · Mensualité · Apport · Durée (N ans ou
+                          date)
+                        }
+                        @case ('RESERVATION') {
+                          Acompte de réservation · Durée de blocage
+                        }
+                        @case ('MANDATE') {
+                          Commission agence · Clauses · Conditions de
+                          résiliation
+                        }
                       }
                     </div>
                   </div>
@@ -299,12 +384,12 @@
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Conditions du contrat</h2>
               <p class="ca-step-header__sub">
-                Renseignez les montants et les dates. Les valeurs sont pré-remplies depuis le bien sélectionné.
+                Renseignez les montants et les dates. Les valeurs sont
+                pré-remplies depuis le bien sélectionné.
               </p>
             </div>
 
             <form class="ca-form">
-
               <!-- ── Dates ── -->
               <div class="ca-section-title">
                 <i class="pi pi-calendar" aria-hidden="true"></i> Dates
@@ -337,12 +422,18 @@
                     </ng-template>
                   </p-datepicker>
                   @if (isTouched('startDate') && step4Errors().startDate) {
-                    <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de début requise</span>
+                    <span class="ca-error"
+                      ><i class="pi pi-exclamation-circle"></i> Date de début
+                      requise</span
+                    >
                   }
                 </div>
 
                 <!-- Date de fin (LEASE, MANDATE) — pas RENT_TO_OWN qui a son propre bloc -->
-                @if (contractTypeFields().showEndDate && !contractTypeFields().showDurationYears) {
+                @if (
+                  contractTypeFields().showEndDate &&
+                  !contractTypeFields().showDurationYears
+                ) {
                   <div class="ca-field">
                     <label class="ca-label" for="ca-end-date">
                       Date de fin
@@ -374,7 +465,10 @@
                       </ng-template>
                     </p-datepicker>
                     @if (isTouched('endDate') && step4Errors().endDate) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de fin requise</span>
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Date de fin
+                        requise</span
+                      >
                     }
                     @if (!contractTypeFields().endDateRequired) {
                       <label class="ca-checkbox-row">
@@ -395,15 +489,20 @@
               @if (contractTypeFields().showDurationYears) {
                 <div class="ca-rto-duration-block">
                   <div class="ca-rto-duration-block__header">
-                    <span class="ca-section-title" style="margin-bottom:0">
-                      <i class="pi pi-clock" aria-hidden="true"></i> Durée du contrat
+                    <span class="ca-section-title" style="margin-bottom: 0">
+                      <i class="pi pi-clock" aria-hidden="true"></i> Durée du
+                      contrat
                     </span>
                     <fieldset class="ca-mode-toggle">
-                      <legend class="sr-only">Mode de saisie de la durée</legend>
+                      <legend class="sr-only">
+                        Mode de saisie de la durée
+                      </legend>
                       <button
                         type="button"
                         class="ca-mode-toggle__btn"
-                        [class.ca-mode-toggle__btn--active]="rentToOwnDurationMode() === 'years'"
+                        [class.ca-mode-toggle__btn--active]="
+                          rentToOwnDurationMode() === 'years'
+                        "
                         (click)="toggleRentToOwnDurationMode('years')"
                       >
                         <i class="pi pi-list-check"></i> N années
@@ -411,7 +510,9 @@
                       <button
                         type="button"
                         class="ca-mode-toggle__btn"
-                        [class.ca-mode-toggle__btn--active]="rentToOwnDurationMode() === 'date'"
+                        [class.ca-mode-toggle__btn--active]="
+                          rentToOwnDurationMode() === 'date'
+                        "
                         (click)="toggleRentToOwnDurationMode('date')"
                       >
                         <i class="pi pi-calendar"></i> Date précise
@@ -429,7 +530,12 @@
                           <button
                             type="button"
                             class="ca-duration-stepper__btn"
-                            (click)="durationYears.set(Math.max(1, (durationYears() ?? 5) - 1)); markFieldEdited('durationYears')"
+                            (click)="
+                              durationYears.set(
+                                Math.max(1, (durationYears() ?? 5) - 1)
+                              );
+                              markFieldEdited('durationYears')
+                            "
                             [disabled]="(durationYears() ?? 5) <= 1"
                             aria-label="Diminuer la durée"
                           >
@@ -450,7 +556,12 @@
                           <button
                             type="button"
                             class="ca-duration-stepper__btn"
-                            (click)="durationYears.set(Math.min(30, (durationYears() ?? 5) + 1)); markFieldEdited('durationYears')"
+                            (click)="
+                              durationYears.set(
+                                Math.min(30, (durationYears() ?? 5) + 1)
+                              );
+                              markFieldEdited('durationYears')
+                            "
                             [disabled]="(durationYears() ?? 5) >= 30"
                             aria-label="Augmenter la durée"
                           >
@@ -458,10 +569,19 @@
                           </button>
                           <span class="ca-duration-stepper__unit">ans</span>
                         </div>
-                        @if (isTouched('durationYears') && step4Errors().durationYears) {
-                          <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Durée requise (1–30 ans)</span>
+                        @if (
+                          isTouched('durationYears') &&
+                          step4Errors().durationYears
+                        ) {
+                          <span class="ca-error"
+                            ><i class="pi pi-exclamation-circle"></i> Durée
+                            requise (1–30 ans)</span
+                          >
                         }
-                        <span class="ca-hint"><i class="pi pi-info-circle"></i> Le backend calculera la date de fin automatiquement.</span>
+                        <span class="ca-hint"
+                          ><i class="pi pi-info-circle"></i> Le backend
+                          calculera la date de fin automatiquement.</span
+                        >
                       </div>
                     </div>
                   } @else {
@@ -493,7 +613,10 @@
                           </ng-template>
                         </p-datepicker>
                         @if (isTouched('endDate') && step4Errors().endDate) {
-                          <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Date de fin requise</span>
+                          <span class="ca-error"
+                            ><i class="pi pi-exclamation-circle"></i> Date de
+                            fin requise</span
+                          >
                         }
                       </div>
                     </div>
@@ -504,7 +627,8 @@
               <!-- ── LEASE : loyer + caution ── -->
               @if (contractTypeFields().showMonthlyRent) {
                 <div class="ca-section-title">
-                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions financières
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions
+                  financières
                 </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
@@ -522,8 +646,13 @@
                       min="1"
                       (input)="markFieldEdited('monthlyRent')"
                     />
-                    @if (isTouched('monthlyRent') && step4Errors().monthlyRent) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Loyer requis et doit être &gt; 0</span>
+                    @if (
+                      isTouched('monthlyRent') && step4Errors().monthlyRent
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Loyer requis
+                        et doit être &gt; 0</span
+                      >
                     }
                   </div>
                   <div class="ca-field">
@@ -541,18 +670,30 @@
                       min="0"
                       (input)="markFieldEdited('depositAmount')"
                     />
-                    @if (isTouched('depositAmount') && step4Errors().depositAmount) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Caution requise (≥ 0)</span>
+                    @if (
+                      isTouched('depositAmount') && step4Errors().depositAmount
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Caution
+                        requise (≥ 0)</span
+                      >
                     }
-                    <span class="ca-hint"><i class="pi pi-info-circle"></i> Pré-calculée : loyer × 2</span>
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculée : loyer ×
+                      2</span
+                    >
                   </div>
                 </div>
               }
 
               <!-- ── SALE : prix de vente ── -->
-              @if (contractTypeFields().showSalePrice && !contractTypeFields().showMonthlyInstallment) {
+              @if (
+                contractTypeFields().showSalePrice &&
+                !contractTypeFields().showMonthlyInstallment
+              ) {
                 <div class="ca-section-title">
-                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions financières
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions
+                  financières
                 </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
@@ -571,7 +712,10 @@
                       (input)="markFieldEdited('salePrice')"
                     />
                     @if (isTouched('salePrice') && step4Errors().salePrice) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Prix de vente requis et doit être &gt; 0</span>
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Prix de vente
+                        requis et doit être &gt; 0</span
+                      >
                     }
                   </div>
                 </div>
@@ -580,7 +724,8 @@
               <!-- ── RENT_TO_OWN : prix total + mensualité + apport ── -->
               @if (contractTypeFields().showMonthlyInstallment) {
                 <div class="ca-section-title">
-                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions financières
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions
+                  financières
                 </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
@@ -599,7 +744,10 @@
                       (input)="markFieldEdited('salePrice')"
                     />
                     @if (isTouched('salePrice') && step4Errors().salePrice) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Prix total requis et doit être &gt; 0</span>
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Prix total
+                        requis et doit être &gt; 0</span
+                      >
                     }
                   </div>
                   <div class="ca-field">
@@ -617,10 +765,19 @@
                       min="1"
                       (input)="markFieldEdited('monthlyInstallment')"
                     />
-                    @if (isTouched('monthlyInstallment') && step4Errors().monthlyInstallment) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Mensualité requise et doit être &gt; 0</span>
+                    @if (
+                      isTouched('monthlyInstallment') &&
+                      step4Errors().monthlyInstallment
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Mensualité
+                        requise et doit être &gt; 0</span
+                      >
                     }
-                    <span class="ca-hint"><i class="pi pi-info-circle"></i> Pré-calculée : prix total ÷ 60 mois</span>
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculée : prix
+                      total ÷ 60 mois</span
+                    >
                   </div>
                 </div>
                 <div class="ca-form-row">
@@ -639,26 +796,48 @@
                       min="0"
                       (input)="markFieldEdited('depositAmount')"
                     />
-                    @if (isTouched('depositAmount') && step4Errors().depositAmount) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Apport requis (≥ 0)</span>
+                    @if (
+                      isTouched('depositAmount') && step4Errors().depositAmount
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Apport requis
+                        (≥ 0)</span
+                      >
                     }
-                    <span class="ca-hint"><i class="pi pi-info-circle"></i> Pré-calculé : mensualité × 6</span>
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculé :
+                      mensualité × 6</span
+                    >
                   </div>
                 </div>
 
                 <!-- Récapitulatif indicatif RENT_TO_OWN -->
                 @if (rentToOwnSummary(); as summary) {
-                  <div class="ca-rto-summary" role="note" aria-label="Récapitulatif location-vente">
-                    <i class="pi pi-calculator ca-rto-summary__icon" aria-hidden="true"></i>
+                  <div
+                    class="ca-rto-summary"
+                    role="note"
+                    aria-label="Récapitulatif location-vente"
+                  >
+                    <i
+                      class="pi pi-calculator ca-rto-summary__icon"
+                      aria-hidden="true"
+                    ></i>
                     <div class="ca-rto-summary__content">
-                      <span class="ca-rto-summary__label">Récapitulatif indicatif</span>
+                      <span class="ca-rto-summary__label"
+                        >Récapitulatif indicatif</span
+                      >
                       <span class="ca-rto-summary__formula">
-                        {{ summary.installment }} × {{ summary.months }} mois = {{ summary.total }}
+                        {{ summary.installment }} × {{ summary.months }} mois =
+                        {{ summary.total }}
                       </span>
                       @if (!summary.balanced) {
                         <span class="ca-rto-summary__warning">
-                          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-                          Le total des mensualités ({{ summary.total }}) diffère du prix total ({{ summary.salePrice }}).
+                          <i
+                            class="pi pi-exclamation-triangle"
+                            aria-hidden="true"
+                          ></i>
+                          Le total des mensualités ({{ summary.total }}) diffère
+                          du prix total ({{ summary.salePrice }}).
                         </span>
                       }
                     </div>
@@ -689,9 +868,15 @@
                       <span class="ca-payment-day-row__label">du mois</span>
                     </div>
                     @if (isTouched('paymentDay') && step4Errors().paymentDay) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Valeur attendue entre 1 et 28</span>
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Valeur
+                        attendue entre 1 et 28</span
+                      >
                     }
-                    <span class="ca-hint"><i class="pi pi-info-circle"></i> Jour du mois auquel le loyer est prélevé (1–28).</span>
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Jour du mois auquel le
+                      loyer est prélevé (1–28).</span
+                    >
                   </div>
                 </div>
               }
@@ -699,7 +884,8 @@
               <!-- ── RESERVATION : acompte + durée ── -->
               @if (contractTypeFields().showReservationDeposit) {
                 <div class="ca-section-title">
-                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions de réservation
+                  <i class="pi pi-wallet" aria-hidden="true"></i> Conditions de
+                  réservation
                 </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
@@ -717,10 +903,19 @@
                       min="1"
                       (input)="markFieldEdited('reservationDeposit')"
                     />
-                    @if (isTouched('reservationDeposit') && step4Errors().reservationDeposit) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Acompte requis et doit être &gt; 0</span>
+                    @if (
+                      isTouched('reservationDeposit') &&
+                      step4Errors().reservationDeposit
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Acompte requis
+                        et doit être &gt; 0</span
+                      >
                     }
-                    <span class="ca-hint"><i class="pi pi-info-circle"></i> Pré-calculé : prix du bien × 5 %</span>
+                    <span class="ca-hint"
+                      ><i class="pi pi-info-circle"></i> Pré-calculé : prix du
+                      bien × 5 %</span
+                    >
                   </div>
                   <div class="ca-field">
                     <label class="ca-label" for="ca-reservation-days">
@@ -737,8 +932,14 @@
                       min="1"
                       (input)="markFieldEdited('reservationDurationDays')"
                     />
-                    @if (isTouched('reservationDurationDays') && step4Errors().reservationDurationDays) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Durée requise (≥ 1 jour)</span>
+                    @if (
+                      isTouched('reservationDurationDays') &&
+                      step4Errors().reservationDurationDays
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Durée requise
+                        (≥ 1 jour)</span
+                      >
                     }
                   </div>
                 </div>
@@ -747,7 +948,8 @@
               <!-- ── MANDATE : commission + clauses + résiliation ── -->
               @if (contractTypeFields().showAgencyCommissionRate) {
                 <div class="ca-section-title">
-                  <i class="pi pi-percentage" aria-hidden="true"></i> Conditions du mandat
+                  <i class="pi pi-percentage" aria-hidden="true"></i> Conditions
+                  du mandat
                 </div>
                 <div class="ca-form-row">
                   <div class="ca-field">
@@ -770,8 +972,14 @@
                       />
                       <span class="ca-input-suffix">%</span>
                     </div>
-                    @if (isTouched('agencyCommissionRate') && step4Errors().agencyCommissionRate) {
-                      <span class="ca-error"><i class="pi pi-exclamation-circle"></i> Taux requis (0–100 %)</span>
+                    @if (
+                      isTouched('agencyCommissionRate') &&
+                      step4Errors().agencyCommissionRate
+                    ) {
+                      <span class="ca-error"
+                        ><i class="pi pi-exclamation-circle"></i> Taux requis
+                        (0–100 %)</span
+                      >
                     }
                   </div>
                 </div>
@@ -816,7 +1024,6 @@
                   </div>
                 </div>
               }
-
             </form>
           }
 
@@ -827,7 +1034,8 @@
             <div class="ca-step-header">
               <h2 class="ca-step-header__title">Récapitulatif</h2>
               <p class="ca-step-header__sub">
-                Vérifiez les informations avant de créer le brouillon. Vous pourrez le modifier avant signature.
+                Vérifiez les informations avant de créer le brouillon. Vous
+                pourrez le modifier avant signature.
               </p>
             </div>
 
@@ -837,7 +1045,9 @@
                 <i class="pi pi-home"></i>
               </div>
               <div class="ca-summary-property-card__body">
-                <div class="ca-summary-property-card__title">{{ selectedPropertyLabel() }}</div>
+                <div class="ca-summary-property-card__title">
+                  {{ selectedPropertyLabel() }}
+                </div>
                 <div class="ca-summary-property-card__owner">
                   <i class="pi pi-user" aria-hidden="true"></i>
                   {{ ownerDisplayName() }}
@@ -845,13 +1055,50 @@
               </div>
               <div class="ca-summary-property-card__badge">
                 <span class="ca-type-pill">
-                  <i [class]="'pi ' + contractTypeIcon(contractType())" aria-hidden="true"></i>
+                  <i
+                    [class]="'pi ' + contractTypeIcon(contractType())"
+                    aria-hidden="true"
+                  ></i>
                   {{ contractTypeLabelFor(contractType()) }}
                 </span>
               </div>
             </div>
 
+            <div class="ca-summary-glance">
+              @for (highlight of summaryHighlights(); track highlight.label) {
+                <div
+                  class="ca-summary-glance__card"
+                  [class.ca-summary-glance__card--accent]="
+                    highlight.tone === 'accent'
+                  "
+                >
+                  <span class="ca-summary-glance__icon" aria-hidden="true">
+                    <i [class]="'pi ' + highlight.icon"></i>
+                  </span>
+                  <span class="ca-summary-glance__content">
+                    <span class="ca-summary-glance__label">{{
+                      highlight.label
+                    }}</span>
+                    <span class="ca-summary-glance__value">{{
+                      highlight.value
+                    }}</span>
+                  </span>
+                </div>
+              }
+            </div>
+
             <ubax-detail-info-block [items]="summaryItems()" [columns]="2" />
+
+            <div class="ca-summary-note" role="note">
+              <i class="pi pi-info-circle" aria-hidden="true"></i>
+              <div>
+                <div class="ca-summary-note__title">Avant validation</div>
+                <div class="ca-summary-note__text">
+                  Le brouillon sera créé avec ces données préremplies. Vous
+                  pourrez encore le soumettre plus tard pour signature.
+                </div>
+              </div>
+            </div>
 
             @if (store.error()) {
               <div class="ca-error-banner" role="alert">
@@ -860,13 +1107,16 @@
               </div>
             }
           }
-
         }
 
         <!-- ── Navigation ── -->
         <div class="ca-nav">
           @if (currentStep() > 1) {
-            <button class="ca-btn ca-btn--ghost" type="button" (click)="prevStep()">
+            <button
+              class="ca-btn ca-btn--ghost"
+              type="button"
+              (click)="prevStep()"
+            >
               <i class="pi pi-arrow-left"></i> Précédent
             </button>
           } @else {
@@ -876,7 +1126,11 @@
           }
 
           @if (currentStep() < totalSteps) {
-            <button class="ca-btn ca-btn--primary" type="button" (click)="nextStep()">
+            <button
+              class="ca-btn ca-btn--primary"
+              type="button"
+              (click)="nextStep()"
+            >
               Suivant <i class="pi pi-arrow-right"></i>
             </button>
           } @else {
@@ -887,14 +1141,15 @@
               [disabled]="store.saving()"
             >
               @if (store.saving()) {
-                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Création…
+                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                Création…
               } @else {
-                <i class="pi pi-check" aria-hidden="true"></i> Créer le brouillon
+                <i class="pi pi-check" aria-hidden="true"></i> Créer le
+                brouillon
               }
             </button>
           }
         </div>
-
       </div>
     </main>
   </div>

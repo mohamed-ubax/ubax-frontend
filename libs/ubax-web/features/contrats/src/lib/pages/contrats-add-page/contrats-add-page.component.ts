@@ -40,6 +40,12 @@ type RichSelectOption<T extends string = string> = {
   meta?: string;
   icon: string;
 };
+type SummaryHighlight = {
+  label: string;
+  value: string;
+  icon: string;
+  tone?: 'accent' | 'default';
+};
 
 /** Mapping transactionType → contractType recommandé */
 const TRANSACTION_TO_CONTRACT_TYPE: Record<string, ContractType> = {
@@ -261,22 +267,28 @@ export class ContratsAddPageComponent {
   readonly endDate = signal<ContractDateValue>(null);
 
   // ─── Computed: codelist options ──────────────────────────────────────────────
-  readonly contractTypeOptions = computed<RichSelectOption<ContractType>[]>(() => {
-    const items = this.contractTypeCodeList();
-    if (items.length > 0) {
-      return items
-        .filter((item): item is LaCodeListDto & { value: ContractType } =>
-          ['LEASE', 'SALE', 'RENT_TO_OWN', 'RESERVATION', 'MANDATE'].includes(item.value ?? ''),
-        )
-        .map((item) => ({
-          value: item.value as ContractType,
-          label: item.description?.trim() || this.fallbackLabel(item.value as ContractType),
-          meta: this.contractTypeMeta(item.value as ContractType),
-          icon: this.contractTypeIconInternal(item.value as ContractType),
-        }));
-    }
-    return STATIC_CONTRACT_TYPE_OPTIONS;
-  });
+  readonly contractTypeOptions = computed<RichSelectOption<ContractType>[]>(
+    () => {
+      const items = this.contractTypeCodeList();
+      if (items.length > 0) {
+        return items
+          .filter((item): item is LaCodeListDto & { value: ContractType } =>
+            ['LEASE', 'SALE', 'RENT_TO_OWN', 'RESERVATION', 'MANDATE'].includes(
+              item.value ?? '',
+            ),
+          )
+          .map((item) => ({
+            value: item.value as ContractType,
+            label:
+              item.description?.trim() ||
+              this.fallbackLabel(item.value as ContractType),
+            meta: this.contractTypeMeta(item.value as ContractType),
+            icon: this.contractTypeIconInternal(item.value as ContractType),
+          }));
+      }
+      return STATIC_CONTRACT_TYPE_OPTIONS;
+    },
+  );
 
   readonly propertyOptions = computed<RichSelectOption[]>(() =>
     this.biensStore
@@ -288,6 +300,12 @@ export class ContratsAddPageComponent {
         meta: this.formatPropertyMeta(property),
         icon: 'pi-home',
       })),
+  );
+
+  readonly selectedProperty = computed(() =>
+    this.biensStore
+      .entities()
+      .find((property) => property.id === this.propertyId()),
   );
 
   /** Seuls les locataires QUALIFIED — stable, aucune dépendance sur la sélection */
@@ -312,7 +330,9 @@ export class ContratsAddPageComponent {
     () => CONTRACT_TYPE_FIELDS[this.contractType()].requiresTenant,
   );
 
-  readonly visibleTotalSteps = computed(() => (this.tenantStepRequired() ? 5 : 4));
+  readonly visibleTotalSteps = computed(() =>
+    this.tenantStepRequired() ? 5 : 4,
+  );
 
   readonly visibleStepConfig = computed(() => {
     if (this.tenantStepRequired()) return this.stepConfig;
@@ -327,7 +347,8 @@ export class ContratsAddPageComponent {
     const propertyId = this.propertyId();
     if (!propertyId) return '—';
     return (
-      this.propertyOptions().find((o) => o.value === propertyId)?.label ?? propertyId
+      this.propertyOptions().find((o) => o.value === propertyId)?.label ??
+      propertyId
     );
   });
 
@@ -340,9 +361,7 @@ export class ContratsAddPageComponent {
   });
 
   readonly ownerDisplayName = computed(() => {
-    const selectedProperty = this.biensStore
-      .entities()
-      .find((property) => property.id === this.propertyId());
+    const selectedProperty = this.selectedProperty();
 
     if (selectedProperty?.ownerName) return selectedProperty.ownerName;
 
@@ -362,7 +381,8 @@ export class ContratsAddPageComponent {
     ownerRequired: !this.ownerId(),
   }));
   readonly step2Valid = computed(
-    () => !this.step2Errors().propertyRequired && !this.step2Errors().ownerRequired,
+    () =>
+      !this.step2Errors().propertyRequired && !this.step2Errors().ownerRequired,
   );
 
   readonly step3Valid = computed(() => !!this.contractType());
@@ -374,15 +394,20 @@ export class ContratsAddPageComponent {
       fields.endDateRequired || (fields.showDurationYears && mode === 'date');
     return {
       startDate: !this.startDate(),
-      monthlyRent: fields.showMonthlyRent && (!this.monthlyRent() || this.monthlyRent()! < 1),
-      salePrice: fields.showSalePrice && (!this.salePrice() || this.salePrice()! < 1),
+      monthlyRent:
+        fields.showMonthlyRent &&
+        (!this.monthlyRent() || this.monthlyRent()! < 1),
+      salePrice:
+        fields.showSalePrice && (!this.salePrice() || this.salePrice()! < 1),
       monthlyInstallment:
         fields.showMonthlyInstallment &&
         (!this.monthlyInstallment() || this.monthlyInstallment()! < 1),
       depositAmount: fields.showDepositAmount && this.depositAmount() == null,
       paymentDay:
         fields.showPaymentDay &&
-        (!this.paymentDay() || this.paymentDay()! < 1 || this.paymentDay()! > 28),
+        (!this.paymentDay() ||
+          this.paymentDay()! < 1 ||
+          this.paymentDay()! > 28),
       durationYears:
         fields.showDurationYears &&
         mode === 'years' &&
@@ -393,7 +418,8 @@ export class ContratsAddPageComponent {
         (!this.reservationDeposit() || this.reservationDeposit()! < 1),
       reservationDurationDays:
         fields.showReservationDurationDays &&
-        (!this.reservationDurationDays() || this.reservationDurationDays()! < 1),
+        (!this.reservationDurationDays() ||
+          this.reservationDurationDays()! < 1),
       agencyCommissionRate:
         fields.showAgencyCommissionRate && this.agencyCommissionRate() == null,
     };
@@ -454,8 +480,14 @@ export class ContratsAddPageComponent {
     });
 
     if (fields.showEndDate) {
-      if (contractType === 'RENT_TO_OWN' && this.rentToOwnDurationMode() === 'years') {
-        items.push({ label: 'Durée', value: `${this.durationYears() ?? 5} an(s)` });
+      if (
+        contractType === 'RENT_TO_OWN' &&
+        this.rentToOwnDurationMode() === 'years'
+      ) {
+        items.push({
+          label: 'Durée',
+          value: `${this.durationYears() ?? 5} an(s)`,
+        });
       } else {
         items.push({
           label: 'Date de fin',
@@ -468,29 +500,53 @@ export class ContratsAddPageComponent {
     }
 
     if (fields.showMonthlyRent && this.monthlyRent() != null)
-      items.push({ label: 'Loyer mensuel', value: this.formatAmount(this.monthlyRent()) });
+      items.push({
+        label: 'Loyer mensuel',
+        value: this.formatAmount(this.monthlyRent()),
+      });
     if (fields.showSalePrice && this.salePrice() != null)
-      items.push({ label: 'Prix total', value: this.formatAmount(this.salePrice()) });
+      items.push({
+        label: 'Prix total',
+        value: this.formatAmount(this.salePrice()),
+      });
     if (fields.showMonthlyInstallment && this.monthlyInstallment() != null)
-      items.push({ label: 'Mensualité', value: this.formatAmount(this.monthlyInstallment()) });
+      items.push({
+        label: 'Mensualité',
+        value: this.formatAmount(this.monthlyInstallment()),
+      });
     if (fields.showDepositAmount && this.depositAmount() != null)
-      items.push({ label: 'Caution / Apport', value: this.formatAmount(this.depositAmount()) });
+      items.push({
+        label: 'Caution / Apport',
+        value: this.formatAmount(this.depositAmount()),
+      });
     if (fields.showPaymentDay && this.paymentDay() != null)
-      items.push({ label: "Jour d'échéance", value: String(this.paymentDay()) });
+      items.push({
+        label: "Jour d'échéance",
+        value: String(this.paymentDay()),
+      });
     if (fields.showReservationDeposit && this.reservationDeposit() != null)
       items.push({
         label: 'Acompte de réservation',
         value: this.formatAmount(this.reservationDeposit()),
       });
-    if (fields.showReservationDurationDays && this.reservationDurationDays() != null)
+    if (
+      fields.showReservationDurationDays &&
+      this.reservationDurationDays() != null
+    )
       items.push({
         label: 'Durée de réservation',
         value: `${this.reservationDurationDays()} jours`,
       });
     if (fields.showAgencyCommissionRate && this.agencyCommissionRate() != null)
-      items.push({ label: 'Commission agence', value: `${this.agencyCommissionRate()} %` });
+      items.push({
+        label: 'Commission agence',
+        value: `${this.agencyCommissionRate()} %`,
+      });
     if (fields.showSpecialClauses && this.specialClauses())
-      items.push({ label: 'Clauses particulières', value: this.specialClauses() });
+      items.push({
+        label: 'Clauses particulières',
+        value: this.specialClauses(),
+      });
     if (fields.showTerminationConditions && this.terminationConditions())
       items.push({
         label: 'Conditions de résiliation',
@@ -498,6 +554,78 @@ export class ContratsAddPageComponent {
       });
 
     return items;
+  });
+
+  readonly summaryHighlights = computed<SummaryHighlight[]>(() => {
+    const highlights: SummaryHighlight[] = [
+      {
+        label: 'Type',
+        value: this.contractTypeLabelFor(this.contractType()),
+        icon: this.contractTypeIcon(this.contractType()),
+        tone: 'accent',
+      },
+      {
+        label: this.tenantStepRequired() ? 'Locataire' : 'Partie ciblée',
+        value: this.tenantStepRequired()
+          ? this.selectedTenantLabel()
+          : this.ownerDisplayName(),
+        icon: this.tenantStepRequired() ? 'pi-user' : 'pi-briefcase',
+      },
+      {
+        label: 'Démarrage',
+        value: this.formatDisplayDate(this.startDate()),
+        icon: 'pi-calendar',
+      },
+    ];
+
+    if (
+      this.contractTypeFields().showMonthlyRent &&
+      this.monthlyRent() != null
+    ) {
+      highlights.push({
+        label: 'Loyer',
+        value: this.formatAmount(this.monthlyRent()),
+        icon: 'pi-wallet',
+      });
+    } else if (
+      this.contractTypeFields().showMonthlyInstallment &&
+      this.monthlyInstallment() != null
+    ) {
+      highlights.push({
+        label: 'Mensualité',
+        value: this.formatAmount(this.monthlyInstallment()),
+        icon: 'pi-wallet',
+      });
+    } else if (
+      this.contractTypeFields().showSalePrice &&
+      this.salePrice() != null
+    ) {
+      highlights.push({
+        label: 'Prix',
+        value: this.formatAmount(this.salePrice()),
+        icon: 'pi-building-columns',
+      });
+    } else if (
+      this.contractTypeFields().showReservationDeposit &&
+      this.reservationDeposit() != null
+    ) {
+      highlights.push({
+        label: 'Acompte',
+        value: this.formatAmount(this.reservationDeposit()),
+        icon: 'pi-wallet',
+      });
+    } else if (
+      this.contractTypeFields().showAgencyCommissionRate &&
+      this.agencyCommissionRate() != null
+    ) {
+      highlights.push({
+        label: 'Commission',
+        value: `${this.agencyCommissionRate()} %`,
+        icon: 'pi-percentage',
+      });
+    }
+
+    return highlights;
   });
 
   constructor() {
@@ -514,7 +642,8 @@ export class ContratsAddPageComponent {
           if (body && typeof body === 'object') {
             const r = body as Record<string, unknown>;
             if (Array.isArray(r['data'])) return r['data'] as LaCodeListDto[];
-            if (Array.isArray(r['content'])) return r['content'] as LaCodeListDto[];
+            if (Array.isArray(r['content']))
+              return r['content'] as LaCodeListDto[];
           }
           return [] as LaCodeListDto[];
         }),
@@ -534,7 +663,9 @@ export class ContratsAddPageComponent {
       const tenantId = this.tenantId();
       if (!tenantId) return;
 
-      const tenant = this.locationStore.entities().find((t) => t.id === tenantId);
+      const tenant = this.locationStore
+        .entities()
+        .find((t) => t.id === tenantId);
       if (!tenant?.propertyId) return;
 
       if (!this.userEditedFields().has('propertyId')) {
@@ -545,19 +676,24 @@ export class ContratsAddPageComponent {
     // ── Étape 2 : Auto-remplissage depuis le bien sélectionné ─────────────────
     effect(() => {
       const propertyId = this.propertyId();
-      if (!propertyId) return;
+      if (!propertyId) {
+        this.ownerId.set('');
+        return;
+      }
 
-      const property = this.biensStore.entities().find((p) => p.id === propertyId);
+      const property = this.selectedProperty();
       if (!property) return;
 
-      // ownerId depuis property.ownerId, fallback sur l'utilisateur connecté
-      const ownerId = property.ownerId ?? this.authStore.user()?.id;
+      const ownerId = property.ownerId?.trim();
       if (ownerId) {
         this.ownerId.set(ownerId);
+      } else {
+        this.ownerId.set('');
       }
 
       // Suggérer le contractType recommandé selon transactionType
-      const suggestedType = TRANSACTION_TO_CONTRACT_TYPE[property.transactionType ?? ''];
+      const suggestedType =
+        TRANSACTION_TO_CONTRACT_TYPE[property.transactionType ?? ''];
       if (suggestedType) {
         this.contractType.set(suggestedType);
       }
@@ -569,7 +705,9 @@ export class ContratsAddPageComponent {
       const propertyId = this.propertyId();
       if (!propertyId) return;
 
-      const property = this.biensStore.entities().find((p) => p.id === propertyId);
+      const property = this.biensStore
+        .entities()
+        .find((p) => p.id === propertyId);
       if (!property) return;
 
       const price = property.price ?? 0;
@@ -595,7 +733,10 @@ export class ContratsAddPageComponent {
           const installment = price ? Math.round(price / 60) : null;
           this.setIfNotEdited('salePrice', price || null);
           this.setIfNotEdited('monthlyInstallment', installment);
-          this.setIfNotEdited('depositAmount', installment ? installment * 6 : null);
+          this.setIfNotEdited(
+            'depositAmount',
+            installment ? installment * 6 : null,
+          );
           this.setIfNotEdited('durationYears', 5);
           this.setIfNotEdited('paymentDay', 5);
           this.setIfNotEdited('startDate', today);
@@ -605,7 +746,10 @@ export class ContratsAddPageComponent {
           break;
         }
         case 'RESERVATION': {
-          this.setIfNotEdited('reservationDeposit', price ? Math.round(price * 0.05) : null);
+          this.setIfNotEdited(
+            'reservationDeposit',
+            price ? Math.round(price * 0.05) : null,
+          );
           this.setIfNotEdited('reservationDurationDays', 30);
           this.setIfNotEdited('startDate', today);
           break;
@@ -743,7 +887,10 @@ export class ContratsAddPageComponent {
     [1, 2, 3, 4].forEach((s) => this.touchStep(s));
 
     const allValid =
-      this.step1Valid() && this.step2Valid() && this.step3Valid() && this.step4Valid();
+      this.step1Valid() &&
+      this.step2Valid() &&
+      this.step3Valid() &&
+      this.step4Valid();
 
     if (!allValid) return;
 
@@ -760,7 +907,10 @@ export class ContratsAddPageComponent {
       } else {
         endDate = this.serializeDate(this.endDate());
       }
-    } else if (fields.endDateRequired || (!this.openEnded() && fields.showEndDate)) {
+    } else if (
+      fields.endDateRequired ||
+      (!this.openEnded() && fields.showEndDate)
+    ) {
       endDate = this.serializeDate(this.endDate());
     }
 
@@ -804,7 +954,8 @@ export class ContratsAddPageComponent {
       ...(fields.showReservationDeposit && this.reservationDeposit() != null
         ? { reservationDeposit: this.reservationDeposit()! }
         : {}),
-      ...(fields.showReservationDurationDays && this.reservationDurationDays() != null
+      ...(fields.showReservationDurationDays &&
+      this.reservationDurationDays() != null
         ? { reservationDurationDays: this.reservationDurationDays()! }
         : {}),
       ...(fields.showAgencyCommissionRate && this.agencyCommissionRate() != null
