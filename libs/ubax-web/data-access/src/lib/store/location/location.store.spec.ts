@@ -102,6 +102,7 @@ type LocationStoreContract = {
   locatairesFiltres(): Tenant[];
   totalLocataires(): number;
   load(params?: unknown): void;
+  loadSansContrat(params?: { propertyId?: string }): void;
   setFilterStatut(statut: Tenant['status'] | null): void;
   qualifier(id: string): void;
   rejeter(params: { id: string; reason: string }): void;
@@ -113,6 +114,7 @@ describe('LocationStore', () => {
   const storeClass = LocationStore as unknown as Type<unknown>;
 
   let store: LocationStoreContract;
+  let httpClient: { get: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.mocked(apiTypes.list6).mockImplementation(() =>
@@ -139,9 +141,13 @@ describe('LocationStore', () => {
         ),
     );
 
+    httpClient = {
+      get: vi.fn(() => of(TENANT_LIST_RESPONSE)),
+    };
+
     const injector = Injector.create({
       providers: [
-        { provide: HttpClient, useValue: {} },
+        { provide: HttpClient, useValue: httpClient },
         {
           provide: ApiConfiguration,
           useValue: { rootUrl: 'https://test.local' },
@@ -184,6 +190,23 @@ describe('LocationStore', () => {
     it('filtre les locataires rejetés (REJECTED)', () => {
       expect(store.locatairesRejetes()).toHaveLength(1);
       expect(store.locatairesRejetes()[0]?.id).toBe('loc-4');
+    });
+  });
+
+  describe('loadSansContrat', () => {
+    it('passe le propertyId quand il est fourni', () => {
+      store.loadSansContrat({ propertyId: 'property-42' });
+
+      expect(httpClient.get).toHaveBeenCalledWith(
+        'https://test.local/v1/tenants',
+        {
+          params: {
+            withoutContract: 'true',
+            status: 'QUALIFIED',
+            propertyId: 'property-42',
+          },
+        },
+      );
     });
   });
 

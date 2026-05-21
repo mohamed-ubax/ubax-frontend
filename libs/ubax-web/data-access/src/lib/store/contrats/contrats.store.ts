@@ -15,15 +15,15 @@ import {
   resolveHttpErrorMessage,
 } from '@ubax-workspace/shared-data-access';
 import {
-  activate,
+  activate1,
   ApiConfiguration,
-  cancel,
-  create7,
+  cancel1,
+  create8,
   getById2,
   getStats,
-  list5,
-  submit1,
-  terminate,
+  list6,
+  submit2,
+  terminate1,
   update2,
 } from '@ubax-workspace/shared-api-types';
 import { exhaustMap, pipe, tap } from 'rxjs';
@@ -334,14 +334,14 @@ export const ContratsStore = signalStore(
   { providedIn: 'root' },
   withApiResource<
     ContractResponse,
-    typeof list5,
+    typeof list6,
     typeof getById2,
-    typeof create7,
+    typeof create8,
     typeof update2
   >({
-    list: list5,
+    list: list6,
     getById: getById2,
-    create: create7,
+    create: create8,
     update: update2,
     buildGetByIdParams: (id) => ({ id }),
     idSelector: (c) => c.id,
@@ -423,7 +423,7 @@ export const ContratsStore = signalStore(
             }),
           ),
           exhaustMap((id) =>
-            activate(http, apiConfig.rootUrl, { id }).pipe(
+            activate1(http, apiConfig.rootUrl, { id }).pipe(
               tapResponse({
                 next: () => {
                   const previousStatus = store
@@ -478,7 +478,7 @@ export const ContratsStore = signalStore(
             }),
           ),
           exhaustMap((id) =>
-            submit1(http, apiConfig.rootUrl, { id }).pipe(
+            submit2(http, apiConfig.rootUrl, { id }).pipe(
               tapResponse({
                 next: (response) => {
                   const previousStatus = store
@@ -534,7 +534,7 @@ export const ContratsStore = signalStore(
             }),
           ),
           exhaustMap(({ id, reason }) =>
-            terminate(http, apiConfig.rootUrl, {
+            terminate1(http, apiConfig.rootUrl, {
               id,
               body: { terminationReason: reason },
             }).pipe(
@@ -591,7 +591,7 @@ export const ContratsStore = signalStore(
             }),
           ),
           exhaustMap((id) =>
-            cancel(http, apiConfig.rootUrl, { id }).pipe(
+            cancel1(http, apiConfig.rootUrl, { id }).pipe(
               tapResponse({
                 next: () => {
                   const previousStatus = store

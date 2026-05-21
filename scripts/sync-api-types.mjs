@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { execSync } from 'node:child_process';
 import { access, readFile, rename, writeFile } from 'node:fs/promises';
 
-import { prepareApiTypesOutput } from './prepare-api-types-output.mjs';
+import { cleanupGeneratorStaging, prepareApiTypesOutput } from './prepare-api-types-output.mjs';
 import { sanitizeOpenApiDocument } from './sanitize-openapi-spec.mjs';
 
 const swaggerUrl = new URL('http://173.249.7.89/api/api-docs');
@@ -18,9 +18,20 @@ async function generatedOutputExists() {
 }
 
 async function runGenerator() {
- execSync('npx ng-openapi-gen --config ng-openapi-gen.json', {
-  stdio: 'inherit',
- });
+ try {
+  execSync('npx ng-openapi-gen --config ng-openapi-gen.json', {
+   stdio: 'inherit',
+  });
+ } catch {
+  // On Windows, ng-openapi-gen may exit with EBUSY after successfully writing all output files.
+  // This happens because the OS (Defender/Search indexer) locks the staging directory (lib$)
+  // before the generator can remove it. Verify the output actually exists before failing.
+  if (!(await generatedOutputExists())) {
+   throw new Error(
+    'API generation failed: output files were not produced. Check the ng-openapi-gen output above.',
+   );
+  }
+ }
 }
 
 async function syncSwaggerFile({
@@ -98,6 +109,9 @@ async function main() {
 
  await prepareApiTypesOutput();
  await runGenerator();
+ // After the generator process exits, Windows releases its file locks on lib$.
+ // Clean up the staging directory that ng-openapi-gen may have left behind.
+ await cleanupGeneratorStaging();
 }
 
 await main();

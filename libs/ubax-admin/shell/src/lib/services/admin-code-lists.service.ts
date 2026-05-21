@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import {
   Api,
-  create8,
+  create9,
   findAll,
   type LaCodeListDto,
   update3,
@@ -37,7 +37,7 @@ export class AdminCodeListsService {
   }
 
   createCodeList(payload: LaCodeListDto): Observable<LaCodeListDto> {
-    return from(this.api.invoke(create8, { body: payload })).pipe(
+    return from(this.api.invoke(create9, { body: payload })).pipe(
       map((raw) => requireCodeListItem(raw)),
     );
   }

@@ -18,9 +18,9 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
   return {
     ...actual,
-    activate: vi.fn(),
+    activate1: vi.fn(),
     getStats: vi.fn(),
-    list5: vi.fn(),
+    list6: vi.fn(),
   };
 });
 
@@ -48,9 +48,10 @@ describe('ContratsStore', () => {
   let store: ContratsStoreContract;
 
   beforeEach(() => {
-    vi.mocked(apiTypes.activate).mockReset();
+    vi.mocked(apiTypes.activate1).mockReset();
     vi.mocked(apiTypes.getStats).mockReset();
-    vi.mocked(apiTypes.list5).mockImplementation(() =>
+    vi.mocked(apiTypes.list6).mockReset();
+    vi.mocked(apiTypes.list6).mockImplementation(() =>
       of(
         toStrictResponse({
           status: 'SUCCESS',
@@ -109,7 +110,7 @@ describe('ContratsStore', () => {
       ),
     );
 
-    vi.mocked(apiTypes.activate).mockImplementation(() =>
+    vi.mocked(apiTypes.activate1).mockImplementation(() =>
       of(
         toStrictResponse({
           status: 'SUCCESS',
@@ -152,7 +153,7 @@ describe('ContratsStore', () => {
   });
 
   it('active un contrat en attente et met à jour le statut local', () => {
-    vi.mocked(apiTypes.list5).mockReturnValueOnce(
+    vi.mocked(apiTypes.list6).mockReturnValueOnce(
       of(
         toStrictResponse({
           status: 'SUCCESS',
@@ -173,7 +174,7 @@ describe('ContratsStore', () => {
       ),
     );
 
-    vi.mocked(apiTypes.activate).mockReturnValueOnce(
+    vi.mocked(apiTypes.activate1).mockReturnValueOnce(
       of(
         toStrictResponse({
           status: 'SUCCESS',

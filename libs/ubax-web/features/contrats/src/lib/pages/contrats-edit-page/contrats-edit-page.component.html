@@ -101,8 +101,8 @@
                 <div class="ca-step-header">
                   <h2 class="ca-step-header__title">Sélection du locataire</h2>
                   <p class="ca-step-header__sub">
-                    Les données existantes sont préremplies. Ajustez uniquement
-                    le locataire si le type de contrat l'exige.
+                    Ajustez d'abord le dossier locataire ou acheteur si le
+                    contrat le nécessite. Les réservations ignorent cette étape.
                   </p>
                 </div>
 
@@ -186,9 +186,9 @@
                     }
                     <span class="ca-hint">
                       <i class="pi pi-info-circle"></i>
-                      Les dossiers <strong>QUALIFIED</strong> restent
-                      sélectionnables pour réaffecter le brouillon si
-                      nécessaire.
+                      Les dossiers affichés restent limités aux statuts
+                      <strong>QUALIFIED</strong> et, après choix du bien, au
+                      périmètre de ce bien.
                     </span>
                   </div>
                 </form>
@@ -198,8 +198,8 @@
                 <div class="ca-step-header">
                   <h2 class="ca-step-header__title">Sélection du bien</h2>
                   <p class="ca-step-header__sub">
-                    Le bien et son propriétaire sont préremplis depuis le
-                    brouillon, puis recalculés si vous changez de bien.
+                    Le bien pilote le propriétaire affiché, les suggestions de
+                    type de contrat et le filtrage des dossiers éligibles.
                   </p>
                 </div>
 
@@ -279,8 +279,8 @@
                     }
                     <span class="ca-hint">
                       <i class="pi pi-info-circle"></i>
-                      Le propriétaire et les suggestions financières sont
-                      synchronisés avec le bien choisi.
+                      Le propriétaire reste un champ informatif dérivé du bien.
+                      Il n'est pas envoyé dans la requête de modification.
                     </span>
                   </div>
 
@@ -296,25 +296,11 @@
                         }}</span>
                         <span
                           class="ca-owner-badge__lock"
-                          aria-label="Champ verrouillé"
+                          aria-label="Champ informatif"
                         >
                           <i class="pi pi-lock"></i>
                         </span>
                       </div>
-                      <span class="ca-hint">
-                        <i class="pi pi-info-circle"></i>
-                        Renseigné automatiquement depuis le bien sélectionné.
-                        Non modifiable.
-                      </span>
-                    </div>
-                  } @else if (propertyId()) {
-                    <div class="ca-field">
-                      <span class="ca-label">Propriétaire</span>
-                      <span class="ca-error">
-                        <i class="pi pi-exclamation-circle"></i>
-                        Impossible d'identifier le propriétaire de ce bien.
-                        Corrigez la fiche bien avant d'enregistrer.
-                      </span>
                     </div>
                   }
                 </form>
@@ -398,10 +384,6 @@
                             }
                             @case ('RESERVATION') {
                               Acompte de réservation · Durée de blocage
-                            }
-                            @case ('MANDATE') {
-                              Commission agence · Clauses · Conditions de
-                              résiliation
                             }
                           }
                         </div>
@@ -962,46 +944,6 @@
                     </div>
                   }
 
-                  @if (contractTypeFields().showAgencyCommissionRate) {
-                    <div class="ca-section-title">
-                      <i class="pi pi-percentage" aria-hidden="true"></i>
-                      Conditions du mandat
-                    </div>
-                    <div class="ca-form-row">
-                      <div class="ca-field">
-                        <label class="ca-label" for="ce-commission">
-                          Taux de commission agence (%)
-                          <span class="req">*</span>
-                        </label>
-                        <div class="ca-input-suffix-wrap">
-                          <input
-                            class="ca-input"
-                            id="ce-commission"
-                            type="number"
-                            placeholder="Ex : 10"
-                            [ngModel]="agencyCommissionRate()"
-                            (ngModelChange)="agencyCommissionRate.set($event)"
-                            [ngModelOptions]="{ standalone: true }"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            (input)="markFieldEdited('agencyCommissionRate')"
-                          />
-                          <span class="ca-input-suffix">%</span>
-                        </div>
-                        @if (
-                          isTouched('agencyCommissionRate') &&
-                          formErrors().agencyCommissionRate
-                        ) {
-                          <span class="ca-error"
-                            ><i class="pi pi-exclamation-circle"></i> Taux
-                            requis (0–100 %)</span
-                          >
-                        }
-                      </div>
-                    </div>
-                  }
-
                   @if (contractTypeFields().showSpecialClauses) {
                     <div class="ca-form-row">
                       <div class="ca-field ca-field--full">
@@ -1106,10 +1048,27 @@
                   }
                 </div>
 
-                <ubax-detail-info-block
-                  [items]="summaryItems()"
-                  [columns]="2"
-                />
+                <div class="ca-summary-details">
+                  <div class="ca-summary-details__header">
+                    <div class="ca-summary-details__intro">
+                      <span class="ca-summary-details__eyebrow"
+                        >Vue d'ensemble</span
+                      >
+                      <div class="ca-summary-details__title">
+                        Points clés du contrat
+                      </div>
+                    </div>
+                    <div class="ca-summary-details__badge">
+                      {{ summaryItems().length }} informations
+                    </div>
+                  </div>
+
+                  <ubax-detail-info-block
+                    [items]="summaryItems()"
+                    [columns]="2"
+                    [bordered]="false"
+                  />
+                </div>
 
                 <div class="ca-summary-note" role="note">
                   <i class="pi pi-info-circle" aria-hidden="true"></i>
