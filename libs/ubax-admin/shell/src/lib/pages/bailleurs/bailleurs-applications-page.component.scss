@@ -1,0 +1,58 @@
+.admin-bailleurs-page {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-bailleurs-page__header {
+  h1 {
+    margin: 8px 0;
+    font-size: 2rem;
+    color: var(--ubax-navy);
+  }
+
+  p {
+    margin: 0;
+    color: #61758a;
+  }
+}
+
+.admin-bailleurs-page__eyebrow {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a6b29;
+}
+
+.admin-bailleurs-page__title-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  span {
+    color: #61758a;
+    font-weight: 600;
+  }
+}
+
+.admin-bailleurs-page__owner-cell {
+  display: grid;
+  gap: 4px;
+
+  span {
+    color: #61758a;
+  }
+}
+
+.admin-bailleurs-page__state {
+  padding: 32px;
+  text-align: center;
+  color: #61758a;
+}
+
+.admin-bailleurs-page__pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 24px;
+}

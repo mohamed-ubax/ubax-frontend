@@ -1,0 +1,113 @@
+<section class="applications-page">
+  <header class="applications-page__header">
+    <div>
+      <p class="applications-page__eyebrow">Agence · Demandes bailleur</p>
+      <h1>Demandes d'adhésion reçues</h1>
+      <p>
+        Consultez les demandes reçues par votre agence et accédez au détail pour
+        approuver ou rejeter chaque dossier.
+      </p>
+    </div>
+
+    <div class="applications-page__actions">
+      <a
+        class="applications-page__action applications-page__action--ghost"
+        routerLink="/biens/bailleurs"
+      >
+        Voir les bailleurs
+      </a>
+    </div>
+  </header>
+
+  <ubax-section-card title="Demandes reçues" bodyClass="p-0">
+    <ubax-search-filter-bar
+      placeholder="Rechercher par nom, email ou téléphone"
+      [filters]="searchFilters"
+      [searchValue]="searchValue()"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    @switch (viewState()) {
+      @case ('loading') {
+        <div class="applications-page__state">Chargement des demandes…</div>
+      }
+
+      @case ('error') {
+        <div class="applications-page__state applications-page__state--error">
+          {{ store.error() }}
+        </div>
+      }
+
+      @case ('empty') {
+        <ubax-empty-state
+          icon="pi pi-inbox"
+          title="Aucune demande reçue"
+          description="Les nouvelles demandes bailleur apparaîtront ici avec leur statut."
+        />
+      }
+
+      @case ('success') {
+        <ubax-ui-data-table [columns]="tableColumns" [rows]="pagedRows()">
+          <ng-template ubaxDataTableCell="owner" let-application>
+            <div class="applications-page__owner-cell">
+              <strong>{{ fullName(application) || '—' }}</strong>
+              <span>{{
+                application.agencyName || 'Agence non renseignée'
+              }}</span>
+            </div>
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="email" let-application>
+            {{ application.email || '—' }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="phone" let-application>
+            {{ application.phone || '—' }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="status" let-application>
+            <ubax-status-badge [variant]="statusVariant(application.status)">
+              {{ statusLabel(application.status) }}
+            </ubax-status-badge>
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="createdAt" let-application>
+            {{
+              application.createdAt
+                ? (application.createdAt | date: 'dd/MM/yyyy')
+                : '—'
+            }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="actions" let-application>
+            <a
+              class="applications-page__link"
+              [routerLink]="['/biens/bailleurs/demandes', application.id]"
+            >
+              Ouvrir
+            </a>
+          </ng-template>
+
+          <ng-template ubaxDataTableEmpty>
+            <ubax-empty-state
+              icon="pi pi-search"
+              title="Aucun résultat"
+              description="Aucune demande ne correspond à vos critères actuels."
+            />
+          </ng-template>
+        </ubax-ui-data-table>
+
+        @if (filteredRows().length > pageSize) {
+          <div class="applications-page__pagination">
+            <ubax-ui-pagination
+              [currentPage]="currentPage()"
+              [totalPages]="totalPages()"
+              (pageChange)="onPageChange($event)"
+            />
+          </div>
+        }
+      }
+    }
+  </ubax-section-card>
+</section>

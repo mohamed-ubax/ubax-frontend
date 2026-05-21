@@ -19,7 +19,7 @@ vi.mock('@ubax-workspace/shared-api-types', async (importOriginal) => {
     await importOriginal<typeof import('@ubax-workspace/shared-api-types')>();
   return {
     ...actual,
-    list6: vi.fn(),
+    list7: vi.fn(),
     getById4: vi.fn(),
     qualify: vi.fn(),
     reject: vi.fn(),
@@ -117,7 +117,7 @@ describe('LocationStore', () => {
   let httpClient: { get: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    vi.mocked(apiTypes.list6).mockImplementation(() =>
+    vi.mocked(apiTypes.list7).mockImplementation(() =>
       of(toStrictResponse(TENANT_LIST_RESPONSE)),
     );
     vi.mocked(apiTypes.qualify).mockImplementation(

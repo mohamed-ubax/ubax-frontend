@@ -1,0 +1,191 @@
+<section class="mandate-detail-page">
+  <header class="mandate-detail-page__header">
+    <div>
+      <p class="mandate-detail-page__eyebrow">Agence · Mandat</p>
+      <h1>{{ mandate()?.referenceNumber || mandate()?.id || 'Mandat' }}</h1>
+      <p>Suivi administratif du mandat de gestion conclu avec le bailleur.</p>
+    </div>
+
+    <div class="mandate-detail-page__header-actions">
+      <a class="mandate-detail-page__back" routerLink="/contrats/mandats"
+        >Retour à la liste</a
+      >
+      <ubax-status-badge [variant]="statusVariant(mandate()?.status)">
+        {{ statusLabel(mandate()?.status) }}
+      </ubax-status-badge>
+    </div>
+  </header>
+
+  <div class="mandate-detail-page__grid">
+    <ubax-section-card title="Données générales">
+      <dl class="mandate-detail-page__details">
+        <div>
+          <dt>Référence</dt>
+          <dd>{{ mandate()?.referenceNumber || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Bailleur</dt>
+          <dd>{{ mandate()?.ownerFullName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Téléphone</dt>
+          <dd>{{ mandate()?.ownerPhone || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Agence</dt>
+          <dd>{{ mandate()?.agencyName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Date de début</dt>
+          <dd>
+            {{
+              mandate()?.startDate
+                ? (mandate()?.startDate | date: 'dd/MM/yyyy')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Date de fin</dt>
+          <dd>
+            {{
+              mandate()?.endDate
+                ? (mandate()?.endDate | date: 'dd/MM/yyyy')
+                : 'Indéterminée'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Commission</dt>
+          <dd>
+            {{
+              mandate()?.commissionRate != null
+                ? mandate()?.commissionRate + ' %'
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Créé le</dt>
+          <dd>
+            {{
+              mandate()?.createdAt
+                ? (mandate()?.createdAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </ubax-section-card>
+
+    <ubax-section-card title="Clauses et transitions">
+      <dl class="mandate-detail-page__details">
+        <div class="mandate-detail-page__block">
+          <dt>Clauses spéciales</dt>
+          <dd>{{ mandate()?.specialClauses || 'Aucune clause spéciale.' }}</dd>
+        </div>
+        <div class="mandate-detail-page__block">
+          <dt>Conditions de résiliation</dt>
+          <dd>
+            {{
+              mandate()?.terminationConditions ||
+                'Aucune condition particulière.'
+            }}
+          </dd>
+        </div>
+        <div class="mandate-detail-page__block">
+          <dt>Motif de résiliation</dt>
+          <dd>{{ mandate()?.terminationReason || '—' }}</dd>
+        </div>
+      </dl>
+
+      <div class="mandate-detail-page__actions">
+        @if (canSubmit()) {
+          <button
+            class="mandate-detail-page__button mandate-detail-page__button--primary"
+            type="button"
+            (click)="showSubmitDialog.set(true)"
+          >
+            Soumettre pour signature
+          </button>
+        }
+        @if (canCancel()) {
+          <button
+            class="mandate-detail-page__button mandate-detail-page__button--ghost"
+            type="button"
+            (click)="showCancelDialog.set(true)"
+          >
+            Annuler
+          </button>
+        }
+        @if (canTerminate()) {
+          <button
+            class="mandate-detail-page__button mandate-detail-page__button--danger"
+            type="button"
+            (click)="showTerminateDialog.set(true)"
+          >
+            Résilier
+          </button>
+        }
+      </div>
+
+      @if (
+        store.submitError() || store.cancelError() || store.terminateError()
+      ) {
+        <p class="mandate-detail-page__error">
+          {{
+            store.submitError() || store.cancelError() || store.terminateError()
+          }}
+        </p>
+      }
+    </ubax-section-card>
+  </div>
+
+  <ubax-confirm-dialog
+    [visible]="showSubmitDialog()"
+    (visibleChange)="showSubmitDialog.set($event)"
+    title="Soumettre ce mandat ?"
+    message="Le mandat passera au statut En attente de signature."
+    confirmLabel="Soumettre"
+    confirmSeverity="success"
+    [loading]="store.saving()"
+    (confirmed)="submitMandate()"
+  />
+
+  <ubax-confirm-dialog
+    [visible]="showCancelDialog()"
+    (visibleChange)="showCancelDialog.set($event)"
+    title="Annuler ce mandat ?"
+    message="Cette action est réservée aux brouillons et mandats en attente de signature."
+    confirmLabel="Annuler"
+    confirmSeverity="warn"
+    [loading]="store.saving()"
+    (confirmed)="cancelMandate()"
+  />
+
+  <ubax-confirm-dialog
+    [visible]="showTerminateDialog()"
+    (visibleChange)="showTerminateDialog.set($event)"
+    title="Résilier ce mandat ?"
+    message="Un motif de résiliation est obligatoire."
+    confirmLabel="Résilier"
+    confirmSeverity="danger"
+    [loading]="store.saving()"
+    (confirmed)="terminateMandate()"
+  >
+    <div class="mandate-detail-page__dialog-content">
+      <label for="terminate-reason">Motif</label>
+      <textarea
+        id="terminate-reason"
+        rows="4"
+        [ngModel]="terminateReason()"
+        (ngModelChange)="
+          terminateReason.set($event); terminateReasonError.set(null)
+        "
+      ></textarea>
+      @if (terminateReasonError()) {
+        <p class="mandate-detail-page__error">{{ terminateReasonError() }}</p>
+      }
+    </div>
+  </ubax-confirm-dialog>
+</section>

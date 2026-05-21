@@ -1,0 +1,128 @@
+<section class="mandates-page">
+  <header class="mandates-page__header">
+    <div>
+      <p class="mandates-page__eyebrow">Agence · Mandats</p>
+      <h1>Mandats de gestion</h1>
+      <p>
+        Créez, soumettez et suivez les mandats conclus avec les bailleurs de
+        votre agence.
+      </p>
+    </div>
+
+    <div class="mandates-page__actions">
+      <a
+        class="mandates-page__action mandates-page__action--ghost"
+        routerLink="/biens/bailleurs"
+      >
+        Voir les bailleurs
+      </a>
+      <a class="mandates-page__action" routerLink="/contrats/mandats/nouveau">
+        Nouveau mandat
+      </a>
+    </div>
+  </header>
+
+  <ubax-section-card title="Mandats" bodyClass="p-0">
+    <ubax-search-filter-bar
+      placeholder="Rechercher par référence ou bailleur"
+      [filters]="searchFilters"
+      [searchValue]="searchValue()"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    @switch (viewState()) {
+      @case ('loading') {
+        <div class="mandates-page__state">Chargement des mandats…</div>
+      }
+
+      @case ('error') {
+        <div class="mandates-page__state mandates-page__state--error">
+          {{ store.error() }}
+        </div>
+      }
+
+      @case ('empty') {
+        <ubax-empty-state
+          icon="pi pi-briefcase"
+          title="Aucun mandat"
+          description="Créez votre premier mandat pour commencer le suivi administratif avec un bailleur."
+        >
+          <a
+            class="mandates-page__action"
+            routerLink="/contrats/mandats/nouveau"
+            >Créer un mandat</a
+          >
+        </ubax-empty-state>
+      }
+
+      @case ('success') {
+        <ubax-ui-data-table [columns]="tableColumns" [rows]="pagedRows()">
+          <ng-template ubaxDataTableCell="referenceNumber" let-mandate>
+            <strong>{{ mandate.referenceNumber || mandate.id }}</strong>
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="owner" let-mandate>
+            <div class="mandates-page__owner-cell">
+              <strong>{{ mandate.ownerFullName || '—' }}</strong>
+              <span>{{ mandate.ownerPhone || 'Téléphone non renseigné' }}</span>
+            </div>
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="status" let-mandate>
+            <ubax-status-badge [variant]="statusVariant(mandate.status)">
+              {{ statusLabel(mandate.status) }}
+            </ubax-status-badge>
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="startDate" let-mandate>
+            {{
+              mandate.startDate ? (mandate.startDate | date: 'dd/MM/yyyy') : '—'
+            }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="endDate" let-mandate>
+            {{
+              mandate.endDate
+                ? (mandate.endDate | date: 'dd/MM/yyyy')
+                : 'Indéterminée'
+            }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="createdAt" let-mandate>
+            {{
+              mandate.createdAt ? (mandate.createdAt | date: 'dd/MM/yyyy') : '—'
+            }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="actions" let-mandate>
+            <a
+              class="mandates-page__link"
+              [routerLink]="['/contrats/mandats', mandate.id]"
+            >
+              Ouvrir
+            </a>
+          </ng-template>
+
+          <ng-template ubaxDataTableEmpty>
+            <ubax-empty-state
+              icon="pi pi-search"
+              title="Aucun résultat"
+              description="Aucun mandat ne correspond à votre filtre actuel."
+            />
+          </ng-template>
+        </ubax-ui-data-table>
+
+        @if (filteredRows().length > pageSize) {
+          <div class="mandates-page__pagination">
+            <ubax-ui-pagination
+              [currentPage]="currentPage()"
+              [totalPages]="totalPages()"
+              (pageChange)="onPageChange($event)"
+            />
+          </div>
+        }
+      }
+    }
+  </ubax-section-card>
+</section>

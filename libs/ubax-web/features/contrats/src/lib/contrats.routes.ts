@@ -9,6 +9,27 @@ export const contratsRoutes: Route[] = [
       ),
   },
   {
+    path: 'mandats',
+    loadComponent: () =>
+      import('./pages/mandats-list-page/mandats-list-page.component').then(
+        (m) => m.MandatsListPageComponent,
+      ),
+  },
+  {
+    path: 'mandats/nouveau',
+    loadComponent: () =>
+      import('./pages/mandats-add-page/mandats-add-page.component').then(
+        (m) => m.MandatsAddPageComponent,
+      ),
+  },
+  {
+    path: 'mandats/:id',
+    loadComponent: () =>
+      import('./pages/mandats-detail-page/mandats-detail-page.component').then(
+        (m) => m.MandatsDetailPageComponent,
+      ),
+  },
+  {
     path: 'nouveau',
     loadComponent: () =>
       import('./pages/contrats-add-page/contrats-add-page.component').then(
@@ -25,8 +46,8 @@ export const contratsRoutes: Route[] = [
   {
     path: ':id',
     loadComponent: () =>
-      import('./pages/contrats-detail-page/contrats-detail-page.component').then(
-        (m) => m.ContratsDetailPageComponent,
-      ),
+      import(
+        './pages/contrats-detail-page/contrats-detail-page.component'
+      ).then((m) => m.ContratsDetailPageComponent),
   },
 ];

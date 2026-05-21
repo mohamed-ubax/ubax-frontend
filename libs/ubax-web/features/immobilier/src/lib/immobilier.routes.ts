@@ -23,6 +23,27 @@ export const immobilierRoutes: Route[] = [
       ),
   },
   {
+    path: 'bailleurs',
+    loadComponent: () =>
+      import('./pages/bailleurs-list-page/bailleurs-list-page.component').then(
+        (m) => m.BailleursListPageComponent,
+      ),
+  },
+  {
+    path: 'bailleurs/demandes',
+    loadComponent: () =>
+      import(
+        './pages/bailleur-applications-list-page/bailleur-applications-list-page.component'
+      ).then((m) => m.BailleurApplicationsListPageComponent),
+  },
+  {
+    path: 'bailleurs/demandes/:id',
+    loadComponent: () =>
+      import(
+        './pages/bailleur-application-detail-page/bailleur-application-detail-page.component'
+      ).then((m) => m.BailleurApplicationDetailPageComponent),
+  },
+  {
     path: 'bailleurs/:id',
     loadComponent: () =>
       import(

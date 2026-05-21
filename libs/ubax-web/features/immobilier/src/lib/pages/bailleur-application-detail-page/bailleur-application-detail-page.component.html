@@ -1,0 +1,163 @@
+<section class="application-detail-page">
+  <header class="application-detail-page__header">
+    <div>
+      <p class="application-detail-page__eyebrow">Agence · Demande bailleur</p>
+      <h1>{{ fullName(application()) || 'Demande bailleur' }}</h1>
+      <p>
+        Examinez le dossier, puis approuvez ou rejetez la demande si elle est
+        encore en attente.
+      </p>
+    </div>
+
+    <div class="application-detail-page__header-actions">
+      <a
+        class="application-detail-page__back"
+        routerLink="/biens/bailleurs/demandes"
+      >
+        Retour à la liste
+      </a>
+      <ubax-status-badge [variant]="statusVariant(application()?.status)">
+        {{ statusLabel(application()?.status) }}
+      </ubax-status-badge>
+    </div>
+  </header>
+
+  <div class="application-detail-page__grid">
+    <ubax-section-card title="Informations du bailleur">
+      <dl class="application-detail-page__details">
+        <div>
+          <dt>Nom complet</dt>
+          <dd>{{ fullName(application()) || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Téléphone</dt>
+          <dd>{{ application()?.phone || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ application()?.email || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Agence ciblée</dt>
+          <dd>{{ application()?.agencyName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Type de pièce</dt>
+          <dd>{{ application()?.idType || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Numéro de pièce</dt>
+          <dd>{{ application()?.idNumber || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Date de création</dt>
+          <dd>
+            {{
+              application()?.createdAt
+                ? (application()?.createdAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Dernière mise à jour</dt>
+          <dd>
+            {{
+              application()?.updatedAt
+                ? (application()?.updatedAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </ubax-section-card>
+
+    <ubax-section-card title="Décision et suivi">
+      <dl class="application-detail-page__details">
+        <div>
+          <dt>Traité par</dt>
+          <dd>{{ application()?.reviewedByName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Traité le</dt>
+          <dd>
+            {{
+              application()?.reviewedAt
+                ? (application()?.reviewedAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div class="application-detail-page__description">
+          <dt>Description</dt>
+          <dd>
+            {{ application()?.description || 'Aucune description fournie.' }}
+          </dd>
+        </div>
+        <div class="application-detail-page__description">
+          <dt>Motif de rejet</dt>
+          <dd>{{ application()?.rejectionReason || '—' }}</dd>
+        </div>
+      </dl>
+
+      <div class="application-detail-page__actions">
+        <button
+          class="application-detail-page__button application-detail-page__button--approve"
+          type="button"
+          [disabled]="!canDecide() || isBusy()"
+          (click)="approveDialogVisible.set(true)"
+        >
+          Approuver
+        </button>
+        <button
+          class="application-detail-page__button application-detail-page__button--reject"
+          type="button"
+          [disabled]="!canDecide() || isBusy()"
+          (click)="rejectDialogVisible.set(true)"
+        >
+          Rejeter
+        </button>
+      </div>
+    </ubax-section-card>
+  </div>
+
+  <ubax-confirm-dialog
+    [visible]="approveDialogVisible()"
+    (visibleChange)="approveDialogVisible.set($event)"
+    title="Approuver cette demande ?"
+    message="Le bailleur sera validé pour votre agence et pourra être sélectionné comme propriétaire sur les futurs biens."
+    confirmLabel="Approuver"
+    confirmSeverity="success"
+    [loading]="isBusy()"
+    (confirmed)="confirmApprove()"
+  />
+
+  <ubax-confirm-dialog
+    [visible]="rejectDialogVisible()"
+    (visibleChange)="rejectDialogVisible.set($event)"
+    title="Rejeter cette demande ?"
+    message="Le motif de rejet est obligatoire. Il sera conservé dans le dossier de demande."
+    confirmLabel="Rejeter"
+    confirmSeverity="danger"
+    [loading]="isBusy()"
+    (confirmed)="confirmReject()"
+  >
+    <div class="application-detail-page__dialog-content">
+      <label for="rejection-comment">Motif de rejet</label>
+      <textarea
+        id="rejection-comment"
+        rows="4"
+        [ngModel]="rejectComment()"
+        (ngModelChange)="
+          rejectComment.set($event); rejectCommentError.set(null)
+        "
+        placeholder="Précisez pourquoi la demande est rejetée"
+      ></textarea>
+      @if (rejectCommentError()) {
+        <p class="application-detail-page__dialog-error">
+          {{ rejectCommentError() }}
+        </p>
+      }
+    </div>
+  </ubax-confirm-dialog>
+</section>

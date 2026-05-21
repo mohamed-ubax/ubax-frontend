@@ -1,0 +1,138 @@
+.application-detail-page {
+  display: grid;
+  gap: 24px;
+}
+
+.application-detail-page__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 8px 0;
+    font-size: 2rem;
+    color: var(--ubax-navy);
+  }
+
+  p {
+    margin: 0;
+    color: #61758a;
+  }
+}
+
+.application-detail-page__eyebrow {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a6b29;
+}
+
+.application-detail-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.application-detail-page__back {
+  color: var(--ubax-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.application-detail-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.application-detail-page__details {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+
+  div {
+    display: grid;
+    gap: 4px;
+  }
+
+  dt {
+    font-size: 0.9rem;
+    color: #61758a;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--ubax-navy);
+    font-weight: 600;
+  }
+}
+
+.application-detail-page__description {
+  padding-top: 12px;
+  border-top: 1px solid #e7edf3;
+}
+
+.application-detail-page__actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 24px;
+}
+
+.application-detail-page__button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Lexend', sans-serif;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &--approve {
+    background: #1f9d62;
+  }
+
+  &--reject {
+    background: #d64545;
+  }
+}
+
+.application-detail-page__dialog-content {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+
+  label {
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  textarea {
+    width: 100%;
+    border: 1px solid #d6dee6;
+    border-radius: 12px;
+    padding: 12px;
+    font: inherit;
+    resize: vertical;
+  }
+}
+
+.application-detail-page__dialog-error {
+  margin: 0;
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .application-detail-page__grid {
+    grid-template-columns: 1fr;
+  }
+}

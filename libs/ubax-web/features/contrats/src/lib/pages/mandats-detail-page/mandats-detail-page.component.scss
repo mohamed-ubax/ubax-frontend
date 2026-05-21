@@ -1,0 +1,139 @@
+.mandate-detail-page {
+  display: grid;
+  gap: 24px;
+}
+
+.mandate-detail-page__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 8px 0;
+    font-size: 2rem;
+    color: var(--ubax-navy);
+  }
+
+  p {
+    margin: 0;
+    color: #61758a;
+  }
+}
+
+.mandate-detail-page__eyebrow {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a6b29;
+}
+
+.mandate-detail-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mandate-detail-page__back {
+  color: var(--ubax-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mandate-detail-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.mandate-detail-page__details {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+
+  div {
+    display: grid;
+    gap: 4px;
+  }
+
+  dt {
+    font-size: 0.9rem;
+    color: #61758a;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--ubax-navy);
+    font-weight: 600;
+  }
+}
+
+.mandate-detail-page__block {
+  padding-top: 12px;
+  border-top: 1px solid #e7edf3;
+}
+
+.mandate-detail-page__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+}
+
+.mandate-detail-page__button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Lexend', sans-serif;
+
+  &--primary {
+    background: var(--ubax-accent);
+    color: #fff;
+  }
+
+  &--ghost {
+    background: #fff4e6;
+    color: #7c4a12;
+  }
+
+  &--danger {
+    background: #d64545;
+    color: #fff;
+  }
+}
+
+.mandate-detail-page__dialog-content {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+
+  label {
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  textarea {
+    width: 100%;
+    border: 1px solid #d6dee6;
+    border-radius: 12px;
+    padding: 12px;
+    font: inherit;
+    resize: vertical;
+  }
+}
+
+.mandate-detail-page__error {
+  margin: 16px 0 0;
+  color: #c62828;
+}
+
+@media (max-width: 900px) {
+  .mandate-detail-page__grid {
+    grid-template-columns: 1fr;
+  }
+}

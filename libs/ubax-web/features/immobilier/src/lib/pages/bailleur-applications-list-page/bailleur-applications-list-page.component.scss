@@ -1,0 +1,86 @@
+.applications-page {
+  display: grid;
+  gap: 24px;
+}
+
+.applications-page__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 8px 0;
+    font-size: 2rem;
+    color: var(--ubax-navy);
+  }
+
+  p {
+    margin: 0;
+    color: #61758a;
+  }
+}
+
+.applications-page__eyebrow {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a6b29;
+}
+
+.applications-page__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.applications-page__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: #fff4e6;
+  color: #7c4a12;
+  text-decoration: none;
+  font-family: 'Lexend', sans-serif;
+}
+
+.applications-page__owner-cell {
+  display: grid;
+  gap: 4px;
+
+  span {
+    color: #61758a;
+  }
+}
+
+.applications-page__link {
+  color: var(--ubax-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.applications-page__state {
+  padding: 32px;
+  text-align: center;
+  color: #61758a;
+
+  &--error {
+    color: #c62828;
+  }
+}
+
+.applications-page__pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 24px;
+}
+
+@media (max-width: 768px) {
+  .applications-page__pagination {
+    justify-content: center;
+  }
+}
