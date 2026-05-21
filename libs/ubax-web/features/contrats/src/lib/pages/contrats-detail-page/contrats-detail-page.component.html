@@ -502,6 +502,15 @@
   />
 }
 
+@if (showActivateDialog() && contrat()) {
+  <ubax-contrat-activate-dialog
+    [contrat]="contrat()!"
+    [loading]="!!store.activatingId()"
+    (confirm)="onActivateConfirm()"
+    (dismissed)="showActivateDialog.set(false)"
+  />
+}
+
 @if (previewUrl()) {
   <div
     class="cd-preview-backdrop ubax-modal-overlay"

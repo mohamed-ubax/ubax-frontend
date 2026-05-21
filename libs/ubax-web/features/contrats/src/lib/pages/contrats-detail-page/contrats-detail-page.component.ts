@@ -31,6 +31,7 @@ import {
 } from '@ubax-workspace/shared-data-access';
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
 import { ContratsSkeletonComponent } from '../../components/contrats-skeleton/contrats-skeleton.component';
+import { ContratActivateDialogComponent } from '../../components/contrat-activate-dialog/contrat-activate-dialog.component';
 import { ContratSubmitDialogComponent } from '../../components/contrat-submit-dialog/contrat-submit-dialog.component';
 import { ContratTerminateDialogComponent } from '../../components/contrat-terminate-dialog/contrat-terminate-dialog.component';
 import { ContratCancelDialogComponent } from '../../components/contrat-cancel-dialog/contrat-cancel-dialog.component';
@@ -59,6 +60,7 @@ type SummaryRow = {
     RouterLink,
     StatusBadgeComponent,
     ContratsSkeletonComponent,
+    ContratActivateDialogComponent,
     ContratSubmitDialogComponent,
     ContratTerminateDialogComponent,
     ContratCancelDialogComponent,
@@ -89,6 +91,7 @@ export class ContratsDetailPageComponent {
   private readonly hasLoaded = signal(false);
 
   readonly showSubmitDialog = signal(false);
+  readonly showActivateDialog = signal(false);
   readonly showTerminateDialog = signal(false);
   readonly showCancelDialog = signal(false);
   readonly documentOpening = signal(false);
@@ -458,6 +461,7 @@ export class ContratsDetailPageComponent {
 
     effect(() => {
       if (this.store.lastActivatedId()) {
+        this.showActivateDialog.set(false);
         this.notifications?.success('Contrat activé avec succès');
         this.store.clearActionFeedback();
       }
@@ -499,15 +503,12 @@ export class ContratsDetailPageComponent {
   }
 
   onActivateRequest(): void {
-    const id = this.contractId();
-    const confirmed =
-      this.document.defaultView?.confirm(
-        'Activer le contrat créera automatiquement le premier paiement de loyer. Continuer ? ',
-      ) ?? false;
+    this.showActivateDialog.set(true);
+  }
 
-    if (id && confirmed) {
-      this.store.activer(id);
-    }
+  onActivateConfirm(): void {
+    const id = this.contractId();
+    if (id) this.store.activer(id);
   }
 
   onTerminateConfirm(reason: string): void {

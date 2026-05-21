@@ -144,13 +144,19 @@ export const LocationStore = signalStore(
         patchState(store, { filterStatut: statut });
       },
 
-      loadSansContrat: rxMethod<void>(
+      loadSansContrat: rxMethod<{ propertyId?: string } | void>(
         pipe(
           tap(() => patchState(store, { loading: true, error: null })),
-          switchMap(() =>
+          switchMap((params) =>
             http
               .get<unknown>(`${apiConfig.rootUrl}/v1/tenants`, {
-                params: { withoutContract: 'true', status: 'QUALIFIED' },
+                params: {
+                  withoutContract: 'true',
+                  status: 'QUALIFIED',
+                  ...(params?.propertyId
+                    ? { propertyId: params.propertyId }
+                    : {}),
+                },
               })
               .pipe(
                 tapResponse({

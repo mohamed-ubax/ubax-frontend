@@ -1,0 +1,110 @@
+<div class="dlg-overlay" (click)="dismissed.emit()">
+  <dialog
+    class="dlg dlg--activate"
+    (click)="$event.stopPropagation()"
+    aria-labelledby="dlg-activate-title"
+    open
+  >
+    <div class="dlg__icon dlg__icon--success" aria-hidden="true">
+      <i class="pi pi-check-circle"></i>
+    </div>
+
+    <h2 class="dlg__title" id="dlg-activate-title">Activer le contrat ?</h2>
+
+    <p class="dlg__message">
+      Le bail passera en statut actif et
+      <strong>la première échéance de loyer sera générée automatiquement</strong
+      >.
+    </p>
+
+    <div class="dlg__highlight" aria-label="Effet immédiat">
+      <i class="pi pi-bolt" aria-hidden="true"></i>
+      <div>
+        <strong>Activation immédiate</strong>
+        <span
+          >Le suivi locatif et les paiements démarrent dès la
+          confirmation.</span
+        >
+      </div>
+    </div>
+
+    <div class="dlg__recap" aria-label="Récapitulatif du contrat à activer">
+      <div class="dlg-recap-row">
+        <span class="dlg-recap-icon" aria-hidden="true"
+          ><i class="pi pi-user"></i
+        ></span>
+        <span class="dlg-recap-label">Locataire</span>
+        <span class="dlg-recap-value">{{
+          contrat().tenantName ??
+            contrat().tenantFullName ??
+            contrat().tenantId ??
+            '—'
+        }}</span>
+      </div>
+      <div class="dlg-recap-row">
+        <span class="dlg-recap-icon" aria-hidden="true"
+          ><i class="pi pi-home"></i
+        ></span>
+        <span class="dlg-recap-label">Bien</span>
+        <span class="dlg-recap-value">{{
+          contrat().propertyTitle ??
+            contrat().propertyAddress ??
+            contrat().propertyId ??
+            '—'
+        }}</span>
+      </div>
+      <div class="dlg-recap-row">
+        <span class="dlg-recap-icon" aria-hidden="true"
+          ><i class="pi pi-calendar"></i
+        ></span>
+        <span class="dlg-recap-label">Début du bail</span>
+        <span class="dlg-recap-value">{{
+          formatDate(contrat().startDate)
+        }}</span>
+      </div>
+      <div class="dlg-recap-row">
+        <span class="dlg-recap-icon" aria-hidden="true"
+          ><i class="pi pi-clock"></i
+        ></span>
+        <span class="dlg-recap-label">Échéance</span>
+        <span class="dlg-recap-value">{{
+          formatPaymentDay(contrat().paymentDay)
+        }}</span>
+      </div>
+      <div class="dlg-recap-row">
+        <span class="dlg-recap-icon" aria-hidden="true"
+          ><i class="pi pi-wallet"></i
+        ></span>
+        <span class="dlg-recap-label">Montant mensuel</span>
+        <span class="dlg-recap-value dlg-recap-value--amount">{{
+          formatAmount(resolveTotalMonthlyAmount())
+        }}</span>
+      </div>
+    </div>
+
+    <div class="dlg__divider" aria-hidden="true"></div>
+
+    <div class="dlg__actions">
+      <button
+        class="dlg-btn dlg-btn--ghost"
+        type="button"
+        (click)="dismissed.emit()"
+        [disabled]="loading()"
+      >
+        Annuler
+      </button>
+      <button
+        class="dlg-btn dlg-btn--success"
+        type="button"
+        (click)="confirm.emit()"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Activation…
+        } @else {
+          <i class="pi pi-check-circle" aria-hidden="true"></i> Activer
+        }
+      </button>
+    </div>
+  </dialog>
+</div>
