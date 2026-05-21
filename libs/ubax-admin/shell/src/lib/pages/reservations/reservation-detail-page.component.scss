@@ -1,0 +1,137 @@
+.admin-res-detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-res-detail-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  color: #e87d1e;
+  font:
+    500 14px/1 'Lexend',
+    sans-serif;
+}
+
+.admin-res-detail-header__title {
+  margin: 0;
+  font:
+    600 34px/1.1 'Lexend',
+    sans-serif;
+  color: #122232;
+}
+
+.admin-res-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.admin-res-detail-card {
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-radius: 28px;
+  background: #fff;
+  padding: 24px 26px;
+}
+
+.admin-res-detail-card--wide {
+  grid-column: 1 / -1;
+}
+
+.admin-res-detail-card--danger {
+  border-color: rgba(220, 38, 38, 0.22);
+  background: rgba(220, 38, 38, 0.04);
+}
+
+.admin-res-detail-card__eyebrow {
+  margin: 0 0 10px;
+  font:
+    600 12px/1.4 'Lexend',
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e87d1e;
+}
+
+.admin-res-detail-card h2 {
+  margin: 0;
+  font:
+    600 24px/1.25 'Lexend',
+    sans-serif;
+  color: #122232;
+}
+
+.admin-res-detail-card__location {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  font:
+    400 14px/1.5 'Lexend',
+    sans-serif;
+  color: #667085;
+}
+
+.admin-res-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-res-detail-list div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #f5f7fa;
+}
+
+.admin-res-detail-card span {
+  font:
+    400 12px/1.4 'Lexend',
+    sans-serif;
+  color: #667085;
+}
+
+.admin-res-detail-card strong {
+  font:
+    600 15px/1.5 'Lexend',
+    sans-serif;
+  color: #122232;
+}
+
+.admin-res-detail-card p:last-child {
+  margin: 0;
+  font:
+    300 14px/1.7 'Lexend',
+    sans-serif;
+  color: #122232;
+}
+
+.admin-res-detail-state {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.admin-res-detail-state i {
+  font-size: 30px;
+  color: #e87d1e;
+}
+
+.admin-res-detail-state--error i {
+  color: #d92d20;
+}
+
+@media (max-width: 960px) {
+  .admin-res-detail-grid,
+  .admin-res-detail-list {
+    grid-template-columns: 1fr;
+  }
+}

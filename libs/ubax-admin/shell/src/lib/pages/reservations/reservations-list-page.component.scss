@@ -1,0 +1,250 @@
+.admin-res-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-res-page__eyebrow {
+  margin: 0 0 8px;
+  font:
+    600 13px/1.4 'Lexend',
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e87d1e;
+}
+
+.admin-res-page__title {
+  margin: 0;
+  font:
+    600 34px/1.1 'Lexend',
+    sans-serif;
+  color: #122232;
+}
+
+.admin-res-page__subtitle {
+  margin: 10px 0 0;
+  max-width: 720px;
+  font:
+    300 15px/1.7 'Lexend',
+    sans-serif;
+  color: #667085;
+}
+
+.admin-res-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-res-tabs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: #fff;
+  font:
+    500 14px/1 'Lexend',
+    sans-serif;
+  cursor: pointer;
+}
+
+.admin-res-tabs__item strong {
+  min-width: 34px;
+  min-height: 28px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f5f7fa;
+}
+
+.admin-res-tabs__item--active {
+  background: rgba(232, 125, 30, 0.12);
+  border-color: rgba(232, 125, 30, 0.2);
+}
+
+.admin-res-tabs__item--active strong {
+  background: #e87d1e;
+  color: #fff;
+}
+
+.admin-res-card {
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-radius: 28px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.admin-res-toolbar {
+  padding: 24px 28px;
+  border-bottom: 1px solid rgba(16, 24, 40, 0.08);
+}
+
+.admin-res-search {
+  position: relative;
+  display: block;
+  max-width: 440px;
+}
+
+.admin-res-search i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #98a2b3;
+}
+
+.admin-res-search input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 18px 0 44px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-radius: 999px;
+  background: #f5f7fa;
+  font:
+    300 14px/1 'Lexend',
+    sans-serif;
+}
+
+.admin-res-state {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  color: #667085;
+}
+
+.admin-res-state i {
+  font-size: 30px;
+  color: #e87d1e;
+}
+
+.admin-res-state--error i {
+  color: #d92d20;
+}
+
+.admin-res-state__action {
+  min-height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: #122232;
+  color: #fff;
+  font:
+    500 14px/1 'Lexend',
+    sans-serif;
+  cursor: pointer;
+}
+
+.admin-res-table__row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.15fr 0.8fr 1.15fr 1fr 0.55fr 0.85fr 0.8fr 0.9fr;
+  gap: 14px;
+  padding: 18px 28px;
+  border: none;
+  border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+  background: transparent;
+  text-align: left;
+}
+
+.admin-res-table__row--head {
+  background: #f9fafb;
+  font:
+    600 12px/1.4 'Lexend',
+    sans-serif;
+  text-transform: uppercase;
+  color: #667085;
+}
+
+.admin-res-table > .admin-res-table__row:not(.admin-res-table__row--head) {
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.admin-res-table
+  > .admin-res-table__row:not(.admin-res-table__row--head):hover {
+  background: rgba(43, 127, 255, 0.04);
+}
+
+.admin-res-table__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font:
+    400 14px/1.5 'Lexend',
+    sans-serif;
+  color: #122232;
+}
+
+.admin-res-table__cell strong {
+  font-weight: 500;
+}
+
+.admin-res-table__cell small {
+  font-size: 12px;
+  color: #667085;
+}
+
+.admin-res-table__cell--amount {
+  font-weight: 600;
+}
+
+.admin-res-status {
+  justify-self: start;
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font:
+    500 12px/1 'Lexend',
+    sans-serif;
+}
+
+.admin-res-status--pending {
+  background: rgba(234, 179, 8, 0.16);
+  color: #946200;
+}
+
+.admin-res-status--confirmed {
+  background: rgba(22, 163, 74, 0.14);
+  color: #10733a;
+}
+
+.admin-res-status--cancelled {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b42318;
+}
+
+.admin-res-status--completed {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1d4ed8;
+}
+
+.admin-res-status--no-show {
+  background: rgba(234, 88, 12, 0.16);
+  color: #c2410c;
+}
+
+.admin-res-footer {
+  padding: 22px 28px 28px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1280px) {
+  .admin-res-card {
+    overflow-x: auto;
+  }
+
+  .admin-res-table__row {
+    min-width: 1160px;
+  }
+}

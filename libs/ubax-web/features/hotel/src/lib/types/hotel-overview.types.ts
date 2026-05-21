@@ -27,7 +27,7 @@ export type NotificationItem = {
 };
 
 export type ReservationRow = {
-  id: number;
+  id: string;
   image: string;
   guest: string;
   room: string;
@@ -37,9 +37,11 @@ export type ReservationRow = {
 };
 
 export type PropertyCard = {
-  id: number;
+  id: string;
   image: string;
-  tenantAvatar: string;
-  tenantName: string;
+  title: string;
+  city: string;
+  typeLabel: string;
+  statusLabel: string;
   price: string;
 };

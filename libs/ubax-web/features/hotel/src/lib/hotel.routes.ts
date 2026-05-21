@@ -3,6 +3,32 @@ import { Route } from '@angular/router';
 export const hotelRoutes: Route[] = [
   {
     path: 'reservations',
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/calendrier-page/calendrier-page.component').then(
+            (m) => m.CalendrierPageComponent,
+          ),
+      },
+      {
+        path: 'liste',
+        loadComponent: () =>
+          import(
+            './pages/reservations-list-page/reservations-list-page.component'
+          ).then((m) => m.ReservationsListPageComponent),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import(
+            './pages/reservation-detail-page/reservation-detail-page.component'
+          ).then((m) => m.ReservationDetailPageComponent),
+      },
+    ],
+  },
+  {
+    path: 'reservations-calendrier',
     loadComponent: () =>
       import('./pages/calendrier-page/calendrier-page.component').then(
         (m) => m.CalendrierPageComponent,

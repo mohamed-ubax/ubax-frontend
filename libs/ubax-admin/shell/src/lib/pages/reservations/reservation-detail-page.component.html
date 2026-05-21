@@ -1,0 +1,177 @@
+<div class="admin-res-detail-page">
+  <header class="admin-res-detail-header">
+    <div>
+      <a routerLink="/reservations" class="admin-res-detail-header__back">
+        <i class="pi pi-arrow-left"></i>
+        Retour aux réservations
+      </a>
+      <h1 class="admin-res-detail-header__title">Détail de réservation</h1>
+    </div>
+  </header>
+
+  @switch (viewState()) {
+    @case ('loading') {
+      <section class="admin-res-detail-card admin-res-detail-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Chargement du détail de réservation...</p>
+      </section>
+    }
+
+    @case ('not-found') {
+      <section class="admin-res-detail-card admin-res-detail-state">
+        <i class="pi pi-inbox"></i>
+        <p>Réservation introuvable.</p>
+      </section>
+    }
+
+    @case ('error') {
+      <section
+        class="admin-res-detail-card admin-res-detail-state admin-res-detail-state--error"
+      >
+        <i class="pi pi-exclamation-triangle"></i>
+        <p>{{ store.error() }}</p>
+      </section>
+    }
+
+    @default {
+      @if (reservation(); as currentReservation) {
+        <section class="admin-res-detail-grid">
+          <article class="admin-res-detail-card admin-res-detail-card--wide">
+            <p class="admin-res-detail-card__eyebrow">Bien</p>
+            <h2>{{ currentReservation.propertyTitle ?? 'Bien sans titre' }}</h2>
+            <p class="admin-res-detail-card__location">
+              <i class="pi pi-map-marker"></i>
+              {{ currentReservation.propertyCity ?? 'Ville non renseignée' }}
+            </p>
+          </article>
+
+          <article class="admin-res-detail-card">
+            <p class="admin-res-detail-card__eyebrow">Client</p>
+            <div class="admin-res-detail-list">
+              <div>
+                <span>Nom</span>
+                <strong>{{ currentReservation.clientFullName ?? '—' }}</strong>
+              </div>
+              <div>
+                <span>Email</span>
+                <strong>{{ currentReservation.clientEmail ?? '—' }}</strong>
+              </div>
+              <div>
+                <span>Identifiant client</span>
+                <strong>{{ currentReservation.clientId ?? '—' }}</strong>
+              </div>
+              <div>
+                <span>Référence</span>
+                <strong>{{ currentReservation.id }}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="admin-res-detail-card">
+            <p class="admin-res-detail-card__eyebrow">Séjour</p>
+            <div class="admin-res-detail-list">
+              <div>
+                <span>Arrivée</span>
+                <strong>{{
+                  formatDate(currentReservation.checkInDate)
+                }}</strong>
+              </div>
+              <div>
+                <span>Départ</span>
+                <strong>{{
+                  formatDate(currentReservation.checkOutDate)
+                }}</strong>
+              </div>
+              <div>
+                <span>Nuits</span>
+                <strong>{{ currentReservation.numberOfNights ?? '—' }}</strong>
+              </div>
+              <div>
+                <span>Voyageurs</span>
+                <strong>{{ currentReservation.guestCount ?? '—' }}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="admin-res-detail-card">
+            <p class="admin-res-detail-card__eyebrow">Montants</p>
+            <div class="admin-res-detail-list">
+              <div>
+                <span>Prix par nuit</span>
+                <strong>{{
+                  formatCurrency(currentReservation.pricePerNight)
+                }}</strong>
+              </div>
+              <div>
+                <span>Total</span>
+                <strong>{{
+                  formatCurrency(currentReservation.totalAmount)
+                }}</strong>
+              </div>
+              <div>
+                <span>Statut</span>
+                <strong>{{ currentReservation.status }}</strong>
+              </div>
+              <div>
+                <span>Annulé par</span>
+                <strong>{{ currentReservation.cancelledById ?? '—' }}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="admin-res-detail-card">
+            <p class="admin-res-detail-card__eyebrow">Timeline</p>
+            <div class="admin-res-detail-list">
+              <div>
+                <span>Créée le</span>
+                <strong>{{
+                  formatDateTime(currentReservation.createdAt)
+                }}</strong>
+              </div>
+              <div>
+                <span>Mise à jour</span>
+                <strong>{{
+                  formatDateTime(currentReservation.updatedAt)
+                }}</strong>
+              </div>
+              <div>
+                <span>Confirmée le</span>
+                <strong>{{
+                  formatDateTime(currentReservation.confirmedAt)
+                }}</strong>
+              </div>
+              <div>
+                <span>Terminée le</span>
+                <strong>{{
+                  formatDateTime(currentReservation.completedAt)
+                }}</strong>
+              </div>
+              <div>
+                <span>Annulée le</span>
+                <strong>{{
+                  formatDateTime(currentReservation.cancelledAt)
+                }}</strong>
+              </div>
+            </div>
+          </article>
+
+          @if (currentReservation.notes) {
+            <article class="admin-res-detail-card admin-res-detail-card--wide">
+              <p class="admin-res-detail-card__eyebrow">Notes</p>
+              <p>{{ currentReservation.notes }}</p>
+            </article>
+          }
+
+          @if (currentReservation.cancellationReason) {
+            <article
+              class="admin-res-detail-card admin-res-detail-card--wide admin-res-detail-card--danger"
+            >
+              <p class="admin-res-detail-card__eyebrow">Motif d'annulation</p>
+              <p>{{ currentReservation.cancellationReason }}</p>
+            </article>
+          }
+        </section>
+      }
+    }
+  }
+</div>

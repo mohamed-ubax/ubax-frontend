@@ -4,3 +4,4 @@ export * from './admin-clients.store';
 export * from './admin-agency-members.store';
 export * from './admin-hotel-members.store';
 export * from './admin-dashboard.store';
+export * from './admin-reservations.store';

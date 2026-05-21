@@ -1,0 +1,282 @@
+<div class="hr-detail-page">
+  <header class="hr-detail-header">
+    <div>
+      <a routerLink="/hotel/reservations/liste" class="hr-detail-header__back">
+        <i class="pi pi-arrow-left"></i>
+        Retour à la liste
+      </a>
+      <h1 class="hr-detail-header__title">Détail de réservation</h1>
+      <p class="hr-detail-header__subtitle">{{ actionMessage() }}</p>
+    </div>
+
+    @if (reservation()) {
+      <span
+        class="hr-detail-status"
+        [class.hr-detail-status--pending]="reservation()?.status === 'PENDING'"
+        [class.hr-detail-status--confirmed]="
+          reservation()?.status === 'CONFIRMED'
+        "
+        [class.hr-detail-status--cancelled]="
+          reservation()?.status === 'CANCELLED'
+        "
+        [class.hr-detail-status--completed]="
+          reservation()?.status === 'COMPLETED'
+        "
+        [class.hr-detail-status--no-show]="reservation()?.status === 'NO_SHOW'"
+      >
+        {{ reservation()?.status }}
+      </span>
+    }
+  </header>
+
+  @switch (viewState()) {
+    @case ('loading') {
+      <section class="hr-detail-card hr-detail-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Chargement du détail de réservation...</p>
+      </section>
+    }
+
+    @case ('unauthorized') {
+      <section class="hr-detail-card hr-detail-state hr-detail-state--error">
+        <i class="pi pi-lock"></i>
+        <p>Accès non autorisé à cette réservation</p>
+      </section>
+    }
+
+    @case ('not-found') {
+      <section class="hr-detail-card hr-detail-state">
+        <i class="pi pi-inbox"></i>
+        <p>Réservation introuvable.</p>
+      </section>
+    }
+
+    @case ('error') {
+      <section class="hr-detail-card hr-detail-state hr-detail-state--error">
+        <i class="pi pi-exclamation-triangle"></i>
+        <p>{{ store.error() }}</p>
+      </section>
+    }
+
+    @default {
+      @if (reservation(); as currentReservation) {
+        <section class="hr-detail-actions">
+          @if (canConfirm()) {
+            <button
+              type="button"
+              class="hr-btn hr-btn--success"
+              (click)="openConfirmAction('confirm')"
+            >
+              Confirmer
+            </button>
+          }
+
+          @if (canComplete()) {
+            <button
+              type="button"
+              class="hr-btn hr-btn--navy"
+              (click)="openConfirmAction('complete')"
+            >
+              Terminer le séjour
+            </button>
+          }
+
+          @if (canMarkNoShow()) {
+            <button
+              type="button"
+              class="hr-btn hr-btn--warning"
+              (click)="openConfirmAction('noShow')"
+            >
+              No-show
+            </button>
+          }
+
+          @if (canCancel()) {
+            <button
+              type="button"
+              class="hr-btn hr-btn--danger"
+              (click)="openCancelDialog()"
+            >
+              Annuler la réservation
+            </button>
+          }
+        </section>
+
+        <section class="hr-detail-grid">
+          <article class="hr-detail-card hr-detail-card--summary">
+            <p class="hr-detail-card__eyebrow">Bien réservé</p>
+            <h2>{{ currentReservation.propertyTitle ?? 'Bien sans titre' }}</h2>
+            <p class="hr-detail-card__location">
+              <i class="pi pi-map-marker"></i>
+              {{ currentReservation.propertyCity ?? 'Ville non renseignée' }}
+            </p>
+
+            <div class="hr-detail-stats">
+              <div>
+                <span>Arrivée</span>
+                <strong>{{
+                  formatDate(currentReservation.checkInDate)
+                }}</strong>
+              </div>
+              <div>
+                <span>Départ</span>
+                <strong>{{
+                  formatDate(currentReservation.checkOutDate)
+                }}</strong>
+              </div>
+              <div>
+                <span>Nuits</span>
+                <strong>{{ currentReservation.numberOfNights ?? '—' }}</strong>
+              </div>
+              <div>
+                <span>Voyageurs</span>
+                <strong>{{ currentReservation.guestCount ?? '—' }}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="hr-detail-card">
+            <p class="hr-detail-card__eyebrow">Client</p>
+            <h2>
+              {{ currentReservation.clientFullName ?? 'Client non renseigné' }}
+            </h2>
+            <div class="hr-detail-contact-list">
+              <div>
+                <span>Email</span>
+                <strong>{{ currentReservation.clientEmail ?? '—' }}</strong>
+              </div>
+              <div>
+                <span>Référence</span>
+                <strong>{{ currentReservation.id }}</strong>
+              </div>
+              <div>
+                <span>Créée le</span>
+                <strong>{{
+                  formatDateTime(currentReservation.createdAt)
+                }}</strong>
+              </div>
+              <div>
+                <span>Mise à jour</span>
+                <strong>{{
+                  formatDateTime(currentReservation.updatedAt)
+                }}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="hr-detail-card">
+            <p class="hr-detail-card__eyebrow">Montants</p>
+            <div class="hr-detail-pricing">
+              <div>
+                <span>Prix par nuit</span>
+                <strong>{{
+                  formatCurrency(currentReservation.pricePerNight)
+                }}</strong>
+              </div>
+              <div>
+                <span>Total calculé</span>
+                <strong>{{
+                  formatCurrency(currentReservation.totalAmount)
+                }}</strong>
+              </div>
+            </div>
+
+            @if (currentReservation.notes) {
+              <div class="hr-detail-note">
+                <span>Notes client</span>
+                <p>{{ currentReservation.notes }}</p>
+              </div>
+            }
+          </article>
+
+          <article class="hr-detail-card">
+            <p class="hr-detail-card__eyebrow">Timeline</p>
+            <div class="hr-detail-timeline">
+              <div>
+                <span>Création</span>
+                <strong>{{
+                  formatDateTime(currentReservation.createdAt)
+                }}</strong>
+              </div>
+
+              @if (currentReservation.confirmedAt) {
+                <div>
+                  <span>Confirmation</span>
+                  <strong>{{
+                    formatDateTime(currentReservation.confirmedAt)
+                  }}</strong>
+                </div>
+              }
+
+              @if (currentReservation.completedAt) {
+                <div>
+                  <span>Fin de séjour</span>
+                  <strong>{{
+                    formatDateTime(currentReservation.completedAt)
+                  }}</strong>
+                </div>
+              }
+
+              @if (currentReservation.cancelledAt) {
+                <div>
+                  <span>Annulation</span>
+                  <strong>{{
+                    formatDateTime(currentReservation.cancelledAt)
+                  }}</strong>
+                </div>
+              }
+            </div>
+          </article>
+
+          @if (currentReservation.cancellationReason) {
+            <article
+              class="hr-detail-card hr-detail-card--wide hr-detail-card--danger"
+            >
+              <p class="hr-detail-card__eyebrow">Motif d'annulation</p>
+              <p>{{ currentReservation.cancellationReason }}</p>
+            </article>
+          }
+        </section>
+      }
+    }
+  }
+</div>
+
+<ubax-confirm-dialog
+  [visible]="showConfirmDialog()"
+  (visibleChange)="showConfirmDialog.set($event)"
+  [title]="confirmDialogTitle()"
+  [message]="confirmDialogMessage()"
+  [loading]="store.saving()"
+  [confirmLabel]="
+    confirmAction() === 'complete'
+      ? 'Terminer'
+      : confirmAction() === 'noShow'
+        ? 'Confirmer le no-show'
+        : 'Confirmer'
+  "
+  [confirmSeverity]="confirmAction() === 'noShow' ? 'warn' : 'success'"
+  (confirmed)="submitConfirmAction()"
+/>
+
+<ubax-confirm-dialog
+  [visible]="showCancelDialog()"
+  (visibleChange)="showCancelDialog.set($event)"
+  title="Annuler la réservation"
+  message="Le motif d’annulation est obligatoire pour conserver la traçabilité côté client."
+  confirmLabel="Annuler la réservation"
+  confirmSeverity="danger"
+  [loading]="store.saving()"
+  (confirmed)="submitCancel()"
+>
+  <div class="hr-detail-dialog-field">
+    <label for="hotel-reservation-detail-cancel-reason">Motif *</label>
+    <textarea
+      id="hotel-reservation-detail-cancel-reason"
+      rows="5"
+      [ngModel]="cancelReason()"
+      (ngModelChange)="cancelReason.set($event)"
+      placeholder="Expliquez la raison de l'annulation"
+    ></textarea>
+  </div>
+</ubax-confirm-dialog>

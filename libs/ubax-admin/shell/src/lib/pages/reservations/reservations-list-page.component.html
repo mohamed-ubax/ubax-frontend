@@ -1,0 +1,167 @@
+<div class="admin-res-page">
+  <header class="admin-res-page__header">
+    <div>
+      <p class="admin-res-page__eyebrow">Back-office UBAX</p>
+      <h1 class="admin-res-page__title">Réservations</h1>
+      <p class="admin-res-page__subtitle">
+        Vue globale en lecture seule sur l’ensemble des réservations de la
+        plateforme.
+      </p>
+    </div>
+  </header>
+
+  <section class="admin-res-tabs" aria-label="Compteurs par statut">
+    @for (tab of statusTabs(); track tab.value) {
+      <button
+        type="button"
+        class="admin-res-tabs__item"
+        [class.admin-res-tabs__item--active]="selectedFilter() === tab.value"
+        (click)="selectFilter(tab.value)"
+      >
+        <span>{{ tab.label }}</span>
+        <strong>{{ tab.count }}</strong>
+      </button>
+    }
+  </section>
+
+  <section class="admin-res-card">
+    <div class="admin-res-toolbar">
+      <label class="admin-res-search" aria-label="Rechercher une réservation">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+          placeholder="Rechercher par client, email ou bien"
+        />
+      </label>
+    </div>
+
+    @switch (viewState()) {
+      @case ('loading') {
+        <div class="admin-res-state">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Chargement des réservations...</p>
+        </div>
+      }
+
+      @case ('error') {
+        <div class="admin-res-state admin-res-state--error">
+          <i class="pi pi-exclamation-triangle"></i>
+          <p>{{ store.error() }}</p>
+          <button
+            type="button"
+            class="admin-res-state__action"
+            (click)="retry()"
+          >
+            Réessayer
+          </button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="admin-res-state">
+          <i class="pi pi-inbox"></i>
+          <p>Aucune réservation trouvée pour ce filtre.</p>
+        </div>
+      }
+
+      @default {
+        <div
+          class="admin-res-table"
+          role="table"
+          aria-label="Tableau des réservations"
+        >
+          <div
+            class="admin-res-table__row admin-res-table__row--head"
+            role="row"
+          >
+            <span>Bien</span>
+            <span>Ville</span>
+            <span>Client</span>
+            <span>Dates</span>
+            <span>Nuits</span>
+            <span>Montant</span>
+            <span>Statut</span>
+            <span>Créée le</span>
+          </div>
+
+          @for (reservation of filteredReservations(); track reservation.id) {
+            <button
+              type="button"
+              class="admin-res-table__row"
+              role="row"
+              (click)="openReservation(reservation)"
+            >
+              <span
+                class="admin-res-table__cell admin-res-table__cell--property"
+              >
+                <strong>{{
+                  reservation.propertyTitle ?? 'Bien sans titre'
+                }}</strong>
+              </span>
+
+              <span class="admin-res-table__cell">
+                {{ reservation.propertyCity ?? '—' }}
+              </span>
+
+              <span class="admin-res-table__cell admin-res-table__cell--client">
+                <strong>{{
+                  reservation.clientFullName ?? 'Client non renseigné'
+                }}</strong>
+                <small>{{ reservation.clientEmail ?? '—' }}</small>
+              </span>
+
+              <span class="admin-res-table__cell">
+                {{ formatDateRange(reservation) }}
+              </span>
+
+              <span class="admin-res-table__cell">
+                {{ reservation.numberOfNights ?? '—' }}
+              </span>
+
+              <span class="admin-res-table__cell admin-res-table__cell--amount">
+                {{ formatCurrency(reservation.totalAmount) }}
+              </span>
+
+              <span
+                class="admin-res-status"
+                [class.admin-res-status--pending]="
+                  reservation.status === 'PENDING'
+                "
+                [class.admin-res-status--confirmed]="
+                  reservation.status === 'CONFIRMED'
+                "
+                [class.admin-res-status--cancelled]="
+                  reservation.status === 'CANCELLED'
+                "
+                [class.admin-res-status--completed]="
+                  reservation.status === 'COMPLETED'
+                "
+                [class.admin-res-status--no-show]="
+                  reservation.status === 'NO_SHOW'
+                "
+              >
+                {{ statusLabel(reservation.status) }}
+              </span>
+
+              <span class="admin-res-table__cell">
+                {{ formatDateTime(reservation.createdAt) }}
+              </span>
+            </button>
+          }
+        </div>
+
+        @if (store.totalPages() > 1) {
+          <footer class="admin-res-footer">
+            <ubax-paginator
+              [(currentPage)]="currentPage"
+              [totalPages]="store.totalPages()"
+              (currentPageChange)="onPageChange($event)"
+            />
+          </footer>
+        }
+      }
+    }
+  </section>
+</div>
