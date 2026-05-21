@@ -140,6 +140,24 @@ export const adminRoutes: Route[] = [
           ),
       },
       {
+        path: 'reservations',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/reservations/reservations-list-page.component').then(
+            (m) => m.ReservationsListPageComponent,
+          ),
+      },
+      {
+        path: 'reservations/:id',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/reservations/reservation-detail-page.component').then(
+            (m) => m.ReservationDetailPageComponent,
+          ),
+      },
+      {
         path: 'code-lists',
         canActivate: [roleGuard],
         data: { roles: ADMIN_READ_ROLES },

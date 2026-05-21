@@ -2,13 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UbaxMorphTabsDirective } from '@ubax-workspace/shared-ui';
+import {
+  HotelReservationsStore,
+  type HotelReservation,
+} from '@ubax-workspace/ubax-web-data-access';
 import type {
   CalReservation,
-  CalReservationTemplate,
   CalendarDay,
   CalendarWeekEvent,
   WeekWithEvents,
@@ -23,6 +27,8 @@ import type {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendrierPageComponent {
+  private readonly store = inject(HotelReservationsStore);
+
   activeView = signal<'Jour' | 'Semaine' | 'Mois' | 'Année'>('Mois');
 
   private readonly weekBaseHeight = 147.196;
@@ -71,129 +77,86 @@ export class CalendrierPageComponent {
     'Année',
   ];
 
+  readonly occupancyRate = computed(() => {
+    const total = this.store.totalElements();
+
+    if (total <= 0) {
+      return 0;
+    }
+
+    const occupied = this.store
+      .entities()
+      .filter((reservation) =>
+        ['CONFIRMED', 'COMPLETED', 'NO_SHOW'].includes(reservation.status),
+      ).length;
+
+    return Math.min(100, Math.round((occupied / total) * 100));
+  });
+
+  readonly arrivalsToday = computed(
+    () =>
+      this.store
+        .entities()
+        .filter(
+          (reservation) =>
+            this.isSameDay(reservation.checkInDate, this.today) &&
+            reservation.status !== 'CANCELLED',
+        ).length,
+  );
+
+  readonly departuresToday = computed(
+    () =>
+      this.store
+        .entities()
+        .filter(
+          (reservation) =>
+            this.isSameDay(reservation.checkOutDate, this.today) &&
+            reservation.status !== 'CANCELLED',
+        ).length,
+  );
+
+  readonly dailyRevenue = computed(() =>
+    this.store.entities().reduce((sum, reservation) => {
+      if (
+        this.isSameDay(reservation.checkInDate, this.today) &&
+        ['CONFIRMED', 'COMPLETED', 'NO_SHOW'].includes(reservation.status)
+      ) {
+        return sum + (reservation.totalAmount ?? 0);
+      }
+
+      return sum;
+    }, 0),
+  );
+
+  readonly todayReservationCount = computed(
+    () =>
+      this.store.entities().filter((reservation) => {
+        const start = this.parseDate(reservation.checkInDate);
+
+        return (
+          start?.getMonth() === this.currentDate().getMonth() &&
+          start?.getFullYear() === this.currentDate().getFullYear()
+        );
+      }).length,
+  );
+
   readonly monthLabel = computed(() => {
     const d = this.currentDate();
     return `${this.monthNames[d.getMonth()]} ${d.getFullYear()}`;
   });
 
-  private readonly reservationTemplates: CalReservationTemplate[] = [
-    {
-      id: '1',
-      guest: 'Konan Olivier',
-      property: 'Appartement meublé',
-      amount: '150 000 FCFA',
-      startDay: 2,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-04.webp',
-      color: 'orange',
-    },
-    {
-      id: '2',
-      guest: 'Konan Olivier',
-      property: 'résidence Plateau',
-      amount: '150 000 FCFA',
-      startDay: 6,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-02.webp',
-      color: 'green',
-    },
-    {
-      id: '3',
-      guest: 'Konan Olivier',
-      property: 'Villa Riviera',
-      amount: '150 000 FCFA',
-      startDay: 9,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-03.webp',
-      color: 'blue',
-    },
-    {
-      id: '4',
-      guest: 'Konan Olivier',
-      property: 'Villa Riviera',
-      amount: '150 000 FCFA',
-      startDay: 12,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-01.webp',
-      color: 'blue',
-    },
-    {
-      id: '5',
-      guest: 'Konan Olivier',
-      property: 'Villa Riviera',
-      amount: '150 000 FCFA',
-      startDay: 15,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-04.webp',
-      color: 'orange',
-    },
-    {
-      id: '6',
-      guest: 'Konan Olivier',
-      property: 'résidence Plateau',
-      amount: '150 000 FCFA',
-      startDay: 20,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-05.webp',
-      color: 'green',
-    },
-    {
-      id: '7',
-      guest: 'Konan Olivier',
-      property: 'Villa Riviera',
-      amount: '150 000 FCFA',
-      startDay: 23,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-02.webp',
-      color: 'blue',
-    },
-    {
-      id: '8',
-      guest: 'Konan Olivier',
-      property: 'Villa Riviera',
-      amount: '150 000 FCFA',
-      startDay: 26,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-04.webp',
-      color: 'orange',
-    },
-    {
-      id: '9',
-      guest: 'Konan Olivier',
-      property: 'Villa Riviera',
-      amount: '150 000 FCFA',
-      startDay: 29,
-      durationDays: 2,
-      image: 'hotel-dashboard/reservations/guest-01.webp',
-      color: 'blue',
-    },
-  ];
-
   readonly reservations = computed((): CalReservation[] => {
-    const currentMonth = this.currentDate();
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    return this.reservationTemplates.map((template) => {
-      const { startDay, durationDays, ...reservation } = template;
-      const maxStartDay = Math.max(1, daysInMonth - durationDays + 1);
-      const resolvedStartDay = Math.min(startDay, maxStartDay);
-      const resolvedEndDay = Math.min(
-        daysInMonth,
-        resolvedStartDay + durationDays - 1,
-      );
-      const start = new Date(year, month, resolvedStartDay);
-      const end = new Date(year, month, resolvedEndDay);
-
-      return {
-        ...reservation,
-        start,
-        end,
-        dateRange: this.formatDateRange(start, end),
-      };
-    });
+    return this.store
+      .entities()
+      .flatMap((reservation) => this.mapToCalendarReservation(reservation));
   });
+
+  constructor() {
+    this.store.load?.({
+      pageable: { page: 0, size: 200, sort: ['createdAt,desc'] },
+    });
+    this.store.loadStatusCounts();
+  }
 
   private normalize(d: Date): Date {
     const n = new Date(d);
@@ -393,5 +356,92 @@ export class CalendrierPageComponent {
     });
 
     return `${formatter.format(start)} - ${formatter.format(end)}`;
+  }
+
+  private mapToCalendarReservation(
+    reservation: HotelReservation,
+  ): CalReservation[] {
+    const start = this.parseDate(reservation.checkInDate);
+    const end = this.parseDate(reservation.checkOutDate);
+
+    if (!start || !end) {
+      return [];
+    }
+
+    return [
+      {
+        id: reservation.id,
+        guest: reservation.clientFullName ?? 'Client UBAX',
+        property: reservation.propertyTitle ?? 'Réservation',
+        amount: this.formatCurrency(reservation.totalAmount),
+        dateRange: this.formatDateRange(start, end),
+        start,
+        end,
+        image: this.resolveGuestImage(reservation.id),
+        color: this.resolveReservationColor(reservation.status),
+      },
+    ];
+  }
+
+  private parseDate(value?: string): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private resolveGuestImage(id: string): string {
+    const images = [
+      'hotel-dashboard/reservations/guest-01.webp',
+      'hotel-dashboard/reservations/guest-02.webp',
+      'hotel-dashboard/reservations/guest-03.webp',
+      'hotel-dashboard/reservations/guest-04.webp',
+      'hotel-dashboard/reservations/guest-05.webp',
+    ];
+    const hash = Array.from(id).reduce(
+      (sum, char) => sum + (char.codePointAt(0) ?? 0),
+      0,
+    );
+
+    return images[hash % images.length];
+  }
+
+  private resolveReservationColor(
+    status: HotelReservation['status'],
+  ): CalReservation['color'] {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'green';
+      case 'COMPLETED':
+      case 'NO_SHOW':
+        return 'blue';
+      case 'CANCELLED':
+      case 'PENDING':
+      default:
+        return 'orange';
+    }
+  }
+
+  protected formatCurrency(value?: number): string {
+    if (typeof value !== 'number') {
+      return '—';
+    }
+
+    return `${new Intl.NumberFormat('fr-FR', {
+      maximumFractionDigits: 0,
+    }).format(value)} FCFA`;
+  }
+
+  private isSameDay(value: string | undefined, date: Date): boolean {
+    const target = this.parseDate(value);
+
+    return Boolean(
+      target?.getDate() === date.getDate() &&
+        target?.getMonth() === date.getMonth() &&
+        target?.getFullYear() === date.getFullYear(),
+    );
   }
 }

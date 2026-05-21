@@ -119,7 +119,12 @@
               aria-label="Rechercher une réservation"
             >
               <i class="pi pi-search"></i>
-              <input type="text" placeholder="Rechercher" />
+              <input
+                type="text"
+                placeholder="Rechercher"
+                [ngModel]="reservationSearch()"
+                (ngModelChange)="reservationSearch.set($event)"
+              />
             </label>
           </div>
 
@@ -133,47 +138,65 @@
           </div>
 
           <div class="reservations-table__body">
-            @for (reservation of reservations; track reservation.id) {
-              <div class="reservations-table__row">
-                <div class="reservations-table__guest">
-                  <img
-                    [src]="reservation.image"
-                    [alt]="reservation.guest"
-                    class="reservations-table__guest-image"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <span class="reservations-table__guest-name">{{
-                    reservation.guest
-                  }}</span>
-                </div>
-
-                <span
-                  class="reservations-table__cell reservations-table__cell--room"
-                  >{{ reservation.room }}</span
-                >
-                <span
-                  class="reservations-table__cell reservations-table__cell--duration"
-                  >{{ reservation.duration }}</span
-                >
-                <span
-                  class="reservations-table__cell reservations-table__cell--dates"
-                  >{{ reservation.dates }}</span
-                >
-
-                <span class="reservations-table__status">{{
-                  reservation.status
-                }}</span>
-
-                <button type="button" class="reservations-table__action">
-                  voir
-                </button>
+            @if (reservations().length === 0) {
+              <div
+                class="reservations-table__row reservations-table__row--empty"
+              >
+                <span class="reservations-table__empty-copy">
+                  Aucune réservation à afficher pour le moment.
+                </span>
               </div>
+            } @else {
+              @for (reservation of reservations(); track reservation.id) {
+                <div class="reservations-table__row">
+                  <div class="reservations-table__guest">
+                    <img
+                      [src]="reservation.image"
+                      [alt]="reservation.guest"
+                      class="reservations-table__guest-image"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span class="reservations-table__guest-name">{{
+                      reservation.guest
+                    }}</span>
+                  </div>
+
+                  <span
+                    class="reservations-table__cell reservations-table__cell--room"
+                    >{{ reservation.room }}</span
+                  >
+                  <span
+                    class="reservations-table__cell reservations-table__cell--duration"
+                    >{{ reservation.duration }}</span
+                  >
+                  <span
+                    class="reservations-table__cell reservations-table__cell--dates"
+                    >{{ reservation.dates }}</span
+                  >
+
+                  <span class="reservations-table__status">{{
+                    reservation.status
+                  }}</span>
+
+                  <button
+                    type="button"
+                    class="reservations-table__action"
+                    [routerLink]="['/hotel/reservations', reservation.id]"
+                  >
+                    voir
+                  </button>
+                </div>
+              }
             }
           </div>
 
           <div class="reservations-table__footer">
-            <button type="button" class="reservations-table__more">
+            <button
+              type="button"
+              class="reservations-table__more"
+              routerLink="/hotel/reservations/liste"
+            >
               Voir plus
             </button>
           </div>
@@ -181,19 +204,6 @@
       </div>
 
       <div class="hotel-dashboard__middle-column">
-        <section class="cta-banner">
-          <img
-            src="shared/rooms/room-photo-01.webp"
-            alt=""
-            class="cta-banner__image"
-          />
-          <div class="cta-banner__overlay"></div>
-
-          <button type="button" class="cta-banner__button">
-            Ajouter une réservation
-          </button>
-        </section>
-
         <section class="panel panel--trend">
           <div class="trend-card__header">
             <h2 class="panel__title panel__title--trend">réservations</h2>
@@ -314,60 +324,72 @@
     <section class="panel panel--properties">
       <div class="properties-panel__header">
         <h2 class="properties-panel__title">Biens disponibles</h2>
-        <a href="/hotel/espaces" class="properties-panel__link">Tout voir</a>
+        <a routerLink="/hotel/espaces" class="properties-panel__link"
+          >Tout voir</a
+        >
       </div>
 
       <div class="properties-panel__list">
-        @for (property of availableProperties; track property.id) {
-          <article class="property-card">
-            <img
-              [src]="property.image"
-              alt=""
-              class="property-card__image"
-              loading="lazy"
-              decoding="async"
-            />
+        @if (availableProperties().length === 0) {
+          <div class="properties-panel__empty">
+            Aucun espace publié n'est disponible pour le moment.
+          </div>
+        } @else {
+          @for (property of availableProperties(); track property.id) {
+            <article class="property-card">
+              <img
+                [src]="property.image"
+                [alt]="property.title"
+                class="property-card__image"
+                loading="lazy"
+                decoding="async"
+              />
 
-            <span class="property-card__badge">Location</span>
+              <span class="property-card__badge">{{ property.typeLabel }}</span>
+              <span class="property-card__price-badge">{{
+                property.price
+              }}</span>
 
-            <div class="property-card__glass">
-              <div class="property-card__top">
-                <div class="property-card__headline">
-                  <p class="property-card__name">Immeuble kalia</p>
+              <div class="property-card__glass">
+                <div class="property-card__top">
+                  <div class="property-card__headline">
+                    <p class="property-card__name">{{ property.title }}</p>
+                  </div>
 
-                  <p class="property-card__location">
-                    <img src="hotel-dashboard/icons/location-icon.svg" alt="" />
-                    Abidjan, Cocody
-                  </p>
+                  <a
+                    [routerLink]="['/hotel/espaces', property.id]"
+                    class="property-card__arrow-shell"
+                    [attr.aria-label]="'Voir le détail de ' + property.title"
+                  >
+                    <i class="pi pi-arrow-up-right"></i>
+                  </a>
                 </div>
 
-                <span class="property-card__arrow-shell" aria-hidden="true">
-                  <i class="pi pi-arrow-up-right"></i>
-                </span>
-              </div>
+                <div class="property-card__bottom">
+                  <div class="property-card__tenant">
+                    <span class="property-card__tenant-icon" aria-hidden="true">
+                      <i class="pi pi-building"></i>
+                    </span>
 
-              <div class="property-card__bottom">
-                <div class="property-card__tenant">
-                  <img
-                    [src]="property.tenantAvatar"
-                    [alt]="property.tenantName"
-                    class="property-card__tenant-avatar"
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-                  <div class="property-card__tenant-copy">
-                    <p class="property-card__tenant-name">
-                      {{ property.tenantName }}
-                    </p>
-                    <p class="property-card__tenant-role">Locataire</p>
+                    <div class="property-card__tenant-copy">
+                      <p
+                        class="property-card__location property-card__location--compact"
+                      >
+                        <img
+                          src="hotel-dashboard/icons/location-icon.svg"
+                          alt=""
+                        />
+                        {{ property.city }}
+                      </p>
+                      <p class="property-card__tenant-role">
+                        {{ property.statusLabel }}
+                      </p>
+                    </div>
                   </div>
                 </div>
-
-                <span class="property-card__price">{{ property.price }}</span>
               </div>
-            </div>
-          </article>
+            </article>
+          }
         }
       </div>
     </section>

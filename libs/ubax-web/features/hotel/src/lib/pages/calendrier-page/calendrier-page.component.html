@@ -17,7 +17,7 @@
       </div>
       <div class="stats-text">
         <p class="stats-label">Taux d'occupation</p>
-        <p class="stats-value stats-value--green">82%</p>
+        <p class="stats-value stats-value--green">{{ occupancyRate() }}%</p>
       </div>
     </article>
 
@@ -36,7 +36,7 @@
       </div>
       <div class="stats-text">
         <p class="stats-label">Arrivée aujourd'hui</p>
-        <p class="stats-value stats-value--purple">8</p>
+        <p class="stats-value stats-value--purple">{{ arrivalsToday() }}</p>
       </div>
     </article>
 
@@ -55,7 +55,7 @@
       </div>
       <div class="stats-text">
         <p class="stats-label">Départ aujourd'hui</p>
-        <p class="stats-value stats-value--orange">3</p>
+        <p class="stats-value stats-value--orange">{{ departuresToday() }}</p>
       </div>
     </article>
 
@@ -75,7 +75,7 @@
       <div class="stats-text">
         <p class="stats-label">Revenus du jour</p>
         <p class="stats-value stats-value--dark stats-value--compact">
-          750 000 FCFA
+          {{ formatCurrency(dailyRevenue()) }}
         </p>
       </div>
     </article>
@@ -143,18 +143,12 @@
 
       <div class="cal-actions">
         <button type="button" class="today-btn" (click)="goToToday()">
-          Aujourd'hui <span class="today-count">(25)</span>
+          Aujourd'hui
+          <span class="today-count">({{ todayReservationCount() }})</span>
         </button>
-        <a routerLink="/reservations" class="see-all-link">
+        <a routerLink="/hotel/reservations/liste" class="see-all-link">
           Voir toutes les reservations
         </a>
-        <button
-          type="button"
-          class="add-res-btn"
-          routerLink="/reservations/ajouter"
-        >
-          Nouvelle réservation
-        </button>
       </div>
     </div>
 
@@ -190,7 +184,10 @@
             <div class="cal-events-layer">
               <!-- Reservation event blocks -->
               @for (event of week.events; track event.id) {
-                <div [class]="getEventClasses(event)">
+                <a
+                  [routerLink]="['/hotel/reservations', event.id]"
+                  [class]="getEventClasses(event)"
+                >
                   <div class="event-avatar">
                     <img
                       class="event-avatar__image"
@@ -206,7 +203,7 @@
                     <span class="event-dates">{{ event.dateRange }}</span>
                     <span class="event-amount">{{ event.amount }}</span>
                   </div>
-                </div>
+                </a>
               }
             </div>
           </div>

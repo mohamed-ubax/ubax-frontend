@@ -555,10 +555,6 @@
                     card.typeLabel
                   }}</span>
 
-                  <span class="espace-card__price-badge">
-                    {{ card.price }} <small>FCFA/nuit</small>
-                  </span>
-
                   <span
                     class="espace-card__status-badge"
                     [class.espace-card__status-badge--draft]="
@@ -649,6 +645,10 @@
                         </svg>
                       </span>
                       <span>{{ card.city }}</span>
+                    </p>
+
+                    <p class="espace-card__price">
+                      {{ card.price }} <small>FCFA/nuit</small>
                     </p>
 
                     @if (card.canSubmit) {

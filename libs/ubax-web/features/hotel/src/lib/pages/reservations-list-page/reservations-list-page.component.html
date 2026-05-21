@@ -1,0 +1,260 @@
+<div class="hr-list-page">
+  <header class="hr-list-page__header">
+    <div>
+      <p class="hr-list-page__eyebrow">Gestion hôtelière</p>
+      <h1 class="hr-list-page__title">Réservations de l'hôtel</h1>
+      <p class="hr-list-page__subtitle">
+        Consultez les demandes, filtrez par statut et déclenchez les actions
+        contextuelles sans quitter la page.
+      </p>
+    </div>
+
+    <a class="hr-list-page__calendar-link" routerLink="/hotel/reservations">
+      Voir le calendrier
+    </a>
+  </header>
+
+  <section class="hr-tabs" aria-label="Compteurs par statut">
+    @for (tab of statusTabs(); track tab.value) {
+      <button
+        type="button"
+        class="hr-tabs__item"
+        [class.hr-tabs__item--active]="selectedFilter() === tab.value"
+        (click)="selectFilter(tab.value)"
+      >
+        <span>{{ tab.label }}</span>
+        <strong>{{ tab.count }}</strong>
+      </button>
+    }
+  </section>
+
+  <section class="hr-card">
+    <div class="hr-toolbar">
+      <label class="hr-search" aria-label="Rechercher une réservation">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+          placeholder="Rechercher par client, email ou bien"
+        />
+      </label>
+
+      <div class="hr-toolbar__meta">
+        <span class="hr-toolbar__results">{{ resultsLabel() }}</span>
+        <a class="hr-toolbar__calendar" routerLink="/hotel/reservations">
+          Calendrier
+        </a>
+      </div>
+    </div>
+
+    @switch (viewState()) {
+      @case ('loading') {
+        <div class="hr-state">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Chargement des réservations...</p>
+        </div>
+      }
+
+      @case ('error') {
+        <div class="hr-state hr-state--error">
+          <i class="pi pi-exclamation-triangle"></i>
+          <p>{{ store.error() }}</p>
+          <button type="button" class="hr-state__action" (click)="retry()">
+            Réessayer
+          </button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="hr-state">
+          <i class="pi pi-inbox"></i>
+          <p>Aucune réservation ne correspond au filtre sélectionné.</p>
+        </div>
+      }
+
+      @default {
+        <div class="hr-table" role="table" aria-label="Liste des réservations">
+          <div class="hr-table__head" role="rowgroup">
+            <div class="hr-table__row hr-table__row--head" role="row">
+              <span>Bien</span>
+              <span>Client</span>
+              <span>Dates</span>
+              <span>Nuits</span>
+              <span>Montant</span>
+              <span>Statut</span>
+              <span>Actions</span>
+            </div>
+          </div>
+
+          <div class="hr-table__body" role="rowgroup">
+            @for (reservation of filteredReservations(); track reservation.id) {
+              <button
+                type="button"
+                class="hr-table__row"
+                role="row"
+                (click)="openReservation(reservation)"
+              >
+                <span class="hr-table__cell hr-table__cell--property">
+                  <strong>{{
+                    reservation.propertyTitle ?? 'Bien sans titre'
+                  }}</strong>
+                  <small>{{
+                    reservation.propertyCity ?? 'Ville non renseignée'
+                  }}</small>
+                </span>
+
+                <span class="hr-table__cell hr-table__cell--client">
+                  <strong>{{
+                    reservation.clientFullName ?? 'Client non renseigné'
+                  }}</strong>
+                  <small>{{ reservation.clientEmail ?? '—' }}</small>
+                </span>
+
+                <span class="hr-table__cell">
+                  {{ formatDateRange(reservation) }}
+                </span>
+
+                <span class="hr-table__cell">
+                  <strong>{{ reservation.numberOfNights ?? 0 }}</strong>
+                  <small>{{ guestCountLabel(reservation.guestCount) }}</small>
+                </span>
+
+                <span class="hr-table__cell hr-table__cell--amount">
+                  {{ formatCurrency(reservation.totalAmount) }}
+                </span>
+
+                <span
+                  class="hr-status"
+                  [class.hr-status--pending]="reservation.status === 'PENDING'"
+                  [class.hr-status--confirmed]="
+                    reservation.status === 'CONFIRMED'
+                  "
+                  [class.hr-status--cancelled]="
+                    reservation.status === 'CANCELLED'
+                  "
+                  [class.hr-status--completed]="
+                    reservation.status === 'COMPLETED'
+                  "
+                  [class.hr-status--no-show]="reservation.status === 'NO_SHOW'"
+                >
+                  {{ statusLabel(reservation.status) }}
+                </span>
+
+                <span
+                  class="hr-table__actions"
+                  (click)="$event.stopPropagation()"
+                >
+                  @if (canConfirm(reservation)) {
+                    <button
+                      type="button"
+                      class="hr-action hr-action--success"
+                      [disabled]="isActionLoading(reservation.id)"
+                      (click)="
+                        openConfirmAction('confirm', reservation, $event)
+                      "
+                    >
+                      Confirmer
+                    </button>
+                  }
+
+                  @if (canComplete(reservation)) {
+                    <button
+                      type="button"
+                      class="hr-action hr-action--navy"
+                      [disabled]="isActionLoading(reservation.id)"
+                      (click)="
+                        openConfirmAction('complete', reservation, $event)
+                      "
+                    >
+                      Terminer
+                    </button>
+                  }
+
+                  @if (canMarkNoShow(reservation)) {
+                    <button
+                      type="button"
+                      class="hr-action hr-action--warning"
+                      [disabled]="isActionLoading(reservation.id)"
+                      (click)="openConfirmAction('noShow', reservation, $event)"
+                    >
+                      No-show
+                    </button>
+                  }
+
+                  @if (canCancel(reservation)) {
+                    <button
+                      type="button"
+                      class="hr-action hr-action--danger"
+                      [disabled]="isActionLoading(reservation.id)"
+                      (click)="openCancelDialog(reservation, $event)"
+                    >
+                      Annuler
+                    </button>
+                  }
+
+                  <button
+                    type="button"
+                    class="hr-action hr-action--ghost"
+                    (click)="openReservation(reservation)"
+                  >
+                    Détail
+                  </button>
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (store.totalPages() > 1) {
+          <footer class="hr-footer">
+            <ubax-paginator
+              [(currentPage)]="currentPage"
+              [totalPages]="store.totalPages()"
+              (currentPageChange)="onPageChange($event)"
+            />
+          </footer>
+        }
+      }
+    }
+  </section>
+</div>
+
+<ubax-confirm-dialog
+  [visible]="showConfirmDialog()"
+  (visibleChange)="showConfirmDialog.set($event)"
+  [title]="confirmDialogTitle()"
+  [message]="confirmDialogMessage()"
+  [loading]="store.saving()"
+  [confirmLabel]="
+    confirmAction() === 'complete'
+      ? 'Terminer'
+      : confirmAction() === 'noShow'
+        ? 'Confirmer le no-show'
+        : 'Confirmer'
+  "
+  [confirmSeverity]="confirmAction() === 'noShow' ? 'warn' : 'success'"
+  (confirmed)="submitConfirmAction()"
+/>
+
+<ubax-confirm-dialog
+  [visible]="showCancelDialog()"
+  (visibleChange)="showCancelDialog.set($event)"
+  title="Annuler la réservation"
+  message="Le motif est obligatoire pour annuler une réservation en attente ou confirmée."
+  confirmLabel="Annuler la réservation"
+  confirmSeverity="danger"
+  [loading]="store.saving()"
+  (confirmed)="submitCancel()"
+>
+  <div class="hr-dialog-field">
+    <label for="hotel-reservation-cancel-reason">Motif *</label>
+    <textarea
+      id="hotel-reservation-cancel-reason"
+      rows="5"
+      [ngModel]="cancelReason()"
+      (ngModelChange)="cancelReason.set($event)"
+      placeholder="Expliquez la raison de l'annulation"
+    ></textarea>
+  </div>
+</ubax-confirm-dialog>

@@ -1,9 +1,24 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ChartData, ChartOptions, Plugin, ScriptableContext } from 'chart.js';
 import { LazyChartComponent } from '@ubax-workspace/shared-ui';
+import {
+  ESPACE_STATUS_LABELS,
+  HotelReservation,
+  HotelReservationsStore,
+  MesEspacesStore,
+  resolvePropertyCardImage,
+} from '@ubax-workspace/ubax-web-data-access';
+import { PropertyResponse } from '@ubax-workspace/shared-api-types';
 import type {
   TrendRangeKey,
   ReservationMonth,
@@ -17,17 +32,27 @@ import type {
 @Component({
   selector: 'ubax-hotel-overview-page',
   standalone: true,
-  imports: [FormsModule, LazyChartComponent, DatePickerModule, SelectModule],
+  imports: [
+    FormsModule,
+    RouterLink,
+    LazyChartComponent,
+    DatePickerModule,
+    SelectModule,
+  ],
   templateUrl: './hotel-overview-page.component.html',
   styleUrl: './hotel-overview-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HotelOverviewPageComponent {
+  private readonly reservationsStore = inject(HotelReservationsStore);
+  private readonly espacesStore = inject(MesEspacesStore);
+
   readonly occupancyRate = 82;
   readonly arrivalsToday = 8;
   readonly departuresToday = 3;
   readonly dailyRevenue = '750 000 FCFA';
   selectedDate = new Date(2026, 3, 18);
+  readonly reservationSearch = signal('');
 
   readonly revenueChartData: ChartData<'bar'> = {
     labels: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
@@ -190,8 +215,62 @@ export class HotelOverviewPageComponent {
     },
   ];
 
+  readonly reservations = computed<ReservationRow[]>(() => {
+    const query = this.normalizeText(this.reservationSearch());
+
+    return this.reservationsStore
+      .entities()
+      .map((reservation) => this.mapReservationRow(reservation))
+      .filter((reservation) => {
+        if (!query) {
+          return true;
+        }
+
+        return this.normalizeText(
+          [
+            reservation.guest,
+            reservation.room,
+            reservation.status,
+            reservation.dates,
+          ].join(' '),
+        ).includes(query);
+      })
+      .slice(0, 5);
+  });
+
+  readonly availableProperties = computed<PropertyCard[]>(() => {
+    const propertyTypeLabels = new Map(
+      this.espacesStore
+        .codeListPropertyTypes()
+        .map((item) => [
+          item.value ?? '',
+          item.description ?? item.value ?? 'Espace',
+        ]),
+    );
+
+    return this.espacesStore
+      .entities()
+      .filter((property) => property.status === 'PUBLISHED')
+      .slice(0, 4)
+      .map((property, index) =>
+        this.mapPropertyCard(property, index, propertyTypeLabels),
+      );
+  });
+
   constructor() {
     this.applyTrendRange(this.selectedTrendRange);
+    this.reservationsStore.load?.({
+      pageable: {
+        page: 0,
+        size: 5,
+        sort: ['createdAt,desc'],
+      },
+    });
+    this.espacesStore.chargerEspaces({
+      page: 0,
+      size: 8,
+      status: 'PUBLISHED',
+    });
   }
 
   onTrendRangeChange(range: TrendRangeKey): void {
@@ -295,82 +374,121 @@ export class HotelOverviewPageComponent {
     },
   ];
 
-  readonly reservations: ReservationRow[] = [
-    {
-      id: 1,
-      image: 'hotel-dashboard/reservations/guest-01.webp',
-      guest: 'Koné Ibrahim',
-      room: 'Résidence Plateau',
-      duration: '2 jours',
-      dates: '14 Avril 2026 - 18 Avril 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: 2,
-      image: 'hotel-dashboard/reservations/guest-02.webp',
-      guest: 'Koné Ibrahim',
-      room: 'Résidence Plateau',
-      duration: '2 jours',
-      dates: '14 Avril 2026 - 18 Avril 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: 3,
-      image: 'hotel-dashboard/reservations/guest-03.webp',
-      guest: 'Koné Ibrahim',
-      room: 'Résidence Plateau',
-      duration: '2 jours',
-      dates: '14 Avril 2026 - 18 Avril 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: 4,
-      image: 'hotel-dashboard/reservations/guest-04.webp',
-      guest: 'Koné Ibrahim',
-      room: 'Résidence Plateau',
-      duration: '2 jours',
-      dates: '14 Avril 2026 - 18 Avril 2026',
-      status: 'Confirmé',
-    },
-    {
-      id: 5,
-      image: 'hotel-dashboard/reservations/guest-05.webp',
-      guest: 'Koné Ibrahim',
-      room: 'Résidence Plateau',
-      duration: '2 jours',
-      dates: '14 Avril 2026 - 18 Avril 2026',
-      status: 'Confirmé',
-    },
-  ];
+  private mapReservationRow(reservation: HotelReservation): ReservationRow {
+    return {
+      id: reservation.id,
+      image: this.resolveGuestImage(reservation.id),
+      guest: reservation.clientFullName ?? 'Client non renseigné',
+      room: reservation.propertyTitle ?? 'Bien non renseigné',
+      duration: this.formatDuration(reservation.numberOfNights),
+      dates: this.formatDateRange(
+        reservation.checkInDate,
+        reservation.checkOutDate,
+      ),
+      status: this.statusLabel(reservation.status),
+    };
+  }
 
-  readonly availableProperties: PropertyCard[] = [
-    {
-      id: 1,
-      image: 'shared/rooms/room-photo-01.webp',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-aicha.webp',
-      tenantName: 'Aïcha Kouadio',
-      price: '400 000 FCFA',
-    },
-    {
-      id: 2,
-      image: 'biens/detail/property-side-03.webp',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-patrick.webp',
-      tenantName: 'Patrick Koffi',
-      price: '350 000 FCFA',
-    },
-    {
-      id: 3,
-      image: 'hotel-dashboard/properties/property-kevin.webp',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-kevin.webp',
-      tenantName: 'Kevin Kouassi',
-      price: '550 000 FCFA',
-    },
-    {
-      id: 4,
-      image: 'hotel-dashboard/properties/property-armand.webp',
-      tenantAvatar: 'hotel-dashboard/properties/tenant-armand.webp',
-      tenantName: 'Armand Tano',
-      price: '765 000 FCFA',
-    },
-  ];
+  private formatDuration(numberOfNights?: number): string {
+    if (!numberOfNights || numberOfNights <= 0) {
+      return '—';
+    }
+
+    return `${numberOfNights} jour${numberOfNights > 1 ? 's' : ''}`;
+  }
+
+  private formatDateRange(checkInDate?: string, checkOutDate?: string): string {
+    return `${this.formatDate(checkInDate)} - ${this.formatDate(checkOutDate)}`;
+  }
+
+  private formatDate(value?: string): string {
+    if (!value) {
+      return '—';
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return '—';
+    }
+
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+  }
+
+  private mapPropertyCard(
+    property: PropertyResponse,
+    index: number,
+    propertyTypeLabels: ReadonlyMap<string, string>,
+  ): PropertyCard {
+    const propertyType = property.propertyType ?? '';
+    const status = property.status ?? 'PUBLISHED';
+
+    return {
+      id: property.id ?? `espace-${index + 1}`,
+      image: resolvePropertyCardImage(
+        property,
+        'shared/rooms/room-photo-01.webp',
+      ),
+      title: property.title?.trim() || 'Espace sans titre',
+      city: property.city?.trim() || 'Ville non renseignée',
+      typeLabel:
+        (propertyTypeLabels.get(propertyType) ?? propertyType) || 'Espace',
+      statusLabel: ESPACE_STATUS_LABELS[status] ?? status,
+      price: this.formatPrice(property.price),
+    };
+  }
+
+  private formatPrice(value?: number | null): string {
+    if (value == null) {
+      return '—';
+    }
+
+    return `${new Intl.NumberFormat('fr-FR', {
+      maximumFractionDigits: 0,
+    }).format(value)} FCFA`;
+  }
+
+  private statusLabel(status?: HotelReservation['status']): string {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'Confirmé';
+      case 'CANCELLED':
+        return 'Annulé';
+      case 'COMPLETED':
+        return 'Terminé';
+      case 'NO_SHOW':
+        return 'No-show';
+      case 'PENDING':
+      default:
+        return 'En attente';
+    }
+  }
+
+  private resolveGuestImage(id: string): string {
+    const images = [
+      'hotel-dashboard/reservations/guest-01.webp',
+      'hotel-dashboard/reservations/guest-02.webp',
+      'hotel-dashboard/reservations/guest-03.webp',
+      'hotel-dashboard/reservations/guest-04.webp',
+      'hotel-dashboard/reservations/guest-05.webp',
+    ];
+    const hash = Array.from(id).reduce(
+      (sum, char) => sum + (char.codePointAt(0) ?? 0),
+      0,
+    );
+
+    return images[hash % images.length];
+  }
+
+  private normalizeText(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
 }
