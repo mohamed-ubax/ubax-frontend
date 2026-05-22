@@ -1,9 +1,12 @@
 <section class="owner-page">
   <header class="owner-page__header">
-    <div>
-      <p class="owner-page__eyebrow">Agence · Bailleurs</p>
-      <h1>Liste des bailleurs liés à l'agence</h1>
-      <p>
+    <div class="owner-page__header-left">
+      <div class="owner-page__eyebrow">
+        <i class="pi pi-users"></i>
+        <span>Agence · Bailleurs</span>
+      </div>
+      <h1 class="owner-page__title">Liste des bailleurs liés à l'agence</h1>
+      <p class="owner-page__subtitle">
         Sélectionnez rapidement un propriétaire approuvé pour vos nouveaux biens
         ou mandats.
       </p>
@@ -14,9 +17,11 @@
         class="owner-page__action owner-page__action--ghost"
         routerLink="/biens/bailleurs/demandes"
       >
+        <i class="pi pi-inbox"></i>
         Voir les demandes
       </a>
-      <a class="owner-page__action" routerLink="/contrats/mandats/nouveau">
+      <a class="owner-page__action owner-page__action--primary" routerLink="/contrats/mandats/nouveau">
+        <i class="pi pi-file-edit"></i>
         Créer un mandat
       </a>
     </div>

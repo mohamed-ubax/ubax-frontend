@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,7 +15,6 @@ import {
   type Mandate,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
-  ConfirmDialogComponent,
   SectionCardComponent,
   StatusBadgeComponent,
   type StatusVariant,
@@ -33,7 +32,6 @@ import { map } from 'rxjs';
     DatePipe,
     FormsModule,
     RouterLink,
-    ConfirmDialogComponent,
     SectionCardComponent,
     StatusBadgeComponent,
   ],
@@ -44,6 +42,7 @@ import { map } from 'rxjs';
 })
 export class MandatsDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly document = inject(DOCUMENT);
   protected readonly store = inject(MandatesStore);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
@@ -80,37 +79,40 @@ export class MandatsDetailPageComponent {
       }
     });
 
+    // Manage body class so overlays cover the topbar
+    effect(() => {
+      const hasOverlay =
+        this.showSubmitDialog() ||
+        this.showCancelDialog() ||
+        this.showTerminateDialog();
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+    });
+
     effect(() => {
       const submittedId = this.store.lastSubmittedId();
-      if (!submittedId) {
-        return;
-      }
-
+      if (!submittedId) return;
       this.showSubmitDialog.set(false);
+      this.document.body.classList.remove('ubax-overlay-open');
       this.notifications?.success('Mandat soumis pour signature.');
       this.store.clearActionFeedback();
     });
 
     effect(() => {
       const cancelledId = this.store.lastCancelledId();
-      if (!cancelledId) {
-        return;
-      }
-
+      if (!cancelledId) return;
       this.showCancelDialog.set(false);
+      this.document.body.classList.remove('ubax-overlay-open');
       this.notifications?.success('Mandat annulé.');
       this.store.clearActionFeedback();
     });
 
     effect(() => {
       const terminatedId = this.store.lastTerminatedId();
-      if (!terminatedId) {
-        return;
-      }
-
+      if (!terminatedId) return;
       this.showTerminateDialog.set(false);
       this.terminateReason.set('');
       this.terminateReasonError.set(null);
+      this.document.body.classList.remove('ubax-overlay-open');
       this.notifications?.success('Mandat résilié.');
       this.store.clearActionFeedback();
     });

@@ -1,9 +1,12 @@
 <section class="mandates-page">
   <header class="mandates-page__header">
-    <div>
-      <p class="mandates-page__eyebrow">Agence · Mandats</p>
-      <h1>Mandats de gestion</h1>
-      <p>
+    <div class="mandates-page__header-left">
+      <div class="mandates-page__eyebrow">
+        <i class="pi pi-briefcase"></i>
+        <span>Agence · Mandats</span>
+      </div>
+      <h1 class="mandates-page__title">Mandats de gestion</h1>
+      <p class="mandates-page__subtitle">
         Créez, soumettez et suivez les mandats conclus avec les bailleurs de
         votre agence.
       </p>
@@ -14,9 +17,11 @@
         class="mandates-page__action mandates-page__action--ghost"
         routerLink="/biens/bailleurs"
       >
+        <i class="pi pi-users"></i>
         Voir les bailleurs
       </a>
-      <a class="mandates-page__action" routerLink="/contrats/mandats/nouveau">
+      <a class="mandates-page__action mandates-page__action--primary" routerLink="/contrats/mandats/nouveau">
+        <i class="pi pi-plus"></i>
         Nouveau mandat
       </a>
     </div>
@@ -49,7 +54,7 @@
           description="Créez votre premier mandat pour commencer le suivi administratif avec un bailleur."
         >
           <a
-            class="mandates-page__action"
+            class="mandates-page__action mandates-page__action--primary"
             routerLink="/contrats/mandats/nouveau"
             >Créer un mandat</a
           >

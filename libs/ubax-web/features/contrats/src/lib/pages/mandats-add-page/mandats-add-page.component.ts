@@ -6,8 +6,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AgencyBailleursStore,
@@ -15,18 +15,29 @@ import {
 } from '@ubax-workspace/ubax-web-data-access';
 import {
   EmptyStateComponent,
-  SectionCardComponent,
 } from '@ubax-workspace/shared-design-system';
 import {
   NOTIFICATION_HANDLER,
   type NotificationHandler,
 } from '@ubax-workspace/shared-data-access';
+import {
+  UiFormInputComponent,
+  UiFormSelectComponent,
+  UiFormDatePickerComponent,
+  type UiFormSelectOption,
+} from '@ubax-workspace/shared-ui';
 import { map } from 'rxjs';
 
 @Component({
   selector: 'ubax-mandats-add-page',
   standalone: true,
-  imports: [FormsModule, RouterLink, EmptyStateComponent, SectionCardComponent],
+  imports: [
+    RouterLink,
+    EmptyStateComponent,
+    UiFormInputComponent,
+    UiFormSelectComponent,
+    UiFormDatePickerComponent,
+  ],
   providers: [AgencyBailleursStore, MandatesStore],
   templateUrl: './mandats-add-page.component.html',
   styleUrl: './mandats-add-page.component.scss',
@@ -46,13 +57,27 @@ export class MandatsAddPageComponent {
     { initialValue: '' },
   );
 
+  // ── Form signals ────────────────────────────────────────────────────────────
   protected readonly ownerId = signal('');
-  protected readonly startDate = signal('');
-  protected readonly endDate = signal('');
+  protected readonly startDateObj = signal<Date>(new Date());
+  protected readonly endDateObj = signal<Date>(
+    new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+  );
+  protected readonly noEndDate = signal(false);
   protected readonly commissionRate = signal('');
   protected readonly specialClauses = signal('');
   protected readonly terminationConditions = signal('');
   protected readonly formError = signal<string | null>(null);
+
+  // ── Derived ─────────────────────────────────────────────────────────────────
+  protected readonly bailleursOptions = computed<UiFormSelectOption[]>(() => [
+    { label: 'Sélectionner un bailleur', value: '' },
+    ...this.bailleursStore.entities().map((owner) => ({
+      label: [owner.firstName, owner.lastName].filter(Boolean).join(' ') +
+        (owner.phone ? ` · ${owner.phone}` : ''),
+      value: owner.id ?? '',
+    })),
+  ]);
 
   protected readonly isSubmitting = computed(
     () => this.mandatesStore.creating() || this.mandatesStore.saving(),
@@ -79,10 +104,7 @@ export class MandatsAddPageComponent {
 
     effect(() => {
       const createdId = this.mandatesStore.lastCreatedId();
-      if (!createdId) {
-        return;
-      }
-
+      if (!createdId) return;
       this.notifications?.success('Mandat créé avec succès.');
       this.mandatesStore.clearActionFeedback();
       void this.router.navigate(['/contrats/mandats', createdId]);
@@ -90,17 +112,20 @@ export class MandatsAddPageComponent {
   }
 
   protected submit(): void {
-    if (!this.ownerId() || !this.startDate()) {
+    if (!this.ownerId() || !this.startDateObj()) {
       this.formError.set('Le bailleur et la date de début sont obligatoires.');
       return;
     }
 
     this.formError.set(null);
 
+    const toIso = (d: Date): string =>
+      d.toISOString().split('T')[0];
+
     this.mandatesStore.createMandate({
       ownerId: this.ownerId(),
-      startDate: this.startDate(),
-      endDate: this.endDate() || undefined,
+      startDate: toIso(this.startDateObj()),
+      endDate: this.noEndDate() ? undefined : toIso(this.endDateObj()),
       commissionRate: this.commissionRate()
         ? Number(this.commissionRate())
         : undefined,

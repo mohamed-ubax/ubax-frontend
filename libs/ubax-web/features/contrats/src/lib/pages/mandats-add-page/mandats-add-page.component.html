@@ -1,14 +1,19 @@
 <section class="mandate-form-page">
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="mandate-form-page__header">
-    <div>
-      <p class="mandate-form-page__eyebrow">Agence · Nouveau mandat</p>
-      <h1>Créer un mandat de gestion</h1>
-      <p>
+    <div class="mandate-form-page__header-left">
+      <div class="mandate-form-page__eyebrow">
+        <i class="pi pi-briefcase"></i>
+        <span>Agence · Nouveau mandat</span>
+      </div>
+      <h1 class="mandate-form-page__title">Créer un mandat de gestion</h1>
+      <p class="mandate-form-page__subtitle">
         Renseignez les clauses principales du mandat conclu avec le bailleur.
       </p>
     </div>
 
     <a class="mandate-form-page__back" routerLink="/contrats/mandats">
+      <i class="pi pi-arrow-left"></i>
       Retour aux mandats
     </a>
   </header>
@@ -20,101 +25,110 @@
       description="Vous devez d'abord approuver un bailleur avant de créer un mandat."
     >
       <a
-        class="mandate-form-page__primary"
+        class="mandate-form-page__action mandate-form-page__action--primary"
         routerLink="/biens/bailleurs/demandes"
       >
         Voir les demandes bailleur
       </a>
     </ubax-empty-state>
   } @else {
-    <ubax-section-card title="Informations du mandat">
-      <div class="mandate-form-page__grid">
-        <label>
-          <span>Bailleur</span>
-          <select
-            [ngModel]="ownerId()"
-            (ngModelChange)="ownerId.set($event); formError.set(null)"
-          >
-            <option value="">Sélectionner un bailleur</option>
-            @for (owner of bailleursStore.entities(); track owner.id) {
-              <option [value]="owner.id">
-                {{ owner.firstName }} {{ owner.lastName }}
-                @if (owner.phone) {
-                  · {{ owner.phone }}
-                }
-              </option>
-            }
-          </select>
-        </label>
+    <div class="mandate-form-card">
+      <h2 class="mandate-form-card__title">Informations du mandat</h2>
 
-        <label>
-          <span>Date de début</span>
-          <input
-            type="date"
-            [ngModel]="startDate()"
-            (ngModelChange)="startDate.set($event); formError.set(null)"
+      <div class="mandate-form-card__grid">
+        <!-- Bailleur -->
+        <ubax-ui-form-select
+          label="Bailleur *"
+          [options]="bailleursOptions()"
+          [(value)]="ownerId"
+        />
+
+        <!-- Date de début -->
+        <ubax-ui-form-date-picker
+          label="Date de début *"
+          [(value)]="startDateObj"
+        />
+
+        <!-- Date de fin -->
+        <div class="mandate-form-card__field">
+          <ubax-ui-form-date-picker
+            label="Date de fin"
+            [(value)]="endDateObj"
           />
-        </label>
+          <label class="mandate-form-card__checkbox">
+            <input
+              type="checkbox"
+              [checked]="noEndDate()"
+              (change)="noEndDate.set($any($event.target).checked)"
+            />
+            <span>Durée indéterminée</span>
+          </label>
+        </div>
 
-        <label>
-          <span>Date de fin</span>
-          <input
-            type="date"
-            [ngModel]="endDate()"
-            (ngModelChange)="endDate.set($event)"
-          />
-        </label>
+        <!-- Taux de commission -->
+        <ubax-ui-form-input
+          label="Taux de commission (%)"
+          type="number"
+          placeholder="Ex : 8.5"
+          [(value)]="commissionRate"
+        />
 
-        <label>
-          <span>Taux de commission (%)</span>
-          <input
-            type="number"
-            min="0"
-            step="0.1"
-            [ngModel]="commissionRate()"
-            (ngModelChange)="commissionRate.set($event)"
-            placeholder="Ex : 8.5"
-          />
-        </label>
-
-        <label class="mandate-form-page__field mandate-form-page__field--full">
-          <span>Clauses spéciales</span>
+        <!-- Clauses spéciales -->
+        <div class="mandate-form-card__field mandate-form-card__field--full">
+          <label class="mandate-form-card__label" for="special-clauses">
+            Clauses spéciales
+          </label>
           <textarea
+            id="special-clauses"
+            class="mandate-form-card__textarea"
             rows="4"
-            [ngModel]="specialClauses()"
-            (ngModelChange)="specialClauses.set($event)"
+            placeholder="Renseignez les clauses spéciales du mandat…"
+            [value]="specialClauses()"
+            (input)="specialClauses.set($any($event.target).value)"
           ></textarea>
-        </label>
+        </div>
 
-        <label class="mandate-form-page__field mandate-form-page__field--full">
-          <span>Conditions de résiliation</span>
+        <!-- Conditions de résiliation -->
+        <div class="mandate-form-card__field mandate-form-card__field--full">
+          <label class="mandate-form-card__label" for="termination-conditions">
+            Conditions de résiliation
+          </label>
           <textarea
+            id="termination-conditions"
+            class="mandate-form-card__textarea"
             rows="4"
-            [ngModel]="terminationConditions()"
-            (ngModelChange)="terminationConditions.set($event)"
+            placeholder="Renseignez les conditions de résiliation…"
+            [value]="terminationConditions()"
+            (input)="terminationConditions.set($any($event.target).value)"
           ></textarea>
-        </label>
+        </div>
       </div>
 
       @if (formError() || mandatesStore.createError()) {
-        <p class="mandate-form-page__error">
+        <p class="mandate-form-card__error">
+          <i class="pi pi-exclamation-circle"></i>
           {{ formError() || mandatesStore.createError() }}
         </p>
       }
 
-      <div class="mandate-form-page__footer">
-        <a class="mandate-form-page__ghost" routerLink="/contrats/mandats"
-          >Annuler</a
-        >
+      <div class="mandate-form-card__footer">
+        <a class="mandate-form-page__action mandate-form-page__action--ghost" routerLink="/contrats/mandats">
+          Annuler
+        </a>
         <button
-          class="mandate-form-page__primary"
+          class="mandate-form-page__action mandate-form-page__action--primary"
           type="button"
           [disabled]="isSubmitting()"
           (click)="submit()"
         >
+          @if (isSubmitting()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <i class="pi pi-check"></i>
+          }
           Créer le mandat
         </button>
       </div>
-    </ubax-section-card>
+    </div>
   }
 </section>

@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,8 +15,6 @@ import {
   type BailleurApplication,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
-  ConfirmDialogComponent,
-  SectionCardComponent,
   StatusBadgeComponent,
   type StatusVariant,
 } from '@ubax-workspace/shared-design-system';
@@ -33,8 +31,6 @@ import { map } from 'rxjs';
     DatePipe,
     FormsModule,
     RouterLink,
-    ConfirmDialogComponent,
-    SectionCardComponent,
     StatusBadgeComponent,
   ],
   providers: [BailleurApplicationsStore],
@@ -45,6 +41,7 @@ import { map } from 'rxjs';
 export class BailleurApplicationDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly store = inject(BailleurApplicationsStore);
+  private readonly document = inject(DOCUMENT);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
@@ -74,6 +71,12 @@ export class BailleurApplicationDetailPageComponent {
       }
     });
 
+    // Manage body class so overlay covers the topbar
+    effect(() => {
+      const hasOverlay = this.approveDialogVisible() || this.rejectDialogVisible();
+      this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
+    });
+
     effect(() => {
       const decidedId = this.store.lastDecidedId();
       if (!decidedId) {
@@ -84,6 +87,7 @@ export class BailleurApplicationDetailPageComponent {
       this.rejectDialogVisible.set(false);
       this.rejectComment.set('');
       this.rejectCommentError.set(null);
+      this.document.body.classList.remove('ubax-overlay-open');
       this.notifications?.success('Décision enregistrée avec succès.');
       this.store.clearDecisionFeedback();
     });
@@ -99,7 +103,7 @@ export class BailleurApplicationDetailPageComponent {
     });
   }
 
-  protected fullName(application: BailleurApplication | null): string {
+  protected fullName(application: BailleurApplication | null | undefined): string {
     if (!application) {
       return '—';
     }
