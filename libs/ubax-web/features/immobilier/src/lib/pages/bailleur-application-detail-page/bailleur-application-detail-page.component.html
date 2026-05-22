@@ -1,0 +1,241 @@
+<section class="app-detail-page">
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="app-detail-page__header">
+    <div class="app-detail-page__header-left">
+      <div class="app-detail-page__eyebrow">
+        <i class="pi pi-inbox"></i>
+        <span>Agence · Demande bailleur</span>
+      </div>
+      <h1 class="app-detail-page__title">{{ fullName(application()) || 'Demande bailleur' }}</h1>
+      <p class="app-detail-page__subtitle">
+        Examinez le dossier, puis approuvez ou rejetez la demande si elle est
+        encore en attente.
+      </p>
+    </div>
+
+    <div class="app-detail-page__header-actions">
+      <a
+        class="app-detail-page__back"
+        routerLink="/biens/bailleurs/demandes"
+      >
+        <i class="pi pi-arrow-left"></i>
+        Retour à la liste
+      </a>
+      <ubax-status-badge [variant]="statusVariant(application()?.status)">
+        {{ statusLabel(application()?.status) }}
+      </ubax-status-badge>
+    </div>
+  </header>
+
+  <!-- ── Content grid ───────────────────────────────────────────────────── -->
+  <div class="app-detail-page__grid">
+    <!-- Informations du bailleur -->
+    <div class="app-detail-card">
+      <h2 class="app-detail-card__title">Informations du bailleur</h2>
+      <dl class="app-detail-card__details">
+        <div>
+          <dt>Nom complet</dt>
+          <dd>{{ fullName(application()) || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Téléphone</dt>
+          <dd>{{ application()?.phone || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ application()?.email || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Agence ciblée</dt>
+          <dd>{{ application()?.agencyName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Type de pièce</dt>
+          <dd>{{ application()?.idType || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Numéro de pièce</dt>
+          <dd>{{ application()?.idNumber || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Date de création</dt>
+          <dd>
+            {{
+              application()?.createdAt
+                ? (application()?.createdAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Dernière mise à jour</dt>
+          <dd>
+            {{
+              application()?.updatedAt
+                ? (application()?.updatedAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Décision et suivi -->
+    <div class="app-detail-card">
+      <h2 class="app-detail-card__title">Décision et suivi</h2>
+      <dl class="app-detail-card__details">
+        <div>
+          <dt>Traité par</dt>
+          <dd>{{ application()?.reviewedByName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Traité le</dt>
+          <dd>
+            {{
+              application()?.reviewedAt
+                ? (application()?.reviewedAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div class="app-detail-card__details-full">
+          <dt>Description</dt>
+          <dd>
+            {{ application()?.description || 'Aucune description fournie.' }}
+          </dd>
+        </div>
+        <div class="app-detail-card__details-full">
+          <dt>Motif de rejet</dt>
+          <dd>{{ application()?.rejectionReason || '—' }}</dd>
+        </div>
+      </dl>
+
+      <div class="app-detail-card__actions">
+        <button
+          class="app-detail-btn app-detail-btn--approve"
+          type="button"
+          [disabled]="!canDecide() || isBusy()"
+          (click)="approveDialogVisible.set(true)"
+        >
+          <i class="pi pi-check"></i>
+          Approuver
+        </button>
+        <button
+          class="app-detail-btn app-detail-btn--reject"
+          type="button"
+          [disabled]="!canDecide() || isBusy()"
+          (click)="rejectDialogVisible.set(true)"
+        >
+          <i class="pi pi-times"></i>
+          Rejeter
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Overlay : Approuver ────────────────────────────────────────────────── -->
+@if (approveDialogVisible()) {
+  <div
+    class="app-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="approve-dialog-title"
+    (click)="approveDialogVisible.set(false)"
+  >
+    <div class="app-dialog" (click)="$event.stopPropagation()">
+      <div class="app-dialog__icon app-dialog__icon--success">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <h3 id="approve-dialog-title" class="app-dialog__title">
+        Approuver cette demande ?
+      </h3>
+      <p class="app-dialog__desc">
+        Le bailleur sera validé pour votre agence et pourra être
+        sélectionné comme propriétaire sur les futurs biens.
+      </p>
+      <div class="app-dialog__actions">
+        <button
+          class="app-dialog__btn app-dialog__btn--ghost"
+          type="button"
+          (click)="approveDialogVisible.set(false)"
+        >
+          Annuler
+        </button>
+        <button
+          class="app-dialog__btn app-dialog__btn--success"
+          type="button"
+          [disabled]="isBusy()"
+          (click)="confirmApprove()"
+        >
+          @if (isBusy()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          }
+          Approuver
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Overlay : Rejeter ──────────────────────────────────────────────────── -->
+@if (rejectDialogVisible()) {
+  <div
+    class="app-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reject-dialog-title"
+    (click)="rejectDialogVisible.set(false)"
+  >
+    <div class="app-dialog app-dialog--wide" (click)="$event.stopPropagation()">
+      <div class="app-dialog__icon app-dialog__icon--danger">
+        <i class="pi pi-times-circle"></i>
+      </div>
+      <h3 id="reject-dialog-title" class="app-dialog__title">
+        Rejeter cette demande ?
+      </h3>
+      <p class="app-dialog__desc">
+        Le motif de rejet est obligatoire. Il sera conservé dans le
+        dossier de demande.
+      </p>
+
+      <div class="app-dialog__field">
+        <label class="app-dialog__label" for="rejection-comment">
+          Motif de rejet <span class="app-dialog__required">*</span>
+        </label>
+        <textarea
+          id="rejection-comment"
+          class="app-dialog__textarea"
+          rows="4"
+          placeholder="Précisez pourquoi la demande est rejetée"
+          [ngModel]="rejectComment()"
+          (ngModelChange)="rejectComment.set($event); rejectCommentError.set(null)"
+        ></textarea>
+        @if (rejectCommentError()) {
+          <p class="app-dialog__error">{{ rejectCommentError() }}</p>
+        }
+      </div>
+
+      <div class="app-dialog__actions">
+        <button
+          class="app-dialog__btn app-dialog__btn--ghost"
+          type="button"
+          (click)="rejectDialogVisible.set(false)"
+        >
+          Annuler
+        </button>
+        <button
+          class="app-dialog__btn app-dialog__btn--danger"
+          type="button"
+          [disabled]="isBusy()"
+          (click)="confirmReject()"
+        >
+          @if (isBusy()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          }
+          Rejeter
+        </button>
+      </div>
+    </div>
+  </div>
+}

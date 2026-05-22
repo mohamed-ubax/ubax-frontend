@@ -1,0 +1,134 @@
+<section class="mandate-form-page">
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="mandate-form-page__header">
+    <div class="mandate-form-page__header-left">
+      <div class="mandate-form-page__eyebrow">
+        <i class="pi pi-briefcase"></i>
+        <span>Agence · Nouveau mandat</span>
+      </div>
+      <h1 class="mandate-form-page__title">Créer un mandat de gestion</h1>
+      <p class="mandate-form-page__subtitle">
+        Renseignez les clauses principales du mandat conclu avec le bailleur.
+      </p>
+    </div>
+
+    <a class="mandate-form-page__back" routerLink="/contrats/mandats">
+      <i class="pi pi-arrow-left"></i>
+      Retour aux mandats
+    </a>
+  </header>
+
+  @if (!bailleursStore.entities().length && !bailleursStore.loading()) {
+    <ubax-empty-state
+      icon="pi pi-users"
+      title="Aucun bailleur approuvé"
+      description="Vous devez d'abord approuver un bailleur avant de créer un mandat."
+    >
+      <a
+        class="mandate-form-page__action mandate-form-page__action--primary"
+        routerLink="/biens/bailleurs/demandes"
+      >
+        Voir les demandes bailleur
+      </a>
+    </ubax-empty-state>
+  } @else {
+    <div class="mandate-form-card">
+      <h2 class="mandate-form-card__title">Informations du mandat</h2>
+
+      <div class="mandate-form-card__grid">
+        <!-- Bailleur -->
+        <ubax-ui-form-select
+          label="Bailleur *"
+          [options]="bailleursOptions()"
+          [(value)]="ownerId"
+        />
+
+        <!-- Date de début -->
+        <ubax-ui-form-date-picker
+          label="Date de début *"
+          [(value)]="startDateObj"
+        />
+
+        <!-- Date de fin -->
+        <div class="mandate-form-card__field">
+          <ubax-ui-form-date-picker
+            label="Date de fin"
+            [(value)]="endDateObj"
+          />
+          <label class="mandate-form-card__checkbox">
+            <input
+              type="checkbox"
+              [checked]="noEndDate()"
+              (change)="noEndDate.set($any($event.target).checked)"
+            />
+            <span>Durée indéterminée</span>
+          </label>
+        </div>
+
+        <!-- Taux de commission -->
+        <ubax-ui-form-input
+          label="Taux de commission (%)"
+          type="number"
+          placeholder="Ex : 8.5"
+          [(value)]="commissionRate"
+        />
+
+        <!-- Clauses spéciales -->
+        <div class="mandate-form-card__field mandate-form-card__field--full">
+          <label class="mandate-form-card__label" for="special-clauses">
+            Clauses spéciales
+          </label>
+          <textarea
+            id="special-clauses"
+            class="mandate-form-card__textarea"
+            rows="4"
+            placeholder="Renseignez les clauses spéciales du mandat…"
+            [value]="specialClauses()"
+            (input)="specialClauses.set($any($event.target).value)"
+          ></textarea>
+        </div>
+
+        <!-- Conditions de résiliation -->
+        <div class="mandate-form-card__field mandate-form-card__field--full">
+          <label class="mandate-form-card__label" for="termination-conditions">
+            Conditions de résiliation
+          </label>
+          <textarea
+            id="termination-conditions"
+            class="mandate-form-card__textarea"
+            rows="4"
+            placeholder="Renseignez les conditions de résiliation…"
+            [value]="terminationConditions()"
+            (input)="terminationConditions.set($any($event.target).value)"
+          ></textarea>
+        </div>
+      </div>
+
+      @if (formError() || mandatesStore.createError()) {
+        <p class="mandate-form-card__error">
+          <i class="pi pi-exclamation-circle"></i>
+          {{ formError() || mandatesStore.createError() }}
+        </p>
+      }
+
+      <div class="mandate-form-card__footer">
+        <a class="mandate-form-page__action mandate-form-page__action--ghost" routerLink="/contrats/mandats">
+          Annuler
+        </a>
+        <button
+          class="mandate-form-page__action mandate-form-page__action--primary"
+          type="button"
+          [disabled]="isSubmitting()"
+          (click)="submit()"
+        >
+          @if (isSubmitting()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <i class="pi pi-check"></i>
+          }
+          Créer le mandat
+        </button>
+      </div>
+    </div>
+  }
+</section>

@@ -1,0 +1,178 @@
+:host {
+  display: block;
+}
+
+// ─── Page layout ──────────────────────────────────────────────────────────────
+.owner-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-bottom: 40px;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+.owner-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.owner-page__header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.owner-page__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ubax-accent);
+  margin: 0;
+
+  i {
+    font-size: 13px;
+  }
+}
+
+.owner-page__title {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ubax-navy);
+}
+
+.owner-page__subtitle {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ubax-text-muted);
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+.owner-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.owner-page__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: none;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
+
+  &:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  i {
+    font-size: 13px;
+  }
+
+  &--primary {
+    background: var(--ubax-navy);
+    color: #fff;
+  }
+
+  &--ghost {
+    background: var(--ubax-surface);
+    color: var(--ubax-navy);
+    border: 1px solid var(--ubax-border-card);
+    box-shadow: var(--ubax-shadow-card-soft);
+  }
+}
+
+// ─── Table cells ──────────────────────────────────────────────────────────────
+.owner-page__owner-cell {
+  display: grid;
+  gap: 4px;
+
+  strong {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ubax-navy);
+  }
+
+  span {
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ubax-text-muted);
+  }
+}
+
+.owner-page__link {
+  color: var(--ubax-accent);
+  text-decoration: none;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.75;
+  }
+}
+
+.owner-page__state {
+  padding: 32px;
+  text-align: center;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ubax-text-muted);
+
+  &--error {
+    color: var(--ubax-danger);
+  }
+}
+
+.owner-page__pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 24px;
+}
+
+@media (max-width: 768px) {
+  .owner-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .owner-page__title {
+    font-size: 24px;
+  }
+
+  .owner-page__pagination {
+    justify-content: center;
+  }
+}

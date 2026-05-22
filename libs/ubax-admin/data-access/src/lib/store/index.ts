@@ -5,3 +5,5 @@ export * from './admin-agency-members.store';
 export * from './admin-hotel-members.store';
 export * from './admin-dashboard.store';
 export * from './admin-reservations.store';
+export * from './admin-bailleur-applications.store';
+export * from './admin-mandates.store';

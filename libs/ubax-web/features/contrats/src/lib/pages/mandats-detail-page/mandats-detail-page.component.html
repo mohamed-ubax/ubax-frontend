@@ -1,0 +1,270 @@
+<section class="mandate-detail-page">
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="mandate-detail-page__header">
+    <div class="mandate-detail-page__header-left">
+      <div class="mandate-detail-page__eyebrow">
+        <i class="pi pi-briefcase"></i>
+        <span>Agence · Mandat</span>
+      </div>
+      <h1 class="mandate-detail-page__title">
+        {{ mandate()?.referenceNumber || mandate()?.id || 'Mandat' }}
+      </h1>
+      <p class="mandate-detail-page__subtitle">
+        Suivi administratif du mandat de gestion conclu avec le bailleur.
+      </p>
+    </div>
+
+    <div class="mandate-detail-page__header-actions">
+      <a class="mandate-detail-page__back" routerLink="/contrats/mandats">
+        <i class="pi pi-arrow-left"></i>
+        Retour à la liste
+      </a>
+      <ubax-status-badge [variant]="statusVariant(mandate()?.status)">
+        {{ statusLabel(mandate()?.status) }}
+      </ubax-status-badge>
+    </div>
+  </header>
+
+  <!-- ── Content grid ───────────────────────────────────────────────────── -->
+  <div class="mandate-detail-page__grid">
+    <!-- Données générales -->
+    <div class="mandate-detail-card">
+      <h2 class="mandate-detail-card__title">Données générales</h2>
+      <dl class="mandate-detail-card__details">
+        <div>
+          <dt>Référence</dt>
+          <dd>{{ mandate()?.referenceNumber || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Bailleur</dt>
+          <dd>{{ mandate()?.ownerFullName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Téléphone</dt>
+          <dd>{{ mandate()?.ownerPhone || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Agence</dt>
+          <dd>{{ mandate()?.agencyName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Date de début</dt>
+          <dd>
+            {{
+              mandate()?.startDate
+                ? (mandate()?.startDate | date: 'dd/MM/yyyy')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Date de fin</dt>
+          <dd>
+            {{
+              mandate()?.endDate
+                ? (mandate()?.endDate | date: 'dd/MM/yyyy')
+                : 'Indéterminée'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Commission</dt>
+          <dd>
+            {{
+              mandate()?.commissionRate != null
+                ? mandate()?.commissionRate + ' %'
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Créé le</dt>
+          <dd>
+            {{
+              mandate()?.createdAt
+                ? (mandate()?.createdAt | date: 'dd/MM/yyyy HH:mm')
+                : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Clauses et transitions -->
+    <div class="mandate-detail-card">
+      <h2 class="mandate-detail-card__title">Clauses et transitions</h2>
+      <dl class="mandate-detail-card__details">
+        <div class="mandate-detail-card__details-full">
+          <dt>Clauses spéciales</dt>
+          <dd>{{ mandate()?.specialClauses || 'Aucune clause spéciale.' }}</dd>
+        </div>
+        <div class="mandate-detail-card__details-full">
+          <dt>Conditions de résiliation</dt>
+          <dd>
+            {{
+              mandate()?.terminationConditions ||
+                'Aucune condition particulière.'
+            }}
+          </dd>
+        </div>
+        <div class="mandate-detail-card__details-full">
+          <dt>Motif de résiliation</dt>
+          <dd>{{ mandate()?.terminationReason || '—' }}</dd>
+        </div>
+      </dl>
+
+      <div class="mandate-detail-card__actions">
+        @if (canSubmit()) {
+          <button
+            class="mandate-detail-btn mandate-detail-btn--primary"
+            type="button"
+            (click)="showSubmitDialog.set(true)"
+          >
+            <i class="pi pi-send"></i>
+            Soumettre pour signature
+          </button>
+        }
+        @if (canCancel()) {
+          <button
+            class="mandate-detail-btn mandate-detail-btn--ghost"
+            type="button"
+            (click)="showCancelDialog.set(true)"
+          >
+            <i class="pi pi-times"></i>
+            Annuler
+          </button>
+        }
+        @if (canTerminate()) {
+          <button
+            class="mandate-detail-btn mandate-detail-btn--danger"
+            type="button"
+            (click)="showTerminateDialog.set(true)"
+          >
+            <i class="pi pi-ban"></i>
+            Résilier
+          </button>
+        }
+      </div>
+
+      @if (store.submitError() || store.cancelError() || store.terminateError()) {
+        <p class="mandate-detail-card__error">
+          {{ store.submitError() || store.cancelError() || store.terminateError() }}
+        </p>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ── Overlay : Soumettre ────────────────────────────────────────────────── -->
+@if (showSubmitDialog()) {
+  <div
+    class="mandate-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="submit-dialog-title"
+    (click)="showSubmitDialog.set(false)"
+  >
+    <div class="mandate-dialog" (click)="$event.stopPropagation()">
+      <div class="mandate-dialog__icon mandate-dialog__icon--success">
+        <i class="pi pi-send"></i>
+      </div>
+      <h3 id="submit-dialog-title" class="mandate-dialog__title">
+        Soumettre ce mandat ?
+      </h3>
+      <p class="mandate-dialog__desc">
+        Le mandat passera au statut En attente de signature.
+      </p>
+      <div class="mandate-dialog__actions">
+        <button class="mandate-dialog__btn mandate-dialog__btn--ghost" type="button" (click)="showSubmitDialog.set(false)">
+          Annuler
+        </button>
+        <button class="mandate-dialog__btn mandate-dialog__btn--success" type="button" [disabled]="store.saving()" (click)="submitMandate()">
+          @if (store.saving()) { <i class="pi pi-spin pi-spinner"></i> }
+          Soumettre
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Overlay : Annuler ──────────────────────────────────────────────────── -->
+@if (showCancelDialog()) {
+  <div
+    class="mandate-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cancel-dialog-title"
+    (click)="showCancelDialog.set(false)"
+  >
+    <div class="mandate-dialog" (click)="$event.stopPropagation()">
+      <div class="mandate-dialog__icon mandate-dialog__icon--warning">
+        <i class="pi pi-times-circle"></i>
+      </div>
+      <h3 id="cancel-dialog-title" class="mandate-dialog__title">
+        Annuler ce mandat ?
+      </h3>
+      <p class="mandate-dialog__desc">
+        Cette action est réservée aux brouillons et mandats en attente de signature.
+      </p>
+      <div class="mandate-dialog__actions">
+        <button class="mandate-dialog__btn mandate-dialog__btn--ghost" type="button" (click)="showCancelDialog.set(false)">
+          Retour
+        </button>
+        <button class="mandate-dialog__btn mandate-dialog__btn--warning" type="button" [disabled]="store.saving()" (click)="cancelMandate()">
+          @if (store.saving()) { <i class="pi pi-spin pi-spinner"></i> }
+          Confirmer l'annulation
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Overlay : Résilier ─────────────────────────────────────────────────── -->
+@if (showTerminateDialog()) {
+  <div
+    class="mandate-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="terminate-dialog-title"
+    (click)="showTerminateDialog.set(false)"
+  >
+    <div class="mandate-dialog mandate-dialog--wide" (click)="$event.stopPropagation()">
+      <div class="mandate-dialog__icon mandate-dialog__icon--danger">
+        <i class="pi pi-ban"></i>
+      </div>
+      <h3 id="terminate-dialog-title" class="mandate-dialog__title">
+        Résilier ce mandat ?
+      </h3>
+      <p class="mandate-dialog__desc">
+        Un motif de résiliation est obligatoire. Il sera conservé dans le dossier.
+      </p>
+
+      <div class="mandate-dialog__field">
+        <label class="mandate-dialog__label" for="terminate-reason">
+          Motif de résiliation <span class="mandate-dialog__required">*</span>
+        </label>
+        <textarea
+          id="terminate-reason"
+          class="mandate-dialog__textarea"
+          rows="4"
+          placeholder="Précisez le motif de résiliation…"
+          [ngModel]="terminateReason()"
+          (ngModelChange)="terminateReason.set($event); terminateReasonError.set(null)"
+        ></textarea>
+        @if (terminateReasonError()) {
+          <p class="mandate-dialog__error">{{ terminateReasonError() }}</p>
+        }
+      </div>
+
+      <div class="mandate-dialog__actions">
+        <button class="mandate-dialog__btn mandate-dialog__btn--ghost" type="button" (click)="showTerminateDialog.set(false)">
+          Annuler
+        </button>
+        <button class="mandate-dialog__btn mandate-dialog__btn--danger" type="button" [disabled]="store.saving()" (click)="terminateMandate()">
+          @if (store.saving()) { <i class="pi pi-spin pi-spinner"></i> }
+          Résilier
+        </button>
+      </div>
+    </div>
+  </div>
+}

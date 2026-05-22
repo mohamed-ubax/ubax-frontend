@@ -99,6 +99,24 @@ export const adminRoutes: Route[] = [
             './pages/candidatures/candidatures-detail-page.component'
           ).then((m) => m.CandidaturesDetailPageComponent),
       },
+      {
+        path: 'bailleurs',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import(
+            './pages/bailleurs/bailleurs-applications-page.component'
+          ).then((m) => m.BailleursApplicationsPageComponent),
+      },
+      {
+        path: 'mandats',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/mandats/mandats-page.component').then(
+            (m) => m.MandatsPageComponent,
+          ),
+      },
       // UBAX-FE-613 — Modération des biens PENDING
       {
         path: 'proprietes',

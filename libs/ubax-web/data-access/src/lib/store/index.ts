@@ -10,3 +10,5 @@ export * from './clients';
 export * from './technicians';
 export * from './ticketing';
 export * from './team';
+export * from './bailleurs';
+export * from './mandates';

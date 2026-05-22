@@ -52,6 +52,26 @@
   background: var(--ubax-navy);
 }
 
+.action-button--secondary {
+  min-width: 188px;
+  height: 52px;
+  padding: 0 24px;
+  justify-content: center;
+  background: color-mix(in srgb, var(--ubax-navy) 8%, #fff);
+  color: var(--ubax-navy);
+  border: 1.5px solid color-mix(in srgb, var(--ubax-navy) 18%, transparent);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--ubax-navy) 14%, #fff);
+    border-color: color-mix(in srgb, var(--ubax-navy) 30%, transparent);
+    transform: translateY(-1px);
+  }
+}
+
 .action-button__label {
   font-size: 20px;
   font-weight: 400;

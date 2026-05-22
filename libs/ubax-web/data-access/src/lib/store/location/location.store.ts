@@ -17,7 +17,7 @@ import {
 import {
   ApiConfiguration,
   getById4,
-  list6,
+  list7,
   qualify,
   reject,
   TenantResponse,
@@ -99,8 +99,8 @@ const mapPaginated = (raw: unknown): Tenant[] => {
  */
 export const LocationStore = signalStore(
   { providedIn: 'root' },
-  withApiResource<Tenant, typeof list6, typeof getById4>({
-    list: list6,
+  withApiResource<Tenant, typeof list7, typeof getById4>({
+    list: list7,
     getById: getById4,
     idSelector: (tenant) => tenant.id,
     mapList: mapPaginated,

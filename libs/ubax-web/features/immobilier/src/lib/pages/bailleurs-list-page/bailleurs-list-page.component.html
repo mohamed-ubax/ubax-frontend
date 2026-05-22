@@ -1,0 +1,110 @@
+<section class="owner-page">
+  <header class="owner-page__header">
+    <div class="owner-page__header-left">
+      <div class="owner-page__eyebrow">
+        <i class="pi pi-users"></i>
+        <span>Agence · Bailleurs</span>
+      </div>
+      <h1 class="owner-page__title">Liste des bailleurs liés à l'agence</h1>
+      <p class="owner-page__subtitle">
+        Sélectionnez rapidement un propriétaire approuvé pour vos nouveaux biens
+        ou mandats.
+      </p>
+    </div>
+
+    <div class="owner-page__actions">
+      <a
+        class="owner-page__action owner-page__action--ghost"
+        routerLink="/biens/bailleurs/demandes"
+      >
+        <i class="pi pi-inbox"></i>
+        Voir les demandes
+      </a>
+      <a class="owner-page__action owner-page__action--primary" routerLink="/contrats/mandats/nouveau">
+        <i class="pi pi-file-edit"></i>
+        Créer un mandat
+      </a>
+    </div>
+  </header>
+
+  <ubax-section-card title="Bailleurs approuvés" bodyClass="p-0">
+    <ubax-search-filter-bar
+      placeholder="Rechercher par nom, email ou téléphone"
+      [searchValue]="searchValue()"
+      (searchChange)="onSearchChange($event)"
+    />
+
+    @switch (viewState()) {
+      @case ('loading') {
+        <div class="owner-page__state">Chargement des bailleurs…</div>
+      }
+
+      @case ('error') {
+        <div class="owner-page__state owner-page__state--error">
+          {{ store.error() }}
+        </div>
+      }
+
+      @case ('empty') {
+        <ubax-empty-state
+          icon="pi pi-users"
+          title="Aucun bailleur approuvé"
+          description="Les bailleurs validés par votre agence apparaîtront ici."
+        />
+      }
+
+      @case ('success') {
+        <ubax-ui-data-table [columns]="tableColumns" [rows]="pagedRows()">
+          <ng-template ubaxDataTableCell="owner" let-bailleur>
+            <div class="owner-page__owner-cell">
+              <strong>{{ fullName(bailleur) || '—' }}</strong>
+              <span>{{ bailleur.email || 'Email non renseigné' }}</span>
+            </div>
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="phone" let-bailleur>
+            {{ bailleur.phone || '—' }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="email" let-bailleur>
+            {{ bailleur.email || '—' }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="joinedAt" let-bailleur>
+            {{
+              bailleur.joinedAt ? (bailleur.joinedAt | date: 'dd/MM/yyyy') : '—'
+            }}
+          </ng-template>
+
+          <ng-template ubaxDataTableCell="actions" let-bailleur>
+            <a
+              class="owner-page__link"
+              [routerLink]="['/biens/ajouter']"
+              [queryParams]="{ ownerId: bailleur.id }"
+            >
+              Ajouter un bien
+            </a>
+          </ng-template>
+
+          <ng-template ubaxDataTableEmpty>
+            <ubax-empty-state
+              icon="pi pi-search"
+              title="Aucun résultat"
+              description="Aucun bailleur ne correspond à votre recherche actuelle."
+            />
+          </ng-template>
+        </ubax-ui-data-table>
+
+        @if (filteredRows().length > pageSize) {
+          <div class="owner-page__pagination">
+            <ubax-ui-pagination
+              [currentPage]="currentPage()"
+              [totalPages]="totalPages()"
+              (pageChange)="onPageChange($event)"
+            />
+          </div>
+        }
+      }
+    }
+  </ubax-section-card>
+</section>

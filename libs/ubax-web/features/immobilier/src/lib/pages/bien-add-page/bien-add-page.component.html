@@ -200,12 +200,18 @@
               @for (b of bailleurs(); track b.id) {
                 <option [value]="b.id">
                   {{ b.firstName }} {{ b.lastName }}
+                  @if (b.phone) {
+                    · {{ b.phone }}
+                  }
                 </option>
               }
             </select>
             <p class="field-hint">
               Si non renseigné, vous serez enregistré comme propriétaire.
             </p>
+            <a class="field-inline-link" routerLink="/biens/bailleurs">
+              Voir la liste des bailleurs approuvés
+            </a>
           </div>
         </div>
 

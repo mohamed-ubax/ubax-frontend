@@ -6,14 +6,14 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   addDocument,
   addMedia,
+  AgencyBailleurResponse,
   ApiConfiguration,
-  BailleurApplicationResponse,
   create4,
   deleteDocument,
   deleteMedia,
   findAllByType,
   LaCodeListDto,
-  listByAgency,
+  listAgencyBailleurs,
   PropertyCreateRequest,
   PropertyDocumentResponse,
   PropertyMediaResponse,
@@ -32,7 +32,7 @@ export type BienCreationState = {
   property: PropertyResponse | null;
   medias: PropertyMediaResponse[];
   documents: PropertyDocumentResponse[];
-  bailleurs: BailleurApplicationResponse[];
+  bailleurs: AgencyBailleurResponse[];
   codeListPropertyTypes: LaCodeListDto[];
   codeListTransactionTypes: LaCodeListDto[];
   codeListCities: LaCodeListDto[];
@@ -74,7 +74,6 @@ function extractList<T>(body: unknown): T[] {
   }
   return [];
 }
-
 
 function extractProperty(body: unknown): PropertyResponse {
   if (body && typeof body === 'object') {
@@ -174,11 +173,9 @@ export const BienCreationStore = signalStore(
               documentTypes: findAllByType(http, apiConfig.rootUrl, {
                 type: 'PROPERTY_DOCUMENT_TYPE',
               }).pipe(map((r) => extractList<LaCodeListDto>(r.body))),
-              bailleurs: listByAgency(http, apiConfig.rootUrl, {
+              bailleurs: listAgencyBailleurs(http, apiConfig.rootUrl, {
                 size: 200,
-              }).pipe(
-                map((r) => extractList<BailleurApplicationResponse>(r.body)),
-              ),
+              }).pipe(map((r) => extractList<AgencyBailleurResponse>(r.body))),
             }).pipe(
               tapResponse({
                 next: ({
@@ -198,7 +195,12 @@ export const BienCreationStore = signalStore(
                     bailleurs,
                   }),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien') }),
+                  patchState(store, {
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
+                  }),
               }),
             ),
           ),
@@ -221,7 +223,10 @@ export const BienCreationStore = signalStore(
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     saving: false,
-                    error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien'),
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
                   }),
               }),
             ),
@@ -262,7 +267,13 @@ export const BienCreationStore = signalStore(
                   }));
                 },
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
+                  }),
               }),
             );
           }),
@@ -332,7 +343,13 @@ export const BienCreationStore = signalStore(
                     }));
                   },
                   error: (err: HttpErrorResponse) =>
-                    patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien') }),
+                    patchState(store, {
+                      saving: false,
+                      error: resolveHttpErrorMessage(
+                        err,
+                        'Erreur lors de la sauvegarde du bien',
+                      ),
+                    }),
                 }),
               );
           }),
@@ -359,7 +376,13 @@ export const BienCreationStore = signalStore(
                     saving: false,
                   })),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
+                  }),
               }),
             );
           }),
@@ -383,7 +406,13 @@ export const BienCreationStore = signalStore(
                     saving: false,
                   })),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
+                  }),
               }),
             );
           }),
@@ -479,7 +508,10 @@ export const BienCreationStore = signalStore(
                   patchState(store, {
                     saving: false,
                     documentUploadStage: 'idle',
-                    error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien'),
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
                   }),
               }),
             );
@@ -504,7 +536,13 @@ export const BienCreationStore = signalStore(
                     saving: false,
                   })),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
+                  }),
               }),
             );
           }),
@@ -523,7 +561,13 @@ export const BienCreationStore = signalStore(
                 next: (property: PropertyResponse) =>
                   patchState(store, { property, saving: false }),
                 error: (err: HttpErrorResponse) =>
-                  patchState(store, { saving: false, error: resolveHttpErrorMessage(err, 'Erreur lors de la sauvegarde du bien') }),
+                  patchState(store, {
+                    saving: false,
+                    error: resolveHttpErrorMessage(
+                      err,
+                      'Erreur lors de la sauvegarde du bien',
+                    ),
+                  }),
               }),
             );
           }),

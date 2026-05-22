@@ -1,0 +1,99 @@
+<div class="admin-mandates-page">
+  <header class="admin-mandates-page__header">
+    <div>
+      <p class="admin-mandates-page__eyebrow">Back-office UBAX</p>
+      <div class="admin-mandates-page__title-row">
+        <h1>Mandats de gestion</h1>
+        <span>{{ totalCount() }} mandat(s)</span>
+      </div>
+      <p>
+        Supervisez les mandats de toutes les agences et activez ceux qui
+        reviennent signés.
+      </p>
+    </div>
+  </header>
+
+  <ubax-section-card bodyClass="p-0">
+    <ubax-search-filter-bar
+      placeholder="Rechercher par référence, agence ou bailleur"
+      [filters]="searchFilters()"
+      (searchChange)="onSearchChange($event)"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    @if (loading()) {
+      <div class="admin-mandates-page__state">Chargement des mandats…</div>
+    } @else {
+      <ubax-ui-data-table
+        [columns]="tableColumns"
+        [rows]="pagedRows()"
+        rowIdKey="id"
+      >
+        <ng-template ubaxDataTableEmpty>
+          <ubax-empty-state
+            icon="pi pi-briefcase"
+            title="Aucun mandat"
+            [description]="
+              searchQuery()
+                ? 'Aucun mandat ne correspond à vos filtres.'
+                : 'Aucun mandat administrable pour le moment.'
+            "
+          />
+        </ng-template>
+
+        <ng-template ubaxDataTableCell="referenceNumber" let-mandate>
+          <strong>{{ mandate.referenceNumber || mandate.id }}</strong>
+        </ng-template>
+
+        <ng-template ubaxDataTableCell="agency" let-mandate>
+          {{ mandate.agencyName || '—' }}
+        </ng-template>
+
+        <ng-template ubaxDataTableCell="owner" let-mandate>
+          <div class="admin-mandates-page__owner-cell">
+            <strong>{{ mandate.ownerFullName || '—' }}</strong>
+            <span>{{ mandate.ownerPhone || 'Téléphone non renseigné' }}</span>
+          </div>
+        </ng-template>
+
+        <ng-template ubaxDataTableCell="status" let-mandate>
+          <ubax-status-badge [variant]="statusVariant(mandate.status)">
+            {{ statusLabel(mandate.status) }}
+          </ubax-status-badge>
+        </ng-template>
+
+        <ng-template ubaxDataTableCell="createdAt" let-mandate>
+          {{
+            mandate.createdAt ? (mandate.createdAt | date: 'dd/MM/yyyy') : '—'
+          }}
+        </ng-template>
+
+        <ng-template ubaxDataTableCell="actions" let-mandate>
+          @if (mandate.status === 'PENDING_SIGNATURE') {
+            <button
+              type="button"
+              class="admin-mandates-page__activate-btn"
+              [disabled]="actionLoading() || activatingId() === mandate.id"
+              (click)="activateMandate(mandate)"
+            >
+              Activer
+            </button>
+          } @else {
+            <span class="admin-mandates-page__muted">—</span>
+          }
+        </ng-template>
+      </ubax-ui-data-table>
+
+      @if (filteredMandates().length > pageSize) {
+        <footer class="admin-mandates-page__pagination">
+          <ubax-ui-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            variant="members"
+            (pageChange)="onPageChange($event)"
+          />
+        </footer>
+      }
+    }
+  </ubax-section-card>
+</div>

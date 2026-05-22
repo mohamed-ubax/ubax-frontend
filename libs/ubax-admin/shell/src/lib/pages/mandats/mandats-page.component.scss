@@ -1,0 +1,73 @@
+.admin-mandates-page {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-mandates-page__header {
+  h1 {
+    margin: 8px 0;
+    font-size: 2rem;
+    color: var(--ubax-navy);
+  }
+
+  p {
+    margin: 0;
+    color: #61758a;
+  }
+}
+
+.admin-mandates-page__eyebrow {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a6b29;
+}
+
+.admin-mandates-page__title-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  span {
+    color: #61758a;
+    font-weight: 600;
+  }
+}
+
+.admin-mandates-page__owner-cell {
+  display: grid;
+  gap: 4px;
+
+  span {
+    color: #61758a;
+  }
+}
+
+.admin-mandates-page__activate-btn {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ubax-accent);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-mandates-page__muted,
+.admin-mandates-page__state {
+  color: #61758a;
+}
+
+.admin-mandates-page__state {
+  padding: 32px;
+  text-align: center;
+}
+
+.admin-mandates-page__pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 24px;
+}

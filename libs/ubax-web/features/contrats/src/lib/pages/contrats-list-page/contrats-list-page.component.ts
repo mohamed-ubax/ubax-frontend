@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import {
@@ -60,6 +60,7 @@ const STATUS_VARIANTS: Record<ContractStatus, StatusVariant> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContratsListPageComponent {
+  private readonly router = inject(Router);
   protected readonly store = inject(ContratsStore);
 
   readonly searchValue = signal('');
@@ -166,9 +167,18 @@ export class ContratsListPageComponent {
     return `${count} contrat${count > 1 ? 's' : ''}`;
   });
 
+  private shouldLoadContracts(): boolean {
+    const url = this.router.url.split('?')[0]?.replace(/\/+$/, '') || '';
+    return url === '/contrats';
+  }
+
   constructor() {
     effect(
       () => {
+        if (!this.shouldLoadContracts()) {
+          return;
+        }
+
         this.store.load!({ pageable: { page: 0, size: 100, sort: [] } });
         this.store.loadStats();
       },

@@ -13,6 +13,18 @@
         class="biens-page__actions"
         [class.biens-page__actions--entering]="contentEntering()"
       >
+        <a
+          class="action-button action-button--secondary"
+          routerLink="bailleurs"
+        >
+          <span class="action-button__label">Bailleurs</span>
+        </a>
+        <a
+          class="action-button action-button--secondary"
+          routerLink="bailleurs/demandes"
+        >
+          <span class="action-button__label">Demandes bailleur</span>
+        </a>
         <a class="action-button action-button--primary" routerLink="ajouter">
           <span class="action-button__label">Ajouter un bien</span>
           <span class="action-button__icon-shell" aria-hidden="true">
@@ -760,7 +772,9 @@
                         : bien.category
                   }}</span>
 
-                  <span class="bien-list-card__price-badge">{{ bien.price }}</span>
+                  <span class="bien-list-card__price-badge">{{
+                    bien.price
+                  }}</span>
                 </div>
 
                 <div class="bien-list-card__content">
