@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
+  AuthStore,
   MandatesStore,
   type Mandate,
 } from '@ubax-workspace/ubax-web-data-access';
@@ -22,6 +23,8 @@ import {
 import {
   NOTIFICATION_HANDLER,
   type NotificationHandler,
+  UbaxRole,
+  UbaxSubRole,
 } from '@ubax-workspace/shared-data-access';
 import { map } from 'rxjs';
 
@@ -44,6 +47,7 @@ export class MandatsDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly document = inject(DOCUMENT);
   protected readonly store = inject(MandatesStore);
+  private readonly authStore = inject(AuthStore);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
@@ -57,6 +61,7 @@ export class MandatsDetailPageComponent {
   protected readonly showSubmitDialog = signal(false);
   protected readonly showCancelDialog = signal(false);
   protected readonly showTerminateDialog = signal(false);
+  protected readonly showActivateDialog = signal(false);
   protected readonly terminateReason = signal('');
   protected readonly terminateReasonError = signal<string | null>(null);
 
@@ -70,6 +75,14 @@ export class MandatsDetailPageComponent {
   protected readonly canTerminate = computed(
     () => this.mandate()?.status === 'ACTIVE',
   );
+  protected readonly canActivate = computed(() => {
+    if (this.mandate()?.status !== 'PENDING_SIGNATURE') return false;
+    const user = this.authStore.user();
+    return (
+      user?.mainRole === UbaxRole.PARTNER_ADMIN &&
+      user?.subRole === UbaxSubRole.DIRECTEUR_AGENCE
+    );
+  });
 
   constructor() {
     effect(() => {
@@ -84,7 +97,8 @@ export class MandatsDetailPageComponent {
       const hasOverlay =
         this.showSubmitDialog() ||
         this.showCancelDialog() ||
-        this.showTerminateDialog();
+        this.showTerminateDialog() ||
+        this.showActivateDialog();
       this.document.body.classList.toggle('ubax-overlay-open', hasOverlay);
     });
 
@@ -116,6 +130,15 @@ export class MandatsDetailPageComponent {
       this.notifications?.success('Mandat résilié.');
       this.store.clearActionFeedback();
     });
+
+    effect(() => {
+      const activatedId = this.store.lastActivatedId();
+      if (!activatedId) return;
+      this.showActivateDialog.set(false);
+      this.document.body.classList.remove('ubax-overlay-open');
+      this.notifications?.success('Mandat activé.');
+      this.store.clearActionFeedback();
+    });
   }
 
   protected submitMandate(): void {
@@ -129,6 +152,13 @@ export class MandatsDetailPageComponent {
     const id = this.mandateId();
     if (id && this.canCancel()) {
       this.store.cancelMandate(id);
+    }
+  }
+
+  protected activateMandate(): void {
+    const id = this.mandateId();
+    if (id && this.canActivate()) {
+      this.store.activateMandate(id);
     }
   }
 
