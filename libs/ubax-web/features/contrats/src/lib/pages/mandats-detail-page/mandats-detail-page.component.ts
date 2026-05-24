@@ -16,7 +16,6 @@ import {
   type Mandate,
 } from '@ubax-workspace/ubax-web-data-access';
 import {
-  SectionCardComponent,
   StatusBadgeComponent,
   type StatusVariant,
 } from '@ubax-workspace/shared-design-system';
@@ -35,7 +34,6 @@ import { map } from 'rxjs';
     DatePipe,
     FormsModule,
     RouterLink,
-    SectionCardComponent,
     StatusBadgeComponent,
   ],
   providers: [MandatesStore],

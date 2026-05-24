@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   OnInit,
   signal,
+  untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -22,7 +24,11 @@ import {
   FINANCE_Y_AXIS_LABELS,
 } from '../../constants/finance-ui.constants';
 import type { FinanceTransactionFilterValue } from '../../types/finance.types';
-import { ExpensesStore, mapExpenseToRow, PaymentsStore } from '@ubax-workspace/ubax-web-data-access';
+import {
+  ExpensesStore,
+  mapExpenseToRow,
+  PaymentsStore,
+} from '@ubax-workspace/ubax-web-data-access';
 
 const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   MAINTENANCE: 'Entretien',
@@ -89,11 +95,22 @@ const ACTIVE_REVENUE_PLUGIN: Plugin<'line'> = {
 export class FinanceOverviewPageComponent implements OnInit {
   private readonly paymentsStore = inject(PaymentsStore);
   private readonly expensesStore = inject(ExpensesStore);
+  private readonly syncTenantNamesEffect = effect(() => {
+    const tenantIds = this.paymentsStore.paymentTenantIds();
+
+    if (tenantIds.length === 0) {
+      return;
+    }
+
+    untracked(() => this.paymentsStore.ensureTenantNames(tenantIds));
+  });
 
   protected readonly assets = FINANCE_ASSETS;
   protected readonly monthLabels = FINANCE_MONTH_LABELS;
   protected readonly yAxisLabels = FINANCE_Y_AXIS_LABELS;
-  protected readonly transactionTypeOptions = [...FINANCE_TRANSACTION_TYPE_OPTIONS];
+  protected readonly transactionTypeOptions = [
+    ...FINANCE_TRANSACTION_TYPE_OPTIONS,
+  ];
   protected readonly selectedType =
     signal<FinanceTransactionFilterValue>('all');
   protected readonly searchQuery = signal('');
@@ -102,7 +119,9 @@ export class FinanceOverviewPageComponent implements OnInit {
   protected readonly activeRevenueLabel =
     FINANCE_REVENUE_SERIES[ACTIVE_REVENUE_INDEX]?.amountLabel ?? '';
 
-  protected readonly isLoadingDashboard = computed(() => this.paymentsStore.isLoadingDashboard());
+  protected readonly isLoadingDashboard = computed(() =>
+    this.paymentsStore.isLoadingDashboard(),
+  );
 
   protected readonly summaryCards = computed(() => {
     const encaissement = this.paymentsStore.kpiEncaissement();
@@ -155,9 +174,7 @@ export class FinanceOverviewPageComponent implements OnInit {
 
   protected readonly overdueItems = computed(() => {
     const rows = this.paymentsStore.latePaymentRows();
-    if (rows.length === 0) return FINANCE_SUMMARY_CARDS[0].amount
-      ? []
-      : [];
+    if (rows.length === 0) return FINANCE_SUMMARY_CARDS[0].amount ? [] : [];
     return rows.slice(0, 7).map((row) => ({
       name: row.tenant,
       property: row.property,
@@ -174,7 +191,8 @@ export class FinanceOverviewPageComponent implements OnInit {
     const tones = ['blue', 'yellow', 'green', 'purple', 'orange'] as const;
     return categories.slice(0, 5).map((c, i) => ({
       label: c.category ?? '—',
-      ratio: total > 0 ? `${Math.round(((c.amount ?? 0) / total) * 100)} %` : '—',
+      ratio:
+        total > 0 ? `${Math.round(((c.amount ?? 0) / total) * 100)} %` : '—',
       value: total > 0 ? Math.round(((c.amount ?? 0) / total) * 100) : 0,
       tone: tones[i % tones.length],
     }));
@@ -207,12 +225,17 @@ export class FinanceOverviewPageComponent implements OnInit {
     const selectedType = this.selectedType();
     const apiRows = this.paymentsStore.paymentRows();
     const rows =
-      apiRows.length > 0 ? apiRows : [...FINANCE_OVERVIEW_TRANSACTIONS].map((t, i) => ({ ...t, id: `static-${i}`, rawStatus: t.status === 'payee' ? 'PAID' : 'PENDING' }));
+      apiRows.length > 0
+        ? apiRows
+        : [...FINANCE_OVERVIEW_TRANSACTIONS].map((t, i) => ({
+            ...t,
+            id: `static-${i}`,
+            rawStatus: t.status === 'payee' ? 'PAID' : 'PENDING',
+          }));
 
     return rows
       .filter((t) => {
-        const matchesType =
-          selectedType === 'all' || t.type === selectedType;
+        const matchesType = selectedType === 'all' || t.type === selectedType;
         const matchesQuery =
           query.length === 0 ||
           [t.date, t.reference, t.property, t.tenant, t.amount]

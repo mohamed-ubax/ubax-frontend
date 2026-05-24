@@ -43,7 +43,11 @@ const PAYMENT_METHOD_OPTIONS = [
 @Component({
   selector: 'ubax-update-statut-paiement-dialog',
   standalone: true,
-  imports: [UiFormSelectComponent, UiFormInputComponent, UiFormDatePickerComponent],
+  imports: [
+    UiFormSelectComponent,
+    UiFormInputComponent,
+    UiFormDatePickerComponent,
+  ],
   templateUrl: './update-statut-paiement-dialog.component.html',
   styleUrl: './update-statut-paiement-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,7 +69,6 @@ export class UpdateStatutPaiementDialogComponent implements OnInit, OnDestroy {
   protected readonly amountPaid = signal('');
   protected readonly hasPaidDate = signal(false);
   protected readonly paidDate = signal<Date>(new Date());
-  protected readonly receiptUrl = signal('');
   protected readonly note = signal('');
 
   protected readonly isValid = computed(() => !!this.status());
@@ -81,15 +84,15 @@ export class UpdateStatutPaiementDialogComponent implements OnInit, OnDestroy {
 
   protected submit(): void {
     if (!this.isValid() || this.loading()) return;
-    const body: PaymentStatusUpdateRequest = {
+    const body = {
       status: this.status() as PaymentStatusUpdateRequest['status'],
       paymentMethod: (this.paymentMethod() ||
         undefined) as PaymentStatusUpdateRequest['paymentMethod'],
       amountPaid: this.amountPaid() ? +this.amountPaid() : undefined,
       paidDate: this.hasPaidDate() ? toIsoDate(this.paidDate()) : undefined,
-      receiptUrl: this.receiptUrl() || undefined,
+      receiptUrl: undefined,
       note: this.note() || undefined,
-    };
+    } as PaymentStatusUpdateRequest;
     this.confirm.emit(body);
   }
 }

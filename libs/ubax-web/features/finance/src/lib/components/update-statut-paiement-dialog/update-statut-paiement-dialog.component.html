@@ -1,9 +1,18 @@
 <div class="dlg-overlay" (click)="dismissed.emit()">
-  <dialog class="dlg dlg--form" (click)="$event.stopPropagation()" aria-labelledby="dlg-statut-title" open>
-
+  <dialog
+    class="dlg dlg--form"
+    (click)="$event.stopPropagation()"
+    aria-labelledby="dlg-statut-title"
+    open
+  >
     <div class="dlg__header">
       <h2 class="dlg__title" id="dlg-statut-title">Mettre à jour le statut</h2>
-      <button class="dlg__close" type="button" aria-label="Fermer" (click)="dismissed.emit()">
+      <button
+        class="dlg__close"
+        type="button"
+        aria-label="Fermer"
+        (click)="dismissed.emit()"
+      >
         <i class="pi pi-times" aria-hidden="true"></i>
       </button>
     </div>
@@ -33,23 +42,18 @@
         />
         <div class="dlg-form__optional-date">
           <label class="dlg-form__toggle">
-            <input type="checkbox" [checked]="hasPaidDate()" (change)="hasPaidDate.set($any($event.target).checked)" />
+            <input
+              type="checkbox"
+              [checked]="hasPaidDate()"
+              (change)="hasPaidDate.set($any($event.target).checked)"
+            />
             <span>Date de réception</span>
           </label>
           @if (hasPaidDate()) {
-            <ubax-ui-form-date-picker
-              label=""
-              [(value)]="paidDate"
-            />
+            <ubax-ui-form-date-picker label="" [(value)]="paidDate" />
           }
         </div>
       </div>
-
-      <ubax-ui-form-input
-        label="URL du reçu"
-        placeholder="https://…"
-        [(value)]="receiptUrl"
-      />
 
       <label class="dlg-form__field">
         <span class="dlg-form__label">Note</span>
@@ -70,10 +74,20 @@
     <div class="dlg__divider" aria-hidden="true"></div>
 
     <div class="dlg__actions">
-      <button class="dlg-btn dlg-btn--ghost" type="button" (click)="dismissed.emit()" [disabled]="loading()">
+      <button
+        class="dlg-btn dlg-btn--ghost"
+        type="button"
+        (click)="dismissed.emit()"
+        [disabled]="loading()"
+      >
         Annuler
       </button>
-      <button class="dlg-btn dlg-btn--primary" type="button" (click)="submit()" [disabled]="!isValid() || loading()">
+      <button
+        class="dlg-btn dlg-btn--primary"
+        type="button"
+        (click)="submit()"
+        [disabled]="!isValid() || loading()"
+      >
         @if (loading()) {
           <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Mise à jour…
         } @else {
@@ -81,6 +95,5 @@
         }
       </button>
     </div>
-
   </dialog>
 </div>

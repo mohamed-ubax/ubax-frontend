@@ -20,15 +20,27 @@ import {
   create5,
   delete2,
   getAgencyDashboard,
+  getById4,
   getById6,
   list3,
   listLate,
   PaymentCreateRequest,
   PaymentResponse,
   PaymentStatusUpdateRequest,
+  TenantResponse,
   updateStatus2,
 } from '@ubax-workspace/shared-api-types';
-import { exhaustMap, pipe, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  exhaustMap,
+  forkJoin,
+  map,
+  of,
+  pipe,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 export type Payment = PaymentResponse & { id: string };
 
@@ -44,6 +56,8 @@ type FinanceState = {
   lastCreatedPaymentId: string | null;
   updatingStatusId: string | null;
   updateStatusError: string | null;
+  tenantNames: Record<string, string>;
+  resolvingTenantIds: Record<string, true>;
 };
 
 const initialFinanceState: FinanceState = {
@@ -58,6 +72,8 @@ const initialFinanceState: FinanceState = {
   lastCreatedPaymentId: null,
   updatingStatusId: null,
   updateStatusError: null,
+  tenantNames: {},
+  resolvingTenantIds: {},
 };
 
 function normalizePayment(raw: unknown, fallbackId = ''): Payment {
@@ -67,7 +83,10 @@ function normalizePayment(raw: unknown, fallbackId = ''): Payment {
     r['data'] && typeof r['data'] === 'object'
       ? (r['data'] as Record<string, unknown>)
       : r;
-  return { ...(src as PaymentResponse), id: (src['id'] as string) ?? fallbackId };
+  return {
+    ...(src as PaymentResponse),
+    id: (src['id'] as string) ?? fallbackId,
+  };
 }
 
 function extractPaymentList(raw: unknown): Payment[] {
@@ -111,7 +130,40 @@ function computeDelayDays(dueDate: string | undefined): string {
   return days > 0 ? `${days} jours` : '—';
 }
 
-export function mapPaymentToRow(p: Payment) {
+function normalizeTenantName(raw: unknown): string {
+  if (!raw || typeof raw !== 'object') {
+    return '—';
+  }
+
+  const record = raw as { data?: unknown } & Record<string, unknown>;
+  const source =
+    record.data && typeof record.data === 'object'
+      ? (record.data as Record<string, unknown>)
+      : record;
+  const fullName = source['fullName'];
+
+  return typeof fullName === 'string' && fullName.trim().length > 0
+    ? fullName.trim()
+    : '—';
+}
+
+function resolvePaymentTenantName(
+  payment: Payment,
+  tenantNames: Record<string, string>,
+): string {
+  const tenantId = payment.tenantId?.trim();
+
+  if (tenantId) {
+    return tenantNames[tenantId] ?? '—';
+  }
+
+  return payment.recordedByName ?? '—';
+}
+
+export function mapPaymentToRow(
+  p: Payment,
+  tenantNames: Record<string, string> = {},
+) {
   const isRent = p.paymentType === 'RENT';
   return {
     id: p.id,
@@ -119,21 +171,21 @@ export function mapPaymentToRow(p: Payment) {
     reference: p.reference ?? '—',
     type: isRent ? ('loyer' as const) : ('depense' as const),
     property: p.periodLabel ?? '—',
-    tenant: p.recordedByName ?? '—',
+    tenant: resolvePaymentTenantName(p, tenantNames),
     amount: formatAmount(p.amount),
-    status:
-      p.status === 'PAID'
-        ? ('payee' as const)
-        : ('en-attente' as const),
+    status: p.status === 'PAID' ? ('payee' as const) : ('en-attente' as const),
     rawStatus: p.status,
   };
 }
 
-export function mapLatePaymentToRow(p: Payment) {
+export function mapLatePaymentToRow(
+  p: Payment,
+  tenantNames: Record<string, string> = {},
+) {
   return {
     id: p.id,
     uid: `late-${p.id}`,
-    tenant: p.recordedByName ?? '—',
+    tenant: resolvePaymentTenantName(p, tenantNames),
     property: p.periodLabel ?? '—',
     amount: formatAmount(p.amount),
     dueDate: formatDate(p.dueDate),
@@ -145,7 +197,14 @@ export function mapLatePaymentToRow(p: Payment) {
 
 export const PaymentsStore = signalStore(
   { providedIn: 'root' },
-  withApiResource<Payment, typeof list3, typeof getById6, typeof create5, typeof updateStatus2, typeof delete2>({
+  withApiResource<
+    Payment,
+    typeof list3,
+    typeof getById6,
+    typeof create5,
+    typeof updateStatus2,
+    typeof delete2
+  >({
     list: list3,
     getById: getById6,
     create: create5,
@@ -160,39 +219,132 @@ export const PaymentsStore = signalStore(
     mapUpdate: (raw) => normalizePayment(raw),
   }),
   withState(initialFinanceState),
-  withComputed(({ entities, dashboard, latePayments, loadingDashboard }) => ({
-    isLoadingDashboard: computed(() => loadingDashboard()),
-    paymentRows: computed(() => entities().map(mapPaymentToRow)),
-    latePaymentRows: computed(() => latePayments().map(mapLatePaymentToRow)),
-    kpiEncaissement: computed(() =>
-      dashboard()?.totalRevenue != null
-        ? formatAmount(dashboard()!.totalRevenue)
-        : null,
-    ),
-    kpiDepenses: computed(() =>
-      dashboard()?.totalExpenses != null
-        ? formatAmount(dashboard()!.totalExpenses)
-        : null,
-    ),
-    kpiLoyerAttente: computed(() =>
-      dashboard()?.overdueAmount != null
-        ? formatAmount(dashboard()!.overdueAmount)
-        : null,
-    ),
-    kpiSolde: computed(() =>
-      dashboard()?.netRevenue != null
-        ? formatAmount(dashboard()!.netRevenue)
-        : null,
-    ),
-    kpiPendingCount: computed(() => dashboard()?.pendingPaymentsCount ?? null),
-    kpiLateCount: computed(() => dashboard()?.latePaymentsCount ?? null),
-    kpiPaidCount: computed(() => dashboard()?.paidPaymentsCount ?? null),
-    kpiRecoveryRate: computed(() => dashboard()?.recoveryRate ?? null),
-    kpiActiveContracts: computed(() => dashboard()?.activeContracts ?? null),
-    expensesByCategory: computed(() => dashboard()?.expensesByCategory ?? []),
-  })),
+  withComputed(
+    ({ entities, dashboard, latePayments, loadingDashboard, tenantNames }) => ({
+      isLoadingDashboard: computed(() => loadingDashboard()),
+      paymentRows: computed(() =>
+        entities().map((payment) => mapPaymentToRow(payment, tenantNames())),
+      ),
+      latePaymentRows: computed(() =>
+        latePayments().map((payment) =>
+          mapLatePaymentToRow(payment, tenantNames()),
+        ),
+      ),
+      paymentTenantIds: computed(() =>
+        Array.from(
+          new Set(
+            [...entities(), ...latePayments()]
+              .map((payment) => payment.tenantId?.trim())
+              .filter((tenantId): tenantId is string => !!tenantId),
+          ),
+        ),
+      ),
+      kpiEncaissement: computed(() =>
+        dashboard()?.totalRevenue != null
+          ? formatAmount(dashboard()!.totalRevenue)
+          : null,
+      ),
+      kpiDepenses: computed(() =>
+        dashboard()?.totalExpenses != null
+          ? formatAmount(dashboard()!.totalExpenses)
+          : null,
+      ),
+      kpiLoyerAttente: computed(() =>
+        dashboard()?.overdueAmount != null
+          ? formatAmount(dashboard()!.overdueAmount)
+          : null,
+      ),
+      kpiSolde: computed(() =>
+        dashboard()?.netRevenue != null
+          ? formatAmount(dashboard()!.netRevenue)
+          : null,
+      ),
+      kpiPendingCount: computed(
+        () => dashboard()?.pendingPaymentsCount ?? null,
+      ),
+      kpiLateCount: computed(() => dashboard()?.latePaymentsCount ?? null),
+      kpiPaidCount: computed(() => dashboard()?.paidPaymentsCount ?? null),
+      kpiRecoveryRate: computed(() => dashboard()?.recoveryRate ?? null),
+      kpiActiveContracts: computed(() => dashboard()?.activeContracts ?? null),
+      expensesByCategory: computed(() => dashboard()?.expensesByCategory ?? []),
+    }),
+  ),
   withMethods(
-    (store, http = inject(HttpClient), apiConfig = inject(ApiConfiguration)) => ({
+    (
+      store,
+      http = inject(HttpClient),
+      apiConfig = inject(ApiConfiguration),
+    ) => ({
+      ensureTenantNames: rxMethod<readonly string[]>(
+        pipe(
+          concatMap((tenantIds) => {
+            const uniqueTenantIds = Array.from(
+              new Set(
+                tenantIds
+                  .map((tenantId) => tenantId?.trim())
+                  .filter((tenantId): tenantId is string => !!tenantId),
+              ),
+            );
+            const knownTenantNames = store.tenantNames();
+            const resolvingTenantIds = store.resolvingTenantIds();
+            const missingTenantIds = uniqueTenantIds.filter(
+              (tenantId) =>
+                knownTenantNames[tenantId] == null &&
+                resolvingTenantIds[tenantId] !== true,
+            );
+
+            if (missingTenantIds.length === 0) {
+              return of([] as Array<{ id: string; fullName: string }>);
+            }
+
+            patchState(store, {
+              resolvingTenantIds: {
+                ...resolvingTenantIds,
+                ...Object.fromEntries(
+                  missingTenantIds.map((tenantId) => [tenantId, true] as const),
+                ),
+              },
+            });
+
+            return forkJoin(
+              missingTenantIds.map((tenantId) =>
+                getById4(http, apiConfig.rootUrl, { id: tenantId }).pipe(
+                  map((response) => ({
+                    id: tenantId,
+                    fullName: normalizeTenantName(
+                      response.body as TenantResponse,
+                    ),
+                  })),
+                  catchError(() =>
+                    of({
+                      id: tenantId,
+                      fullName: '—',
+                    }),
+                  ),
+                ),
+              ),
+            ).pipe(
+              tap((resolvedTenants) => {
+                const nextTenantNames = { ...store.tenantNames() };
+                const nextResolvingTenantIds = {
+                  ...store.resolvingTenantIds(),
+                };
+
+                for (const tenant of resolvedTenants) {
+                  nextTenantNames[tenant.id] = tenant.fullName;
+                  delete nextResolvingTenantIds[tenant.id];
+                }
+
+                patchState(store, {
+                  tenantNames: nextTenantNames,
+                  resolvingTenantIds: nextResolvingTenantIds,
+                });
+              }),
+            );
+          }),
+        ),
+      ),
+
       loadLatePayments: rxMethod<void>(
         pipe(
           tap(() => patchState(store, { loadingLate: true, lateError: null })),
@@ -213,12 +365,18 @@ export const PaymentsStore = signalStore(
                       items = extractPaymentList(raw);
                     }
                   }
-                  patchState(store, { latePayments: items, loadingLate: false });
+                  patchState(store, {
+                    latePayments: items,
+                    loadingLate: false,
+                  });
                 },
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     loadingLate: false,
-                    lateError: resolveHttpErrorMessage(err, 'Erreur chargement loyers en retard'),
+                    lateError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur chargement loyers en retard',
+                    ),
                   }),
               }),
             ),
@@ -228,9 +386,15 @@ export const PaymentsStore = signalStore(
 
       loadDashboard: rxMethod<{ from?: string; to?: string } | void>(
         pipe(
-          tap(() => patchState(store, { loadingDashboard: true, dashboardError: null })),
+          tap(() =>
+            patchState(store, { loadingDashboard: true, dashboardError: null }),
+          ),
           switchMap((params) =>
-            getAgencyDashboard(http, apiConfig.rootUrl, params ?? undefined).pipe(
+            getAgencyDashboard(
+              http,
+              apiConfig.rootUrl,
+              params ?? undefined,
+            ).pipe(
               tapResponse({
                 next: (r) => {
                   const raw = r.body as unknown;
@@ -239,12 +403,18 @@ export const PaymentsStore = signalStore(
                     const rec = raw as Record<string, unknown>;
                     data = (rec['data'] ?? raw) as AgencyDashboardResponse;
                   }
-                  patchState(store, { dashboard: data, loadingDashboard: false });
+                  patchState(store, {
+                    dashboard: data,
+                    loadingDashboard: false,
+                  });
                 },
                 error: (err: HttpErrorResponse) =>
                   patchState(store, {
                     loadingDashboard: false,
-                    dashboardError: resolveHttpErrorMessage(err, 'Erreur chargement tableau de bord'),
+                    dashboardError: resolveHttpErrorMessage(
+                      err,
+                      'Erreur chargement tableau de bord',
+                    ),
                   }),
               }),
             ),
@@ -289,10 +459,16 @@ export const PaymentsStore = signalStore(
         ),
       ),
 
-      updatePaymentStatus: rxMethod<{ id: string; body: PaymentStatusUpdateRequest }>(
+      updatePaymentStatus: rxMethod<{
+        id: string;
+        body: PaymentStatusUpdateRequest;
+      }>(
         pipe(
           tap(({ id }) =>
-            patchState(store, { updatingStatusId: id, updateStatusError: null }),
+            patchState(store, {
+              updatingStatusId: id,
+              updateStatusError: null,
+            }),
           ),
           exhaustMap(({ id, body }) =>
             updateStatus2(http, apiConfig.rootUrl, { id, body }).pipe(
