@@ -6,6 +6,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import {
   FINANCE_ASSETS,
@@ -23,7 +24,7 @@ const PAGE_SIZE = 8;
 @Component({
   selector: 'ubax-transactions-history-page',
   standalone: true,
-  imports: [UbaxPaginatorComponent, NouvelleTransactionDialogComponent, UpdateStatutPaiementDialogComponent],
+  imports: [RouterLink, UbaxPaginatorComponent, NouvelleTransactionDialogComponent, UpdateStatutPaiementDialogComponent],
   templateUrl: './transactions-history-page.component.html',
   styleUrl: './transactions-history-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -159,7 +160,7 @@ export class TransactionsHistoryPageComponent implements OnInit {
     this.paymentsStore.createPayment(body);
   }
 
-  protected openUpdateStatus(paymentId: string, rawStatus: string): void {
+  protected openUpdateStatus(paymentId: string, rawStatus: string | undefined): void {
     this.selectedPaymentId.set(paymentId);
     this.selectedPaymentStatus.set(rawStatus ?? 'PENDING');
     this.isUpdateStatusOpen.set(true);

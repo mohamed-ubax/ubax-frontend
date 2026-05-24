@@ -197,27 +197,26 @@
     display: flex;
     align-items: center;
     gap: 6px;
+  }
 
-    button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.15s;
+  &__action-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    transition: background 0.15s;
+    text-decoration: none;
 
-      &:hover {
-        background: var(--ubax-surface-muted, #f1f5f9);
-      }
+    &:hover {
+      background: var(--ubax-surface-muted, #f1f5f9);
+    }
 
-      img {
-        width: 18px;
-        height: 18px;
-      }
+    img {
+      width: 18px;
+      height: 18px;
     }
   }
 

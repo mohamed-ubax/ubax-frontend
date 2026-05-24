@@ -1,0 +1,155 @@
+<section class="detail-page" data-ubax-motion="page">
+
+  <header class="detail-page__header">
+    <a class="detail-back" routerLink="/finances/transactions" aria-label="Retour aux transactions">
+      <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      <span>Retour</span>
+    </a>
+
+    <div class="detail-page__title-block">
+      <h1 class="detail-page__title">Détails du paiement</h1>
+      @if (payment()) {
+        <span
+          class="status-badge"
+          [class.status-badge--success]="statusTone() === 'success'"
+          [class.status-badge--warning]="statusTone() === 'warning'"
+          [class.status-badge--danger]="statusTone() === 'danger'"
+          [class.status-badge--info]="statusTone() === 'info'"
+          [class.status-badge--neutral]="statusTone() === 'neutral'"
+        >
+          <span class="status-badge__dot"></span>
+          {{ statusLabel() }}
+        </span>
+      }
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="detail-page__state">
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+      <span>Chargement…</span>
+    </div>
+  } @else if (error()) {
+    <div class="detail-page__state detail-page__state--error">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      <span>{{ error() }}</span>
+    </div>
+  } @else if (payment()) {
+
+    <div class="detail-page__kpi-row">
+      <article class="kpi-card" data-ubax-motion="surface">
+        <span class="kpi-card__label">Montant total</span>
+        <strong class="kpi-card__value">{{ amountFormatted() }}</strong>
+      </article>
+      <article class="kpi-card" data-ubax-motion="surface">
+        <span class="kpi-card__label">Montant reçu</span>
+        <strong class="kpi-card__value kpi-card__value--paid">{{ amountPaidFormatted() }}</strong>
+      </article>
+      <article class="kpi-card" data-ubax-motion="surface">
+        <span class="kpi-card__label">Type</span>
+        <strong class="kpi-card__value">{{ typeLabel() }}</strong>
+      </article>
+      <article class="kpi-card" data-ubax-motion="surface">
+        <span class="kpi-card__label">Date d'échéance</span>
+        <strong class="kpi-card__value">{{ dueDateFormatted() }}</strong>
+      </article>
+    </div>
+
+    <section class="detail-card" data-ubax-motion="surface">
+      <h2 class="detail-card__title">Informations</h2>
+      <div class="detail-card__divider"></div>
+
+      <dl class="detail-grid">
+        <div class="detail-grid__item">
+          <dt>Référence</dt>
+          <dd>{{ payment()?.reference ?? '—' }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Période couverte</dt>
+          <dd>{{ payment()?.periodLabel ?? '—' }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Date de réception</dt>
+          <dd>{{ paidDateFormatted() }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Mode de paiement</dt>
+          <dd>{{ methodLabel() }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Enregistré par</dt>
+          <dd>{{ payment()?.recordedByName ?? '—' }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Créé le</dt>
+          <dd>{{ createdAtFormatted() }}</dd>
+        </div>
+      </dl>
+
+      @if (payment()?.note) {
+        <div class="detail-card__divider"></div>
+        <div class="detail-note">
+          <span class="detail-note__label">Note</span>
+          <p class="detail-note__text">{{ payment()?.note }}</p>
+        </div>
+      }
+    </section>
+
+    @if (payment()?.receiptUrl) {
+      <section class="detail-card detail-card--document" data-ubax-motion="surface">
+        <h2 class="detail-card__title">Reçu de paiement</h2>
+        <div class="detail-card__divider"></div>
+
+        <div class="document-row">
+          <div class="document-row__info">
+            <span class="document-row__icon">
+              <i class="pi pi-file" aria-hidden="true"></i>
+            </span>
+            <span class="document-row__name">Reçu</span>
+          </div>
+          <button
+            class="document-row__btn"
+            type="button"
+            [disabled]="previewLoading()"
+            (click)="openReceipt()"
+          >
+            @if (previewLoading()) {
+              <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+              Chargement…
+            } @else {
+              <i class="pi pi-eye" aria-hidden="true"></i>
+              Prévisualiser
+            }
+          </button>
+        </div>
+      </section>
+    }
+
+  }
+</section>
+
+@if (previewUrl()) {
+  <div class="preview-overlay" (click)="closePreview()">
+    <div class="preview-modal" (click)="$event.stopPropagation()">
+      <div class="preview-modal__header">
+        <span class="preview-modal__title">Reçu de paiement</span>
+        <button class="preview-modal__close" type="button" aria-label="Fermer" (click)="closePreview()">
+          <i class="pi pi-times" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="preview-modal__body">
+        @if (previewIsImage()) {
+          <img [src]="safePreviewUrl()" alt="Reçu de paiement" class="preview-modal__img" />
+        } @else {
+          <iframe
+            [src]="safePreviewUrl()"
+            class="preview-modal__iframe"
+            title="Reçu de paiement"
+            sandbox="allow-same-origin allow-scripts"
+          ></iframe>
+        }
+      </div>
+    </div>
+  </div>
+}

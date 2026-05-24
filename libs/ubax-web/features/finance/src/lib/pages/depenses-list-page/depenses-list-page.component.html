@@ -72,9 +72,13 @@
               <span>{{ row.provider }}</span>
               <span class="depenses-panel__amount">{{ row.amount }}</span>
               <span class="depenses-panel__actions">
-                <button type="button" aria-label="Plus d'actions">
+                <a
+                  [routerLink]="'/finances/depenses/' + row.id"
+                  class="depenses-panel__action-link"
+                  aria-label="Voir les détails"
+                >
                   <img [src]="assets.actionMore" alt="" aria-hidden="true" />
-                </button>
+                </a>
               </span>
             </div>
           }

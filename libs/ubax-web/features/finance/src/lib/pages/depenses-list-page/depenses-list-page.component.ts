@@ -6,6 +6,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { ExpensesStore } from '@ubax-workspace/ubax-web-data-access';
 import { ExpenseCreateRequest } from '@ubax-workspace/shared-api-types';
@@ -26,7 +27,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 @Component({
   selector: 'ubax-depenses-list-page',
   standalone: true,
-  imports: [UbaxPaginatorComponent, NouvelleDepenseDialogComponent],
+  imports: [RouterLink, UbaxPaginatorComponent, NouvelleDepenseDialogComponent],
   templateUrl: './depenses-list-page.component.html',
   styleUrl: './depenses-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

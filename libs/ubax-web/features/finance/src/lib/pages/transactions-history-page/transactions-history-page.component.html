@@ -175,17 +175,17 @@
                     class="transactions-panel__action-button transactions-panel__action-button--edit"
                     type="button"
                     aria-label="Modifier le statut"
-                    (click)="openUpdateStatus(transaction.id, transaction.rawStatus ?? 'PENDING')"
+                    (click)="openUpdateStatus(transaction.id, transaction.rawStatus)"
                   >
                     <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
                   </button>
-                  <button
+                  <a
                     class="transactions-panel__action-button transactions-panel__action-button--more"
-                    type="button"
-                    aria-label="Plus d’actions"
+                    [routerLink]="['/finances/transactions/' + transaction.id]"
+                    aria-label="Voir les détails"
                   >
                     <img [src]="assets.actionMore" alt="" aria-hidden="true" />
-                  </button>
+                  </a>
                 </span>
               </div>
             </div>
