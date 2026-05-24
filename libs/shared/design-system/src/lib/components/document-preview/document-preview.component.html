@@ -1,0 +1,106 @@
+<!-- Bouton déclencheur intégré (optionnel) -->
+@if (showTriggerButton() && fileUrl()) {
+  <button
+    class="ubax-doc-preview__trigger"
+    type="button"
+    [disabled]="opening()"
+    (click)="open()"
+  >
+    @if (opening()) {
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+      <span>Chargement…</span>
+    } @else {
+      <i [class]="buttonIcon()" aria-hidden="true"></i>
+      <span>{{ buttonLabel() }}</span>
+    }
+  </button>
+}
+
+<!-- Backdrop -->
+@if (isOpen()) {
+  <div
+    class="ubax-doc-preview__backdrop"
+    (click)="close()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Modal plein écran -->
+  <div
+    class="ubax-doc-preview__modal"
+    [class.ubax-doc-preview__modal--fullscreen]="previewFullscreen()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="documentName()"
+  >
+    <!-- En-tête -->
+    <header class="ubax-doc-preview__header">
+      <div class="ubax-doc-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file-pdf]="!previewIsImage()"
+          aria-hidden="true"
+        ></i>
+        <span>{{ documentName() }}</span>
+      </div>
+
+      <div class="ubax-doc-preview__actions">
+        <!-- Ouvrir dans un nouvel onglet -->
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ubax-doc-preview__action"
+          title="Ouvrir dans un nouvel onglet"
+          aria-label="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link" aria-hidden="true"></i>
+        </a>
+
+        <!-- Plein écran -->
+        <button
+          type="button"
+          class="ubax-doc-preview__action"
+          (click)="toggleFullscreen()"
+          [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+          [attr.aria-label]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+            aria-hidden="true"
+          ></i>
+        </button>
+
+        <!-- Fermer -->
+        <button
+          type="button"
+          class="ubax-doc-preview__action ubax-doc-preview__action--close"
+          (click)="close()"
+          title="Fermer"
+          aria-label="Fermer la prévisualisation"
+        >
+          <i class="pi pi-times" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Corps -->
+    <div class="ubax-doc-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="safePreviewUrl()"
+          [alt]="documentName()"
+          class="ubax-doc-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="safePreviewUrl()"
+          class="ubax-doc-preview__iframe"
+          [title]="documentName()"
+        ></iframe>
+      }
+    </div>
+  </div>
+}

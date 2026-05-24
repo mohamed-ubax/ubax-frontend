@@ -5,18 +5,17 @@ import {
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 import {
   ApiConfiguration,
-  generateReadUrl,
   getById6,
   PaymentResponse,
 } from '@ubax-workspace/shared-api-types';
+import { DocumentPreviewComponent } from '@ubax-workspace/shared-design-system';
 
 const STATUS_LABELS: Record<string, string> = {
   PAID: 'Payé',
@@ -76,34 +75,21 @@ function extractResponseData(body: unknown): unknown {
 @Component({
   selector: 'ubax-paiement-detail-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DocumentPreviewComponent],
   templateUrl: './paiement-detail-page.component.html',
   styleUrl: './paiement-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaiementDetailPageComponent implements OnInit {
-  private static readonly DOCUMENT_READ_URL_TTL_MS = 240_000;
-
   private readonly route = inject(ActivatedRoute);
-  private readonly doc = inject(DOCUMENT);
   private readonly http = inject(HttpClient);
   private readonly apiConfig = inject(ApiConfiguration);
-  private readonly sanitizer = inject(DomSanitizer);
+
+  protected readonly previewRef = viewChild(DocumentPreviewComponent);
 
   protected readonly payment = signal<PaymentResponse | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
-
-  protected readonly previewUrl = signal<string | null>(null);
-  protected readonly previewName = signal('Reçu de paiement');
-  protected readonly previewIsImage = signal(false);
-  protected readonly previewFullscreen = signal(false);
-  protected readonly documentOpening = signal(false);
-
-  private prefetchedDocumentSource: string | null = null;
-  private prefetchedDocumentUrl: string | null = null;
-  private prefetchedDocumentAt: number | null = null;
-  private prefetchedDocumentPromise: Promise<string | null> | null = null;
 
   protected readonly statusLabel = computed(
     () => STATUS_LABELS[this.payment()?.status ?? ''] ?? '—',
@@ -132,10 +118,6 @@ export class PaiementDetailPageComponent implements OnInit {
   protected readonly createdAtFormatted = computed(() =>
     formatDate(this.payment()?.createdAt),
   );
-  protected readonly safePreviewUrl = computed<SafeResourceUrl | null>(() => {
-    const url = this.previewUrl();
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
-  });
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -161,99 +143,5 @@ export class PaiementDetailPageComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  protected async openReceipt(): Promise<void> {
-    const fileUrl = this.payment()?.receiptUrl;
-    if (!fileUrl || this.documentOpening()) return;
-
-    const prefetchedUrl = this.getFreshPrefetchedDocumentUrl(fileUrl);
-    if (prefetchedUrl) {
-      this.openPreview(prefetchedUrl);
-      return;
-    }
-
-    this.documentOpening.set(true);
-    this.doc.body.classList.add('ubax-overlay-open');
-
-    try {
-      const resolvedUrl = this.prefetchedDocumentPromise
-        ? await this.prefetchedDocumentPromise
-        : await this.resolveDocumentReadUrl(fileUrl);
-
-      if (!resolvedUrl) throw new Error('Missing read url');
-
-      this.cachePrefetchedDocumentUrl(fileUrl, resolvedUrl);
-      this.openPreview(resolvedUrl);
-    } catch {
-      // Fallback : utiliser l'URL brute si la présignature échoue
-      this.openPreview(fileUrl);
-    } finally {
-      this.documentOpening.set(false);
-    }
-  }
-
-  protected closePreview(): void {
-    this.previewUrl.set(null);
-    this.previewName.set('Reçu de paiement');
-    this.previewIsImage.set(false);
-    this.previewFullscreen.set(false);
-    this.doc.body.classList.remove('ubax-overlay-open');
-  }
-
-  protected togglePreviewFullscreen(): void {
-    this.previewFullscreen.update((v) => !v);
-  }
-
-  private openPreview(resolvedUrl: string): void {
-    this.previewIsImage.set(this.isPreviewImage(resolvedUrl));
-    this.previewUrl.set(resolvedUrl);
-    this.previewFullscreen.set(false);
-  }
-
-  private async resolveDocumentReadUrl(fileUrl: string): Promise<string | null> {
-    const response = await firstValueFrom(
-      generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
-    );
-    return this.extractReadUrlFromResponse(response.body);
-  }
-
-  private extractReadUrlFromResponse(body: unknown): string | null {
-    if (!body || typeof body !== 'object') return null;
-    const direct = body as { readUrl?: unknown };
-    if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) return direct.readUrl;
-    const wrapped = body as { data?: unknown };
-    if (wrapped.data && typeof wrapped.data === 'object') {
-      const nested = wrapped.data as { readUrl?: unknown };
-      if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) return nested.readUrl;
-    }
-    return null;
-  }
-
-  private cachePrefetchedDocumentUrl(fileUrl: string, resolvedUrl: string): void {
-    this.prefetchedDocumentSource = fileUrl;
-    this.prefetchedDocumentUrl = resolvedUrl;
-    this.prefetchedDocumentAt = Date.now();
-  }
-
-  private getFreshPrefetchedDocumentUrl(fileUrl: string): string | null {
-    if (
-      this.prefetchedDocumentSource !== fileUrl ||
-      !this.prefetchedDocumentUrl ||
-      this.prefetchedDocumentAt == null
-    ) return null;
-
-    if (Date.now() - this.prefetchedDocumentAt > PaiementDetailPageComponent.DOCUMENT_READ_URL_TTL_MS) {
-      this.prefetchedDocumentSource = null;
-      this.prefetchedDocumentUrl = null;
-      this.prefetchedDocumentAt = null;
-      return null;
-    }
-
-    return this.prefetchedDocumentUrl;
-  }
-
-  private isPreviewImage(url: string): boolean {
-    return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/i.test(url);
   }
 }

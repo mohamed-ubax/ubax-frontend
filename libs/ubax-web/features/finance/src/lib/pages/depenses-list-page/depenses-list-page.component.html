@@ -10,7 +10,9 @@
           [value]="searchQuery()"
           (input)="setSearchQuery($any($event.target).value)"
         />
-        <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
+        </span>
       </label>
 
       <button class="toolbar-chip toolbar-chip--action" type="button">

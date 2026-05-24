@@ -297,29 +297,32 @@
   font: inherit;
 }
 
-.transactions-panel__filter {
-  width: 255px;
-  height: 65px;
-  justify-content: space-between;
-  padding: 0 27px 0 36px;
-  background: var(--ubax-page-bg);
-
-  img {
-    width: 36px;
-    height: 37px;
-  }
-
-  select {
-    width: 100%;
+// Le select PrimeNG reprend les dimensions du filtre précédent
+::ng-deep .transactions-panel__type-select {
+  &.p-select {
+    width: 255px;
+    height: 65px;
+    border-radius: 10px;
     border: 0;
-    outline: 0;
-    background: transparent;
+    background: var(--ubax-page-bg);
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 500;
     color: var(--ubax-text-primary);
-    appearance: none;
-    cursor: pointer;
+
+    .p-select-label {
+      padding: 0 36px;
+      line-height: 65px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ubax-text-primary);
+    }
+
+    .p-select-dropdown {
+      width: 48px;
+      color: var(--ubax-text-primary);
+    }
   }
 }
 
@@ -599,6 +602,10 @@
   .transactions-panel__filter,
   .transactions-panel__search,
   .transactions-panel__add {
+    width: 100%;
+  }
+
+  ::ng-deep .transactions-panel__type-select.p-select {
     width: 100%;
   }
 }

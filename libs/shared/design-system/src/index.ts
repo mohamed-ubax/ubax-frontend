@@ -43,6 +43,7 @@ export {
   LineChartComponent,
   BarChartComponent,
   MapViewComponent,
+  DocumentPreviewComponent,
 } from './lib/components/index';
 
 // ── Types ─────────────────────────────────────────────────────

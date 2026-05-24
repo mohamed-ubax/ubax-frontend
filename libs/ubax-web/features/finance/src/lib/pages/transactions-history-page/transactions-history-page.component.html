@@ -90,18 +90,15 @@
       <h2>Historique des transactions</h2>
 
       <div class="transactions-panel__toolbar">
-        <label class="transactions-panel__filter">
-          <select
-            [value]="selectedType()"
-            (change)="setSelectedType($any($event.target).value)"
-            title="Type de transaction"
-          >
-            @for (option of transactionTypeOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
-          <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
-        </label>
+        <p-select
+          [options]="transactionTypeOptions"
+          [ngModel]="selectedType()"
+          (ngModelChange)="setSelectedType($event)"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="transactions-panel__type-select"
+          appendTo="body"
+        />
 
         <label class="transactions-panel__search">
           <img [src]="assets.tableSearchIcon" alt="" aria-hidden="true" />

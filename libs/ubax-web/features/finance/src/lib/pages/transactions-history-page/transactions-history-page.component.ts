@@ -9,6 +9,8 @@ import {
   untracked,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import {
   FINANCE_ASSETS,
@@ -31,6 +33,8 @@ const PAGE_SIZE = 8;
   standalone: true,
   imports: [
     RouterLink,
+    FormsModule,
+    SelectModule,
     UbaxPaginatorComponent,
     NouvelleTransactionDialogComponent,
     UpdateStatutPaiementDialogComponent,
