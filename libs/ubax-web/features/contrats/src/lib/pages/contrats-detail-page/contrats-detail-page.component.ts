@@ -253,14 +253,14 @@ export class ContratsDetailPageComponent {
     return [
       {
         label: 'Clauses spéciales',
-        value: c.specialClauses ?? 'Aucune clause spéciale n'a encore été renseignée pour ce bail.',
+        value: c.specialClauses ?? "Aucune clause spéciale n'a encore été renseignée pour ce bail.",
         hint: 'Éléments particuliers négociés entre les parties',
         icon: 'pi-file',
         tone: 'accent',
       },
       {
         label: 'Conditions de résiliation',
-        value: c.terminationConditions ?? 'Aucune condition de résiliation n'a encore été renseignée.',
+        value: c.terminationConditions ?? "Aucune condition de résiliation n'a encore été renseignée.",
         hint: 'Préavis, modalités de sortie et garde-fous',
         icon: 'pi-times-circle',
         tone: c.terminationConditions ? 'warning' : 'neutral',

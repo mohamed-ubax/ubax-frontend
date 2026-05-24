@@ -61,7 +61,7 @@ export class TransactionsHistoryPageComponent implements OnInit {
   protected readonly isUpdateStatusOpen = signal(false);
 
   protected readonly assets = FINANCE_ASSETS;
-  protected readonly transactionTypeOptions = FINANCE_TRANSACTION_TYPE_OPTIONS;
+  protected readonly transactionTypeOptions = [...FINANCE_TRANSACTION_TYPE_OPTIONS];
   protected readonly currentPage = signal(1);
   protected readonly selectedType =
     signal<FinanceTransactionFilterValue>('all');
