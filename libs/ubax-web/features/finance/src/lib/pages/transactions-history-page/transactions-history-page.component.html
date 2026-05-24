@@ -132,10 +132,7 @@
             <span>Ref</span>
             <span>Type</span>
             <span>Bien</span>
-            <span class="transactions-panel__head-sort">
-              <span>Locataire</span>
-              <img [src]="assets.sortArrow" alt="" aria-hidden="true" />
-            </span>
+            <span>Locataire</span>
             <span>Montant</span>
             <span>Statut</span>
             <span>Action</span>
@@ -175,7 +172,9 @@
                     class="transactions-panel__action-button transactions-panel__action-button--edit"
                     type="button"
                     aria-label="Modifier le statut"
-                    (click)="openUpdateStatus(transaction.id, transaction.rawStatus)"
+                    (click)="
+                      openUpdateStatus(transaction.id, transaction.rawStatus)
+                    "
                   >
                     <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
                   </button>

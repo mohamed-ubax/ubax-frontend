@@ -369,6 +369,8 @@
 }
 
 .expense-card {
+  grid-column: 2;
+  grid-row: 1 / span 2;
   padding: 28px 28px 26px;
 }
 
@@ -489,7 +491,7 @@
 
 
 .expenses-sidebar {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 2;
   padding: 24px 16px 20px;
 
@@ -563,7 +565,7 @@
 
 .overdue-sidebar {
   grid-column: 3;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   padding: 24px 16px 20px;
 
   h2 {
@@ -677,13 +679,6 @@
   flex-wrap: wrap;
 }
 
-.transactions-preview__search {
-  height: 55px;
-  border: 0;
-  border-radius: 10px;
-  font: inherit;
-}
-
 ::ng-deep .transactions-preview__filter {
   height: 55px;
   width: 195px;
@@ -693,6 +688,8 @@
   box-shadow: none !important;
 
   .p-select-label {
+    display: flex;
+    align-items: center;
     padding: 0 8px 0 28px;
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
@@ -707,6 +704,10 @@
 }
 
 .transactions-preview__search {
+  height: 55px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
   width: 230px;
   gap: 12px;
   padding: 0 16px;
@@ -873,12 +874,17 @@
     grid-row: 1 / span 2;
   }
 
-  .expenses-sidebar {
+  .expense-card {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1 / span 2;
   }
 
   .overdue-sidebar {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .expenses-sidebar {
     grid-column: 2;
     grid-row: auto;
   }
