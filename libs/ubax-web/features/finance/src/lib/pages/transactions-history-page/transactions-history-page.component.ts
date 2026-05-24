@@ -6,7 +6,6 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import {
   FINANCE_ASSETS,
@@ -15,15 +14,16 @@ import {
 } from '../../constants/finance-ui.constants';
 import type { FinanceTransactionFilterValue } from '../../types/finance.types';
 import { PaymentsStore } from '@ubax-workspace/ubax-web-data-access';
-import { PaymentCreateRequest } from '@ubax-workspace/shared-api-types';
+import { PaymentCreateRequest, PaymentStatusUpdateRequest } from '@ubax-workspace/shared-api-types';
 import { NouvelleTransactionDialogComponent } from '../../components/nouvelle-transaction-dialog/nouvelle-transaction-dialog.component';
+import { UpdateStatutPaiementDialogComponent } from '../../components/update-statut-paiement-dialog/update-statut-paiement-dialog.component';
 
 const PAGE_SIZE = 8;
 
 @Component({
   selector: 'ubax-transactions-history-page',
   standalone: true,
-  imports: [UbaxPaginatorComponent, FormsModule, NouvelleTransactionDialogComponent],
+  imports: [UbaxPaginatorComponent, NouvelleTransactionDialogComponent, UpdateStatutPaiementDialogComponent],
   templateUrl: './transactions-history-page.component.html',
   styleUrl: './transactions-history-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +32,9 @@ export class TransactionsHistoryPageComponent implements OnInit {
   private readonly paymentsStore = inject(PaymentsStore);
 
   protected readonly isNewTransactionOpen = signal(false);
+  protected readonly selectedPaymentId = signal<string | null>(null);
+  protected readonly selectedPaymentStatus = signal('PENDING');
+  protected readonly isUpdateStatusOpen = signal(false);
 
   protected readonly assets = FINANCE_ASSETS;
   protected readonly transactionTypeOptions = FINANCE_TRANSACTION_TYPE_OPTIONS;
@@ -88,6 +91,8 @@ export class TransactionsHistoryPageComponent implements OnInit {
   protected readonly isLoading = computed(() => this.paymentsStore.loading());
   protected readonly isCreatingPayment = computed(() => this.paymentsStore.creatingPayment());
   protected readonly createPaymentError = computed(() => this.paymentsStore.createPaymentError());
+  protected readonly isUpdatingStatus = computed(() => !!this.paymentsStore.updatingStatusId());
+  protected readonly updateStatusError = computed(() => this.paymentsStore.updateStatusError());
 
   protected readonly filteredTransactions = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -152,5 +157,23 @@ export class TransactionsHistoryPageComponent implements OnInit {
 
   protected submitNewTransaction(body: PaymentCreateRequest): void {
     this.paymentsStore.createPayment(body);
+  }
+
+  protected openUpdateStatus(paymentId: string, rawStatus: string): void {
+    this.selectedPaymentId.set(paymentId);
+    this.selectedPaymentStatus.set(rawStatus ?? 'PENDING');
+    this.isUpdateStatusOpen.set(true);
+    this.paymentsStore.clearPaymentFeedback();
+  }
+
+  protected closeUpdateStatus(): void {
+    this.isUpdateStatusOpen.set(false);
+    this.selectedPaymentId.set(null);
+  }
+
+  protected submitStatusUpdate(body: PaymentStatusUpdateRequest): void {
+    const id = this.selectedPaymentId();
+    if (!id) return;
+    this.paymentsStore.updatePaymentStatus({ id, body });
   }
 }

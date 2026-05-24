@@ -693,8 +693,8 @@
 .transactions-table__head,
 .transactions-table__row {
   display: grid;
-  grid-template-columns: 0.9fr 0.95fr 0.82fr 1.28fr 1.28fr 1fr 1fr 0.82fr;
-  gap: 16px;
+  grid-template-columns: 1fr 1.4fr 0.85fr 1.3fr 1.6fr 1.1fr 1.2fr 0.85fr;
+  gap: 20px;
 }
 
 .transactions-table__head {

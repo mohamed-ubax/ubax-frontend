@@ -3,16 +3,21 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { PaymentCreateRequest } from '@ubax-workspace/shared-api-types';
+import {
+  UiFormSelectComponent,
+  UiFormInputComponent,
+  UiFormDatePickerComponent,
+} from '@ubax-workspace/shared-ui';
 
-const PAYMENT_TYPE_OPTIONS: { value: PaymentCreateRequest['paymentType']; label: string }[] = [
+const PAYMENT_TYPE_OPTIONS = [
   { value: 'RENT', label: 'Loyer' },
   { value: 'DEPOSIT', label: 'Caution' },
   { value: 'CHARGES', label: 'Charges' },
@@ -20,17 +25,25 @@ const PAYMENT_TYPE_OPTIONS: { value: PaymentCreateRequest['paymentType']; label:
   { value: 'SALE', label: 'Vente' },
 ];
 
-const PAYMENT_METHOD_OPTIONS: { value: NonNullable<PaymentCreateRequest['paymentMethod']>; label: string }[] = [
+const PAYMENT_METHOD_OPTIONS = [
+  { value: '', label: '— Non renseigné' },
   { value: 'CASH', label: 'Espèces' },
   { value: 'BANK_TRANSFER', label: 'Virement bancaire' },
   { value: 'MOBILE_MONEY', label: 'Mobile Money' },
   { value: 'CHECK', label: 'Chèque' },
 ];
 
+function toIsoDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 @Component({
   selector: 'ubax-nouvelle-transaction-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [UiFormSelectComponent, UiFormInputComponent, UiFormDatePickerComponent],
   templateUrl: './nouvelle-transaction-dialog.component.html',
   styleUrl: './nouvelle-transaction-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,12 +59,19 @@ export class NouvelleTransactionDialogComponent implements OnInit, OnDestroy {
   protected readonly paymentTypeOptions = PAYMENT_TYPE_OPTIONS;
   protected readonly paymentMethodOptions = PAYMENT_METHOD_OPTIONS;
 
-  protected readonly form = signal<PaymentCreateRequest>({
-    paymentType: 'RENT',
-    amount: 0,
-    dueDate: new Date().toISOString().split('T')[0],
-    paymentMethod: 'MOBILE_MONEY',
-  });
+  protected readonly paymentType = signal('RENT');
+  protected readonly paymentMethod = signal('MOBILE_MONEY');
+  protected readonly amount = signal('0');
+  protected readonly amountPaid = signal('');
+  protected readonly dueDate = signal<Date>(new Date());
+  protected readonly paidDateStr = signal('');
+  protected readonly periodLabel = signal('');
+  protected readonly reference = signal('');
+  protected readonly note = signal('');
+
+  protected readonly isValid = computed(
+    () => !!this.paymentType() && +this.amount() > 0,
+  );
 
   ngOnInit(): void {
     this.doc.body.classList.add('ubax-overlay-open');
@@ -61,17 +81,20 @@ export class NouvelleTransactionDialogComponent implements OnInit, OnDestroy {
     this.doc.body.classList.remove('ubax-overlay-open');
   }
 
-  protected patch(partial: Partial<PaymentCreateRequest>): void {
-    this.form.update((f) => ({ ...f, ...partial }));
-  }
-
-  protected isValid(): boolean {
-    const f = this.form();
-    return !!f.paymentType && f.amount > 0 && !!f.dueDate;
-  }
-
   protected submit(): void {
-    if (!this.isValid()) return;
-    this.confirm.emit(this.form());
+    if (!this.isValid() || this.loading()) return;
+    const body: PaymentCreateRequest = {
+      paymentType: this.paymentType() as PaymentCreateRequest['paymentType'],
+      amount: +this.amount(),
+      dueDate: toIsoDate(this.dueDate()),
+      paymentMethod: (this.paymentMethod() ||
+        undefined) as PaymentCreateRequest['paymentMethod'],
+      amountPaid: this.amountPaid() ? +this.amountPaid() : undefined,
+      paidDate: this.paidDateStr() || undefined,
+      periodLabel: this.periodLabel() || undefined,
+      reference: this.reference() || undefined,
+      note: this.note() || undefined,
+    };
+    this.confirm.emit(body);
   }
 }

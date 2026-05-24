@@ -7,8 +7,8 @@
         <input
           type="search"
           placeholder="Recherche ..."
-          [ngModel]="searchQuery()"
-          (ngModelChange)="setSearchQuery($event)"
+          [value]="searchQuery()"
+          (input)="setSearchQuery($any($event.target).value)"
         />
         <span class="toolbar-chip__icon-shell">
           <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
@@ -92,8 +92,8 @@
       <div class="transactions-panel__toolbar">
         <label class="transactions-panel__filter">
           <select
-            [ngModel]="selectedType()"
-            (ngModelChange)="setSelectedType($event)"
+            [value]="selectedType()"
+            (change)="setSelectedType($any($event.target).value)"
             title="Type de transaction"
           >
             @for (option of transactionTypeOptions; track option.value) {
@@ -108,8 +108,8 @@
           <input
             type="search"
             placeholder="Rechercher"
-            [ngModel]="searchQuery()"
-            (ngModelChange)="setSearchQuery($event)"
+            [value]="searchQuery()"
+            (input)="setSearchQuery($any($event.target).value)"
           />
         </label>
 
@@ -174,7 +174,8 @@
                   <button
                     class="transactions-panel__action-button transactions-panel__action-button--edit"
                     type="button"
-                    aria-label="Modifier la transaction"
+                    aria-label="Modifier le statut"
+                    (click)="openUpdateStatus(transaction.id, transaction.rawStatus ?? 'PENDING')"
                   >
                     <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
                   </button>
@@ -210,5 +211,15 @@
     [error]="createPaymentError()"
     (confirm)="submitNewTransaction($event)"
     (dismissed)="closeNewTransaction()"
+  />
+}
+
+@if (isUpdateStatusOpen()) {
+  <ubax-update-statut-paiement-dialog
+    [loading]="isUpdatingStatus()"
+    [error]="updateStatusError()"
+    [currentStatus]="selectedPaymentStatus()"
+    (confirm)="submitStatusUpdate($event)"
+    (dismissed)="closeUpdateStatus()"
   />
 }

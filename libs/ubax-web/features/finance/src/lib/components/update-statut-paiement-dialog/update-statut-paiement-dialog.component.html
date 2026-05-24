@@ -1,8 +1,8 @@
 <div class="dlg-overlay" (click)="dismissed.emit()">
-  <dialog class="dlg dlg--form" (click)="$event.stopPropagation()" aria-labelledby="dlg-depense-title" open>
+  <dialog class="dlg dlg--form" (click)="$event.stopPropagation()" aria-labelledby="dlg-statut-title" open>
 
     <div class="dlg__header">
-      <h2 class="dlg__title" id="dlg-depense-title">Nouvelle dépense</h2>
+      <h2 class="dlg__title" id="dlg-statut-title">Mettre à jour le statut</h2>
       <button class="dlg__close" type="button" aria-label="Fermer" (click)="dismissed.emit()">
         <i class="pi pi-times" aria-hidden="true"></i>
       </button>
@@ -13,55 +13,36 @@
     <div class="dlg-form">
       <div class="dlg-form__row">
         <ubax-ui-form-select
-          label="Catégorie *"
-          [options]="categoryOptions"
-          [(value)]="category"
+          label="Nouveau statut *"
+          [options]="statusOptions"
+          [(value)]="status"
         />
         <ubax-ui-form-select
-          label="Centre de coût *"
-          [options]="costCenterOptions"
-          [(value)]="costCenter"
-        />
-      </div>
-
-      <div class="dlg-form__row">
-        <ubax-ui-form-input
-          label="Montant (FCFA) *"
-          type="number"
-          placeholder="ex : 150 000"
-          [(value)]="amount"
-        />
-        <ubax-ui-form-date-picker
-          label="Date de la dépense *"
-          [(value)]="expenseDate"
-        />
-      </div>
-
-      <div class="dlg-form__row">
-        <ubax-ui-form-input
-          label="Intitulé"
-          placeholder="ex : Réparation toiture"
-          [(value)]="label"
-        />
-        <ubax-ui-form-input
-          label="Fournisseur"
-          placeholder="ex : Entreprise Kouassi"
-          [(value)]="provider"
-        />
-      </div>
-
-      <div class="dlg-form__row">
-        <ubax-ui-form-select
-          label="Mode de règlement"
+          label="Mode de paiement"
           [options]="paymentMethodOptions"
           [(value)]="paymentMethod"
         />
+      </div>
+
+      <div class="dlg-form__row">
         <ubax-ui-form-input
-          label="Référence facture"
-          placeholder="ex : FAC-2026-1042"
-          [(value)]="invoiceReference"
+          label="Montant reçu (FCFA)"
+          type="number"
+          placeholder="Optionnel"
+          [(value)]="amountPaid"
+        />
+        <ubax-ui-form-input
+          label="Date de réception"
+          type="date"
+          [(value)]="paidDate"
         />
       </div>
+
+      <ubax-ui-form-input
+        label="URL du reçu"
+        placeholder="https://…"
+        [(value)]="receiptUrl"
+      />
 
       <label class="dlg-form__field">
         <span class="dlg-form__label">Note</span>
@@ -87,9 +68,9 @@
       </button>
       <button class="dlg-btn dlg-btn--primary" type="button" (click)="submit()" [disabled]="!isValid() || loading()">
         @if (loading()) {
-          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Enregistrement…
+          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Mise à jour…
         } @else {
-          Enregistrer
+          Mettre à jour
         }
       </button>
     </div>

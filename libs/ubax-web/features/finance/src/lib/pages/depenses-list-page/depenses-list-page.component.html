@@ -7,8 +7,8 @@
         <input
           type="search"
           placeholder="Recherche ..."
-          [ngModel]="searchQuery()"
-          (ngModelChange)="setSearchQuery($event)"
+          [value]="searchQuery()"
+          (input)="setSearchQuery($any($event.target).value)"
         />
         <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
       </label>
