@@ -82,6 +82,8 @@ export class FinanceOverviewPageComponent implements OnInit {
   protected readonly activeRevenueLabel =
     FINANCE_REVENUE_SERIES[ACTIVE_REVENUE_INDEX]?.amountLabel ?? '';
 
+  protected readonly isLoadingDashboard = computed(() => this.paymentsStore.isLoadingDashboard());
+
   protected readonly summaryCards = computed(() => {
     const encaissement = this.paymentsStore.kpiEncaissement();
     const depenses = this.paymentsStore.kpiDepenses();
@@ -99,7 +101,7 @@ export class FinanceOverviewPageComponent implements OnInit {
     return [
       {
         ...FINANCE_SUMMARY_CARDS[0],
-        amount: encaissement ?? FINANCE_SUMMARY_CARDS[0].amount,
+        amount: encaissement ?? '—',
         count:
           paidCount != null
             ? `${paidCount} paiement${paidCount !== 1 ? 's' : ''} encaissé${paidCount !== 1 ? 's' : ''}`
@@ -107,16 +109,16 @@ export class FinanceOverviewPageComponent implements OnInit {
       },
       {
         ...FINANCE_SUMMARY_CARDS[1],
-        amount: depenses ?? FINANCE_SUMMARY_CARDS[1].amount,
+        amount: depenses ?? '—',
       },
       {
         ...FINANCE_SUMMARY_CARDS[2],
-        amount: loyerAttente ?? FINANCE_SUMMARY_CARDS[2].amount,
+        amount: loyerAttente ?? '—',
         count: pendingLabel,
       },
       {
         ...FINANCE_SUMMARY_CARDS[3],
-        amount: solde ?? FINANCE_SUMMARY_CARDS[3].amount,
+        amount: solde ?? '—',
       },
     ];
   });
@@ -124,7 +126,7 @@ export class FinanceOverviewPageComponent implements OnInit {
   protected readonly balanceAmount = computed(() =>
     this.isBalanceHidden()
       ? '•••••••• FCFA'
-      : (this.paymentsStore.kpiSolde() ?? FINANCE_SUMMARY_CARDS[3].amount),
+      : (this.paymentsStore.kpiSolde() ?? '—'),
   );
 
   protected readonly overdueItems = computed(() => {

@@ -41,6 +41,8 @@ export class TransactionsHistoryPageComponent implements OnInit {
   protected readonly searchQuery = signal('');
   protected readonly isBalanceHidden = signal(false);
 
+  protected readonly isLoadingDashboard = computed(() => this.paymentsStore.isLoadingDashboard());
+
   protected readonly kpiCards = computed(() => {
     const encaissement = this.paymentsStore.kpiEncaissement();
     const depenses = this.paymentsStore.kpiDepenses();
@@ -57,16 +59,16 @@ export class TransactionsHistoryPageComponent implements OnInit {
     return [
       {
         ...FINANCE_SUMMARY_CARDS[0],
-        amount: encaissement ?? FINANCE_SUMMARY_CARDS[0].amount,
+        amount: encaissement ?? '—',
         count:
           paidCount != null
             ? `${paidCount} paiement${paidCount !== 1 ? 's' : ''} encaissé${paidCount !== 1 ? 's' : ''}`
             : undefined,
       },
-      { ...FINANCE_SUMMARY_CARDS[1], amount: depenses ?? FINANCE_SUMMARY_CARDS[1].amount },
+      { ...FINANCE_SUMMARY_CARDS[1], amount: depenses ?? '—' },
       {
         ...FINANCE_SUMMARY_CARDS[2],
-        amount: loyerAttente ?? FINANCE_SUMMARY_CARDS[2].amount,
+        amount: loyerAttente ?? '—',
         count: pendingLabel,
       },
     ];
@@ -74,13 +76,13 @@ export class TransactionsHistoryPageComponent implements OnInit {
 
   protected readonly balanceCard = computed(() => ({
     ...FINANCE_SUMMARY_CARDS[3],
-    amount: this.paymentsStore.kpiSolde() ?? FINANCE_SUMMARY_CARDS[3].amount,
+    amount: this.paymentsStore.kpiSolde() ?? '—',
   }));
 
   protected readonly balanceAmount = computed(() =>
     this.isBalanceHidden()
       ? '•••••••• FCFA'
-      : (this.paymentsStore.kpiSolde() ?? FINANCE_SUMMARY_CARDS[3].amount),
+      : (this.paymentsStore.kpiSolde() ?? '—'),
   );
 
   protected readonly isLoading = computed(() => this.paymentsStore.loading());

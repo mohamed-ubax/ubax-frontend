@@ -160,7 +160,8 @@ export const PaymentsStore = signalStore(
     mapUpdate: (raw) => normalizePayment(raw),
   }),
   withState(initialFinanceState),
-  withComputed(({ entities, dashboard, latePayments }) => ({
+  withComputed(({ entities, dashboard, latePayments, loadingDashboard }) => ({
+    isLoadingDashboard: computed(() => loadingDashboard()),
     paymentRows: computed(() => entities().map(mapPaymentToRow)),
     latePaymentRows: computed(() => latePayments().map(mapLatePaymentToRow)),
     kpiEncaissement: computed(() =>

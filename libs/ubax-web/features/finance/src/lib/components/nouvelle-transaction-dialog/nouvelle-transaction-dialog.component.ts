@@ -1,10 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject,
-  input,
   OnDestroy,
   OnInit,
+  inject,
+  input,
   output,
   signal,
 } from '@angular/core';
@@ -65,14 +65,13 @@ export class NouvelleTransactionDialogComponent implements OnInit, OnDestroy {
     this.form.update((f) => ({ ...f, ...partial }));
   }
 
-  protected submit(): void {
-    const f = this.form();
-    if (!f.paymentType || !f.amount || !f.dueDate) return;
-    this.confirm.emit(f);
-  }
-
   protected isValid(): boolean {
     const f = this.form();
     return !!f.paymentType && f.amount > 0 && !!f.dueDate;
+  }
+
+  protected submit(): void {
+    if (!this.isValid()) return;
+    this.confirm.emit(this.form());
   }
 }
