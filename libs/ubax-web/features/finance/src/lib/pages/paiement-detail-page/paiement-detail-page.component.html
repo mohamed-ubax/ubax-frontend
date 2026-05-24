@@ -110,10 +110,10 @@
           <button
             class="document-row__btn"
             type="button"
-            [disabled]="previewLoading()"
+            [disabled]="documentOpening()"
             (click)="openReceipt()"
           >
-            @if (previewLoading()) {
+            @if (documentOpening()) {
               <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
               Chargement…
             } @else {
@@ -129,27 +129,71 @@
 </section>
 
 @if (previewUrl()) {
-  <div class="preview-overlay" (click)="closePreview()">
-    <div class="preview-modal" (click)="$event.stopPropagation()">
-      <div class="preview-modal__header">
-        <span class="preview-modal__title">Reçu de paiement</span>
-        <button class="preview-modal__close" type="button" aria-label="Fermer" (click)="closePreview()">
+  <div
+    class="pd-preview-backdrop"
+    (click)="closePreview()"
+  ></div>
+  <div class="pd-preview" [class.pd-preview--fullscreen]="previewFullscreen()">
+    <header class="pd-preview__header">
+      <div class="pd-preview__title">
+        <i
+          class="pi"
+          [class.pi-image]="previewIsImage()"
+          [class.pi-file-pdf]="!previewIsImage()"
+          aria-hidden="true"
+        ></i>
+        <span>{{ previewName() }}</span>
+      </div>
+
+      <div class="pd-preview__actions">
+        <a
+          [href]="previewUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="pd-preview__action"
+          title="Ouvrir dans un nouvel onglet"
+        >
+          <i class="pi pi-external-link" aria-hidden="true"></i>
+        </a>
+        <button
+          type="button"
+          class="pd-preview__action"
+          (click)="togglePreviewFullscreen()"
+          [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+        >
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+            aria-hidden="true"
+          ></i>
+        </button>
+        <button
+          type="button"
+          class="pd-preview__action pd-preview__action--close"
+          (click)="closePreview()"
+          title="Fermer"
+          aria-label="Fermer la prévisualisation"
+        >
           <i class="pi pi-times" aria-hidden="true"></i>
         </button>
       </div>
+    </header>
 
-      <div class="preview-modal__body">
-        @if (previewIsImage()) {
-          <img [src]="safePreviewUrl()" alt="Reçu de paiement" class="preview-modal__img" />
-        } @else {
-          <iframe
-            [src]="safePreviewUrl()"
-            class="preview-modal__iframe"
-            title="Reçu de paiement"
-            sandbox="allow-same-origin allow-scripts"
-          ></iframe>
-        }
-      </div>
+    <div class="pd-preview__body">
+      @if (previewIsImage()) {
+        <img
+          [src]="safePreviewUrl()"
+          alt="Reçu de paiement"
+          class="pd-preview__image"
+        />
+      } @else {
+        <iframe
+          [src]="safePreviewUrl()"
+          class="pd-preview__iframe"
+          title="Prévisualisation du reçu de paiement"
+        ></iframe>
+      }
     </div>
   </div>
 }
