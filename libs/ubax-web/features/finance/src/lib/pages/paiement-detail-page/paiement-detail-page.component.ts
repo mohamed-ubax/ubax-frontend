@@ -12,6 +12,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
   ApiConfiguration,
+  generateReadUrl,
   getById6,
   PaymentResponse,
 } from '@ubax-workspace/shared-api-types';
@@ -119,8 +120,16 @@ export class PaiementDetailPageComponent implements OnInit {
     formatDate(this.payment()?.createdAt),
   );
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+  /** Résolveur d'URL présignée passé à <ubax-document-preview>. */
+  readonly resolveDocumentUrl = (fileUrl: string): Promise<string | null> =>
+    firstValueFrom(generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }))
+      .then((res) => {
+        const body = res.body as { readUrl?: string; data?: { readUrl?: string } } | null;
+        return body?.readUrl ?? body?.data?.readUrl ?? null;
+      })
+      .catch(() => null);
+
+  ngOnInit(): void {    const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       void this.loadPayment(id);
     } else {

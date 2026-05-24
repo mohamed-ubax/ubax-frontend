@@ -8,6 +8,8 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import {
@@ -25,6 +27,10 @@ import {
   type NotificationHandler,
 } from '@ubax-workspace/shared-data-access';
 import { deriveViewState, type ViewState } from '@ubax-workspace/shared-ui';
+import {
+  ApiConfiguration,
+  generateReadUrl,
+} from '@ubax-workspace/shared-api-types';
 import { ContratsSkeletonComponent } from '../../components/contrats-skeleton/contrats-skeleton.component';
 import { ContratActivateDialogComponent } from '../../components/contrat-activate-dialog/contrat-activate-dialog.component';
 import { ContratSubmitDialogComponent } from '../../components/contrat-submit-dialog/contrat-submit-dialog.component';
@@ -69,6 +75,8 @@ export class ContratsDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(ApiConfiguration);
   private readonly notifications = inject(NOTIFICATION_HANDLER, {
     optional: true,
   }) as NotificationHandler | null;
@@ -307,6 +315,15 @@ export class ContratsDetailPageComponent {
       },
     ];
   });
+
+  /** Résolveur d'URL présignée passé à <ubax-document-preview>. */
+  readonly resolveDocumentUrl = (fileUrl: string): Promise<string | null> =>
+    firstValueFrom(generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }))
+      .then((res) => {
+        const body = res.body as { readUrl?: string; data?: { readUrl?: string } } | null;
+        return body?.readUrl ?? body?.data?.readUrl ?? null;
+      })
+      .catch(() => null);
 
   constructor() {
     effect(() => {

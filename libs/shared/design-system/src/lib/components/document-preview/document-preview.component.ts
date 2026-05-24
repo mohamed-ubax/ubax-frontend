@@ -9,10 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
-import { firstValueFrom } from 'rxjs';
-import { ApiConfiguration, generateReadUrl } from '@ubax-workspace/shared-api-types';
 
 const DOCUMENT_READ_URL_TTL_MS = 240_000;
 
@@ -20,17 +17,6 @@ function isPreviewImage(url: string): boolean {
   return /(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg)(\?|$|\s)/i.test(url);
 }
 
-function extractReadUrlFromResponse(body: unknown): string | null {
-  if (!body || typeof body !== 'object') return null;
-  const direct = body as { readUrl?: unknown };
-  if (typeof direct.readUrl === 'string' && direct.readUrl.length > 0) return direct.readUrl;
-  const wrapped = body as { data?: unknown };
-  if (wrapped.data && typeof wrapped.data === 'object') {
-    const nested = wrapped.data as { readUrl?: unknown };
-    if (typeof nested.readUrl === 'string' && nested.readUrl.length > 0) return nested.readUrl;
-  }
-  return null;
-}
 
 /**
  * UbaxDocumentPreviewComponent — Prévisualisation de document (PDF ou image)
@@ -67,8 +53,6 @@ function extractReadUrlFromResponse(body: unknown): string | null {
 })
 export class DocumentPreviewComponent {
   private readonly doc = inject(DOCUMENT);
-  private readonly http = inject(HttpClient);
-  private readonly apiConfig = inject(ApiConfiguration);
   private readonly sanitizer = inject(DomSanitizer);
 
   // ── Inputs ──────────────────────────────────────────────────────────────────
@@ -87,6 +71,19 @@ export class DocumentPreviewComponent {
 
   /** Icône PrimeNG du bouton déclencheur (ex: "pi pi-eye"). */
   readonly buttonIcon = input<string>('pi pi-eye');
+
+  /**
+   * Résolveur d'URL présignée optionnel.
+   * Si fourni, appelé avec l'URL brute pour obtenir une URL de lecture temporaire.
+   * Si absent, l'URL brute est utilisée directement.
+   *
+   * @example
+   * // Dans le composant parent :
+   * readonly resolveUrl = (fileUrl: string) =>
+   *   firstValueFrom(generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }))
+   *     .then(res => res.body?.readUrl ?? null);
+   */
+  readonly urlResolver = input<((fileUrl: string) => Promise<string | null>) | null>(null);
 
   // ── Outputs ─────────────────────────────────────────────────────────────────
 
@@ -130,7 +127,7 @@ export class DocumentPreviewComponent {
     // Pré-chargement de l'URL dès que fileUrl est disponible
     effect(() => {
       const url = this.fileUrl();
-      if (!url) {
+      if (!url || !this.urlResolver()) {
         this.clearCache();
         return;
       }
@@ -148,6 +145,12 @@ export class DocumentPreviewComponent {
     const cached = this.getFreshCachedUrl(fileUrl);
     if (cached) {
       this.showPreview(cached);
+      return;
+    }
+
+    // No resolver — use the raw URL directly
+    if (!this.urlResolver()) {
+      this.showPreview(fileUrl);
       return;
     }
 
@@ -189,10 +192,9 @@ export class DocumentPreviewComponent {
   }
 
   private async resolveReadUrl(fileUrl: string): Promise<string | null> {
-    const response = await firstValueFrom(
-      generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
-    );
-    return extractReadUrlFromResponse(response.body);
+    const resolver = this.urlResolver();
+    if (!resolver) return null;
+    return resolver(fileUrl);
   }
 
   private async prefetchUrl(fileUrl: string): Promise<string | null> {
