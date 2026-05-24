@@ -64,7 +64,8 @@ export class NouvelleTransactionDialogComponent implements OnInit, OnDestroy {
   protected readonly amount = signal('0');
   protected readonly amountPaid = signal('');
   protected readonly dueDate = signal<Date>(new Date());
-  protected readonly paidDateStr = signal('');
+  protected readonly hasPaidDate = signal(false);
+  protected readonly paidDate = signal<Date>(new Date());
   protected readonly periodLabel = signal('');
   protected readonly reference = signal('');
   protected readonly note = signal('');
@@ -90,7 +91,7 @@ export class NouvelleTransactionDialogComponent implements OnInit, OnDestroy {
       paymentMethod: (this.paymentMethod() ||
         undefined) as PaymentCreateRequest['paymentMethod'],
       amountPaid: this.amountPaid() ? +this.amountPaid() : undefined,
-      paidDate: this.paidDateStr() || undefined,
+      paidDate: this.hasPaidDate() ? toIsoDate(this.paidDate()) : undefined,
       periodLabel: this.periodLabel() || undefined,
       reference: this.reference() || undefined,
       note: this.note() || undefined,

@@ -487,6 +487,25 @@
   background: var(--ubax-accent);
 }
 
+.expense-card__more-container {
+  display: flex;
+  justify-content: center;
+}
+
+.expense-card__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--ubax-text-primary);
+  background: var(--ubax-page-bg);
+  border-radius: 10px;
+  width: 176px;
+  height: 43px;
+  font-size: 15px;
+  font-weight: 400;
+}
+
 .overdue-sidebar {
   grid-column: 3;
   grid-row: 1 / span 2;

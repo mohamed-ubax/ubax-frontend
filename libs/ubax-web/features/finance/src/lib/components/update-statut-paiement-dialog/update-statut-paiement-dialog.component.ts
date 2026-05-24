@@ -14,6 +14,7 @@ import { PaymentStatusUpdateRequest } from '@ubax-workspace/shared-api-types';
 import {
   UiFormSelectComponent,
   UiFormInputComponent,
+  UiFormDatePickerComponent,
 } from '@ubax-workspace/shared-ui';
 
 const STATUS_OPTIONS = [
@@ -23,6 +24,13 @@ const STATUS_OPTIONS = [
   { value: 'LATE', label: 'En retard' },
   { value: 'CANCELLED', label: 'Annulé' },
 ];
+
+function toIsoDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
 const PAYMENT_METHOD_OPTIONS = [
   { value: '', label: '— Non renseigné' },
@@ -35,7 +43,7 @@ const PAYMENT_METHOD_OPTIONS = [
 @Component({
   selector: 'ubax-update-statut-paiement-dialog',
   standalone: true,
-  imports: [UiFormSelectComponent, UiFormInputComponent],
+  imports: [UiFormSelectComponent, UiFormInputComponent, UiFormDatePickerComponent],
   templateUrl: './update-statut-paiement-dialog.component.html',
   styleUrl: './update-statut-paiement-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,7 +63,8 @@ export class UpdateStatutPaiementDialogComponent implements OnInit, OnDestroy {
   protected readonly status = signal('PAID');
   protected readonly paymentMethod = signal('');
   protected readonly amountPaid = signal('');
-  protected readonly paidDate = signal('');
+  protected readonly hasPaidDate = signal(false);
+  protected readonly paidDate = signal<Date>(new Date());
   protected readonly receiptUrl = signal('');
   protected readonly note = signal('');
 
@@ -77,7 +86,7 @@ export class UpdateStatutPaiementDialogComponent implements OnInit, OnDestroy {
       paymentMethod: (this.paymentMethod() ||
         undefined) as PaymentStatusUpdateRequest['paymentMethod'],
       amountPaid: this.amountPaid() ? +this.amountPaid() : undefined,
-      paidDate: this.paidDate() || undefined,
+      paidDate: this.hasPaidDate() ? toIsoDate(this.paidDate()) : undefined,
       receiptUrl: this.receiptUrl() || undefined,
       note: this.note() || undefined,
     };

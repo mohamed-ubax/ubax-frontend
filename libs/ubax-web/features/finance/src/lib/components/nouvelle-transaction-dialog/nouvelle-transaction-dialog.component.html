@@ -44,11 +44,18 @@
           label="Date d'échéance *"
           [(value)]="dueDate"
         />
-        <ubax-ui-form-input
-          label="Date de réception"
-          type="date"
-          [(value)]="paidDateStr"
-        />
+        <div class="dlg-form__optional-date">
+          <label class="dlg-form__toggle">
+            <input type="checkbox" [checked]="hasPaidDate()" (change)="hasPaidDate.set($any($event.target).checked)" />
+            <span>Date de réception</span>
+          </label>
+          @if (hasPaidDate()) {
+            <ubax-ui-form-date-picker
+              label=""
+              [(value)]="paidDate"
+            />
+          }
+        </div>
       </div>
 
       <div class="dlg-form__row">

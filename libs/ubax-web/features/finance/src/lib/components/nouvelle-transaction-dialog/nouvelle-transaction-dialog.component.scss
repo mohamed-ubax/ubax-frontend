@@ -127,6 +127,25 @@
     min-height: 64px;
   }
 
+  &__optional-date {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ubax-text-muted, #6b7280);
+
+    input[type='checkbox'] { accent-color: var(--ubax-accent, #e87d1e); cursor: pointer; }
+  }
+
   &__error {
     font-family: 'Lexend', sans-serif;
     font-size: 13px;
