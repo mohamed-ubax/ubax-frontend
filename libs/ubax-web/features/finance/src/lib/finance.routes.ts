@@ -37,6 +37,20 @@ export const financeRoutes: Route[] = [
       ),
   },
   {
+    path: 'depenses/:id',
+    loadComponent: () =>
+      import('./pages/depense-detail-page/depense-detail-page.component').then(
+        (m) => m.DepenseDetailPageComponent,
+      ),
+  },
+  {
+    path: 'transactions/:id',
+    loadComponent: () =>
+      import('./pages/paiement-detail-page/paiement-detail-page.component').then(
+        (m) => m.PaiementDetailPageComponent,
+      ),
+  },
+  {
     path: 'transactions',
     loadComponent: () =>
       import(

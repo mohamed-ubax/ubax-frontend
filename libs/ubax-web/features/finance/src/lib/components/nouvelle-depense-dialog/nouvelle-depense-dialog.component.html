@@ -1,0 +1,98 @@
+<div class="dlg-overlay" (click)="dismissed.emit()">
+  <dialog class="dlg dlg--form" (click)="$event.stopPropagation()" aria-labelledby="dlg-depense-title" open>
+
+    <div class="dlg__header">
+      <h2 class="dlg__title" id="dlg-depense-title">Nouvelle dépense</h2>
+      <button class="dlg__close" type="button" aria-label="Fermer" (click)="dismissed.emit()">
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="dlg__divider" aria-hidden="true"></div>
+
+    <div class="dlg-form">
+      <div class="dlg-form__row">
+        <ubax-ui-form-select
+          label="Catégorie *"
+          [options]="categoryOptions"
+          [(value)]="category"
+        />
+        <ubax-ui-form-select
+          label="Centre de coût *"
+          [options]="costCenterOptions"
+          [(value)]="costCenter"
+        />
+      </div>
+
+      <div class="dlg-form__row">
+        <ubax-ui-form-input
+          label="Montant (FCFA) *"
+          type="number"
+          placeholder="ex : 150 000"
+          [(value)]="amount"
+        />
+        <ubax-ui-form-date-picker
+          label="Date de la dépense *"
+          [(value)]="expenseDate"
+        />
+      </div>
+
+      <div class="dlg-form__row">
+        <ubax-ui-form-input
+          label="Intitulé"
+          placeholder="ex : Réparation toiture"
+          [(value)]="label"
+        />
+        <ubax-ui-form-input
+          label="Fournisseur"
+          placeholder="ex : Entreprise Kouassi"
+          [(value)]="provider"
+        />
+      </div>
+
+      <div class="dlg-form__row">
+        <ubax-ui-form-select
+          label="Mode de règlement"
+          [options]="paymentMethodOptions"
+          [(value)]="paymentMethod"
+        />
+        <ubax-ui-form-input
+          label="Référence facture"
+          placeholder="ex : FAC-2026-1042"
+          [(value)]="invoiceReference"
+        />
+      </div>
+
+      <label class="dlg-form__field">
+        <span class="dlg-form__label">Note</span>
+        <textarea
+          class="dlg-form__textarea"
+          rows="2"
+          placeholder="Note libre…"
+          [value]="note()"
+          (input)="note.set($any($event.target).value)"
+        ></textarea>
+      </label>
+
+      @if (error()) {
+        <p class="dlg-form__error" role="alert">{{ error() }}</p>
+      }
+    </div>
+
+    <div class="dlg__divider" aria-hidden="true"></div>
+
+    <div class="dlg__actions">
+      <button class="dlg-btn dlg-btn--ghost" type="button" (click)="dismissed.emit()" [disabled]="loading()">
+        Annuler
+      </button>
+      <button class="dlg-btn dlg-btn--primary" type="button" (click)="submit()" [disabled]="!isValid() || loading()">
+        @if (loading()) {
+          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Enregistrement…
+        } @else {
+          Enregistrer
+        }
+      </button>
+    </div>
+
+  </dialog>
+</div>

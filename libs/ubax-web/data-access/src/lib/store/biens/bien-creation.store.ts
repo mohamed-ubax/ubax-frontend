@@ -64,12 +64,14 @@ const initialState: BienCreationState = {
 function extractList<T>(body: unknown): T[] {
   if (Array.isArray(body)) return body as T[];
   if (body && typeof body === 'object') {
-    const b = body as { data?: unknown; content?: unknown };
+    const b = body as { data?: unknown; content?: unknown; results?: unknown };
     if (Array.isArray(b.data)) return b.data as T[];
     if (Array.isArray(b.content)) return b.content as T[];
+    if (Array.isArray(b.results)) return b.results as T[];
     if (b.data && typeof b.data === 'object') {
-      const nested = (b.data as { content?: unknown }).content;
-      if (Array.isArray(nested)) return nested as T[];
+      const nested = b.data as { content?: unknown; results?: unknown };
+      if (Array.isArray(nested.content)) return nested.content as T[];
+      if (Array.isArray(nested.results)) return nested.results as T[];
     }
   }
   return [];

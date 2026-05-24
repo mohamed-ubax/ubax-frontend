@@ -1,0 +1,106 @@
+<div class="dlg-overlay" (click)="dismissed.emit()">
+  <dialog class="dlg dlg--form" (click)="$event.stopPropagation()" aria-labelledby="dlg-transaction-title" open>
+
+    <div class="dlg__header">
+      <h2 class="dlg__title" id="dlg-transaction-title">Nouvelle transaction</h2>
+      <button class="dlg__close" type="button" aria-label="Fermer" (click)="dismissed.emit()">
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="dlg__divider" aria-hidden="true"></div>
+
+    <div class="dlg-form">
+      <div class="dlg-form__row">
+        <ubax-ui-form-select
+          label="Type de paiement *"
+          [options]="paymentTypeOptions"
+          [(value)]="paymentType"
+        />
+        <ubax-ui-form-select
+          label="Mode de paiement"
+          [options]="paymentMethodOptions"
+          [(value)]="paymentMethod"
+        />
+      </div>
+
+      <div class="dlg-form__row">
+        <ubax-ui-form-input
+          label="Montant total (FCFA) *"
+          type="number"
+          placeholder="ex : 450 000"
+          [(value)]="amount"
+        />
+        <ubax-ui-form-input
+          label="Montant reçu (FCFA)"
+          type="number"
+          placeholder="Optionnel"
+          [(value)]="amountPaid"
+        />
+      </div>
+
+      <div class="dlg-form__row">
+        <ubax-ui-form-date-picker
+          label="Date d'échéance *"
+          [(value)]="dueDate"
+        />
+        <div class="dlg-form__optional-date">
+          <label class="dlg-form__toggle">
+            <input type="checkbox" [checked]="hasPaidDate()" (change)="hasPaidDate.set($any($event.target).checked)" />
+            <span>Date de réception</span>
+          </label>
+          @if (hasPaidDate()) {
+            <ubax-ui-form-date-picker
+              label=""
+              [(value)]="paidDate"
+            />
+          }
+        </div>
+      </div>
+
+      <div class="dlg-form__row">
+        <ubax-ui-form-input
+          label="Période couverte"
+          placeholder="ex : Juillet 2026"
+          [(value)]="periodLabel"
+        />
+        <ubax-ui-form-input
+          label="Référence"
+          placeholder="ex : WAVE-2026070001"
+          [(value)]="reference"
+        />
+      </div>
+
+      <label class="dlg-form__field">
+        <span class="dlg-form__label">Note</span>
+        <textarea
+          class="dlg-form__textarea"
+          rows="2"
+          placeholder="Note libre…"
+          [value]="note()"
+          (input)="note.set($any($event.target).value)"
+        ></textarea>
+      </label>
+
+      @if (error()) {
+        <p class="dlg-form__error" role="alert">{{ error() }}</p>
+      }
+    </div>
+
+    <div class="dlg__divider" aria-hidden="true"></div>
+
+    <div class="dlg__actions">
+      <button class="dlg-btn dlg-btn--ghost" type="button" (click)="dismissed.emit()" [disabled]="loading()">
+        Annuler
+      </button>
+      <button class="dlg-btn dlg-btn--primary" type="button" (click)="submit()" [disabled]="!isValid() || loading()">
+        @if (loading()) {
+          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Enregistrement…
+        } @else {
+          Enregistrer
+        }
+      </button>
+    </div>
+
+  </dialog>
+</div>

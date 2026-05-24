@@ -18,9 +18,7 @@
 .overdue-sidebar__copy,
 .transactions-preview__header,
 .transactions-preview__actions,
-.transactions-preview__filter,
 .transactions-preview__search,
-.transactions-preview__add,
 .transactions-table__head,
 .transactions-table__row,
 .transactions-table__actions,
@@ -179,6 +177,13 @@
   }
 }
 
+.summary-card__count {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ubax-text-secondary, #6b7280);
+  margin-top: -2px;
+}
+
 .summary-card--balance {
   justify-content: space-between;
   padding-inline: 30px;
@@ -244,6 +249,8 @@
 }
 
 .chart-card {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   padding: 28px 22px 28px;
 
   h2 {
@@ -362,6 +369,8 @@
 }
 
 .expense-card {
+  grid-column: 2;
+  grid-row: 1 / span 2;
   padding: 28px 28px 26px;
 }
 
@@ -480,9 +489,83 @@
   background: var(--ubax-accent);
 }
 
+
+.expenses-sidebar {
+  grid-column: 3;
+  grid-row: 2;
+  padding: 24px 16px 20px;
+
+  h2 {
+    margin: 0 0 16px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 48px;
+    color: var(--ubax-navy);
+  }
+}
+
+.expenses-sidebar__list {
+  display: grid;
+  gap: 10px;
+  padding-top: 18px;
+}
+
+.expenses-sidebar__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expenses-sidebar__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ubax-accent);
+  flex-shrink: 0;
+}
+
+.expenses-sidebar__copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+
+  strong {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ubax-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: 300;
+    color: #5d5d5d;
+  }
+}
+
+.expenses-sidebar__amount {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  white-space: nowrap;
+}
+
+.expenses-sidebar__empty {
+  font-size: 13px;
+  color: var(--ubax-text-secondary, #6b7280);
+  text-align: center;
+  padding: 20px 0;
+}
+
 .overdue-sidebar {
   grid-column: 3;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   padding: 24px 16px 20px;
 
   h2 {
@@ -573,7 +656,7 @@
 }
 
 .transactions-preview {
-  grid-column: 1 / 3;
+  grid-column: 1 / -1;
   padding: 27px 20px 24px;
 }
 
@@ -596,42 +679,35 @@
   flex-wrap: wrap;
 }
 
-.transactions-preview__filter,
-.transactions-preview__search,
-.transactions-preview__add {
+::ng-deep .transactions-preview__filter {
   height: 55px;
-  border: 0;
-  border-radius: 10px;
-  font: inherit;
-}
-
-.transactions-preview__filter {
-  justify-content: space-between;
   width: 195px;
-  padding: 0 26px 0 28px;
-  background: var(--ubax-page-bg);
-  color: var(--ubax-text-primary);
+  border-radius: 10px;
+  border: none !important;
+  background: var(--ubax-page-bg) !important;
+  box-shadow: none !important;
 
-  img {
-    width: 20px;
-    height: 20px;
-  }
-
-  select {
-    width: 100%;
-    border: 0;
-    outline: 0;
-    background: transparent;
+  .p-select-label {
+    display: flex;
+    align-items: center;
+    padding: 0 8px 0 28px;
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 500;
     color: var(--ubax-text-primary);
-    appearance: none;
-    cursor: pointer;
+  }
+
+  .p-select-dropdown {
+    width: 36px;
+    color: var(--ubax-text-primary);
   }
 }
 
 .transactions-preview__search {
+  height: 55px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
   width: 230px;
   gap: 12px;
   padding: 0 16px;
@@ -659,25 +735,6 @@
   }
 }
 
-.transactions-preview__add {
-  gap: 12px;
-  width: 247px;
-  justify-content: flex-start;
-  padding: 0 15px;
-  background: var(--ubax-accent);
-  color: #fff;
-  cursor: pointer;
-
-  img {
-    width: 22px;
-    height: 22px;
-  }
-
-  span {
-    font-size: 15px;
-    font-weight: 500;
-  }
-}
 
 .transactions-table {
   display: grid;
@@ -686,8 +743,8 @@
 .transactions-table__head,
 .transactions-table__row {
   display: grid;
-  grid-template-columns: 0.9fr 0.95fr 0.82fr 1.28fr 1.28fr 1fr 1fr 0.82fr;
-  gap: 16px;
+  grid-template-columns: 1fr 1.4fr 0.85fr 1.3fr 1.6fr 1.1fr 1.2fr 0.85fr;
+  gap: 20px;
 }
 
 .transactions-table__head {
@@ -771,24 +828,27 @@
 
 .transactions-table__actions {
   gap: 10px;
+}
 
-  button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 0;
-    border-radius: 5px;
-    background: var(--ubax-page-bg);
-    cursor: pointer;
+.transactions-table__action-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: var(--ubax-page-bg);
+  text-decoration: none;
+  transition: background 0.15s;
 
-    img {
-      width: 12px;
-      height: 12px;
-      object-fit: contain;
-    }
+  &:hover {
+    background: #e5e9ef;
+  }
+
+  img {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
   }
 }
 
@@ -809,7 +869,22 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
+  .chart-card {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .expense-card {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
   .overdue-sidebar {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .expenses-sidebar {
     grid-column: 2;
     grid-row: auto;
   }
@@ -855,9 +930,11 @@
     width: 100%;
   }
 
-  .transactions-preview__filter,
-  .transactions-preview__search,
-  .transactions-preview__add {
+  ::ng-deep .transactions-preview__filter {
+    width: 100%;
+  }
+
+  .transactions-preview__search {
     width: 100%;
   }
 

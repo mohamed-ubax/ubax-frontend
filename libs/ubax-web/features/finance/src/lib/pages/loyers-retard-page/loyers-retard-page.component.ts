@@ -2,34 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
-import {
-  FINANCE_ASSETS,
-  FINANCE_OVERDUE_ROWS,
-  FINANCE_SUMMARY_CARDS,
-} from '../../constants/finance-ui.constants';
-import type { OverdueItem } from '../../types/loyers-retard.types';
+import { FINANCE_ASSETS } from '../../constants/finance-ui.constants';
+import { PaymentsStore } from '@ubax-workspace/ubax-web-data-access';
 
-const PERIOD_OPTIONS = [
-  'Avril 2025',
-  'Mars 2025',
-  'Février 2025',
-  'Janvier 2025',
-  'Décembre 2024',
-] as const;
-
-const ALL_ROWS: readonly OverdueItem[] = Array.from(
-  { length: 5 },
-  (_, pageIndex) =>
-    FINANCE_OVERDUE_ROWS.map((row, index) => ({
-      ...row,
-      uid: `finance-overdue-${pageIndex + 1}-${index + 1}`,
-    })),
-).flat();
+const PAGE_SIZE = 6;
 
 @Component({
   selector: 'ubax-loyers-retard-page',
@@ -39,50 +22,44 @@ const ALL_ROWS: readonly OverdueItem[] = Array.from(
   styleUrl: './loyers-retard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoyersRetardPageComponent {
+export class LoyersRetardPageComponent implements OnInit {
+  private readonly paymentsStore = inject(PaymentsStore);
+
   protected readonly assets = FINANCE_ASSETS;
-  protected readonly periodOptions = PERIOD_OPTIONS;
-  protected readonly currentPage = signal(3);
-  protected readonly selectedPeriod =
-    signal<(typeof PERIOD_OPTIONS)[number]>('Avril 2025');
+  protected readonly currentPage = signal(1);
   protected readonly searchQuery = signal('');
-  protected readonly unpaidBalance = FINANCE_SUMMARY_CARDS[0].amount;
+
+  protected readonly unpaidBalance = computed(
+    () => this.paymentsStore.kpiLoyerAttente() ?? '—',
+  );
+
   protected readonly filteredRows = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
-    const selectedPeriod = this.selectedPeriod();
+    const rows = this.paymentsStore.latePaymentRows();
 
-    return ALL_ROWS.filter((row) => {
-      const matchesPeriod = row.period === selectedPeriod;
-      const matchesQuery =
-        query.length === 0
-          ? true
-          : [row.tenant, row.property, row.amount, row.penalty]
-              .join(' ')
-              .toLowerCase()
-              .includes(query);
-
-      return matchesPeriod && matchesQuery;
-    });
-  });
-  protected readonly totalPages = computed(() =>
-    Math.max(
-      1,
-      Math.ceil(this.filteredRows().length / FINANCE_OVERDUE_ROWS.length),
-    ),
-  );
-  protected readonly pagedRows = computed(() => {
-    const start = (this.currentPage() - 1) * FINANCE_OVERDUE_ROWS.length;
-    return this.filteredRows().slice(
-      start,
-      start + FINANCE_OVERDUE_ROWS.length,
+    if (query.length === 0) return rows;
+    return rows.filter((row) =>
+      [row.tenant, row.property, row.amount, row.penalty]
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
     );
   });
 
-  protected setSelectedPeriod(value: (typeof PERIOD_OPTIONS)[number]): void {
-    if (PERIOD_OPTIONS.includes(value)) {
-      this.selectedPeriod.set(value);
-      this.currentPage.set(1);
-    }
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredRows().length / PAGE_SIZE)),
+  );
+
+  protected readonly pagedRows = computed(() => {
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return this.filteredRows().slice(start, start + PAGE_SIZE);
+  });
+
+  protected readonly isLoading = computed(() => this.paymentsStore.loadingLate());
+
+  ngOnInit(): void {
+    this.paymentsStore.loadLatePayments();
+    this.paymentsStore.loadDashboard();
   }
 
   protected setSearchQuery(value: string): void {

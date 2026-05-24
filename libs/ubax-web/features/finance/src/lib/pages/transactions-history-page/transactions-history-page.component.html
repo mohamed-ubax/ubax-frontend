@@ -7,8 +7,8 @@
         <input
           type="search"
           placeholder="Recherche ..."
-          [ngModel]="searchQuery()"
-          (ngModelChange)="setSearchQuery($event)"
+          [value]="searchQuery()"
+          (input)="setSearchQuery($any($event.target).value)"
         />
         <span class="toolbar-chip__icon-shell">
           <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
@@ -38,7 +38,7 @@
     class="transactions-history-page__summary-grid"
     aria-label="Résumé financier"
   >
-    @for (card of kpiCards; track card.label) {
+    @for (card of kpiCards(); track card.label) {
       <article class="summary-card" data-ubax-motion="surface">
         <span
           class="summary-card__icon-shell"
@@ -54,6 +54,9 @@
         <div class="summary-card__content">
           <p>{{ card.label }}</p>
           <strong>{{ card.amount }}</strong>
+          @if (card.count) {
+            <span class="summary-card__count">{{ card.count }}</span>
+          }
         </div>
       </article>
     }
@@ -63,7 +66,7 @@
       data-ubax-motion="surface"
     >
       <div class="summary-card__balance-copy">
-        <p>{{ balanceCard.label }}</p>
+        <p>{{ balanceCard().label }}</p>
         <strong>{{ balanceAmount() }}</strong>
       </div>
 
@@ -75,8 +78,8 @@
         <span class="summary-card__balance-toggle-label"
           >Afficher ou masquer le solde</span
         >
-        @if (balanceCard.icon) {
-          <img [src]="balanceCard.icon" [alt]="balanceCard.iconAlt ?? ''" />
+        @if (balanceCard().icon) {
+          <img [src]="balanceCard().icon" [alt]="balanceCard().iconAlt ?? ''" />
         }
       </button>
     </article>
@@ -87,30 +90,31 @@
       <h2>Historique des transactions</h2>
 
       <div class="transactions-panel__toolbar">
-        <label class="transactions-panel__filter">
-          <select
-            [ngModel]="selectedType()"
-            (ngModelChange)="setSelectedType($event)"
-            title="Type de transaction"
-          >
-            @for (option of transactionTypeOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
-          <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
-        </label>
+        <p-select
+          [options]="transactionTypeOptions"
+          [ngModel]="selectedType()"
+          (ngModelChange)="setSelectedType($event)"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="transactions-panel__type-select"
+          appendTo="body"
+        />
 
         <label class="transactions-panel__search">
           <img [src]="assets.tableSearchIcon" alt="" aria-hidden="true" />
           <input
             type="search"
             placeholder="Rechercher"
-            [ngModel]="searchQuery()"
-            (ngModelChange)="setSearchQuery($event)"
+            [value]="searchQuery()"
+            (input)="setSearchQuery($any($event.target).value)"
           />
         </label>
 
-        <button class="transactions-panel__add" type="button">
+        <button
+          class="transactions-panel__add"
+          type="button"
+          (click)="openNewTransaction()"
+        >
           <img [src]="assets.addIcon" alt="" aria-hidden="true" />
           <span>Nouvelle transaction</span>
         </button>
@@ -125,10 +129,7 @@
             <span>Ref</span>
             <span>Type</span>
             <span>Bien</span>
-            <span class="transactions-panel__head-sort">
-              <span>Locataire</span>
-              <img [src]="assets.sortArrow" alt="" aria-hidden="true" />
-            </span>
+            <span>Locataire</span>
             <span>Montant</span>
             <span>Statut</span>
             <span>Action</span>
@@ -167,17 +168,20 @@
                   <button
                     class="transactions-panel__action-button transactions-panel__action-button--edit"
                     type="button"
-                    aria-label="Modifier la transaction"
+                    aria-label="Modifier le statut"
+                    (click)="
+                      openUpdateStatus(transaction.id, transaction.rawStatus)
+                    "
                   >
                     <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
                   </button>
-                  <button
+                  <a
                     class="transactions-panel__action-button transactions-panel__action-button--more"
-                    type="button"
-                    aria-label="Plus d’actions"
+                    [routerLink]="['/finances/transactions/' + transaction.id]"
+                    aria-label="Voir les détails"
                   >
                     <img [src]="assets.actionMore" alt="" aria-hidden="true" />
-                  </button>
+                  </a>
                 </span>
               </div>
             </div>
@@ -196,3 +200,22 @@
     </footer>
   </section>
 </section>
+
+@if (isNewTransactionOpen()) {
+  <ubax-nouvelle-transaction-dialog
+    [loading]="isCreatingPayment()"
+    [error]="createPaymentError()"
+    (confirm)="submitNewTransaction($event)"
+    (dismissed)="closeNewTransaction()"
+  />
+}
+
+@if (isUpdateStatusOpen()) {
+  <ubax-update-statut-paiement-dialog
+    [loading]="isUpdatingStatus()"
+    [error]="updateStatusError()"
+    [currentStatus]="selectedPaymentStatus()"
+    (confirm)="submitStatusUpdate($event)"
+    (dismissed)="closeUpdateStatus()"
+  />
+}

@@ -124,6 +124,16 @@
             Soumettre pour signature
           </button>
         }
+        @if (canActivate()) {
+          <button
+            class="mandate-detail-btn mandate-detail-btn--primary"
+            type="button"
+            (click)="showActivateDialog.set(true)"
+          >
+            <i class="pi pi-check-circle"></i>
+            Activer
+          </button>
+        }
         @if (canCancel()) {
           <button
             class="mandate-detail-btn mandate-detail-btn--ghost"
@@ -146,9 +156,9 @@
         }
       </div>
 
-      @if (store.submitError() || store.cancelError() || store.terminateError()) {
+      @if (store.submitError() || store.cancelError() || store.terminateError() || store.activateError()) {
         <p class="mandate-detail-card__error">
-          {{ store.submitError() || store.cancelError() || store.terminateError() }}
+          {{ store.submitError() || store.cancelError() || store.terminateError() || store.activateError() }}
         </p>
       }
     </div>
@@ -213,6 +223,38 @@
         <button class="mandate-dialog__btn mandate-dialog__btn--warning" type="button" [disabled]="store.saving()" (click)="cancelMandate()">
           @if (store.saving()) { <i class="pi pi-spin pi-spinner"></i> }
           Confirmer l'annulation
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Overlay : Activer ──────────────────────────────────────────────────── -->
+@if (showActivateDialog()) {
+  <div
+    class="mandate-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="activate-dialog-title"
+    (click)="showActivateDialog.set(false)"
+  >
+    <div class="mandate-dialog" (click)="$event.stopPropagation()">
+      <div class="mandate-dialog__icon mandate-dialog__icon--success">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <h3 id="activate-dialog-title" class="mandate-dialog__title">
+        Activer ce mandat ?
+      </h3>
+      <p class="mandate-dialog__desc">
+        Le mandat passera au statut Actif. Cette action ne peut pas être annulée.
+      </p>
+      <div class="mandate-dialog__actions">
+        <button class="mandate-dialog__btn mandate-dialog__btn--ghost" type="button" (click)="showActivateDialog.set(false)">
+          Annuler
+        </button>
+        <button class="mandate-dialog__btn mandate-dialog__btn--success" type="button" [disabled]="store.saving()" (click)="activateMandate()">
+          @if (store.saving()) { <i class="pi pi-spin pi-spinner"></i> }
+          Confirmer l'activation
         </button>
       </div>
     </div>

@@ -90,3 +90,5 @@ export { BarChartComponent } from './bar-chart/bar-chart.component';
 
 export { MapViewComponent } from './map-view/map-view.component';
 export type { MapPin } from './map-view/map-view.component';
+
+export { DocumentPreviewComponent } from './document-preview/document-preview.component';

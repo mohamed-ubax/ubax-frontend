@@ -446,6 +446,10 @@ export class BienAddPageComponent implements OnInit {
     const id = this.editPropertyId();
     if (id) {
       void this.prefillFromProperty(id);
+    } else {
+      const ownerIdFromQuery = this.route.snapshot.queryParamMap.get('ownerId');
+      const ownerId = ownerIdFromQuery ?? this.authStore.user()?.id ?? '';
+      this._step1.update((s) => ({ ...s, ownerId }));
     }
   }
 

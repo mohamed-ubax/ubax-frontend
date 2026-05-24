@@ -1,0 +1,109 @@
+<section class="depenses-list-page" data-ubax-motion="page">
+  <header class="depenses-list-page__header">
+    <h1 class="depenses-list-page__title">Dépenses</h1>
+
+    <div class="depenses-list-page__toolbar">
+      <label class="toolbar-chip toolbar-chip--search">
+        <input
+          type="search"
+          placeholder="Recherche ..."
+          [value]="searchQuery()"
+          (input)="setSearchQuery($any($event.target).value)"
+        />
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.searchIcon" alt="" aria-hidden="true" />
+        </span>
+      </label>
+
+      <button class="toolbar-chip toolbar-chip--action" type="button">
+        <span>Sélectionner une date</span>
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.calendarIcon" alt="" aria-hidden="true" />
+        </span>
+      </button>
+
+      <button
+        class="toolbar-chip toolbar-chip--action toolbar-chip--export"
+        type="button"
+      >
+        <span>Exporter les données</span>
+        <span class="toolbar-chip__icon-shell">
+          <img [src]="assets.exportIcon" alt="" aria-hidden="true" />
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <section class="depenses-panel" data-ubax-motion="surface">
+    <div class="depenses-panel__header">
+      <h2>Historique des dépenses</h2>
+
+      <button
+        class="depenses-panel__add"
+        type="button"
+        (click)="openAdd()"
+      >
+        <img [src]="assets.addIcon" alt="" aria-hidden="true" />
+        <span>Nouvelle dépense</span>
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <p class="depenses-panel__empty">Chargement…</p>
+    } @else if (pagedRows().length > 0) {
+      <div class="depenses-panel__table">
+        <div class="depenses-panel__head">
+          <span>Date</span>
+          <span>Référence</span>
+          <span>Catégorie</span>
+          <span>Intitulé</span>
+          <span>Fournisseur</span>
+          <span>Montant</span>
+          <span>Action</span>
+        </div>
+
+        <div class="depenses-panel__body">
+          @for (row of pagedRows(); track row.uid) {
+            <div class="depenses-panel__row">
+              <span>{{ row.date }}</span>
+              <span>{{ row.reference }}</span>
+              <span>
+                <span class="table-pill table-pill--expense">{{ row.category }}</span>
+              </span>
+              <span>{{ row.label }}</span>
+              <span>{{ row.provider }}</span>
+              <span class="depenses-panel__amount">{{ row.amount }}</span>
+              <span class="depenses-panel__actions">
+                <a
+                  [routerLink]="'/finances/depenses/' + row.id"
+                  class="depenses-panel__action-link"
+                  aria-label="Voir les détails"
+                >
+                  <img [src]="assets.actionMore" alt="" aria-hidden="true" />
+                </a>
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <p class="depenses-panel__empty">Aucune dépense enregistrée.</p>
+    }
+
+    <footer class="depenses-panel__pagination">
+      <ubax-paginator
+        [(currentPage)]="currentPage"
+        [totalPages]="totalPages()"
+      />
+    </footer>
+  </section>
+</section>
+
+@if (isAddOpen()) {
+  <ubax-nouvelle-depense-dialog
+    [loading]="isCreating()"
+    [error]="createError()"
+    (confirm)="submitExpense($event)"
+    (dismissed)="closeAdd()"
+  />
+}

@@ -185,6 +185,13 @@
   }
 }
 
+.summary-card__count {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ubax-text-secondary, #6b7280);
+  margin-top: -2px;
+}
+
 .summary-card--balance {
   position: relative;
   min-height: 129px;
@@ -290,29 +297,32 @@
   font: inherit;
 }
 
-.transactions-panel__filter {
-  width: 255px;
-  height: 65px;
-  justify-content: space-between;
-  padding: 0 27px 0 36px;
-  background: var(--ubax-page-bg);
-
-  img {
-    width: 36px;
-    height: 37px;
-  }
-
-  select {
-    width: 100%;
+// Le select PrimeNG reprend les dimensions du filtre précédent
+::ng-deep .transactions-panel__type-select {
+  &.p-select {
+    width: 255px;
+    height: 65px;
+    border-radius: 10px;
     border: 0;
-    outline: 0;
-    background: transparent;
+    background: var(--ubax-page-bg);
     font-family: 'Lexend', sans-serif;
     font-size: 15px;
     font-weight: 500;
     color: var(--ubax-text-primary);
-    appearance: none;
-    cursor: pointer;
+
+    .p-select-label {
+      padding: 0 36px;
+      line-height: 65px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ubax-text-primary);
+    }
+
+    .p-select-dropdown {
+      width: 48px;
+      color: var(--ubax-text-primary);
+    }
   }
 }
 
@@ -376,7 +386,6 @@
 .transactions-panel__head {
   display: flex;
   align-items: center;
-  min-width: 1582px;
   min-height: 75px;
   padding-inline: 23px 14px;
   border-radius: 10px;
@@ -387,8 +396,9 @@
 .transactions-panel__head-grid,
 .transactions-panel__row-grid {
   display: grid;
-  grid-template-columns: 167px 151px 162px 231px 239px 200px 229px 166px;
-  width: 1545px;
+  grid-template-columns: 1fr 1.4fr 0.85fr 1.3fr 1.6fr 1.2fr 1.4fr 1fr;
+  width: 100%;
+  gap: 16px;
 }
 
 .transactions-panel__head-grid {
@@ -401,11 +411,11 @@
   display: grid;
   gap: 20px;
   margin-top: 20px;
-  padding-left: 23px;
+  padding-inline: 23px 14px;
 }
 
 .transactions-panel__row {
-  width: 1545px;
+  width: 100%;
   min-height: 64px;
   border-bottom: 1px solid var(--ubax-border-subtle);
 }
@@ -594,6 +604,10 @@
   .transactions-panel__add {
     width: 100%;
   }
+
+  ::ng-deep .transactions-panel__type-select.p-select {
+    width: 100%;
+  }
 }
 
 @media (max-width: 900px) {
@@ -624,11 +638,6 @@
   .transactions-panel__header h2 {
     margin-top: 0;
     line-height: 1.3;
-  }
-
-  .transactions-panel__head,
-  .transactions-panel__row {
-    min-width: 1545px;
   }
 
   .transactions-panel__pagination {

@@ -1,0 +1,265 @@
+:host {
+  display: block;
+}
+
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ubax-text-secondary, #6b7280);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s;
+
+  i { font-size: 13px; }
+
+  &:hover { color: var(--ubax-navy, #0f2d5e); }
+}
+
+.detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: var(--ubax-text-primary);
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__title-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ubax-text-primary);
+    line-height: 1.2;
+  }
+
+  &__state {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 0;
+    color: var(--ubax-text-secondary, #6b7280);
+    font-size: 15px;
+
+    i { font-size: 20px; }
+
+    &--error {
+      color: #dc2626;
+    }
+  }
+
+  &__kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 540px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &--success {
+    background: #dcfce7;
+    color: #15803d;
+    .status-badge__dot { background: #16a34a; }
+  }
+
+  &--warning {
+    background: #fef9c3;
+    color: #a16207;
+    .status-badge__dot { background: #ca8a04; }
+  }
+
+  &--danger {
+    background: #fee2e2;
+    color: #b91c1c;
+    .status-badge__dot { background: #dc2626; }
+  }
+
+  &--info {
+    background: #dbeafe;
+    color: #1d4ed8;
+    .status-badge__dot { background: #2563eb; }
+  }
+
+  &--neutral {
+    background: var(--ubax-surface-muted, #f1f5f9);
+    color: var(--ubax-text-secondary, #6b7280);
+    .status-badge__dot { background: #9ca3af; }
+  }
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 24px;
+  background: var(--ubax-surface);
+  border: 1px solid var(--ubax-border-card, #e2e8f0);
+  border-radius: var(--ubax-radius-xl, 16px);
+
+  &__label {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ubax-text-secondary, #6b7280);
+  }
+
+  &__value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ubax-text-primary);
+
+    &--paid {
+      color: #16a34a;
+    }
+  }
+}
+
+.detail-card {
+  background: var(--ubax-surface);
+  border: 1px solid var(--ubax-border-card, #e2e8f0);
+  border-radius: var(--ubax-radius-xl, 16px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  &__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ubax-text-primary);
+  }
+
+  &__divider {
+    height: 1px;
+    background: var(--ubax-border-card, #e2e8f0);
+    margin: 0 -24px;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 32px;
+  margin: 0;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 540px) {
+    grid-template-columns: 1fr;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    dt {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ubax-text-secondary, #6b7280);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    dd {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ubax-text-primary);
+    }
+  }
+}
+
+.detail-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ubax-text-secondary, #6b7280);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ubax-text-primary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+}
+
+// Styles du bouton déclencheur et du modal gérés par ubax-document-preview
+// (shared-design-system). Aucun style de preview local nécessaire.
+
+.document-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--ubax-surface-muted, #f1f5f9);
+    color: var(--ubax-navy, #0f2d5e);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ubax-text-primary);
+  }
+}
+

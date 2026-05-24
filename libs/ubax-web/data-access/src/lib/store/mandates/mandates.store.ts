@@ -15,6 +15,7 @@ import {
   withApiResource,
 } from '@ubax-workspace/shared-data-access';
 import {
+  activate,
   ApiConfiguration,
   cancel,
   create6,
@@ -69,6 +70,9 @@ type MandatesState = {
   cancellingId: string | null;
   cancelError: string | null;
   lastCancelledId: string | null;
+  activatingId: string | null;
+  activateError: string | null;
+  lastActivatedId: string | null;
 };
 
 const initialState: MandatesState = {
@@ -84,6 +88,9 @@ const initialState: MandatesState = {
   cancellingId: null,
   cancelError: null,
   lastCancelledId: null,
+  activatingId: null,
+  activateError: null,
+  lastActivatedId: null,
 };
 
 function extractMandateCollection(raw: unknown): Mandate[] {
@@ -361,6 +368,54 @@ export const MandatesStore = signalStore(
         ),
       ),
 
+      activateMandate: rxMethod<string>(
+        pipe(
+          tap((id) =>
+            patchState(store, {
+              activatingId: id,
+              saving: true,
+              activateError: null,
+              lastActivatedId: null,
+            }),
+          ),
+          exhaustMap((id) =>
+            activate(http, apiConfig.rootUrl, { id }).pipe(
+              tapResponse({
+                next: (response) => {
+                  const updated = mergeMandate(store.entityMap()[id], id, {
+                    ...extractMandateItem(response.body, id),
+                    status: 'ACTIVE',
+                  });
+
+                  patchState(
+                    store,
+                    setEntity(updated, {
+                      selectId: (item: Mandate) => item.id,
+                    }),
+                    {
+                      saving: false,
+                      activatingId: null,
+                      activateError: null,
+                      lastActivatedId: id,
+                      selectedId: id,
+                    },
+                  );
+                },
+                error: (error: HttpErrorResponse) =>
+                  patchState(store, {
+                    saving: false,
+                    activatingId: null,
+                    activateError: resolveHttpErrorMessage(
+                      error,
+                      "Impossible d'activer le mandat.",
+                    ),
+                  }),
+              }),
+            ),
+          ),
+        ),
+      ),
+
       clearActionFeedback(): void {
         patchState(store, {
           createError: null,
@@ -371,6 +426,8 @@ export const MandatesStore = signalStore(
           lastTerminatedId: null,
           cancelError: null,
           lastCancelledId: null,
+          activateError: null,
+          lastActivatedId: null,
         });
       },
     }),

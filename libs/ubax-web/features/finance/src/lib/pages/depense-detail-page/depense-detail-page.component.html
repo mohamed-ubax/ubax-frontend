@@ -1,0 +1,145 @@
+<section class="detail-page" data-ubax-motion="page">
+
+  <header class="detail-page__header">
+    <a class="detail-back" routerLink="/finances/depenses" aria-label="Retour aux dépenses">
+      <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      <span>Retour</span>
+    </a>
+
+    <div class="detail-page__title-block">
+      <h1 class="detail-page__title">Détails de la dépense</h1>
+      @if (expense()) {
+        <span class="category-badge">{{ categoryLabel() }}</span>
+      }
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="detail-page__state">
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+      <span>Chargement…</span>
+    </div>
+  } @else if (error()) {
+    <div class="detail-page__state detail-page__state--error">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      <span>{{ error() }}</span>
+    </div>
+  } @else if (expense()) {
+
+    <div class="detail-page__kpi-row">
+      <article class="kpi-card kpi-card--expense" data-ubax-motion="surface">
+        <span class="kpi-card__label">Montant</span>
+        <strong class="kpi-card__value">{{ amountFormatted() }}</strong>
+      </article>
+      <article class="kpi-card" data-ubax-motion="surface">
+        <span class="kpi-card__label">Date de dépense</span>
+        <strong class="kpi-card__value">{{ expenseDateFormatted() }}</strong>
+      </article>
+      <article class="kpi-card" data-ubax-motion="surface">
+        <span class="kpi-card__label">Centre de coût</span>
+        <strong class="kpi-card__value">{{ costCenterLabel() }}</strong>
+      </article>
+      <article class="kpi-card" data-ubax-motion="surface">
+        <span class="kpi-card__label">Mode de paiement</span>
+        <strong class="kpi-card__value">{{ methodLabel() }}</strong>
+      </article>
+    </div>
+
+    <section class="detail-card" data-ubax-motion="surface">
+      <h2 class="detail-card__title">Informations</h2>
+      <div class="detail-card__divider"></div>
+
+      <dl class="detail-grid">
+        <div class="detail-grid__item">
+          <dt>Intitulé</dt>
+          <dd>{{ expense()?.label ?? '—' }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Fournisseur</dt>
+          <dd>{{ expense()?.provider ?? '—' }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Référence facture</dt>
+          <dd>{{ expense()?.invoiceReference ?? '—' }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Catégorie</dt>
+          <dd>{{ categoryLabel() }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Créé par</dt>
+          <dd>{{ expense()?.createdByName ?? '—' }}</dd>
+        </div>
+        <div class="detail-grid__item">
+          <dt>Créé le</dt>
+          <dd>{{ createdAtFormatted() }}</dd>
+        </div>
+      </dl>
+
+      @if (expense()?.note) {
+        <div class="detail-card__divider"></div>
+        <div class="detail-note">
+          <span class="detail-note__label">Note</span>
+          <p class="detail-note__text">{{ expense()?.note }}</p>
+        </div>
+      }
+    </section>
+
+    @if (expense()?.justificationUrl) {
+      <section class="detail-card detail-card--document" data-ubax-motion="surface">
+        <h2 class="detail-card__title">Justificatif</h2>
+        <div class="detail-card__divider"></div>
+
+        <div class="document-row">
+          <div class="document-row__info">
+            <span class="document-row__icon">
+              <i class="pi pi-file" aria-hidden="true"></i>
+            </span>
+            <span class="document-row__name">Justificatif de dépense</span>
+          </div>
+          <button
+            class="document-row__btn"
+            type="button"
+            [disabled]="previewLoading()"
+            (click)="openJustification()"
+          >
+            @if (previewLoading()) {
+              <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+              Chargement…
+            } @else {
+              <i class="pi pi-eye" aria-hidden="true"></i>
+              Prévisualiser
+            }
+          </button>
+        </div>
+      </section>
+    }
+
+  }
+</section>
+
+@if (previewUrl()) {
+  <div class="preview-overlay" (click)="closePreview()">
+    <div class="preview-modal" (click)="$event.stopPropagation()">
+      <div class="preview-modal__header">
+        <span class="preview-modal__title">Justificatif de dépense</span>
+        <button class="preview-modal__close" type="button" aria-label="Fermer" (click)="closePreview()">
+          <i class="pi pi-times" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="preview-modal__body">
+        @if (previewIsImage()) {
+          <img [src]="safePreviewUrl()" alt="Justificatif de dépense" class="preview-modal__img" />
+        } @else {
+          <iframe
+            [src]="safePreviewUrl()"
+            class="preview-modal__iframe"
+            title="Justificatif de dépense"
+            sandbox="allow-same-origin allow-scripts"
+          ></iframe>
+        }
+      </div>
+    </div>
+  </div>
+}
