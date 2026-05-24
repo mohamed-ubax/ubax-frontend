@@ -147,14 +147,37 @@
         }
       </div>
 
-      <div class="expense-card__divider"></div>
-
-      <div class="expense-card__more-container">
-        <a class="expense-card__more" routerLink="/finances/depenses">Voir les dépenses</a>
-      </div>
     </article>
 
-    <aside class="surface-card overdue-sidebar" data-ubax-motion="surface">
+    <aside class="surface-card expenses-sidebar" data-ubax-motion="surface" aria-label="Dépenses récentes">
+      <h2>Dépenses récentes</h2>
+
+      <div class="overdue-sidebar__divider"></div>
+
+      <div class="expenses-sidebar__list">
+        @for (item of recentExpenses(); track item.id) {
+          <article class="expenses-sidebar__row">
+            <span class="expenses-sidebar__dot"></span>
+
+            <div class="expenses-sidebar__copy">
+              <strong>{{ item.label }}</strong>
+              <span>{{ item.provider }}</span>
+            </div>
+
+            <span class="expenses-sidebar__amount">{{ item.amount }}</span>
+          </article>
+        }
+        @if (recentExpenses().length === 0) {
+          <p class="expenses-sidebar__empty">Aucune dépense récente.</p>
+        }
+      </div>
+
+      <div class="transactions-preview__divider-container">
+        <a class="overdue-sidebar__more" routerLink="/finances/depenses">Voir plus</a>
+      </div>
+    </aside>
+
+    <aside class="surface-card overdue-sidebar" data-ubax-motion="surface" aria-label="Loyer en retard">
       <h2>Loyer en retard</h2>
 
       <div class="overdue-sidebar__divider"></div>
@@ -193,18 +216,14 @@
         <h2>Historique des transactions</h2>
 
         <div class="transactions-preview__actions">
-          <label class="transactions-preview__filter">
-            <select
-              [ngModel]="selectedType()"
-              (ngModelChange)="setSelectedType($event)"
-              title="Type de transaction"
-            >
-              @for (option of transactionTypeOptions; track option.value) {
-                <option [value]="option.value">{{ option.label }}</option>
-              }
-            </select>
-            <img [src]="assets.chevronDown" alt="" aria-hidden="true" />
-          </label>
+          <p-select
+            styleClass="transactions-preview__filter"
+            [options]="transactionTypeOptions"
+            [ngModel]="selectedType()"
+            (ngModelChange)="setSelectedType($event)"
+            optionLabel="label"
+            optionValue="value"
+          />
 
           <label class="transactions-preview__search">
             <img [src]="assets.tableSearchIcon" alt="" aria-hidden="true" />
@@ -215,11 +234,6 @@
               (ngModelChange)="setSearchQuery($event)"
             />
           </label>
-
-          <button class="transactions-preview__add" type="button">
-            <img [src]="assets.addIcon" alt="" aria-hidden="true" />
-            <span>Nouvelle transaction</span>
-          </button>
         </div>
       </div>
 
@@ -267,12 +281,13 @@
                   </span>
                 </span>
                 <span class="transactions-table__actions">
-                  <button type="button" aria-label="Modifier la transaction">
-                    <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
-                  </button>
-                  <button type="button" aria-label="Plus d'actions">
+                  <a
+                    class="transactions-table__action-more"
+                    [routerLink]="'/finances/transactions/' + transaction.id"
+                    aria-label="Voir les détails"
+                  >
                     <img [src]="assets.actionMore" alt="" aria-hidden="true" />
-                  </button>
+                  </a>
                 </span>
               </div>
             }

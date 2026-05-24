@@ -9,6 +9,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
+import { SelectModule } from 'primeng/select';
 import { ChartData, ChartOptions, Plugin } from 'chart.js';
 import {
   FINANCE_ASSETS,
@@ -21,7 +22,25 @@ import {
   FINANCE_Y_AXIS_LABELS,
 } from '../../constants/finance-ui.constants';
 import type { FinanceTransactionFilterValue } from '../../types/finance.types';
-import { PaymentsStore } from '@ubax-workspace/ubax-web-data-access';
+import { ExpensesStore, mapExpenseToRow, PaymentsStore } from '@ubax-workspace/ubax-web-data-access';
+
+const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
+  MAINTENANCE: 'Entretien',
+  MARKETING: 'Marketing',
+  SALARY: 'Salaire',
+  UTILITIES: 'Charges',
+  TAX: 'Taxes',
+  OTHER: 'Autre',
+};
+
+const EXPENSE_CATEGORY_TONES: Record<string, string> = {
+  MAINTENANCE: 'blue',
+  MARKETING: 'yellow',
+  SALARY: 'green',
+  UTILITIES: 'orange',
+  TAX: 'purple',
+  OTHER: 'gray',
+};
 
 const ACTIVE_REVENUE_INDEX = FINANCE_REVENUE_SERIES.findIndex(
   (point) => point.highlighted,
@@ -62,18 +81,19 @@ const ACTIVE_REVENUE_PLUGIN: Plugin<'line'> = {
 @Component({
   selector: 'ubax-finance-overview-page',
   standalone: true,
-  imports: [RouterLink, FormsModule, ChartModule],
+  imports: [RouterLink, FormsModule, ChartModule, SelectModule],
   templateUrl: './finance-overview-page.component.html',
   styleUrl: './finance-overview-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FinanceOverviewPageComponent implements OnInit {
   private readonly paymentsStore = inject(PaymentsStore);
+  private readonly expensesStore = inject(ExpensesStore);
 
   protected readonly assets = FINANCE_ASSETS;
   protected readonly monthLabels = FINANCE_MONTH_LABELS;
   protected readonly yAxisLabels = FINANCE_Y_AXIS_LABELS;
-  protected readonly transactionTypeOptions = FINANCE_TRANSACTION_TYPE_OPTIONS;
+  protected readonly transactionTypeOptions = [...FINANCE_TRANSACTION_TYPE_OPTIONS];
   protected readonly selectedType =
     signal<FinanceTransactionFilterValue>('all');
   protected readonly searchQuery = signal('');
@@ -127,6 +147,10 @@ export class FinanceOverviewPageComponent implements OnInit {
     this.isBalanceHidden()
       ? '•••••••• FCFA'
       : (this.paymentsStore.kpiSolde() ?? '—'),
+  );
+
+  protected readonly recentExpenses = computed(() =>
+    this.expensesStore.entities().slice(0, 5).map(mapExpenseToRow),
   );
 
   protected readonly overdueItems = computed(() => {
@@ -284,6 +308,9 @@ export class FinanceOverviewPageComponent implements OnInit {
     this.paymentsStore.loadLatePayments();
     this.paymentsStore.load?.({
       pageable: { page: 0, size: 10, sort: [] },
+    });
+    this.expensesStore.load?.({
+      pageable: { page: 0, size: 5, sort: [] },
     });
   }
 
