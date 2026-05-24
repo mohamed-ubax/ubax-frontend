@@ -179,6 +179,13 @@
   }
 }
 
+.summary-card__count {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ubax-text-secondary, #6b7280);
+  margin-top: -2px;
+}
+
 .summary-card--balance {
   justify-content: space-between;
   padding-inline: 30px;

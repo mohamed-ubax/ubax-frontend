@@ -8,6 +8,7 @@ export type FinanceSummaryCard = {
   readonly tone: 'success' | 'info' | 'warning' | 'balance';
   readonly icon?: string;
   readonly iconAlt?: string;
+  readonly count?: string;
 };
 
 export type FinanceSelectOption<T extends string = string> = {

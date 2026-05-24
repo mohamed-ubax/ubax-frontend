@@ -183,6 +183,11 @@ export const PaymentsStore = signalStore(
         ? formatAmount(dashboard()!.netRevenue)
         : null,
     ),
+    kpiPendingCount: computed(() => dashboard()?.pendingPaymentsCount ?? null),
+    kpiLateCount: computed(() => dashboard()?.latePaymentsCount ?? null),
+    kpiPaidCount: computed(() => dashboard()?.paidPaymentsCount ?? null),
+    kpiRecoveryRate: computed(() => dashboard()?.recoveryRate ?? null),
+    kpiActiveContracts: computed(() => dashboard()?.activeContracts ?? null),
     expensesByCategory: computed(() => dashboard()?.expensesByCategory ?? []),
   })),
   withMethods(

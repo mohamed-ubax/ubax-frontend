@@ -45,10 +45,30 @@ export class TransactionsHistoryPageComponent implements OnInit {
     const encaissement = this.paymentsStore.kpiEncaissement();
     const depenses = this.paymentsStore.kpiDepenses();
     const loyerAttente = this.paymentsStore.kpiLoyerAttente();
+    const paidCount = this.paymentsStore.kpiPaidCount();
+    const pendingCount = this.paymentsStore.kpiPendingCount();
+    const lateCount = this.paymentsStore.kpiLateCount();
+
+    const pendingLabel =
+      pendingCount != null
+        ? `${pendingCount} paiement${pendingCount !== 1 ? 's' : ''} en attente${lateCount ? `, dont ${lateCount} en retard` : ''}`
+        : undefined;
+
     return [
-      { ...FINANCE_SUMMARY_CARDS[0], amount: encaissement ?? FINANCE_SUMMARY_CARDS[0].amount },
+      {
+        ...FINANCE_SUMMARY_CARDS[0],
+        amount: encaissement ?? FINANCE_SUMMARY_CARDS[0].amount,
+        count:
+          paidCount != null
+            ? `${paidCount} paiement${paidCount !== 1 ? 's' : ''} encaissé${paidCount !== 1 ? 's' : ''}`
+            : undefined,
+      },
       { ...FINANCE_SUMMARY_CARDS[1], amount: depenses ?? FINANCE_SUMMARY_CARDS[1].amount },
-      { ...FINANCE_SUMMARY_CARDS[2], amount: loyerAttente ?? FINANCE_SUMMARY_CARDS[2].amount },
+      {
+        ...FINANCE_SUMMARY_CARDS[2],
+        amount: loyerAttente ?? FINANCE_SUMMARY_CARDS[2].amount,
+        count: pendingLabel,
+      },
     ];
   });
 

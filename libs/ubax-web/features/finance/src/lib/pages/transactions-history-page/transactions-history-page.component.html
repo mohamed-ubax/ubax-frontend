@@ -54,6 +54,9 @@
         <div class="summary-card__content">
           <p>{{ card.label }}</p>
           <strong>{{ card.amount }}</strong>
+          @if (card.count) {
+            <span class="summary-card__count">{{ card.count }}</span>
+          }
         </div>
       </article>
     }
