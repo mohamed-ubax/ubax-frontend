@@ -1,0 +1,180 @@
+<div class="dlg-overlay" (click)="dismissed.emit()">
+  <dialog
+    class="dlg dlg--transaction"
+    (click)="$event.stopPropagation()"
+    aria-labelledby="dlg-transaction-title"
+    open
+  >
+    <div class="dlg__header">
+      <h2 class="dlg__title" id="dlg-transaction-title">
+        Nouvelle transaction
+      </h2>
+      <button
+        class="dlg__close"
+        type="button"
+        aria-label="Fermer"
+        (click)="dismissed.emit()"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="dlg__divider" aria-hidden="true"></div>
+
+    <form class="dlg__form" (ngSubmit)="submit()">
+      <div class="dlg-form-row">
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Type de paiement *</span>
+          <select
+            class="dlg-form-field__select"
+            [ngModel]="form().paymentType"
+            (ngModelChange)="patch({ paymentType: $event })"
+            name="paymentType"
+            required
+          >
+            @for (opt of paymentTypeOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Mode de paiement</span>
+          <select
+            class="dlg-form-field__select"
+            [ngModel]="form().paymentMethod"
+            (ngModelChange)="patch({ paymentMethod: $event })"
+            name="paymentMethod"
+          >
+            @for (opt of paymentMethodOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="dlg-form-row">
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Montant total (FCFA) *</span>
+          <input
+            class="dlg-form-field__input"
+            type="number"
+            min="1"
+            placeholder="ex : 450 000"
+            [ngModel]="form().amount"
+            (ngModelChange)="patch({ amount: +$event })"
+            name="amount"
+            required
+          />
+        </label>
+
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Montant reçu (FCFA)</span>
+          <input
+            class="dlg-form-field__input"
+            type="number"
+            min="0"
+            placeholder="Optionnel"
+            [ngModel]="form().amountPaid"
+            (ngModelChange)="patch({ amountPaid: +$event || undefined })"
+            name="amountPaid"
+          />
+        </label>
+      </div>
+
+      <div class="dlg-form-row">
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Date d'échéance *</span>
+          <input
+            class="dlg-form-field__input"
+            type="date"
+            [ngModel]="form().dueDate"
+            (ngModelChange)="patch({ dueDate: $event })"
+            name="dueDate"
+            required
+          />
+        </label>
+
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Date de réception</span>
+          <input
+            class="dlg-form-field__input"
+            type="date"
+            [ngModel]="form().paidDate"
+            (ngModelChange)="patch({ paidDate: $event || undefined })"
+            name="paidDate"
+          />
+        </label>
+      </div>
+
+      <div class="dlg-form-row">
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Période couverte</span>
+          <input
+            class="dlg-form-field__input"
+            type="text"
+            placeholder="ex : Juillet 2026"
+            [ngModel]="form().periodLabel"
+            (ngModelChange)="patch({ periodLabel: $event || undefined })"
+            name="periodLabel"
+          />
+        </label>
+
+        <label class="dlg-form-field">
+          <span class="dlg-form-field__label">Référence</span>
+          <input
+            class="dlg-form-field__input"
+            type="text"
+            placeholder="ex : WAVE-2026070001"
+            [ngModel]="form().reference"
+            (ngModelChange)="patch({ reference: $event || undefined })"
+            name="reference"
+          />
+        </label>
+      </div>
+
+      <label class="dlg-form-field dlg-form-field--full">
+        <span class="dlg-form-field__label">Note</span>
+        <textarea
+          class="dlg-form-field__textarea"
+          rows="3"
+          placeholder="Note libre…"
+          [ngModel]="form().note"
+          (ngModelChange)="patch({ note: $event || undefined })"
+          name="note"
+        ></textarea>
+      </label>
+
+      @if (error()) {
+        <p class="dlg__error" role="alert">{{ error() }}</p>
+      }
+
+      <div class="dlg__divider" aria-hidden="true"></div>
+
+      <div class="dlg__actions">
+        <button
+          class="dlg-btn dlg-btn--ghost"
+          type="button"
+          (click)="dismissed.emit()"
+          [disabled]="loading()"
+        >
+          Annuler
+        </button>
+        <button
+          class="dlg-btn dlg-btn--primary"
+          type="submit"
+          [disabled]="loading() || !isValid()"
+          (click)="submit()"
+        >
+          @if (loading()) {
+            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+            Enregistrement…
+          } @else {
+            <i class="pi pi-check" aria-hidden="true"></i>
+            Enregistrer
+          }
+        </button>
+      </div>
+    </form>
+  </dialog>
+</div>

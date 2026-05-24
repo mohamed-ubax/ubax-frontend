@@ -38,7 +38,7 @@
     class="transactions-history-page__summary-grid"
     aria-label="Résumé financier"
   >
-    @for (card of kpiCards; track card.label) {
+    @for (card of kpiCards(); track card.label) {
       <article class="summary-card" data-ubax-motion="surface">
         <span
           class="summary-card__icon-shell"
@@ -63,7 +63,7 @@
       data-ubax-motion="surface"
     >
       <div class="summary-card__balance-copy">
-        <p>{{ balanceCard.label }}</p>
+        <p>{{ balanceCard().label }}</p>
         <strong>{{ balanceAmount() }}</strong>
       </div>
 
@@ -75,8 +75,8 @@
         <span class="summary-card__balance-toggle-label"
           >Afficher ou masquer le solde</span
         >
-        @if (balanceCard.icon) {
-          <img [src]="balanceCard.icon" [alt]="balanceCard.iconAlt ?? ''" />
+        @if (balanceCard().icon) {
+          <img [src]="balanceCard().icon" [alt]="balanceCard().iconAlt ?? ''" />
         }
       </button>
     </article>
@@ -110,7 +110,11 @@
           />
         </label>
 
-        <button class="transactions-panel__add" type="button">
+        <button
+          class="transactions-panel__add"
+          type="button"
+          (click)="openNewTransaction()"
+        >
           <img [src]="assets.addIcon" alt="" aria-hidden="true" />
           <span>Nouvelle transaction</span>
         </button>
@@ -196,3 +200,12 @@
     </footer>
   </section>
 </section>
+
+@if (isNewTransactionOpen()) {
+  <ubax-nouvelle-transaction-dialog
+    [loading]="isCreatingPayment()"
+    [error]="createPaymentError()"
+    (confirm)="submitNewTransaction($event)"
+    (dismissed)="closeNewTransaction()"
+  />
+}

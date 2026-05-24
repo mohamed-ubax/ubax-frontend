@@ -39,33 +39,25 @@
         <div class="overdue-panel__period">
           <span class="overdue-panel__period-label">Période</span>
 
-          <label class="overdue-panel__period-select">
+          <div class="overdue-panel__period-select">
             <img
               [src]="assets.overduePeriodCalendarIcon"
               alt=""
               aria-hidden="true"
             />
-            <select
-              [ngModel]="selectedPeriod()"
-              (ngModelChange)="setSelectedPeriod($event)"
-              title="Période des loyers en retard"
-            >
-              @for (period of periodOptions; track period) {
-                <option [value]="period">{{ period }}</option>
-              }
-            </select>
+            <span>Toutes périodes</span>
             <img
               [src]="assets.overduePeriodDropdownIcon"
               alt=""
               aria-hidden="true"
             />
-          </label>
+          </div>
         </div>
 
         <div class="overdue-panel__meta">
           <div class="overdue-panel__balance">
             <span>Solde impayé</span>
-            <strong>{{ unpaidBalance }}</strong>
+            <strong>{{ unpaidBalance() }}</strong>
           </div>
 
           <label class="overdue-panel__search">
@@ -82,7 +74,9 @@
         </div>
       </div>
 
-      @if (pagedRows().length > 0) {
+      @if (isLoading()) {
+        <p class="overdue-panel__empty">Chargement…</p>
+      } @else if (pagedRows().length > 0) {
         <div class="overdue-panel__table">
           <div class="overdue-panel__head">
             <span>Locataire</span>
@@ -121,7 +115,7 @@
                   <button
                     class="overdue-panel__icon-button overdue-panel__icon-button--more"
                     type="button"
-                    aria-label="Plus d’actions"
+                    aria-label="Plus d'actions"
                   >
                     <img
                       [src]="assets.overdueRowMore"

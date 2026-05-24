@@ -12,3 +12,4 @@ export * from './ticketing';
 export * from './team';
 export * from './bailleurs';
 export * from './mandates';
+export * from './finance';

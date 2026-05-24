@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,77 +11,97 @@ import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import {
   FINANCE_ASSETS,
   FINANCE_SUMMARY_CARDS,
-  FINANCE_TRANSACTION_HISTORY,
   FINANCE_TRANSACTION_TYPE_OPTIONS,
 } from '../../constants/finance-ui.constants';
 import type { FinanceTransactionFilterValue } from '../../types/finance.types';
-import type { TransactionHistoryItem } from '../../types/transactions-history.types';
+import { PaymentsStore } from '@ubax-workspace/ubax-web-data-access';
+import { PaymentCreateRequest } from '@ubax-workspace/shared-api-types';
+import { NouvelleTransactionDialogComponent } from '../../components/nouvelle-transaction-dialog/nouvelle-transaction-dialog.component';
 
-const HISTORY_PAGE_SIZE = 8;
-
-const ALL_TRANSACTIONS: readonly TransactionHistoryItem[] = Array.from(
-  { length: 5 },
-  (_, pageIndex) =>
-    FINANCE_TRANSACTION_HISTORY.map((transaction, index) => ({
-      ...transaction,
-      uid: `finance-history-${pageIndex + 1}-${index + 1}`,
-    })),
-).flat();
+const PAGE_SIZE = 8;
 
 @Component({
   selector: 'ubax-transactions-history-page',
   standalone: true,
-  imports: [UbaxPaginatorComponent, FormsModule],
+  imports: [UbaxPaginatorComponent, FormsModule, NouvelleTransactionDialogComponent],
   templateUrl: './transactions-history-page.component.html',
   styleUrl: './transactions-history-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TransactionsHistoryPageComponent {
+export class TransactionsHistoryPageComponent implements OnInit {
+  private readonly paymentsStore = inject(PaymentsStore);
+
+  protected readonly isNewTransactionOpen = signal(false);
+
   protected readonly assets = FINANCE_ASSETS;
-  protected readonly kpiCards = FINANCE_SUMMARY_CARDS.slice(0, 3);
-  protected readonly balanceCard = FINANCE_SUMMARY_CARDS[3];
   protected readonly transactionTypeOptions = FINANCE_TRANSACTION_TYPE_OPTIONS;
-  protected readonly currentPage = signal(3);
+  protected readonly currentPage = signal(1);
   protected readonly selectedType =
     signal<FinanceTransactionFilterValue>('all');
   protected readonly searchQuery = signal('');
   protected readonly isBalanceHidden = signal(false);
+
+  protected readonly kpiCards = computed(() => {
+    const encaissement = this.paymentsStore.kpiEncaissement();
+    const depenses = this.paymentsStore.kpiDepenses();
+    const loyerAttente = this.paymentsStore.kpiLoyerAttente();
+    return [
+      { ...FINANCE_SUMMARY_CARDS[0], amount: encaissement ?? FINANCE_SUMMARY_CARDS[0].amount },
+      { ...FINANCE_SUMMARY_CARDS[1], amount: depenses ?? FINANCE_SUMMARY_CARDS[1].amount },
+      { ...FINANCE_SUMMARY_CARDS[2], amount: loyerAttente ?? FINANCE_SUMMARY_CARDS[2].amount },
+    ];
+  });
+
+  protected readonly balanceCard = computed(() => ({
+    ...FINANCE_SUMMARY_CARDS[3],
+    amount: this.paymentsStore.kpiSolde() ?? FINANCE_SUMMARY_CARDS[3].amount,
+  }));
+
   protected readonly balanceAmount = computed(() =>
-    this.isBalanceHidden() ? '•••••••• FCFA' : this.balanceCard.amount,
+    this.isBalanceHidden()
+      ? '•••••••• FCFA'
+      : (this.paymentsStore.kpiSolde() ?? FINANCE_SUMMARY_CARDS[3].amount),
   );
+
+  protected readonly isLoading = computed(() => this.paymentsStore.loading());
+  protected readonly isCreatingPayment = computed(() => this.paymentsStore.creatingPayment());
+  protected readonly createPaymentError = computed(() => this.paymentsStore.createPaymentError());
+
   protected readonly filteredTransactions = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
     const selectedType = this.selectedType();
+    const rows = this.paymentsStore.paymentRows();
 
-    return ALL_TRANSACTIONS.filter((transaction) => {
+    return rows.filter((t) => {
       const matchesType =
-        selectedType === 'all' || transaction.type === selectedType;
+        selectedType === 'all' || t.type === selectedType;
       const matchesQuery =
         query.length === 0 ||
-        [
-          transaction.date,
-          transaction.reference,
-          transaction.property,
-          transaction.tenant,
-          transaction.amount,
-        ]
+        [t.date, t.reference, t.property, t.tenant, t.amount]
           .join(' ')
           .toLowerCase()
           .includes(query);
-
       return matchesType && matchesQuery;
     });
   });
+
   protected readonly totalPages = computed(() =>
-    Math.max(
-      1,
-      Math.ceil(this.filteredTransactions().length / HISTORY_PAGE_SIZE),
-    ),
+    Math.max(1, Math.ceil(this.filteredTransactions().length / PAGE_SIZE)),
   );
+
   protected readonly pagedTransactions = computed(() => {
-    const start = (this.currentPage() - 1) * HISTORY_PAGE_SIZE;
-    return this.filteredTransactions().slice(start, start + HISTORY_PAGE_SIZE);
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return this.filteredTransactions()
+      .slice(start, start + PAGE_SIZE)
+      .map((t, i) => ({ ...t, uid: `tx-${t.id}-${i}` }));
   });
+
+  ngOnInit(): void {
+    this.paymentsStore.loadDashboard();
+    this.paymentsStore.load?.({
+      pageable: { page: 0, size: 100, sort: [] },
+    });
+  }
 
   protected setSelectedType(value: FinanceTransactionFilterValue): void {
     if (value === 'all' || value === 'loyer' || value === 'depense') {
@@ -94,6 +116,19 @@ export class TransactionsHistoryPageComponent {
   }
 
   protected toggleBalanceVisibility(): void {
-    this.isBalanceHidden.update((value) => !value);
+    this.isBalanceHidden.update((v) => !v);
+  }
+
+  protected openNewTransaction(): void {
+    this.isNewTransactionOpen.set(true);
+    this.paymentsStore.clearPaymentFeedback();
+  }
+
+  protected closeNewTransaction(): void {
+    this.isNewTransactionOpen.set(false);
+  }
+
+  protected submitNewTransaction(body: PaymentCreateRequest): void {
+    this.paymentsStore.createPayment(body);
   }
 }

@@ -28,7 +28,7 @@
   </header>
 
   <div class="finance-overview-page__summary-grid" data-ubax-motion="surface">
-    @for (card of summaryCards; track card.label) {
+    @for (card of summaryCards(); track card.label) {
       <article
         class="summary-card"
         [class.summary-card--balance]="card.tone === 'balance'"
@@ -121,14 +121,14 @@
         <div class="expense-card__chart">
           <p-chart
             type="pie"
-            [data]="expenseChartData"
+            [data]="expenseChartData()"
             [options]="expenseChartOptions"
           />
         </div>
       </div>
 
       <div class="expense-card__legend">
-        @for (item of expenseLegend; track item.label) {
+        @for (item of expenseLegend(); track item.label) {
           <div class="expense-card__legend-item">
             <span
               class="expense-card__legend-dot"
@@ -151,7 +151,7 @@
       <div class="overdue-sidebar__divider"></div>
 
       <div class="overdue-sidebar__list">
-        @for (item of overdueItems; track item.amount + item.avatar) {
+        @for (item of overdueItems(); track item.amount + item.avatar) {
           <article class="overdue-sidebar__row">
             <img
               class="overdue-sidebar__avatar"
@@ -261,7 +261,7 @@
                   <button type="button" aria-label="Modifier la transaction">
                     <img [src]="assets.actionEdit" alt="" aria-hidden="true" />
                   </button>
-                  <button type="button" aria-label="Plus d’actions">
+                  <button type="button" aria-label="Plus d'actions">
                     <img [src]="assets.actionMore" alt="" aria-hidden="true" />
                   </button>
                 </span>
