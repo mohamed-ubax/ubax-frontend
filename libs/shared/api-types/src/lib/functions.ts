@@ -51,6 +51,8 @@ export type { RemoveBoost$Params as RemoveBoost$Params } from './fn/property/rem
 export { removeBoost as removeBoost } from './fn/property/remove-boost';
 export type { Boost$Params as Boost$Params } from './fn/property/boost';
 export { boost as boost } from './fn/property/boost';
+export type { GetAvailability$Params as GetAvailability$Params } from './fn/property/get-availability';
+export { getAvailability as getAvailability } from './fn/property/get-availability';
 export type { ListMine1$Params as ListMine1$Params } from './fn/property/list-mine-1';
 export { listMine1 as listMine1 } from './fn/property/list-mine-1';
 export type { ListHotelProperties$Params as ListHotelProperties$Params } from './fn/property/list-hotel-properties';

@@ -11,7 +11,7 @@ import { RequestBuilder } from '../../request-builder';
 export interface CancelRequest$Params {
 
 /**
- * ID de la demande
+ * ID de la demande de visite
  */
   visitRequestId: string;
 }

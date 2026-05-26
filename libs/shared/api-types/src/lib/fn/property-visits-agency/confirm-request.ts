@@ -8,18 +8,18 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { ConfirmVisitRequestDto } from '../../models/confirm-visit-request-dto';
-import { CustomResponse } from '../../models/custom-response';
+import { VisitRequestResponse } from '../../models/visit-request-response';
 
 export interface ConfirmRequest$Params {
 
 /**
- * ID de la demande
+ * ID de la demande de visite
  */
   visitRequestId: string;
       body: ConfirmVisitRequestDto
 }
 
-export function confirmRequest(http: HttpClient, rootUrl: string, params: ConfirmRequest$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function confirmRequest(http: HttpClient, rootUrl: string, params: ConfirmRequest$Params, context?: HttpContext): Observable<StrictHttpResponse<VisitRequestResponse>> {
   const rb = new RequestBuilder(rootUrl, confirmRequest.PATH, 'patch');
   if (params) {
     rb.path('visitRequestId', params.visitRequestId, {});
@@ -31,7 +31,7 @@ export function confirmRequest(http: HttpClient, rootUrl: string, params: Confir
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<VisitRequestResponse>;
     })
   );
 }

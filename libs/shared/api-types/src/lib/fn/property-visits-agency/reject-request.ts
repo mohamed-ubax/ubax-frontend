@@ -7,19 +7,19 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
 import { RejectVisitRequestDto } from '../../models/reject-visit-request-dto';
+import { VisitRequestResponse } from '../../models/visit-request-response';
 
 export interface RejectRequest$Params {
 
 /**
- * ID de la demande
+ * ID de la demande de visite
  */
   visitRequestId: string;
       body: RejectVisitRequestDto
 }
 
-export function rejectRequest(http: HttpClient, rootUrl: string, params: RejectRequest$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function rejectRequest(http: HttpClient, rootUrl: string, params: RejectRequest$Params, context?: HttpContext): Observable<StrictHttpResponse<VisitRequestResponse>> {
   const rb = new RequestBuilder(rootUrl, rejectRequest.PATH, 'patch');
   if (params) {
     rb.path('visitRequestId', params.visitRequestId, {});
@@ -31,7 +31,7 @@ export function rejectRequest(http: HttpClient, rootUrl: string, params: RejectR
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<VisitRequestResponse>;
     })
   );
 }

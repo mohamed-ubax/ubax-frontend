@@ -204,6 +204,11 @@ export interface PropertyResponse {
   transactionType?: string;
 
   /**
+   * Nombre d'unités disponibles pour ce type de bien hôtelier (toujours 1 pour les biens immobiliers classiques). Une réservation est acceptée tant que le nombre de séjours CONFIRMED se chevauchant est < unitCount.
+   */
+  unitCount?: number;
+
+  /**
    * Date de dernière modification
    */
   updatedAt?: string;
