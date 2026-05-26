@@ -15,6 +15,7 @@ export type { AssignAdminRoleRequest } from './models/assign-admin-role-request'
 export type { AssignRoleRequest } from './models/assign-role-request';
 export type { AssignSubRolesRequest } from './models/assign-sub-roles-request';
 export type { AssignTicketRequest } from './models/assign-ticket-request';
+export type { AvailableSlot } from './models/available-slot';
 export type { BailleurAgencyResponse } from './models/bailleur-agency-response';
 export type { BailleurApplicationResponse } from './models/bailleur-application-response';
 export type { BailleurApplyRequest } from './models/bailleur-apply-request';
@@ -50,6 +51,7 @@ export type { PresignedReadUrlResponse } from './models/presigned-read-url-respo
 export type { PresignedUrlResponse } from './models/presigned-url-response';
 export type { PropertyAmenityRequest } from './models/property-amenity-request';
 export type { PropertyAmenityResponse } from './models/property-amenity-response';
+export type { PropertyAvailabilityResponse } from './models/property-availability-response';
 export type { PropertyBoostRequest } from './models/property-boost-request';
 export type { PropertyCreateRequest } from './models/property-create-request';
 export type { PropertyDetailResponse } from './models/property-detail-response';
@@ -84,3 +86,5 @@ export type { UpdateTechnicienRequest } from './models/update-technicien-request
 export type { UpdateTicketStatusRequest } from './models/update-ticket-status-request';
 export type { UserResponse } from './models/user-response';
 export type { VerifyOtpRequest } from './models/verify-otp-request';
+export type { VisitAvailabilityResponse } from './models/visit-availability-response';
+export type { VisitRequestResponse } from './models/visit-request-response';

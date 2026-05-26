@@ -139,6 +139,11 @@ export interface PropertyCreateRequest {
   transactionType?: string;
 
   /**
+   * Nombre d'unités disponibles pour ce type de bien hôtelier (défaut : 1). Permet de modéliser un pool de chambres identiques. Ex : 5 chambres Standard de même config/prix → unitCount=5. Pour les biens immobiliers classiques, ne pas renseigner (toujours 1).
+   */
+  unitCount?: number;
+
+  /**
    * Année de construction
    */
   yearBuilt?: number;

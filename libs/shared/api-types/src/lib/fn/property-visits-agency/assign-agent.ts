@@ -7,22 +7,22 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { VisitRequestResponse } from '../../models/visit-request-response';
 
 export interface AssignAgent$Params {
 
 /**
- * ID de la demande
+ * ID de la demande de visite
  */
   visitRequestId: string;
 
 /**
- * ID de l'agent
+ * UUID base de données de l'agent (user.id — pas le Keycloak ID)
  */
   agentId: string;
 }
 
-export function assignAgent(http: HttpClient, rootUrl: string, params: AssignAgent$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function assignAgent(http: HttpClient, rootUrl: string, params: AssignAgent$Params, context?: HttpContext): Observable<StrictHttpResponse<VisitRequestResponse>> {
   const rb = new RequestBuilder(rootUrl, assignAgent.PATH, 'patch');
   if (params) {
     rb.path('visitRequestId', params.visitRequestId, {});
@@ -34,7 +34,7 @@ export function assignAgent(http: HttpClient, rootUrl: string, params: AssignAge
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<VisitRequestResponse>;
     })
   );
 }

@@ -8,13 +8,13 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { ConfigureVisitAvailabilityDto } from '../../models/configure-visit-availability-dto';
-import { CustomResponse } from '../../models/custom-response';
+import { VisitAvailabilityResponse } from '../../models/visit-availability-response';
 
 export interface ConfigureAvailability$Params {
       body: ConfigureVisitAvailabilityDto
 }
 
-export function configureAvailability(http: HttpClient, rootUrl: string, params: ConfigureAvailability$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function configureAvailability(http: HttpClient, rootUrl: string, params: ConfigureAvailability$Params, context?: HttpContext): Observable<StrictHttpResponse<VisitAvailabilityResponse>> {
   const rb = new RequestBuilder(rootUrl, configureAvailability.PATH, 'post');
   if (params) {
     rb.body(params.body, 'application/json');
@@ -25,7 +25,7 @@ export function configureAvailability(http: HttpClient, rootUrl: string, params:
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<VisitAvailabilityResponse>;
     })
   );
 }

@@ -7,22 +7,22 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { VisitAvailabilityResponse } from '../../models/visit-availability-response';
 
 export interface GetAvailableSlots$Params {
 
 /**
- * ID du bien
+ * ID du bien immobilier
  */
   propertyId: string;
 
 /**
- * Nombre de jours à scanner (défaut: 30)
+ * Nombre de jours à scanner à partir d'aujourd'hui (défaut : 30)
  */
   daysAhead?: number;
 }
 
-export function getAvailableSlots(http: HttpClient, rootUrl: string, params: GetAvailableSlots$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function getAvailableSlots(http: HttpClient, rootUrl: string, params: GetAvailableSlots$Params, context?: HttpContext): Observable<StrictHttpResponse<VisitAvailabilityResponse>> {
   const rb = new RequestBuilder(rootUrl, getAvailableSlots.PATH, 'get');
   if (params) {
     rb.path('propertyId', params.propertyId, {});
@@ -34,7 +34,7 @@ export function getAvailableSlots(http: HttpClient, rootUrl: string, params: Get
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<VisitAvailabilityResponse>;
     })
   );
 }

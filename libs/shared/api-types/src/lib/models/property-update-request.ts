@@ -134,6 +134,11 @@ export interface PropertyUpdateRequest {
   transactionType?: string;
 
   /**
+   * Nombre d'unités disponibles pour ce type de bien hôtelier. Mettre à jour si la capacité de chambres disponibles change.
+   */
+  unitCount?: number;
+
+  /**
    * Année de construction
    */
   yearBuilt?: number;

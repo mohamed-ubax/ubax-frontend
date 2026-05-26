@@ -7,17 +7,17 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { CustomResponse } from '../../models/custom-response';
+import { VisitAvailabilityResponse } from '../../models/visit-availability-response';
 
 export interface GetConfiguration$Params {
 
 /**
- * ID du bien
+ * ID du bien immobilier
  */
   propertyId: string;
 }
 
-export function getConfiguration(http: HttpClient, rootUrl: string, params: GetConfiguration$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function getConfiguration(http: HttpClient, rootUrl: string, params: GetConfiguration$Params, context?: HttpContext): Observable<StrictHttpResponse<VisitAvailabilityResponse>> {
   const rb = new RequestBuilder(rootUrl, getConfiguration.PATH, 'get');
   if (params) {
     rb.path('propertyId', params.propertyId, {});
@@ -28,7 +28,7 @@ export function getConfiguration(http: HttpClient, rootUrl: string, params: GetC
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<VisitAvailabilityResponse>;
     })
   );
 }

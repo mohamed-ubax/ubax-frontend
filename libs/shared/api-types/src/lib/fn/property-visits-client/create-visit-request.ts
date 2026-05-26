@@ -8,13 +8,13 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { CreateVisitRequestDto } from '../../models/create-visit-request-dto';
-import { CustomResponse } from '../../models/custom-response';
+import { VisitRequestResponse } from '../../models/visit-request-response';
 
 export interface CreateVisitRequest$Params {
       body: CreateVisitRequestDto
 }
 
-export function createVisitRequest(http: HttpClient, rootUrl: string, params: CreateVisitRequest$Params, context?: HttpContext): Observable<StrictHttpResponse<CustomResponse>> {
+export function createVisitRequest(http: HttpClient, rootUrl: string, params: CreateVisitRequest$Params, context?: HttpContext): Observable<StrictHttpResponse<VisitRequestResponse>> {
   const rb = new RequestBuilder(rootUrl, createVisitRequest.PATH, 'post');
   if (params) {
     rb.body(params.body, 'application/json');
@@ -25,7 +25,7 @@ export function createVisitRequest(http: HttpClient, rootUrl: string, params: Cr
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<CustomResponse>;
+      return r as StrictHttpResponse<VisitRequestResponse>;
     })
   );
 }

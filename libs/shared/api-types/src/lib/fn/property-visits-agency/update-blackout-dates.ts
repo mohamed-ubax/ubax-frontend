@@ -13,7 +13,7 @@ import { UpdateBlackoutDatesDto } from '../../models/update-blackout-dates-dto';
 export interface UpdateBlackoutDates$Params {
 
 /**
- * ID du bien
+ * ID du bien immobilier
  */
   propertyId: string;
       body: UpdateBlackoutDatesDto

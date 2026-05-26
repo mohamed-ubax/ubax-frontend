@@ -20,6 +20,7 @@ export type { AssignAdminRoleRequest } from './models/assign-admin-role-request'
 export type { AssignRoleRequest } from './models/assign-role-request';
 export type { AssignSubRolesRequest } from './models/assign-sub-roles-request';
 export type { AssignTicketRequest } from './models/assign-ticket-request';
+export type { AvailableSlot } from './models/available-slot';
 export type { BailleurAgencyResponse } from './models/bailleur-agency-response';
 export type { BailleurApplicationResponse } from './models/bailleur-application-response';
 export type { BailleurApplyRequest } from './models/bailleur-apply-request';
@@ -55,6 +56,7 @@ export type { PresignedReadUrlResponse } from './models/presigned-read-url-respo
 export type { PresignedUrlResponse } from './models/presigned-url-response';
 export type { PropertyAmenityRequest } from './models/property-amenity-request';
 export type { PropertyAmenityResponse } from './models/property-amenity-response';
+export type { PropertyAvailabilityResponse } from './models/property-availability-response';
 export type { PropertyBoostRequest } from './models/property-boost-request';
 export type { PropertyCreateRequest } from './models/property-create-request';
 export type { PropertyDetailResponse } from './models/property-detail-response';
@@ -89,6 +91,8 @@ export type { UpdateTechnicienRequest } from './models/update-technicien-request
 export type { UpdateTicketStatusRequest } from './models/update-ticket-status-request';
 export type { UserResponse } from './models/user-response';
 export type { VerifyOtpRequest } from './models/verify-otp-request';
+export type { VisitAvailabilityResponse } from './models/visit-availability-response';
+export type { VisitRequestResponse } from './models/visit-request-response';
 
 export type { GetById$Params as GetById$Params } from './fn/techniciens-sav/get-by-id';
 export { getById as getById } from './fn/techniciens-sav/get-by-id';
@@ -140,6 +144,8 @@ export type { RemoveBoost$Params as RemoveBoost$Params } from './fn/property/rem
 export { removeBoost as removeBoost } from './fn/property/remove-boost';
 export type { Boost$Params as Boost$Params } from './fn/property/boost';
 export { boost as boost } from './fn/property/boost';
+export type { GetAvailability$Params as GetAvailability$Params } from './fn/property/get-availability';
+export { getAvailability as getAvailability } from './fn/property/get-availability';
 export type { ListMine1$Params as ListMine1$Params } from './fn/property/list-mine-1';
 export { listMine1 as listMine1 } from './fn/property/list-mine-1';
 export type { ListHotelProperties$Params as ListHotelProperties$Params } from './fn/property/list-hotel-properties';
