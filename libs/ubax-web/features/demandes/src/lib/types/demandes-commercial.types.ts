@@ -12,6 +12,7 @@ export type CalendarDay = {
   readonly label: string;
   readonly isActive?: boolean;
   readonly isMuted?: boolean;
+  readonly hasVisit?: boolean;
 };
 
 export type CommercialRequestRow = {

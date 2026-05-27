@@ -1,0 +1,89 @@
+<div class="vaad-backdrop" (click)="onBackdropClick($event)">
+  <div class="vaad" role="dialog" aria-modal="true" aria-labelledby="vaad-title">
+    <button
+      type="button"
+      class="vaad__close"
+      aria-label="Fermer"
+      (click)="onDismiss()"
+    >
+      ×
+    </button>
+
+    <div class="vaad__status-badge">Assigner un agent</div>
+
+    <h2 id="vaad-title" class="vaad__title">
+      Assigner un agent immobilier
+    </h2>
+
+    <div class="vaad__meta">
+      <div class="vaad__meta-item">
+        <span class="vaad__meta-label">Client</span>
+        <span class="vaad__meta-value">{{ visit().clientName ?? '—' }}</span>
+      </div>
+      <div class="vaad__meta-item">
+        <span class="vaad__meta-label">Bien</span>
+        <span class="vaad__meta-value">{{ visit().propertyTitle ?? '—' }}</span>
+      </div>
+      <div class="vaad__meta-item">
+        <span class="vaad__meta-label">Date</span>
+        <span class="vaad__meta-value">{{ visit().confirmedDate ?? visit().requestedDate ?? '—' }}</span>
+      </div>
+      <div class="vaad__meta-item">
+        <span class="vaad__meta-label">Créneau</span>
+        <span class="vaad__meta-value">{{ visit().confirmedTimeSlot ?? visit().requestedTimeSlot ?? '—' }}</span>
+      </div>
+      @if (visit().agentName) {
+        <div class="vaad__meta-item vaad__meta-item--full">
+          <span class="vaad__meta-label">Agent actuel</span>
+          <span class="vaad__meta-value">{{ visit().agentName }}</span>
+        </div>
+      }
+    </div>
+
+    <form class="vaad__form" (ngSubmit)="onSubmit()">
+      <label class="vaad__field">
+        <span class="vaad__field-label">
+          Agent à assigner <span class="vaad__required">*</span>
+        </span>
+
+        @if (agents().length === 0) {
+          <p class="vaad__empty">Aucun agent disponible pour le moment.</p>
+        } @else {
+          <select
+            class="vaad__select"
+            [ngModel]="selectedAgentId()"
+            (ngModelChange)="selectedAgentId.set($event)"
+            name="agentId"
+            required
+          >
+            <option value="">— Choisir un agent —</option>
+            @for (agent of agents(); track agent.userId) {
+              <option [value]="agent.userId">{{ agentLabel(agent) }}</option>
+            }
+          </select>
+        }
+      </label>
+
+      <div class="vaad__actions">
+        <button
+          type="button"
+          class="vaad__btn vaad__btn--cancel"
+          (click)="onDismiss()"
+        >
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="vaad__btn vaad__btn--assign"
+          [disabled]="!isValid || loading() || agents().length === 0"
+        >
+          @if (loading()) {
+            Assignation…
+          } @else {
+            Assigner l'agent
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

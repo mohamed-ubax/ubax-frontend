@@ -1,8 +1,15 @@
 import {
+  APP_INITIALIZER,
   ApplicationConfig,
+  inject,
+  Injector,
   LOCALE_ID,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
+import { firstValueFrom, of } from 'rxjs';
+import { catchError, filter, take, timeout } from 'rxjs';
 import { registerLocaleData } from '@angular/common';
 import {
   provideRouter,
@@ -87,6 +94,26 @@ const PRIMENG_FRENCH_TRANSLATION: Translation = {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => {
+        const authStore = inject(AuthStore);
+        const injector = inject(Injector);
+        return (): Promise<void> | void => {
+          if (!authStore.token()) return;
+          authStore.loadMe();
+          return firstValueFrom(
+            toObservable(authStore.user, { injector }).pipe(
+              filter((user) => !user || user.scope !== null),
+              take(1),
+              timeout(8000),
+              catchError(() => of(null)),
+            ),
+          ).then(() => undefined);
+        };
+      },
+      multi: true,
+    },
     { provide: LOCALE_ID, useValue: 'fr-FR' },
     provideRouter(
       appRoutes,
