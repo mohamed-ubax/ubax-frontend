@@ -1,26 +1,36 @@
 <div class="demandes-commercial" data-ubax-motion="page">
   <div class="demandes-commercial__layout">
+
+    <!-- ── Content Column ───────────────────────────────────────────────── -->
     <div class="demandes-commercial__content-column">
+
+      <!-- Summary -->
       <section class="demandes-commercial__summary" data-ubax-motion="surface">
         <div class="demandes-commercial__title-wrap">
           <h1 class="demandes-commercial__title">Demande clientèle</h1>
+          <a
+            routerLink="/demandes/visites/configuration"
+            class="demandes-commercial__config-link"
+            title="Configurer les créneaux de visite"
+          >
+            Configurer les créneaux
+          </a>
         </div>
 
         <div class="demandes-commercial__stats">
-          @for (metric of metricCards; track metric.label) {
-            <article
-              class="summary-card"
-              [style.--summary-accent]="metric.accent"
-            >
+          @for (metric of metricCards(); track metric.label) {
+            <article class="summary-card" [style.--summary-accent]="metric.accent">
               <div class="summary-card__copy">
                 <p class="summary-card__label">{{ metric.label }}</p>
-                <p class="summary-card__value">{{ metric.value }}</p>
+                <p class="summary-card__value">
+                  @if (visitesStore.loading() && metric.value === 0) {
+                    <span class="summary-card__skeleton"></span>
+                  } @else {
+                    {{ metric.value }}
+                  }
+                </p>
               </div>
-
-              <span
-                class="summary-card__icon"
-                [style.--summary-icon-bg]="metric.iconBackground"
-              >
+              <span class="summary-card__icon" [style.--summary-icon-bg]="metric.iconBackground">
                 <img [src]="metric.icon" alt="" />
               </span>
             </article>
@@ -28,7 +38,10 @@
         </div>
       </section>
 
+      <!-- Board -->
       <section class="demandes-commercial__board" data-ubax-motion="surface">
+
+        <!-- Info Requests Table -->
         <article class="board-card board-card--requests">
           <header class="board-card__header">
             <h2>Liste des demandes</h2>
@@ -52,7 +65,6 @@
                   <span>{{ request.requestType }}</span>
                   <span>{{ request.summary }}</span>
                   <span>{{ request.date }}</span>
-
                   <button
                     type="button"
                     class="request-row__action"
@@ -67,69 +79,162 @@
           </div>
         </article>
 
+        <!-- Visit Requests -->
         <article class="board-card board-card--visits">
           <header class="board-card__header">
-            <h2>Demande de visite</h2>
+            <div class="board-card__header-row">
+              <h2>Demande de visite</h2>
+              @if (visitesStore.loading()) {
+                <span class="loading-badge">Chargement…</span>
+              }
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="visit-filter-tabs" role="tablist">
+              @for (tab of visitFilterTabs; track tab.key) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="visit-filter-tab"
+                  [class.visit-filter-tab--active]="activeFilter() === tab.key"
+                  (click)="setFilter(tab.key)"
+                >
+                  {{ tab.label }}
+                  @if (tab.key !== 'ALL') {
+                    <span class="visit-filter-tab__badge">
+                      {{ visitesStore.visitCounts()[tab.key] || 0 }}
+                    </span>
+                  }
+                </button>
+              }
+            </div>
           </header>
 
           <div class="visit-grid">
-            @for (visit of visitCards; track visit.id) {
-              <article class="visit-card">
-                <div class="visit-card__header">
-                  <img
-                    class="visit-card__avatar"
-                    [src]="visit.avatar"
-                    [alt]="visit.client"
-                  />
-
-                  <div>
-                    <p class="visit-card__name">{{ visit.client }}</p>
-                    <p class="visit-card__phone">{{ visit.phone }}</p>
+            @if (visitesStore.loading() && filteredVisits().length === 0) {
+              <!-- Skeleton -->
+              @for (i of [1, 2, 3, 4]; track i) {
+                <div class="visit-card visit-card--skeleton">
+                  <div class="visit-card__skeleton-avatar"></div>
+                  <div class="visit-card__skeleton-lines">
+                    <div class="visit-card__skeleton-line visit-card__skeleton-line--w70"></div>
+                    <div class="visit-card__skeleton-line visit-card__skeleton-line--w50"></div>
                   </div>
                 </div>
+              }
+            } @else if (filteredVisits().length === 0) {
+              <div class="visit-empty">
+                <p>Aucune demande de visite pour ce filtre.</p>
+              </div>
+            } @else {
+              @for (visit of filteredVisits(); track visit.id) {
+                <article class="visit-card" [class]="'visit-card--' + visit.status.toLowerCase()">
+                  <div class="visit-card__header">
+                    <!-- Avatar initials -->
+                    <span class="visit-card__avatar" aria-hidden="true">
+                      {{ clientInitials(visit.clientName) }}
+                    </span>
 
-                <div class="visit-card__meta">
-                  <div class="visit-card__meta-item">
-                    <img [src]="visitMetaIcons.home" alt="" />
-                    <span>{{ visit.location }}</span>
+                    <div class="visit-card__identity">
+                      <p class="visit-card__name">{{ visit.clientName ?? '—' }}</p>
+                    </div>
+
+                    <span
+                      class="visit-card__status-badge"
+                      [class]="'visit-card__status-badge--' + visit.status.toLowerCase()"
+                    >
+                      {{ visitStatusLabel(visit.status) }}
+                    </span>
                   </div>
 
-                  <div class="visit-card__meta-item">
-                    <img [src]="visitMetaIcons.clock" alt="" />
-                    <span>{{ visit.schedule }}</span>
-                  </div>
-                </div>
+                  <div class="visit-card__meta">
+                    <div class="visit-card__meta-item">
+                      <img [src]="visitMetaIcons.home" alt="" />
+                      <span>{{ visit.propertyTitle ?? '—' }}</span>
+                    </div>
 
-                <div class="visit-card__actions">
-                  <button
-                    type="button"
-                    class="visit-card__button visit-card__button--cancel"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="button"
-                    class="visit-card__button visit-card__button--confirm"
-                  >
-                    Confirmer
-                  </button>
-                </div>
-              </article>
+                    <div class="visit-card__meta-item">
+                      <img [src]="visitMetaIcons.clock" alt="" />
+                      <span>
+                        {{ visit.confirmedDate ?? visit.requestedDate ?? '—' }}
+                        &nbsp;·&nbsp;
+                        {{ visit.confirmedTimeSlot ?? visit.requestedTimeSlot ?? '—' }}
+                      </span>
+                    </div>
+
+                    @if (visit.agentName) {
+                      <div class="visit-card__meta-item visit-card__meta-item--agent">
+                        <span class="visit-card__agent-dot"></span>
+                        <span>{{ visit.agentName }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  @if (visit.clientNotes) {
+                    <p class="visit-card__notes">{{ visit.clientNotes }}</p>
+                  }
+
+                  <div class="visit-card__actions">
+                    @if (visit.status === 'PENDING') {
+                      <button
+                        type="button"
+                        class="visit-card__button visit-card__button--reject"
+                        [disabled]="isActionBusy(visit.id)"
+                        (click)="openRejectDialog(visit)"
+                      >
+                        Rejeter
+                      </button>
+                      <button
+                        type="button"
+                        class="visit-card__button visit-card__button--confirm"
+                        [disabled]="isActionBusy(visit.id)"
+                        (click)="openConfirmDialog(visit)"
+                      >
+                        @if (isActionBusy(visit.id)) { … } @else { Confirmer }
+                      </button>
+                    } @else if (visit.status === 'CONFIRMED') {
+                      <button
+                        type="button"
+                        class="visit-card__button visit-card__button--assign"
+                        [disabled]="isActionBusy(visit.id)"
+                        (click)="openAssignAgentDialog(visit)"
+                      >
+                        {{ visit.agentName ? 'Réassigner' : 'Assigner un agent' }}
+                      </button>
+                    }
+                  </div>
+                </article>
+              }
             }
           </div>
+
+          @if (visitesStore.hasError()) {
+            <div class="visit-error">
+              <p>{{ visitesStore.error() }}</p>
+              <button type="button" (click)="retryLoad()">
+                Réessayer
+              </button>
+            </div>
+          }
         </article>
       </section>
     </div>
 
+    <!-- ── Side Column ──────────────────────────────────────────────────── -->
     <div class="demandes-commercial__side-column">
+
+      <!-- Calendar -->
       <aside class="calendar-shell">
         <div class="calendar-card">
           <div class="calendar-card__header">
-            <h2>Avril 2026</h2>
-
-            <div class="calendar-card__actions" aria-hidden="true">
-              <img [src]="calendarIcons.previous" alt="" />
-              <img [src]="calendarIcons.next" alt="" />
+            <h2>{{ calendarTitle() }}</h2>
+            <div class="calendar-card__actions">
+              <button type="button" class="calendar-card__nav" (click)="prevMonth()" aria-label="Mois précédent">
+                <img [src]="calendarIcons.previous" alt="" />
+              </button>
+              <button type="button" class="calendar-card__nav" (click)="nextMonth()" aria-label="Mois suivant">
+                <img [src]="calendarIcons.next" alt="" />
+              </button>
             </div>
           </div>
 
@@ -139,13 +244,14 @@
             }
           </div>
 
-          @for (week of calendarWeeks; track $index) {
+          @for (week of calendarWeeks(); track $index) {
             <div class="calendar-card__grid">
-              @for (day of week; track day.label) {
+              @for (day of week; track day.label + $index) {
                 <span
                   class="calendar-card__day"
                   [class.calendar-card__day--active]="day.isActive"
                   [class.calendar-card__day--muted]="day.isMuted"
+                  [class.calendar-card__day--has-visit]="day.hasVisit"
                 >
                   {{ day.label }}
                 </span>
@@ -155,6 +261,7 @@
         </div>
       </aside>
 
+      <!-- Notifications -->
       <article class="board-card board-card--notifications">
         <header class="board-card__header board-card__header--stacked">
           <h2>Notification</h2>
@@ -164,13 +271,8 @@
           @for (item of notifications; track item.id) {
             <article class="notification-item">
               <span class="notification-item__icon" aria-hidden="true">
-                <img
-                  class="notification-item__icon-bell"
-                  [src]="notificationBellIcon"
-                  alt=""
-                />
+                <img class="notification-item__icon-bell" [src]="notificationBellIcon" alt="" />
               </span>
-
               <div class="notification-item__copy">
                 <h3>{{ item.title }}</h3>
                 <p>{{ item.message }}</p>
@@ -183,11 +285,41 @@
     </div>
   </div>
 
+  <!-- ── Overlays ──────────────────────────────────────────────────────── -->
+
   @if (selectedRequest(); as request) {
     <ubax-demande-detail-panel
       [request]="request"
       [closeIconSrc]="overlayCloseIcon"
       (close)="closeRequest()"
+    />
+  }
+
+  @if (confirmDialogVisit(); as visit) {
+    <ubax-visit-confirm-dialog
+      [visit]="visit"
+      [loading]="isActionBusy(visit.id)"
+      (confirmed)="onVisitConfirmed(visit.id, $event)"
+      (dismissed)="closeConfirmDialog()"
+    />
+  }
+
+  @if (rejectDialogVisit(); as visit) {
+    <ubax-visit-reject-dialog
+      [visit]="visit"
+      [loading]="isActionBusy(visit.id)"
+      (rejected)="onVisitRejected(visit.id, $event)"
+      (dismissed)="closeRejectDialog()"
+    />
+  }
+
+  @if (assignAgentDialogVisit(); as visit) {
+    <ubax-visit-assign-agent-dialog
+      [visit]="visit"
+      [agents]="agentOptions()"
+      [loading]="isActionBusy(visit.id)"
+      (agentAssigned)="onAgentAssigned(visit.id, $event)"
+      (dismissed)="closeAssignAgentDialog()"
     />
   }
 </div>

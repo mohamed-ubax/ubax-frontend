@@ -8,8 +8,9 @@ import {
 
 /**
  * Filtre par sous-rôle agence.
- * Si user.subRole est null (pas encore chargé), la restriction est ignorée
- * afin d'éviter un écran vide avant la réponse GET /sub-roles.
+ * Scope est garanti non-null par l'APP_INITIALIZER (auth.initializer).
+ * Si user.subRole est null (sous-rôles pas encore chargés), la restriction
+ * sur le sous-rôle est ignorée.
  */
 const forAgenceSubRoles =
   (...subRoles: UbaxSubRole[]): CanMatchFn =>
@@ -79,5 +80,15 @@ export const demandesRoutes: Route[] = [
       import(
         './pages/demandes-comptable-page/demandes-comptable-page.component'
       ).then((m) => m.DemandesComptablePageComponent),
+  },
+
+  // ── Configuration des créneaux de visite (SCRUM-375 / SCRUM-376) ─────────
+  {
+    path: 'visites/configuration',
+    canMatch: [forAgenceSubRoles(...COMMERCIAL_ROLES)],
+    loadComponent: () =>
+      import(
+        './pages/visite-config-page/visite-config-page.component'
+      ).then((m) => m.VisiteConfigPageComponent),
   },
 ];

@@ -1,0 +1,111 @@
+<div class="vcd-backdrop" (click)="onBackdropClick($event)">
+  <div class="vcd" role="dialog" aria-modal="true" aria-labelledby="vcd-title">
+    <button
+      type="button"
+      class="vcd__close"
+      aria-label="Fermer"
+      (click)="onDismiss()"
+    >
+      ×
+    </button>
+
+    <div class="vcd__status-badge vcd__status-badge--confirm">
+      Confirmer la visite
+    </div>
+
+    <h2 id="vcd-title" class="vcd__title">
+      Confirmer la demande de visite
+    </h2>
+
+    <div class="vcd__meta">
+      <div class="vcd__meta-item">
+        <span class="vcd__meta-label">Client</span>
+        <span class="vcd__meta-value">{{ visit().clientName ?? '—' }}</span>
+      </div>
+      <div class="vcd__meta-item">
+        <span class="vcd__meta-label">Bien</span>
+        <span class="vcd__meta-value">{{ visit().propertyTitle ?? '—' }}</span>
+      </div>
+      <div class="vcd__meta-item">
+        <span class="vcd__meta-label">Date demandée</span>
+        <span class="vcd__meta-value">{{ visit().requestedDate ?? '—' }}</span>
+      </div>
+      <div class="vcd__meta-item">
+        <span class="vcd__meta-label">Créneau demandé</span>
+        <span class="vcd__meta-value">{{ visit().requestedTimeSlot ?? '—' }}</span>
+      </div>
+      @if (visit().clientNotes) {
+        <div class="vcd__meta-item vcd__meta-item--full">
+          <span class="vcd__meta-label">Note du client</span>
+          <span class="vcd__meta-value">{{ visit().clientNotes }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="vcd__divider"></div>
+
+    <form class="vcd__form" (ngSubmit)="onSubmit()">
+      <div class="vcd__fields">
+        <label class="vcd__field">
+          <span class="vcd__field-label">Date confirmée <span class="vcd__required">*</span></span>
+          <input
+            type="date"
+            class="vcd__input"
+            [ngModel]="confirmedDate()"
+            (ngModelChange)="confirmedDate.set($event)"
+            name="confirmedDate"
+            required
+          />
+        </label>
+
+        <label class="vcd__field">
+          <span class="vcd__field-label">Créneau confirmé <span class="vcd__required">*</span></span>
+          <select
+            class="vcd__select"
+            [ngModel]="confirmedTimeSlot()"
+            (ngModelChange)="confirmedTimeSlot.set($event)"
+            name="confirmedTimeSlot"
+            required
+          >
+            @for (slot of timeSlots; track slot) {
+              <option [value]="slot">{{ slot }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <label class="vcd__field vcd__field--full">
+        <span class="vcd__field-label">Notes pour le client</span>
+        <textarea
+          class="vcd__textarea"
+          rows="3"
+          placeholder="Ex : Veuillez arriver 5 minutes en avance. Présenter une pièce d'identité."
+          [ngModel]="agencyNotes()"
+          (ngModelChange)="agencyNotes.set($event)"
+          name="agencyNotes"
+        ></textarea>
+      </label>
+
+      <div class="vcd__actions">
+        <button
+          type="button"
+          class="vcd__btn vcd__btn--cancel"
+          (click)="onDismiss()"
+        >
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="vcd__btn vcd__btn--confirm"
+          [disabled]="!isValid || loading()"
+        >
+          @if (loading()) {
+            Confirmation…
+          } @else {
+            Confirmer la visite
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

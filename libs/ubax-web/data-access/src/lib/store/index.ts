@@ -1,6 +1,7 @@
 export * from './auth';
 export * from './demandes';
 export * from './location';
+export * from './visites';
 export * from './hotel';
 export * from './agency';
 export * from './biens';

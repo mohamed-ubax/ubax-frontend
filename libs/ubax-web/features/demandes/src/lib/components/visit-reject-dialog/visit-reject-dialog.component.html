@@ -1,0 +1,78 @@
+<div class="vrd-backdrop" (click)="onBackdropClick($event)">
+  <div class="vrd" role="dialog" aria-modal="true" aria-labelledby="vrd-title">
+    <button
+      type="button"
+      class="vrd__close"
+      aria-label="Fermer"
+      (click)="onDismiss()"
+    >
+      ×
+    </button>
+
+    <div class="vrd__status-badge">Rejeter la visite</div>
+
+    <h2 id="vrd-title" class="vrd__title">
+      Rejeter la demande de visite
+    </h2>
+
+    <div class="vrd__meta">
+      <div class="vrd__meta-item">
+        <span class="vrd__meta-label">Client</span>
+        <span class="vrd__meta-value">{{ visit().clientName ?? '—' }}</span>
+      </div>
+      <div class="vrd__meta-item">
+        <span class="vrd__meta-label">Bien</span>
+        <span class="vrd__meta-value">{{ visit().propertyTitle ?? '—' }}</span>
+      </div>
+      <div class="vrd__meta-item">
+        <span class="vrd__meta-label">Date demandée</span>
+        <span class="vrd__meta-value">{{ visit().requestedDate ?? '—' }}</span>
+      </div>
+      <div class="vrd__meta-item">
+        <span class="vrd__meta-label">Créneau</span>
+        <span class="vrd__meta-value">{{ visit().requestedTimeSlot ?? '—' }}</span>
+      </div>
+    </div>
+
+    <form class="vrd__form" (ngSubmit)="onSubmit()">
+      <label class="vrd__field">
+        <span class="vrd__field-label">
+          Motif du rejet <span class="vrd__required">*</span>
+        </span>
+        <textarea
+          class="vrd__textarea"
+          rows="4"
+          placeholder="Ex : Bien vendu, visite impossible. Nous vous suggérons de consulter nos autres annonces."
+          [ngModel]="reason()"
+          (ngModelChange)="reason.set($event)"
+          name="reason"
+          required
+        ></textarea>
+        @if (reason().trim().length > 0 && reason().trim().length < 5) {
+          <span class="vrd__hint">Veuillez saisir au moins 5 caractères.</span>
+        }
+      </label>
+
+      <div class="vrd__actions">
+        <button
+          type="button"
+          class="vrd__btn vrd__btn--cancel"
+          (click)="onDismiss()"
+        >
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="vrd__btn vrd__btn--reject"
+          [disabled]="!isValid || loading()"
+        >
+          @if (loading()) {
+            Rejet en cours…
+          } @else {
+            Rejeter la visite
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

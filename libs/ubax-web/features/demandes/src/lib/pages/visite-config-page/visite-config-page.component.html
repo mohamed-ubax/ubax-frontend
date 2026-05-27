@@ -1,0 +1,254 @@
+<div class="visite-config" data-ubax-motion="page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="visite-config__header">
+    <div class="visite-config__breadcrumb">
+      <a routerLink="/app/demandes" class="visite-config__back-link">
+        ← Demandes clientèle
+      </a>
+    </div>
+
+    <div class="visite-config__title-row">
+      <h1 class="visite-config__title">Configuration des visites</h1>
+      <p class="visite-config__subtitle">
+        Gérez les créneaux disponibles et les dates d'indisponibilité pour chaque bien.
+      </p>
+    </div>
+  </header>
+
+  <!-- ── Property selector ───────────────────────────────────────────────── -->
+  <section class="visite-config__property-select-section">
+    <div class="vc-card">
+      <h2 class="vc-card__title">Sélectionner un bien</h2>
+      <div class="vc-property-select">
+        @if (biensStore.loading()) {
+          <p class="vc-property-select__loading">Chargement des biens…</p>
+        } @else if (propertyOptions().length === 0) {
+          <p class="vc-property-select__empty">Aucun bien disponible. Ajoutez d'abord un bien immobilier.</p>
+        } @else {
+          <select
+            class="vc-property-select__input"
+            [ngModel]="selectedPropertyId()"
+            (ngModelChange)="onPropertySelected($event)"
+            name="propertyId"
+          >
+            <option value="">— Choisir un bien —</option>
+            @for (option of propertyOptions(); track option.id) {
+              <option [value]="option.id">{{ option.label }}</option>
+            }
+          </select>
+        }
+      </div>
+
+      @if (selectedPropertyId() && visitesStore.visitConfigLoading()) {
+        <div class="vc-property-select__config-loading">
+          Chargement de la configuration…
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (selectedPropertyId()) {
+    <!-- ── Tabs ─────────────────────────────────────────────────────────── -->
+    <div class="vc-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="vc-tab"
+        [class.vc-tab--active]="activeTab() === 'slots'"
+        (click)="activeTab.set('slots')"
+      >
+        Créneaux de visite
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="vc-tab"
+        [class.vc-tab--active]="activeTab() === 'blackout'"
+        (click)="activeTab.set('blackout')"
+      >
+        Dates d'indisponibilité
+        @if (blackoutDates().length > 0) {
+          <span class="vc-tab__badge">{{ blackoutDates().length }}</span>
+        }
+      </button>
+    </div>
+
+    <!-- ── Slots Tab ────────────────────────────────────────────────────── -->
+    @if (activeTab() === 'slots') {
+      <section class="vc-section">
+        <div class="vc-card">
+          <div class="vc-card__header">
+            <h2 class="vc-card__title">Créneaux de visite par jour</h2>
+            <p class="vc-card__description">
+              Activez les jours et saisissez les créneaux séparés par des virgules
+              (ex&nbsp;: <code>10:00-14:00, 14:00-18:00</code>).
+            </p>
+          </div>
+
+          <div class="vc-slots-grid">
+            @for (day of weekdays; track day.dayNumber) {
+              <div
+                class="vc-day-row"
+                [class.vc-day-row--disabled]="!getDayConfig(day.dayNumber).enabled"
+              >
+                <div class="vc-day-row__toggle">
+                  <label class="vc-toggle">
+                    <input
+                      type="checkbox"
+                      class="vc-toggle__input"
+                      [checked]="getDayConfig(day.dayNumber).enabled"
+                      (change)="toggleDay(day.dayNumber)"
+                    />
+                    <span class="vc-toggle__track"></span>
+                  </label>
+                  <span class="vc-day-row__label">{{ day.label }}</span>
+                </div>
+
+                <div class="vc-day-row__slots">
+                  @if (getDayConfig(day.dayNumber).enabled) {
+                    <input
+                      type="text"
+                      class="vc-input"
+                      placeholder="10:00-14:00, 14:00-18:00"
+                      [value]="getDayConfig(day.dayNumber).slotsRaw"
+                      (input)="updateDaySlots(day.dayNumber, $any($event.target).value)"
+                    />
+                  } @else {
+                    <span class="vc-day-row__closed">Fermé</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="vc-max-visits">
+            <label class="vc-field">
+              <span class="vc-field__label">Nombre max de visites par créneau</span>
+              <input
+                type="number"
+                class="vc-input vc-input--short"
+                min="1"
+                max="20"
+                [ngModel]="maxVisitsPerSlot()"
+                (ngModelChange)="maxVisitsPerSlot.set($event)"
+                name="maxVisitsPerSlot"
+              />
+            </label>
+          </div>
+
+          <div class="vc-card__footer">
+            @if (slotsSuccess()) {
+              <div class="vc-success-msg">
+                ✓ Configuration enregistrée avec succès.
+              </div>
+            }
+
+            <button
+              type="button"
+              class="vc-btn vc-btn--primary"
+              [disabled]="!isSlotsFormValid || visitesStore.visitConfigLoading()"
+              (click)="submitSlotsConfig()"
+            >
+              @if (visitesStore.visitConfigLoading()) {
+                Enregistrement…
+              } @else {
+                Enregistrer les créneaux
+              }
+            </button>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ── Blackout Tab ─────────────────────────────────────────────────── -->
+    @if (activeTab() === 'blackout') {
+      <section class="vc-section">
+        <div class="vc-card">
+          <div class="vc-card__header">
+            <h2 class="vc-card__title">Dates d'indisponibilité</h2>
+            <p class="vc-card__description">
+              Ajoutez les dates où aucune visite ne peut être planifiée (jours fériés, congés…).
+            </p>
+          </div>
+
+          <!-- Add date -->
+          <div class="vc-blackout-add">
+            <label class="vc-field">
+              <span class="vc-field__label">Ajouter une date</span>
+              <div class="vc-blackout-add__row">
+                <input
+                  type="date"
+                  class="vc-input"
+                  [ngModel]="newBlackoutDate()"
+                  (ngModelChange)="newBlackoutDate.set($event)"
+                  name="newBlackoutDate"
+                />
+                <button
+                  type="button"
+                  class="vc-btn vc-btn--secondary"
+                  [disabled]="!newBlackoutDate()"
+                  (click)="addBlackoutDate()"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </label>
+          </div>
+
+          <!-- Dates list -->
+          @if (blackoutDates().length === 0) {
+            <div class="vc-blackout-empty">
+              <p>Aucune date d'indisponibilité configurée.</p>
+            </div>
+          } @else {
+            <ul class="vc-blackout-list">
+              @for (date of blackoutDates(); track date) {
+                <li class="vc-blackout-item">
+                  <span class="vc-blackout-item__date">{{ formatDateDisplay(date) }}</span>
+                  <span class="vc-blackout-item__raw">{{ date }}</span>
+                  <button
+                    type="button"
+                    class="vc-blackout-item__remove"
+                    [attr.aria-label]="'Supprimer ' + date"
+                    (click)="removeBlackoutDate(date)"
+                  >
+                    ×
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          <div class="vc-card__footer">
+            @if (blackoutSuccess()) {
+              <div class="vc-success-msg">
+                ✓ Dates d'indisponibilité mises à jour.
+              </div>
+            }
+
+            <button
+              type="button"
+              class="vc-btn vc-btn--primary"
+              [disabled]="!isBlackoutFormValid || visitesStore.visitConfigLoading()"
+              (click)="submitBlackoutDates()"
+            >
+              @if (visitesStore.visitConfigLoading()) {
+                Mise à jour…
+              } @else {
+                Mettre à jour les dates
+              }
+            </button>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Error display -->
+    @if (visitesStore.visitConfigError()) {
+      <div class="vc-error">
+        <p>{{ visitesStore.visitConfigError() }}</p>
+      </div>
+    }
+  }
+</div>
