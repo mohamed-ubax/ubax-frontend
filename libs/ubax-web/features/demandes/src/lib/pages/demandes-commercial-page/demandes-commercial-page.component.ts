@@ -18,7 +18,6 @@ import {
 } from '@ubax-workspace/ubax-web-data-access';
 import type { ConfirmVisitRequestDto, RejectVisitRequestDto } from '@ubax-workspace/shared-api-types';
 import type { CommercialRequestDetail } from '../../types/demandes.types';
-import { DemandeDetailPanelComponent } from '../../components/demande-detail-panel/demande-detail-panel.component';
 import { VisitConfirmDialogComponent } from '../../components/visit-confirm-dialog/visit-confirm-dialog.component';
 import { VisitRejectDialogComponent } from '../../components/visit-reject-dialog/visit-reject-dialog.component';
 import { VisitAssignAgentDialogComponent } from '../../components/visit-assign-agent-dialog/visit-assign-agent-dialog.component';
@@ -60,7 +59,6 @@ const MONTHS_FR = [
   imports: [
     CommonModule,
     RouterLink,
-    DemandeDetailPanelComponent,
     VisitConfirmDialogComponent,
     VisitRejectDialogComponent,
     VisitAssignAgentDialogComponent,

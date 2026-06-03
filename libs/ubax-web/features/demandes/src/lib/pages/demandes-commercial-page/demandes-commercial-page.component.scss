@@ -85,10 +85,8 @@
   }
 
   &__board {
-    display: grid;
-    grid-template-columns: minmax(320px, 672px) minmax(320px, 590px);
-    gap: 22px;
-    align-items: start;
+    display: block;
+    width: 100%;
   }
 }
 
@@ -315,12 +313,8 @@
     gap: 12px;
   }
 
-  &--requests {
-    min-height: 711px;
-  }
-
   &--visits {
-    min-height: 710px;
+    min-height: 500px;
   }
 
   &--notifications {
@@ -402,96 +396,6 @@
   &:not(&--active) &__badge {
     background: var(--ubax-page-bg);
     color: var(--ubax-text-faint);
-  }
-}
-
-// ── Request table ─────────────────────────────────────────────────────────
-
-.requests-table {
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-  padding: 13px 14px 20px;
-
-  &__head {
-    display: grid;
-    grid-template-columns: 1.2fr 1.2fr 0.82fr 1.45fr 0.95fr 36px;
-    align-items: center;
-    gap: 12px;
-    min-height: 52px;
-    padding: 0 20px;
-    border-radius: 5px;
-    background: var(--ubax-navy);
-
-    span {
-      font-family: 'Lexend', sans-serif;
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 1.2;
-      color: var(--ubax-surface);
-      white-space: nowrap;
-    }
-  }
-
-  &__body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-}
-
-.request-row {
-  gap: 12px;
-  display: grid;
-  min-height: 49px;
-  position: relative;
-  align-items: center;
-  padding: 0 0 0 12px;
-  margin-bottom: 0.5rem;
-  background: var(--ubax-surface);
-  border-bottom: 1px solid var(--ubax-page-bg);
-  grid-template-columns: 1.2fr 1.2fr 0.82fr 1.45fr 0.95fr 36px;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    border-radius: 5px;
-    background: var(--ubax-accent);
-  }
-
-  span {
-    font-family: 'Lexend', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.25;
-    color: var(--ubax-text-primary);
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__action {
-    display: grid;
-    place-items: center;
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: var(--ubax-page-bg);
-    cursor: pointer;
-
-    img {
-      width: 11px;
-      height: 11px;
-      object-fit: contain;
-      transform: rotate(-45deg);
-    }
   }
 }
 
@@ -900,8 +804,7 @@
       gap: 24px;
     }
 
-    &__summary,
-    &__board {
+    &__summary {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
@@ -933,7 +836,6 @@
   .demandes-commercial {
     &__layout,
     &__summary,
-    &__board,
     &__stats,
     &__side-column {
       grid-template-columns: 1fr;
@@ -943,11 +845,6 @@
   .visit-grid,
   .notification-list {
     grid-template-columns: 1fr;
-  }
-
-  .requests-table__head,
-  .request-row {
-    grid-template-columns: 1.1fr 1.1fr 0.8fr 1.3fr 0.85fr 36px;
   }
 }
 
@@ -962,15 +859,6 @@
 
   .calendar-shell {
     padding: 8px;
-  }
-
-  .requests-table {
-    overflow-x: auto;
-
-    &__head,
-    &__body {
-      min-width: 610px;
-    }
   }
 
   .board-card__header {
