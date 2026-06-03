@@ -1,4 +1,5 @@
 import { computed, inject } from '@angular/core';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { tapResponse } from '@ngrx/operators';
 import {
@@ -70,7 +71,11 @@ function needsSubRoles(mainRole: UbaxRole): boolean {
   );
 }
 
-function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
+function maybeRedirectToResolvedHome(
+  router: Router,
+  location: Location,
+  user: User | null,
+): void {
   if (!user) return;
 
   const isPartner = user.mainRole === UbaxRole.PARTNER;
@@ -80,7 +85,13 @@ function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
     return;
   }
 
-  const currentUrl = router.url.split('?')[0].split('#')[0];
+  // During APP_INITIALIZER, router.url is still '/' before initial navigation
+  // completes. Location.path() reads window.location synchronously and returns
+  // the actual browser path the user refreshed on.
+  const currentUrl =
+    location.path().split('?')[0].split('#')[0] ||
+    router.url.split('?')[0].split('#')[0] ||
+    '/';
 
   const isHotelContext = user.scope === 'HOTEL';
   const isAgencyContext = user.scope === 'AGENCE';
@@ -126,7 +137,12 @@ export const AuthStore = signalStore(
 
   // ── Bloc 1 : méthodes sync + loadSubRoles ─────────────────────────────────
   withMethods(
-    (store, authSvc = inject(AuthService), router = inject(Router)) => ({
+    (
+      store,
+      authSvc = inject(AuthService),
+      router = inject(Router),
+      location = inject(Location),
+    ) => ({
       setToken(token: string): void {
         persistAuthToken(token);
         patchState(store, {
@@ -207,7 +223,7 @@ export const AuthStore = signalStore(
                     patchState(store, {
                       user: nextUser,
                     });
-                    maybeRedirectToResolvedHome(router, nextUser);
+                    maybeRedirectToResolvedHome(router, location, nextUser);
                   },
                   error: () => {
                     // Non-fatal : sub-roles indisponibles, on continue sans eux
@@ -222,7 +238,12 @@ export const AuthStore = signalStore(
 
   // ── Bloc 2 : flux réseau qui dépendent de loadSubRoles ───────────────────
   withMethods(
-    (store, authSvc = inject(AuthService), router = inject(Router)) => ({
+    (
+      store,
+      authSvc = inject(AuthService),
+      router = inject(Router),
+      location = inject(Location),
+    ) => ({
       loadMe: rxMethod<void>(
         pipe(
           switchMap(() => {
@@ -262,7 +283,7 @@ export const AuthStore = signalStore(
                       store.loadSubRoles();
                     }
 
-                    maybeRedirectToResolvedHome(router, hydratedUser);
+                    maybeRedirectToResolvedHome(router, location, hydratedUser);
                   },
                   error: () => {
                     patchState(store, {
@@ -274,7 +295,7 @@ export const AuthStore = signalStore(
                       store.loadSubRoles();
                     }
 
-                    maybeRedirectToResolvedHome(router, derivedUser);
+                    maybeRedirectToResolvedHome(router, location, derivedUser);
                   },
                 }),
               );
