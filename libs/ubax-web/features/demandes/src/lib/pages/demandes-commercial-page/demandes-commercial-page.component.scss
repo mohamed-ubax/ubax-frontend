@@ -377,6 +377,10 @@
     background: var(--ubax-navy);
     color: var(--ubax-surface);
     border-color: var(--ubax-navy);
+
+    &:hover {
+      background: var(--ubax-navy);
+    }
   }
 
   &__badge {

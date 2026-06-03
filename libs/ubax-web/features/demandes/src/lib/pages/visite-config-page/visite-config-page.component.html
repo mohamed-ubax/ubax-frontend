@@ -166,7 +166,7 @@
             <span class="vc-field__label">Ajouter une date</span>
             <div class="vc-blackout-add__row">
               <div class="vc-blackout-add__picker">
-                <ubax-ui-form-date-picker [(value)]="newBlackoutDateObj" />
+                <ubax-ui-form-date-picker [(value)]="newBlackoutDateObj" [disablePast]="true" />
               </div>
               <button
                 type="button"
