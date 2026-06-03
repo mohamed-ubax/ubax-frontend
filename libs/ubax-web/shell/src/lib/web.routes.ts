@@ -38,20 +38,6 @@ export const webRoutes: Route[] = [
         data: ROUTE_ROLE_ACCESS.biens,
       },
 
-      // ── Location / Réservations ─────────────────────────────────────────────
-      {
-        path: 'reservations',
-        loadChildren: () =>
-          import('@ubax-workspace/ubax-web-location').then(
-            (m) => m.locationRoutes,
-          ),
-        canActivate: [roleGuard],
-        data: {
-          preload: true,
-          ...ROUTE_ROLE_ACCESS.reservations,
-        },
-      },
-
       // ── Demandes clients ────────────────────────────────────────────────────
       {
         path: 'demandes',
