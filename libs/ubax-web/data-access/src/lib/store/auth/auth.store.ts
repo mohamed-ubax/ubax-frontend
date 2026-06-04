@@ -19,8 +19,11 @@ import {
   UbaxScope,
   UbaxSubRole,
   clearStoredAuthSession,
+  clearResolvedProfile,
   deriveUserFromAuthToken,
+  persistResolvedProfile,
   readKeycloakIdCandidatesFromAuthToken,
+  readResolvedProfile,
   persistAuthToken,
   readUserIdCandidatesFromAuthToken,
   readStoredRefreshToken,
@@ -55,13 +58,31 @@ type AuthState = {
   profileLoaded: boolean;
 };
 
-const initialState: AuthState = {
-  user: deriveUserFromAuthToken(initialToken),
-  token: initialToken,
-  loading: false,
-  error: null,
-  profileLoaded: false,
-};
+function buildInitialState(token: string | null): AuthState {
+  const baseUser = deriveUserFromAuthToken(token);
+  const keycloakSub = readKeycloakIdCandidatesFromAuthToken(token)[0] ?? null;
+  const cached = keycloakSub ? readResolvedProfile(keycloakSub) : null;
+
+  if (!baseUser || !cached) {
+    return { user: baseUser, token, loading: false, error: null, profileLoaded: false };
+  }
+
+  return {
+    token,
+    loading: false,
+    error: null,
+    profileLoaded: true,
+    user: {
+      ...baseUser,
+      id: cached.userId ?? baseUser.id,
+      avatar: cached.avatarUrl ?? baseUser.avatar,
+      scope: cached.scope,
+      subRole: cached.subRole,
+    },
+  };
+}
+
+const initialState: AuthState = buildInitialState(initialToken);
 
 /** Roles whose sub-roles live in the DB and must be fetched after login */
 function needsSubRoles(mainRole: UbaxRole): boolean {
@@ -167,6 +188,7 @@ export const AuthStore = signalStore(
       /** Vide la session sans appel réseau — utilisé par l'intercepteur en cas d'échec du refresh */
       expireSession(): void {
         clearStoredAuthSession();
+        clearResolvedProfile();
         patchState(store, {
           user: null,
           token: null,
@@ -223,9 +245,20 @@ export const AuthStore = signalStore(
 
                     const nextUser = { ...latestUser, subRole, scope };
 
-                    patchState(store, {
-                      user: nextUser,
-                    });
+                    patchState(store, { user: nextUser });
+
+                    const keycloakSub =
+                      readKeycloakIdCandidatesFromAuthToken(store.token())[0] ?? null;
+                    if (keycloakSub) {
+                      persistResolvedProfile({
+                        keycloakSub,
+                        userId: nextUser.id,
+                        scope: nextUser.scope,
+                        avatarUrl: nextUser.avatar ?? null,
+                        subRole: nextUser.subRole,
+                      });
+                    }
+
                     maybeRedirectToResolvedHome(router, location, nextUser);
                   },
                   error: () => {
@@ -288,6 +321,14 @@ export const AuthStore = signalStore(
 
                     if (needsSubRoles(hydratedUser.mainRole)) {
                       store.loadSubRoles();
+                    } else if (keycloakId) {
+                      persistResolvedProfile({
+                        keycloakSub: keycloakId,
+                        userId: hydratedUser.id,
+                        scope: hydratedUser.scope,
+                        avatarUrl: hydratedUser.avatar ?? null,
+                        subRole: hydratedUser.subRole,
+                      });
                     }
 
                     maybeRedirectToResolvedHome(router, location, hydratedUser);
@@ -337,6 +378,7 @@ export const AuthStore = signalStore(
               tapResponse({
                 next: () => {
                   clearStoredAuthSession();
+                  clearResolvedProfile();
                   patchState(store, { user: null, token: null, profileLoaded: false });
                   if (redirectBrowserToPortalLogin()) return;
                   router.navigate(['/connexion'], {
@@ -345,6 +387,7 @@ export const AuthStore = signalStore(
                 },
                 error: () => {
                   clearStoredAuthSession();
+                  clearResolvedProfile();
                   patchState(store, { user: null, token: null, profileLoaded: false });
                   if (redirectBrowserToPortalLogin()) return;
                   router.navigate(['/connexion'], {
