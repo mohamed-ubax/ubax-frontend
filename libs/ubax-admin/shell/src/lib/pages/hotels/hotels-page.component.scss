@@ -64,7 +64,7 @@ $orange: #f5a623;
   position: relative;
   display: inline-flex;
   align-items: flex-end;
-  margin-top: 0.95rem;
+  margin-top: 4cqh;
   padding: 0.32rem 0.46rem 0.24rem;
   border-radius: 10px;
   overflow: hidden;
@@ -79,38 +79,6 @@ $orange: #f5a623;
     border-radius: 8px;
     pointer-events: none;
     background: var(--hotels-kpi-graph-bg, transparent);
-  }
-
-  &--purple {
-    --hotels-kpi-graph-bg: linear-gradient(
-      180deg,
-      rgba(190, 79, 231, 0) 0%,
-      rgba(190, 79, 231, 0.24) 100%
-    );
-  }
-
-  &--green {
-    --hotels-kpi-graph-bg: linear-gradient(
-      180deg,
-      rgba(34, 197, 94, 0) 0%,
-      rgba(34, 197, 94, 0.22) 100%
-    );
-  }
-
-  &--orange {
-    --hotels-kpi-graph-bg: linear-gradient(
-      180deg,
-      rgba(245, 158, 11, 0) 0%,
-      rgba(245, 158, 11, 0.24) 100%
-    );
-  }
-
-  &--red {
-    --hotels-kpi-graph-bg: linear-gradient(
-      180deg,
-      rgba(239, 68, 68, 0) 0%,
-      rgba(239, 68, 68, 0.22) 100%
-    );
   }
 }
 
