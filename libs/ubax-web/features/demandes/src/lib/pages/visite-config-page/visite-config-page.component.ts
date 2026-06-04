@@ -14,6 +14,11 @@ import {
   VisitesStore,
 } from '@ubax-workspace/ubax-web-data-access';
 import type { ConfigureVisitAvailabilityDto } from '@ubax-workspace/shared-api-types';
+import {
+  UiFormSelectComponent,
+  UiFormSelectOption,
+  UiFormDatePickerComponent,
+} from '@ubax-workspace/shared-ui';
 
 const WEEKDAYS: { key: string; label: string; dayNumber: number }[] = [
   { key: 'lundi', label: 'Lundi', dayNumber: 1 },
@@ -35,7 +40,7 @@ type DayConfig = {
 @Component({
   selector: 'ubax-visite-config-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, UiFormSelectComponent, UiFormDatePickerComponent],
   templateUrl: './visite-config-page.component.html',
   styleUrl: './visite-config-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +61,11 @@ export class VisiteConfigPageComponent implements OnInit {
       .map((b) => ({ id: b.id as string, label: b.title as string })),
   );
 
+  readonly propertySelectOptions = computed<UiFormSelectOption[]>(() => [
+    { label: '— Choisir un bien —', value: '__none__' },
+    ...this.propertyOptions().map((o) => ({ label: o.label, value: o.id })),
+  ]);
+
   // ── Slots config ─────────────────────────────────────────────────────────
   readonly dayConfigs = signal<Record<number, DayConfig>>({
     0: { enabled: false, slotsRaw: DEFAULT_SLOTS_FOR_DAY },
@@ -71,14 +81,10 @@ export class VisiteConfigPageComponent implements OnInit {
 
   // ── Blackout dates ───────────────────────────────────────────────────────
   readonly blackoutDates = signal<string[]>([]);
-  readonly newBlackoutDate = signal('');
+  readonly newBlackoutDateObj = signal<Date>(new Date());
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
   readonly activeTab = signal<'slots' | 'blackout'>('slots');
-
-  // ── Success state ────────────────────────────────────────────────────────
-  readonly slotsSuccess = signal(false);
-  readonly blackoutSuccess = signal(false);
 
   ngOnInit(): void {
     this.biensStore.load?.({ pageable: { page: 0, size: 100 } } as never);
@@ -109,12 +115,20 @@ export class VisiteConfigPageComponent implements OnInit {
     }));
   }
 
+  // ── Property selection ───────────────────────────────────────────────────
+  protected onPropertySelectChange(value: string): void {
+    this.onPropertySelected(value === '__none__' ? '' : value);
+  }
+
   // ── Blackout helpers ─────────────────────────────────────────────────────
   protected addBlackoutDate(): void {
-    const date = this.newBlackoutDate();
-    if (!date || this.blackoutDates().includes(date)) return;
-    this.blackoutDates.update((dates) => [...dates, date].sort());
-    this.newBlackoutDate.set('');
+    const date = this.newBlackoutDateObj();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const isoDate = `${year}-${month}-${day}`;
+    if (this.blackoutDates().includes(isoDate)) return;
+    this.blackoutDates.update((dates) => [...dates, isoDate].sort());
   }
 
   protected removeBlackoutDate(date: string): void {
@@ -157,8 +171,6 @@ export class VisiteConfigPageComponent implements OnInit {
     };
 
     this.visitesStore.configureAvailability(dto);
-    this.slotsSuccess.set(true);
-    setTimeout(() => this.slotsSuccess.set(false), 3000);
   }
 
   // ── Submit blackout dates ────────────────────────────────────────────────
@@ -169,8 +181,6 @@ export class VisiteConfigPageComponent implements OnInit {
       propertyId: this.selectedPropertyId(),
       body: { blackoutDates: this.blackoutDates() },
     });
-    this.blackoutSuccess.set(true);
-    setTimeout(() => this.blackoutSuccess.set(false), 3000);
   }
 
   // ── Load existing config ─────────────────────────────────────────────────
@@ -179,8 +189,6 @@ export class VisiteConfigPageComponent implements OnInit {
     if (id) {
       this.visitesStore.loadPropertyConfig(id);
     }
-    this.slotsSuccess.set(false);
-    this.blackoutSuccess.set(false);
   }
 
   // ── Config loading: populate form from store ─────────────────────────────

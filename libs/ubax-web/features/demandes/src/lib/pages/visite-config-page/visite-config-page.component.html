@@ -20,25 +20,20 @@
   <section class="visite-config__property-select-section">
     <div class="vc-card">
       <h2 class="vc-card__title">Sélectionner un bien</h2>
-      <div class="vc-property-select">
-        @if (biensStore.loading()) {
-          <p class="vc-property-select__loading">Chargement des biens…</p>
-        } @else if (propertyOptions().length === 0) {
-          <p class="vc-property-select__empty">Aucun bien disponible. Ajoutez d'abord un bien immobilier.</p>
-        } @else {
-          <select
-            class="vc-property-select__input"
-            [ngModel]="selectedPropertyId()"
-            (ngModelChange)="onPropertySelected($event)"
-            name="propertyId"
-          >
-            <option value="">— Choisir un bien —</option>
-            @for (option of propertyOptions(); track option.id) {
-              <option [value]="option.id">{{ option.label }}</option>
-            }
-          </select>
-        }
-      </div>
+
+      @if (biensStore.loading()) {
+        <p class="vc-property-select__loading">Chargement des biens…</p>
+      } @else if (propertyOptions().length === 0) {
+        <p class="vc-property-select__empty">Aucun bien disponible. Ajoutez d'abord un bien immobilier.</p>
+      } @else {
+        <div class="vc-property-select__dropdown">
+          <ubax-ui-form-select
+            [options]="propertySelectOptions()"
+            [value]="selectedPropertyId() || '__none__'"
+            (valueChange)="onPropertySelectChange($event)"
+          />
+        </div>
+      }
 
       @if (selectedPropertyId() && visitesStore.visitConfigLoading()) {
         <div class="vc-property-select__config-loading">
@@ -138,12 +133,6 @@
           </div>
 
           <div class="vc-card__footer">
-            @if (slotsSuccess()) {
-              <div class="vc-success-msg">
-                ✓ Configuration enregistrée avec succès.
-              </div>
-            }
-
             <button
               type="button"
               class="vc-btn vc-btn--primary"
@@ -174,26 +163,19 @@
 
           <!-- Add date -->
           <div class="vc-blackout-add">
-            <label class="vc-field">
-              <span class="vc-field__label">Ajouter une date</span>
-              <div class="vc-blackout-add__row">
-                <input
-                  type="date"
-                  class="vc-input"
-                  [ngModel]="newBlackoutDate()"
-                  (ngModelChange)="newBlackoutDate.set($event)"
-                  name="newBlackoutDate"
-                />
-                <button
-                  type="button"
-                  class="vc-btn vc-btn--secondary"
-                  [disabled]="!newBlackoutDate()"
-                  (click)="addBlackoutDate()"
-                >
-                  Ajouter
-                </button>
+            <span class="vc-field__label">Ajouter une date</span>
+            <div class="vc-blackout-add__row">
+              <div class="vc-blackout-add__picker">
+                <ubax-ui-form-date-picker [(value)]="newBlackoutDateObj" [disablePast]="true" />
               </div>
-            </label>
+              <button
+                type="button"
+                class="vc-btn vc-btn--secondary"
+                (click)="addBlackoutDate()"
+              >
+                Ajouter
+              </button>
+            </div>
           </div>
 
           <!-- Dates list -->
@@ -221,12 +203,6 @@
           }
 
           <div class="vc-card__footer">
-            @if (blackoutSuccess()) {
-              <div class="vc-success-msg">
-                ✓ Dates d'indisponibilité mises à jour.
-              </div>
-            }
-
             <button
               type="button"
               class="vc-btn vc-btn--primary"
@@ -242,13 +218,6 @@
           </div>
         </div>
       </section>
-    }
-
-    <!-- Error display -->
-    @if (visitesStore.visitConfigError()) {
-      <div class="vc-error">
-        <p>{{ visitesStore.visitConfigError() }}</p>
-      </div>
     }
   }
 </div>

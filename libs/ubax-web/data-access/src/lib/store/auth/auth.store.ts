@@ -1,4 +1,5 @@
 import { computed, inject } from '@angular/core';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { tapResponse } from '@ngrx/operators';
 import {
@@ -18,8 +19,11 @@ import {
   UbaxScope,
   UbaxSubRole,
   clearStoredAuthSession,
+  clearResolvedProfile,
   deriveUserFromAuthToken,
+  persistResolvedProfile,
   readKeycloakIdCandidatesFromAuthToken,
+  readResolvedProfile,
   persistAuthToken,
   readUserIdCandidatesFromAuthToken,
   readStoredRefreshToken,
@@ -51,14 +55,34 @@ type AuthState = {
   token: string | null;
   loading: boolean;
   error: string | null;
+  profileLoaded: boolean;
 };
 
-const initialState: AuthState = {
-  user: deriveUserFromAuthToken(initialToken),
-  token: initialToken,
-  loading: false,
-  error: null,
-};
+function buildInitialState(token: string | null): AuthState {
+  const baseUser = deriveUserFromAuthToken(token);
+  const keycloakSub = readKeycloakIdCandidatesFromAuthToken(token)[0] ?? null;
+  const cached = keycloakSub ? readResolvedProfile(keycloakSub) : null;
+
+  if (!baseUser || !cached) {
+    return { user: baseUser, token, loading: false, error: null, profileLoaded: false };
+  }
+
+  return {
+    token,
+    loading: false,
+    error: null,
+    profileLoaded: true,
+    user: {
+      ...baseUser,
+      id: cached.userId ?? baseUser.id,
+      avatar: cached.avatarUrl ?? baseUser.avatar,
+      scope: cached.scope,
+      subRole: cached.subRole,
+    },
+  };
+}
+
+const initialState: AuthState = buildInitialState(initialToken);
 
 /** Roles whose sub-roles live in the DB and must be fetched after login */
 function needsSubRoles(mainRole: UbaxRole): boolean {
@@ -70,7 +94,11 @@ function needsSubRoles(mainRole: UbaxRole): boolean {
   );
 }
 
-function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
+function maybeRedirectToResolvedHome(
+  router: Router,
+  location: Location,
+  user: User | null,
+): void {
   if (!user) return;
 
   const isPartner = user.mainRole === UbaxRole.PARTNER;
@@ -80,7 +108,13 @@ function maybeRedirectToResolvedHome(router: Router, user: User | null): void {
     return;
   }
 
-  const currentUrl = router.url.split('?')[0].split('#')[0];
+  // During APP_INITIALIZER, router.url is still '/' before initial navigation
+  // completes. Location.path() reads window.location synchronously and returns
+  // the actual browser path the user refreshed on.
+  const currentUrl =
+    location.path().split('?')[0].split('#')[0] ||
+    router.url.split('?')[0].split('#')[0] ||
+    '/';
 
   const isHotelContext = user.scope === 'HOTEL';
   const isAgencyContext = user.scope === 'AGENCE';
@@ -126,7 +160,12 @@ export const AuthStore = signalStore(
 
   // ── Bloc 1 : méthodes sync + loadSubRoles ─────────────────────────────────
   withMethods(
-    (store, authSvc = inject(AuthService), router = inject(Router)) => ({
+    (
+      store,
+      authSvc = inject(AuthService),
+      router = inject(Router),
+      location = inject(Location),
+    ) => ({
       setToken(token: string): void {
         persistAuthToken(token);
         patchState(store, {
@@ -149,10 +188,12 @@ export const AuthStore = signalStore(
       /** Vide la session sans appel réseau — utilisé par l'intercepteur en cas d'échec du refresh */
       expireSession(): void {
         clearStoredAuthSession();
+        clearResolvedProfile();
         patchState(store, {
           user: null,
           token: null,
           error: 'Session expirée',
+          profileLoaded: false,
         });
         if (redirectBrowserToPortalLogin()) return;
         router.navigate(['/connexion']);
@@ -204,10 +245,21 @@ export const AuthStore = signalStore(
 
                     const nextUser = { ...latestUser, subRole, scope };
 
-                    patchState(store, {
-                      user: nextUser,
-                    });
-                    maybeRedirectToResolvedHome(router, nextUser);
+                    patchState(store, { user: nextUser });
+
+                    const keycloakSub =
+                      readKeycloakIdCandidatesFromAuthToken(store.token())[0] ?? null;
+                    if (keycloakSub) {
+                      persistResolvedProfile({
+                        keycloakSub,
+                        userId: nextUser.id,
+                        scope: nextUser.scope,
+                        avatarUrl: nextUser.avatar ?? null,
+                        subRole: nextUser.subRole,
+                      });
+                    }
+
+                    maybeRedirectToResolvedHome(router, location, nextUser);
                   },
                   error: () => {
                     // Non-fatal : sub-roles indisponibles, on continue sans eux
@@ -222,10 +274,18 @@ export const AuthStore = signalStore(
 
   // ── Bloc 2 : flux réseau qui dépendent de loadSubRoles ───────────────────
   withMethods(
-    (store, authSvc = inject(AuthService), router = inject(Router)) => ({
+    (
+      store,
+      authSvc = inject(AuthService),
+      router = inject(Router),
+      location = inject(Location),
+    ) => ({
       loadMe: rxMethod<void>(
         pipe(
           switchMap(() => {
+            // Idempotency guard: skip if profile was already fetched this session
+            if (store.profileLoaded()) return EMPTY;
+
             patchState(store, { loading: true, error: null });
 
             const derivedUser = deriveUserFromAuthToken(store.token());
@@ -256,25 +316,35 @@ export const AuthStore = signalStore(
                       user: hydratedUser,
                       loading: false,
                       error: null,
+                      profileLoaded: true,
                     });
 
                     if (needsSubRoles(hydratedUser.mainRole)) {
                       store.loadSubRoles();
+                    } else if (keycloakId) {
+                      persistResolvedProfile({
+                        keycloakSub: keycloakId,
+                        userId: hydratedUser.id,
+                        scope: hydratedUser.scope,
+                        avatarUrl: hydratedUser.avatar ?? null,
+                        subRole: hydratedUser.subRole,
+                      });
                     }
 
-                    maybeRedirectToResolvedHome(router, hydratedUser);
+                    maybeRedirectToResolvedHome(router, location, hydratedUser);
                   },
                   error: () => {
                     patchState(store, {
                       loading: false,
                       error: null,
+                      profileLoaded: true,
                     });
 
                     if (needsSubRoles(derivedUser.mainRole)) {
                       store.loadSubRoles();
                     }
 
-                    maybeRedirectToResolvedHome(router, derivedUser);
+                    maybeRedirectToResolvedHome(router, location, derivedUser);
                   },
                 }),
               );
@@ -308,7 +378,8 @@ export const AuthStore = signalStore(
               tapResponse({
                 next: () => {
                   clearStoredAuthSession();
-                  patchState(store, { user: null, token: null });
+                  clearResolvedProfile();
+                  patchState(store, { user: null, token: null, profileLoaded: false });
                   if (redirectBrowserToPortalLogin()) return;
                   router.navigate(['/connexion'], {
                     queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
@@ -316,7 +387,8 @@ export const AuthStore = signalStore(
                 },
                 error: () => {
                   clearStoredAuthSession();
-                  patchState(store, { user: null, token: null });
+                  clearResolvedProfile();
+                  patchState(store, { user: null, token: null, profileLoaded: false });
                   if (redirectBrowserToPortalLogin()) return;
                   router.navigate(['/connexion'], {
                     queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },

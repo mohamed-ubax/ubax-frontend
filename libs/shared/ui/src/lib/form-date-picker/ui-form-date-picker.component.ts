@@ -20,7 +20,8 @@ type CalendarDay = {
   readonly date: Date;
   readonly label: string;
   readonly muted: boolean;
-  readonly active: boolean;};
+  readonly active: boolean;
+};
 
 const WEEKDAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'] as const;
 
@@ -98,10 +99,13 @@ function buildCalendarWeeks(
 export class UiFormDatePickerComponent implements OnDestroy {
   readonly label = input('');
   readonly iconSrc = input('');
+  readonly disablePast = input(false);
   readonly value = model<Date>(new Date());
 
-  protected readonly isOpen = signal(false);
+  private readonly todayStart = startOfDay(new Date());
+
   protected readonly weekdays = WEEKDAYS;
+  protected readonly isOpen = signal(false);
   protected readonly calendarTop = signal(0);
   protected readonly calendarLeft = signal(0);
 
@@ -128,33 +132,32 @@ export class UiFormDatePickerComponent implements OnDestroy {
     buildCalendarWeeks(this.calendarMonth(), this.value()),
   );
 
+  protected isPast(date: Date): boolean {
+    return this.disablePast() && date < this.todayStart;
+  }
+
   protected toggle(): void {
     if (this.isOpen()) {
       this.close();
-    } else {
-      const v = this.value();
-      this.calendarMonth.set(new Date(v.getFullYear(), v.getMonth(), 1));
-
-      const trigger = this.el.nativeElement.querySelector<HTMLElement>(
-        '.form-date-picker__trigger',
-      );
-      if (trigger) {
-        const rect = trigger.getBoundingClientRect();
-        this.calendarTop.set(rect.bottom + 10);
-        this.calendarLeft.set(rect.left);
-      }
-
-      this.isOpen.set(true);
-      this.calendarView = this.vcr.createEmbeddedView(this.calendarTpl);
-      this.calendarView.detectChanges();
-      this.calendarEl =
-        this.calendarView.rootNodes.find(
-          (n): n is HTMLElement => n.nodeType === Node.ELEMENT_NODE,
-        ) ?? null;
-      if (this.calendarEl) {
-        this.renderer.appendChild(document.body, this.calendarEl);
-      }
+      return;
     }
+
+    const v = this.value();
+    this.calendarMonth.set(new Date(v.getFullYear(), v.getMonth(), 1));
+
+    this.isOpen.set(true);
+    this.calendarView = this.vcr.createEmbeddedView(this.calendarTpl);
+    this.calendarView.detectChanges();
+    this.calendarEl =
+      this.calendarView.rootNodes.find(
+        (n): n is HTMLElement => n.nodeType === Node.ELEMENT_NODE,
+      ) ?? null;
+
+    if (this.calendarEl) {
+      this.renderer.appendChild(document.body, this.calendarEl);
+    }
+
+    queueMicrotask(() => this.repositionCalendar());
   }
 
   protected close(): void {
@@ -174,14 +177,17 @@ export class UiFormDatePickerComponent implements OnDestroy {
   protected previousMonth(): void {
     const m = this.calendarMonth();
     this.calendarMonth.set(new Date(m.getFullYear(), m.getMonth() - 1, 1));
+    queueMicrotask(() => this.repositionCalendar());
   }
 
   protected nextMonth(): void {
     const m = this.calendarMonth();
     this.calendarMonth.set(new Date(m.getFullYear(), m.getMonth() + 1, 1));
+    queueMicrotask(() => this.repositionCalendar());
   }
 
   protected selectDate(date: Date): void {
+    if (this.isPast(date)) return;
     this.value.set(startOfDay(date));
     this.close();
   }
@@ -207,5 +213,47 @@ export class UiFormDatePickerComponent implements OnDestroy {
       event.stopImmediatePropagation();
       this.close();
     }
+  }
+
+  @HostListener('window:resize')
+  protected onResize(): void {
+    if (this.isOpen()) {
+      this.repositionCalendar();
+    }
+  }
+
+  private repositionCalendar(): void {
+    const trigger = this.el.nativeElement.querySelector<HTMLElement>(
+      '.form-date-picker__trigger',
+    );
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const calendarHeight = this.calendarEl?.offsetHeight || 390;
+    const calendarWidth = this.calendarEl?.offsetWidth || 320;
+    const viewportH = window.innerHeight;
+    const viewportW = window.innerWidth;
+    const margin = 12;
+
+    // Prefer below, flip above if insufficient space
+    const spaceBelow = viewportH - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+    let top: number;
+    if (spaceBelow >= calendarHeight || spaceBelow >= spaceAbove) {
+      top = rect.bottom + margin;
+    } else {
+      top = rect.top - calendarHeight - margin;
+    }
+    top = Math.max(margin, Math.min(top, viewportH - calendarHeight - margin));
+
+    // Align with trigger, clamp to viewport
+    let left = rect.left;
+    if (left + calendarWidth > viewportW - margin) {
+      left = viewportW - calendarWidth - margin;
+    }
+    left = Math.max(margin, left);
+
+    this.calendarTop.set(top);
+    this.calendarLeft.set(left);
   }
 }

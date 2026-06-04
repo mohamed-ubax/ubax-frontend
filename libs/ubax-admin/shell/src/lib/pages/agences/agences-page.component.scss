@@ -323,15 +323,44 @@ $muted: #6b7280;
   font-weight: 600;
 }
 
-.partners-field :deep(.p-select),
-.partners-field :deep(.p-datepicker),
-.partners-field :deep(.p-datepicker-input) {
-  width: 100%;
-}
+// Styles des champs (select + datepicker) → déplacés dans styles.scss global
 
-.partners-field :deep(.p-select),
-.partners-field :deep(.p-inputtext) {
-  border-radius: 0.85rem;
+// ── Dialog buttons ────────────────────────────────────────────────────────────
+
+.partners-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 140ms ease, opacity 140ms ease;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &--ghost {
+    background: #f1f5f9;
+    color: #334155;
+
+    &:hover:not(:disabled) { background: #e2e8f0; }
+  }
+
+  &--primary {
+    background: #1a3047;
+    color: #fff;
+
+    &:hover:not(:disabled) { background: #102235; }
+  }
 }
 
 @media (max-width: 60rem) {

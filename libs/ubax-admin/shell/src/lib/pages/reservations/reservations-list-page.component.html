@@ -87,11 +87,9 @@
           </div>
 
           @for (reservation of filteredReservations(); track reservation.id) {
-            <button
-              type="button"
+            <div
               class="admin-res-table__row"
               role="row"
-              (click)="openReservation(reservation)"
             >
               <span
                 class="admin-res-table__cell admin-res-table__cell--property"
@@ -148,7 +146,7 @@
               <span class="admin-res-table__cell">
                 {{ formatDateTime(reservation.createdAt) }}
               </span>
-            </button>
+            </div>
           }
         </div>
 

@@ -41,44 +41,6 @@
       <!-- Board -->
       <section class="demandes-commercial__board" data-ubax-motion="surface">
 
-        <!-- Info Requests Table -->
-        <article class="board-card board-card--requests">
-          <header class="board-card__header">
-            <h2>Liste des demandes</h2>
-          </header>
-
-          <div class="requests-table">
-            <div class="requests-table__head">
-              <span>Client</span>
-              <span>Bien</span>
-              <span>Type</span>
-              <span>Message</span>
-              <span>Date</span>
-              <span></span>
-            </div>
-
-            <div class="requests-table__body">
-              @for (request of requestRows; track request.id) {
-                <div class="request-row">
-                  <span>{{ request.client }}</span>
-                  <span>{{ request.property }}</span>
-                  <span>{{ request.requestType }}</span>
-                  <span>{{ request.summary }}</span>
-                  <span>{{ request.date }}</span>
-                  <button
-                    type="button"
-                    class="request-row__action"
-                    [attr.aria-label]="'Voir les détails de ' + request.client"
-                    (click)="openRequest(request.detail)"
-                  >
-                    <img [src]="requestActionIcon" alt="" />
-                  </button>
-                </div>
-              }
-            </div>
-          </div>
-        </article>
-
         <!-- Visit Requests -->
         <article class="board-card board-card--visits">
           <header class="board-card__header">
@@ -286,14 +248,6 @@
   </div>
 
   <!-- ── Overlays ──────────────────────────────────────────────────────── -->
-
-  @if (selectedRequest(); as request) {
-    <ubax-demande-detail-panel
-      [request]="request"
-      [closeIconSrc]="overlayCloseIcon"
-      (close)="closeRequest()"
-    />
-  }
 
   @if (confirmDialogVisit(); as visit) {
     <ubax-visit-confirm-dialog

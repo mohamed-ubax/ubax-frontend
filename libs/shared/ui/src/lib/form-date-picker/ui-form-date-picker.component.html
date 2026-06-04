@@ -5,6 +5,7 @@
 
   <button
     class="form-date-picker__trigger"
+    [class.form-date-picker__trigger--with-icon]="iconSrc()"
     [class.is-open]="isOpen()"
     type="button"
     (click)="toggle()"
@@ -59,6 +60,8 @@
             type="button"
             [class.is-active]="day.active"
             [class.is-muted]="day.muted"
+            [class.is-past]="isPast(day.date)"
+            [disabled]="isPast(day.date)"
             (click)="selectDate(day.date)"
           >
             {{ day.label }}

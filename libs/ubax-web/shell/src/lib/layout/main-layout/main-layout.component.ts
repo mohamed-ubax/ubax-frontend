@@ -25,11 +25,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private readonly inactivity = inject(InactivityService);
 
   ngOnInit(): void {
-    // Le profil principal vient du JWT, puis les sous-rôles/scope sont
-    // enrichis depuis l'API quand une session persistée existe.
     if (this.authStore.token()) {
-      this.authStore.loadMe();
-      // Démarre la surveillance d'inactivité (30 min → déconnexion auto).
       this.inactivity.start();
     }
   }

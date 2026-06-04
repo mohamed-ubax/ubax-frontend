@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import {
   ADMIN_RESERVATION_STATUSES,
@@ -39,7 +38,6 @@ const STATUS_LABELS: Record<AdminReservationStatus, string> = {
 })
 export class ReservationsListPageComponent implements OnInit {
   protected readonly store = inject(AdminReservationsStore);
-  private readonly router = inject(Router);
 
   protected readonly searchTerm = signal('');
   protected readonly currentPage = signal(1);
@@ -120,10 +118,6 @@ export class ReservationsListPageComponent implements OnInit {
   protected onPageChange(page: number): void {
     this.currentPage.set(page);
     this.loadReservations();
-  }
-
-  protected openReservation(reservation: AdminReservation): void {
-    this.router.navigate(['/reservations', reservation.id]);
   }
 
   protected retry(): void {

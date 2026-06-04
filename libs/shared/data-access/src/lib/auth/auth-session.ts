@@ -3,6 +3,7 @@ import type { UbaxScope, User, StoredAuthSession } from './types/auth.types';
 import {
   AUTH_TOKEN_STORAGE_KEY,
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
+  AUTH_RESOLVED_PROFILE_KEY,
   DEFAULT_UBAX_WEB_HOME_PATH,
   DEFAULT_UBAX_ADMIN_HOME_PATH,
 } from './constants/auth-session.constants';
@@ -509,4 +510,39 @@ export function redirectBrowserToPortalLogin(returnTo?: string): boolean {
     buildPortalLoginUrl(returnTo ?? currentBrowserPath()),
   );
   return true;
+}
+
+export type PersistedResolvedProfile = {
+  /** Keycloak `sub` — stable across token refreshes, used as cache key */
+  keycloakSub: string;
+  userId: string | null;
+  scope: UbaxScope | null;
+  avatarUrl: string | null;
+  subRole: UbaxSubRole | null;
+};
+
+export function persistResolvedProfile(profile: PersistedResolvedProfile): void {
+  getLocalStorage()?.setItem(AUTH_RESOLVED_PROFILE_KEY, JSON.stringify(profile));
+}
+
+/**
+ * Returns the persisted profile only when its `keycloakSub` matches the
+ * current token's subject, ensuring a different user's cache is never reused.
+ */
+export function readResolvedProfile(
+  currentKeycloakSub: string,
+): PersistedResolvedProfile | null {
+  const raw = getLocalStorage()?.getItem(AUTH_RESOLVED_PROFILE_KEY);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as PersistedResolvedProfile;
+    if (!parsed || parsed.keycloakSub !== currentKeycloakSub) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function clearResolvedProfile(): void {
+  getLocalStorage()?.removeItem(AUTH_RESOLVED_PROFILE_KEY);
 }

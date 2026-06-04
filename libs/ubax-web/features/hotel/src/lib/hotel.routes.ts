@@ -77,13 +77,6 @@ export const hotelRoutes: Route[] = [
       ),
   },
   {
-    path: 'employes',
-    loadComponent: () =>
-      import('./pages/employes-list-page/employes-list-page.component').then(
-        (m) => m.EmployesListPageComponent,
-      ),
-  },
-  {
     path: 'clients',
     loadComponent: () =>
       import('./pages/clients-list-page/clients-list-page.component').then(
@@ -95,20 +88,6 @@ export const hotelRoutes: Route[] = [
     loadComponent: () =>
       import('./pages/client-detail-page/client-detail-page.component').then(
         (m) => m.ClientDetailPageComponent,
-      ),
-  },
-  {
-    path: 'employes/ajouter',
-    loadComponent: () =>
-      import('./pages/employe-add-page/employe-add-page.component').then(
-        (m) => m.EmployeAddPageComponent,
-      ),
-  },
-  {
-    path: 'employes/:id',
-    loadComponent: () =>
-      import('./pages/employe-detail-page/employe-detail-page.component').then(
-        (m) => m.EmployeDetailPageComponent,
       ),
   },
   {

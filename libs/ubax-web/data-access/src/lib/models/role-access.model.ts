@@ -146,10 +146,6 @@ export const ROUTE_ROLE_ACCESS = {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
   },
-  reservations: {
-    roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'AGENCE' as UbaxScope,
-  },
   demandes: {
     roles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE' as UbaxScope,
@@ -231,13 +227,6 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
   {
     label: 'Biens',
     path: '/biens',
-    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'AGENCE',
-    subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
-  },
-  {
-    label: 'Réservations',
-    path: '/reservations',
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'AGENCE',
     subRoles: [UbaxSubRole.DIRECTEUR_AGENCE, UbaxSubRole.COMMERCIAL],
@@ -325,12 +314,6 @@ const TOPBAR_NAV_ITEMS: readonly NavItemConfig[] = [
   {
     label: 'Clients',
     path: '/hotel/clients',
-    mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
-    scope: 'HOTEL',
-  },
-  {
-    label: 'Employés',
-    path: '/hotel/employes',
     mainRoles: [UbaxRole.PARTNER, UbaxRole.PARTNER_ADMIN],
     scope: 'HOTEL',
   },

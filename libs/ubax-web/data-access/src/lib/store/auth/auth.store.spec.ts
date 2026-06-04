@@ -1,5 +1,6 @@
 import '@angular/compiler';
 import { Buffer } from 'node:buffer';
+import { Location } from '@angular/common';
 import { Injector, ProviderToken, Type } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -84,6 +85,7 @@ describe('AuthStore', () => {
     navigateByUrl: ReturnType<typeof vi.fn>;
     url: string;
   };
+  let location: { path: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     Object.defineProperty(globalThis, 'localStorage', {
@@ -113,11 +115,15 @@ describe('AuthStore', () => {
       navigateByUrl: vi.fn().mockResolvedValue(true),
       url: '/tableau-de-bord',
     };
+    location = {
+      path: vi.fn().mockReturnValue('/tableau-de-bord'),
+    };
 
     const injector = Injector.create({
       providers: [
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
+        { provide: Location, useValue: location },
         { provide: authStoreToken, useClass: authStoreClass },
       ],
     });

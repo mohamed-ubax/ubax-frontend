@@ -117,24 +117,8 @@
 // ── Property select ───────────────────────────────────────────────────────
 
 .vc-property-select {
-  &__input {
-    width: 100%;
-    max-width: 420px;
-    height: 44px;
-    padding: 0 14px;
-    border: 1.5px solid var(--ubax-divider-soft);
-    border-radius: 10px;
-    background: var(--ubax-surface);
-    font-family: 'Lexend', sans-serif;
-    font-size: 14px;
-    color: var(--ubax-text-primary);
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s;
-
-    &:focus {
-      border-color: var(--ubax-navy);
-    }
+  &__dropdown {
+    max-width: 480px;
   }
 
   &__loading,
@@ -357,14 +341,19 @@
 // ── Blackout section ──────────────────────────────────────────────────────
 
 .vc-blackout-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
   &__row {
     display: flex;
     align-items: center;
     gap: 10px;
+  }
 
-    .vc-input {
-      max-width: 220px;
-    }
+  &__picker {
+    max-width: 260px;
+    flex-shrink: 0;
   }
 }
 
@@ -473,29 +462,6 @@
     &:hover:not(:disabled) {
       background: var(--ubax-divider-soft);
     }
-  }
-}
-
-// ── Feedback ──────────────────────────────────────────────────────────────
-
-.vc-success-msg {
-  font-family: 'Lexend', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: #059669;
-}
-
-.vc-error {
-  padding: 14px 18px;
-  border-radius: 10px;
-  background: rgb(220 38 38 / 8%);
-  border: 1px solid rgb(220 38 38 / 20%);
-
-  p {
-    margin: 0;
-    font-family: 'Lexend', sans-serif;
-    font-size: 13px;
-    color: #dc2626;
   }
 }
 
