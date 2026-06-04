@@ -1,52 +1,133 @@
-<div class="partners-page">
-  <div class="partners-page__header">
-    <div class="partners-page__title-block">
-      <p class="partners-page__eyebrow">Back-office UBAX</p>
-      <div class="partners-page__title-row">
-        <h1 class="partners-page__title">Hôtels</h1>
-        <span class="partners-page__count">{{ hotelCount() }} hôtel(s)</span>
-      </div>
-      <p class="partners-page__subtitle">
-        Gérez les hôtels partenaires, leur statut et consultez leurs équipes.
-      </p>
-    </div>
-  </div>
+<div class="hotels-page">
+  @if (hasKpiSection()) {
+    <section class="hotels-kpi-grid" aria-label="Indicateurs hôtels">
+      @for (card of kpiCards(); track card.label; let cardIndex = $index) {
+        <ubax-kpi-card
+          [label]="card.label"
+          [value]="card.value"
+          [trend]="card.trend"
+          [trendPositive]="card.positive"
+        >
+          <i icon [class]="card.iconClass + ' ' + card.iconToneClass"></i>
 
-  <div class="partners-kpi-grid">
-    <ubax-kpi-card label="Hôtels actifs" [value]="kpis().active">
-      <i icon class="pi pi-building text-xl text-brand-blue"></i>
-    </ubax-kpi-card>
-    <ubax-kpi-card label="Abonnements actifs" [value]="kpis().subscribed">
-      <i icon class="pi pi-wallet text-xl text-brand-orange"></i>
-    </ubax-kpi-card>
-    <ubax-kpi-card label="Chambres pilotées" [value]="kpis().roomCount">
-      <i icon class="pi pi-th-large text-xl text-brand-teal"></i>
-    </ubax-kpi-card>
-    <ubax-kpi-card label="Hôtels suspendus" [value]="kpis().suspended">
-      <i icon class="pi pi-ban text-xl text-danger"></i>
-    </ubax-kpi-card>
-  </div>
+          <div graph [class]="card.graphWrapClass">
+            <svg [class]="card.graphClass" viewBox="0 0 82 30" fill="none">
+              <defs>
+                <linearGradient
+                  [attr.id]="'hotelsKpiStroke' + cardIndex"
+                  x1="0"
+                  y1="30"
+                  x2="82"
+                  y2="0"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0%"
+                    stop-opacity="0.72"
+                    [attr.stop-color]="card.gradientStart"
+                  />
+                  <stop offset="100%" [attr.stop-color]="card.gradientEnd" />
+                </linearGradient>
+
+                <linearGradient
+                  [attr.id]="'hotelsKpiArea' + cardIndex"
+                  x1="41"
+                  y1="6"
+                  x2="41"
+                  y2="30"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0%"
+                    stop-opacity="0.22"
+                    [attr.stop-color]="card.gradientEnd"
+                  />
+                  <stop
+                    offset="100%"
+                    stop-opacity="0"
+                    [attr.stop-color]="card.gradientEnd"
+                  />
+                </linearGradient>
+              </defs>
+
+              <path
+                class="hotels-kpi__graph-area"
+                d="M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5L81 30L1 30Z"
+                [attr.fill]="'url(#hotelsKpiArea' + cardIndex + ')'"
+              />
+
+              <path
+                class="hotels-kpi__graph-line"
+                d="M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5"
+                [attr.stroke]="'url(#hotelsKpiStroke' + cardIndex + ')'"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+        </ubax-kpi-card>
+      }
+    </section>
+  }
 
   <ubax-section-card bodyClass="p-0">
-    <ubax-search-filter-bar
-      class="partners-toolbar"
-      placeholder="Rechercher un hôtel..."
-      [filters]="searchFilters()"
-      (searchChange)="onSearchChange($event)"
-      (filterChange)="onFilterChange($event)"
-    />
+    <section class="hotels-table-stage" aria-label="Liste des hôtels">
+      <header class="hotels-table-head">
+        <h2 class="hotels-table-head__title">{{ listTitle() }}</h2>
 
-    <section class="partners-table-stage" aria-label="Liste des hôtels">
+        <div class="hotels-table-head__actions">
+          <div class="hotels-table-search">
+            <i class="pi pi-search"></i>
+            <input
+              type="search"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchChange($event)"
+              placeholder="Rechercher"
+              aria-label="Rechercher un hôtel"
+            />
+          </div>
+
+          @if (isSuperAdmin()) {
+            <button type="button" class="hotels-add-btn">
+              <i class="pi pi-plus-circle"></i>
+              Ajouter un hôtel
+            </button>
+          }
+        </div>
+      </header>
+
+      <div class="hotels-filters">
+        <p-select
+          [options]="subscriptionPlanOptions()"
+          [ngModel]="subscriptionFilter()"
+          (ngModelChange)="onSubscriptionFilterChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          placeholder="Filtrer plan"
+        />
+
+        <p-select
+          [options]="starsFilterOptions"
+          [ngModel]="starsFilter()"
+          (ngModelChange)="onStarsFilterChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          placeholder="Filtrer étoiles"
+        />
+      </div>
+
       @if (loading()) {
-        <div class="partners-table-loading" aria-busy="true" aria-live="polite">
+        <div class="hotels-table-loading" aria-busy="true" aria-live="polite">
           @for (_ of [0, 1, 2, 3, 4]; track $index) {
-            <div class="partners-table-loading__row" aria-hidden="true"></div>
+            <div class="hotels-table-loading__row" aria-hidden="true"></div>
           }
         </div>
       } @else {
-        <div class="partners-table-wrap">
+        <div class="hotels-table-wrap">
           <ubax-ui-data-table
-            class="partners-table"
+            class="hotels-table"
             [columns]="tableColumns"
             [rows]="pagedRows()"
             rowIdKey="id"
@@ -64,132 +145,143 @@
             </ng-template>
 
             <ng-template ubaxDataTableCell="hotel" let-hotel>
-              <div class="partners-user-cell">
+              <div class="hotels-user-cell">
                 @if (hotel.logoUrl) {
                   <img
                     [src]="hotel.logoUrl"
                     [alt]="hotel.name"
-                    class="partners-user-cell__logo"
+                    class="hotels-user-cell__logo"
                   />
                 } @else {
-                  <div class="partners-user-cell__avatar">
+                  <div class="hotels-user-cell__avatar">
                     {{ initials(hotel) }}
                   </div>
                 }
-                <div class="partners-user-cell__meta">
-                  <p class="partners-user-cell__name">
-                    {{ hotel.name ?? '—' }}
-                  </p>
-                  <p class="partners-user-cell__sub">{{ hotel.city ?? '—' }}</p>
+
+                <div class="hotels-user-cell__meta">
+                  <p class="hotels-user-cell__name">{{ hotel.name ?? '—' }}</p>
+                  <p class="hotels-user-cell__code">{{ hotelCode(hotel) }}</p>
                 </div>
               </div>
             </ng-template>
 
-            <ng-template ubaxDataTableCell="email" let-hotel>
-              <span class="partners-table__cell">{{ hotel.email ?? '—' }}</span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="phone" let-hotel>
-              <span class="partners-table__cell partners-table__cell--muted">
-                {{ hotel.phone ?? '—' }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="city" let-hotel>
-              <span class="partners-table__cell partners-table__cell--muted">
-                {{ hotel.city ?? '—' }}
-              </span>
+            <ng-template ubaxDataTableCell="location" let-hotel>
+              <span class="hotels-table__cell hotels-table__cell--muted">{{
+                locationLabel(hotel)
+              }}</span>
             </ng-template>
 
             <ng-template ubaxDataTableCell="stars" let-hotel>
-              <span class="partners-table__cell partners-table__stars">
-                {{ stars(hotel) }}
-              </span>
+              <span class="hotels-table__cell hotels-table__stars">{{
+                stars(hotel)
+              }}</span>
             </ng-template>
 
             <ng-template ubaxDataTableCell="rooms" let-hotel>
-              <span class="partners-table__cell partners-table__cell--muted">
-                {{ hotel.totalRooms ?? '—' }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="subscription" let-hotel>
-              <div class="partners-subscription-cell">
-                <ubax-status-badge [variant]="subscriptionVariant(hotel)">
-                  {{ subscriptionLabel(hotel) }}
-                </ubax-status-badge>
-                <span class="partners-subscription-cell__meta">
-                  {{ hotel.subscriptionActive ? 'En cours' : 'À renouveler' }}
-                </span>
-              </div>
+              <span class="hotels-table__cell hotels-table__cell--muted">{{
+                hotel.totalRooms ?? '—'
+              }}</span>
             </ng-template>
 
             <ng-template ubaxDataTableCell="status" let-hotel>
-              @if (hotel.active) {
-                <ubax-status-badge variant="active">Actif</ubax-status-badge>
-              } @else {
-                <ubax-status-badge variant="suspended"
-                  >Suspendu</ubax-status-badge
-                >
-              }
+              <span [class]="hotelStatusCssClass(hotel)">
+                {{ hotelStatusLabel(hotel) }}
+              </span>
             </ng-template>
 
             <ng-template ubaxDataTableCell="actions" let-hotel>
-              <div class="partners-actions">
+              <div class="hotels-actions">
                 <button
                   type="button"
-                  class="partners-action-btn"
-                  title="Voir les membres"
-                  (click)="viewMembers(hotel)"
+                  class="hotels-action-btn"
+                  title="Voir les détails de l'hôtel"
+                  (click)="viewDetails(hotel)"
                 >
-                  <i class="pi pi-users"></i>
+                  <i class="pi pi-eye"></i>
                 </button>
 
-                @if (isSuperAdmin()) {
-                  <button
-                    type="button"
-                    class="partners-action-btn partners-action-btn--info"
-                    title="Mettre à jour l'abonnement"
-                    (click)="openSubscriptionDialog(hotel)"
-                  >
-                    <i class="pi pi-wallet"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    [class]="
-                      hotel.active
-                        ? 'partners-action-btn partners-action-btn--warn'
-                        : 'partners-action-btn partners-action-btn--success'
-                    "
-                    [title]="hotel.active ? 'Suspendre' : 'Activer'"
-                    (click)="promptToggle(hotel)"
-                  >
-                    <i
-                      [class]="
-                        hotel.active ? 'pi pi-ban' : 'pi pi-check-circle'
-                      "
-                    ></i>
-                  </button>
-                }
+                <button
+                  type="button"
+                  class="hotels-action-btn"
+                  title="Actions"
+                  (click)="toggleActionsPopover($event, hotel)"
+                >
+                  <i class="pi pi-ellipsis-v"></i>
+                </button>
               </div>
             </ng-template>
           </ubax-ui-data-table>
         </div>
       }
 
-      @if (!loading() && totalPages() > 1) {
-        <footer class="partners-pagination">
-          <ubax-ui-pagination
+      <footer class="hotels-table-footer">
+        <p class="hotels-table-footer__count">
+          Affichage
+          {{ pagedRows().length ? (currentPage() - 1) * pageSize + 1 : 0 }} à
+          {{ (currentPage() - 1) * pageSize + pagedRows().length }} sur
+          {{ hotelCount() }} hôtels
+        </p>
+
+        @if (!loading() && hotelCount() > 0) {
+          <ubax-paginator
             [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            variant="members"
-            (pageChange)="onPageChange($event)"
+            [totalPages]="totalPages() || 1"
+            (currentPageChange)="onPageChange($event)"
           />
-        </footer>
-      }
+        }
+      </footer>
     </section>
   </ubax-section-card>
+
+  @if (selectedHotel(); as selectedHotel) {
+    @if (isActionsPopoverOpen(selectedHotel)) {
+      <div
+        class="hotels-actions-popover"
+        [style.top.px]="actionPopoverTop()"
+        [style.left.px]="actionPopoverLeft()"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          type="button"
+          class="hotels-actions-popover__item"
+          (click)="handleViewMembers(selectedHotel)"
+        >
+          <i class="pi pi-users"></i>
+          Voir les membres de l'hôtel
+        </button>
+
+        @if (isSuperAdmin()) {
+          <button
+            type="button"
+            class="hotels-actions-popover__item"
+            (click)="handleOpenSubscription(selectedHotel)"
+          >
+            <i class="pi pi-wallet"></i>
+            Mettre à jour l'abonnement
+          </button>
+
+          <button
+            type="button"
+            class="hotels-actions-popover__item hotels-actions-popover__item--warn"
+            (click)="handlePromptToggle(selectedHotel)"
+          >
+            <i
+              [class]="
+                hotelStatusVariant(selectedHotel) === 'suspended'
+                  ? 'pi pi-check-circle'
+                  : 'pi pi-ban'
+              "
+            ></i>
+            {{
+              hotelStatusVariant(selectedHotel) === 'suspended'
+                ? "Réactiver l'abonnement"
+                : "Suspendre l'abonnement"
+            }}
+          </button>
+        }
+      </div>
+    }
+  }
 </div>
 
 <ubax-confirm-dialog

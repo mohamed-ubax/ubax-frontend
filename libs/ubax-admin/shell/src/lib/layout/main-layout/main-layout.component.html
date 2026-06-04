@@ -23,14 +23,71 @@
       </a>
 
       @if (isSuperAdmin()) {
-        <a
-          routerLink="/hotels"
-          routerLinkActive="sidebar-nav-item--active"
-          class="sidebar-nav-item"
+        <button
+          type="button"
+          class="sidebar-nav-item sidebar-nav-item--btn"
+          [class.sidebar-nav-item--active]="isHotelsRoute()"
+          [class.sidebar-nav-item--expanded]="hotelsExpanded()"
+          (click)="toggleHotels()"
         >
           <i class="pi pi-building text-lg w-6 flex-shrink-0"></i>
-          <span class="flex-1 truncate">Hôtels</span>
-        </a>
+          <span class="flex-1 truncate text-left">Hôtels</span>
+          <i
+            class="pi text-sm flex-shrink-0 sidebar-chevron"
+            [class.pi-chevron-down]="!hotelsExpanded()"
+            [class.pi-chevron-up]="hotelsExpanded()"
+          ></i>
+        </button>
+
+        @if (hotelsExpanded()) {
+          <div class="sidebar-subnav">
+            <div class="sidebar-subnav__track">
+              <div class="sidebar-subnav__line-bg"></div>
+              <div class="sidebar-subnav__items">
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'all' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Tous les hôtels ({{ hotelsSubItemCounts().all }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'suspended' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Suspendus ({{ hotelsSubItemCounts().suspended }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'active' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Hôtels actifs ({{ hotelsSubItemCounts().active }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'pending' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    En attente ({{ hotelsSubItemCounts().pending }})
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        }
 
         <a
           routerLink="/agences"
@@ -184,6 +241,22 @@
         <p class="admin-header__page-title">{{ currentPageTitle() }}</p>
       </div>
       <div class="admin-header__actions">
+        <div class="admin-header__date-picker">
+          <p-datepicker
+            [ngModel]="selectedRange()"
+            (ngModelChange)="selectedRange.set($event)"
+            selectionMode="range"
+            [readonlyInput]="true"
+            [showIcon]="true"
+            iconDisplay="input"
+            appendTo="body"
+            dateFormat="dd M yy"
+            [inputStyleClass]="'admin-header__date-input'"
+            panelStyleClass="admin-header__date-panel"
+            placeholder="Sélectionner une période"
+          />
+        </div>
+
         <button
           type="button"
           class="admin-header__notif"

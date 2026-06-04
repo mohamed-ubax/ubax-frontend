@@ -69,6 +69,15 @@ export const adminRoutes: Route[] = [
             (m) => m.HotelsPageComponent,
           ),
       },
+      {
+        path: 'hotels/:hotelId',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/hotels/hotel-detail-page.component').then(
+            (m) => m.HotelDetailPageComponent,
+          ),
+      },
       // FE-409 — Membres d'un hôtel (lecture seule)
       {
         path: 'hotels/:hotelId/membres',

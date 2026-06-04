@@ -76,7 +76,7 @@
   }
 
   &--expanded {
-    background: #e87d1e;
+    background: rgba(232, 125, 30, 0.2);
     color: #fff;
 
     i,
@@ -341,6 +341,45 @@
   gap: 12px;
 }
 
+.admin-header__date-picker {
+  position: relative;
+
+  :deep(.p-datepicker) {
+    min-width: 238px;
+  }
+
+  :deep(.admin-header__date-input.p-inputtext) {
+    width: 238px;
+    height: 42px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #1f2937;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    padding-inline: 14px 36px;
+    line-height: 42px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:focus {
+      border-color: #f5a623;
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.16);
+    }
+  }
+
+  :deep(.p-datepicker .p-datepicker-input-icon-container) {
+    right: 12px;
+    color: #334155;
+  }
+
+  :deep(.p-datepicker-input-icon) {
+    font-size: 14px;
+  }
+}
+
 .admin-header__page-title {
   margin: 0;
   color: #1c1c1c;
@@ -427,4 +466,36 @@
   font-weight: 400;
   line-height: 1.2;
   opacity: 0.85;
+}
+
+:host ::ng-deep .admin-header__date-panel {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(17, 33, 56, 0.16);
+
+  .p-datepicker-header {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .p-datepicker-select-month,
+  .p-datepicker-select-year {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+  }
+
+  .p-datepicker-calendar td > span {
+    width: 2rem;
+    height: 2rem;
+    font-size: 12px;
+    font-family: 'Lexend', sans-serif;
+  }
+
+  .p-datepicker-calendar td.p-datepicker-today > span {
+    border-color: #f5a623;
+  }
+
+  .p-datepicker-calendar td > span.p-highlight {
+    background: #f5a623;
+    color: #fff;
+  }
 }
