@@ -1,5 +1,6 @@
 export * from './admin-agencies.store';
 export * from './admin-hotels.store';
+export * from './admin-hotel-detail.store';
 export * from './admin-clients.store';
 export * from './admin-agency-members.store';
 export * from './admin-hotel-members.store';

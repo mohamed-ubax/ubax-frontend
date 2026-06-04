@@ -274,17 +274,15 @@ $muted: #6b7280;
 }
 
 :deep(.partners-dialog) {
-  .p-dialog-header {
-    padding: 1.5rem 1.5rem 1rem;
-  }
-
   .p-dialog-content {
-    padding: 0 1.5rem 1.5rem;
+    padding: 0;
   }
+}
 
-  .p-dialog-footer {
-    padding: 0 1.5rem 1.5rem;
-  }
+.partners-dialog__surface {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
 }
 
 .partners-dialog__header {
@@ -292,6 +290,29 @@ $muted: #6b7280;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.partners-dialog__close {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 140ms ease;
+
+  &:hover:not(:disabled) {
+    background: #e2e8f0;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
 .partners-dialog__title {
@@ -340,7 +361,9 @@ $muted: #6b7280;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 140ms ease, opacity 140ms ease;
+  transition:
+    background-color 140ms ease,
+    opacity 140ms ease;
   white-space: nowrap;
 
   &:disabled {
@@ -352,14 +375,18 @@ $muted: #6b7280;
     background: #f1f5f9;
     color: #334155;
 
-    &:hover:not(:disabled) { background: #e2e8f0; }
+    &:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
   }
 
   &--primary {
     background: #1a3047;
     color: #fff;
 
-    &:hover:not(:disabled) { background: #102235; }
+    &:hover:not(:disabled) {
+      background: #102235;
+    }
   }
 }
 

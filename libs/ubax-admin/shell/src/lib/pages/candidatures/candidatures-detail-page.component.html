@@ -1,5 +1,4 @@
 <div class="candidature-detail">
-
   <!-- Fil d'Ariane -->
   <nav class="candidature-detail__breadcrumb">
     <a routerLink="/candidatures" class="candidature-detail__breadcrumb-link">
@@ -43,7 +42,10 @@
             {{ getPartnerTypeLabel(application()?.partnerType) }}
           </p>
         </div>
-        <ubax-status-badge [variant]="getStatusBadge(application()?.status)" class="candidature-detail__status-badge">
+        <ubax-status-badge
+          [variant]="getStatusBadge(application()?.status)"
+          class="candidature-detail__status-badge"
+        >
           {{ getStatusLabel(application()?.status) }}
         </ubax-status-badge>
       </div>
@@ -106,9 +108,9 @@
               <div>
                 <p class="candidature-terminal__title">Candidature approuvée</p>
                 <p class="candidature-terminal__sub">
-                  Un compte partenaire a été créé automatiquement.
-                  Approuvé par {{ application()?.reviewedByName ?? '—' }}
-                  le {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
+                  Un compte partenaire a été créé automatiquement. Approuvé par
+                  {{ application()?.reviewedByName ?? '—' }} le
+                  {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
                 </p>
               </div>
             </div>
@@ -119,8 +121,8 @@
               <div>
                 <p class="candidature-terminal__title">Candidature rejetée</p>
                 <p class="candidature-terminal__sub">
-                  Rejeté par {{ application()?.reviewedByName ?? '—' }}
-                  le {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
+                  Rejeté par {{ application()?.reviewedByName ?? '—' }} le
+                  {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
                 </p>
                 @if (application()?.rejectionReason) {
                   <p class="candidature-terminal__reason">
@@ -137,17 +139,20 @@
     <div class="candidature-detail__body">
       <!-- Colonne principale -->
       <div class="candidature-detail__main">
-
         <!-- Informations partenaires -->
         <ubax-section-card title="Informations partenaires">
           <div class="info-grid">
             <div class="info-item">
               <span class="info-item__label">Type de partenaire</span>
-              <span class="info-item__value">{{ getPartnerTypeLabel(application()?.partnerType) }}</span>
+              <span class="info-item__value">{{
+                getPartnerTypeLabel(application()?.partnerType)
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-item__label">Raison sociale</span>
-              <span class="info-item__value">{{ application()?.companyName ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.companyName ?? '—'
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-item__label">Représentant légal</span>
@@ -155,19 +160,27 @@
             </div>
             <div class="info-item">
               <span class="info-item__label">Numéro de téléphone</span>
-              <span class="info-item__value">{{ application()?.phone ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.phone ?? '—'
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-item__label">Email</span>
-              <span class="info-item__value">{{ application()?.email ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.email ?? '—'
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-item__label">Statut juridique</span>
-              <span class="info-item__value">{{ application()?.legalStatus ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.legalStatus ?? '—'
+              }}</span>
             </div>
             <div class="info-item info-item--full">
               <span class="info-item__label">Numéro RCCM ou équivalent</span>
-              <span class="info-item__value">{{ application()?.registrationNumber ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.registrationNumber ?? '—'
+              }}</span>
             </div>
           </div>
         </ubax-section-card>
@@ -177,19 +190,27 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="info-item__label">Pays</span>
-              <span class="info-item__value">{{ application()?.country ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.country ?? '—'
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-item__label">Ville</span>
-              <span class="info-item__value">{{ application()?.city ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.city ?? '—'
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-item__label">Adresse postale</span>
-              <span class="info-item__value">{{ application()?.postalAddress ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.postalAddress ?? '—'
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-item__label">Quartier / Zone</span>
-              <span class="info-item__value">{{ application()?.zone ?? '—' }}</span>
+              <span class="info-item__value">{{
+                application()?.zone ?? '—'
+              }}</span>
             </div>
           </div>
         </ubax-section-card>
@@ -197,15 +218,15 @@
         <!-- Présentation -->
         @if (application()?.description) {
           <ubax-section-card title="Présentation">
-            <p class="candidature-detail__description">{{ application()?.description }}</p>
+            <p class="candidature-detail__description">
+              {{ application()?.description }}
+            </p>
           </ubax-section-card>
         }
-
       </div>
 
       <!-- Colonne latérale -->
       <div class="candidature-detail__side">
-
         <!-- Documents -->
         <ubax-section-card title="Documents">
           @if (documents().length === 0) {
@@ -227,7 +248,10 @@
                 <div class="timeline-entry__dot"></div>
                 <div class="timeline-entry__content">
                   <div class="timeline-entry__header">
-                    <ubax-status-badge [variant]="getHistoryStatusBadge(entry)" class="timeline-entry__badge">
+                    <ubax-status-badge
+                      [variant]="getHistoryStatusBadge(entry)"
+                      class="timeline-entry__badge"
+                    >
                       {{ getHistoryStatusLabel(entry) }}
                     </ubax-status-badge>
                     <span class="timeline-entry__date">
@@ -235,7 +259,9 @@
                     </span>
                   </div>
                   @if (entry.changedByName) {
-                    <p class="timeline-entry__author">Par {{ entry.changedByName }}</p>
+                    <p class="timeline-entry__author">
+                      Par {{ entry.changedByName }}
+                    </p>
                   }
                   @if (entry.comment) {
                     <p class="timeline-entry__comment">{{ entry.comment }}</p>
@@ -248,11 +274,9 @@
             }
           </div>
         </ubax-section-card>
-
       </div>
     </div>
   }
-
 </div>
 
 <!-- Overlay : Prévisualisation de document -->
@@ -266,10 +290,17 @@
     (keyup.enter)="closePreview()"
     (keydown.escape)="closePreview()"
   ></div>
-  <div class="doc-preview" [class.doc-preview--fullscreen]="previewFullscreen()">
+  <div
+    class="doc-preview"
+    [class.doc-preview--fullscreen]="previewFullscreen()"
+  >
     <header class="doc-preview__header">
       <div class="doc-preview__title">
-        <i class="pi" [class.pi-file-pdf]="previewItem()?.type !== 'Image'" [class.pi-image]="previewItem()?.type === 'Image'"></i>
+        <i
+          class="pi"
+          [class.pi-file-pdf]="previewItem()?.type !== 'Image'"
+          [class.pi-image]="previewItem()?.type === 'Image'"
+        ></i>
         <span>{{ previewItem()?.name }}</span>
         @if (previewItem()?.type) {
           <span class="doc-preview__type-badge">{{ previewItem()?.type }}</span>
@@ -289,11 +320,22 @@
           type="button"
           class="doc-preview__action-btn"
           (click)="togglePreviewFullscreen()"
-          [title]="previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+          [title]="
+            previewFullscreen() ? 'Quitter le plein écran' : 'Plein écran'
+          "
         >
-          <i class="pi" [class.pi-window-maximize]="!previewFullscreen()" [class.pi-window-minimize]="previewFullscreen()"></i>
+          <i
+            class="pi"
+            [class.pi-window-maximize]="!previewFullscreen()"
+            [class.pi-window-minimize]="previewFullscreen()"
+          ></i>
         </button>
-        <button type="button" class="doc-preview__action-btn doc-preview__action-btn--close" (click)="closePreview()" title="Fermer">
+        <button
+          type="button"
+          class="doc-preview__action-btn doc-preview__action-btn--close"
+          (click)="closePreview()"
+          title="Fermer"
+        >
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -328,10 +370,13 @@
 >
   <form [formGroup]="commentForm" class="candidature-modal__form">
     <p class="candidature-modal__description">
-      Veuillez saisir le motif du rejet. Ce message sera visible par le candidat.
+      Veuillez saisir le motif du rejet. Ce message sera visible par le
+      candidat.
     </p>
     <div class="candidature-modal__field">
-      <label class="candidature-modal__label" for="reject-comment">Motif du rejet *</label>
+      <label class="candidature-modal__label" for="reject-comment"
+        >Motif du rejet *</label
+      >
       <textarea
         pTextarea
         id="reject-comment"
@@ -339,29 +384,36 @@
         rows="5"
         placeholder="Saisir le motif du rejet..."
         class="candidature-modal__textarea"
-        [class.ng-invalid]="commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched"
+        [class.ng-invalid]="
+          commentForm.get('comment')?.invalid &&
+          commentForm.get('comment')?.touched
+        "
       ></textarea>
-      @if (commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched) {
+      @if (
+        commentForm.get('comment')?.invalid &&
+        commentForm.get('comment')?.touched
+      ) {
         <span class="candidature-modal__error">Le motif est obligatoire.</span>
       }
     </div>
   </form>
-
-  <ng-template pTemplate="footer">
-    <div class="candidature-modal__footer">
-      <button type="button" class="candidature-btn candidature-btn--ghost" (click)="closeModal()">
-        Annuler
-      </button>
-      <button
-        type="button"
-        class="candidature-btn candidature-btn--danger"
-        [disabled]="saving()"
-        (click)="submitReject()"
-      >
-        {{ saving() ? 'Envoi...' : 'Confirmer le rejet' }}
-      </button>
-    </div>
-  </ng-template>
+  <div class="candidature-modal__footer">
+    <button
+      type="button"
+      class="candidature-btn candidature-btn--ghost"
+      (click)="closeModal()"
+    >
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="candidature-btn candidature-btn--danger"
+      [disabled]="saving()"
+      (click)="submitReject()"
+    >
+      {{ saving() ? 'Envoi...' : 'Confirmer le rejet' }}
+    </button>
+  </div>
 </p-dialog>
 
 <!-- Modal : Demande de compléments -->
@@ -376,10 +428,13 @@
 >
   <form [formGroup]="commentForm" class="candidature-modal__form">
     <p class="candidature-modal__description">
-      Précisez les informations ou documents manquants. Le candidat devra resoumettre sa candidature.
+      Précisez les informations ou documents manquants. Le candidat devra
+      resoumettre sa candidature.
     </p>
     <div class="candidature-modal__field">
-      <label class="candidature-modal__label" for="incomplete-comment">Message au candidat *</label>
+      <label class="candidature-modal__label" for="incomplete-comment"
+        >Message au candidat *</label
+      >
       <textarea
         pTextarea
         id="incomplete-comment"
@@ -387,29 +442,38 @@
         rows="5"
         placeholder="Indiquer les compléments requis..."
         class="candidature-modal__textarea"
-        [class.ng-invalid]="commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched"
+        [class.ng-invalid]="
+          commentForm.get('comment')?.invalid &&
+          commentForm.get('comment')?.touched
+        "
       ></textarea>
-      @if (commentForm.get('comment')?.invalid && commentForm.get('comment')?.touched) {
-        <span class="candidature-modal__error">Le message est obligatoire.</span>
+      @if (
+        commentForm.get('comment')?.invalid &&
+        commentForm.get('comment')?.touched
+      ) {
+        <span class="candidature-modal__error"
+          >Le message est obligatoire.</span
+        >
       }
     </div>
   </form>
-
-  <ng-template pTemplate="footer">
-    <div class="candidature-modal__footer">
-      <button type="button" class="candidature-btn candidature-btn--ghost" (click)="closeModal()">
-        Annuler
-      </button>
-      <button
-        type="button"
-        class="candidature-btn candidature-btn--warning"
-        [disabled]="saving()"
-        (click)="submitIncomplete()"
-      >
-        {{ saving() ? 'Envoi...' : 'Envoyer la demande' }}
-      </button>
-    </div>
-  </ng-template>
+  <div class="candidature-modal__footer">
+    <button
+      type="button"
+      class="candidature-btn candidature-btn--ghost"
+      (click)="closeModal()"
+    >
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="candidature-btn candidature-btn--warning"
+      [disabled]="saving()"
+      (click)="submitIncomplete()"
+    >
+      {{ saving() ? 'Envoi...' : 'Envoyer la demande' }}
+    </button>
+  </div>
 </p-dialog>
 
 <!-- Modal : Confirmation d'approbation -->
@@ -431,7 +495,8 @@
     </p>
     <p class="candidature-modal__approve-desc">
       L'agence a été validée et peut désormais accéder à la plateforme UBAX.
-      Elle peut commencer à publier des biens, gérer ses clients et recevoir des réservations.
+      Elle peut commencer à publier des biens, gérer ses clients et recevoir des
+      réservations.
     </p>
 
     <!-- Récapitulatif -->
@@ -439,11 +504,15 @@
       <div class="summary-row">
         <div class="summary-col">
           <span class="summary-col__label">Type de partenaire</span>
-          <span class="summary-col__value">{{ getPartnerTypeLabel(application()?.partnerType) }}</span>
+          <span class="summary-col__value">{{
+            getPartnerTypeLabel(application()?.partnerType)
+          }}</span>
         </div>
         <div class="summary-col">
           <span class="summary-col__label">Raison sociale</span>
-          <span class="summary-col__value">{{ application()?.companyName ?? '—' }}</span>
+          <span class="summary-col__value">{{
+            application()?.companyName ?? '—'
+          }}</span>
         </div>
         <div class="summary-col">
           <span class="summary-col__label">Représentant légal</span>
@@ -452,20 +521,21 @@
       </div>
     </div>
   </div>
-
-  <ng-template pTemplate="footer">
-    <div class="candidature-modal__footer">
-      <button type="button" class="candidature-btn candidature-btn--ghost" (click)="closeModal()">
-        Annuler
-      </button>
-      <button
-        type="button"
-        class="candidature-btn candidature-btn--success"
-        [disabled]="saving()"
-        (click)="submitApprove()"
-      >
-        {{ saving() ? 'Approbation...' : 'Confirmer l\'approbation' }}
-      </button>
-    </div>
-  </ng-template>
+  <div class="candidature-modal__footer">
+    <button
+      type="button"
+      class="candidature-btn candidature-btn--ghost"
+      (click)="closeModal()"
+    >
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="candidature-btn candidature-btn--success"
+      [disabled]="saving()"
+      (click)="submitApprove()"
+    >
+      {{ saving() ? 'Approbation...' : "Confirmer l'approbation" }}
+    </button>
+  </div>
 </p-dialog>

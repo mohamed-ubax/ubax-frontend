@@ -1,0 +1,565 @@
+<div class="hotel-detail-page">
+  <header class="hotel-detail-page__topbar">
+    <button type="button" class="hotel-detail-page__back" (click)="goBack()">
+      <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      Retour à la liste
+    </button>
+
+    <div class="hotel-detail-page__top-actions">
+      @if (selectedHotel(); as selectedHotel) {
+        <button
+          type="button"
+          class="hotel-detail-page__action hotel-detail-page__action--ghost"
+          [class.hotel-detail-page__action--danger]="selectedHotel.active"
+          (click)="promptToggle()"
+        >
+          <i
+            [class]="selectedHotel.active ? 'pi pi-ban' : 'pi pi-check-circle'"
+            aria-hidden="true"
+          ></i>
+          {{ selectedHotel.active ? 'Suspendre' : 'Réactiver' }}
+        </button>
+
+        <button
+          type="button"
+          class="hotel-detail-page__action hotel-detail-page__action--primary"
+          (click)="openSubscriptionDialog()"
+        >
+          Modifier
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (loading()) {
+    <section
+      class="hotel-detail-page__loading"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--hero"
+      ></div>
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--side"
+      ></div>
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--side"
+      ></div>
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--metrics"
+      ></div>
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--metrics"
+      ></div>
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--metrics"
+      ></div>
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--wide"
+      ></div>
+      <div
+        class="hotel-detail-page__skeleton hotel-detail-page__skeleton--wide"
+      ></div>
+    </section>
+  } @else if (error()) {
+    <section class="hotel-detail-page__empty-state">
+      <p class="hotel-detail-page__empty-eyebrow">Erreur de chargement</p>
+      <h2 class="hotel-detail-page__empty-title">
+        Impossible d'afficher les détails de l'hôtel.
+      </h2>
+      <p class="hotel-detail-page__empty-message">{{ error() }}</p>
+      <div class="hotel-detail-page__empty-actions">
+        <button
+          type="button"
+          class="hotel-detail-page__action hotel-detail-page__action--primary"
+          (click)="retryLoad()"
+        >
+          Réessayer
+        </button>
+        <button
+          type="button"
+          class="hotel-detail-page__action hotel-detail-page__action--ghost"
+          (click)="goBack()"
+        >
+          Retour
+        </button>
+      </div>
+    </section>
+  } @else if (hotel(); as hotel) {
+    <section class="hotel-detail-page__content">
+      <div class="hotel-detail-page__layout">
+        <article class="hotel-detail-page__hero card">
+          <div class="hotel-detail-page__hero-media">
+            @if (hotel.logoUrl || firstCoverPhoto()) {
+              <img
+                class="hotel-detail-page__hero-image"
+                [src]="hotel.logoUrl || firstCoverPhoto() || ''"
+                [alt]="hotel.name ?? 'Hôtel'"
+              />
+            } @else {
+              <div class="hotel-detail-page__hero-fallback">
+                <span>{{ hotelInitials(hotel.name) }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="hotel-detail-page__hero-body">
+            <div class="hotel-detail-page__reference-row">
+              <span class="hotel-detail-page__reference">{{
+                hotelReference()
+              }}</span>
+
+              <span class="hotel-detail-page__subscription-chip">
+                <i class="pi pi-bolt" aria-hidden="true"></i>
+                {{ subscriptionBadgeLabel() }}
+              </span>
+
+              <div
+                class="hotel-detail-page__stars"
+                aria-label="Catégorie de l'hôtel"
+              >
+                @for (_ of [0, 1, 2, 3, 4]; track $index) {
+                  <i
+                    class="pi pi-star-fill"
+                    [class.hotel-detail-page__star--active]="
+                      $index < (hotel.stars ?? 0)
+                    "
+                    aria-hidden="true"
+                  ></i>
+                }
+              </div>
+            </div>
+
+            <h2 class="hotel-detail-page__hotel-name">
+              {{ hotel.name ?? 'Hôtel' }}
+            </h2>
+
+            <p class="hotel-detail-page__hotel-location">
+              <i class="pi pi-map-marker" aria-hidden="true"></i>
+              {{ locationLabel() }}
+            </p>
+
+            <div class="hotel-detail-page__tags">
+              <span class="hotel-detail-page__tag hotel-detail-page__tag--blue">
+                <i class="pi pi-building" aria-hidden="true"></i>
+                Hôtel
+              </span>
+              <span
+                class="hotel-detail-page__tag hotel-detail-page__tag--neutral"
+              >
+                <i class="pi pi-calendar" aria-hidden="true"></i>
+                Membre depuis {{ hotelSinceLabel() }}
+              </span>
+              <span
+                class="hotel-detail-page__tag hotel-detail-page__tag--purple"
+              >
+                <i class="pi pi-bed" aria-hidden="true"></i>
+                {{ formatInteger(hotel.totalRooms ?? 0) }} chambres
+              </span>
+            </div>
+
+            <div class="hotel-detail-page__identity-grid">
+              <div class="hotel-detail-page__identity-field">
+                <span class="hotel-detail-page__identity-label">Téléphone</span>
+                <strong class="hotel-detail-page__identity-value">{{
+                  hotel.phone ?? '—'
+                }}</strong>
+              </div>
+              <div class="hotel-detail-page__identity-field">
+                <span class="hotel-detail-page__identity-label">Email</span>
+                <strong class="hotel-detail-page__identity-value">{{
+                  hotel.email ?? '—'
+                }}</strong>
+              </div>
+              <div class="hotel-detail-page__identity-field">
+                <span class="hotel-detail-page__identity-label"
+                  >Responsable</span
+                >
+                <strong class="hotel-detail-page__identity-value">{{
+                  memberName(primaryMember())
+                }}</strong>
+              </div>
+              <div class="hotel-detail-page__identity-field">
+                <span class="hotel-detail-page__identity-label">Membres</span>
+                <strong class="hotel-detail-page__identity-value">{{
+                  formatInteger(
+                    activeMembers().length + inactiveMembers().length
+                  )
+                }}</strong>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="hotel-detail-page__stack">
+          <section class="hotel-detail-page__availability card">
+            <div class="hotel-detail-page__card-head">
+              <h3 class="hotel-detail-page__card-title">Disponibilité</h3>
+            </div>
+
+            <div class="hotel-detail-page__availability-body">
+              <div
+                class="hotel-detail-page__ring"
+                [style.background]="availabilityRingStyle()"
+              >
+                <div class="hotel-detail-page__ring-center">
+                  <strong>{{
+                    formatInteger(availabilitySummary().total)
+                  }}</strong>
+                  <span>Total</span>
+                </div>
+              </div>
+
+              <div class="hotel-detail-page__availability-legend">
+                <div class="hotel-detail-page__legend-item">
+                  <span
+                    class="hotel-detail-page__legend-dot hotel-detail-page__legend-dot--green"
+                  ></span>
+                  <div class="hotel-detail-page__legend-content">
+                    <strong>Disponibles</strong>
+                    <span>{{
+                      formatInteger(availabilitySummary().available)
+                    }}</span>
+                  </div>
+                </div>
+                <div class="hotel-detail-page__legend-item">
+                  <span
+                    class="hotel-detail-page__legend-dot hotel-detail-page__legend-dot--blue"
+                  ></span>
+                  <div class="hotel-detail-page__legend-content">
+                    <strong>Occupées</strong>
+                    <span>{{
+                      formatInteger(availabilitySummary().occupied)
+                    }}</span>
+                  </div>
+                </div>
+                <div class="hotel-detail-page__legend-item">
+                  <span
+                    class="hotel-detail-page__legend-dot hotel-detail-page__legend-dot--grey"
+                  ></span>
+                  <div class="hotel-detail-page__legend-content">
+                    <strong>Hors services</strong>
+                    <span>{{
+                      formatInteger(availabilitySummary().outOfService)
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="hotel-detail-page__location card">
+            <h3
+              class="hotel-detail-page__card-title hotel-detail-page__location-title"
+            >
+              Localisation
+            </h3>
+
+            @if (mapEmbedUrl(); as mapUrl) {
+              <iframe
+                class="hotel-detail-page__map"
+                [src]="mapUrl"
+                [title]="mapFrameTitle(hotel.name)"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            } @else {
+              <div
+                class="hotel-detail-page__map hotel-detail-page__map--fallback"
+              >
+                <i class="pi pi-map" aria-hidden="true"></i>
+                <strong>{{ hotelAddress() }}</strong>
+                <span>Géolocalisation non disponible</span>
+              </div>
+            }
+          </section>
+        </aside>
+      </div>
+
+      <section class="hotel-detail-page__metrics">
+        <article class="hotel-detail-page__metric card">
+          <span
+            class="hotel-detail-page__metric-icon hotel-detail-page__metric-icon--green"
+          >
+            <i class="pi pi-money-bill" aria-hidden="true"></i>
+          </span>
+
+          <div class="hotel-detail-page__metric-body">
+            <p class="hotel-detail-page__metric-label">Revenus</p>
+            <strong class="hotel-detail-page__metric-value">{{
+              revenueMetricValue()
+            }}</strong>
+          </div>
+        </article>
+
+        <article class="hotel-detail-page__metric card">
+          <span
+            class="hotel-detail-page__metric-icon hotel-detail-page__metric-icon--blue"
+          >
+            <i class="pi pi-briefcase" aria-hidden="true"></i>
+          </span>
+
+          <div class="hotel-detail-page__metric-body">
+            <p class="hotel-detail-page__metric-label">Réservations</p>
+            <strong class="hotel-detail-page__metric-value">{{
+              reservationsMetricValue()
+            }}</strong>
+          </div>
+        </article>
+
+        <article class="hotel-detail-page__metric card">
+          <span
+            class="hotel-detail-page__metric-icon hotel-detail-page__metric-icon--violet"
+          >
+            <i class="pi pi-percentage" aria-hidden="true"></i>
+          </span>
+
+          <div class="hotel-detail-page__metric-body">
+            <p class="hotel-detail-page__metric-label">Taux d'occupation</p>
+            <strong class="hotel-detail-page__metric-value">{{
+              occupancyMetricValue()
+            }}</strong>
+          </div>
+        </article>
+
+        <article class="hotel-detail-page__balance card card--success">
+          <div class="hotel-detail-page__balance-columns">
+            <div>
+              <span>Solde</span>
+              <strong>{{ formatCurrency(totalRevenue(payments())) }}</strong>
+            </div>
+            <div>
+              <span>Solde disponible</span>
+              <strong>{{
+                formatCurrency(totalPaidRevenue(payments()))
+              }}</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="hotel-detail-page__bottom-grid">
+        <article class="hotel-detail-page__panel card">
+          <div class="hotel-detail-page__card-head">
+            <h3 class="hotel-detail-page__bottom-title">Activités récentes</h3>
+
+            <button
+              type="button"
+              class="hotel-detail-page__ghost-link"
+              (click)="viewReservations()"
+            >
+              Voir toutes
+            </button>
+          </div>
+
+          <div class="hotel-detail-page__activity-list">
+            @for (
+              activity of recentActivities();
+              track activity.title + activity.timestamp
+            ) {
+              <div class="hotel-detail-page__activity-item">
+                <span
+                  class="hotel-detail-page__activity-icon hotel-detail-page__activity-icon--{{
+                    activity.tone
+                  }}"
+                >
+                  <i [class]="activity.iconClass" aria-hidden="true"></i>
+                </span>
+
+                <div class="hotel-detail-page__activity-copy">
+                  <strong>{{ activity.title }}</strong>
+                  <small>{{ relativeTime(activity.timestamp) }}</small>
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article
+          class="hotel-detail-page__panel hotel-detail-page__panel--wide card"
+        >
+          <div class="hotel-detail-page__card-head">
+            <h3 class="hotel-detail-page__bottom-title">
+              Historique de paiements
+            </h3>
+
+            <button
+              type="button"
+              class="hotel-detail-page__ghost-link"
+              (click)="viewReservations()"
+            >
+              Voir toutes
+            </button>
+          </div>
+
+          <div class="hotel-detail-page__table-wrap">
+            <table class="hotel-detail-page__table">
+              <thead>
+                <tr>
+                  <th>Opérateurs</th>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                  <th class="hotel-detail-page__action-col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  payment of paymentRows();
+                  track payment.reference + payment.date
+                ) {
+                  <tr>
+                    <td>
+                      <div class="hotel-detail-page__payment-operator">
+                        <span class="hotel-detail-page__operator-avatar">
+                          {{ operatorInitials(payment.operator) }}
+                        </span>
+                        <strong>{{ payment.operator }}</strong>
+                      </div>
+                    </td>
+                    <td>{{ payment.date }}</td>
+                    <td>{{ payment.amount }}</td>
+                    <td>
+                      <span
+                        class="hotel-detail-page__status hotel-detail-page__status--{{
+                          payment.statusTone
+                        }}"
+                      >
+                        <i class="pi pi-check" aria-hidden="true"></i>
+                        {{ payment.status }}
+                      </span>
+                    </td>
+                    <td class="hotel-detail-page__action-col">
+                      <button
+                        type="button"
+                        class="hotel-detail-page__row-action"
+                        [attr.aria-label]="'Actions pour ' + payment.reference"
+                      >
+                        <i class="pi pi-ellipsis-v" aria-hidden="true"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </section>
+  } @else {
+    <section class="hotel-detail-page__empty-state">
+      <p class="hotel-detail-page__empty-eyebrow">Hôtel introuvable</p>
+      <h2 class="hotel-detail-page__empty-title">
+        Aucun hôtel trouvé pour cet identifiant.
+      </h2>
+      <p class="hotel-detail-page__empty-message">
+        La page est connectée aux données du backend mais l'hôtel demandé
+        n'existe pas ou n'est plus accessible.
+      </p>
+      <div class="hotel-detail-page__empty-actions">
+        <button
+          type="button"
+          class="hotel-detail-page__action hotel-detail-page__action--primary"
+          (click)="goBack()"
+        >
+          Retour
+        </button>
+      </div>
+    </section>
+  }
+</div>
+
+<ubax-confirm-dialog
+  [visible]="showConfirm()"
+  (visibleChange)="showConfirm.set($event)"
+  [title]="confirmTitle()"
+  icon="pi pi-exclamation-triangle"
+  [message]="confirmMessage()"
+  [confirmLabel]="confirmLabel()"
+  [confirmSeverity]="confirmSeverity()"
+  (confirmed)="confirmToggle()"
+/>
+
+@if (showSubscriptionDialog()) {
+  <div
+    class="hotel-subscription-dialog__overlay"
+    (click)="closeSubscriptionDialog()"
+  >
+    <div
+      class="hotel-subscription-dialog card"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="hotel-subscription-dialog__header">
+        <div>
+          <p class="hotel-subscription-dialog__eyebrow">
+            Abonnement partenaire
+          </p>
+          <h2 class="hotel-subscription-dialog__title">
+            {{ hotel()?.name ?? 'Hôtel' }}
+          </h2>
+        </div>
+
+        @if (hotel(); as selectedHotel) {
+          <ubax-status-badge
+            [variant]="selectedHotel.active ? 'active' : 'suspended'"
+          >
+            {{ selectedHotel.active ? 'Actif' : 'Suspendu' }}
+          </ubax-status-badge>
+        }
+      </div>
+
+      <div class="hotel-subscription-dialog__body">
+        <div class="hotel-subscription-dialog__field">
+          <span class="hotel-subscription-dialog__label"
+            >Plan d'abonnement</span
+          >
+          <p-select
+            [options]="subscriptionPlanOptions()"
+            [ngModel]="subscriptionPlanValue()"
+            (ngModelChange)="subscriptionPlanValue.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Choisir un plan"
+            appendTo="body"
+            panelStyleClass="hotel-subscription-dialog__panel"
+          />
+        </div>
+
+        <div class="hotel-subscription-dialog__field">
+          <span class="hotel-subscription-dialog__label"
+            >Date d'expiration</span
+          >
+          <p-datepicker
+            [ngModel]="subscriptionExpiresAtValue()"
+            (ngModelChange)="subscriptionExpiresAtValue.set($event)"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [minDate]="today"
+            appendTo="body"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            panelStyleClass="hotel-subscription-dialog__panel"
+          />
+        </div>
+      </div>
+
+      <div class="hotel-subscription-dialog__footer">
+        <button
+          type="button"
+          class="hotel-detail-page__action hotel-detail-page__action--ghost"
+          (click)="closeSubscriptionDialog()"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="hotel-detail-page__action hotel-detail-page__action--primary"
+          (click)="saveSubscription()"
+        >
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+}

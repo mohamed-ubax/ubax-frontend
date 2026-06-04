@@ -16,9 +16,13 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { DatePickerModule } from 'primeng/datepicker';
-import { Toast } from 'primeng/toast';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { AdminHotelsStore } from '@ubax-workspace/ubax-admin-data-access';
+import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import {
+  NotificationService,
+  type AdminNotification,
+} from '@ubax-workspace/ubax-admin-shell/notification-service';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
@@ -30,20 +34,25 @@ import { filter, map, startWith } from 'rxjs/operators';
     RouterLink,
     RouterLinkActive,
     DatePickerModule,
-    Toast,
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
+  providers: [
+    NotificationService,
+    { provide: NOTIFICATION_HANDLER, useExisting: NotificationService },
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly hotelsStore = inject(AdminHotelsStore);
+  private readonly notificationService = inject(NotificationService);
 
   protected readonly user = this.authStore.user;
   protected readonly fullName = this.authStore.fullName;
   protected readonly isSuperAdmin = this.authStore.isSuperAdmin;
+  protected readonly notifications = this.notificationService.notifications;
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -100,6 +109,10 @@ export class MainLayoutComponent implements OnInit {
 
   protected toggleHotels(): void {
     this.hotelsExpanded.update((v) => !v);
+  }
+
+  protected dismissNotification(notification: AdminNotification): void {
+    this.notificationService.dismiss(notification.id);
   }
 
   protected formatRangeDisplay(range: Date[] | null): string {

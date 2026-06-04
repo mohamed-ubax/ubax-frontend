@@ -300,14 +300,14 @@
   [visible]="showSubscriptionDialog()"
   (visibleChange)="$event ? null : closeSubscriptionDialog()"
   [modal]="true"
-  [closable]="!subscriptionLoading()"
+  [closable]="false"
   [dismissableMask]="!subscriptionLoading()"
   [draggable]="false"
   [resizable]="false"
   [style]="{ width: '34rem', maxWidth: '94vw' }"
   styleClass="partners-dialog"
 >
-  <ng-template pTemplate="header">
+  <div class="partners-dialog__surface">
     <div class="partners-dialog__header">
       <div>
         <p class="partners-page__eyebrow">Abonnement partenaire</p>
@@ -320,44 +320,52 @@
           {{ subscriptionLabel(hotel) }}
         </ubax-status-badge>
       }
-    </div>
-  </ng-template>
 
-  <div class="partners-dialog__body">
-    <div class="partners-field">
-      <span class="partners-field__label">Plan d'abonnement</span>
-      <p-select
-        [options]="subscriptionPlanOptions().slice(1)"
-        [ngModel]="subscriptionPlanValue"
-        (ngModelChange)="subscriptionPlanValue = $event"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Choisir un plan"
-        appendTo="body"
-        panelStyleClass="partners-plan-panel"
-      />
+      <button
+        type="button"
+        class="partners-dialog__close"
+        [disabled]="subscriptionLoading()"
+        aria-label="Fermer"
+        (click)="closeSubscriptionDialog()"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
     </div>
 
-    <div class="partners-field">
-      <span class="partners-field__label">Date d'expiration</span>
-      <div class="partners-datepicker-wrap">
-        <p-datepicker
-          [ngModel]="subscriptionExpiresAtValue"
-          (ngModelChange)="subscriptionExpiresAtValue = $event"
-          [showIcon]="true"
-          [showButtonBar]="true"
-          [minDate]="today"
+    <div class="partners-dialog__body">
+      <div class="partners-field">
+        <span class="partners-field__label">Plan d'abonnement</span>
+        <p-select
+          [options]="subscriptionPlanOptions().slice(1)"
+          [ngModel]="subscriptionPlanValue"
+          (ngModelChange)="subscriptionPlanValue = $event"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Choisir un plan"
           appendTo="body"
-          dateFormat="dd/mm/yy"
-          placeholder="jj/mm/aaaa"
-          inputId="hotel-subscription-expiry"
-          panelStyleClass="partners-datepicker-panel"
+          panelStyleClass="partners-plan-panel"
         />
       </div>
-    </div>
-  </div>
 
-  <ng-template pTemplate="footer">
+      <div class="partners-field">
+        <span class="partners-field__label">Date d'expiration</span>
+        <div class="partners-datepicker-wrap">
+          <p-datepicker
+            [ngModel]="subscriptionExpiresAtValue"
+            (ngModelChange)="subscriptionExpiresAtValue = $event"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [minDate]="today"
+            appendTo="body"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            inputId="hotel-subscription-expiry"
+            panelStyleClass="partners-datepicker-panel"
+          />
+        </div>
+      </div>
+    </div>
+
     <div class="partners-dialog__footer">
       <button
         type="button"
@@ -379,5 +387,5 @@
         Enregistrer
       </button>
     </div>
-  </ng-template>
+  </div>
 </p-dialog>

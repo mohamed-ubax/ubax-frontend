@@ -27,7 +27,7 @@ export interface ApprovalSummary {
       styleClass="ubax-dialog"
       data-ubax-motion="surface"
     >
-      <ng-template pTemplate="header">
+      <div class="grid gap-6">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
             <h3 class="text-3xl font-semibold text-brand-navy">
@@ -46,53 +46,53 @@ export interface ApprovalSummary {
             <i class="pi pi-times"></i>
           </button>
         </div>
-      </ng-template>
 
-      <div class="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-        <div class="rounded-xl bg-neutral-50 p-6">
-          <dl class="grid gap-4 md:grid-cols-2">
-            <div>
-              <dt class="text-sm font-medium text-neutral-500">
-                Type partenaire
-              </dt>
-              <dd class="mt-1 text-md font-medium text-neutral-900">
-                {{ summary().partnerType }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-neutral-500">
-                Raison sociale
-              </dt>
-              <dd class="mt-1 text-md font-medium text-neutral-900">
-                {{ summary().companyName }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-neutral-500">
-                Représentant légal
-              </dt>
-              <dd class="mt-1 text-md font-medium text-neutral-900">
-                {{ summary().representative }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-neutral-500">
-                Date d'approbation
-              </dt>
-              <dd class="mt-1 text-md font-medium text-neutral-900">
-                {{ summary().approvalDate }}
-              </dd>
-            </div>
-          </dl>
+        <div class="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
+          <div class="rounded-xl bg-neutral-50 p-6">
+            <dl class="grid gap-4 md:grid-cols-2">
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">
+                  Type partenaire
+                </dt>
+                <dd class="mt-1 text-md font-medium text-neutral-900">
+                  {{ summary().partnerType }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">
+                  Raison sociale
+                </dt>
+                <dd class="mt-1 text-md font-medium text-neutral-900">
+                  {{ summary().companyName }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">
+                  Représentant légal
+                </dt>
+                <dd class="mt-1 text-md font-medium text-neutral-900">
+                  {{ summary().representative }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">
+                  Date d'approbation
+                </dt>
+                <dd class="mt-1 text-md font-medium text-neutral-900">
+                  {{ summary().approvalDate }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="rounded-xl border border-neutral-300 p-6">
+            <p class="text-md text-neutral-500">{{ supportText() }}</p>
+          </div>
         </div>
 
-        <div class="rounded-xl border border-neutral-300 p-6">
-          <p class="text-md text-neutral-500">{{ supportText() }}</p>
-        </div>
-      </div>
-
-      <ng-template pTemplate="footer">
-        <div class="flex flex-wrap justify-end gap-3">
+        <div
+          class="flex flex-wrap justify-end gap-3 border-t border-neutral-200 pt-2"
+        >
           <p-button
             [label]="profileButtonLabel()"
             severity="secondary"
@@ -100,7 +100,7 @@ export interface ApprovalSummary {
           />
           <p-button label="Fermer" (onClick)="close()" />
         </div>
-      </ng-template>
+      </div>
     </p-dialog>
   `,
 })

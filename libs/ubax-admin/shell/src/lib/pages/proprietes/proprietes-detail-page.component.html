@@ -514,26 +514,24 @@
       </div>
     </div>
   </div>
-  <ng-template pTemplate="footer">
-    <div class="propriete-modal__footer">
-      <button
-        type="button"
-        class="propriete-btn propriete-btn--ghost"
-        (click)="closeModal()"
-      >
-        Annuler
-      </button>
-      <button
-        type="button"
-        class="propriete-btn propriete-btn--success"
-        [disabled]="saving()"
-        (click)="submitApprove()"
-      >
-        <i class="pi pi-check"></i>
-        {{ saving() ? 'Publication...' : 'Confirmer la publication' }}
-      </button>
-    </div>
-  </ng-template>
+  <div class="propriete-modal__footer">
+    <button
+      type="button"
+      class="propriete-btn propriete-btn--ghost"
+      (click)="closeModal()"
+    >
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="propriete-btn propriete-btn--success"
+      [disabled]="saving()"
+      (click)="submitApprove()"
+    >
+      <i class="pi pi-check"></i>
+      {{ saving() ? 'Publication...' : 'Confirmer la publication' }}
+    </button>
+  </div>
 </p-dialog>
 
 <!-- ── Modal : Rejeter ───────────────────────────────────────────────────── -->
@@ -578,24 +576,22 @@
       }
     </div>
   </form>
-  <ng-template pTemplate="footer">
-    <div class="propriete-modal__footer">
-      <button
-        type="button"
-        class="propriete-btn propriete-btn--ghost"
-        (click)="closeModal()"
-      >
-        Annuler
-      </button>
-      <button
-        type="button"
-        class="propriete-btn propriete-btn--danger"
-        [disabled]="saving()"
-        (click)="submitReject()"
-      >
-        <i class="pi pi-times"></i>
-        {{ saving() ? 'Rejet en cours...' : 'Confirmer le rejet' }}
-      </button>
-    </div>
-  </ng-template>
+  <div class="propriete-modal__footer">
+    <button
+      type="button"
+      class="propriete-btn propriete-btn--ghost"
+      (click)="closeModal()"
+    >
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="propriete-btn propriete-btn--danger"
+      [disabled]="saving()"
+      (click)="submitReject()"
+    >
+      <i class="pi pi-times"></i>
+      {{ saving() ? 'Rejet en cours...' : 'Confirmer le rejet' }}
+    </button>
+  </div>
 </p-dialog>
