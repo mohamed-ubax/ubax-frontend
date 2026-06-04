@@ -108,6 +108,7 @@ export class AgencesPageComponent implements OnInit {
 
   protected subscriptionPlanValue: string | null = null;
   protected subscriptionExpiresAtValue: Date | null = null;
+  protected readonly today = new Date();
 
   protected readonly subscriptionPlanOptions = computed<FilterOption[]>(() => {
     const dynamicPlans = this.agencies()

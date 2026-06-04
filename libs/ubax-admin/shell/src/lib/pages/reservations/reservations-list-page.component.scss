@@ -164,13 +164,7 @@
 }
 
 .admin-res-table > .admin-res-table__row:not(.admin-res-table__row--head) {
-  cursor: pointer;
-  transition: background-color 0.18s ease;
-}
-
-.admin-res-table
-  > .admin-res-table__row:not(.admin-res-table__row--head):hover {
-  background: rgba(43, 127, 255, 0.04);
+  cursor: default;
 }
 
 .admin-res-table__cell {

@@ -324,14 +324,126 @@ $muted: #6b7280;
 }
 
 .partners-field :deep(.p-select),
-.partners-field :deep(.p-datepicker),
-.partners-field :deep(.p-datepicker-input) {
+.partners-field :deep(.p-datepicker) {
   width: 100%;
+  display: block;
 }
 
-.partners-field :deep(.p-select),
-.partners-field :deep(.p-inputtext) {
-  border-radius: 0.85rem;
+// ── Select ────────────────────────────────────────────────────────────────────
+
+.partners-field :deep(.partners-plan-select.p-select) {
+  width: 100%;
+  height: 46px;
+  border-radius: 10px;
+  border: 1.5px solid #e1e4ed;
+  background: #fff;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &:hover { border-color: #b0b8cc; }
+
+  &.p-focus {
+    border-color: #2b7fff;
+    box-shadow: 0 0 0 3px rgba(43, 127, 255, 0.12);
+  }
+}
+
+.partners-field :deep(.partners-plan-select .p-select-label) {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  padding: 0 14px;
+  line-height: 44px;
+}
+
+// ── Datepicker wrapper ────────────────────────────────────────────────────────
+
+.partners-datepicker-wrap {
+  display: flex;
+  width: 100%;
+
+  :deep(.p-datepicker) {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 46px;
+    border-radius: 10px;
+    border: 1.5px solid #e1e4ed;
+    background: #fff;
+    overflow: hidden;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+
+    &:focus-within {
+      border-color: #2b7fff;
+      box-shadow: 0 0 0 3px rgba(43, 127, 255, 0.12);
+    }
+  }
+
+  :deep(.p-datepicker-input.p-inputtext) {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none !important;
+    background: transparent;
+    padding: 0 0 0 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0f172a;
+    box-shadow: none !important;
+    outline: none;
+
+    &::placeholder { color: #94a3b8; font-weight: 400; }
+  }
+
+  :deep(.p-datepicker-trigger.p-button) {
+    flex-shrink: 0;
+    width: 44px;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: #64748b;
+    transition: color 150ms ease;
+
+    &:hover { color: #2b7fff; }
+  }
+}
+
+// ── Dialog buttons ────────────────────────────────────────────────────────────
+
+.partners-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 140ms ease, opacity 140ms ease;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &--ghost {
+    background: #f1f5f9;
+    color: #334155;
+
+    &:hover:not(:disabled) { background: #e2e8f0; }
+  }
+
+  &--primary {
+    background: #1a3047;
+    color: #fff;
+
+    &:hover:not(:disabled) { background: #102235; }
+  }
 }
 
 @media (max-width: 60rem) {

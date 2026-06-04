@@ -241,36 +241,52 @@
         optionLabel="label"
         optionValue="value"
         placeholder="Choisir un plan"
+        appendTo="body"
+        panelStyleClass="partners-plan-panel"
+        styleClass="partners-plan-select"
       />
     </div>
 
     <div class="partners-field">
       <span class="partners-field__label">Date d'expiration</span>
-      <p-datepicker
-        [ngModel]="subscriptionExpiresAtValue"
-        (ngModelChange)="subscriptionExpiresAtValue = $event"
-        [showIcon]="true"
-        appendTo="body"
-        dateFormat="dd/mm/yy"
-        inputId="hotel-subscription-expiry"
-      />
+      <div class="partners-datepicker-wrap">
+        <p-datepicker
+          [ngModel]="subscriptionExpiresAtValue"
+          (ngModelChange)="subscriptionExpiresAtValue = $event"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          [minDate]="today"
+          appendTo="body"
+          dateFormat="dd/mm/yy"
+          placeholder="jj/mm/aaaa"
+          inputId="hotel-subscription-expiry"
+          panelStyleClass="partners-datepicker-panel"
+        />
+      </div>
     </div>
   </div>
 
   <ng-template pTemplate="footer">
     <div class="partners-dialog__footer">
-      <p-button
-        label="Annuler"
-        severity="secondary"
+      <button
+        type="button"
+        class="partners-btn partners-btn--ghost"
         [disabled]="subscriptionLoading()"
-        (onClick)="closeSubscriptionDialog()"
-      />
-      <p-button
-        label="Enregistrer"
-        [loading]="subscriptionLoading()"
-        [disabled]="subscriptionSaveDisabled"
-        (onClick)="saveSubscription()"
-      />
+        (click)="closeSubscriptionDialog()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="partners-btn partners-btn--primary"
+        [disabled]="subscriptionLoading() || subscriptionSaveDisabled"
+        (click)="saveSubscription()"
+      >
+        @if (subscriptionLoading()) {
+          <i class="pi pi-spinner pi-spin" aria-hidden="true"></i>
+        }
+        Enregistrer
+      </button>
     </div>
   </ng-template>
 </p-dialog>

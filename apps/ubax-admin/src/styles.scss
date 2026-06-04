@@ -102,6 +102,56 @@ body.ubax-admin-dialog-open .ubax-header {
   padding: 0 1.45rem 1.45rem;
 }
 
+/* ── partners-plan-panel — dropdown abonnement (appendTo="body") ──────────── */
+.partners-plan-panel.p-select-overlay {
+  border-radius: 12px;
+  border: 1.5px solid #e1e4ed;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+}
+
+.partners-plan-panel .p-select-list {
+  padding: 6px;
+}
+
+.partners-plan-panel .p-select-option {
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  color: #0f172a;
+  transition: background-color 120ms ease;
+}
+
+.partners-plan-panel .p-select-option:hover {
+  background: #f1f5f9;
+}
+
+.partners-plan-panel .p-select-option.p-selected {
+  background: #e8f0ff;
+  color: #1243a0;
+}
+
+/* ── partners-datepicker-panel — calendrier abonnement (appendTo="body") ──── */
+.partners-datepicker-panel.p-datepicker-panel {
+  border-radius: 14px;
+  border: 1.5px solid #e1e4ed;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+}
+
+.partners-datepicker-panel .p-datepicker-today .p-datepicker-day {
+  background: #dce9ff;
+  color: #1243a0;
+  border-radius: 8px;
+}
+
+.partners-datepicker-panel .p-datepicker-day-selected .p-datepicker-day {
+  background: #1243a0;
+  color: #fff;
+  border-radius: 8px;
+}
+
 /* ── Reset global ─────────────────────────────────────────────────────────── */
 *,
 *::before,
