@@ -1,8 +1,11 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
+  OnDestroy,
   OnInit,
   signal,
 } from '@angular/core';
@@ -102,7 +105,8 @@ function buildPreference(entry: LaCodeListDto): {
   styleUrl: './code-lists-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CodeListsPageComponent implements OnInit {
+export class CodeListsPageComponent implements OnInit, OnDestroy {
+  private readonly document = inject(DOCUMENT);
   private readonly service = inject(AdminCodeListsService);
   private readonly notifications = inject(NOTIFICATION_HANDLER);
   private readonly formBuilder = inject(NonNullableFormBuilder);
@@ -291,6 +295,19 @@ export class CodeListsPageComponent implements OnInit {
         label: formatTypeLabel(type),
       }));
   });
+
+  constructor() {
+    effect(() => {
+      this.document.body.classList.toggle(
+        'ubax-admin-dialog-open',
+        this.editorOpen(),
+      );
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.document.body.classList.remove('ubax-admin-dialog-open');
+  }
 
   ngOnInit(): void {
     this.prepareCreateMode();

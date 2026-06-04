@@ -68,6 +68,40 @@
   --ubax-z-overlay: 2147483647;
 }
 
+/*
+ * Quand un dialog est ouvert, le header sticky passe derrière l'overlay
+ * (même mécanique que ubax-web : la classe est togglée depuis le composant)
+ */
+body.ubax-admin-dialog-open .ubax-header {
+  z-index: -1;
+}
+
+/* ── code-lists-dialog — styles globaux (p-dialog avec appendTo="body") ──── *
+ * Impossible de styler depuis le composant car appendTo="body" rend le dialog
+ * en dehors du subtree Angular → ::ng-deep n'atteint pas le DOM.
+ * ─────────────────────────────────────────────────────────────────────────── */
+.code-lists-dialog.p-dialog {
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  background: #ffffff;
+  box-shadow: 0 32px 70px rgba(15, 23, 42, 0.22);
+}
+
+.code-lists-dialog .p-dialog-header {
+  align-items: flex-start;
+  padding: 1.35rem 1.45rem 0.75rem;
+  background: linear-gradient(180deg, #fff8f1 0%, #ffffff 100%);
+}
+
+.code-lists-dialog .p-dialog-title {
+  width: 100%;
+}
+
+.code-lists-dialog .p-dialog-content {
+  background: #ffffff;
+  padding: 0 1.45rem 1.45rem;
+}
+
 /* ── Reset global ─────────────────────────────────────────────────────────── */
 *,
 *::before,

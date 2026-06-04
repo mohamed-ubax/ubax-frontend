@@ -608,29 +608,6 @@
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
 }
 
-:host ::ng-deep .code-lists-dialog {
-  .p-dialog {
-    overflow: hidden;
-    border: 1px solid rgba(226, 232, 240, 0.92);
-    background: #ffffff;
-    box-shadow: 0 32px 70px rgba(15, 23, 42, 0.22);
-  }
-
-  .p-dialog-header {
-    align-items: flex-start;
-    padding: 1.35rem 1.45rem 0.75rem;
-    background: linear-gradient(180deg, #fff8f1 0%, #ffffff 100%);
-  }
-
-  .p-dialog-title {
-    width: 100%;
-  }
-
-  .p-dialog-content {
-    background: #ffffff;
-    padding: 0 1.45rem 1.45rem;
-  }
-}
 
 .code-lists-dialog__header {
   display: flex;
