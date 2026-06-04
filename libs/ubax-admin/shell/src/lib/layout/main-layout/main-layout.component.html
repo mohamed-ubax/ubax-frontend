@@ -1,23 +1,20 @@
 <div class="ubax-shell">
-  <!-- Sidebar custom avec sous-items Propriétés -->
   <nav
-    class="ubax-sidebar bg-surface-sidebar flex flex-col h-full flex-shrink-0 overflow-y-auto overflow-x-hidden"
+    class="ubax-sidebar admin-sidebar bg-surface-sidebar flex flex-col h-full flex-shrink-0 overflow-y-auto overflow-x-hidden"
     aria-label="Navigation principale"
   >
-    <!-- Logo -->
-    <div class="flex items-center px-5 py-6 flex-shrink-0 gap-2">
-      <span
-        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-orange text-white font-semibold text-lg leading-none"
-        >U</span
-      >
-      <span class="text-white font-semibold text-2xl tracking-wide">BAX</span>
+    <div class="sidebar-brand flex-shrink-0" aria-label="Ubax Admin">
+      <img
+        class="sidebar-brand__logo"
+        src="/admin/sidebar/ubax-admin-logo.svg"
+        alt="Ubax"
+      />
     </div>
 
-    <!-- Navigation -->
     <div class="flex-1 flex flex-col gap-1 py-2">
       <a
         routerLink="/tableau-de-bord"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         [routerLinkActiveOptions]="{ exact: true }"
         class="sidebar-nav-item"
       >
@@ -28,7 +25,7 @@
       @if (isSuperAdmin()) {
         <a
           routerLink="/hotels"
-          routerLinkActive="bg-brand-orange text-white"
+          routerLinkActive="sidebar-nav-item--active"
           class="sidebar-nav-item"
         >
           <i class="pi pi-building text-lg w-6 flex-shrink-0"></i>
@@ -37,17 +34,17 @@
 
         <a
           routerLink="/agences"
-          routerLinkActive="bg-brand-orange text-white"
+          routerLinkActive="sidebar-nav-item--active"
           class="sidebar-nav-item"
         >
           <i class="pi pi-home text-lg w-6 flex-shrink-0"></i>
-          <span class="flex-1 truncate">Agences</span>
+          <span class="flex-1 truncate">Agences Immobilières</span>
         </a>
       }
 
       <a
         routerLink="/candidatures"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-inbox text-lg w-6 flex-shrink-0"></i>
@@ -56,7 +53,7 @@
 
       <a
         routerLink="/bailleurs"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-users text-lg w-6 flex-shrink-0"></i>
@@ -107,7 +104,7 @@
       <!-- Modération -->
       <a
         routerLink="/proprietes"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         [routerLinkActiveOptions]="{ exact: true }"
         class="sidebar-nav-item"
       >
@@ -117,7 +114,7 @@
 
       <a
         routerLink="/reservations"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-calendar text-lg w-6 flex-shrink-0"></i>
@@ -126,7 +123,7 @@
 
       <a
         routerLink="/administrateurs"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-users text-lg w-6 flex-shrink-0"></i>
@@ -135,7 +132,7 @@
 
       <a
         routerLink="/clients"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-user text-lg w-6 flex-shrink-0"></i>
@@ -144,7 +141,7 @@
 
       <a
         routerLink="/code-lists"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-sliders-h text-lg w-6 flex-shrink-0"></i>
@@ -158,13 +155,22 @@
 
       <span class="sidebar-nav-item sidebar-nav-item--disabled">
         <i class="pi pi-chart-bar text-lg w-6 flex-shrink-0"></i>
-        <span class="flex-1 truncate">Statistiques</span>
+        <span class="flex-1 truncate">Statistiques &amp; Rapports</span>
+      </span>
+
+      <span class="sidebar-nav-item sidebar-nav-item--disabled">
+        <i class="pi pi-book text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Logs système</span>
       </span>
     </div>
 
     <!-- Footer -->
-    <div class="flex-shrink-0 border-t border-white/10 py-4 px-2">
-      <button type="button" class="sidebar-nav-item w-full" (click)="logout()">
+    <div class="flex-shrink-0 border-t border-white/10 py-4">
+      <button
+        type="button"
+        class="sidebar-nav-item sidebar-logout-item"
+        (click)="logout()"
+      >
         <i class="pi pi-sign-out text-lg w-6 flex-shrink-0"></i>
         <span>Déconnexion</span>
       </button>
@@ -173,22 +179,41 @@
 
   <!-- Zone principale -->
   <div class="ubax-main">
-    <!-- Topbar -->
-    <header class="ubax-header">
-      <div></div>
-      <div class="text-right">
-        <p class="text-xl font-medium text-neutral-900 m-0 leading-tight">
-          {{ fullName() }}
-        </p>
-        <p
-          class="text-base font-regular text-neutral-500 m-0 leading-tight mt-0.5"
+    <header class="ubax-header admin-header">
+      <div class="admin-header__left">
+        <p class="admin-header__page-title">{{ currentPageTitle() }}</p>
+      </div>
+      <div class="admin-header__actions">
+        <button
+          type="button"
+          class="admin-header__notif"
+          aria-label="Notifications"
         >
-          {{
-            user()?.mainRole === 'UBAX_SUPER_ADMIN'
-              ? 'Super Admin'
-              : 'Administrateur'
-          }}
-        </p>
+          <i class="pi pi-bell"></i>
+        </button>
+
+        <div class="admin-header__avatar" aria-hidden="true">
+          @if (avatarUrl()) {
+            <img
+              class="admin-header__avatar-image"
+              [src]="avatarUrl()!"
+              alt="Avatar utilisateur"
+            />
+          } @else {
+            <i class="pi pi-user"></i>
+          }
+        </div>
+
+        <div class="admin-header__profile">
+          <p class="admin-header__name">{{ fullName() }}</p>
+          <p class="admin-header__role">
+            {{
+              user()?.mainRole === 'UBAX_SUPER_ADMIN'
+                ? 'Super Admin'
+                : 'Administrateur'
+            }}
+          </p>
+        </div>
       </div>
     </header>
 
