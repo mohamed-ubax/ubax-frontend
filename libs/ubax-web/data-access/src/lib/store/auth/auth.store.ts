@@ -52,6 +52,7 @@ type AuthState = {
   token: string | null;
   loading: boolean;
   error: string | null;
+  profileLoaded: boolean;
 };
 
 const initialState: AuthState = {
@@ -59,6 +60,7 @@ const initialState: AuthState = {
   token: initialToken,
   loading: false,
   error: null,
+  profileLoaded: false,
 };
 
 /** Roles whose sub-roles live in the DB and must be fetched after login */
@@ -169,6 +171,7 @@ export const AuthStore = signalStore(
           user: null,
           token: null,
           error: 'Session expirée',
+          profileLoaded: false,
         });
         if (redirectBrowserToPortalLogin()) return;
         router.navigate(['/connexion']);
@@ -247,6 +250,9 @@ export const AuthStore = signalStore(
       loadMe: rxMethod<void>(
         pipe(
           switchMap(() => {
+            // Idempotency guard: skip if profile was already fetched this session
+            if (store.profileLoaded()) return EMPTY;
+
             patchState(store, { loading: true, error: null });
 
             const derivedUser = deriveUserFromAuthToken(store.token());
@@ -277,6 +283,7 @@ export const AuthStore = signalStore(
                       user: hydratedUser,
                       loading: false,
                       error: null,
+                      profileLoaded: true,
                     });
 
                     if (needsSubRoles(hydratedUser.mainRole)) {
@@ -289,6 +296,7 @@ export const AuthStore = signalStore(
                     patchState(store, {
                       loading: false,
                       error: null,
+                      profileLoaded: true,
                     });
 
                     if (needsSubRoles(derivedUser.mainRole)) {
@@ -329,7 +337,7 @@ export const AuthStore = signalStore(
               tapResponse({
                 next: () => {
                   clearStoredAuthSession();
-                  patchState(store, { user: null, token: null });
+                  patchState(store, { user: null, token: null, profileLoaded: false });
                   if (redirectBrowserToPortalLogin()) return;
                   router.navigate(['/connexion'], {
                     queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
@@ -337,7 +345,7 @@ export const AuthStore = signalStore(
                 },
                 error: () => {
                   clearStoredAuthSession();
-                  patchState(store, { user: null, token: null });
+                  patchState(store, { user: null, token: null, profileLoaded: false });
                   if (redirectBrowserToPortalLogin()) return;
                   router.navigate(['/connexion'], {
                     queryParams: { redirect: DEFAULT_UBAX_WEB_HOME_PATH },
