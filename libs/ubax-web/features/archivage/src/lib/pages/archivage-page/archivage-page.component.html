@@ -38,7 +38,7 @@
     </div>
   </header>
 
-  <nav class="archivage-tabs" aria-label="Onglets d’archivage">
+  <nav class="archivage-tabs" aria-label="Onglets d'archivage">
     @for (tab of tabs; track tab.id) {
       <button
         type="button"
@@ -153,104 +153,111 @@
             </thead>
 
             <tbody class="archivage-table__body">
-              @for (row of pagedRows(); track row.id) {
-                <tr class="archivage-table__row">
-                  @for (cell of row.cells; track $index) {
-                    <td
-                      class="archivage-table__cell"
-                      [class.archivage-table__cell--avatar]="
-                        cell.kind === 'avatar'
-                      "
-                      [class.archivage-table__cell--actions]="
-                        cell.kind === 'actions'
-                      "
-                    >
-                      @switch (cell.kind) {
-                        @case ('avatar') {
-                          <div class="archivage-table__avatar-cell">
-                            <img
-                              class="archivage-table__avatar"
-                              [src]="cell.imageSrc"
-                              [alt]="cell.value"
-                            />
-                            <span>{{ cell.value }}</span>
-                          </div>
-                        }
-
-                        @case ('badge') {
-                          <span
-                            class="archivage-badge"
-                            [class.archivage-badge--success]="
-                              cell.tone === 'success'
-                            "
-                            [class.archivage-badge--warning]="
-                              cell.tone === 'warning'
-                            "
-                            [class.archivage-badge--danger]="
-                              cell.tone === 'danger'
-                            "
-                          >
-                            <span
-                              class="archivage-badge__label"
-                              [pTooltip]="cell.label"
-                              tooltipPosition="top"
-                              [showOnEllipsis]="true"
-                              [appendTo]="'body'"
-                              tooltipStyleClass="archivage-badge-tooltip"
-                            >
-                              {{ cell.label }}
-                            </span>
-                          </span>
-                        }
-
-                        @case ('actions') {
-                          <div class="archivage-table__actions">
-                            <button
-                              type="button"
-                              class="archivage-table__action archivage-table__action--primary"
-                            >
-                              {{ cell.primaryLabel }}
-                            </button>
-                            <button
-                              type="button"
-                              class="archivage-table__action archivage-table__action--secondary"
-                            >
-                              {{ cell.secondaryLabel }}
-                            </button>
-                          </div>
-                        }
-
-                        @default {
-                          <span
-                            [class.archivage-table__text--emphasis]="
-                              cell.emphasis ?? false
-                            "
-                            >{{ formatTableCellValue(cell.value) }}</span
-                          >
-                        }
-                      }
-                    </td>
-                  }
-                </tr>
-              } @empty {
+              @if (isLoading()) {
+                @for (skeleton of [1, 2, 3, 4, 5]; track skeleton) {
+                  <tr class="archivage-table__row archivage-table__row--skeleton">
+                    @for (column of activeDefinition().columns; track column) {
+                      <td class="archivage-table__cell">
+                        <span class="archivage-skeleton"></span>
+                      </td>
+                    }
+                  </tr>
+                }
+              } @else if (loadError(); as error) {
                 <tr class="archivage-table__empty-row">
                   <td
-                    class="archivage-table__empty"
+                    class="archivage-table__empty archivage-table__empty--error"
                     [attr.colspan]="activeDefinition().columns.length"
                   >
-                    Aucune ligne ne correspond aux filtres en cours.
+                    {{ error }}
                   </td>
                 </tr>
+              } @else {
+                @for (row of pagedRows(); track row.id) {
+                  <tr class="archivage-table__row">
+                    @for (cell of row.cells; track $index) {
+                      <td
+                        class="archivage-table__cell"
+                        [class.archivage-table__cell--avatar]="cell.kind === 'avatar'"
+                        [class.archivage-table__cell--actions]="cell.kind === 'actions'"
+                      >
+                        @switch (cell.kind) {
+                          @case ('avatar') {
+                            <div class="archivage-table__avatar-cell">
+                              <img
+                                class="archivage-table__avatar"
+                                [src]="cell.imageSrc"
+                                [alt]="cell.value"
+                              />
+                              <span>{{ cell.value }}</span>
+                            </div>
+                          }
+                          @case ('badge') {
+                            <span
+                              class="archivage-badge"
+                              [class.archivage-badge--success]="cell.tone === 'success'"
+                              [class.archivage-badge--warning]="cell.tone === 'warning'"
+                              [class.archivage-badge--danger]="cell.tone === 'danger'"
+                            >
+                              <span
+                                class="archivage-badge__label"
+                                [pTooltip]="cell.label"
+                                tooltipPosition="top"
+                                [showOnEllipsis]="true"
+                                [appendTo]="'body'"
+                                tooltipStyleClass="archivage-badge-tooltip"
+                              >
+                                {{ cell.label }}
+                              </span>
+                            </span>
+                          }
+                          @case ('actions') {
+                            <div class="archivage-table__actions">
+                              <button
+                                type="button"
+                                class="archivage-table__action archivage-table__action--primary"
+                                (click)="handleView(row)"
+                              >
+                                {{ cell.primaryLabel }}
+                              </button>
+                              <button
+                                type="button"
+                                class="archivage-table__action archivage-table__action--secondary"
+                                (click)="handleRestore(row)"
+                              >
+                                {{ cell.secondaryLabel }}
+                              </button>
+                            </div>
+                          }
+                          @default {
+                            <span
+                              [class.archivage-table__text--emphasis]="cell.emphasis ?? false"
+                            >
+                              {{ formatTableCellValue(cell.value) }}
+                            </span>
+                          }
+                        }
+                      </td>
+                    }
+                  </tr>
+                } @empty {
+                  <tr class="archivage-table__empty-row">
+                    <td
+                      class="archivage-table__empty"
+                      [attr.colspan]="activeDefinition().columns.length"
+                    >
+                      Aucune ligne ne correspond aux filtres en cours.
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
 
-          <div
-            class="archivage-table__pagination archivage-table__pagination--panel"
-          >
+          <div class="archivage-table__pagination archivage-table__pagination--panel">
             <ubax-paginator
               [currentPage]="currentPage()"
-              (currentPageChange)="currentPage.set($event)"
+              (currentPageChange)="changePage($event)"
               [totalPages]="totalPages()"
               [previousIconSrc]="icons.paginatorPrevious"
               [nextIconSrc]="icons.paginatorNext"
@@ -355,94 +362,103 @@
           </thead>
 
           <tbody class="archivage-table__body">
-            @for (row of pagedRows(); track row.id) {
-              <tr class="archivage-table__row">
-                @for (cell of row.cells; track $index) {
-                  <td
-                    class="archivage-table__cell"
-                    [class.archivage-table__cell--avatar]="
-                      cell.kind === 'avatar'
-                    "
-                    [class.archivage-table__cell--actions]="
-                      cell.kind === 'actions'
-                    "
-                  >
-                    @switch (cell.kind) {
-                      @case ('avatar') {
-                        <div class="archivage-table__avatar-cell">
-                          <img
-                            class="archivage-table__avatar"
-                            [src]="cell.imageSrc"
-                            [alt]="cell.value"
-                          />
-                          <span>{{ cell.value }}</span>
-                        </div>
-                      }
-
-                      @case ('badge') {
-                        <span
-                          class="archivage-badge"
-                          [class.archivage-badge--success]="
-                            cell.tone === 'success'
-                          "
-                          [class.archivage-badge--warning]="
-                            cell.tone === 'warning'
-                          "
-                          [class.archivage-badge--danger]="
-                            cell.tone === 'danger'
-                          "
-                        >
-                          <span
-                            class="archivage-badge__label"
-                            [pTooltip]="cell.label"
-                            tooltipPosition="top"
-                            [showOnEllipsis]="true"
-                            [appendTo]="'body'"
-                            tooltipStyleClass="archivage-badge-tooltip"
-                          >
-                            {{ cell.label }}
-                          </span>
-                        </span>
-                      }
-
-                      @case ('actions') {
-                        <div class="archivage-table__actions">
-                          <button
-                            type="button"
-                            class="archivage-table__action archivage-table__action--primary"
-                          >
-                            {{ cell.primaryLabel }}
-                          </button>
-                          <button
-                            type="button"
-                            class="archivage-table__action archivage-table__action--secondary"
-                          >
-                            {{ cell.secondaryLabel }}
-                          </button>
-                        </div>
-                      }
-
-                      @default {
-                        <span
-                          [class.archivage-table__text--emphasis]="
-                            cell.emphasis ?? false
-                          "
-                          >{{ formatTableCellValue(cell.value) }}</span
-                        >
-                      }
-                    }
-                  </td>
-                }
-              </tr>
-            } @empty {
+            @if (isLoading()) {
+              @for (skeleton of [1, 2, 3, 4, 5]; track skeleton) {
+                <tr class="archivage-table__row archivage-table__row--skeleton">
+                  @for (column of activeDefinition().columns; track column) {
+                    <td class="archivage-table__cell">
+                      <span class="archivage-skeleton"></span>
+                    </td>
+                  }
+                </tr>
+              }
+            } @else if (loadError(); as error) {
               <tr class="archivage-table__empty-row">
                 <td
-                  class="archivage-table__empty"
+                  class="archivage-table__empty archivage-table__empty--error"
                   [attr.colspan]="activeDefinition().columns.length"
                 >
-                  Aucune ligne ne correspond aux filtres en cours.
+                  {{ error }}
                 </td>
               </tr>
+            } @else {
+              @for (row of pagedRows(); track row.id) {
+                <tr class="archivage-table__row">
+                  @for (cell of row.cells; track $index) {
+                    <td
+                      class="archivage-table__cell"
+                      [class.archivage-table__cell--avatar]="cell.kind === 'avatar'"
+                      [class.archivage-table__cell--actions]="cell.kind === 'actions'"
+                    >
+                      @switch (cell.kind) {
+                        @case ('avatar') {
+                          <div class="archivage-table__avatar-cell">
+                            <img
+                              class="archivage-table__avatar"
+                              [src]="cell.imageSrc"
+                              [alt]="cell.value"
+                            />
+                            <span>{{ cell.value }}</span>
+                          </div>
+                        }
+                        @case ('badge') {
+                          <span
+                            class="archivage-badge"
+                            [class.archivage-badge--success]="cell.tone === 'success'"
+                            [class.archivage-badge--warning]="cell.tone === 'warning'"
+                            [class.archivage-badge--danger]="cell.tone === 'danger'"
+                          >
+                            <span
+                              class="archivage-badge__label"
+                              [pTooltip]="cell.label"
+                              tooltipPosition="top"
+                              [showOnEllipsis]="true"
+                              [appendTo]="'body'"
+                              tooltipStyleClass="archivage-badge-tooltip"
+                            >
+                              {{ cell.label }}
+                            </span>
+                          </span>
+                        }
+                        @case ('actions') {
+                          <div class="archivage-table__actions">
+                            <button
+                              type="button"
+                              class="archivage-table__action archivage-table__action--primary"
+                              (click)="handleView(row)"
+                            >
+                              {{ cell.primaryLabel }}
+                            </button>
+                            <button
+                              type="button"
+                              class="archivage-table__action archivage-table__action--secondary"
+                              (click)="handleRestore(row)"
+                            >
+                              {{ cell.secondaryLabel }}
+                            </button>
+                          </div>
+                        }
+                        @default {
+                          <span
+                            [class.archivage-table__text--emphasis]="cell.emphasis ?? false"
+                          >
+                            {{ formatTableCellValue(cell.value) }}
+                          </span>
+                        }
+                      }
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr class="archivage-table__empty-row">
+                  <td
+                    class="archivage-table__empty"
+                    [attr.colspan]="activeDefinition().columns.length"
+                  >
+                    Aucune ligne ne correspond aux filtres en cours.
+                  </td>
+                </tr>
+              }
             }
           </tbody>
         </table>
@@ -450,7 +466,7 @@
         <div class="archivage-table__pagination">
           <ubax-paginator
             [currentPage]="currentPage()"
-            (currentPageChange)="currentPage.set($event)"
+            (currentPageChange)="changePage($event)"
             [totalPages]="totalPages()"
             [previousIconSrc]="icons.paginatorPrevious"
             [nextIconSrc]="icons.paginatorNext"
@@ -460,3 +476,94 @@
     </section>
   }
 </div>
+
+<!-- Detail dialog -->
+<p-dialog
+  [visible]="detailDialogVisible()"
+  (visibleChange)="$event ? null : closeDetailDialog()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="archivage-detail-dialog"
+  [header]="activeDefinition().title + ' — Détail'"
+  appendTo="body"
+>
+  @if (selectedItemLoading()) {
+    <div class="archivage-detail-loading">
+      <span class="archivage-skeleton archivage-skeleton--line"></span>
+      <span class="archivage-skeleton archivage-skeleton--line"></span>
+      <span class="archivage-skeleton archivage-skeleton--line"></span>
+    </div>
+  } @else if (selectedItem(); as item) {
+    <dl class="archivage-detail-list">
+      @for (field of detailFields(); track field.key) {
+        @if (getFieldValue(field) !== '—') {
+          <div class="archivage-detail-list__item">
+            <dt class="archivage-detail-list__label">{{ field.label }}</dt>
+            <dd class="archivage-detail-list__value">{{ getFieldValue(field) }}</dd>
+          </div>
+        }
+      }
+    </dl>
+  } @else {
+    <p class="archivage-detail-empty">Aucune donnée disponible.</p>
+  }
+
+  <ng-template #footer>
+    <button
+      type="button"
+      class="archivage-dialog-btn archivage-dialog-btn--secondary"
+      (click)="closeDetailDialog()"
+    >
+      Fermer
+    </button>
+    <button
+      type="button"
+      class="archivage-dialog-btn archivage-dialog-btn--primary"
+      (click)="restoreFromDetail()"
+    >
+      Restaurer
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- Restore confirmation dialog -->
+<p-dialog
+  [visible]="confirmDialogVisible()"
+  (visibleChange)="$event ? null : cancelRestore()"
+  [modal]="true"
+  [closable]="!isRestoring()"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="archivage-confirm-dialog"
+  header="Confirmer la restauration"
+  appendTo="body"
+>
+  <p class="archivage-confirm-dialog__body">
+    Êtes-vous sûr de vouloir restaurer cet élément ? Il sera remis dans son état actif et sera de nouveau visible dans la liste correspondante.
+  </p>
+
+  <ng-template #footer>
+    <button
+      type="button"
+      class="archivage-dialog-btn archivage-dialog-btn--secondary"
+      [disabled]="isRestoring()"
+      (click)="cancelRestore()"
+    >
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="archivage-dialog-btn archivage-dialog-btn--restore"
+      [disabled]="isRestoring()"
+      (click)="confirmRestore()"
+    >
+      @if (isRestoring()) {
+        Restauration en cours…
+      } @else {
+        Confirmer la restauration
+      }
+    </button>
+  </ng-template>
+</p-dialog>
