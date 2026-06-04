@@ -477,93 +477,138 @@
   }
 </div>
 
-<!-- Detail dialog -->
-<p-dialog
-  [visible]="detailDialogVisible()"
-  (visibleChange)="$event ? null : closeDetailDialog()"
-  [modal]="true"
-  [closable]="true"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="archivage-detail-dialog"
-  [header]="activeDefinition().title + ' — Détail'"
-  appendTo="body"
->
-  @if (selectedItemLoading()) {
-    <div class="archivage-detail-loading">
-      <span class="archivage-skeleton archivage-skeleton--line"></span>
-      <span class="archivage-skeleton archivage-skeleton--line"></span>
-      <span class="archivage-skeleton archivage-skeleton--line"></span>
-    </div>
-  } @else if (selectedItem(); as item) {
-    <dl class="archivage-detail-list">
-      @for (field of detailFields(); track field.key) {
-        @if (getFieldValue(field) !== '—') {
-          <div class="archivage-detail-list__item">
-            <dt class="archivage-detail-list__label">{{ field.label }}</dt>
-            <dd class="archivage-detail-list__value">{{ getFieldValue(field) }}</dd>
+<!-- ── Detail overlay ─────────────────────────────────────────────────────── -->
+@if (detailDialogVisible()) {
+  <div
+    class="archivage-overlay ubax-modal-overlay"
+    [class.is-closing]="detailDialogClosing()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="archivage-detail-title"
+    (click)="closeDetailDialog()"
+  >
+    <div
+      class="archivage-modal archivage-modal--detail"
+      [class.is-closing]="detailDialogClosing()"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="archivage-modal__header">
+        <h3 id="archivage-detail-title" class="archivage-modal__title">
+          {{ activeDefinition().title }}&ensp;—&ensp;Détail
+        </h3>
+        <button
+          type="button"
+          class="archivage-modal__close"
+          aria-label="Fermer"
+          (click)="closeDetailDialog()"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M14 4L4 14M4 4l10 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="archivage-modal__body">
+        @if (selectedItemLoading()) {
+          <div class="archivage-detail-loading">
+            <span class="archivage-skeleton archivage-skeleton--line"></span>
+            <span class="archivage-skeleton archivage-skeleton--line"></span>
+            <span class="archivage-skeleton archivage-skeleton--line"></span>
+            <span class="archivage-skeleton archivage-skeleton--line" style="width:55%"></span>
           </div>
+        } @else if (selectedItem()) {
+          <dl class="archivage-detail-list">
+            @for (field of detailFields(); track field.key) {
+              @if (getFieldValue(field) !== '—') {
+                <div class="archivage-detail-list__item">
+                  <dt class="archivage-detail-list__label">{{ field.label }}</dt>
+                  <dd class="archivage-detail-list__value">{{ getFieldValue(field) }}</dd>
+                </div>
+              }
+            }
+          </dl>
+        } @else {
+          <p class="archivage-detail-empty">Aucune donnée disponible.</p>
         }
-      }
-    </dl>
-  } @else {
-    <p class="archivage-detail-empty">Aucune donnée disponible.</p>
-  }
+      </div>
 
-  <ng-template #footer>
-    <button
-      type="button"
-      class="archivage-dialog-btn archivage-dialog-btn--secondary"
-      (click)="closeDetailDialog()"
-    >
-      Fermer
-    </button>
-    <button
-      type="button"
-      class="archivage-dialog-btn archivage-dialog-btn--primary"
-      (click)="restoreFromDetail()"
-    >
-      Restaurer
-    </button>
-  </ng-template>
-</p-dialog>
+      <!-- Footer -->
+      <div class="archivage-modal__footer">
+        <button
+          type="button"
+          class="archivage-modal-btn archivage-modal-btn--ghost"
+          (click)="closeDetailDialog()"
+        >
+          Fermer
+        </button>
+        <button
+          type="button"
+          class="archivage-modal-btn archivage-modal-btn--restore"
+          (click)="restoreFromDetail()"
+        >
+          Restaurer
+        </button>
+      </div>
+    </div>
+  </div>
+}
 
-<!-- Restore confirmation dialog -->
-<p-dialog
-  [visible]="confirmDialogVisible()"
-  (visibleChange)="$event ? null : cancelRestore()"
-  [modal]="true"
-  [closable]="!isRestoring()"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="archivage-confirm-dialog"
-  header="Confirmer la restauration"
-  appendTo="body"
->
-  <p class="archivage-confirm-dialog__body">
-    Êtes-vous sûr de vouloir restaurer cet élément ? Il sera remis dans son état actif et sera de nouveau visible dans la liste correspondante.
-  </p>
+<!-- ── Restore confirmation overlay ──────────────────────────────────────── -->
+@if (confirmDialogVisible()) {
+  <div
+    class="archivage-overlay ubax-modal-overlay"
+    [class.is-closing]="confirmDialogClosing()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="archivage-confirm-title"
+    (click)="!isRestoring() && cancelRestore()"
+  >
+    <div
+      class="archivage-modal archivage-modal--confirm"
+      [class.is-closing]="confirmDialogClosing()"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Icon -->
+      <div class="archivage-modal__icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M5 14a9 9 0 1 0 18 0A9 9 0 0 0 5 14Z" stroke="#e67e22" stroke-width="1.6"/>
+          <path d="M10.5 14l2.5 2.5 5-5" stroke="#e67e22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
 
-  <ng-template #footer>
-    <button
-      type="button"
-      class="archivage-dialog-btn archivage-dialog-btn--secondary"
-      [disabled]="isRestoring()"
-      (click)="cancelRestore()"
-    >
-      Annuler
-    </button>
-    <button
-      type="button"
-      class="archivage-dialog-btn archivage-dialog-btn--restore"
-      [disabled]="isRestoring()"
-      (click)="confirmRestore()"
-    >
-      @if (isRestoring()) {
-        Restauration en cours…
-      } @else {
+      <h3 id="archivage-confirm-title" class="archivage-modal__title">
         Confirmer la restauration
-      }
-    </button>
-  </ng-template>
-</p-dialog>
+      </h3>
+      <p class="archivage-modal__desc">
+        Êtes-vous sûr de vouloir restaurer cet élément&nbsp;?<br/>
+        Il sera remis dans son état actif et redeviendra visible dans la liste correspondante.
+      </p>
+
+      <div class="archivage-modal__footer archivage-modal__footer--centered">
+        <button
+          type="button"
+          class="archivage-modal-btn archivage-modal-btn--ghost"
+          [disabled]="isRestoring()"
+          (click)="cancelRestore()"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="archivage-modal-btn archivage-modal-btn--restore"
+          [disabled]="isRestoring()"
+          (click)="confirmRestore()"
+        >
+          @if (isRestoring()) {
+            <span class="archivage-modal-btn__spinner"></span>
+            Restauration…
+          } @else {
+            Confirmer la restauration
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

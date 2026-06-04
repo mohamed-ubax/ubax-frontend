@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   OnInit,
   computed,
   effect,
@@ -11,7 +12,6 @@ import {
 import { FormsModule } from '@angular/forms';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { ArchivageStore } from '@ubax-workspace/ubax-web-data-access';
-import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
@@ -83,6 +83,52 @@ const TICKET_STATUS_LABELS: Record<string, { label: string; tone: ArchivageCellT
   OPEN: { label: 'Ouvert', tone: 'warning' },
   IN_ANALYSIS: { label: 'En analyse', tone: 'warning' },
   TECHNICIAN_SENT: { label: 'Technicien envoyé', tone: 'warning' },
+};
+
+const FRENCH_STATUS_LABELS: Record<string, string> = {
+  // Propriétés
+  DRAFT: 'Brouillon',
+  PENDING: 'En attente',
+  PUBLISHED: 'Publié',
+  RESERVED: 'Réservé',
+  SOLD: 'Vendu',
+  ARCHIVED: 'Archivé',
+  REJECTED: 'Rejeté',
+  // Locataires
+  ACTIVE: 'Actif',
+  INACTIVE: 'Inactif',
+  QUALIFIED: 'Qualifié',
+  // Paiements
+  PAID: 'Payé',
+  UNPAID: 'Non payé',
+  PARTIAL: 'Partiel',
+  OVERDUE: 'En retard',
+  CANCELLED: 'Annulé',
+  REFUNDED: 'Remboursé',
+  // Tickets
+  OPEN: 'Ouvert',
+  IN_ANALYSIS: 'En analyse',
+  TECHNICIAN_SENT: 'Technicien envoyé',
+  RESOLVED: 'Résolu',
+  CLOSED: 'Clôturé',
+  // Documents
+  EXPIRED: 'Expiré',
+  VALID: 'Valide',
+  // Priorités tickets
+  LOW: 'Faible',
+  NORMAL: 'Normale',
+  HIGH: 'Haute',
+  URGENT: 'Urgente',
+  // Méthodes de paiement
+  CASH: 'Espèces',
+  BANK_TRANSFER: 'Virement',
+  MOBILE_MONEY: 'Mobile Money',
+  CHECK: 'Chèque',
+  // Types de paiement
+  RENT: 'Loyer',
+  CHARGE: 'Charges',
+  DEPOSIT: 'Dépôt de garantie',
+  MAINTENANCE: 'Maintenance',
 };
 
 type PendingRestoreInfo = {
@@ -386,7 +432,6 @@ function normalizeText(value: string): string {
   imports: [
     FormsModule,
     DatePickerModule,
-    DialogModule,
     SelectModule,
     TooltipModule,
     UbaxPaginatorComponent,
@@ -395,7 +440,7 @@ function normalizeText(value: string): string {
   styleUrl: './archivage-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ArchivagePageComponent implements OnInit {
+export class ArchivagePageComponent implements OnInit, OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly store = inject(ArchivageStore);
   private readonly messageService = inject(MessageService);
@@ -412,7 +457,9 @@ export class ArchivagePageComponent implements OnInit {
   protected readonly appliedFilters = signal<ArchivageFiltersState>(cloneFiltersState(DEFAULT_FILTERS));
 
   protected readonly detailDialogVisible = signal(false);
+  protected readonly detailDialogClosing = signal(false);
   protected readonly confirmDialogVisible = signal(false);
+  protected readonly confirmDialogClosing = signal(false);
   protected readonly pendingRestore = signal<PendingRestoreInfo | null>(null);
 
   protected readonly activeDefinition = computed<ArchivageTabDefinition>(
@@ -482,14 +529,24 @@ export class ArchivagePageComponent implements OnInit {
   protected readonly detailFields = computed(() => DETAIL_FIELDS[this.activeTab()]);
 
   constructor() {
+    // Gestion du z-index du topbar : on le passe derrière l'overlay quand un dialog est ouvert
+    effect(() => {
+      const isOpen = this.detailDialogVisible() || this.confirmDialogVisible();
+      this.document.body.classList.toggle('ubax-overlay-open', isOpen);
+    });
+
     effect(() => {
       const status = this.store.restoreStatus();
       if (status === 'success') {
         this.pushToast('success', 'Élément restauré avec succès.');
         this.store.setRestoreIdle();
-        this.confirmDialogVisible.set(false);
-        this.pendingRestore.set(null);
-        this.reloadActiveTab();
+        this.confirmDialogClosing.set(true);
+        setTimeout(() => {
+          this.confirmDialogVisible.set(false);
+          this.confirmDialogClosing.set(false);
+          this.pendingRestore.set(null);
+          this.reloadActiveTab();
+        }, 220);
       } else if (status === 'error') {
         this.pushToast('error', this.store.restoreError() ?? 'Erreur lors de la restauration.');
         this.store.setRestoreIdle();
@@ -512,6 +569,10 @@ export class ArchivagePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.reloadActiveTab();
+  }
+
+  ngOnDestroy(): void {
+    this.document.body.classList.remove('ubax-overlay-open');
   }
 
   private reloadActiveTab(): void {
@@ -651,13 +712,21 @@ export class ArchivagePageComponent implements OnInit {
   }
 
   protected cancelRestore(): void {
-    this.confirmDialogVisible.set(false);
-    this.pendingRestore.set(null);
+    this.confirmDialogClosing.set(true);
+    setTimeout(() => {
+      this.confirmDialogVisible.set(false);
+      this.confirmDialogClosing.set(false);
+      this.pendingRestore.set(null);
+    }, 220);
   }
 
   protected closeDetailDialog(): void {
-    this.detailDialogVisible.set(false);
-    this.store.clearDetail();
+    this.detailDialogClosing.set(true);
+    setTimeout(() => {
+      this.detailDialogVisible.set(false);
+      this.detailDialogClosing.set(false);
+      this.store.clearDetail();
+    }, 220);
   }
 
   protected getFieldValue(field: DetailFieldDef): string {
@@ -667,8 +736,9 @@ export class ArchivagePageComponent implements OnInit {
     if (raw === null || raw === undefined || raw === '') return '—';
     if (field.format === 'date') return isoToFrenchDate(raw) || '—';
     if (field.format === 'amount') return formatAmount(raw);
-    if (field.format === 'type') return PROPERTY_TYPE_LABELS[String(raw)] || String(raw);
-    return String(raw);
+    if (field.format === 'type') return PROPERTY_TYPE_LABELS[String(raw)] || FRENCH_STATUS_LABELS[String(raw)] || String(raw);
+    const asStr = String(raw);
+    return FRENCH_STATUS_LABELS[asStr] || asStr;
   }
 
   protected getTextInputValue(event: Event): string {
