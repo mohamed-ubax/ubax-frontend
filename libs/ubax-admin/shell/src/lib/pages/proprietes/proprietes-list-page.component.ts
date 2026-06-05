@@ -225,6 +225,14 @@ export class ProprietesListPageComponent {
     );
   }
 
+  protected getOwnerLogoUrl(property: PropertyResponse): string | null {
+    const p = property as PropertyResponse & {
+      agencyLogoUrl?: string;
+      hotelLogoUrl?: string;
+    };
+    return p.agencyLogoUrl ?? p.hotelLogoUrl ?? null;
+  }
+
   protected getDisplayCount(): string {
     const total = this.totalElements();
     const page = this.currentPage();
