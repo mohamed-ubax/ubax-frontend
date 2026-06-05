@@ -216,7 +216,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) minmax(300px, 0.82fr);
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .hotel-detail-page__hero {
@@ -370,6 +370,7 @@
 .hotel-detail-page__stack {
   display: grid;
   gap: 16px;
+  grid-template-rows: auto 1fr;
 }
 
 .hotel-detail-page__availability,
@@ -503,6 +504,7 @@
   padding: 18px;
   display: grid;
   gap: 10px;
+  grid-template-rows: auto 1fr;
 }
 
 .hotel-detail-page__map {

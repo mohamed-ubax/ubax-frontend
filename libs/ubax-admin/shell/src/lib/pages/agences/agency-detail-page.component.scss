@@ -226,7 +226,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) minmax(300px, 0.82fr);
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .agency-detail-page__hero {
@@ -374,6 +374,7 @@
 .agency-detail-page__stack {
   display: grid;
   gap: 16px;
+  grid-template-rows: auto 1fr;
 }
 
 .agency-detail-page__availability,
@@ -495,6 +496,7 @@
   padding: 18px;
   display: grid;
   gap: 10px;
+  grid-template-rows: auto 1fr;
 }
 
 .agency-detail-page__location-title {
