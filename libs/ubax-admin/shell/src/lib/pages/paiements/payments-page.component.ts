@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Paginator } from 'primeng/paginator';
 import { firstValueFrom } from 'rxjs';
 import {
   ApiConfiguration,
@@ -57,7 +58,7 @@ const STATUS_OPTIONS: Array<{
 @Component({
   selector: 'ubax-admin-payments-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DocumentPreviewComponent],
+  imports: [CommonModule, FormsModule, DocumentPreviewComponent, Paginator],
   templateUrl: './payments-page.component.html',
   styleUrl: './payments-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,7 +71,8 @@ export class PaymentsPageComponent implements OnInit {
 
   protected readonly searchTerm = signal('');
   protected readonly selectedType = signal<PaymentTypeFilter>('ALL');
-  protected readonly showAllTransactions = signal(false);
+  protected readonly tablePage = signal(0);
+  protected readonly tablePageSize = 6;
   protected readonly dialogOpen = signal(false);
   protected readonly treatmentStatus =
     signal<PaymentStatusUpdateRequest['status']>('PENDING');
@@ -78,7 +80,6 @@ export class PaymentsPageComponent implements OnInit {
 
   protected readonly typeOptions = PAYMENT_TYPE_OPTIONS;
   protected readonly statusOptions = STATUS_OPTIONS;
-  protected readonly initialTransactionsCount = INITIAL_TRANSACTIONS_COUNT;
 
   protected readonly filteredPayments = computed(() => {
     const query = this.normalizeText(this.searchTerm());
@@ -108,12 +109,10 @@ export class PaymentsPageComponent implements OnInit {
 
   protected readonly recentTransactions = computed(() => {
     const payments = this.filteredPayments();
+    const page = this.tablePage();
+    const size = this.tablePageSize;
 
-    if (this.showAllTransactions()) {
-      return payments;
-    }
-
-    return payments.slice(0, INITIAL_TRANSACTIONS_COUNT);
+    return payments.slice(page * size, (page + 1) * size);
   });
 
   protected readonly pendingRequests = computed(() =>
@@ -234,10 +233,12 @@ export class PaymentsPageComponent implements OnInit {
 
   protected onSearch(value: string): void {
     this.searchTerm.set(value);
+    this.tablePage.set(0);
   }
 
   protected onTypeChange(value: PaymentTypeFilter): void {
     this.selectedType.set(value);
+    this.tablePage.set(0);
     void this.loadPayments();
   }
 
@@ -245,8 +246,10 @@ export class PaymentsPageComponent implements OnInit {
     void this.loadPayments();
   }
 
-  protected toggleTransactions(): void {
-    this.showAllTransactions.update((value) => !value);
+  protected onTablePage(event: { first?: number; rows?: number }): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.tablePageSize;
+    this.tablePage.set(Math.floor(first / rows));
   }
 
   protected async openDetails(id: string): Promise<void> {
@@ -458,7 +461,35 @@ export class PaymentsPageComponent implements OnInit {
   }
 
   protected customerMeta(payment: AdminPayment): string {
-    return payment.tenantId?.trim() || payment.recordedById?.trim() || '—';
+    return payment.reference?.trim() || payment.periodLabel?.trim() || '—';
+  }
+
+  protected partnerName(payment: AdminPayment): string {
+    return this.propertyLabel(payment);
+  }
+
+  protected partnerInitials(payment: AdminPayment): string {
+    return this.propertyLabel(payment).slice(0, 2).toUpperCase();
+  }
+
+  protected partnerTypeLabel(payment: AdminPayment): string {
+    switch (payment.paymentType) {
+      case 'RENT':
+      case 'DEPOSIT':
+      case 'CHARGES':
+        return 'Hôtel';
+      case 'COMMISSION':
+      case 'SALE':
+        return 'Agence Immobilière';
+      default:
+        return 'Partenaire';
+    }
+  }
+
+  protected contractShortLabel(contractId?: string | null): string {
+    if (!contractId) return '—';
+    const id = contractId.trim();
+    return id.length > 12 ? `CONT-${id.slice(0, 8).toUpperCase()}` : id;
   }
 
   protected propertyLabel(payment: AdminPayment): string {

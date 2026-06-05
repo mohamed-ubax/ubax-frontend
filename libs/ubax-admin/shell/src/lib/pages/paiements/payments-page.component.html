@@ -179,17 +179,18 @@
           </table>
         </div>
 
-        @if (filteredPayments().length > initialTransactionsCount) {
+        @if (filteredPayments().length > tablePageSize) {
           <div
-            class="admin-payments-panel__footer admin-payments-panel__footer--center"
+            class="admin-payments-panel__footer admin-payments-panel__footer--paginator"
           >
-            <button
-              type="button"
-              class="admin-payments-pill-button admin-payments-pill-button--dark"
-              (click)="toggleTransactions()"
-            >
-              {{ showAllTransactions() ? 'Réduire' : 'Tout voir' }}
-            </button>
+            <p-paginator
+              [first]="tablePage() * tablePageSize"
+              [rows]="tablePageSize"
+              [totalRecords]="filteredPayments().length"
+              (onPageChange)="onTablePage($event)"
+              [showFirstLastIcon]="true"
+              [showPageLinks]="true"
+            />
           </div>
         }
       }
@@ -200,7 +201,10 @@
     <section class="admin-payments-panel">
       <div class="admin-payments-panel__head">
         <h2>Liste demande de paiements</h2>
-        <button type="button" class="admin-payments-pill-button">
+        <button
+          type="button"
+          class="admin-payments-pill-button admin-payments-pill-button--bordered"
+        >
           Tout voir
         </button>
       </div>
@@ -208,9 +212,14 @@
       <div class="admin-payments-list">
         @for (payment of pendingRequests(); track payment.id) {
           <article class="admin-payments-list__item">
-            <div>
-              <strong>{{ customerName(payment) }}</strong>
-              <small>{{ paymentTypeLabel(payment.paymentType) }}</small>
+            <div class="admin-payments-list__partner">
+              <span class="admin-payments-list__partner-avatar">
+                {{ partnerInitials(payment) }}
+              </span>
+              <div class="admin-payments-list__partner-meta">
+                <strong>{{ partnerName(payment) }}</strong>
+                <small>{{ partnerTypeLabel(payment) }}</small>
+              </div>
             </div>
 
             <strong class="admin-payments-list__amount">{{
@@ -241,7 +250,10 @@
     <section class="admin-payments-panel">
       <div class="admin-payments-panel__head">
         <h2>Historique de paiements</h2>
-        <button type="button" class="admin-payments-pill-button">
+        <button
+          type="button"
+          class="admin-payments-pill-button admin-payments-pill-button--bordered"
+        >
           Tout voir
         </button>
       </div>
@@ -249,9 +261,14 @@
       <div class="admin-payments-list">
         @for (payment of paymentHistory(); track payment.id) {
           <article class="admin-payments-list__item">
-            <div>
-              <strong>{{ customerName(payment) }}</strong>
-              <small>{{ paymentTypeLabel(payment.paymentType) }}</small>
+            <div class="admin-payments-list__partner">
+              <span class="admin-payments-list__partner-avatar">
+                {{ partnerInitials(payment) }}
+              </span>
+              <div class="admin-payments-list__partner-meta">
+                <strong>{{ partnerName(payment) }}</strong>
+                <small>{{ partnerTypeLabel(payment) }}</small>
+              </div>
             </div>
 
             <strong class="admin-payments-list__amount">{{
@@ -409,7 +426,9 @@
                   </div>
                   <div>
                     <span>Contrat</span>
-                    <strong>{{ payment.contractId ?? '—' }}</strong>
+                    <strong>{{
+                      contractShortLabel(payment.contractId)
+                    }}</strong>
                   </div>
                   <div>
                     <span>Période</span>
@@ -507,10 +526,6 @@
                   <div class="admin-payments-upload-box">
                     <i class="pi pi-upload"></i>
                     <p>Glisser vos fichiers ici ou cliquer pour importer</p>
-                    <small
-                      >Le backend ne fournit ici que `receiptUrl` déjà
-                      résolu.</small
-                    >
                   </div>
                 }
               </div>
