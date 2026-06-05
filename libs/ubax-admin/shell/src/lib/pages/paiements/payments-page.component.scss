@@ -5,14 +5,6 @@
   color: #122232;
 }
 
-.admin-payments-page__title {
-  margin: 0;
-  font:
-    600 24px/1.1 'Lexend',
-    sans-serif;
-  color: #1c1c1c;
-}
-
 .admin-payments-panel__filters {
   display: flex;
   align-items: center;
@@ -314,17 +306,28 @@
 
 .admin-payments-person__avatar,
 .admin-payments-requester__logo {
-  width: 34px;
-  height: 34px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   background: linear-gradient(180deg, #ffedd5 0%, #fde6d3 100%);
   color: #9a4d00;
+  flex-shrink: 0;
+}
+
+.admin-payments-person__avatar {
+  width: 34px;
+  height: 34px;
   font:
     600 12px/1 'Lexend',
     sans-serif;
-  flex-shrink: 0;
+}
+
+.admin-payments-requester__logo {
+  width: 56px;
+  height: 56px;
+  font:
+    600 16px/1 'Lexend',
+    sans-serif;
 }
 
 .admin-payments-table__property-icon {
@@ -346,10 +349,10 @@
   align-items: center;
   justify-content: center;
   min-height: 28px;
-  padding: 0 10px;
+  padding: 0 12px;
   border-radius: 999px;
   font:
-    500 11px/1 'Lexend',
+    500 12px/1 'Lexend',
     sans-serif;
 }
 
@@ -445,6 +448,18 @@
   color: #fff;
 }
 
+.admin-payments-pill-button--primary-outline {
+  background: transparent;
+  color: #1456c0;
+  border: 1.5px solid #1456c0;
+}
+
+.admin-payments-dialog__footer .admin-payments-pill-button {
+  min-height: 40px;
+  padding: 0 22px;
+  font-size: 13px;
+}
+
 .admin-payments-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -457,14 +472,29 @@
   padding: 0 14px 14px;
 }
 
-.admin-payments-list__item,
-.admin-payments-attachment {
+.admin-payments-list__item {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: 12px;
   padding: 14px 10px;
   border-radius: 12px;
+}
+
+.admin-payments-attachment {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #eef4f9;
+}
+
+.admin-payments-attachment__icon {
+  font-size: 22px;
+  color: #1a3047;
 }
 
 .admin-payments-list__item + .admin-payments-list__item {
@@ -534,16 +564,14 @@
 .admin-payments-dialog {
   position: fixed;
   top: calc(var(--header-height, 81px) + 20px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(980px, calc(100vw - 72px));
+  width: 60%;
   max-height: calc(100vh - var(--header-height, 81px) - 40px);
   overflow: auto;
-  border-radius: 28px;
-  margin: 0;
+  border-radius: 20px;
   padding: 0;
   border: none;
   z-index: 1400;
+  margin: 0 auto;
 }
 
 .admin-payments-dialog__header,
@@ -552,7 +580,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 22px;
+  padding: 20px 24px;
 }
 
 .admin-payments-dialog__header {
@@ -563,11 +591,34 @@
   border-bottom: 1px solid rgba(16, 24, 40, 0.08);
 }
 
-.admin-payments-dialog__header h2,
-.admin-payments-dialog-card h3 {
+.admin-payments-dialog__header h2 {
   margin: 0;
   font:
     600 18px/1.3 'Lexend',
+    sans-serif;
+  color: #22334a;
+}
+
+.admin-payments-dialog-card h3 {
+  margin: 0;
+  font:
+    600 16px/1.3 'Lexend',
+    sans-serif;
+  color: #22334a;
+}
+
+.admin-payments-dialog-card--center h3 {
+  text-align: left;
+}
+
+.admin-payments-dialog-card__muted {
+  font-size: 13px;
+}
+
+.admin-payments-dialog-card__meta-grid strong,
+.admin-payments-bank-box__grid strong {
+  font:
+    600 13px/1.4 'Lexend',
     sans-serif;
   color: #22334a;
 }
@@ -576,7 +627,7 @@
   margin: 6px 0 0;
   color: #667085;
   font:
-    400 12px/1.4 'Lexend',
+    400 13px/1.4 'Lexend',
     sans-serif;
 }
 
@@ -594,19 +645,19 @@
 .admin-payments-dialog__content {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px 22px 22px;
+  gap: 16px;
+  padding: 20px 24px 24px;
 }
 
 .admin-payments-dialog__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .admin-payments-dialog-card {
   border-radius: 14px;
-  padding: 16px;
+  padding: 20px;
 }
 
 .admin-payments-dialog-card--center {
@@ -631,9 +682,9 @@
 
 .admin-payments-dialog-card__hero {
   display: block;
-  margin-top: 10px;
+  margin-top: 12px;
   font:
-    600 28px/1.05 'Lexend',
+    700 36px/1 'Lexend',
     sans-serif;
   color: #1a3047;
 }
@@ -648,7 +699,7 @@
 .admin-payments-dialog-card__meta-grid {
   margin-top: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  text-align: left;
+  text-align: center;
 }
 
 .admin-payments-dialog-card__meta-grid span,
@@ -656,7 +707,7 @@
   display: block;
   margin-bottom: 4px;
   color: #98a2b3;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .admin-payments-requester,
@@ -677,24 +728,33 @@
   color: #1f2937;
 }
 
+.admin-payments-requester strong {
+  font:
+    600 15px/1.3 'Lexend',
+    sans-serif;
+}
+
 .admin-payments-requester p,
 .admin-payments-bank-box p {
   margin: 4px 0 0;
   color: #667085;
   font:
-    400 12px/1.5 'Lexend',
+    400 13px/1.5 'Lexend',
     sans-serif;
 }
 
 .admin-payments-bank-box {
-  padding: 12px;
+  padding: 16px;
   border-radius: 12px;
   background: #f4f8fb;
 }
 
-.admin-payments-bank-box__grid,
-.admin-payments-treatment-grid {
+.admin-payments-bank-box__grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-payments-treatment-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .admin-payments-note-box,
@@ -778,12 +838,6 @@
   background: rgba(34, 197, 94, 0.06);
 }
 
-.admin-payments-attachment {
-  margin-top: 16px;
-  padding: 14px;
-  background: #eef4f9;
-}
-
 .admin-payments-attachment--empty {
   grid-template-columns: 1fr;
   background: #f8fafc;
@@ -835,9 +889,7 @@
     grid-template-columns: 1fr;
   }
 
-  .admin-payments-dialog {
-    width: min(960px, calc(100vw - 24px));
-  }
+  /* Le calcul de left s'adapte automatiquement via var(--sidebar-width) */
 }
 
 @media (max-width: 768px) {
@@ -866,9 +918,7 @@
   .admin-payments-dialog {
     top: calc(var(--header-height, 81px) + 12px);
     left: 12px;
-    right: 12px;
-    transform: none;
-    width: auto;
+    width: calc(100vw - 24px);
     max-height: calc(100vh - var(--header-height, 81px) - 24px);
   }
 }

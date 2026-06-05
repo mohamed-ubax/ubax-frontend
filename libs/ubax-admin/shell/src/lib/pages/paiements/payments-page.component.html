@@ -1,6 +1,4 @@
 <div class="admin-payments-page">
-  <h1 class="admin-payments-page__title">Paiements</h1>
-
   <section class="admin-payments-kpis" aria-label="Synthèse paiements">
     @for (kpi of kpis(); track kpi.title) {
       <article
@@ -430,6 +428,7 @@
 
               @if (payment.receiptUrl) {
                 <div class="admin-payments-attachment">
+                  <i class="pi pi-file-pdf admin-payments-attachment__icon"></i>
                   <div>
                     <strong>{{ attachmentLabel(payment) }}</strong>
                     <small>Reçu disponible</small>
@@ -528,7 +527,7 @@
           <footer class="admin-payments-dialog__footer">
             <button
               type="button"
-              class="admin-payments-pill-button"
+              class="admin-payments-pill-button admin-payments-pill-button--primary-outline"
               [disabled]="store.updating()"
               (click)="saveTreatment()"
             >
