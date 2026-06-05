@@ -217,17 +217,24 @@
 
 // ─── Table ──────────────────────────────────────────────────────────────────
 .ar-table {
+  // --ar-table-columns: 1.45fr 1.35fr 1.35fr 1fr 1.35fr 1.2fr 1fr 0.9fr;
+  --ar-table-columns: 1.55fr 1.55fr 2fr 0.65fr 1.5fr 1fr 0.55fr 0.65fr;
+
   width: 100%;
   overflow-x: auto;
 }
 
 .ar-table__row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1.3fr 0.8fr 1.8fr 1.2fr 0.95fr 0.7fr;
-  gap: 14px;
-  padding: 16px 24px;
-  align-items: center;
+  grid-template-columns: var(--ar-table-columns);
+  gap: 18px;
+  padding: 18px 24px;
+  align-items: flex-start;
   border-bottom: 1px solid #f0f0f0;
+
+  > * {
+    min-width: 0;
+  }
 
   &:last-child {
     border-bottom: none;
@@ -241,6 +248,8 @@
   padding: 18px 24px;
 
   span {
+    display: flex;
+    align-items: center;
     font:
       500 15px/1.2 'Lexend',
       sans-serif;
@@ -297,7 +306,7 @@
   background: #ffe8d3;
   border-radius: 10px;
   font:
-    500 8px/1.5 'Lexend',
+    500 11px/1.4 'Lexend',
     sans-serif;
   color: #e87d1e;
   white-space: nowrap;
@@ -345,7 +354,7 @@
 
 .ar-col-client__sub {
   font:
-    300 10px/1.4 'Lexend',
+    300 12px/1.4 'Lexend',
     sans-serif;
   color: #323232;
   white-space: nowrap;
@@ -373,17 +382,25 @@
 
 .ar-col-property__city {
   font:
-    300 10px/1.4 'Lexend',
+    300 12px/1.4 'Lexend',
     sans-serif;
   color: #323232;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 // ─── Column: Type ───────────────────────────────────────────────────────────
 .ar-col-type {
+  display: inline-flex;
+  align-items: center;
   font:
     500 15px/1.2 'Lexend',
     sans-serif;
   color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 // ─── Column: Date ───────────────────────────────────────────────────────────
@@ -399,11 +416,13 @@
     sans-serif;
   color: #222;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ar-col-date__nights {
   font:
-    300 10px/1.4 'Lexend',
+    300 12px/1.4 'Lexend',
     sans-serif;
   color: #323232;
 }
@@ -425,7 +444,7 @@
 
 .ar-col-amount__sub {
   font:
-    400 10px/1.4 'Lexend',
+    400 12px/1.4 'Lexend',
     sans-serif;
   color: #34c759;
 }
@@ -435,11 +454,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 35px;
-  padding: 0 14px;
+  padding: 8px 15px;
+  justify-self: start;
+  width: max-content;
+  height: max-content;
   border-radius: 999px;
   font:
-    400 13px/1 'Lexend',
+    400 14px/1 'Lexend',
     sans-serif;
   white-space: nowrap;
 
@@ -470,6 +491,39 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: flex-start;
+}
+
+:host ::ng-deep .ar-list-tooltip.p-tooltip {
+  max-width: 340px;
+}
+
+:host ::ng-deep .ar-list-tooltip .p-tooltip-text {
+  background: #1a3047;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font:
+    400 12px/1.4 'Lexend',
+    sans-serif;
+  box-shadow: 0 10px 24px rgba(26, 48, 71, 0.22);
+  word-break: break-word;
+}
+
+:host ::ng-deep .ar-list-tooltip.p-tooltip-top .p-tooltip-arrow {
+  border-top-color: #1a3047;
+}
+
+:host ::ng-deep .ar-list-tooltip.p-tooltip-bottom .p-tooltip-arrow {
+  border-bottom-color: #1a3047;
+}
+
+:host ::ng-deep .ar-list-tooltip.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #1a3047;
+}
+
+:host ::ng-deep .ar-list-tooltip.p-tooltip-right .p-tooltip-arrow {
+  border-right-color: #1a3047;
 }
 
 .ar-action-btn {
@@ -494,13 +548,13 @@
 
 // ─── States ─────────────────────────────────────────────────────────────────
 .ar-state {
-  min-height: 240px;
   display: grid;
   place-items: center;
   gap: 12px;
   text-align: center;
   padding: 24px;
   color: #667085;
+  margin: 6rem 0;
 
   i {
     font-size: 30px;
@@ -678,7 +732,7 @@
   }
 
   .ar-table__row {
-    min-width: 1100px;
+    min-width: 1180px;
   }
 
   .ar-filter-row {

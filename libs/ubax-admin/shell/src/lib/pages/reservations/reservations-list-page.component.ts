@@ -10,6 +10,7 @@ import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
+import { TooltipModule } from 'primeng/tooltip';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import {
   ADMIN_RESERVATION_STATUSES,
@@ -49,7 +50,12 @@ interface KpiCard {
 @Component({
   selector: 'ubax-admin-reservations-list-page',
   standalone: true,
-  imports: [UbaxPaginatorComponent, FormsModule, DatePickerModule],
+  imports: [
+    UbaxPaginatorComponent,
+    FormsModule,
+    DatePickerModule,
+    TooltipModule,
+  ],
   templateUrl: './reservations-list-page.component.html',
   styleUrl: './reservations-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -182,6 +188,7 @@ export class ReservationsListPageComponent implements OnInit {
 
   protected readonly filteredReservations = computed(() => {
     const query = this.normalizeText(this.searchTerm());
+    const selectedType = this.selectedType();
     const property = this.selectedProperty();
     const range = this.dateRange();
 
@@ -202,6 +209,10 @@ export class ReservationsListPageComponent implements OnInit {
       }
 
       if (property && reservation.propertyTitle !== property) return false;
+
+      if (selectedType && this.reservationType(reservation) !== selectedType) {
+        return false;
+      }
 
       if (range && range.length === 2 && range[0] && range[1]) {
         const checkIn = reservation.checkInDate
@@ -362,7 +373,7 @@ export class ReservationsListPageComponent implements OnInit {
       r.clientEmail ?? '',
       r.propertyTitle ?? '',
       r.propertyCity ?? '',
-      'Location',
+      this.reservationType(r),
       this.formatDate(r.checkInDate),
       this.formatDate(r.checkOutDate),
       r.numberOfNights ?? 0,
@@ -456,6 +467,35 @@ export class ReservationsListPageComponent implements OnInit {
     return `${this.formatDate(reservation.checkInDate)} - ${this.formatDate(reservation.checkOutDate)}`;
   }
 
+  protected reservationType(reservation: AdminReservation): string {
+    const raw = reservation as unknown as Record<string, unknown>;
+    const candidates = [
+      raw['propertyType'],
+      raw['type'],
+      raw['category'],
+      raw['propertyCategory'],
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate !== 'string' || !candidate.trim()) {
+        continue;
+      }
+
+      const mapped = this.mapReservationType(candidate);
+      if (mapped) {
+        return mapped;
+      }
+    }
+
+    const inferredFromTitle = this.mapReservationType(
+      [reservation.propertyTitle, reservation.propertyCity]
+        .filter(Boolean)
+        .join(' '),
+    );
+
+    return inferredFromTitle ?? 'Location';
+  }
+
   protected openReservationDetail(id?: string): void {
     if (!id) {
       return;
@@ -488,6 +528,35 @@ export class ReservationsListPageComponent implements OnInit {
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim();
+  }
+
+  private mapReservationType(rawType: string): string | null {
+    const type = this.normalizeText(rawType);
+
+    if (type.includes('hotel')) {
+      return 'Hôtel';
+    }
+
+    if (
+      type.includes('immobilier') ||
+      type.includes('appartement') ||
+      type.includes('maison') ||
+      type.includes('villa') ||
+      type.includes('studio') ||
+      type.includes('terrain')
+    ) {
+      return 'Immobilier';
+    }
+
+    if (
+      type.includes('location') ||
+      type.includes('locatif') ||
+      type.includes('bail')
+    ) {
+      return 'Location';
+    }
+
+    return null;
   }
 
   private selectedFilterValue(): AdminReservationStatus | undefined {

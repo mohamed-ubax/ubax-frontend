@@ -132,9 +132,14 @@
                     <i class="pi pi-building"></i>
                   </div>
                   <div class="ar-col-res__info">
-                    <span class="ar-col-res__code">{{
-                      reservationCode(reservation.id)
-                    }}</span>
+                    <span
+                      class="ar-col-res__code"
+                      [pTooltip]="reservationCode(reservation.id)"
+                      tooltipPosition="top"
+                      tooltipStyleClass="ar-list-tooltip"
+                    >
+                      {{ reservationCode(reservation.id) }}
+                    </span>
                     <span class="ar-col-res__badge">Agence immobilière</span>
                   </div>
                 </div>
@@ -145,45 +150,86 @@
                     {{ clientInitials(reservation.clientFullName) }}
                   </div>
                   <div class="ar-col-client__info">
-                    <span class="ar-col-client__name">{{
-                      reservation.clientFullName ?? '—'
-                    }}</span>
-                    <span class="ar-col-client__sub">{{
-                      reservation.clientEmail ?? '—'
-                    }}</span>
+                    <span
+                      class="ar-col-client__name"
+                      [pTooltip]="reservation.clientFullName ?? '—'"
+                      tooltipPosition="top"
+                      tooltipStyleClass="ar-list-tooltip"
+                    >
+                      {{ reservation.clientFullName ?? '—' }}
+                    </span>
+                    <span
+                      class="ar-col-client__sub"
+                      [pTooltip]="reservation.clientEmail ?? '—'"
+                      tooltipPosition="top"
+                      tooltipStyleClass="ar-list-tooltip"
+                    >
+                      {{ reservation.clientEmail ?? '—' }}
+                    </span>
                   </div>
                 </div>
 
                 <!-- Propriété -->
                 <div class="ar-col-property">
-                  <span class="ar-col-property__name">{{
-                    reservation.propertyTitle ?? '—'
-                  }}</span>
-                  <span class="ar-col-property__city">{{
-                    reservation.propertyCity ?? '—'
-                  }}</span>
+                  <span
+                    class="ar-col-property__name"
+                    [pTooltip]="reservation.propertyTitle ?? '—'"
+                    tooltipPosition="top"
+                    tooltipStyleClass="ar-list-tooltip"
+                  >
+                    {{ reservation.propertyTitle ?? '—' }}
+                  </span>
+                  <span
+                    class="ar-col-property__city"
+                    [pTooltip]="reservation.propertyCity ?? '—'"
+                    tooltipPosition="top"
+                    tooltipStyleClass="ar-list-tooltip"
+                  >
+                    {{ reservation.propertyCity ?? '—' }}
+                  </span>
                 </div>
 
                 <!-- Type -->
-                <span class="ar-col-type">Location</span>
+                <span
+                  class="ar-col-type"
+                  [pTooltip]="reservationType(reservation)"
+                  tooltipPosition="top"
+                  tooltipStyleClass="ar-list-tooltip"
+                >
+                  {{ reservationType(reservation) }}
+                </span>
 
                 <!-- Date -->
                 <div class="ar-col-date">
-                  <span class="ar-col-date__range">
+                  <span
+                    class="ar-col-date__range"
+                    [pTooltip]="formatDateRange(reservation)"
+                    tooltipPosition="top"
+                    tooltipStyleClass="ar-list-tooltip"
+                  >
                     {{ formatDate(reservation.checkInDate) }}&nbsp;→&nbsp;{{
                       formatDate(reservation.checkOutDate)
                     }}
                   </span>
-                  <span class="ar-col-date__nights"
+                  <span
+                    class="ar-col-date__nights"
+                    [pTooltip]="formatDateRange(reservation)"
+                    tooltipPosition="top"
+                    tooltipStyleClass="ar-list-tooltip"
                     >{{ reservation.numberOfNights ?? 0 }} nuits</span
                   >
                 </div>
 
                 <!-- Montant -->
                 <div class="ar-col-amount">
-                  <span class="ar-col-amount__value">{{
-                    formatCurrency(reservation.totalAmount)
-                  }}</span>
+                  <span
+                    class="ar-col-amount__value"
+                    [pTooltip]="formatCurrency(reservation.totalAmount)"
+                    tooltipPosition="top"
+                    tooltipStyleClass="ar-list-tooltip"
+                  >
+                    {{ formatCurrency(reservation.totalAmount) }}
+                  </span>
                   <span class="ar-col-amount__sub">Paiement complet</span>
                 </div>
 
@@ -192,6 +238,9 @@
                   class="ar-status ar-status--{{
                     statusTone(reservation.status)
                   }}"
+                  [pTooltip]="statusLabel(reservation.status)"
+                  tooltipPosition="top"
+                  tooltipStyleClass="ar-list-tooltip"
                 >
                   {{ statusLabel(reservation.status) }}
                 </span>
