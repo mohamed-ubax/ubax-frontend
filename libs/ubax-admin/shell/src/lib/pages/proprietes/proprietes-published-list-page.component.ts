@@ -211,6 +211,14 @@ export class ProprietesPublishedListPageComponent {
           property.transactionType === 'RENT' ||
           property.transactionType === 'RENT_FURNISHED',
       ).length;
+      const occupiedCount = properties.filter(
+        (property) =>
+          property.status === 'RESERVED' || property.status === 'SOLD',
+      ).length;
+      const occupancyRate =
+        properties.length > 0
+          ? `${Math.round((occupiedCount / properties.length) * 100)}%`
+          : '—';
 
       return [
         {
@@ -246,10 +254,10 @@ export class ProprietesPublishedListPageComponent {
           iconColor: '#ffffff',
         },
         {
-          label: 'Prix moyen',
-          value: averagePrice,
+          label: 'Taux moyen',
+          value: occupancyRate,
           trend: KPI_PAGE_TREND,
-          icon: 'pi pi-chart-line',
+          icon: 'pi pi-chart-bar',
           iconBg: '#06b6d4',
           iconColor: '#ffffff',
         },
