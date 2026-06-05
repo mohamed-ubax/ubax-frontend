@@ -47,7 +47,10 @@
               [variant]="getStatusBadge(application()?.status)"
               class="candidature-detail__status-badge"
             >
-              {{ getStatusLabel(application()?.status) }}
+              <span class="candidature-detail__badge-inner">
+                <i [class]="getStatusIcon(application()?.status)"></i>
+                {{ getStatusLabel(application()?.status) }}
+              </span>
             </ubax-status-badge>
           </div>
 

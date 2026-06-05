@@ -80,6 +80,23 @@
     font-weight: 400;
   }
 
+  &__status-badge {
+    ::ng-deep span {
+      border-radius: 20px;
+      padding: 5px 10px;
+    }
+  }
+
+  &__badge-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    i {
+      font-size: 0.75rem;
+    }
+  }
+
   &__terminal-info {
     width: 100%;
   }

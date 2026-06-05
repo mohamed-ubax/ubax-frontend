@@ -1,42 +1,45 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
   inject,
   signal,
+  effect,
+  computed,
+  Component,
+  ChangeDetectionStrategy,
 } from '@angular/core';
-import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { map, firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map, firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import {
-  ApiConfiguration,
   generateReadUrl,
+  ApiConfiguration,
+  type PresignedReadUrlResponse,
   type PartnerApplicationResponse,
   type ApplicationStatusLogResponse,
-  type PresignedReadUrlResponse,
 } from '@ubax-workspace/shared-api-types';
 import {
-  DocumentListComponent,
   type DocumentItem,
   EmptyStateComponent,
-  SectionCardComponent,
   StatusBadgeComponent,
+  SectionCardComponent,
+  DocumentListComponent,
 } from '@ubax-workspace/shared-design-system';
-import { NOTIFICATION_HANDLER, resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
+import {
+  NOTIFICATION_HANDLER,
+  resolveHttpErrorMessage,
+} from '@ubax-workspace/shared-data-access';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
 import {
-  AdminCandidaturesService,
   type DecisionStatus,
+  AdminCandidaturesService,
 } from '../../services/admin-candidatures.service';
 
 type ModalType = 'reject' | 'incomplete' | 'approve' | null;
@@ -61,31 +64,30 @@ const STATUS_LABEL_MAP: Record<string, string> = {
 };
 
 @Component({
-  selector: 'ubax-admin-candidatures-detail-page',
   standalone: true,
+  selector: 'ubax-admin-candidatures-detail-page',
   imports: [
     DatePipe,
-    RouterLink,
-    ReactiveFormsModule,
-    SectionCardComponent,
-    StatusBadgeComponent,
-    EmptyStateComponent,
-    DocumentListComponent,
     DialogModule,
     TextareaModule,
+    ReactiveFormsModule,
+    EmptyStateComponent,
+    SectionCardComponent,
+    StatusBadgeComponent,
+    DocumentListComponent,
   ],
-  templateUrl: './candidatures-detail-page.component.html',
-  styleUrl: './candidatures-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './candidatures-detail-page.component.scss',
+  templateUrl: './candidatures-detail-page.component.html',
 })
 export class CandidaturesDetailPageComponent {
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly svc = inject(AdminCandidaturesService);
-  private readonly notif = inject(NOTIFICATION_HANDLER);
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly notif = inject(NOTIFICATION_HANDLER);
   private readonly apiConfig = inject(ApiConfiguration);
+  private readonly svc = inject(AdminCandidaturesService);
 
   private readonly applicationId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -212,7 +214,9 @@ export class CandidaturesDetailPageComponent {
     try {
       this.application.set(await firstValueFrom(this.svc.getApplication(id)));
     } catch (err) {
-      this.notif.error(resolveHttpErrorMessage(err, 'Impossible de charger la candidature.'));
+      this.notif.error(
+        resolveHttpErrorMessage(err, 'Impossible de charger la candidature.'),
+      );
     } finally {
       this.loading.set(false);
     }
@@ -277,7 +281,12 @@ export class CandidaturesDetailPageComponent {
       };
       this.notif.success(messages[newStatus]);
     } catch (err) {
-      this.notif.error(resolveHttpErrorMessage(err, "L'opération a échoué. Veuillez réessayer."));
+      this.notif.error(
+        resolveHttpErrorMessage(
+          err,
+          "L'opération a échoué. Veuillez réessayer.",
+        ),
+      );
     } finally {
       this.saving.set(false);
     }
@@ -287,6 +296,17 @@ export class CandidaturesDetailPageComponent {
     status: string | undefined,
   ): 'pending' | 'active' | 'warning' | 'danger' | 'neutral' | 'info' {
     return STATUS_BADGE_MAP[status ?? ''] ?? 'neutral';
+  }
+
+  protected getStatusIcon(status: string | undefined): string {
+    const icons: Record<string, string> = {
+      PENDING: 'pi pi-spin pi-spinner',
+      UNDER_REVIEW: 'pi pi-eye',
+      INCOMPLETE: 'pi pi-exclamation-circle',
+      APPROVED: 'pi pi-check-circle',
+      REJECTED: 'pi pi-times-circle',
+    };
+    return icons[status ?? ''] ?? '';
   }
 
   protected getStatusLabel(status: string | undefined): string {
@@ -321,7 +341,8 @@ export class CandidaturesDetailPageComponent {
       const response = await firstValueFrom(
         generateReadUrl(this.http, this.apiConfig.rootUrl, { fileUrl }),
       );
-      const readUrl = (response.body as { data: PresignedReadUrlResponse })?.data?.readUrl;
+      const readUrl = (response.body as { data: PresignedReadUrlResponse })
+        ?.data?.readUrl;
       this.previewItem.set(item);
       this.previewUrl.set(readUrl ?? fileUrl);
     } catch {
