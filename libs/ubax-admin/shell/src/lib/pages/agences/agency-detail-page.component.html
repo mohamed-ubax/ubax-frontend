@@ -472,95 +472,112 @@
 <ubax-confirm-dialog
   [visible]="showConfirm()"
   (visibleChange)="showConfirm.set($event)"
-  [title]="confirmTitle()"
+  [title]="confirmTitle"
   icon="pi pi-exclamation-triangle"
-  [message]="confirmMessage()"
-  [confirmLabel]="confirmLabel()"
-  [confirmSeverity]="confirmSeverity()"
+  [message]="confirmMessage"
+  [confirmLabel]="confirmLabel"
+  [confirmSeverity]="confirmSeverity"
+  [loading]="actionLoading()"
   (confirmed)="confirmToggle()"
 />
 
-@if (showSubscriptionDialog()) {
-  <div
-    class="agency-subscription-dialog__overlay"
-    tabindex="0"
-    (click)="
-      $event.target === $event.currentTarget && closeSubscriptionDialog()
-    "
-    (keydown.enter)="closeSubscriptionDialog()"
-    (keydown.space)="$event.preventDefault(); closeSubscriptionDialog()"
-  >
-    <div class="agency-subscription-dialog card">
-      <div class="agency-subscription-dialog__header">
-        <div>
-          <p class="agency-subscription-dialog__eyebrow">
-            Abonnement partenaire
-          </p>
-          <h2 class="agency-subscription-dialog__title">
-            {{ agency()?.name ?? 'Agence' }}
-          </h2>
-        </div>
-
-        @if (agency(); as selectedAgency) {
-          <ubax-status-badge
-            [variant]="selectedAgency.active ? 'active' : 'suspended'"
-          >
-            {{ selectedAgency.active ? 'Actif' : 'Suspendu' }}
-          </ubax-status-badge>
-        }
+<p-dialog
+  [visible]="showSubscriptionDialog()"
+  (visibleChange)="$event ? null : closeSubscriptionDialog()"
+  [modal]="true"
+  [closable]="false"
+  [dismissableMask]="!subscriptionLoading()"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '34rem', maxWidth: '94vw' }"
+  styleClass="partners-dialog"
+>
+  <div class="partners-dialog__surface">
+    <div class="partners-dialog__header">
+      <div>
+        <p class="partners-page__eyebrow">Abonnement partenaire</p>
+        <h2 class="partners-dialog__title">
+          {{ agency()?.name ?? 'Agence' }}
+        </h2>
       </div>
 
-      <div class="agency-subscription-dialog__body">
-        <div class="agency-subscription-dialog__field">
-          <span class="agency-subscription-dialog__label"
-            >Plan d'abonnement</span
-          >
-          <p-select
-            [options]="subscriptionPlanOptions()"
-            [ngModel]="subscriptionPlanValue()"
-            (ngModelChange)="subscriptionPlanValue.set($event)"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Choisir un plan"
-            appendTo="body"
-            panelStyleClass="agency-subscription-dialog__panel"
-          />
-        </div>
+      @if (agency(); as selectedAgency) {
+        <ubax-status-badge
+          [variant]="selectedAgency.active ? 'active' : 'suspended'"
+        >
+          {{ selectedAgency.active ? 'Actif' : 'Suspendu' }}
+        </ubax-status-badge>
+      }
 
-        <div class="agency-subscription-dialog__field">
-          <span class="agency-subscription-dialog__label"
-            >Date d'expiration</span
-          >
+      <button
+        type="button"
+        class="partners-dialog__close"
+        [disabled]="subscriptionLoading()"
+        aria-label="Fermer"
+        (click)="closeSubscriptionDialog()"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="partners-dialog__body">
+      <div class="partners-field">
+        <span class="partners-field__label">Plan d'abonnement</span>
+        <p-select
+          [options]="[
+            { label: 'FREE', value: 'FREE' },
+            { label: 'PRO', value: 'PRO' },
+            { label: 'PREMIUM', value: 'PREMIUM' },
+          ]"
+          [ngModel]="subscriptionPlanValue"
+          (ngModelChange)="subscriptionPlanValue = $event"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Choisir un plan"
+          appendTo="body"
+          panelStyleClass="partners-plan-panel"
+        />
+      </div>
+
+      <div class="partners-field">
+        <span class="partners-field__label">Date d'expiration</span>
+        <div class="partners-datepicker-wrap">
           <p-datepicker
-            [ngModel]="subscriptionExpiresAtValue()"
-            (ngModelChange)="subscriptionExpiresAtValue.set($event)"
+            [ngModel]="subscriptionExpiresAtValue"
+            (ngModelChange)="subscriptionExpiresAtValue = $event"
             [showIcon]="true"
             [showButtonBar]="true"
             [minDate]="today"
             appendTo="body"
             dateFormat="dd/mm/yy"
             placeholder="jj/mm/aaaa"
-            panelStyleClass="agency-subscription-dialog__panel"
+            inputId="agency-subscription-expiry"
+            panelStyleClass="partners-datepicker-panel"
           />
         </div>
       </div>
+    </div>
 
-      <div class="agency-subscription-dialog__footer">
-        <button
-          type="button"
-          class="agency-detail-page__action agency-detail-page__action--ghost"
-          (click)="closeSubscriptionDialog()"
-        >
-          Annuler
-        </button>
-        <button
-          type="button"
-          class="agency-detail-page__action agency-detail-page__action--primary"
-          (click)="saveSubscription()"
-        >
-          Enregistrer
-        </button>
-      </div>
+    <div class="partners-dialog__footer">
+      <button
+        type="button"
+        class="partners-btn partners-btn--ghost"
+        [disabled]="subscriptionLoading()"
+        (click)="closeSubscriptionDialog()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="partners-btn partners-btn--primary"
+        [disabled]="subscriptionSaveDisabled"
+        (click)="saveSubscription()"
+      >
+        @if (subscriptionLoading()) {
+          <i class="pi pi-spinner pi-spin" aria-hidden="true"></i>
+        }
+        Enregistrer
+      </button>
     </div>
   </div>
-}
+</p-dialog>

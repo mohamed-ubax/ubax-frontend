@@ -25,6 +25,7 @@ import type {
   ReservationResponse,
 } from '@ubax-workspace/shared-api-types';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 
 type HotelAction = 'activate' | 'suspend';
@@ -59,6 +60,7 @@ interface PaymentRow {
   imports: [
     FormsModule,
     DatePickerModule,
+    DialogModule,
     SelectModule,
     ConfirmDialogComponent,
     StatusBadgeComponent,
@@ -94,8 +96,10 @@ export class HotelDetailPageComponent implements OnInit {
   protected readonly showConfirm = signal(false);
   protected readonly currentAction = signal<HotelAction | null>(null);
   protected readonly showSubscriptionDialog = signal(false);
-  protected readonly subscriptionPlanValue = signal<string | null>(null);
-  protected readonly subscriptionExpiresAtValue = signal<Date | null>(null);
+  protected readonly subscriptionLoading = signal(false);
+  protected readonly actionLoading = signal(false);
+  protected subscriptionPlanValue: string | null = null;
+  protected subscriptionExpiresAtValue: Date | null = null;
   protected readonly today = new Date();
 
   protected readonly subscriptionPlanOptions = computed(() => {
@@ -224,28 +228,34 @@ export class HotelDetailPageComponent implements OnInit {
       })),
   );
 
-  protected readonly confirmTitle = computed(() =>
-    this.currentAction() === 'activate'
-      ? "Activer l'hôtel"
-      : "Suspendre l'hôtel",
-  );
-
-  protected readonly confirmMessage = computed(() => {
-    const hotel = this.hotel();
-    const hotelName = hotel?.name ?? 'cet hôtel';
-
+  protected get confirmTitle(): string {
     return this.currentAction() === 'activate'
-      ? `Voulez-vous réactiver ${hotelName} ?`
-      : `Voulez-vous suspendre ${hotelName} ? Les données restent conservées.`;
-  });
+      ? "Activer l'hôtel"
+      : "Suspendre l'hôtel";
+  }
 
-  protected readonly confirmLabel = computed(() =>
-    this.currentAction() === 'activate' ? 'Activer' : 'Suspendre',
-  );
+  protected get confirmMessage(): string {
+    const hotelName = this.hotel()?.name ?? 'cet hôtel';
+    return this.currentAction() === 'activate'
+      ? `Activer ${hotelName} lui permettra d'accéder à nouveau à la plateforme.`
+      : `Suspendre ${hotelName} bloquera l'accès à la plateforme pour cet hôtel.`;
+  }
 
-  protected readonly confirmSeverity = computed(() =>
-    this.currentAction() === 'activate' ? 'success' : 'danger',
-  );
+  protected get confirmLabel(): string {
+    return this.currentAction() === 'activate' ? 'Activer' : 'Suspendre';
+  }
+
+  protected get confirmSeverity(): 'success' | 'warn' {
+    return this.currentAction() === 'activate' ? 'success' : 'warn';
+  }
+
+  protected get subscriptionSaveDisabled(): boolean {
+    return (
+      this.subscriptionLoading() ||
+      !this.subscriptionPlanValue ||
+      !this.subscriptionExpiresAtValue
+    );
+  }
 
   ngOnInit(): void {
     void this.loadHotel();
@@ -279,21 +289,18 @@ export class HotelDetailPageComponent implements OnInit {
       return;
     }
 
-    this.subscriptionPlanValue.set(
-      hotel.subscriptionPlan?.trim().toUpperCase() ?? null,
-    );
-    this.subscriptionExpiresAtValue.set(
-      hotel.subscriptionExpiresAt
-        ? new Date(hotel.subscriptionExpiresAt)
-        : null,
-    );
+    this.subscriptionPlanValue =
+      hotel.subscriptionPlan?.trim().toUpperCase() ?? null;
+    this.subscriptionExpiresAtValue = hotel.subscriptionExpiresAt
+      ? new Date(hotel.subscriptionExpiresAt)
+      : null;
     this.showSubscriptionDialog.set(true);
   }
 
   protected closeSubscriptionDialog(): void {
     this.showSubscriptionDialog.set(false);
-    this.subscriptionPlanValue.set(null);
-    this.subscriptionExpiresAtValue.set(null);
+    this.subscriptionPlanValue = null;
+    this.subscriptionExpiresAtValue = null;
   }
 
   protected promptToggle(): void {
@@ -307,45 +314,51 @@ export class HotelDetailPageComponent implements OnInit {
       return;
     }
 
+    this.actionLoading.set(true);
     try {
-      if (this.currentAction() === 'activate') {
+      const action = this.currentAction();
+      if (action === 'activate') {
         await this.store.activate(hotel.id);
       } else {
         await this.store.suspend(hotel.id);
       }
 
       this.notif.success(
-        this.currentAction() === 'activate'
-          ? 'Hôtel activé.'
-          : 'Hôtel suspendu.',
+        action === 'activate' ? 'Hôtel activé.' : 'Hôtel suspendu.',
       );
       this.showConfirm.set(false);
     } catch {
-      this.notif.error(this.store.error() ?? 'L’opération a échoué.');
+      this.notif.error(this.store.error() ?? "L'opération a échoué.");
+    } finally {
+      this.actionLoading.set(false);
     }
   }
 
   protected async saveSubscription(): Promise<void> {
     const hotel = this.hotel();
-    const plan = this.subscriptionPlanValue();
-    const expiresAt = this.subscriptionExpiresAtValue();
-
-    if (!hotel?.id || !plan || !expiresAt) {
+    if (
+      !hotel?.id ||
+      !this.subscriptionPlanValue ||
+      !this.subscriptionExpiresAtValue
+    ) {
       this.notif.error("Veuillez renseigner un plan et une date d'expiration.");
       return;
     }
 
+    this.subscriptionLoading.set(true);
     try {
       await this.store.updateSubscription(hotel.id, {
-        subscriptionPlan: plan,
-        subscriptionExpiresAt: this.toIsoDateTime(expiresAt),
+        subscriptionPlan: this.subscriptionPlanValue,
+        subscriptionExpiresAt: this.toIsoDateTime(this.subscriptionExpiresAtValue),
       });
-      this.notif.success('Abonnement mis à jour.');
+      this.notif.success("Abonnement de l'hôtel mis à jour.");
       this.closeSubscriptionDialog();
     } catch {
       this.notif.error(
         this.store.error() ?? "Impossible de mettre à jour l'abonnement.",
       );
+    } finally {
+      this.subscriptionLoading.set(false);
     }
   }
 
@@ -467,7 +480,7 @@ export class HotelDetailPageComponent implements OnInit {
 
   protected relativeTime(value?: string | null): string {
     if (!value) {
-      return 'à l’instant';
+      return "à l'instant";
     }
 
     const date = new Date(value);

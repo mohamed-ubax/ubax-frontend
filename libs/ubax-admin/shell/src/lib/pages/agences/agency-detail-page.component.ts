@@ -24,6 +24,7 @@ import type {
   PropertyResponse,
 } from '@ubax-workspace/shared-api-types';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 
 type AgencyAction = 'activate' | 'suspend';
@@ -58,6 +59,7 @@ interface PaymentRow {
   imports: [
     FormsModule,
     DatePickerModule,
+    DialogModule,
     SelectModule,
     ConfirmDialogComponent,
     StatusBadgeComponent,
@@ -92,8 +94,10 @@ export class AgencyDetailPageComponent implements OnInit {
   protected readonly showConfirm = signal(false);
   protected readonly currentAction = signal<AgencyAction | null>(null);
   protected readonly showSubscriptionDialog = signal(false);
-  protected readonly subscriptionPlanValue = signal<string | null>(null);
-  protected readonly subscriptionExpiresAtValue = signal<Date | null>(null);
+  protected readonly subscriptionLoading = signal(false);
+  protected readonly actionLoading = signal(false);
+  protected subscriptionPlanValue: string | null = null;
+  protected subscriptionExpiresAtValue: Date | null = null;
   protected readonly today = new Date();
 
   protected readonly subscriptionPlanOptions = computed(() => {
@@ -215,28 +219,34 @@ export class AgencyDetailPageComponent implements OnInit {
       })),
   );
 
-  protected readonly confirmTitle = computed(() =>
-    this.currentAction() === 'activate'
-      ? "Activer l'agence"
-      : "Suspendre l'agence",
-  );
-
-  protected readonly confirmMessage = computed(() => {
-    const agency = this.agency();
-    const agencyName = agency?.name ?? 'cette agence';
-
+  protected get confirmTitle(): string {
     return this.currentAction() === 'activate'
-      ? `Voulez-vous réactiver ${agencyName} ?`
-      : `Voulez-vous suspendre ${agencyName} ? Les données restent conservées.`;
-  });
+      ? "Activer l'agence"
+      : "Suspendre l'agence";
+  }
 
-  protected readonly confirmLabel = computed(() =>
-    this.currentAction() === 'activate' ? 'Activer' : 'Suspendre',
-  );
+  protected get confirmMessage(): string {
+    const agencyName = this.agency()?.name ?? 'cette agence';
+    return this.currentAction() === 'activate'
+      ? `Activer ${agencyName} lui permettra d'accéder à nouveau à la plateforme.`
+      : `Suspendre ${agencyName} bloquera l'accès à la plateforme pour cette agence.`;
+  }
 
-  protected readonly confirmSeverity = computed(() =>
-    this.currentAction() === 'activate' ? 'success' : 'danger',
-  );
+  protected get confirmLabel(): string {
+    return this.currentAction() === 'activate' ? 'Activer' : 'Suspendre';
+  }
+
+  protected get confirmSeverity(): 'success' | 'warn' {
+    return this.currentAction() === 'activate' ? 'success' : 'warn';
+  }
+
+  protected get subscriptionSaveDisabled(): boolean {
+    return (
+      this.subscriptionLoading() ||
+      !this.subscriptionPlanValue ||
+      !this.subscriptionExpiresAtValue
+    );
+  }
 
   ngOnInit(): void {
     void this.loadAgency();
@@ -272,21 +282,18 @@ export class AgencyDetailPageComponent implements OnInit {
       return;
     }
 
-    this.subscriptionPlanValue.set(
-      agency.subscriptionPlan?.trim().toUpperCase() ?? null,
-    );
-    this.subscriptionExpiresAtValue.set(
-      agency.subscriptionExpiresAt
-        ? new Date(agency.subscriptionExpiresAt)
-        : null,
-    );
+    this.subscriptionPlanValue =
+      agency.subscriptionPlan?.trim().toUpperCase() ?? null;
+    this.subscriptionExpiresAtValue = agency.subscriptionExpiresAt
+      ? new Date(agency.subscriptionExpiresAt)
+      : null;
     this.showSubscriptionDialog.set(true);
   }
 
   protected closeSubscriptionDialog(): void {
     this.showSubscriptionDialog.set(false);
-    this.subscriptionPlanValue.set(null);
-    this.subscriptionExpiresAtValue.set(null);
+    this.subscriptionPlanValue = null;
+    this.subscriptionExpiresAtValue = null;
   }
 
   protected promptToggle(): void {
@@ -300,45 +307,51 @@ export class AgencyDetailPageComponent implements OnInit {
       return;
     }
 
+    this.actionLoading.set(true);
     try {
-      if (this.currentAction() === 'activate') {
+      const action = this.currentAction();
+      if (action === 'activate') {
         await this.store.activate(agency.id);
       } else {
         await this.store.suspend(agency.id);
       }
 
       this.notif.success(
-        this.currentAction() === 'activate'
-          ? 'Agence activée.'
-          : 'Agence suspendue.',
+        action === 'activate' ? 'Agence activée.' : 'Agence suspendue.',
       );
       this.showConfirm.set(false);
     } catch {
       this.notif.error(this.store.error() ?? "L'opération a échoué.");
+    } finally {
+      this.actionLoading.set(false);
     }
   }
 
   protected async saveSubscription(): Promise<void> {
     const agency = this.agency();
-    const plan = this.subscriptionPlanValue();
-    const expiresAt = this.subscriptionExpiresAtValue();
-
-    if (!agency?.id || !plan || !expiresAt) {
+    if (
+      !agency?.id ||
+      !this.subscriptionPlanValue ||
+      !this.subscriptionExpiresAtValue
+    ) {
       this.notif.error("Veuillez renseigner un plan et une date d'expiration.");
       return;
     }
 
+    this.subscriptionLoading.set(true);
     try {
       await this.store.updateSubscription(agency.id, {
-        subscriptionPlan: plan,
-        subscriptionExpiresAt: this.toIsoDateTime(expiresAt),
+        subscriptionPlan: this.subscriptionPlanValue,
+        subscriptionExpiresAt: this.toIsoDateTime(this.subscriptionExpiresAtValue),
       });
-      this.notif.success('Abonnement mis à jour.');
+      this.notif.success("Abonnement de l'agence mis à jour.");
       this.closeSubscriptionDialog();
     } catch {
       this.notif.error(
         this.store.error() ?? "Impossible de mettre à jour l'abonnement.",
       );
+    } finally {
+      this.subscriptionLoading.set(false);
     }
   }
 
