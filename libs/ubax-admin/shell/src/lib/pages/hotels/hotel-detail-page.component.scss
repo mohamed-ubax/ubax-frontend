@@ -95,7 +95,9 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 140ms ease, opacity 140ms ease;
+  transition:
+    background-color 140ms ease,
+    opacity 140ms ease;
   white-space: nowrap;
 
   &:disabled {
@@ -125,7 +127,6 @@
 .hotel-detail-page {
   display: grid;
   gap: 20px;
-  padding: 20px 22px 28px;
   background:
     radial-gradient(
       circle at top right,
@@ -706,7 +707,7 @@
 .hotel-detail-page__bottom-title {
   margin: 0;
   color: #1f3348;
-  font-size: 31px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1.15;
 }
