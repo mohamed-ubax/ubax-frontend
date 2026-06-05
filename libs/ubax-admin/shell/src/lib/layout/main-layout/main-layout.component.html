@@ -197,6 +197,14 @@
             <div class="sidebar-subnav__line-bg"></div>
             <div class="sidebar-subnav__items">
               <a
+                routerLink="/proprietes"
+                routerLinkActive="sidebar-subitem--active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="sidebar-subitem"
+              >
+                <span>Modération</span>
+              </a>
+              <a
                 routerLink="/proprietes/agences"
                 routerLinkActive="sidebar-subitem--active"
                 class="sidebar-subitem"
@@ -214,17 +222,6 @@
           </div>
         </div>
       }
-
-      <!-- Modération -->
-      <a
-        routerLink="/proprietes"
-        routerLinkActive="sidebar-nav-item--active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="sidebar-nav-item"
-      >
-        <i class="pi pi-shield text-lg w-6 flex-shrink-0"></i>
-        <span class="flex-1 truncate">Modération</span>
-      </a>
 
       <a
         routerLink="/reservations"
