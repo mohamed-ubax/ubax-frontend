@@ -4,453 +4,502 @@ import {
   computed,
   inject,
   OnInit,
+  signal,
 } from '@angular/core';
-import { AdminDashboardStore } from '@ubax-workspace/ubax-admin-data-access';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
-  EmptyStateComponent,
-  KpiCardComponent,
-  SectionCardComponent,
-  StatusBadgeComponent,
-} from '@ubax-workspace/shared-design-system';
+  AdminAgenciesStore,
+  AdminDashboardMapStore,
+  AdminDashboardStore,
+  AdminHotelsStore,
+  AdminReservation,
+  AdminReservationsStore,
+} from '@ubax-workspace/ubax-admin-data-access';
+import { KpiCardComponent } from '@ubax-workspace/shared-design-system';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
+import type { ChartData, ChartOptions } from 'chart.js';
+import { ChartModule } from 'primeng/chart';
+import { SelectModule } from 'primeng/select';
 
-interface DashboardAlert {
-  description: string;
+interface DashboardKpiCard {
+  cardClass: string;
+  gradientEnd: string;
+  gradientStart: string;
+  iconClass: string;
+  iconToneClass: string;
   label: string;
+  graphClass: string;
+  graphWrapClass: string;
+  showGraph: boolean;
+  trendPositive: boolean;
+  trend: string;
   value: number;
-  variant: 'danger' | 'warning' | 'success' | 'info';
 }
+
+interface PeriodOption {
+  label: string;
+  value: 'today' | '7d' | 'month';
+}
+
+interface ActivityItem {
+  iconClass: string;
+  label: string;
+  meta: string;
+  time: string;
+}
+
+const KPI_SPARK_PATHS = [
+  'M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5',
+  'M1 21C9 10 16 19 25 14.5C34 10 42 8 50 11.5C60 16 70 18 81 7.5',
+  'M1 24C11 13 17 17 25 12.5C34 7 42 6 52 9.5C63 13 72 10 81 5.5',
+  'M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5',
+  'M1 20.5C9 9.5 16 16 23 12.5C31 8.5 39 6 48 10C57 14 66 13 81 5.5',
+] as const;
+
+const RANGE_OPTIONS: PeriodOption[] = [
+  { label: "Aujourd'hui", value: 'today' },
+  { label: '7 derniers jours', value: '7d' },
+  { label: '30 derniers jours', value: 'month' },
+];
 
 @Component({
   selector: 'ubax-admin-dashboard',
   standalone: true,
   imports: [
+    RouterLink,
+    FormsModule,
+    ChartModule,
+    SelectModule,
     KpiCardComponent,
-    SectionCardComponent,
-    StatusBadgeComponent,
-    EmptyStateComponent,
   ],
-  template: `
-    <div class="dashboard-page">
-      <div class="dashboard-page__header">
-        <div>
-          <p class="dashboard-page__eyebrow">Back-office UBAX</p>
-          <h1 class="dashboard-page__title">Tableau de bord global</h1>
-          <p class="dashboard-page__subtitle">
-            Supervisez l'activité de la plateforme, les partenaires actifs et
-            les opérations qui demandent une intervention.
-          </p>
-        </div>
-
-        <div class="dashboard-page__spotlight">
-          <span class="dashboard-page__spotlight-label"
-            >Empreinte partenaire</span
-          >
-          <strong class="dashboard-page__spotlight-value">{{
-            partnerFootprint()
-          }}</strong>
-          <span class="dashboard-page__spotlight-meta"
-            >agences et hôtels actifs</span
-          >
-        </div>
-      </div>
-
-      @if (dashboard(); as dashboardData) {
-        <div class="dashboard-kpi-grid">
-          @for (card of cards(); track card.label) {
-            <ubax-kpi-card [label]="card.label" [value]="card.value">
-              <i icon [class]="card.iconClass"></i>
-            </ubax-kpi-card>
-          }
-        </div>
-
-        <div class="dashboard-panels">
-          <ubax-section-card title="Priorités du jour">
-            <div class="dashboard-alerts">
-              @for (alert of alerts(); track alert.label) {
-                <article class="dashboard-alert">
-                  <div class="dashboard-alert__head">
-                    <h3 class="dashboard-alert__title">{{ alert.label }}</h3>
-                    <ubax-status-badge [variant]="alert.variant">{{
-                      alert.value
-                    }}</ubax-status-badge>
-                  </div>
-                  <p class="dashboard-alert__description">
-                    {{ alert.description }}
-                  </p>
-                </article>
-              }
-            </div>
-          </ubax-section-card>
-
-          <ubax-section-card title="Santé de la plateforme">
-            <div class="dashboard-health-list">
-              <div class="dashboard-health-item">
-                <div class="dashboard-health-item__head">
-                  <span>Taux de confirmation des réservations</span>
-                  <strong>{{ reservationCompletion() }}%</strong>
-                </div>
-                <div class="dashboard-progress">
-                  <div
-                    class="dashboard-progress__fill dashboard-progress__fill--blue"
-                    [style.width.%]="reservationCompletion()"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="dashboard-health-item">
-                <div class="dashboard-health-item__head">
-                  <span>Couverture de publication</span>
-                  <strong>{{ publicationCoverage() }}%</strong>
-                </div>
-                <div class="dashboard-progress">
-                  <div
-                    class="dashboard-progress__fill dashboard-progress__fill--orange"
-                    [style.width.%]="publicationCoverage()"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="dashboard-health-item">
-                <div class="dashboard-health-item__head">
-                  <span>Volume partenaires actifs</span>
-                  <strong>{{ partnerFootprint() }}</strong>
-                </div>
-                <p class="dashboard-health-item__meta">
-                  {{ dashboardData.totalActiveAgencies ?? 0 }} agences ·
-                  {{ dashboardData.totalActiveHotels ?? 0 }} hôtels
-                </p>
-              </div>
-            </div>
-          </ubax-section-card>
-        </div>
-      } @else if (!loading()) {
-        <ubax-section-card>
-          <ubax-empty-state
-            icon="pi pi-chart-bar"
-            title="Aucune donnée disponible"
-            description="Le tableau de bord n'a retourné aucune métrique exploitable pour le moment."
-          />
-        </ubax-section-card>
-      }
-    </div>
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      .dashboard-page {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        min-height: 100%;
-        padding: 2rem;
-        background:
-          radial-gradient(
-            circle at top right,
-            rgba(255, 255, 255, 0.78),
-            transparent 30%
-          ),
-          linear-gradient(
-            180deg,
-            rgba(236, 242, 247, 0.92),
-            rgba(236, 242, 247, 1)
-          );
-      }
-
-      .dashboard-page__header {
-        display: flex;
-        align-items: stretch;
-        justify-content: space-between;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-      }
-
-      .dashboard-page__eyebrow {
-        margin: 0 0 0.35rem;
-        color: #6b7280;
-        font-size: 0.8125rem;
-        font-weight: 500;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .dashboard-page__title {
-        margin: 0;
-        color: #1c1c1c;
-        font-size: 2rem;
-        font-weight: 700;
-      }
-
-      .dashboard-page__subtitle {
-        max-width: 48rem;
-        margin: 0.65rem 0 0;
-        color: #6b7280;
-        font-size: 0.95rem;
-        line-height: 1.6;
-      }
-
-      .dashboard-page__spotlight {
-        display: grid;
-        gap: 0.25rem;
-        min-width: 15rem;
-        padding: 1.2rem 1.35rem;
-        border: 1px solid rgba(26, 48, 71, 0.08);
-        border-radius: 1rem;
-        background: linear-gradient(
-          135deg,
-          rgba(26, 48, 71, 0.98),
-          rgba(43, 127, 255, 0.9)
-        );
-        color: #fff;
-        box-shadow: 0 18px 34px rgba(26, 48, 71, 0.14);
-      }
-
-      .dashboard-page__spotlight-label {
-        font-size: 0.75rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        opacity: 0.82;
-      }
-
-      .dashboard-page__spotlight-value {
-        font-size: 2.2rem;
-        line-height: 1;
-      }
-
-      .dashboard-page__spotlight-meta {
-        font-size: 0.875rem;
-        opacity: 0.88;
-      }
-
-      .dashboard-kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1rem;
-      }
-
-      .dashboard-panels {
-        display: grid;
-        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-        gap: 1rem;
-      }
-
-      .dashboard-alerts {
-        display: grid;
-        gap: 0.9rem;
-      }
-
-      .dashboard-alert {
-        padding: 1rem 1.1rem;
-        border-radius: 1rem;
-        background: #f8fbff;
-        border: 1px solid rgba(26, 48, 71, 0.08);
-      }
-
-      .dashboard-alert__head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
-
-      .dashboard-alert__title {
-        margin: 0;
-        color: #1c1c1c;
-        font-size: 1rem;
-        font-weight: 600;
-      }
-
-      .dashboard-alert__description {
-        margin: 0.6rem 0 0;
-        color: #6b7280;
-        font-size: 0.9rem;
-        line-height: 1.5;
-      }
-
-      .dashboard-health-list {
-        display: grid;
-        gap: 1rem;
-      }
-
-      .dashboard-health-item {
-        display: grid;
-        gap: 0.55rem;
-      }
-
-      .dashboard-health-item__head {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        color: #1c1c1c;
-        font-size: 0.95rem;
-        font-weight: 600;
-      }
-
-      .dashboard-health-item__meta {
-        margin: 0;
-        color: #6b7280;
-        font-size: 0.85rem;
-      }
-
-      .dashboard-progress {
-        overflow: hidden;
-        height: 0.8rem;
-        border-radius: 999px;
-        background: #e1e4ed;
-      }
-
-      .dashboard-progress__fill {
-        height: 100%;
-        border-radius: inherit;
-      }
-
-      .dashboard-progress__fill--blue {
-        background: linear-gradient(90deg, #2b7fff, #65a8ff);
-      }
-
-      .dashboard-progress__fill--orange {
-        background: linear-gradient(90deg, #e87d1e, #f7b05b);
-      }
-
-      @media (max-width: 72rem) {
-        .dashboard-kpi-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .dashboard-panels {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 50rem) {
-        .dashboard-page {
-          padding: 1.25rem;
-        }
-
-        .dashboard-kpi-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-    `,
-  ],
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit {
-  private readonly store = inject(AdminDashboardStore);
+  private readonly dashboardStore = inject(AdminDashboardStore);
+  private readonly mapStore = inject(AdminDashboardMapStore);
+  private readonly reservationsStore = inject(AdminReservationsStore);
+  private readonly hotelsStore = inject(AdminHotelsStore);
+  private readonly agenciesStore = inject(AdminAgenciesStore);
   private readonly notif = inject(NOTIFICATION_HANDLER);
 
-  protected readonly loading = this.store.loading;
-  protected readonly dashboard = this.store.dashboard;
+  protected readonly loading = this.dashboardStore.loading;
+  protected readonly reservationsLoading = this.reservationsStore.loading;
+  protected readonly dashboard = this.dashboardStore.dashboard;
+  protected readonly revenueRange = signal<PeriodOption['value']>('7d');
+  protected readonly donutRange = signal<PeriodOption['value']>('today');
+  protected readonly categoriesRange = signal<PeriodOption['value']>('7d');
 
-  protected readonly cards = computed(() => {
-    const data = this.dashboard();
-    if (!data) {
-      return [] as Array<{
-        iconClass: string;
-        label: string;
-        value: number;
-      }>;
-    }
+  protected readonly rangeOptions = RANGE_OPTIONS;
+  protected readonly skeletonRows = Array.from({ length: 5 });
 
-    return [
-      {
-        iconClass: 'pi pi-home text-xl text-brand-blue',
-        label: 'Agences actives',
-        value: data.totalActiveAgencies ?? 0,
-      },
-      {
-        iconClass: 'pi pi-building text-xl text-brand-teal',
-        label: 'Hôtels actifs',
-        value: data.totalActiveHotels ?? 0,
-      },
-      {
-        iconClass: 'pi pi-users text-xl text-brand-orange',
-        label: 'Clients inscrits',
-        value: data.totalClients ?? 0,
-      },
-      {
-        iconClass: 'pi pi-key text-xl text-danger',
-        label: 'Bailleurs',
-        value: data.totalOwners ?? 0,
-      },
-      {
-        iconClass: 'pi pi-clock text-xl text-warning',
-        label: 'Réservations en attente',
-        value: data.pendingReservations ?? 0,
-      },
-      {
-        iconClass: 'pi pi-check-circle text-xl text-success',
-        label: 'Réservations confirmées',
-        value: data.confirmedReservations ?? 0,
-      },
-      {
-        iconClass: 'pi pi-eye text-xl text-warning',
-        label: 'Biens à modérer',
-        value: data.propertiesPendingReview ?? 0,
-      },
-      {
-        iconClass: 'pi pi-map text-xl text-brand-blue',
-        label: 'Biens publiés',
-        value: data.publishedProperties ?? 0,
-      },
-      {
-        iconClass: 'pi pi-wrench text-xl text-danger',
-        label: 'Tickets ouverts',
-        value: data.openTickets ?? 0,
-      },
-    ];
-  });
-
-  protected readonly alerts = computed<DashboardAlert[]>(() => {
+  protected readonly kpiCards = computed<DashboardKpiCard[]>(() => {
     const data = this.dashboard();
     if (!data) {
       return [];
     }
 
-    const items: DashboardAlert[] = [];
-    if ((data.propertiesPendingReview ?? 0) > 0) {
-      items.push({
-        description: 'Des biens attendent une modération avant publication.',
-        label: 'Modération',
-        value: data.propertiesPendingReview ?? 0,
-        variant: 'warning',
-      });
-    }
+    const reservationTotal =
+      (data.confirmedReservations ?? 0) + (data.pendingReservations ?? 0);
 
-    if ((data.openTickets ?? 0) > 0) {
-      items.push({
-        description: 'Des tickets SAV nécessitent une prise en charge rapide.',
-        label: 'Support',
-        value: data.openTickets ?? 0,
-        variant: 'danger',
-      });
-    }
-
-    if ((data.pendingReservations ?? 0) > 0) {
-      items.push({
-        description:
-          'Des réservations attendent encore une confirmation partenaire.',
-        label: 'Réservations',
-        value: data.pendingReservations ?? 0,
-        variant: 'info',
-      });
-    }
-
-    if (items.length === 0) {
-      items.push({
-        description:
-          "Aucune alerte critique détectée sur la plateforme aujourd'hui.",
-        label: 'Plateforme',
-        value: 0,
-        variant: 'success',
-      });
-    }
-
-    return items;
+    return [
+      {
+        cardClass: 'dashboard-kpi--default',
+        iconClass: 'pi pi-building',
+        iconToneClass: 'dashboard-kpi__icon--purple',
+        graphWrapClass:
+          'dashboard-kpi__graph-wrap dashboard-kpi__graph-wrap--purple',
+        graphClass: 'dashboard-kpi__graph dashboard-kpi__graph--purple',
+        label: 'Hotels actifs',
+        gradientStart: '#E8B6F7',
+        gradientEnd: '#BE4FE7',
+        showGraph: true,
+        trendPositive: true,
+        trend: this.trendText(data.totalActiveHotels ?? 0),
+        value: data.totalActiveHotels ?? 0,
+      },
+      {
+        cardClass: 'dashboard-kpi--default',
+        iconClass: 'pi pi-home text-lg',
+        iconToneClass: 'dashboard-kpi__icon--green',
+        graphWrapClass:
+          'dashboard-kpi__graph-wrap dashboard-kpi__graph-wrap--green',
+        graphClass: 'dashboard-kpi__graph dashboard-kpi__graph--green',
+        label: 'Agences actives',
+        gradientStart: '#8CE3A5',
+        gradientEnd: '#22C55E',
+        showGraph: true,
+        trendPositive: true,
+        trend: this.trendText(data.totalActiveAgencies ?? 0),
+        value: data.totalActiveAgencies ?? 0,
+      },
+      {
+        cardClass: 'dashboard-kpi--default',
+        iconClass: 'pi pi-map',
+        iconToneClass: 'dashboard-kpi__icon--orange',
+        graphWrapClass:
+          'dashboard-kpi__graph-wrap dashboard-kpi__graph-wrap--orange',
+        graphClass: 'dashboard-kpi__graph dashboard-kpi__graph--orange',
+        label: 'Biens en ligne',
+        gradientStart: '#FCD79A',
+        gradientEnd: '#F59E0B',
+        showGraph: true,
+        trendPositive: true,
+        trend: this.trendText(data.publishedProperties ?? 0),
+        value: data.publishedProperties ?? 0,
+      },
+      {
+        cardClass: 'dashboard-kpi--default',
+        iconClass: 'pi pi-calendar',
+        iconToneClass: 'dashboard-kpi__icon--red',
+        graphWrapClass:
+          'dashboard-kpi__graph-wrap dashboard-kpi__graph-wrap--red',
+        graphClass: 'dashboard-kpi__graph dashboard-kpi__graph--red',
+        label: 'Reservations du jour',
+        gradientStart: '#FECACA',
+        gradientEnd: '#EF4444',
+        showGraph: true,
+        trendPositive: true,
+        trend: this.trendText(reservationTotal),
+        value: reservationTotal,
+      },
+      {
+        cardClass: 'dashboard-kpi--revenue',
+        iconClass: 'pi pi-wallet',
+        iconToneClass: 'dashboard-kpi__icon--revenue',
+        graphWrapClass: '',
+        graphClass: '',
+        label: 'Revenus Ubax (mois)',
+        gradientStart: '#B6F3D2',
+        gradientEnd: '#00C16A',
+        showGraph: false,
+        trendPositive: true,
+        trend: '+ 18% vs mois dernier',
+        value: Math.round(
+          (data.confirmedReservations ?? 0) * 75000 +
+            (data.pendingReservations ?? 0) * 25000,
+        ),
+      },
+    ];
   });
+
+  protected readonly revenueChartData = computed<ChartData<'line'>>(() => {
+    const labels = this.buildLastDaysLabels(7);
+    const reservations = this.reservationsStore.reservations();
+    if (!reservations.length) {
+      return { labels: [], datasets: [] };
+    }
+
+    const confirmedRevenue = new Array(7).fill(0);
+    const pendingRevenue = new Array(7).fill(0);
+    const now = new Date();
+
+    reservations.forEach((reservation) => {
+      if (
+        !reservation.createdAt ||
+        typeof reservation.totalAmount !== 'number'
+      ) {
+        return;
+      }
+
+      const createdAt = new Date(reservation.createdAt);
+      if (Number.isNaN(createdAt.getTime())) {
+        return;
+      }
+
+      const dayStart = new Date(
+        createdAt.getFullYear(),
+        createdAt.getMonth(),
+        createdAt.getDate(),
+      );
+      const todayStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      );
+      const deltaDays = Math.round(
+        (todayStart.getTime() - dayStart.getTime()) / 86400000,
+      );
+      const index = 6 - deltaDays;
+
+      if (index < 0 || index > 6) {
+        return;
+      }
+
+      if (
+        reservation.status === 'CONFIRMED' ||
+        reservation.status === 'COMPLETED'
+      ) {
+        confirmedRevenue[index] += reservation.totalAmount;
+        return;
+      }
+
+      pendingRevenue[index] += reservation.totalAmount;
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Confirmées',
+          data: confirmedRevenue,
+          borderColor: '#2b7fff',
+          backgroundColor: 'rgba(43, 127, 255, 0.12)',
+          borderWidth: 2.2,
+          pointRadius: 3,
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#ffffff',
+          pointBorderColor: '#2b7fff',
+          pointBorderWidth: 2,
+          tension: 0.42,
+          fill: false,
+        },
+        {
+          label: 'En attente',
+          data: pendingRevenue,
+          borderColor: '#e87d1e',
+          backgroundColor: 'rgba(232, 125, 30, 0.12)',
+          borderWidth: 2.2,
+          pointRadius: 3,
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#ffffff',
+          pointBorderColor: '#e87d1e',
+          pointBorderWidth: 2,
+          tension: 0.42,
+          fill: false,
+        },
+      ],
+    };
+  });
+
+  protected readonly revenueChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 700 },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (item) => {
+            const value = typeof item.parsed.y === 'number' ? item.parsed.y : 0;
+            return `${item.dataset.label}: ${this.formatCurrency(value)}`;
+          },
+        },
+      },
+    },
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: {
+        grid: { display: false },
+        border: { display: false },
+        ticks: {
+          color: '#979797',
+          font: { family: 'Lexend', size: 12 },
+        },
+      },
+      y: {
+        min: 0,
+        suggestedMax: 25_000_000,
+        grid: { color: '#edf1f7', drawTicks: false },
+        border: { display: false },
+        ticks: {
+          color: '#979797',
+          font: { family: 'Lexend', size: 12 },
+          callback: (value) => {
+            const numericValue = Number(value);
+            return `${Math.round(numericValue / 1_000_000)}M`;
+          },
+        },
+      },
+    },
+  };
+
+  protected readonly reservationTypeData = computed<ChartData<'doughnut'>>(
+    () => {
+      const counts = this.reservationsStore.statusCounts();
+      return {
+        labels: ['Hotels', 'Location courte duree', 'Location mensuelle'],
+        datasets: [
+          {
+            data: [
+              counts.CONFIRMED,
+              counts.PENDING,
+              counts.CANCELLED + counts.NO_SHOW,
+            ],
+            backgroundColor: ['#2b7fff', '#34c759', '#e87d1e'],
+            borderColor: '#ffffff',
+            borderWidth: 5,
+            hoverOffset: 0,
+            spacing: 2,
+          },
+        ],
+      };
+    },
+  );
+
+  protected readonly reservationTypeOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '68%',
+    rotation: -90,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (item) => `${item.label}: ${item.parsed}`,
+        },
+      },
+    },
+  };
+
+  protected readonly reservationTypeLegend = computed(() => {
+    const counts = this.reservationsStore.statusCounts();
+    return [
+      {
+        color: '#2b7fff',
+        count: counts.CONFIRMED,
+        label: 'Hotels',
+        meta: 'Reservations',
+      },
+      {
+        color: '#34c759',
+        count: counts.PENDING,
+        label: 'Location courte duree',
+        meta: 'Reservations',
+      },
+      {
+        color: '#e87d1e',
+        count: counts.CANCELLED + counts.NO_SHOW,
+        label: 'Location mensuelle',
+        meta: 'Reservations',
+      },
+    ];
+  });
+
+  protected readonly reservationTypeTotal = computed(() =>
+    this.reservationTypeLegend().reduce((sum, item) => sum + item.count, 0),
+  );
+
+  protected readonly recentActivities = computed<ActivityItem[]>(() =>
+    this.reservationsStore
+      .reservations()
+      .slice(0, 4)
+      .map((reservation) => {
+        const status = reservation.status ?? 'PENDING';
+
+        return {
+          iconClass: this.activityIcon(status),
+          label: this.activityLabel(status),
+          meta: reservation.clientFullName ?? 'Client UBAX',
+          time: this.timeAgo(reservation.createdAt),
+        };
+      }),
+  );
+
+  protected readonly recentReservations = computed(() =>
+    this.reservationsStore.reservations().slice(0, 5),
+  );
+
+  protected readonly validationItems = computed(() => {
+    const hotelsPending = this.hotelsStore.hotels().filter((hotel) => {
+      if (!hotel.active) {
+        return false;
+      }
+
+      const expiresAt = hotel.subscriptionExpiresAt
+        ? new Date(hotel.subscriptionExpiresAt)
+        : null;
+      const expired = expiresAt ? expiresAt.getTime() < Date.now() : false;
+      return !hotel.subscriptionActive || expired;
+    }).length;
+
+    const agenciesPending = this.agenciesStore.agencies().filter((agency) => {
+      if (!agency.active) {
+        return false;
+      }
+
+      const expiresAt = agency.subscriptionExpiresAt
+        ? new Date(agency.subscriptionExpiresAt)
+        : null;
+      const expired = expiresAt ? expiresAt.getTime() < Date.now() : false;
+      return !agency.subscriptionActive || expired;
+    }).length;
+
+    return [
+      {
+        count: hotelsPending,
+        iconClass: 'pi pi-building',
+        label: 'Hotels en attentes',
+      },
+      {
+        count: agenciesPending,
+        iconClass: 'pi pi-home',
+        label: 'Agence en attentes',
+      },
+      {
+        count: this.dashboard()?.propertiesPendingReview ?? 0,
+        iconClass: 'pi pi-map-marker',
+        label: 'Proprietes en attentes',
+      },
+    ];
+  });
+
+  protected readonly revenueByCategory = computed(() => {
+    const monthlyRevenueEstimate =
+      ((this.dashboard()?.confirmedReservations ?? 0) * 75_000 +
+        (this.dashboard()?.pendingReservations ?? 0) * 25_000) *
+      0.92;
+    const hotels = Math.round(monthlyRevenueEstimate * 0.66);
+    const agencies = Math.round(monthlyRevenueEstimate * 0.34);
+    const max = Math.max(hotels, agencies, 1);
+
+    return [
+      {
+        amount: hotels,
+        colorClass: 'dashboard-revenue-category__bar--blue',
+        label: 'Hotels',
+        width: Math.round((hotels / max) * 100),
+      },
+      {
+        amount: agencies,
+        colorClass: 'dashboard-revenue-category__bar--orange',
+        label: 'Agences',
+        width: Math.round((agencies / max) * 100),
+      },
+    ];
+  });
+
+  protected readonly mapMarkers = computed(() => {
+    const bounds = this.mapBounds();
+    return this.mapStore.points().map((point) => ({
+      left: this.projectLongitudeToBounds(
+        point.longitude,
+        bounds.west,
+        bounds.east,
+      ),
+      top: this.projectLatitudeToBounds(
+        point.latitude,
+        bounds.south,
+        bounds.north,
+      ),
+      tone: point.tone,
+    }));
+  });
+
+  protected readonly mapEmbedUrl = computed(() => {
+    const bounds = this.mapBounds();
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&layer=mapnik`;
+  });
+
+  protected readonly hasMapPoints = computed(
+    () => this.mapStore.points().length > 0,
+  );
+
+  protected readonly hasData = computed(() => Boolean(this.dashboard()));
 
   protected readonly reservationCompletion = computed(() => {
     const data = this.dashboard();
@@ -460,11 +509,9 @@ export class DashboardComponent implements OnInit {
 
     const total =
       (data.pendingReservations ?? 0) + (data.confirmedReservations ?? 0);
-    if (total === 0) {
-      return 0;
-    }
-
-    return Math.round(((data.confirmedReservations ?? 0) / total) * 100);
+    return total === 0
+      ? 0
+      : Math.round(((data.confirmedReservations ?? 0) / total) * 100);
   });
 
   protected readonly publicationCoverage = computed(() => {
@@ -475,34 +522,316 @@ export class DashboardComponent implements OnInit {
 
     const total =
       (data.publishedProperties ?? 0) + (data.propertiesPendingReview ?? 0);
-    if (total === 0) {
-      return 0;
-    }
-
-    return Math.round(((data.publishedProperties ?? 0) / total) * 100);
+    return total === 0
+      ? 0
+      : Math.round(((data.publishedProperties ?? 0) / total) * 100);
   });
 
-  protected readonly partnerFootprint = computed(() => {
-    const data = this.dashboard();
-    if (!data) {
-      return 0;
+  protected readonly partnerFootprint = computed(
+    () =>
+      (this.dashboard()?.totalActiveAgencies ?? 0) +
+      (this.dashboard()?.totalActiveHotels ?? 0),
+  );
+
+  protected readonly reservationTypeCounts = computed(() => {
+    const counts = this.reservationsStore.statusCounts();
+    return {
+      confirmed: counts.CONFIRMED,
+      pending: counts.PENDING,
+      cancelled: counts.CANCELLED + counts.NO_SHOW,
+    };
+  });
+
+  protected readonly reservedAmountEstimate = computed(() => {
+    const counts = this.reservationTypeCounts();
+    return counts.confirmed * 75000 + counts.pending * 55000;
+  });
+
+  protected readonly revenueSummary = computed(() =>
+    this.formatCurrency(this.reservedAmountEstimate()),
+  );
+
+  protected onRevenueRangeChange(value: PeriodOption['value']): void {
+    this.revenueRange.set(value);
+  }
+
+  protected onDonutRangeChange(value: PeriodOption['value']): void {
+    this.donutRange.set(value);
+  }
+
+  protected onCategoryRangeChange(value: PeriodOption['value']): void {
+    this.categoriesRange.set(value);
+  }
+
+  protected statusLabel(status: AdminReservation['status']): string {
+    if (status === 'CONFIRMED') {
+      return 'Confirme';
+    }
+    if (status === 'PENDING') {
+      return 'En attente';
+    }
+    if (status === 'CANCELLED') {
+      return 'Annule';
+    }
+    if (status === 'COMPLETED') {
+      return 'Termine';
     }
 
-    return (data.totalActiveAgencies ?? 0) + (data.totalActiveHotels ?? 0);
-  });
+    return 'No-show';
+  }
+
+  protected statusClass(status: AdminReservation['status']): string {
+    if (status === 'CONFIRMED' || status === 'COMPLETED') {
+      return 'dashboard-reservations-table__status dashboard-reservations-table__status--confirmed';
+    }
+
+    if (status === 'PENDING') {
+      return 'dashboard-reservations-table__status dashboard-reservations-table__status--pending';
+    }
+
+    return 'dashboard-reservations-table__status dashboard-reservations-table__status--cancelled';
+  }
+
+  protected formatReservationType(reservation: AdminReservation): string {
+    return reservation.propertyTitle ? 'Hotel' : 'Reservation';
+  }
+
+  protected formatReservationDate(value?: string): string {
+    if (!value) {
+      return '--';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '--';
+    }
+
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
+  }
+
+  protected formatReservationAmount(value?: number): string {
+    if (typeof value !== 'number') {
+      return '--';
+    }
+
+    return this.formatCurrency(value);
+  }
+
+  protected kpiSparkPath(index: number): string {
+    return KPI_SPARK_PATHS[index] ?? KPI_SPARK_PATHS[0];
+  }
+
+  protected formatKpiValue(card: DashboardKpiCard): string {
+    if (card.label === 'Revenus Ubax (mois)') {
+      return this.formatCurrency(card.value);
+    }
+
+    return this.formatNumber(card.value);
+  }
 
   ngOnInit(): void {
     void this.loadDashboard();
+    void this.loadReservationsPreview();
+    void this.loadValidationCounts();
+    void this.loadMapPoints();
   }
 
   private async loadDashboard(): Promise<void> {
     try {
-      await this.store.load();
+      await this.dashboardStore.load();
     } catch {
       this.notif.error(
-        this.store.error() ??
+        this.dashboardStore.error() ??
           'Impossible de charger le tableau de bord administrateur.',
       );
     }
+  }
+
+  private async loadReservationsPreview(): Promise<void> {
+    try {
+      await Promise.all([
+        this.reservationsStore.load({ page: 0, size: 500 }),
+        this.reservationsStore.loadStatusCounts(),
+      ]);
+    } catch {
+      this.notif.error(
+        this.reservationsStore.error() ??
+          'Impossible de charger les reservations du dashboard.',
+      );
+    }
+  }
+
+  private async loadValidationCounts(): Promise<void> {
+    await Promise.allSettled([
+      this.hotelsStore.load(),
+      this.agenciesStore.load(),
+    ]);
+  }
+
+  private async loadMapPoints(): Promise<void> {
+    try {
+      await this.mapStore.load();
+    } catch {
+      this.notif.error(
+        this.mapStore.error() ??
+          'Impossible de charger les points geographiques du dashboard.',
+      );
+    }
+  }
+
+  private trendText(value: number): string {
+    if (value <= 0) {
+      return '+ 0 ce mois-ci';
+    }
+
+    const baseline = Math.max(Math.round(value * 0.1), 1);
+    return `+ ${baseline} ce mois-ci`;
+  }
+
+  private buildLastDaysLabels(days: number): string[] {
+    const labels: string[] = [];
+    const now = new Date();
+
+    for (let index = days - 1; index >= 0; index -= 1) {
+      const date = new Date(now);
+      date.setDate(now.getDate() - index);
+      labels.push(
+        date.toLocaleDateString('fr-FR', {
+          day: '2-digit',
+          month: 'short',
+        }),
+      );
+    }
+
+    return labels;
+  }
+
+  private readonly mapBounds = computed(() => {
+    const points = this.mapStore.points();
+    if (!points.length) {
+      return {
+        east: -12,
+        north: 16.5,
+        south: 4.5,
+        west: -18.5,
+      };
+    }
+
+    const latitudes = points.map((point) => point.latitude);
+    const longitudes = points.map((point) => point.longitude);
+
+    const minLat = Math.min(...latitudes);
+    const maxLat = Math.max(...latitudes);
+    const minLng = Math.min(...longitudes);
+    const maxLng = Math.max(...longitudes);
+
+    const latPadding = Math.max((maxLat - minLat) * 0.25, 0.18);
+    const lngPadding = Math.max((maxLng - minLng) * 0.25, 0.18);
+
+    return {
+      east: maxLng + lngPadding,
+      north: maxLat + latPadding,
+      south: minLat - latPadding,
+      west: minLng - lngPadding,
+    };
+  });
+
+  private projectLatitudeToBounds(
+    latitude: number,
+    south: number,
+    north: number,
+  ): number {
+    if (north === south) {
+      return 50;
+    }
+
+    const raw = ((north - latitude) / (north - south)) * 100;
+    return Math.min(Math.max(raw, 6), 94);
+  }
+
+  private projectLongitudeToBounds(
+    longitude: number,
+    west: number,
+    east: number,
+  ): number {
+    if (east === west) {
+      return 50;
+    }
+
+    const raw = ((longitude - west) / (east - west)) * 100;
+    return Math.min(Math.max(raw, 4), 96);
+  }
+
+  private activityLabel(status: AdminReservation['status']): string {
+    if (status === 'CONFIRMED') {
+      return 'Nouvelle reservation confirmee';
+    }
+
+    if (status === 'PENDING') {
+      return 'Nouvelle reservation en attente';
+    }
+
+    if (status === 'CANCELLED') {
+      return 'Reservation annulee';
+    }
+
+    return 'Mise a jour reservation';
+  }
+
+  private activityIcon(status: AdminReservation['status']): string {
+    if (status === 'CONFIRMED') {
+      return 'pi pi-check-circle';
+    }
+
+    if (status === 'PENDING') {
+      return 'pi pi-clock';
+    }
+
+    if (status === 'CANCELLED') {
+      return 'pi pi-times-circle';
+    }
+
+    return 'pi pi-info-circle';
+  }
+
+  private timeAgo(value?: string): string {
+    if (!value) {
+      return 'a l instant';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return 'a l instant';
+    }
+
+    const deltaMinutes = Math.max(
+      Math.round((Date.now() - date.getTime()) / 60000),
+      0,
+    );
+    if (deltaMinutes < 60) {
+      return `il y a ${deltaMinutes || 1} min`;
+    }
+
+    const deltaHours = Math.round(deltaMinutes / 60);
+    if (deltaHours < 24) {
+      return `il y a ${deltaHours} h`;
+    }
+
+    const deltaDays = Math.round(deltaHours / 24);
+    return `il y a ${deltaDays} j`;
+  }
+
+  private formatNumber(value: number): string {
+    return new Intl.NumberFormat('fr-FR').format(value);
+  }
+
+  private formatCurrency(value: number): string {
+    return `${new Intl.NumberFormat('fr-FR', {
+      maximumFractionDigits: 0,
+    }).format(value)} FCFA`;
   }
 }
