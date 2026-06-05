@@ -177,20 +177,25 @@
           </table>
         </div>
 
-        @if (filteredPayments().length > tablePageSize) {
-          <div
-            class="admin-payments-panel__footer admin-payments-panel__footer--paginator"
+        <div
+          class="admin-payments-panel__footer admin-payments-panel__footer--table-foot"
+          [class.admin-payments-panel__footer--table-foot-expanded]="tableShowAll()"
+        >
+          <button
+            type="button"
+            class="admin-payments-pill-button admin-payments-pill-button--dark admin-payments-pill-button--tout-voir"
+            (click)="toggleShowAll()"
           >
-            <p-paginator
-              [first]="tablePage() * tablePageSize"
-              [rows]="tablePageSize"
-              [totalRecords]="filteredPayments().length"
-              (onPageChange)="onTablePage($event)"
-              [showFirstLastIcon]="true"
-              [showPageLinks]="true"
+            {{ tableShowAll() ? 'Réduire' : 'Tout voir' }}
+          </button>
+          @if (tableShowAll()) {
+            <ubax-paginator
+              [currentPage]="store.currentPage()"
+              [totalPages]="store.totalPages() || 1"
+              (currentPageChange)="onUbaxPageChange($event)"
             />
-          </div>
-        }
+          }
+        </div>
       }
     }
   </section>

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Paginator } from 'primeng/paginator';
+import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { Select } from 'primeng/select';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -58,7 +58,7 @@ const STATUS_OPTIONS: Array<{
 @Component({
   selector: 'ubax-admin-payments-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DocumentPreviewComponent, Paginator, Select],
+  imports: [CommonModule, FormsModule, DocumentPreviewComponent, UbaxPaginatorComponent, Select],
   templateUrl: './payments-page.component.html',
   styleUrl: './payments-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,6 +73,7 @@ export class PaymentsPageComponent implements OnInit {
   protected readonly selectedType = signal<PaymentTypeFilter>('ALL');
   protected readonly tablePage = signal(0);
   protected readonly tablePageSize = 6;
+  protected readonly tableShowAll = signal(false);
   protected readonly dialogOpen = signal(false);
   protected readonly treatmentStatus =
     signal<PaymentStatusUpdateRequest['status']>('PENDING');
@@ -109,6 +110,11 @@ export class PaymentsPageComponent implements OnInit {
 
   protected readonly recentTransactions = computed(() => {
     const payments = this.filteredPayments();
+
+    if (this.tableShowAll()) {
+      return payments;
+    }
+
     const page = this.tablePage();
     const size = this.tablePageSize;
 
@@ -234,22 +240,27 @@ export class PaymentsPageComponent implements OnInit {
   protected onSearch(value: string): void {
     this.searchTerm.set(value);
     this.tablePage.set(0);
+    this.tableShowAll.set(false);
   }
 
   protected onTypeChange(value: PaymentTypeFilter): void {
     this.selectedType.set(value);
     this.tablePage.set(0);
+    this.tableShowAll.set(false);
     void this.loadPayments();
+  }
+
+  protected toggleShowAll(): void {
+    this.tableShowAll.update((v) => !v);
+    this.tablePage.set(0);
   }
 
   protected retry(): void {
     void this.loadPayments();
   }
 
-  protected onTablePage(event: { first?: number; rows?: number }): void {
-    const first = event.first ?? 0;
-    const rows = event.rows ?? this.tablePageSize;
-    this.tablePage.set(Math.floor(first / rows));
+  protected onUbaxPageChange(page: number): void {
+    void this.loadPayments(page - 1);
   }
 
   protected async openDetails(id: string): Promise<void> {
@@ -581,12 +592,12 @@ export class PaymentsPageComponent implements OnInit {
     };
   }
 
-  private async loadPayments(): Promise<void> {
+  private async loadPayments(page = 0): Promise<void> {
     const selectedType = this.selectedType();
 
     try {
       await this.store.load({
-        page: 0,
+        page,
         size: PAGE_SIZE,
         type: selectedType === 'ALL' ? undefined : selectedType,
       });
