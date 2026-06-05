@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, firstValueFrom } from 'rxjs';
@@ -54,6 +53,15 @@ type BienDocument = {
 type BienMetric = {
   readonly label: string;
   readonly value: string;
+  readonly icon: string;
+};
+
+type BienReview = {
+  readonly id: string;
+  readonly authorName: string;
+  readonly avatarUrl: string | null;
+  readonly rating: number;
+  readonly reviewText: string;
 };
 
 const MIN_GALLERY_SLOTS = 4;
@@ -115,7 +123,7 @@ const STATUS_LABELS: Record<string, string> = {
 @Component({
   selector: 'ubax-admin-proprietes-detail-page',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, DialogModule, TextareaModule],
+  imports: [ReactiveFormsModule, DialogModule, TextareaModule],
   templateUrl: './proprietes-detail-page.component.html',
   styleUrl: './proprietes-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -304,14 +312,14 @@ export class ProprietesDetailPageComponent {
   protected readonly metrics = computed<readonly BienMetric[]>(() => {
     const p = this.property();
     return [
-      { label: 'Pièces', value: this.formatNumber(p?.rooms) },
-      { label: 'Chambres', value: this.formatNumber(p?.bedrooms) },
-      { label: 'Salles de bains', value: this.formatNumber(p?.bathrooms) },
-      { label: 'Balcons', value: this.formatNumber(p?.balconies) },
+      { label: 'Chambres', value: this.formatNumber(p?.bedrooms), icon: 'pi-home' },
+      { label: 'Salles de bains', value: this.formatNumber(p?.bathrooms), icon: 'pi-box' },
+      { label: 'Pièces', value: this.formatNumber(p?.rooms), icon: 'pi-table' },
+      { label: 'Balcons', value: this.formatNumber(p?.balconies), icon: 'pi-sun' },
       {
         label: 'Surface',
-        value:
-          typeof p?.surfaceTotal === 'number' ? `${p.surfaceTotal} m²` : '—',
+        value: typeof p?.surfaceTotal === 'number' ? `${p.surfaceTotal} m²` : '—',
+        icon: 'pi-expand',
       },
     ];
   });
@@ -338,6 +346,64 @@ export class ProprietesDetailPageComponent {
     return cols.filter((c) => c.length > 0);
   });
 
+  // ── Partner card ────────────────────────────────────────────────────────
+
+  protected readonly partnerTypeLabel = computed(() => {
+    if (this.property()?.hotelId) return 'Hôtel';
+    if (this.property()?.agencyId) return 'Agence immobilière';
+    return 'Particulier';
+  });
+
+  protected readonly partnerLogoUrl = computed<string | null>(() => null);
+
+  // ── Gallery side ─────────────────────────────────────────────────────────
+
+  protected readonly sideGalleryItems = computed(() =>
+    this.galleryItems().slice(0, 3),
+  );
+
+  protected readonly galleryOverflowCount = computed(() => {
+    const photos = (this.propertyDetail()?.media ?? []).filter(
+      (item) => (item.mediaType ?? 'PHOTO') !== 'VIDEO',
+    );
+    return Math.max(0, photos.length - 4);
+  });
+
+  // ── Video ────────────────────────────────────────────────────────────────
+
+  protected readonly activeVideoTab = signal<'video' | '360'>('video');
+
+  protected readonly videoItems = computed(() =>
+    (this.propertyDetail()?.media ?? [])
+      .filter((item) => item.mediaType === 'VIDEO')
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
+  );
+
+  protected readonly activeVideoItem = computed(
+    () => this.videoItems()[0] ?? null,
+  );
+
+  protected readonly videoTitle = computed(
+    () =>
+      this.activeVideoItem()?.fileName?.trim() ||
+      `Vidéo de ${this.propertyTitle()}`,
+  );
+
+  // ── Rating & views ───────────────────────────────────────────────────────
+
+  protected readonly averageRating = computed<number | null>(() => null);
+  protected readonly viewCount = computed<number | null>(() => null);
+
+  // ── Reviews ──────────────────────────────────────────────────────────────
+
+  protected readonly reviews = computed<readonly BienReview[]>(() => []);
+
+  // ── Location card image ───────────────────────────────────────────────────
+
+  protected readonly locationCardImage = computed<string | null>(() =>
+    this.galleryItems().find((i) => !i.isPlaceholder)?.src ?? null,
+  );
+
   protected readonly hasCoordinates = computed(
     () =>
       typeof this.property()?.latitude === 'number' &&
@@ -352,6 +418,22 @@ export class ProprietesDetailPageComponent {
     const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d},${lat - d},${lng + d},${lat + d}&layer=mapnik&marker=${lat},${lng}`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   });
+
+  // ── Partner navigation ────────────────────────────────────────────────────
+
+  protected goToPartnerDetail(): void {
+    const agencyId = this.property()?.agencyId;
+    const hotelId = this.property()?.hotelId;
+    if (agencyId) {
+      void this.router.navigate(['/agences', agencyId]);
+    } else if (hotelId) {
+      void this.router.navigate(['/hotels', hotelId]);
+    }
+  }
+
+  protected setVideoTab(tab: 'video' | '360'): void {
+    this.activeVideoTab.set(tab);
+  }
 
   // ── Back navigation ───────────────────────────────────────────────────────
 
