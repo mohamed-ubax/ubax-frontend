@@ -1,165 +1,186 @@
-<div class="admin-res-page">
-  <header class="admin-res-page__header">
-    <div>
-      <p class="admin-res-page__eyebrow">Back-office UBAX</p>
-      <h1 class="admin-res-page__title">Réservations</h1>
-      <p class="admin-res-page__subtitle">
-        Vue globale en lecture seule sur l’ensemble des réservations de la
-        plateforme.
-      </p>
+<div class="ar-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <header class="ar-header">
+    <h1 class="ar-header__title">Toutes les reservations</h1>
+    <div class="ar-header__toolbar">
+      <button type="button" class="ar-date-chip">
+        <i class="pi pi-calendar"></i>
+        <span>{{ currentDateLabel() }}</span>
+      </button>
+      <div class="ar-header__spacer"></div>
+      <button type="button" class="ar-export-btn">
+        <i class="pi pi-upload"></i>
+        <span>Exporter</span>
+      </button>
     </div>
   </header>
 
-  <section class="admin-res-tabs" aria-label="Compteurs par statut">
-    @for (tab of statusTabs(); track tab.value) {
-      <button
-        type="button"
-        class="admin-res-tabs__item"
-        [class.admin-res-tabs__item--active]="selectedFilter() === tab.value"
-        (click)="selectFilter(tab.value)"
-      >
-        <span>{{ tab.label }}</span>
-        <strong>{{ tab.count }}</strong>
-      </button>
+  <!-- ── KPI Cards ──────────────────────────────────────────────── -->
+  <div class="ar-kpi-grid">
+    @for (card of kpiCards(); track card.key) {
+      <div class="ar-kpi-card">
+        <div class="ar-kpi-icon ar-kpi-icon--{{ card.tone }}">
+          <i [class]="card.icon"></i>
+        </div>
+        <div class="ar-kpi-body">
+          <span class="ar-kpi-label">{{ card.label }}</span>
+          <strong class="ar-kpi-value">{{ card.count }}</strong>
+        </div>
+      </div>
     }
-  </section>
+  </div>
 
-  <section class="admin-res-card">
-    <div class="admin-res-toolbar">
-      <label class="admin-res-search" aria-label="Rechercher une réservation">
-        <i class="pi pi-search"></i>
-        <input
-          type="text"
-          [ngModel]="searchTerm()"
-          (ngModelChange)="onSearch($event)"
-          placeholder="Rechercher par client, email ou bien"
-        />
-      </label>
+  <!-- ── Filter Row ─────────────────────────────────────────────── -->
+  <div class="ar-filter-row">
+    <div class="ar-tab-group">
+      @for (tab of statusTabs(); track tab.value) {
+        <button
+          type="button"
+          class="ar-tab"
+          [class.ar-tab--active]="selectedFilter() === tab.value"
+          (click)="selectFilter(tab.value)"
+        >
+          {{ tab.label }}
+        </button>
+      }
     </div>
+    <div class="ar-filter-selects">
+      <button type="button" class="ar-select">
+        <span>Tous les types</span>
+        <i class="pi pi-chevron-down"></i>
+      </button>
+      <button type="button" class="ar-select">
+        <span>Toutes les propriétés</span>
+        <i class="pi pi-chevron-down"></i>
+      </button>
+    </div>
+  </div>
 
+  <!-- ── Table Card ─────────────────────────────────────────────── -->
+  <div class="ar-card">
     @switch (viewState()) {
       @case ('loading') {
-        <div class="admin-res-state">
+        <div class="ar-state">
           <i class="pi pi-spin pi-spinner"></i>
           <p>Chargement des réservations...</p>
         </div>
       }
 
       @case ('error') {
-        <div class="admin-res-state admin-res-state--error">
+        <div class="ar-state ar-state--error">
           <i class="pi pi-exclamation-triangle"></i>
           <p>{{ store.error() }}</p>
-          <button
-            type="button"
-            class="admin-res-state__action"
-            (click)="retry()"
-          >
+          <button type="button" class="ar-state__action" (click)="retry()">
             Réessayer
           </button>
         </div>
       }
 
       @case ('empty') {
-        <div class="admin-res-state">
+        <div class="ar-state">
           <i class="pi pi-inbox"></i>
           <p>Aucune réservation trouvée pour ce filtre.</p>
         </div>
       }
 
       @default {
-        <div
-          class="admin-res-table"
-          role="table"
-          aria-label="Tableau des réservations"
-        >
-          <div
-            class="admin-res-table__row admin-res-table__row--head"
-            role="row"
-          >
-            <span>Bien</span>
-            <span>Ville</span>
-            <span>Client</span>
-            <span>Dates</span>
-            <span>Nuits</span>
-            <span>Montant</span>
-            <span>Statut</span>
-            <span>Créée le</span>
+        <div class="ar-table" role="table" aria-label="Tableau des réservations">
+
+          <!-- Head -->
+          <div class="ar-table__head" role="rowgroup">
+            <div class="ar-table__row ar-table__row--head" role="row">
+              <span>Réservations</span>
+              <span>Client</span>
+              <span>Propriété</span>
+              <span>Type</span>
+              <span>Date</span>
+              <span>Montant</span>
+              <span>Statut</span>
+              <span>Actions</span>
+            </div>
           </div>
 
-          @for (reservation of filteredReservations(); track reservation.id) {
-            <div
-              class="admin-res-table__row"
-              role="row"
-            >
-              <span
-                class="admin-res-table__cell admin-res-table__cell--property"
-              >
-                <strong>{{
-                  reservation.propertyTitle ?? 'Bien sans titre'
-                }}</strong>
-              </span>
+          <!-- Body -->
+          <div class="ar-table__body" role="rowgroup">
+            @for (reservation of filteredReservations(); track reservation.id) {
+              <div class="ar-table__row" role="row">
 
-              <span class="admin-res-table__cell">
-                {{ reservation.propertyCity ?? '—' }}
-              </span>
+                <!-- Réservations -->
+                <div class="ar-col-res">
+                  <div class="ar-col-res__thumb">
+                    <i class="pi pi-building"></i>
+                  </div>
+                  <div class="ar-col-res__info">
+                    <span class="ar-col-res__code">{{ reservationCode(reservation.id) }}</span>
+                    <span class="ar-col-res__badge">Agence immobilière</span>
+                  </div>
+                </div>
 
-              <span class="admin-res-table__cell admin-res-table__cell--client">
-                <strong>{{
-                  reservation.clientFullName ?? 'Client non renseigné'
-                }}</strong>
-                <small>{{ reservation.clientEmail ?? '—' }}</small>
-              </span>
+                <!-- Client -->
+                <div class="ar-col-client">
+                  <div class="ar-avatar">{{ clientInitials(reservation.clientFullName) }}</div>
+                  <div class="ar-col-client__info">
+                    <span class="ar-col-client__name">{{ reservation.clientFullName ?? '—' }}</span>
+                    <span class="ar-col-client__sub">{{ reservation.clientEmail ?? '—' }}</span>
+                  </div>
+                </div>
 
-              <span class="admin-res-table__cell">
-                {{ formatDateRange(reservation) }}
-              </span>
+                <!-- Propriété -->
+                <div class="ar-col-property">
+                  <span class="ar-col-property__name">{{ reservation.propertyTitle ?? '—' }}</span>
+                  <span class="ar-col-property__city">{{ reservation.propertyCity ?? '—' }}</span>
+                </div>
 
-              <span class="admin-res-table__cell">
-                {{ reservation.numberOfNights ?? '—' }}
-              </span>
+                <!-- Type -->
+                <span class="ar-col-type">Location</span>
 
-              <span class="admin-res-table__cell admin-res-table__cell--amount">
-                {{ formatCurrency(reservation.totalAmount) }}
-              </span>
+                <!-- Date -->
+                <div class="ar-col-date">
+                  <span class="ar-col-date__range">
+                    {{ formatDate(reservation.checkInDate) }}&nbsp;→&nbsp;{{ formatDate(reservation.checkOutDate) }}
+                  </span>
+                  <span class="ar-col-date__nights">{{ reservation.numberOfNights ?? 0 }} nuits</span>
+                </div>
 
-              <span
-                class="admin-res-status"
-                [class.admin-res-status--pending]="
-                  reservation.status === 'PENDING'
-                "
-                [class.admin-res-status--confirmed]="
-                  reservation.status === 'CONFIRMED'
-                "
-                [class.admin-res-status--cancelled]="
-                  reservation.status === 'CANCELLED'
-                "
-                [class.admin-res-status--completed]="
-                  reservation.status === 'COMPLETED'
-                "
-                [class.admin-res-status--no-show]="
-                  reservation.status === 'NO_SHOW'
-                "
-              >
-                {{ statusLabel(reservation.status) }}
-              </span>
+                <!-- Montant -->
+                <div class="ar-col-amount">
+                  <span class="ar-col-amount__value">{{ formatCurrency(reservation.totalAmount) }}</span>
+                  <span class="ar-col-amount__sub">Paiement complet</span>
+                </div>
 
-              <span class="admin-res-table__cell">
-                {{ formatDateTime(reservation.createdAt) }}
-              </span>
-            </div>
-          }
+                <!-- Statut -->
+                <span class="ar-status ar-status--{{ statusTone(reservation.status) }}">
+                  {{ statusLabel(reservation.status) }}
+                </span>
+
+                <!-- Actions -->
+                <div class="ar-actions">
+                  <button type="button" class="ar-action-btn" aria-label="Voir le détail">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button type="button" class="ar-action-btn" aria-label="Plus d'actions">
+                    <i class="pi pi-ellipsis-v"></i>
+                  </button>
+                </div>
+
+              </div>
+            }
+          </div>
         </div>
 
-        @if (store.totalPages() > 1) {
-          <footer class="admin-res-footer">
+        <footer class="ar-pagination-bar">
+          <span class="ar-pagination-info">{{ paginationLabel() }}</span>
+          @if (store.totalPages() > 1) {
             <ubax-paginator
               [(currentPage)]="currentPage"
               [totalPages]="store.totalPages()"
               (currentPageChange)="onPageChange($event)"
             />
-          </footer>
-        }
+          }
+        </footer>
       }
     }
-  </section>
+  </div>
+
 </div>
