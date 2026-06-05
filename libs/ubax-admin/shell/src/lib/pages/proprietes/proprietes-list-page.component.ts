@@ -6,26 +6,17 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import type { PropertyResponse } from '@ubax-workspace/shared-api-types';
-import {
-  EmptyStateComponent,
-  SectionCardComponent,
-  StatusBadgeComponent,
-} from '@ubax-workspace/shared-design-system';
+import { EmptyStateComponent } from '@ubax-workspace/shared-design-system';
 import {
   NOTIFICATION_HANDLER,
   resolveHttpErrorMessage,
 } from '@ubax-workspace/shared-data-access';
 import {
-  UiDataTableCellDefDirective,
-  type UiDataTableColumn,
-  UiDataTableComponent,
-  UiDataTableEmptyDefDirective,
+  UbaxPaginatorComponent,
   UiFormSelectComponent,
-  UiPaginationComponent,
 } from '@ubax-workspace/shared-ui';
 import { AdminPropertiesService } from '../../services/admin-properties.service';
 
@@ -50,19 +41,40 @@ const TRANSACTION_TYPE_LABELS: Record<string, string> = {
   SHORT_STAY: 'Court séjour',
 };
 
+const TRANSACTION_COLORS: Record<string, string> = {
+  SALE: '#34c759',
+  RENT: '#e87d1e',
+  RENT_FURNISHED: '#e87d1e',
+  SHORT_STAY: '#2b7fff',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Brouillon',
+  PENDING: 'En attente',
+  PUBLISHED: 'Publié',
+  REJECTED: 'Rejeté',
+  ARCHIVED: 'Archivé',
+  RESERVED: 'Réservé',
+  SOLD: 'Vendu',
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  DRAFT: '#6b7280',
+  PENDING: '#f59e0b',
+  PUBLISHED: '#2b7fff',
+  REJECTED: '#ef4444',
+  ARCHIVED: '#7c3aed',
+  RESERVED: '#10b981',
+  SOLD: '#111827',
+};
+
 @Component({
   selector: 'ubax-admin-proprietes-list-page',
   standalone: true,
   imports: [
-    DatePipe,
-    SectionCardComponent,
-    StatusBadgeComponent,
     EmptyStateComponent,
+    UbaxPaginatorComponent,
     UiFormSelectComponent,
-    UiDataTableComponent,
-    UiDataTableCellDefDirective,
-    UiDataTableEmptyDefDirective,
-    UiPaginationComponent,
   ],
   templateUrl: './proprietes-list-page.component.html',
   styleUrl: './proprietes-list-page.component.scss',
@@ -77,25 +89,10 @@ export class ProprietesListPageComponent {
   protected readonly properties = signal<PropertyResponse[]>([]);
   protected readonly totalElements = signal(0);
   protected readonly totalPages = signal(1);
-  protected readonly currentPage = signal(0); // 0-based for server pagination
+  protected readonly currentPage = signal(1); // 1-based
 
-  // Active filters
   protected readonly searchQuery = signal('');
-  protected readonly cityFilter = signal('');
   protected readonly typeFilter = signal('');
-  protected readonly agencyFilter = signal('');
-
-  protected readonly tableColumns: readonly UiDataTableColumn<PropertyResponse>[] =
-    [
-      { key: 'property', header: 'Bien', width: '24%' },
-      { key: 'type', header: 'Type', width: '10%' },
-      { key: 'transaction', header: 'Transaction', width: '12%' },
-      { key: 'city', header: 'Ville', width: '10%' },
-      { key: 'price', header: 'Prix', width: '12%', align: 'end' },
-      { key: 'owner', header: 'Agence / Propriétaire', width: '18%' },
-      { key: 'submittedAt', header: 'Soumis le', width: '8%' },
-      { key: 'actions', header: 'Actions', width: '6%', align: 'end' },
-    ];
 
   protected readonly typeOptions = [
     'Tous les types',
@@ -112,13 +109,13 @@ export class ProprietesListPageComponent {
 
   private readonly typeOptionValues: Record<string, string> = {
     'Tous les types': '',
-    'Appartement': 'APARTMENT',
-    'Villa': 'VILLA',
-    'Maison': 'HOUSE',
-    'Terrain': 'LAND',
-    'Bureau': 'OFFICE',
-    'Commercial': 'COMMERCIAL',
-    'Studio': 'STUDIO',
+    Appartement: 'APARTMENT',
+    Villa: 'VILLA',
+    Maison: 'HOUSE',
+    Terrain: 'LAND',
+    Bureau: 'OFFICE',
+    Commercial: 'COMMERCIAL',
+    Studio: 'STUDIO',
   };
 
   protected readonly filteredProperties = computed(() => {
@@ -134,8 +131,6 @@ export class ProprietesListPageComponent {
     );
   });
 
-  protected readonly pagedRows = computed(() => this.filteredProperties());
-
   constructor() {
     effect(() => {
       void this.loadProperties();
@@ -147,11 +142,9 @@ export class ProprietesListPageComponent {
     try {
       const result = await firstValueFrom(
         this.svc.listPending({
-          page: this.currentPage(),
+          page: this.currentPage() - 1,
           size: PAGE_SIZE,
-          city: this.cityFilter() || undefined,
           propertyType: this.typeFilter() || undefined,
-          agencyId: this.agencyFilter() || undefined,
         }),
       );
       this.properties.set(result.items);
@@ -176,16 +169,12 @@ export class ProprietesListPageComponent {
   protected onTypeFilterChange(label: string): void {
     this.typeFilterLabel.set(label);
     this.typeFilter.set(this.typeOptionValues[label] ?? '');
-    this.currentPage.set(0);
+    this.currentPage.set(1);
     void this.loadProperties();
   }
 
-  protected onPageChange(page: number | Event): void {
-    if (typeof page !== 'number') {
-      return;
-    }
-
-    this.currentPage.set(page - 1);
+  protected onPageChange(page: number): void {
+    this.currentPage.set(page);
     void this.loadProperties();
   }
 
@@ -201,43 +190,47 @@ export class ProprietesListPageComponent {
     return TRANSACTION_TYPE_LABELS[type ?? ''] ?? type ?? '—';
   }
 
-  protected getTransactionBadge(
-    type: string | undefined,
-  ): 'info' | 'neutral' | 'active' | 'warning' {
-    switch (type) {
-      case 'SALE':
-        return 'active';
-      case 'RENT':
-        return 'info';
-      case 'RENT_FURNISHED':
-        return 'info';
-      case 'SHORT_STAY':
-        return 'warning';
-      default:
-        return 'neutral';
-    }
+  protected getTransactionColor(type: string | undefined): string {
+    return TRANSACTION_COLORS[type ?? ''] ?? '#e87d1e';
   }
 
-  protected formatPrice(price: number | undefined): string {
+  protected getStatusLabel(
+    status: PropertyResponse['status'] | undefined,
+  ): string {
+    return STATUS_LABELS[status ?? ''] ?? status ?? 'Inconnu';
+  }
+
+  protected getStatusColor(
+    status: PropertyResponse['status'] | undefined,
+  ): string {
+    return STATUS_COLORS[status ?? ''] ?? '#6b7280';
+  }
+
+  protected formatPrice(
+    price: number | undefined,
+    transactionType?: string,
+  ): string {
     if (!price) return '—';
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
+    const formatted = new Intl.NumberFormat('fr-FR', {
       maximumFractionDigits: 0,
     }).format(price);
+    const suffix = transactionType === 'SALE' ? 'FCFA' : 'FCFA/Mois';
+    return `${formatted} ${suffix}`;
   }
 
-  protected getPropertyInitials(property: PropertyResponse): string {
-    return (property.title ?? property.propertyType ?? 'BI')
-      .slice(0, 2)
-      .toUpperCase();
-  }
-
-  /** coverPhotoUrl est retourné par l'API mais absent du type généré */
   protected getCoverPhotoUrl(property: PropertyResponse): string | null {
     return (
       (property as PropertyResponse & { coverPhotoUrl?: string })
         .coverPhotoUrl ?? null
     );
+  }
+
+  protected getDisplayCount(): string {
+    const total = this.totalElements();
+    const page = this.currentPage();
+    const start = (page - 1) * PAGE_SIZE + 1;
+    const end = Math.min(page * PAGE_SIZE, total);
+    if (total === 0) return 'Aucun bien';
+    return `Affichage ${start} à ${end} sur ${total} bien${total > 1 ? 's' : ''}`;
   }
 }
