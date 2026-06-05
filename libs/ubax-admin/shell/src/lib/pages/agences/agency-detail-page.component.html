@@ -1,84 +1,566 @@
 <div class="agency-detail-page">
-  <div class="agency-detail-page__topbar">
+  <header class="agency-detail-page__topbar">
     <button type="button" class="agency-detail-page__back" (click)="goBack()">
-      <i class="pi pi-arrow-left"></i>
-      Retour aux agences
+      <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      Retour à la liste
     </button>
-  </div>
 
-  @if (loading()) {
-    <ubax-section-card>
-      <div class="agency-detail-page__loading">Chargement du détail...</div>
-    </ubax-section-card>
-  } @else if (agency(); as agency) {
-    <div class="agency-detail-page__header">
-      <div class="agency-detail-page__identity">
-        <h1 class="agency-detail-page__title">{{ agency.name ?? 'Agence' }}</h1>
-        <p class="agency-detail-page__subtitle">
-          {{ agency.city ?? 'Ville non renseignée' }}
-        </p>
-      </div>
-
-      <div class="agency-detail-page__badges">
-        <ubax-status-badge [variant]="statusVariant(agency)">
-          {{ statusLabel(agency) }}
-        </ubax-status-badge>
-        <ubax-status-badge [variant]="agency.verified ? 'active' : 'warning'">
-          {{ agency.verified ? 'Vérifiée' : 'Non vérifiée' }}
-        </ubax-status-badge>
-      </div>
-    </div>
-
-    <ubax-section-card>
-      <div class="agency-detail-grid">
-        <div class="agency-detail-item">
-          <span class="agency-detail-item__label">Email</span>
-          <span class="agency-detail-item__value">{{
-            agency.email ?? '—'
-          }}</span>
-        </div>
-        <div class="agency-detail-item">
-          <span class="agency-detail-item__label">Téléphone</span>
-          <span class="agency-detail-item__value">{{
-            agency.phone ?? '—'
-          }}</span>
-        </div>
-        <div class="agency-detail-item">
-          <span class="agency-detail-item__label">Plan abonnement</span>
-          <span class="agency-detail-item__value">{{
-            agency.subscriptionPlan ?? '—'
-          }}</span>
-        </div>
-        <div class="agency-detail-item">
-          <span class="agency-detail-item__label">Expiration abonnement</span>
-          <span class="agency-detail-item__value">{{
-            formatDate(agency.subscriptionExpiresAt)
-          }}</span>
-        </div>
-        <div class="agency-detail-item">
-          <span class="agency-detail-item__label">Créée le</span>
-          <span class="agency-detail-item__value">{{
-            formatDate(agency.createdAt)
-          }}</span>
-        </div>
-      </div>
-
-      <div class="agency-detail-page__actions">
+    <div class="agency-detail-page__top-actions">
+      @if (selectedAgency(); as selectedAgency) {
         <button
           type="button"
-          class="agency-detail-page__action-btn"
-          (click)="viewMembers()"
+          class="agency-detail-page__action agency-detail-page__action--ghost"
+          [class.agency-detail-page__action--danger]="selectedAgency.active"
+          (click)="promptToggle()"
         >
-          <i class="pi pi-users"></i>
-          Voir les membres de l'agence
+          <i
+            [class]="selectedAgency.active ? 'pi pi-ban' : 'pi pi-check-circle'"
+            aria-hidden="true"
+          ></i>
+          {{ selectedAgency.active ? 'Suspendre' : 'Réactiver' }}
+        </button>
+
+        <button
+          type="button"
+          class="agency-detail-page__action agency-detail-page__action--primary"
+          (click)="openSubscriptionDialog()"
+        >
+          Modifier
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (loading()) {
+    <section
+      class="agency-detail-page__loading"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--hero"
+      ></div>
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--side"
+      ></div>
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--side"
+      ></div>
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--metrics"
+      ></div>
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--metrics"
+      ></div>
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--metrics"
+      ></div>
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--wide"
+      ></div>
+      <div
+        class="agency-detail-page__skeleton agency-detail-page__skeleton--wide"
+      ></div>
+    </section>
+  } @else if (error()) {
+    <section class="agency-detail-page__empty-state">
+      <p class="agency-detail-page__empty-eyebrow">Erreur de chargement</p>
+      <h2 class="agency-detail-page__empty-title">
+        Impossible d'afficher les détails de l'agence.
+      </h2>
+      <p class="agency-detail-page__empty-message">{{ error() }}</p>
+      <div class="agency-detail-page__empty-actions">
+        <button
+          type="button"
+          class="agency-detail-page__action agency-detail-page__action--primary"
+          (click)="retryLoad()"
+        >
+          Réessayer
+        </button>
+        <button
+          type="button"
+          class="agency-detail-page__action agency-detail-page__action--ghost"
+          (click)="goBack()"
+        >
+          Retour
         </button>
       </div>
-    </ubax-section-card>
+    </section>
+  } @else if (agency(); as agency) {
+    <section class="agency-detail-page__content">
+      <div class="agency-detail-page__layout">
+        <article class="agency-detail-page__hero card">
+          <div class="agency-detail-page__hero-media">
+            @if (agency.logoUrl || firstCoverPhoto()) {
+              <img
+                class="agency-detail-page__hero-image"
+                [src]="agency.logoUrl || firstCoverPhoto() || ''"
+                [alt]="agency.name ?? 'Agence'"
+              />
+            } @else {
+              <div class="agency-detail-page__hero-fallback">
+                <span>{{ agencyInitials(agency.name) }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="agency-detail-page__hero-body">
+            <div class="agency-detail-page__reference-row">
+              <span class="agency-detail-page__reference">{{
+                agencyReference()
+              }}</span>
+
+              <span class="agency-detail-page__subscription-chip">
+                <i class="pi pi-bolt" aria-hidden="true"></i>
+                {{ subscriptionBadgeLabel() }}
+              </span>
+            </div>
+
+            <h2 class="agency-detail-page__agency-name">
+              {{ agency.name ?? 'Agence' }}
+            </h2>
+
+            <p class="agency-detail-page__agency-location">
+              <i class="pi pi-map-marker" aria-hidden="true"></i>
+              {{ locationLabel() }}
+            </p>
+
+            <div class="agency-detail-page__tags">
+              <span
+                class="agency-detail-page__tag agency-detail-page__tag--teal"
+              >
+                <i class="pi pi-building" aria-hidden="true"></i>
+                Agence immobilière
+              </span>
+              <span
+                class="agency-detail-page__tag agency-detail-page__tag--neutral"
+              >
+                <i class="pi pi-calendar" aria-hidden="true"></i>
+                Membre depuis {{ agencySinceLabel() }}
+              </span>
+              <span
+                class="agency-detail-page__tag agency-detail-page__tag--purple"
+              >
+                <i class="pi pi-home" aria-hidden="true"></i>
+                {{ formatInteger(properties().length) }} propriétés
+              </span>
+              <span
+                class="agency-detail-page__tag agency-detail-page__tag--green"
+              >
+                <i class="pi pi-users" aria-hidden="true"></i>
+                {{ formatInteger(clients().length) }} clients
+              </span>
+            </div>
+
+            <div class="agency-detail-page__identity-grid">
+              <div class="agency-detail-page__identity-field">
+                <span class="agency-detail-page__identity-label">Téléphone</span>
+                <strong class="agency-detail-page__identity-value">{{
+                  agency.phone ?? '—'
+                }}</strong>
+              </div>
+              <div class="agency-detail-page__identity-field">
+                <span class="agency-detail-page__identity-label">Email</span>
+                <strong class="agency-detail-page__identity-value">{{
+                  agency.email ?? '—'
+                }}</strong>
+              </div>
+              <div class="agency-detail-page__identity-field">
+                <span class="agency-detail-page__identity-label"
+                  >Responsable</span
+                >
+                <strong class="agency-detail-page__identity-value">{{
+                  memberName(primaryMember())
+                }}</strong>
+              </div>
+              <div class="agency-detail-page__identity-field">
+                <span class="agency-detail-page__identity-label">Membres</span>
+                <strong class="agency-detail-page__identity-value">{{
+                  formatInteger(
+                    activeMembers().length + inactiveMembers().length
+                  )
+                }}</strong>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="agency-detail-page__stack">
+          <section class="agency-detail-page__availability card">
+            <div class="agency-detail-page__card-head">
+              <h3 class="agency-detail-page__card-title">Disponibilité</h3>
+            </div>
+
+            <div class="agency-detail-page__availability-body">
+              <div
+                class="agency-detail-page__ring"
+                [style.background]="availabilityRingStyle()"
+              >
+                <div class="agency-detail-page__ring-center">
+                  <strong>{{
+                    formatInteger(availabilitySummary().total)
+                  }}</strong>
+                  <span>Total</span>
+                </div>
+              </div>
+
+              <div class="agency-detail-page__availability-legend">
+                <div class="agency-detail-page__legend-item">
+                  <span
+                    class="agency-detail-page__legend-dot agency-detail-page__legend-dot--green"
+                  ></span>
+                  <div class="agency-detail-page__legend-content">
+                    <strong>Disponibles</strong>
+                    <span>{{
+                      formatInteger(availabilitySummary().available)
+                    }}</span>
+                  </div>
+                </div>
+                <div class="agency-detail-page__legend-item">
+                  <span
+                    class="agency-detail-page__legend-dot agency-detail-page__legend-dot--blue"
+                  ></span>
+                  <div class="agency-detail-page__legend-content">
+                    <strong>Louées</strong>
+                    <span>{{
+                      formatInteger(availabilitySummary().rented)
+                    }}</span>
+                  </div>
+                </div>
+                <div class="agency-detail-page__legend-item">
+                  <span
+                    class="agency-detail-page__legend-dot agency-detail-page__legend-dot--grey"
+                  ></span>
+                  <div class="agency-detail-page__legend-content">
+                    <strong>Hors service</strong>
+                    <span>{{
+                      formatInteger(availabilitySummary().inactive)
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="agency-detail-page__location card">
+            <h3
+              class="agency-detail-page__card-title agency-detail-page__location-title"
+            >
+              Localisation
+            </h3>
+
+            @if (mapEmbedUrl(); as mapUrl) {
+              <iframe
+                class="agency-detail-page__map"
+                [src]="mapUrl"
+                [title]="mapFrameTitle(agency.name)"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            } @else {
+              <div
+                class="agency-detail-page__map agency-detail-page__map--fallback"
+              >
+                <i class="pi pi-map" aria-hidden="true"></i>
+                <strong>{{ agencyAddress() }}</strong>
+                <span>Géolocalisation non disponible</span>
+              </div>
+            }
+          </section>
+        </aside>
+      </div>
+
+      <section class="agency-detail-page__metrics">
+        <article class="agency-detail-page__metric card">
+          <span
+            class="agency-detail-page__metric-icon agency-detail-page__metric-icon--green"
+          >
+            <i class="pi pi-money-bill" aria-hidden="true"></i>
+          </span>
+
+          <div class="agency-detail-page__metric-body">
+            <p class="agency-detail-page__metric-label">Revenus</p>
+            <strong class="agency-detail-page__metric-value">{{
+              revenueMetricValue()
+            }}</strong>
+          </div>
+        </article>
+
+        <article class="agency-detail-page__metric card">
+          <span
+            class="agency-detail-page__metric-icon agency-detail-page__metric-icon--blue"
+          >
+            <i class="pi pi-home" aria-hidden="true"></i>
+          </span>
+
+          <div class="agency-detail-page__metric-body">
+            <p class="agency-detail-page__metric-label">Propriétés</p>
+            <strong class="agency-detail-page__metric-value">{{
+              propertiesMetricValue()
+            }}</strong>
+          </div>
+        </article>
+
+        <article class="agency-detail-page__metric card">
+          <span
+            class="agency-detail-page__metric-icon agency-detail-page__metric-icon--violet"
+          >
+            <i class="pi pi-percentage" aria-hidden="true"></i>
+          </span>
+
+          <div class="agency-detail-page__metric-body">
+            <p class="agency-detail-page__metric-label">Taux de disponibilité</p>
+            <strong class="agency-detail-page__metric-value">{{
+              availabilityRateMetricValue()
+            }}</strong>
+          </div>
+        </article>
+
+        <article class="agency-detail-page__balance card card--success">
+          <div class="agency-detail-page__balance-columns">
+            <div>
+              <span>Solde</span>
+              <strong>{{ formatCurrency(totalRevenue(payments())) }}</strong>
+            </div>
+            <div>
+              <span>Solde disponible</span>
+              <strong>{{
+                formatCurrency(totalPaidRevenue(payments()))
+              }}</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="agency-detail-page__bottom-grid">
+        <article class="agency-detail-page__panel card">
+          <div class="agency-detail-page__card-head">
+            <h3 class="agency-detail-page__bottom-title">Activités récentes</h3>
+
+            <button
+              type="button"
+              class="agency-detail-page__ghost-link"
+              (click)="viewMembers()"
+            >
+              Voir les membres
+            </button>
+          </div>
+
+          <div class="agency-detail-page__activity-list">
+            @for (
+              activity of recentActivities();
+              track activity.title + activity.timestamp
+            ) {
+              <div class="agency-detail-page__activity-item">
+                <span
+                  class="agency-detail-page__activity-icon agency-detail-page__activity-icon--{{
+                    activity.tone
+                  }}"
+                >
+                  <i [class]="activity.iconClass" aria-hidden="true"></i>
+                </span>
+
+                <div class="agency-detail-page__activity-copy">
+                  <strong>{{ activity.title }}</strong>
+                  <small>{{ relativeTime(activity.timestamp) }}</small>
+                </div>
+              </div>
+            }
+
+            @if (recentActivities().length === 0) {
+              <p class="agency-detail-page__empty-activities">
+                Aucune activité récente
+              </p>
+            }
+          </div>
+        </article>
+
+        <article
+          class="agency-detail-page__panel agency-detail-page__panel--wide card"
+        >
+          <div class="agency-detail-page__card-head">
+            <h3 class="agency-detail-page__bottom-title">
+              Historique de paiements
+            </h3>
+          </div>
+
+          <div class="agency-detail-page__table-wrap">
+            <table class="agency-detail-page__table">
+              <thead>
+                <tr>
+                  <th>Opérateurs</th>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                  <th class="agency-detail-page__action-col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  payment of paymentRows();
+                  track payment.reference + payment.date
+                ) {
+                  <tr>
+                    <td>
+                      <div class="agency-detail-page__payment-operator">
+                        <span class="agency-detail-page__operator-avatar">
+                          {{ operatorInitials(payment.operator) }}
+                        </span>
+                        <strong>{{ payment.operator }}</strong>
+                      </div>
+                    </td>
+                    <td>{{ payment.date }}</td>
+                    <td>{{ payment.amount }}</td>
+                    <td>
+                      <span
+                        class="agency-detail-page__status agency-detail-page__status--{{
+                          payment.statusTone
+                        }}"
+                      >
+                        <i class="pi pi-check" aria-hidden="true"></i>
+                        {{ payment.status }}
+                      </span>
+                    </td>
+                    <td class="agency-detail-page__action-col">
+                      <button
+                        type="button"
+                        class="agency-detail-page__row-action"
+                        [attr.aria-label]="'Actions pour ' + payment.reference"
+                      >
+                        <i class="pi pi-ellipsis-v" aria-hidden="true"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+
+                @if (paymentRows().length === 0) {
+                  <tr>
+                    <td colspan="5" class="agency-detail-page__empty-row">
+                      Aucun paiement enregistré
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </section>
   } @else {
-    <ubax-empty-state
-      icon="pi pi-home"
-      title="Agence introuvable"
-      description="Cette agence n'existe pas ou n'est plus disponible."
-    />
+    <section class="agency-detail-page__empty-state">
+      <p class="agency-detail-page__empty-eyebrow">Agence introuvable</p>
+      <h2 class="agency-detail-page__empty-title">
+        Aucune agence trouvée pour cet identifiant.
+      </h2>
+      <p class="agency-detail-page__empty-message">
+        La page est connectée aux données du backend mais l'agence demandée
+        n'existe pas ou n'est plus accessible.
+      </p>
+      <div class="agency-detail-page__empty-actions">
+        <button
+          type="button"
+          class="agency-detail-page__action agency-detail-page__action--primary"
+          (click)="goBack()"
+        >
+          Retour
+        </button>
+      </div>
+    </section>
   }
 </div>
+
+<ubax-confirm-dialog
+  [visible]="showConfirm()"
+  (visibleChange)="showConfirm.set($event)"
+  [title]="confirmTitle()"
+  icon="pi pi-exclamation-triangle"
+  [message]="confirmMessage()"
+  [confirmLabel]="confirmLabel()"
+  [confirmSeverity]="confirmSeverity()"
+  (confirmed)="confirmToggle()"
+/>
+
+@if (showSubscriptionDialog()) {
+  <div
+    class="agency-subscription-dialog__overlay"
+    tabindex="0"
+    (click)="
+      $event.target === $event.currentTarget && closeSubscriptionDialog()
+    "
+    (keydown.enter)="closeSubscriptionDialog()"
+    (keydown.space)="$event.preventDefault(); closeSubscriptionDialog()"
+  >
+    <div class="agency-subscription-dialog card">
+      <div class="agency-subscription-dialog__header">
+        <div>
+          <p class="agency-subscription-dialog__eyebrow">
+            Abonnement partenaire
+          </p>
+          <h2 class="agency-subscription-dialog__title">
+            {{ agency()?.name ?? 'Agence' }}
+          </h2>
+        </div>
+
+        @if (agency(); as selectedAgency) {
+          <ubax-status-badge
+            [variant]="selectedAgency.active ? 'active' : 'suspended'"
+          >
+            {{ selectedAgency.active ? 'Actif' : 'Suspendu' }}
+          </ubax-status-badge>
+        }
+      </div>
+
+      <div class="agency-subscription-dialog__body">
+        <div class="agency-subscription-dialog__field">
+          <span class="agency-subscription-dialog__label"
+            >Plan d'abonnement</span
+          >
+          <p-select
+            [options]="subscriptionPlanOptions()"
+            [ngModel]="subscriptionPlanValue()"
+            (ngModelChange)="subscriptionPlanValue.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Choisir un plan"
+            appendTo="body"
+            panelStyleClass="agency-subscription-dialog__panel"
+          />
+        </div>
+
+        <div class="agency-subscription-dialog__field">
+          <span class="agency-subscription-dialog__label"
+            >Date d'expiration</span
+          >
+          <p-datepicker
+            [ngModel]="subscriptionExpiresAtValue()"
+            (ngModelChange)="subscriptionExpiresAtValue.set($event)"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [minDate]="today"
+            appendTo="body"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            panelStyleClass="agency-subscription-dialog__panel"
+          />
+        </div>
+      </div>
+
+      <div class="agency-subscription-dialog__footer">
+        <button
+          type="button"
+          class="agency-detail-page__action agency-detail-page__action--ghost"
+          (click)="closeSubscriptionDialog()"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="agency-detail-page__action agency-detail-page__action--primary"
+          (click)="saveSubscription()"
+        >
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+}
