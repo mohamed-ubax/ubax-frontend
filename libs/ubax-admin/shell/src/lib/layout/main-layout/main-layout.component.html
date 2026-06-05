@@ -89,14 +89,71 @@
           </div>
         }
 
-        <a
-          routerLink="/agences"
-          routerLinkActive="sidebar-nav-item--active"
-          class="sidebar-nav-item"
+        <button
+          type="button"
+          class="sidebar-nav-item sidebar-nav-item--btn"
+          [class.sidebar-nav-item--active]="isAgenciesRoute()"
+          [class.sidebar-nav-item--expanded]="agenciesExpanded()"
+          (click)="toggleAgencies()"
         >
           <i class="pi pi-home text-lg w-6 flex-shrink-0"></i>
-          <span class="flex-1 truncate">Agences Immobilières</span>
-        </a>
+          <span class="flex-1 truncate text-left">Agences Immobilières</span>
+          <i
+            class="pi text-sm flex-shrink-0 sidebar-chevron"
+            [class.pi-chevron-down]="!agenciesExpanded()"
+            [class.pi-chevron-up]="agenciesExpanded()"
+          ></i>
+        </button>
+
+        @if (agenciesExpanded()) {
+          <div class="sidebar-subnav">
+            <div class="sidebar-subnav__track">
+              <div class="sidebar-subnav__line-bg"></div>
+              <div class="sidebar-subnav__items">
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'all' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Toutes les agences ({{ agenciesSubItemCounts().all }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'pending' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    En attente ({{ agenciesSubItemCounts().pending }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'suspended' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Suspendues ({{ agenciesSubItemCounts().suspended }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'active' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Agences actives ({{ agenciesSubItemCounts().active }})
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        }
       }
 
       <a
@@ -297,11 +354,7 @@
   </div>
 </div>
 
-<div
-  class="ubax-toast-stack"
-  aria-live="polite"
-  aria-relevant="additions removals"
->
+<div class="ubax-toast-stack" aria-live="polite" aria-relevant="all">
   @for (notification of notifications(); track notification.id) {
     <div class="ubax-toast" [class]="'ubax-toast--' + notification.severity">
       <div class="ubax-toast__icon">

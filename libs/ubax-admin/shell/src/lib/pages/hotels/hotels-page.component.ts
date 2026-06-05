@@ -394,8 +394,13 @@ export class HotelsPageComponent implements OnInit {
     this.openedActionHotelId.set(null);
   }
 
-  @HostListener('document:click')
-  protected onDocumentClick(): void {
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.hotels-actions-popover')) {
+      return;
+    }
+
     this.closeActionsPopover();
   }
 

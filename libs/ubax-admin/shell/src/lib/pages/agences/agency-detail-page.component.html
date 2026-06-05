@@ -1,0 +1,84 @@
+<div class="agency-detail-page">
+  <div class="agency-detail-page__topbar">
+    <button type="button" class="agency-detail-page__back" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i>
+      Retour aux agences
+    </button>
+  </div>
+
+  @if (loading()) {
+    <ubax-section-card>
+      <div class="agency-detail-page__loading">Chargement du détail...</div>
+    </ubax-section-card>
+  } @else if (agency(); as agency) {
+    <div class="agency-detail-page__header">
+      <div class="agency-detail-page__identity">
+        <h1 class="agency-detail-page__title">{{ agency.name ?? 'Agence' }}</h1>
+        <p class="agency-detail-page__subtitle">
+          {{ agency.city ?? 'Ville non renseignée' }}
+        </p>
+      </div>
+
+      <div class="agency-detail-page__badges">
+        <ubax-status-badge [variant]="statusVariant(agency)">
+          {{ statusLabel(agency) }}
+        </ubax-status-badge>
+        <ubax-status-badge [variant]="agency.verified ? 'active' : 'warning'">
+          {{ agency.verified ? 'Vérifiée' : 'Non vérifiée' }}
+        </ubax-status-badge>
+      </div>
+    </div>
+
+    <ubax-section-card>
+      <div class="agency-detail-grid">
+        <div class="agency-detail-item">
+          <span class="agency-detail-item__label">Email</span>
+          <span class="agency-detail-item__value">{{
+            agency.email ?? '—'
+          }}</span>
+        </div>
+        <div class="agency-detail-item">
+          <span class="agency-detail-item__label">Téléphone</span>
+          <span class="agency-detail-item__value">{{
+            agency.phone ?? '—'
+          }}</span>
+        </div>
+        <div class="agency-detail-item">
+          <span class="agency-detail-item__label">Plan abonnement</span>
+          <span class="agency-detail-item__value">{{
+            agency.subscriptionPlan ?? '—'
+          }}</span>
+        </div>
+        <div class="agency-detail-item">
+          <span class="agency-detail-item__label">Expiration abonnement</span>
+          <span class="agency-detail-item__value">{{
+            formatDate(agency.subscriptionExpiresAt)
+          }}</span>
+        </div>
+        <div class="agency-detail-item">
+          <span class="agency-detail-item__label">Créée le</span>
+          <span class="agency-detail-item__value">{{
+            formatDate(agency.createdAt)
+          }}</span>
+        </div>
+      </div>
+
+      <div class="agency-detail-page__actions">
+        <button
+          type="button"
+          class="agency-detail-page__action-btn"
+          (click)="viewMembers()"
+        >
+          <i class="pi pi-users"></i>
+          Voir les membres de l'agence
+        </button>
+      </div>
+    </ubax-section-card>
+  } @else {
+    <ubax-empty-state
+      icon="pi pi-home"
+      title="Agence introuvable"
+      description="Cette agence n'existe pas ou n'est plus disponible."
+    />
+  }
+</div>

@@ -17,12 +17,15 @@ import {
 } from '@angular/router';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
-import { AdminHotelsStore } from '@ubax-workspace/ubax-admin-data-access';
+import {
+  AdminAgenciesStore,
+  AdminHotelsStore,
+} from '@ubax-workspace/ubax-admin-data-access';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
 import {
   NotificationService,
   type AdminNotification,
-} from '@ubax-workspace/ubax-admin-shell/notification-service';
+} from '../../services/notification.service';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
@@ -47,6 +50,7 @@ export class MainLayoutComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly hotelsStore = inject(AdminHotelsStore);
+  private readonly agenciesStore = inject(AdminAgenciesStore);
   private readonly notificationService = inject(NotificationService);
 
   protected readonly user = this.authStore.user;
@@ -74,10 +78,16 @@ export class MainLayoutComponent implements OnInit {
 
   protected readonly proprietesExpanded = signal(false);
   protected readonly hotelsExpanded = signal(true);
+  protected readonly agenciesExpanded = signal(true);
 
   protected readonly isHotelsRoute = computed(() => {
     const pathname = this.currentUrl().split('?')[0].replace(/\/+$/, '');
     return pathname.endsWith('/hotels') || pathname.includes('/hotels/');
+  });
+
+  protected readonly isAgenciesRoute = computed(() => {
+    const pathname = this.currentUrl().split('?')[0].replace(/\/+$/, '');
+    return pathname.endsWith('/agences') || pathname.includes('/agences/');
   });
 
   protected readonly hotelsSubItemCounts = computed(() => {
@@ -100,6 +110,26 @@ export class MainLayoutComponent implements OnInit {
     };
   });
 
+  protected readonly agenciesSubItemCounts = computed(() => {
+    const agencies = this.agenciesStore.agencies();
+    const active = agencies.filter(
+      (agency) => this.resolveAgencyStatus(agency) === 'active',
+    ).length;
+    const pending = agencies.filter(
+      (agency) => this.resolveAgencyStatus(agency) === 'pending',
+    ).length;
+    const suspended = agencies.filter(
+      (agency) => this.resolveAgencyStatus(agency) === 'suspended',
+    ).length;
+
+    return {
+      all: agencies.length,
+      active,
+      pending,
+      suspended,
+    };
+  });
+
   // navGroups gardé pour référence future si on revient au composant ubax-sidebar
   protected readonly navGroups = [];
 
@@ -109,6 +139,10 @@ export class MainLayoutComponent implements OnInit {
 
   protected toggleHotels(): void {
     this.hotelsExpanded.update((v) => !v);
+  }
+
+  protected toggleAgencies(): void {
+    this.agenciesExpanded.update((v) => !v);
   }
 
   protected dismissNotification(notification: AdminNotification): void {
@@ -143,11 +177,16 @@ export class MainLayoutComponent implements OnInit {
       return;
     }
 
-    if (this.hotelsStore.hotels().length > 0 || this.hotelsStore.loading()) {
-      return;
+    if (!this.hotelsStore.hotels().length && !this.hotelsStore.loading()) {
+      void this.hotelsStore.load().catch(() => undefined);
     }
 
-    void this.hotelsStore.load().catch(() => undefined);
+    if (
+      !this.agenciesStore.agencies().length &&
+      !this.agenciesStore.loading()
+    ) {
+      void this.agenciesStore.load().catch(() => undefined);
+    }
   }
 
   private resolveCurrentPageTitle(url: string): string {
@@ -167,17 +206,19 @@ export class MainLayoutComponent implements OnInit {
     const pair = routeSegments.slice(0, 2).join('/');
 
     if (first === 'hotels') {
-      const status = queryParams.get('status');
-      if (status === 'suspended') {
-        return 'Hôtels suspendus';
+      return this.resolveHotelsTitle(queryParams.get('status'));
+    }
+
+    if (first === 'agences') {
+      if (routeSegments.length >= 2 && routeSegments[1] !== 'membres') {
+        return "Détail de l'agence";
       }
-      if (status === 'active') {
-        return 'Hôtels actifs';
+
+      if (routeSegments.length >= 3 && routeSegments[2] === 'membres') {
+        return "Membres de l'agence";
       }
-      if (status === 'pending') {
-        return 'Hôtels en attente';
-      }
-      return 'Tous les hôtels';
+
+      return this.resolveAgenciesTitle(queryParams.get('status'));
     }
 
     const labels: Record<string, string> = {
@@ -196,6 +237,34 @@ export class MainLayoutComponent implements OnInit {
     };
 
     return labels[pair] ?? labels[first] ?? 'Back-office UBAX';
+  }
+
+  private resolveHotelsTitle(status: string | null): string {
+    if (status === 'suspended') {
+      return 'Hôtels suspendus';
+    }
+    if (status === 'active') {
+      return 'Hôtels actifs';
+    }
+    if (status === 'pending') {
+      return 'Hôtels en attente';
+    }
+
+    return 'Tous les hôtels';
+  }
+
+  private resolveAgenciesTitle(status: string | null): string {
+    if (status === 'suspended') {
+      return 'Agences suspendues';
+    }
+    if (status === 'active') {
+      return 'Agences actives';
+    }
+    if (status === 'pending') {
+      return 'Agences en attente';
+    }
+
+    return 'Toutes les agences';
   }
 
   private createCurrentWeekRange(): Date[] {
@@ -225,6 +294,25 @@ export class MainLayoutComponent implements OnInit {
     if (
       !hotel.subscriptionActive ||
       this.isExpired(hotel.subscriptionExpiresAt)
+    ) {
+      return 'pending';
+    }
+
+    return 'active';
+  }
+
+  private resolveAgencyStatus(agency: {
+    active?: boolean;
+    subscriptionActive?: boolean;
+    subscriptionExpiresAt?: string;
+  }): 'active' | 'pending' | 'suspended' {
+    if (!agency.active) {
+      return 'suspended';
+    }
+
+    if (
+      !agency.subscriptionActive ||
+      this.isExpired(agency.subscriptionExpiresAt)
     ) {
       return 'pending';
     }

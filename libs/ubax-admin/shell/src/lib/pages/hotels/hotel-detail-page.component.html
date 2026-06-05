@@ -484,12 +484,14 @@
 @if (showSubscriptionDialog()) {
   <div
     class="hotel-subscription-dialog__overlay"
-    (click)="closeSubscriptionDialog()"
+    tabindex="0"
+    (click)="
+      $event.target === $event.currentTarget && closeSubscriptionDialog()
+    "
+    (keydown.enter)="closeSubscriptionDialog()"
+    (keydown.space)="$event.preventDefault(); closeSubscriptionDialog()"
   >
-    <div
-      class="hotel-subscription-dialog card"
-      (click)="$event.stopPropagation()"
-    >
+    <div class="hotel-subscription-dialog card">
       <div class="hotel-subscription-dialog__header">
         <div>
           <p class="hotel-subscription-dialog__eyebrow">

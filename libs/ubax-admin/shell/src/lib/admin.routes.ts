@@ -49,6 +49,15 @@ export const adminRoutes: Route[] = [
             (m) => m.AgencesPageComponent,
           ),
       },
+      {
+        path: 'agences/:agencyId',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/agences/agency-detail-page.component').then(
+            (m) => m.AgencyDetailPageComponent,
+          ),
+      },
       // FE-408 — Membres d'une agence (lecture seule)
       {
         path: 'agences/:agencyId/membres',

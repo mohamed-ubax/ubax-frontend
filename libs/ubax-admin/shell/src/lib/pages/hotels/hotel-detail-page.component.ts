@@ -35,13 +35,6 @@ const DEFAULT_SUBSCRIPTION_PLAN_OPTIONS = [
   { label: 'PREMIUM', value: 'PREMIUM' },
 ];
 
-interface MetricCard {
-  iconClass: string;
-  label: string;
-  toneClass: string;
-  value: string;
-}
-
 interface ActivityItem {
   iconClass: string;
   tone: 'blue' | 'green' | 'orange' | 'purple' | 'red';

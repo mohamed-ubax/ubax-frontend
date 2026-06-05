@@ -1,0 +1,133 @@
+:host {
+  display: block;
+}
+
+.agency-detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 100%;
+  padding: 1.35rem;
+  background: #ecf2f7;
+}
+
+.agency-detail-page__topbar {
+  display: flex;
+  align-items: center;
+}
+
+.agency-detail-page__back {
+  border: 0;
+  background: transparent;
+  color: #1a3047;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.agency-detail-page__loading {
+  padding: 1.2rem;
+  color: #64748b;
+  font-family: 'Lexend', sans-serif;
+}
+
+.agency-detail-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.agency-detail-page__title {
+  margin: 0;
+  color: #1a3047;
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.agency-detail-page__subtitle {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-family: 'Lexend', sans-serif;
+}
+
+.agency-detail-page__badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.agency-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.agency-detail-item {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border-radius: 10px;
+  background: #f7f7f7;
+  border: 1px solid #e7e6e6;
+}
+
+.agency-detail-item__label {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-family: 'Lexend', sans-serif;
+}
+
+.agency-detail-item__value {
+  color: #1c1c1c;
+  font-size: 0.9rem;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 500;
+}
+
+.agency-detail-page__actions {
+  margin-top: 1rem;
+  display: flex;
+}
+
+.agency-detail-page__action-btn {
+  height: 45px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 1rem;
+  background: #e87d1e;
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+@media (max-width: 64rem) {
+  .agency-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  .agency-detail-page {
+    padding: 0.85rem;
+  }
+
+  .agency-detail-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .agency-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
