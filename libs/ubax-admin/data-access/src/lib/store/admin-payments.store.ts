@@ -40,6 +40,9 @@ export type AdminPayment = PaymentResponse & {
 export type AdminPaymentPropertySummary = {
   city: string;
   title: string;
+  partnerName: string;
+  ownerName: string;
+  partnerType: 'hotel' | 'agency' | 'unknown';
 };
 
 type PaymentPageResult = {
@@ -195,6 +198,9 @@ function normalizePropertySummary(raw: unknown): AdminPaymentPropertySummary {
   const detail = source as PropertyDetailResponse | null;
   const propertyRecord = readRecord(detail?.property) ?? source;
 
+  const hotelId = readNonEmptyString(propertyRecord, ['hotelId']);
+  const agencyId = readNonEmptyString(propertyRecord, ['agencyId']);
+
   return {
     title:
       readNonEmptyString(propertyRecord, [
@@ -205,6 +211,11 @@ function normalizePropertySummary(raw: unknown): AdminPaymentPropertySummary {
       ]) || 'Bien non renseigné',
     city:
       readNonEmptyString(propertyRecord, ['city', 'district', 'street']) || '',
+    partnerName:
+      readNonEmptyString(propertyRecord, ['hotelName', 'agencyName']) || '',
+    ownerName:
+      readNonEmptyString(propertyRecord, ['ownerName']) || '',
+    partnerType: hotelId ? 'hotel' : agencyId ? 'agency' : 'unknown',
   };
 }
 

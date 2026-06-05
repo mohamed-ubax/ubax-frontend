@@ -55,18 +55,32 @@
   padding: 0 16px 0 42px;
 }
 
-.admin-payments-page__select {
-  width: 124px;
-}
+/* Remplacé par p-select — ancienne règle select conservée pour fallback */
 
-.admin-payments-page__select select {
-  padding: 0 34px 0 16px;
-  appearance: none;
-  cursor: pointer;
-}
+.admin-payments-page__type-select {
+  ::ng-deep .p-select {
+    min-height: 44px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(16, 24, 40, 0.06);
+    width: 130px;
+    box-shadow: none;
+  }
 
-.admin-payments-page__select i {
-  right: 14px;
+  ::ng-deep .p-select-label {
+    font:
+      300 13px/1 'Lexend',
+      sans-serif;
+    color: #1c1c1c;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  ::ng-deep .p-select-dropdown {
+    width: 36px;
+    color: #98a2b3;
+  }
 }
 
 .admin-payments-kpis {
@@ -845,9 +859,7 @@
 }
 
 .admin-payments-note-box,
-.admin-payments-upload-box,
-.admin-payments-field select,
-.admin-payments-field textarea {
+.admin-payments-upload-box {
   border-radius: 12px;
   border: 1px solid rgba(16, 24, 40, 0.08);
   background: #f8fbff;
@@ -875,24 +887,47 @@
     sans-serif;
 }
 
-.admin-payments-field select,
 .admin-payments-field textarea {
   width: 100%;
+  min-height: 124px;
   padding: 12px 14px;
   font:
     400 13px/1.4 'Lexend',
     sans-serif;
   color: #122232;
   outline: none;
-}
-
-.admin-payments-field select {
-  min-height: 48px;
-}
-
-.admin-payments-field textarea {
-  min-height: 124px;
   resize: vertical;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  background: #f8fbff;
+}
+
+.admin-payments-field__select {
+  width: 100%;
+
+  ::ng-deep .p-select {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 12px;
+    border: 1px solid rgba(16, 24, 40, 0.08);
+    background: #f8fbff;
+    box-shadow: none;
+  }
+
+  ::ng-deep .p-select-label {
+    font:
+      400 13px/1.4 'Lexend',
+      sans-serif;
+    color: #122232;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+  }
+
+  ::ng-deep .p-select-dropdown {
+    color: #98a2b3;
+    border-radius: 0 12px 12px 0;
+  }
 }
 
 .admin-payments-upload-box {

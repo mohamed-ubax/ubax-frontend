@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Paginator } from 'primeng/paginator';
+import { Select } from 'primeng/select';
 import { firstValueFrom } from 'rxjs';
 import {
   ApiConfiguration,
@@ -25,7 +26,6 @@ import { DocumentPreviewComponent } from '@ubax-workspace/shared-design-system';
 import { HttpClient } from '@angular/common/http';
 
 const PAGE_SIZE = 60;
-const INITIAL_TRANSACTIONS_COUNT = 6;
 
 type PaymentTypeFilter = AdminPaymentType | 'ALL';
 type KpiTone = 'blue' | 'green' | 'orange' | 'purple';
@@ -58,7 +58,7 @@ const STATUS_OPTIONS: Array<{
 @Component({
   selector: 'ubax-admin-payments-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DocumentPreviewComponent, Paginator],
+  imports: [CommonModule, FormsModule, DocumentPreviewComponent, Paginator, Select],
   templateUrl: './payments-page.component.html',
   styleUrl: './payments-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -492,6 +492,20 @@ export class PaymentsPageComponent implements OnInit {
     return id.length > 12 ? `CONT-${id.slice(0, 8).toUpperCase()}` : id;
   }
 
+  protected partnerDisplayName(payment: AdminPayment): string {
+    const summary = this.propertySummary(payment);
+    return summary.partnerName || this.propertyLabel(payment);
+  }
+
+  protected partnerOwnerName(payment: AdminPayment): string {
+    const summary = this.propertySummary(payment);
+    return summary.ownerName || payment.recordedByName || 'Non renseigné';
+  }
+
+  protected partnerInitialsForDialog(payment: AdminPayment): string {
+    return this.partnerDisplayName(payment).slice(0, 2).toUpperCase();
+  }
+
   protected propertyLabel(payment: AdminPayment): string {
     return this.propertySummary(payment).title;
   }
@@ -545,9 +559,11 @@ export class PaymentsPageComponent implements OnInit {
     if (propertyId) {
       return (
         this.resolvedPropertySummaries()[propertyId] ?? {
-          title:
-            payment.periodLabel?.trim() || propertyId || 'Bien non renseigné',
+          title: payment.periodLabel?.trim() || propertyId || 'Bien non renseigné',
           city: '',
+          partnerName: '',
+          ownerName: payment.recordedByName || '',
+          partnerType: 'unknown',
         }
       );
     }
@@ -555,6 +571,9 @@ export class PaymentsPageComponent implements OnInit {
     return {
       title: payment.periodLabel?.trim() || 'Bien non renseigné',
       city: '',
+      partnerName: '',
+      ownerName: payment.recordedByName || '',
+      partnerType: 'unknown',
     };
   }
 

@@ -39,17 +39,14 @@
           />
         </label>
 
-        <label class="admin-payments-page__select">
-          <select
-            [ngModel]="selectedType()"
-            (ngModelChange)="onTypeChange($event)"
-          >
-            @for (option of typeOptions; track option.value) {
-              <option [ngValue]="option.value">{{ option.label }}</option>
-            }
-          </select>
-          <i class="pi pi-angle-down"></i>
-        </label>
+        <p-select
+          class="admin-payments-page__type-select"
+          [options]="typeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="selectedType()"
+          (ngModelChange)="onTypeChange($event)"
+        />
       </div>
     </div>
 
@@ -303,12 +300,21 @@
   </div>
 
   @if (dialogOpen()) {
-    <div class="admin-payments-dialog-backdrop" (click)="closeDetails()"></div>
+    <div
+      class="admin-payments-dialog-backdrop"
+      role="button"
+      tabindex="-1"
+      aria-label="Fermer"
+      (click)="closeDetails()"
+      (keyup.escape)="closeDetails()"
+    ></div>
 
     <dialog
       class="admin-payments-dialog"
       (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
       aria-modal="true"
+      tabindex="-1"
       open
     >
       <header class="admin-payments-dialog__header">
@@ -372,16 +378,14 @@
 
               <div class="admin-payments-requester">
                 <span class="admin-payments-requester__logo">
-                  {{ customerName(payment).slice(0, 2).toUpperCase() }}
+                  {{ partnerInitialsForDialog(payment) }}
                 </span>
 
                 <div>
-                  <strong>{{ customerName(payment) }}</strong>
-                  <p>
-                    Responsable: {{ payment.recordedByName ?? 'Non renseigné' }}
-                  </p>
-                  <p>{{ customerMeta(payment) }}</p>
+                  <strong>{{ partnerDisplayName(payment) }}</strong>
+                  <p>Responsable : {{ partnerOwnerName(payment) }}</p>
                   <p>{{ propertyLabel(payment) }}</p>
+                  <p>{{ customerMeta(payment) }}</p>
                 </div>
               </div>
             </article>
@@ -488,17 +492,17 @@
             <h3><i class="pi pi-cog"></i> Traitement de la demande</h3>
 
             <div class="admin-payments-treatment-grid">
-              <label class="admin-payments-field">
+              <div class="admin-payments-field">
                 <span>Statut</span>
-                <select
+                <p-select
+                  class="admin-payments-field__select"
+                  [options]="statusOptions"
+                  optionLabel="label"
+                  optionValue="value"
                   [ngModel]="treatmentStatus()"
                   (ngModelChange)="treatmentStatus.set($event)"
-                >
-                  @for (option of statusOptions; track option.value) {
-                    <option [ngValue]="option.value">{{ option.label }}</option>
-                  }
-                </select>
-              </label>
+                />
+              </div>
 
               <label
                 class="admin-payments-field admin-payments-field--textarea"
