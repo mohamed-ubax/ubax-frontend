@@ -7,28 +7,20 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import type { PartnerApplicationResponse } from '@ubax-workspace/shared-api-types';
 import {
   EmptyStateComponent,
   KpiCardComponent,
-  SearchFilterBarComponent,
   SectionCardComponent,
-  StatusBadgeComponent,
-  type FilterOption,
 } from '@ubax-workspace/shared-design-system';
 import {
   NOTIFICATION_HANDLER,
   resolveHttpErrorMessage,
 } from '@ubax-workspace/shared-data-access';
-import {
-  UiDataTableCellDefDirective,
-  type UiDataTableColumn,
-  UiDataTableComponent,
-  UiDataTableEmptyDefDirective,
-  UiPaginationComponent,
-} from '@ubax-workspace/shared-ui';
+import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
+import { SelectModule } from 'primeng/select';
 import { AdminCandidaturesService } from '../../services/admin-candidatures.service';
 
 type StatusFilter =
@@ -48,17 +40,6 @@ const STATUS_FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
   { label: 'Rejeté', value: 'REJECTED' },
 ];
 
-const STATUS_BADGE_MAP: Record<
-  string,
-  'pending' | 'active' | 'warning' | 'danger' | 'neutral' | 'info'
-> = {
-  PENDING: 'pending',
-  UNDER_REVIEW: 'info',
-  INCOMPLETE: 'warning',
-  APPROVED: 'active',
-  REJECTED: 'danger',
-};
-
 const STATUS_LABEL_MAP: Record<string, string> = {
   PENDING: 'En attente',
   UNDER_REVIEW: 'En examen',
@@ -69,26 +50,29 @@ const STATUS_LABEL_MAP: Record<string, string> = {
 
 interface CandidatureKpiCard {
   iconClass: string;
+  iconToneClass: string;
   label: string;
   value: number;
+  trend: string;
+  positive: boolean;
+  graphWrapClass: string;
+  graphClass: string;
+  gradientStart: string;
+  gradientEnd: string;
 }
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 12;
 
 @Component({
   selector: 'ubax-admin-candidatures-list-page',
   standalone: true,
   imports: [
-    DatePipe,
+    FormsModule,
+    SelectModule,
     KpiCardComponent,
-    SearchFilterBarComponent,
     SectionCardComponent,
-    StatusBadgeComponent,
     EmptyStateComponent,
-    UiDataTableComponent,
-    UiDataTableCellDefDirective,
-    UiDataTableEmptyDefDirective,
-    UiPaginationComponent,
+    UbaxPaginatorComponent,
   ],
   templateUrl: './candidatures-list-page.component.html',
   styleUrl: './candidatures-list-page.component.scss',
@@ -105,22 +89,18 @@ export class CandidaturesListPageComponent {
   protected readonly statusFilter = signal<StatusFilter>('all');
   protected readonly currentPage = signal(1);
 
-  protected readonly tableColumns: readonly UiDataTableColumn<PartnerApplicationResponse>[] =
-    [
-      { key: 'company', header: 'Entreprise', width: '21%' },
-      { key: 'type', header: 'Type', width: '9%' },
-      { key: 'legalRep', header: 'Représentant légal', width: '16%' },
-      { key: 'email', header: 'Email', width: '16%' },
-      { key: 'city', header: 'Ville', width: '9%' },
-      { key: 'status', header: 'Statut', width: '11%' },
-      { key: 'submittedAt', header: 'Date soumission', width: '10%' },
-      { key: 'actions', header: 'Actions', width: '8%', align: 'end' },
-    ];
+  protected readonly pageSize = PAGE_SIZE;
+  protected readonly statusFilterOptions = STATUS_FILTER_OPTIONS;
 
-  protected readonly searchFilters: {
-    label: string;
-    options: FilterOption[];
-  }[] = [{ label: 'Tous les statuts', options: STATUS_FILTER_OPTIONS }];
+  protected readonly listTitle = computed(() => {
+    const status = this.statusFilter();
+    if (status === 'PENDING') return 'Candidatures en attente';
+    if (status === 'UNDER_REVIEW') return 'Candidatures en examen';
+    if (status === 'INCOMPLETE') return 'Candidatures incomplètes';
+    if (status === 'APPROVED') return 'Candidatures approuvées';
+    if (status === 'REJECTED') return 'Candidatures rejetées';
+    return 'Liste des candidatures';
+  });
 
   protected readonly filteredApplications = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -138,6 +118,10 @@ export class CandidaturesListPageComponent {
     });
   });
 
+  protected readonly filteredCount = computed(
+    () => this.filteredApplications().length,
+  );
+
   protected readonly totalPages = computed(() =>
     Math.ceil(this.filteredApplications().length / PAGE_SIZE),
   );
@@ -152,13 +136,10 @@ export class CandidaturesListPageComponent {
     return {
       PENDING: apps.filter((a) => a.status === 'PENDING').length,
       UNDER_REVIEW: apps.filter((a) => a.status === 'UNDER_REVIEW').length,
-      INCOMPLETE: apps.filter((a) => a.status === 'INCOMPLETE').length,
       APPROVED: apps.filter((a) => a.status === 'APPROVED').length,
       REJECTED: apps.filter((a) => a.status === 'REJECTED').length,
     };
   });
-
-  protected readonly totalCount = computed(() => this.applications().length);
 
   protected readonly kpiCards = computed<CandidatureKpiCard[]>(() => {
     const counts = this.statusCounts();
@@ -167,27 +148,56 @@ export class CandidaturesListPageComponent {
       {
         label: 'En attente',
         value: counts.PENDING,
-        iconClass: 'pi pi-hourglass candidatures-kpi-card__icon--pending',
+        trend: '0 ce mois ci',
+        positive: true,
+        iconClass: 'pi pi-hourglass',
+        iconToneClass:
+          'candidatures-kpi__icon candidatures-kpi__icon--orange',
+        graphWrapClass:
+          'candidatures-kpi__graph-wrap candidatures-kpi__graph-wrap--orange',
+        graphClass: 'candidatures-kpi__graph candidatures-kpi__graph--orange',
+        gradientStart: '#FCD79A',
+        gradientEnd: '#F59E0B',
       },
       {
         label: 'En examen',
         value: counts.UNDER_REVIEW,
-        iconClass: 'pi pi-search candidatures-kpi-card__icon--review',
-      },
-      {
-        label: 'Incomplets',
-        value: counts.INCOMPLETE,
-        iconClass: 'pi pi-file-edit candidatures-kpi-card__icon--incomplete',
+        trend: '0 ce mois ci',
+        positive: true,
+        iconClass: 'pi pi-search',
+        iconToneClass: 'candidatures-kpi__icon candidatures-kpi__icon--blue',
+        graphWrapClass:
+          'candidatures-kpi__graph-wrap candidatures-kpi__graph-wrap--blue',
+        graphClass: 'candidatures-kpi__graph candidatures-kpi__graph--blue',
+        gradientStart: '#93C5FD',
+        gradientEnd: '#3B82F6',
       },
       {
         label: 'Approuvés',
         value: counts.APPROVED,
-        iconClass: 'pi pi-check-circle candidatures-kpi-card__icon--approved',
+        trend: '0 ce mois ci',
+        positive: true,
+        iconClass: 'pi pi-check-circle',
+        iconToneClass:
+          'candidatures-kpi__icon candidatures-kpi__icon--green',
+        graphWrapClass:
+          'candidatures-kpi__graph-wrap candidatures-kpi__graph-wrap--green',
+        graphClass: 'candidatures-kpi__graph candidatures-kpi__graph--green',
+        gradientStart: '#8CE3A5',
+        gradientEnd: '#22C55E',
       },
       {
         label: 'Rejetés',
         value: counts.REJECTED,
-        iconClass: 'pi pi-times-circle candidatures-kpi-card__icon--rejected',
+        trend: '0 ce mois ci',
+        positive: false,
+        iconClass: 'pi pi-times-circle',
+        iconToneClass: 'candidatures-kpi__icon candidatures-kpi__icon--red',
+        graphWrapClass:
+          'candidatures-kpi__graph-wrap candidatures-kpi__graph-wrap--red',
+        graphClass: 'candidatures-kpi__graph candidatures-kpi__graph--red',
+        gradientStart: '#FECACA',
+        gradientEnd: '#EF4444',
       },
     ];
   });
@@ -219,8 +229,8 @@ export class CandidaturesListPageComponent {
     this.currentPage.set(1);
   }
 
-  protected onFilterChange(event: { filter: string; value: unknown }): void {
-    this.statusFilter.set((event.value as StatusFilter) ?? 'all');
+  protected onStatusFilterChange(value: StatusFilter): void {
+    this.statusFilter.set(value ?? 'all');
     this.currentPage.set(1);
   }
 
@@ -232,14 +242,21 @@ export class CandidaturesListPageComponent {
     void this.router.navigate(['/candidatures', app.id]);
   }
 
-  protected getStatusBadge(
-    status: string | undefined,
-  ): 'pending' | 'active' | 'warning' | 'danger' | 'neutral' | 'info' {
-    return STATUS_BADGE_MAP[status ?? ''] ?? 'neutral';
-  }
-
   protected getStatusLabel(status: string | undefined): string {
     return STATUS_LABEL_MAP[status ?? ''] ?? status ?? '—';
+  }
+
+  protected applicationStatusClass(app: PartnerApplicationResponse): string {
+    const s = app.status ?? '';
+    if (s === 'APPROVED')
+      return 'candidatures-status-pill candidatures-status-pill--approved';
+    if (s === 'REJECTED')
+      return 'candidatures-status-pill candidatures-status-pill--rejected';
+    if (s === 'UNDER_REVIEW')
+      return 'candidatures-status-pill candidatures-status-pill--review';
+    if (s === 'INCOMPLETE')
+      return 'candidatures-status-pill candidatures-status-pill--incomplete';
+    return 'candidatures-status-pill candidatures-status-pill--pending';
   }
 
   protected getPartnerTypeLabel(type: string | undefined): string {
@@ -249,14 +266,9 @@ export class CandidaturesListPageComponent {
     return type;
   }
 
-  protected getPartnerTypeBadge(type: string | undefined): 'info' | 'neutral' {
-    if (!type) return 'neutral';
-    if (type.includes('AGENCE') || type.includes('IMMOB')) return 'info';
-    return 'neutral';
-  }
-
-  protected legalRepName(app: PartnerApplicationResponse): string {
-    const parts = [app.legalRepFirstName, app.legalRepLastName].filter(Boolean);
-    return parts.length ? parts.join(' ') : '—';
+  protected cardSubLabel(app: PartnerApplicationResponse): string {
+    const type = this.getPartnerTypeLabel(app.partnerType);
+    const city = app.city ?? '—';
+    return `${type} · ${city}`;
   }
 }

@@ -1,272 +1,444 @@
+@use 'sass:color';
+
+$line: #eeeeee;
+$text: #1c1c1c;
+$muted: #8b8b8b;
+$navy: #1a3047;
+$bg-soft: #ecf2f7;
+
+:host {
+  display: block;
+}
+
+// ── Page container ────────────────────────────────────────────────────────────
+
 .candidatures-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 2rem;
-  background:
-    radial-gradient(
-      circle at top right,
-      rgba(255, 255, 255, 0.78),
-      transparent 30%
-    ),
-    linear-gradient(180deg, rgba(236, 242, 247, 0.92), rgba(236, 242, 247, 1));
-
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-  }
-
-  &__eyebrow {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin: 0 0 0.35rem;
-  }
-
-  &__title-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  &__title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1c1c1c;
-    margin: 0;
-  }
-
-  &__count {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #526071;
-    background: rgba(255, 255, 255, 0.85);
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    border: 1px solid rgba(26, 48, 71, 0.08);
-  }
-
-  &__subtitle {
-    max-width: 48rem;
-    font-size: 0.95rem;
-    color: #6b7280;
-    line-height: 1.6;
-    margin: 0.65rem 0 0;
-  }
+  gap: 1.25rem;
+  min-height: 100%;
+  background: $bg-soft;
 }
+
+// ── KPI grid — 4 colonnes comme agences/hôtels ────────────────────────────────
 
 .candidatures-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.candidatures-kpi-card__icon--pending {
-  color: #d97706;
+// Icônes KPI
+.candidatures-kpi__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  font-size: 1.3rem;
+
+  &--orange {
+    color: #b45309;
+    background: #fff4e2;
+  }
+
+  &--blue {
+    color: #1d4ed8;
+    background: #eff6ff;
+  }
+
+  &--green {
+    color: #15803d;
+    background: #eafaf0;
+  }
+
+  &--red {
+    color: #c81e1e;
+    background: #ffebec;
+  }
 }
 
-.candidatures-kpi-card__icon--review {
-  color: #2563eb;
+// Wrapper graphe sparkline
+.candidatures-kpi__graph-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  margin-top: 4cqh;
+  padding: 0.32rem 0.46rem 0.24rem;
+  border-radius: 10px;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 3px;
+    height: 14px;
+    border-radius: 8px;
+    pointer-events: none;
+  }
 }
 
-.candidatures-kpi-card__icon--incomplete {
-  color: #f59e0b;
+// SVG sparkline
+.candidatures-kpi__graph {
+  position: relative;
+  z-index: 1;
+  width: 82px;
+  height: 30px;
+
+  .candidatures-kpi__graph-area {
+    stroke: none;
+  }
+
+  &--orange .candidatures-kpi__graph-line {
+    stroke: #f59e0b;
+  }
+  &--blue .candidatures-kpi__graph-line {
+    stroke: #3b82f6;
+  }
+  &--green .candidatures-kpi__graph-line {
+    stroke: #22c55e;
+  }
+  &--red .candidatures-kpi__graph-line {
+    stroke: #ef4444;
+  }
 }
 
-.candidatures-kpi-card__icon--approved {
-  color: #059669;
-}
+// ── Section stage — même structure que agences/hôtels ─────────────────────────
 
-.candidatures-kpi-card__icon--rejected {
-  color: #dc2626;
-}
-
-// Toolbar
-.candidatures-toolbar {
-  display: block;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-neutral-300);
-}
-
-// Table
-.candidatures-table-stage {
-  display: grid;
-}
-
-.candidatures-table-wrap {
-  overflow-x: auto;
-}
-
-.candidatures-table-loading {
+.candidatures-stage {
   display: grid;
   gap: 0.9rem;
-  padding: 1rem 1.25rem 1.35rem;
+  padding: 1rem;
 }
 
-.candidatures-table-loading__row {
-  height: 4.75rem;
-  border-radius: 1rem;
-  background: #e2e8f0;
-  animation: candidaturesTablePulse 1.6s ease-in-out infinite;
-}
-
-.candidatures-data-table {
-  --ui-data-table-header-bg: #1a3047;
-  --ui-data-table-header-radius: 18px;
-  --ui-data-table-header-height: 64px;
-  --ui-data-table-header-padding-inline: 20px;
-  --ui-data-table-row-height: 78px;
-  --ui-data-table-row-padding-inline: 20px;
-  --ui-data-table-row-divider: rgba(207, 214, 220, 0.8);
-  --ui-data-table-cell-font-size: 14px;
-}
-
-.candidatures-pagination {
+.candidatures-stage__head {
   display: flex;
-  justify-content: flex-end;
-  padding: 1rem 1.25rem 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-@keyframes candidaturesTablePulse {
+.candidatures-stage__title {
+  margin: 0;
+  color: $navy;
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.candidatures-stage__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  :deep(.p-select) {
+    height: 50px;
+    min-width: 180px;
+    border-radius: 10px;
+    border-color: #e2e8f0;
+    background: #f7f7f7;
+
+    .p-select-label {
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.82rem;
+      color: $text;
+    }
+  }
+}
+
+.candidatures-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 244px;
+  height: 50px;
+  border-radius: 10px;
+  background: #f7f7f7;
+  border: 1px solid transparent;
+  padding: 0 0.8rem;
+
+  i {
+    font-size: 0.9rem;
+    color: #9aa3af;
+    flex-shrink: 0;
+  }
+
+  input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: $text;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.78rem;
+
+    &::placeholder {
+      color: $muted;
+    }
+  }
+}
+
+// ── Grille de cards — même motif que agences ─────────────────────────────────
+
+.candidatures-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.candidatures-grid--loading {
+  .candidatures-card--skeleton {
+    min-height: 255px;
+    border-radius: 20px;
+    background: #e2e8f0;
+    border: 1px solid #d6dde6;
+    animation: candidaturesPulse 1.5s ease-in-out infinite;
+  }
+}
+
+// ── Card individuelle ─────────────────────────────────────────────────────────
+
+.candidatures-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.62rem;
+  min-height: 254px;
+  padding: 0.95rem 0.8rem 0.85rem;
+  border-radius: 20px;
+  background: #f7f7f7;
+  border: 1px solid #e7e6e6;
+}
+
+.candidatures-card__logo-wrap {
+  margin-top: 0.45rem;
+}
+
+.candidatures-card__logo,
+.candidatures-card__avatar {
+  width: 73px;
+  height: 73px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.candidatures-card__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: $navy;
+  border: 1px solid #e5e7eb;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.candidatures-card__meta {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  min-height: 68px;
+}
+
+.candidatures-card__name {
+  margin: 0;
+  color: #222;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.candidatures-card__sub {
+  margin: 0;
+  color: #222;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.candidatures-card__code {
+  margin: 0;
+  color: #4a5568;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+}
+
+.candidatures-card__actions-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.candidatures-card__detail-btn {
+  flex: 1;
+  height: 51px;
+  border: 0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: $navy;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 140ms ease;
+
+  &:hover {
+    background: #eef3f8;
+  }
+}
+
+// Première card avec bouton orange (comme agences)
+.candidatures-card:first-child .candidatures-card__detail-btn {
+  background: #e87d1e;
+  color: #fff;
+
+  &:hover {
+    background: color.adjust(#e87d1e, $lightness: -8%);
+  }
+}
+
+// ── Pillule de statut (position absolue, coin supérieur droit) ─────────────────
+
+.candidatures-status-pill {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25px;
+  min-width: 86px;
+  padding: 0.2rem 0.7rem;
+  border-radius: 16px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+
+  &--pending {
+    background: #b45309;
+    color: #fff;
+  }
+  &--review {
+    background: #1d4ed8;
+    color: #fff;
+  }
+  &--incomplete {
+    background: #92400e;
+    color: #fff;
+  }
+  &--approved {
+    background: #15803d;
+    color: #fff;
+  }
+  &--rejected {
+    background: #e7000b;
+    color: #fff;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+.candidatures-empty-wrap {
+  padding: 1.5rem 0.25rem 0.75rem;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.candidatures-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid $line;
+  margin-top: 0.25rem;
+  padding: 0.75rem 0.2rem 0;
+}
+
+.candidatures-footer__count {
+  margin: 0;
+  color: $text;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+@keyframes candidaturesPulse {
   0%,
   100% {
     opacity: 1;
   }
-
   50% {
-    opacity: 0.45;
+    opacity: 0.42;
   }
 }
 
-// Cellule utilisateur
-.candidatures-user-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0;
+// ── Responsive ────────────────────────────────────────────────────────────────
 
-  &__logo {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  &__avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--color-brand-navy);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
-
-  &__name {
-    font-weight: 600;
-    color: var(--color-brand-navy);
-    margin: 0;
-    font-size: 0.8125rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &__sub {
-    color: var(--color-neutral-500);
-    margin: 0;
-    font-size: 0.75rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-.candidatures-user-cell__meta {
-  min-width: 0;
-}
-
-.candidatures-table {
-  &__cell {
-    display: block;
-    color: var(--color-brand-navy);
-
-    &--muted {
-      color: var(--color-neutral-500);
-    }
-
-    &--wrap {
-      overflow-wrap: anywhere;
-      line-height: 1.45;
-    }
-  }
-
-  &__actions-head {
-    text-align: center;
-  }
-
-  &__actions {
-    text-align: center;
-  }
-}
-
-@media (max-width: 1200px) {
+@media (max-width: 80rem) {
   .candidatures-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .candidatures-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 62rem) {
+  .candidatures-stage__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .candidatures-stage__actions {
+    justify-content: space-between;
+  }
+
+  .candidatures-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .candidatures-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 48rem) {
   .candidatures-page {
-    padding: 1.25rem;
+    padding: 0.85rem;
   }
 
   .candidatures-kpi-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-// Boutons d'action
-.candidatures-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.candidatures-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 0.5rem;
-  border: 1px solid var(--color-neutral-300);
-  background: transparent;
-  color: var(--color-brand-navy);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s;
-
-  &:hover {
-    background: var(--color-brand-navy);
-    color: white;
-    border-color: var(--color-brand-navy);
+    grid-template-columns: 1fr;
   }
 
-  i {
-    font-size: 0.875rem;
+  .candidatures-stage__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .candidatures-search,
+  .candidatures-stage__actions :deep(.p-select) {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .candidatures-grid {
+    grid-template-columns: 1fr;
   }
 }
