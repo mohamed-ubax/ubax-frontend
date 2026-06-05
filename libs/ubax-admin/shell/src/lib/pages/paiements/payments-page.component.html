@@ -41,6 +41,7 @@
 
         <p-select
           class="admin-payments-page__type-select"
+          panelStyleClass="admin-payments-type-panel"
           [options]="typeOptions"
           optionLabel="label"
           optionValue="value"
@@ -377,8 +378,19 @@
               </div>
 
               <div class="admin-payments-requester">
-                <span class="admin-payments-requester__logo">
-                  {{ partnerInitialsForDialog(payment) }}
+                <span
+                  class="admin-payments-requester__logo"
+                  [class.admin-payments-requester__logo--has-img]="!!partnerLogoUrl(payment)"
+                >
+                  @if (partnerLogoUrl(payment); as logoUrl) {
+                    <img
+                      [src]="logoUrl"
+                      [alt]="partnerDisplayName(payment)"
+                      class="admin-payments-requester__logo-img"
+                    />
+                  } @else {
+                    {{ partnerInitialsForDialog(payment) }}
+                  }
                 </span>
 
                 <div>
@@ -496,6 +508,7 @@
                 <span>Statut</span>
                 <p-select
                   class="admin-payments-field__select"
+                  panelStyleClass="admin-payments-status-panel"
                   [options]="statusOptions"
                   optionLabel="label"
                   optionValue="value"

@@ -9,6 +9,8 @@ import {
   getById6,
   getById4,
   list3,
+  listHotels,
+  listAgencies,
   updateStatus2,
 } from '@ubax-workspace/shared-api-types';
 import { resolveHttpErrorMessage } from '@ubax-workspace/shared-data-access';
@@ -43,6 +45,8 @@ export type AdminPaymentPropertySummary = {
   partnerName: string;
   ownerName: string;
   partnerType: 'hotel' | 'agency' | 'unknown';
+  partnerId?: string;
+  logoUrl?: string;
 };
 
 type PaymentPageResult = {
@@ -216,6 +220,8 @@ function normalizePropertySummary(raw: unknown): AdminPaymentPropertySummary {
     ownerName:
       readNonEmptyString(propertyRecord, ['ownerName']) || '',
     partnerType: hotelId ? 'hotel' : agencyId ? 'agency' : 'unknown',
+    partnerId: hotelId ?? agencyId ?? undefined,
+    logoUrl: undefined,
   };
 }
 
@@ -394,7 +400,13 @@ export class AdminPaymentsStore {
           } catch {
             return [
               propertyId,
-              { title: 'Bien non renseigné', city: '' },
+              {
+                title: 'Bien non renseigné',
+                city: '',
+                partnerName: '',
+                ownerName: '',
+                partnerType: 'unknown' as const,
+              },
             ] as const;
           }
         }),
@@ -404,6 +416,78 @@ export class AdminPaymentsStore {
         ...current,
         ...Object.fromEntries(propertyEntries),
       }));
+
+      const hotelIds = new Set<string>();
+      const agencyIds = new Set<string>();
+
+      for (const [, summary] of propertyEntries) {
+        if ('partnerId' in summary && summary.partnerId) {
+          if ('partnerType' in summary && summary.partnerType === 'hotel') {
+            hotelIds.add(summary.partnerId);
+          } else if ('partnerType' in summary && summary.partnerType === 'agency') {
+            agencyIds.add(summary.partnerId);
+          }
+        }
+      }
+
+      if (hotelIds.size > 0 || agencyIds.size > 0) {
+        await this.resolvePartnerLogos(hotelIds, agencyIds);
+      }
+    }
+  }
+
+  private async resolvePartnerLogos(
+    hotelIds: Set<string>,
+    agencyIds: Set<string>,
+  ): Promise<void> {
+    const logoMap = new Map<string, string>();
+
+    if (hotelIds.size > 0) {
+      try {
+        const raw = await this.api.invoke(listHotels, {
+          pageable: { page: 0, size: 500 },
+        });
+        for (const item of readCollection(raw)) {
+          const record = readRecord(item);
+          const id = typeof record?.['id'] === 'string' ? record['id'] : null;
+          const logo = typeof record?.['logoUrl'] === 'string' ? record['logoUrl'] : null;
+          if (id && logo && hotelIds.has(id)) {
+            logoMap.set(id, logo);
+          }
+        }
+      } catch {
+        // Logo resolution is best-effort
+      }
+    }
+
+    if (agencyIds.size > 0) {
+      try {
+        const raw = await this.api.invoke(listAgencies, {
+          pageable: { page: 0, size: 500 },
+        });
+        for (const item of readCollection(raw)) {
+          const record = readRecord(item);
+          const id = typeof record?.['id'] === 'string' ? record['id'] : null;
+          const logo = typeof record?.['logoUrl'] === 'string' ? record['logoUrl'] : null;
+          if (id && logo && agencyIds.has(id)) {
+            logoMap.set(id, logo);
+          }
+        }
+      } catch {
+        // Logo resolution is best-effort
+      }
+    }
+
+    if (logoMap.size > 0) {
+      this.propertySummaries.update((current) => {
+        const updated = { ...current };
+        for (const [propId, summary] of Object.entries(updated)) {
+          if (summary.partnerId && logoMap.has(summary.partnerId)) {
+            updated[propId] = { ...summary, logoUrl: logoMap.get(summary.partnerId) };
+          }
+        }
+        return updated;
+      });
     }
   }
 }

@@ -506,6 +506,10 @@ export class PaymentsPageComponent implements OnInit {
     return this.partnerDisplayName(payment).slice(0, 2).toUpperCase();
   }
 
+  protected partnerLogoUrl(payment: AdminPayment): string | null {
+    return this.propertySummary(payment).logoUrl ?? null;
+  }
+
   protected propertyLabel(payment: AdminPayment): string {
     return this.propertySummary(payment).title;
   }

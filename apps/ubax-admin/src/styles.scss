@@ -278,6 +278,75 @@ body.ubax-admin-dialog-open .ubax-header {
   border-radius: 8px;
 }
 
+/* ── payments page — type-filter pill dropdown ────────────────────────────── */
+.admin-payments-type-panel.p-select-overlay {
+  border-radius: 14px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+  min-width: 140px !important;
+}
+
+.admin-payments-type-panel .p-select-list {
+  padding: 6px;
+}
+
+.admin-payments-type-panel .p-select-option {
+  border-radius: 8px;
+  font:
+    300 13px/1.4 'Lexend',
+    sans-serif;
+  color: #344054;
+  padding: 9px 14px;
+  transition: background-color 100ms ease;
+}
+
+.admin-payments-type-panel .p-select-option:not(.p-disabled):hover {
+  background: #f4f7fb;
+  color: #122232;
+}
+
+.admin-payments-type-panel .p-select-option.p-selected,
+.admin-payments-type-panel .p-select-option.p-highlight {
+  background: #eef4ff;
+  color: #1456c0;
+  font-weight: 400;
+}
+
+/* ── payments page — status select in dialog ──────────────────────────────── */
+.admin-payments-status-panel.p-select-overlay {
+  border-radius: 14px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.admin-payments-status-panel .p-select-list {
+  padding: 6px;
+}
+
+.admin-payments-status-panel .p-select-option {
+  border-radius: 8px;
+  font:
+    400 13px/1.4 'Lexend',
+    sans-serif;
+  color: #344054;
+  padding: 10px 14px;
+  transition: background-color 100ms ease;
+}
+
+.admin-payments-status-panel .p-select-option:not(.p-disabled):hover {
+  background: #f4f7fb;
+  color: #122232;
+}
+
+.admin-payments-status-panel .p-select-option.p-selected,
+.admin-payments-status-panel .p-select-option.p-highlight {
+  background: #eef4ff;
+  color: #1456c0;
+  font-weight: 500;
+}
+
 /* ── Reset global ─────────────────────────────────────────────────────────── */
 *,
 *::before,
