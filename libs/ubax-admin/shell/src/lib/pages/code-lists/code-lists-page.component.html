@@ -1,48 +1,4 @@
 <section class="code-lists-page">
-  <header class="code-lists-page__header">
-    <div class="code-lists-page__title-block">
-      <p class="code-lists-page__eyebrow">Back-office UBAX</p>
-      <div class="code-lists-page__title-row">
-        <h1 class="code-lists-page__title">Gestion des listes de codes</h1>
-        <span class="code-lists-page__count"
-          >{{ totalEntries() }} entrée(s)</span
-        >
-      </div>
-      <p class="code-lists-page__subtitle">
-        Centralisez les référentiels métier, harmonisez les valeurs exposées au
-        produit et gardez une vue claire sur les entrées système versus les
-        ajouts manuels.
-      </p>
-    </div>
-
-    <div class="code-lists-page__header-actions">
-      <button
-        type="button"
-        class="code-lists-page__ghost-btn"
-        [disabled]="loading()"
-        (click)="reload()"
-      >
-        <i
-          class="pi"
-          [class.pi-refresh]="!loading()"
-          [class.pi-spinner]="loading()"
-          [class.pi-spin]="loading()"
-          aria-hidden="true"
-        ></i>
-        <span>Rafraîchir</span>
-      </button>
-
-      <button
-        type="button"
-        class="code-lists-page__create-btn"
-        (click)="openCreateModal()"
-      >
-        <i class="pi pi-plus-circle" aria-hidden="true"></i>
-        <span>Nouvelle entrée</span>
-      </button>
-    </div>
-  </header>
-
   <ubax-section-card>
     <section class="overview-panel" aria-label="Synthèse des référentiels">
       <div class="overview-panel__intro">

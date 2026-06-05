@@ -2,7 +2,11 @@
   <!-- ── Header ─────────────────────────────────────────────────── -->
   <header class="ar-header">
     <div class="ar-header__toolbar">
-      <button type="button" class="ar-date-chip" (click)="toggleDateOverlay($event)">
+      <button
+        type="button"
+        class="ar-date-chip"
+        (click)="toggleDateOverlay($event)"
+      >
         <i class="pi pi-calendar"></i>
         <span>{{ currentDateLabel() }}</span>
         @if (dateRange()) {
@@ -53,19 +57,19 @@
       <button
         type="button"
         class="ar-select"
-        [class.ar-select--active]="selectedType() !== null"
-        (click)="toggleTypeDropdown($event)"
+        [class.ar-select--active]="selectedProperty() !== null"
+        (click)="togglePropertyDropdown($event)"
       >
-        <span>{{ typeLabel() }}</span>
+        <span>{{ propertyLabel() }}</span>
         <i class="pi pi-chevron-down"></i>
       </button>
       <button
         type="button"
         class="ar-select"
-        [class.ar-select--active]="selectedProperty() !== null"
-        (click)="togglePropertyDropdown($event)"
+        [class.ar-select--active]="selectedType() !== null"
+        (click)="toggleTypeDropdown($event)"
       >
-        <span>{{ propertyLabel() }}</span>
+        <span>{{ typeLabel() }}</span>
         <i class="pi pi-chevron-down"></i>
       </button>
     </div>
@@ -198,6 +202,7 @@
                     type="button"
                     class="ar-action-btn"
                     aria-label="Voir le détail"
+                    (click)="openReservationDetail(reservation.id)"
                   >
                     <i class="pi pi-eye"></i>
                   </button>
@@ -287,10 +292,18 @@
       dateFormat="dd/mm/yy"
     />
     <div class="ar-date-overlay__footer">
-      <button type="button" class="ar-date-clear-btn" (click)="clearDateRange()">
+      <button
+        type="button"
+        class="ar-date-clear-btn"
+        (click)="clearDateRange()"
+      >
         Effacer
       </button>
-      <button type="button" class="ar-date-apply-btn" (click)="applyDateRange()">
+      <button
+        type="button"
+        class="ar-date-apply-btn"
+        (click)="applyDateRange()"
+      >
         Appliquer
       </button>
     </div>

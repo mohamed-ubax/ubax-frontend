@@ -7,7 +7,6 @@
   flex-direction: column;
   gap: 24px;
   min-height: 100%;
-  padding: 2rem;
   padding-bottom: 48px;
   background:
     radial-gradient(
@@ -16,12 +15,6 @@
       transparent 30%
     ),
     linear-gradient(180deg, rgba(236, 242, 247, 0.92), rgba(236, 242, 247, 1));
-
-  &__header {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
 
   &__eyebrow {
     margin: 0;

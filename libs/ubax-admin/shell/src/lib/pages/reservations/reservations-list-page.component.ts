@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
@@ -56,6 +57,7 @@ interface KpiCard {
 export class ReservationsListPageComponent implements OnInit {
   protected readonly store = inject(AdminReservationsStore);
   private readonly doc = inject(DOCUMENT);
+  private readonly router = inject(Router);
 
   protected readonly searchTerm = signal('');
   protected readonly currentPage = signal(1);
@@ -452,6 +454,14 @@ export class ReservationsListPageComponent implements OnInit {
 
   protected formatDateRange(reservation: AdminReservation): string {
     return `${this.formatDate(reservation.checkInDate)} - ${this.formatDate(reservation.checkOutDate)}`;
+  }
+
+  protected openReservationDetail(id?: string): void {
+    if (!id) {
+      return;
+    }
+
+    void this.router.navigate(['/reservations', id]);
   }
 
   private loadReservations(): void {

@@ -1,17 +1,4 @@
 <div class="clients-page">
-  <div class="clients-page__header">
-    <div class="clients-page__title-block">
-      <p class="clients-page__eyebrow">Back-office UBAX</p>
-      <div class="clients-page__title-row">
-        <h1 class="clients-page__title">Clients</h1>
-        <span class="clients-page__count">{{ clientCount() }} client(s)</span>
-      </div>
-      <p class="clients-page__subtitle">
-        Consultez l'ensemble des clients enregistrés sur la plateforme.
-      </p>
-    </div>
-  </div>
-
   <div class="clients-kpi-grid">
     <ubax-kpi-card label="Clients actifs" [value]="kpis().active">
       <i icon class="pi pi-users text-xl text-brand-blue"></i>
