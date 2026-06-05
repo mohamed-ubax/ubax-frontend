@@ -30,7 +30,6 @@
   <div class="props-filters">
     <!-- Recherche -->
     <div class="props-filters__search">
-      <i class="pi pi-search props-filters__search-icon"></i>
       <input
         type="text"
         class="props-filters__search-input"
@@ -38,6 +37,7 @@
         [value]="searchQuery()"
         (input)="onSearch($event)"
       />
+      <i class="pi pi-search props-filters__search-icon"></i>
     </div>
 
     <!-- Agence / Hôtel -->
@@ -130,10 +130,9 @@
           <div class="props-card__info">
             <p class="props-card__title">{{ property.title ?? '—' }}</p>
             <p class="props-card__location">
-              <i class="pi pi-map-marker"></i>
               {{ property.city ?? '' }}
               @if (property.district) {
-                · {{ property.district }}
+                , {{ property.district }}
               }
             </p>
 
@@ -141,20 +140,20 @@
             <div class="props-card__features">
               @if (property.bedrooms) {
                 <span class="props-card__feature">
-                  <i class="pi pi-th-large"></i>
-                  {{ property.bedrooms }} Ch.
+                  <i class="pi pi-objects-column"></i>
+                  {{ property.bedrooms }} Chambres
                 </span>
               }
               @if (property.bathrooms) {
                 <span class="props-card__feature">
-                  <i class="pi pi-circle"></i>
-                  {{ property.bathrooms }} SdB
+                  <i class="pi pi-drop"></i>
+                  {{ property.bathrooms }} Salle de bains
                 </span>
               }
               @if (property.surfaceLiving) {
                 <span class="props-card__feature">
                   <i class="pi pi-expand"></i>
-                  {{ property.surfaceLiving }} m²
+                  Surface {{ property.surfaceLiving }} m²
                 </span>
               }
             </div>

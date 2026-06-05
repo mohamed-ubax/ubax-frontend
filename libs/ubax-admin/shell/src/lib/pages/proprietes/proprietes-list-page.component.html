@@ -16,17 +16,28 @@
     </div>
   </div>
 
-  <!-- Carte principale -->
-  <ubax-section-card bodyClass="p-0">
-    <!-- Barre de recherche + filtres -->
-    <ubax-search-filter-bar
-      class="proprietes-toolbar"
-      placeholder="Rechercher par titre, ville, agence..."
-      [filters]="searchFilters"
-      (searchChange)="onSearchChange($event)"
-      (filterChange)="onFilterChange($event)"
+  <!-- Barre de filtres pill -->
+  <div class="proprietes-filters">
+    <div class="proprietes-filters__search">
+      <input
+        type="text"
+        class="proprietes-filters__search-input"
+        placeholder="Rechercher par titre, ville, agence..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event.target).value)"
+      />
+      <i class="pi pi-search proprietes-filters__search-icon"></i>
+    </div>
+    <ubax-ui-form-select
+      class="proprietes-filters__select-field"
+      [options]="typeOptions"
+      [value]="typeFilterLabel()"
+      (valueChange)="onTypeFilterChange($event)"
     />
+  </div>
 
+  <!-- Table -->
+  <ubax-section-card bodyClass="p-0">
     <section
       class="proprietes-table-stage"
       aria-label="Liste des biens en attente"

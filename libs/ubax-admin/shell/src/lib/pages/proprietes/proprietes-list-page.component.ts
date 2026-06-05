@@ -12,10 +12,8 @@ import { firstValueFrom } from 'rxjs';
 import type { PropertyResponse } from '@ubax-workspace/shared-api-types';
 import {
   EmptyStateComponent,
-  SearchFilterBarComponent,
   SectionCardComponent,
   StatusBadgeComponent,
-  type FilterOption,
 } from '@ubax-workspace/shared-design-system';
 import {
   NOTIFICATION_HANDLER,
@@ -26,6 +24,7 @@ import {
   type UiDataTableColumn,
   UiDataTableComponent,
   UiDataTableEmptyDefDirective,
+  UiFormSelectComponent,
   UiPaginationComponent,
 } from '@ubax-workspace/shared-ui';
 import { AdminPropertiesService } from '../../services/admin-properties.service';
@@ -56,10 +55,10 @@ const TRANSACTION_TYPE_LABELS: Record<string, string> = {
   standalone: true,
   imports: [
     DatePipe,
-    SearchFilterBarComponent,
     SectionCardComponent,
     StatusBadgeComponent,
     EmptyStateComponent,
+    UiFormSelectComponent,
     UiDataTableComponent,
     UiDataTableCellDefDirective,
     UiDataTableEmptyDefDirective,
@@ -98,24 +97,29 @@ export class ProprietesListPageComponent {
       { key: 'actions', header: 'Actions', width: '6%', align: 'end' },
     ];
 
-  protected readonly searchFilters: {
-    label: string;
-    options: FilterOption[];
-  }[] = [
-    {
-      label: 'Type de bien',
-      options: [
-        { label: 'Tous les types', value: '' },
-        { label: 'Appartement', value: 'APARTMENT' },
-        { label: 'Villa', value: 'VILLA' },
-        { label: 'Maison', value: 'HOUSE' },
-        { label: 'Terrain', value: 'LAND' },
-        { label: 'Bureau', value: 'OFFICE' },
-        { label: 'Commercial', value: 'COMMERCIAL' },
-        { label: 'Studio', value: 'STUDIO' },
-      ],
-    },
+  protected readonly typeOptions = [
+    'Tous les types',
+    'Appartement',
+    'Villa',
+    'Maison',
+    'Terrain',
+    'Bureau',
+    'Commercial',
+    'Studio',
   ];
+
+  protected readonly typeFilterLabel = signal('Tous les types');
+
+  private readonly typeOptionValues: Record<string, string> = {
+    'Tous les types': '',
+    'Appartement': 'APARTMENT',
+    'Villa': 'VILLA',
+    'Maison': 'HOUSE',
+    'Terrain': 'LAND',
+    'Bureau': 'OFFICE',
+    'Commercial': 'COMMERCIAL',
+    'Studio': 'STUDIO',
+  };
 
   protected readonly filteredProperties = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -169,8 +173,9 @@ export class ProprietesListPageComponent {
     this.searchQuery.set(value);
   }
 
-  protected onFilterChange(event: { filter: string; value: unknown }): void {
-    this.typeFilter.set((event.value as string) ?? '');
+  protected onTypeFilterChange(label: string): void {
+    this.typeFilterLabel.set(label);
+    this.typeFilter.set(this.typeOptionValues[label] ?? '');
     this.currentPage.set(0);
     void this.loadProperties();
   }
