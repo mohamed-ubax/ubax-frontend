@@ -10,7 +10,7 @@
       >
         <i class="pi pi-arrow-left" aria-hidden="true"></i>
       </button>
-      <h1 class="bien-detail-page__title">Détails d'un bien</h1>
+      <h1 class="bien-detail-page__title">Détails propriété</h1>
     </div>
 
     <div class="bien-detail-page__actions">
@@ -115,292 +115,373 @@
 
     <!-- Success -->
   } @else {
-    <div class="bien-detail-page__layout">
-      <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
-      <aside class="bien-detail-sidebar">
-        <!-- Propriétaire / Agence -->
-        <article class="info-card">
-          <div class="info-card__header">
-            <i class="pi pi-user" aria-hidden="true"></i>
-            <h2>{{ property()?.agencyName ? 'Agence' : 'Propriétaire' }}</h2>
-          </div>
-          <div class="owner-card">
-            <div class="owner-card__avatar-placeholder">
-              <i class="pi pi-building" aria-hidden="true"></i>
-            </div>
-            <div class="owner-card__meta">
-              <p class="owner-card__name">{{ ownerName() }}</p>
-              @if (property()?.agencyId) {
-                <p class="owner-card__sub">ID : {{ property()?.agencyId }}</p>
-              }
-            </div>
-          </div>
-        </article>
 
-        <!-- Documents -->
-        <article class="info-card">
-          <div class="info-card__header">
-            <i class="pi pi-file" aria-hidden="true"></i>
-            <h2>Documents</h2>
+    <!-- ── Carte partenaire ──────────────────────────────────────────────── -->
+    <div class="partner-card">
+      <div class="partner-card__media">
+        @if (partnerLogoUrl()) {
+          <img
+            class="partner-card__logo"
+            [src]="partnerLogoUrl()"
+            [alt]="ownerName()"
+          />
+        } @else {
+          <div class="partner-card__logo-placeholder">
+            <i class="pi pi-building" aria-hidden="true"></i>
           </div>
-          <div class="document-list">
-            @for (doc of documents(); track doc.id) {
-              <div class="document-row">
-                <div class="document-row__label">
-                  <i class="pi pi-file-pdf" aria-hidden="true"></i>
-                  <span>{{ doc.name }}</span>
-                </div>
-                <div class="document-row__actions">
-                  <button
-                    type="button"
-                    aria-label="Prévisualiser"
-                    [disabled]="documentOpeningId() === doc.id"
-                    (click)="openDocument(doc.fileUrl, doc.name, doc.id)"
-                  >
-                    <i
-                      class="pi"
-                      [class.pi-eye]="documentOpeningId() !== doc.id"
-                      [class.pi-spin]="documentOpeningId() === doc.id"
-                      [class.pi-spinner]="documentOpeningId() === doc.id"
-                      aria-hidden="true"
-                    ></i>
-                  </button>
-                </div>
-              </div>
-            } @empty {
-              <div class="document-row document-row--empty">
-                <span>Aucun document disponible</span>
-              </div>
-            }
-          </div>
-        </article>
-
-        <!-- Statut modération (si PENDING) -->
-        @if (isPending()) {
-          <article class="info-card info-card--moderation">
-            <div class="info-card__header">
-              <i class="pi pi-shield" aria-hidden="true"></i>
-              <h2>Modération</h2>
-            </div>
-            <p class="moderation-hint">
-              Ce bien est en attente de validation. Examinez les informations,
-              les photos et les documents avant de statuer.
-            </p>
-            <div class="moderation-actions">
-              <button
-                type="button"
-                class="moderation-btn moderation-btn--reject"
-                [disabled]="saving()"
-                (click)="openModal('reject')"
-              >
-                <i class="pi pi-times-circle"></i> Rejeter
-              </button>
-              <button
-                type="button"
-                class="moderation-btn moderation-btn--approve"
-                [disabled]="saving()"
-                (click)="openModal('approve')"
-              >
-                <i class="pi pi-check-circle"></i> Approuver
-              </button>
-            </div>
-          </article>
         }
+      </div>
 
-        <!-- Statut terminal -->
-        @if (isTerminal()) {
-          <article class="info-card">
-            <div class="info-card__header">
-              <i class="pi pi-info-circle" aria-hidden="true"></i>
-              <h2>Statut</h2>
-            </div>
-            @if (statusCode() === 'PUBLISHED') {
-              <div class="terminal-banner terminal-banner--published">
-                <i class="pi pi-check-circle"></i>
-                <div>
-                  <p class="terminal-banner__title">Bien publié</p>
-                  <p class="terminal-banner__sub">
-                    Publié le {{ property()?.publishedAt | date: 'dd/MM/yyyy' }}
-                  </p>
-                </div>
-              </div>
-            }
-            @if (statusCode() === 'REJECTED') {
-              <div class="terminal-banner terminal-banner--rejected">
-                <i class="pi pi-times-circle"></i>
-                <div>
-                  <p class="terminal-banner__title">Bien rejeté</p>
-                  @if (property()?.rejectionReason) {
-                    <p class="terminal-banner__reason">
-                      {{ property()?.rejectionReason }}
-                    </p>
-                  }
-                </div>
-              </div>
-            }
-          </article>
+      <div class="partner-card__body">
+        <p class="partner-card__name">{{ ownerName() }}</p>
+        <p class="partner-card__type">{{ partnerTypeLabel() }}</p>
+        @if (property()?.agencyId || property()?.hotelId) {
+          <p class="partner-card__id">
+            +225 000 000 000
+          </p>
         }
-      </aside>
+      </div>
 
-      <!-- ── Contenu principal ───────────────────────────────────────────── -->
-      <div class="bien-detail-content">
-        <article class="bien-detail-shell">
-          <!-- Galerie -->
-          <section class="gallery-section">
-            <div class="gallery-section__main">
-              <span class="gallery-section__status">{{
-                transactionLabel()
-              }}</span>
+      <div class="partner-card__divider" aria-hidden="true"></div>
 
-              @if (isGalleryImageAvailable(activeGalleryItem())) {
-                <img
-                  class="gallery-section__image"
-                  [src]="activeGalleryItem().src"
-                  [alt]="activeGalleryItem().alt || propertyTitle()"
-                  (error)="markGalleryImageBroken(activeGalleryItem().key)"
-                />
-              } @else {
-                <div class="gallery-section__placeholder">
-                  <i class="pi pi-image" aria-hidden="true"></i>
-                  <span>Image indisponible</span>
-                </div>
-              }
+      <div class="partner-card__stats">
+        <div class="partner-stat">
+          <span class="partner-stat__label">Biens à louer</span>
+          <span class="partner-stat__value">—</span>
+        </div>
+        <div class="partner-stat">
+          <span class="partner-stat__label">Biens à Vendre</span>
+          <span class="partner-stat__value">—</span>
+        </div>
+        <div class="partner-stat">
+          <span class="partner-stat__label">Biens hors services</span>
+          <span class="partner-stat__value">—</span>
+        </div>
+      </div>
 
-              <button
-                class="gallery-nav gallery-nav--previous"
-                type="button"
-                (click)="previousImage()"
-                aria-label="Image précédente"
-              >
-                <i class="pi pi-angle-left" aria-hidden="true"></i>
-              </button>
-              <button
-                class="gallery-nav gallery-nav--next"
-                type="button"
-                (click)="nextImage()"
-                aria-label="Image suivante"
-              >
-                <i class="pi pi-angle-right" aria-hidden="true"></i>
-              </button>
-            </div>
+      <button
+        type="button"
+        class="partner-card__cta"
+        (click)="goToPartnerDetail()"
+      >
+        Voir les détails
+      </button>
+    </div>
 
-            <div class="gallery-section__thumbs">
-              @for (
-                image of galleryItems();
-                track image.key;
-                let index = $index
-              ) {
-                <button
-                  class="gallery-thumb"
-                  [class.is-active]="activeImageIndex() === index"
-                  type="button"
-                  (click)="selectImage(index)"
-                >
-                  @if (isGalleryImageAvailable(image)) {
-                    <img
-                      [src]="image.src"
-                      [alt]="image.alt"
-                      (error)="markGalleryImageBroken(image.key)"
-                    />
-                  } @else {
-                    <div class="gallery-thumb__placeholder">
-                      <i class="pi pi-image" aria-hidden="true"></i>
-                    </div>
-                  }
-                </button>
-              }
-            </div>
-          </section>
+    <!-- ── Bannière statut rejeté ──────────────────────────────────────── -->
+    @if (statusCode() === 'REJECTED') {
+      <div class="terminal-banner terminal-banner--rejected">
+        <i class="pi pi-times-circle"></i>
+        <div>
+          <p class="terminal-banner__title">Bien rejeté</p>
+          @if (property()?.rejectionReason) {
+            <p class="terminal-banner__reason">{{ property()?.rejectionReason }}</p>
+          }
+        </div>
+      </div>
+    }
 
-          <!-- Overview -->
-          <section class="overview-section">
-            <div class="overview-section__intro">
-              <div>
-                <span class="lease-badge">{{ propertyTypeLabel() }}</span>
-                <h2>{{ propertyTitle() }}</h2>
-                <p class="overview-section__location">
-                  <i class="pi pi-map-marker" aria-hidden="true"></i>
-                  {{ locationLabel() }}
-                </p>
-                <p class="overview-section__location">
-                  <i class="pi pi-home" aria-hidden="true"></i>
-                  {{ fullAddress() }}
-                </p>
+    <!-- ── Documents (modération) ──────────────────────────────────────── -->
+    @if (documents().length > 0) {
+      <div class="docs-strip">
+        <div class="docs-strip__header">
+          <i class="pi pi-file" aria-hidden="true"></i>
+          <span>Documents</span>
+        </div>
+        <div class="docs-strip__list">
+          @for (doc of documents(); track doc.id) {
+            <button
+              type="button"
+              class="docs-strip__item"
+              [disabled]="documentOpeningId() === doc.id"
+              (click)="openDocument(doc.fileUrl, doc.name, doc.id)"
+            >
+              <i
+                class="pi"
+                [class.pi-file-pdf]="documentOpeningId() !== doc.id"
+                [class.pi-spin]="documentOpeningId() === doc.id"
+                [class.pi-spinner]="documentOpeningId() === doc.id"
+                aria-hidden="true"
+              ></i>
+              <span>{{ doc.name }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── Contenu principal ───────────────────────────────────────────── -->
+    <div class="bien-detail-content">
+      <article class="bien-detail-shell">
+
+        <!-- Galerie -->
+        <section class="gallery-section">
+          <div class="gallery-section__main">
+            <span class="gallery-section__status">{{ transactionLabel() }}</span>
+
+            @if (isGalleryImageAvailable(activeGalleryItem())) {
+              <img
+                class="gallery-section__image"
+                [src]="activeGalleryItem().src"
+                [alt]="activeGalleryItem().alt || propertyTitle()"
+                (error)="markGalleryImageBroken(activeGalleryItem().key)"
+              />
+            } @else {
+              <div class="gallery-section__placeholder">
+                <i class="pi pi-image" aria-hidden="true"></i>
+                <span>Image indisponible</span>
               </div>
-              <div class="overview-section__stats">
-                <p class="overview-section__price">{{ priceLabel() }}</p>
-                <div class="overview-section__meta">
-                  <span>
-                    <strong>{{ transactionLabel() }}</strong>
-                    <em>transaction</em>
+            }
+
+            <button
+              class="gallery-nav gallery-nav--previous"
+              type="button"
+              (click)="previousImage()"
+              aria-label="Image précédente"
+            >
+              <i class="pi pi-angle-left" aria-hidden="true"></i>
+            </button>
+            <button
+              class="gallery-nav gallery-nav--next"
+              type="button"
+              (click)="nextImage()"
+              aria-label="Image suivante"
+            >
+              <i class="pi pi-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="gallery-section__side">
+            @for (image of sideGalleryItems(); track image.key; let index = $index) {
+              <button
+                class="gallery-side-thumb"
+                [class.is-active]="activeImageIndex() === index"
+                type="button"
+                (click)="selectImage(index)"
+              >
+                @if (isGalleryImageAvailable(image)) {
+                  <img
+                    [src]="image.src"
+                    [alt]="image.alt"
+                    (error)="markGalleryImageBroken(image.key)"
+                  />
+                } @else {
+                  <div class="gallery-side-thumb__placeholder">
+                    <i class="pi pi-image" aria-hidden="true"></i>
+                  </div>
+                }
+                @if (index === 2 && galleryOverflowCount() > 0) {
+                  <div class="gallery-side-thumb__overflow" aria-hidden="true">
+                    +{{ galleryOverflowCount() }}
+                  </div>
+                }
+              </button>
+            }
+          </div>
+        </section>
+
+        <!-- Overview -->
+        <section class="overview-section">
+          <div class="overview-section__intro">
+            <div class="overview-section__left">
+              <span class="lease-badge">{{ propertyTypeLabel() }}</span>
+              <h2>{{ propertyTitle() }}</h2>
+              <p class="overview-section__location">
+                <i class="pi pi-map-marker" aria-hidden="true"></i>
+                {{ locationLabel() }}
+              </p>
+            </div>
+            <div class="overview-section__right">
+              <p class="overview-section__price">{{ priceLabel() }}</p>
+              <div class="overview-section__meta-row">
+                @if (averageRating()) {
+                  <span class="overview-section__rating">
+                    <strong>{{ averageRating() }}</strong>
+                    <i class="pi pi-star-fill" aria-hidden="true"></i>
                   </span>
-                  <span>
-                    <strong>{{ conditionLabel() }}</strong>
-                    <em>état</em>
+                }
+                @if (viewCount()) {
+                  <span class="overview-section__views">
+                    <i class="pi pi-eye" aria-hidden="true"></i>
+                    {{ viewCount() }} vues
                   </span>
-                </div>
+                }
               </div>
             </div>
+          </div>
 
-            <div class="metric-grid">
-              @for (metric of metrics(); track metric.label) {
-                <div class="metric-pill">
+          <div class="metric-grid">
+            @for (metric of metrics(); track metric.label) {
+              <div class="metric-pill">
+                <i class="pi {{ metric.icon }}" aria-hidden="true"></i>
+                <div class="metric-pill__text">
                   <span class="metric-pill__value">{{ metric.value }}</span>
                   <span class="metric-pill__label">{{ metric.label }}</span>
                 </div>
-              }
-            </div>
-          </section>
+              </div>
+            }
+          </div>
+        </section>
 
-          <!-- Description -->
+        <!-- Description -->
+        <section class="content-section">
+          <h3>Description</h3>
+          @for (paragraph of descriptionParagraphs(); track paragraph) {
+            <p>{{ paragraph }}</p>
+          }
+        </section>
+
+        <!-- Commodités -->
+        <section class="content-section">
+          <h3>Commodités</h3>
+          <div class="amenities-grid">
+            @for (column of amenityColumns(); track $index) {
+              <div class="amenity-column">
+                @for (item of column; track item) {
+                  <div class="amenity-item">
+                    <span class="amenity-item__icon">
+                      <i class="pi pi-check" aria-hidden="true"></i>
+                    </span>
+                    <span>{{ item }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Localisation -->
+        <section class="content-section content-section--location">
+          <h3>Localisation</h3>
+          <div class="location-panel">
+            @if (hasCoordinates()) {
+              @if (locationCardImage()) {
+                <div class="location-panel__card">
+                  <img [src]="locationCardImage()" [alt]="propertyTitle()" />
+                  <div>
+                    <p>{{ propertyTitle() }}</p>
+                    <span>
+                      <i class="pi pi-map-marker" aria-hidden="true"></i>
+                      {{ locationLabel() }}
+                    </span>
+                  </div>
+                </div>
+              }
+              <iframe
+                class="location-panel__map"
+                [src]="mapSafeUrl()"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Localisation du bien"
+              ></iframe>
+            } @else {
+              <div class="location-panel__map-placeholder">
+                <i class="pi pi-map" aria-hidden="true"></i>
+                <span>Coordonnées GPS non renseignées</span>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Vidéo -->
+        @if (videoItems().length > 0) {
           <section class="content-section">
-            <h3>Description</h3>
-            @for (paragraph of descriptionParagraphs(); track paragraph) {
-              <p>{{ paragraph }}</p>
+            <div class="content-section__header-row">
+              <div class="video-tabs">
+                <button
+                  type="button"
+                  class="video-tab"
+                  [class.is-active]="activeVideoTab() === 'video'"
+                  (click)="setVideoTab('video')"
+                >
+                  video
+                </button>
+                <button
+                  type="button"
+                  class="video-tab"
+                  [class.is-active]="activeVideoTab() === '360'"
+                  (click)="setVideoTab('360')"
+                >
+                  Video 360
+                </button>
+              </div>
+            </div>
+
+            @if (activeVideoItem(); as video) {
+              <div class="video-panel">
+                <video
+                  class="video-panel__player"
+                  [src]="video.fileUrl ?? ''"
+                  preload="metadata"
+                ></video>
+                <div class="video-panel__overlay">
+                  <button type="button" aria-label="Lire la vidéo">
+                    <i class="pi pi-play-circle" aria-hidden="true"></i>
+                  </button>
+                  <p>{{ videoTitle() }}</p>
+                </div>
+              </div>
             }
           </section>
+        }
 
-          <!-- Commodités -->
-          <section class="content-section">
-            <h3>Commodités</h3>
-            <div class="amenities-grid">
-              @for (column of amenityColumns(); track $index) {
-                <div class="amenity-column">
-                  @for (item of column; track item) {
-                    <div class="amenity-item">
-                      <span class="amenity-item__icon">
-                        <i class="pi pi-check" aria-hidden="true"></i>
-                      </span>
-                      <span>{{ item }}</span>
+        <!-- Avis & Commentaires -->
+        <section class="content-section content-section--reviews">
+          <div class="content-section__header-row">
+            <h3>Avis &amp; Commentaires</h3>
+            @if (reviews().length > 0) {
+              <div class="comment-nav">
+                <button type="button" aria-label="Avis précédents">
+                  <i class="pi pi-angle-left" aria-hidden="true"></i>
+                </button>
+                <button type="button" aria-label="Avis suivants">
+                  <i class="pi pi-angle-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            }
+          </div>
+
+          @if (reviews().length > 0) {
+            <div class="comment-grid">
+              @for (review of reviews(); track review.id) {
+                <div class="comment-card">
+                  <div class="comment-card__head">
+                    @if (review.avatarUrl) {
+                      <img [src]="review.avatarUrl" [alt]="review.authorName" />
+                    } @else {
+                      <div class="comment-card__avatar-placeholder">
+                        <i class="pi pi-user" aria-hidden="true"></i>
+                      </div>
+                    }
+                    <div>
+                      <p class="comment-card__author">{{ review.authorName }}</p>
+                      <div class="comment-card__rating">
+                        <span class="comment-card__score">{{ review.rating }}</span>
+                        <div class="comment-card__stars" aria-hidden="true">
+                          @for (star of [1, 2, 3, 4, 5]; track star) {
+                            <i
+                              class="pi pi-star-fill"
+                              [class.is-muted]="star > review.rating"
+                            ></i>
+                          }
+                        </div>
+                      </div>
                     </div>
-                  }
+                  </div>
+                  <p class="comment-card__review">{{ review.reviewText }}</p>
                 </div>
               }
             </div>
-          </section>
+          } @else {
+            <div class="comment-empty-state">
+              <i class="pi pi-comment" aria-hidden="true"></i>
+              <p>Aucun avis pour ce bien</p>
+              <span>Les commentaires des utilisateurs apparaîtront ici.</span>
+            </div>
+          }
+        </section>
 
-          <!-- Localisation -->
-          <section class="content-section content-section--location">
-            <h3>Localisation</h3>
-            <div class="location-panel">
-              @if (hasCoordinates()) {
-                <iframe
-                  class="location-panel__map"
-                  [src]="mapSafeUrl()"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  title="Localisation du bien"
-                ></iframe>
-              } @else {
-                <div class="location-panel__map-placeholder">
-                  <i class="pi pi-map" aria-hidden="true"></i>
-                  <span>Coordonnées GPS non renseignées</span>
-                </div>
-              }
-            </div>
-          </section>
-        </article>
-      </div>
+      </article>
     </div>
   }
 </section>
