@@ -1220,21 +1220,22 @@ iframe.location-panel__map {
   border-radius: 5px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 10px 14px;
   background: var(--ubax-page-bg);
 
   > i {
     font-size: 20px;
-    color: var(--ubax-navy);
+    color: var(--ubax-accent);
     flex-shrink: 0;
   }
 }
 
 .metric-pill__text {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 5px;
 }
 
 .metric-pill__value {
@@ -1384,7 +1385,9 @@ iframe.location-panel__map {
   font-size: 16px;
   color: var(--ubax-text-secondary);
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
   font-weight: 600;
 
   &.is-active {
