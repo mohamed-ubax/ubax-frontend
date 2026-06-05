@@ -3,15 +3,34 @@
 
 // ── Sidebar nav items ─────────────────────────────────────────────────────────
 
+.admin-sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-brand {
+  min-height: 118px;
+  padding: 32px 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-brand__logo {
+  width: 44px;
+  height: 55px;
+  display: block;
+}
+
 .sidebar-nav-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-height: 48px;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  margin: 0 0.5rem;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.9375rem;
+  border-radius: 10px;
+  margin: 0 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
   font-weight: 400;
   font-family: 'Lexend', sans-serif;
   line-height: normal;
@@ -25,28 +44,45 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: white;
+  }
+
+  &.sidebar-nav-item--active {
+    color: #fff;
+    background: #e87d1e;
+    font-weight: 500;
+    box-shadow: 0 6px 18px rgba(232, 125, 30, 0.32);
+
+    i,
+    span {
+      color: inherit;
+    }
   }
 
   &--disabled {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    opacity: 0.7;
     cursor: not-allowed;
     pointer-events: none;
 
     &:hover {
       background: transparent;
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.7);
     }
   }
 
   &--btn {
-    width: calc(100% - 1rem);
+    width: calc(100% - 2rem);
     text-align: left;
   }
 
   &--expanded {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
+    background: rgba(232, 125, 30, 0.2);
+    color: #fff;
+
+    i,
+    span {
+      color: inherit;
+    }
   }
 }
 
@@ -58,7 +94,7 @@
 // ── Sous-navigation Propriétés ────────────────────────────────────────────────
 
 .sidebar-subnav {
-  margin: 0 0.5rem 0 1rem;
+  margin: 0.35rem 1rem 0.15rem 1.5rem;
   animation: slideDown 0.18s ease;
 }
 
@@ -73,157 +109,171 @@
   }
 }
 
-:host ::ng-deep .ubax-toast-shell {
+.ubax-toast-stack {
+  position: fixed;
+  top: clamp(88px, 10vh, 122px);
+  right: clamp(12px, 2vw, 28px);
+  z-index: 1300;
   width: min(460px, calc(100vw - 28px));
+  display: grid;
+  gap: 12px;
+  pointer-events: none;
+}
 
-  &.p-toast-top-right {
-    top: clamp(88px, 10vh, 122px);
-    right: clamp(12px, 2vw, 28px);
-  }
+.ubax-toast {
+  pointer-events: auto;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  overflow: hidden;
+  padding: 14px 16px;
+  border: 1px solid rgb(26 48 71 / 0.15);
+  border-radius: 16px;
+  box-shadow:
+    0 18px 38px rgb(17 35 56 / 0.25),
+    0 2px 10px rgb(17 35 56 / 0.12);
+  backdrop-filter: blur(8px);
+  animation: ubaxToastEnter 180ms var(--ubax-motion-ease-soft);
+}
 
-  .p-toast-message {
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgb(26 48 71 / 0.15);
-    border-radius: 16px;
-    box-shadow:
-      0 18px 38px rgb(17 35 56 / 0.25),
-      0 2px 10px rgb(17 35 56 / 0.12);
-    backdrop-filter: blur(8px);
-  }
+.ubax-toast::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    rgb(255 255 255 / 0.36),
+    rgb(255 255 255 / 0.04) 40%,
+    transparent 72%
+  );
+  opacity: 0.62;
+}
 
-  .p-toast-message::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(
-      125deg,
-      rgb(255 255 255 / 0.36),
-      rgb(255 255 255 / 0.04) 40%,
-      transparent 72%
-    );
-    opacity: 0.78;
-    animation: ubaxToastShimmer 2.8s ease-out 1;
-  }
+.ubax-toast__icon {
+  margin-top: 1px;
+  font-size: 1.05rem;
+}
 
-  .p-toast-message-content {
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px;
-  }
+.ubax-toast__body {
+  min-width: 0;
+}
 
-  .p-toast-message-icon {
-    margin-top: 1px;
-    font-size: 1.05rem;
-  }
+.ubax-toast__title {
+  margin: 0 0 4px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #112138;
+}
 
-  .p-toast-summary {
-    margin-bottom: 4px;
-    font-family: 'Lexend', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    color: #112138;
-  }
+.ubax-toast__detail {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: rgb(17 33 56 / 0.92);
+}
 
-  .p-toast-detail {
-    margin: 0;
-    font-family: 'Lexend', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.45;
-    color: rgb(17 33 56 / 0.92);
-  }
+.ubax-toast__close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgb(17 33 56 / 0.74);
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--ubax-motion-ease-soft),
+    color 180ms var(--ubax-motion-ease-soft),
+    transform 180ms var(--ubax-motion-ease-soft);
+}
 
-  .p-toast-close-button {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    color: rgb(17 33 56 / 0.74);
-    transition:
-      background-color 180ms var(--ubax-motion-ease-soft),
-      color 180ms var(--ubax-motion-ease-soft),
-      transform 180ms var(--ubax-motion-ease-soft);
-  }
+.ubax-toast__close:hover {
+  color: #f4f8ff;
+  transform: translateY(-1px);
+  background: #1a3047;
+}
 
-  .p-toast-close-button:hover {
-    color: #fff;
-    transform: translateY(-1px);
-    background: #1a3047;
-  }
+.ubax-toast--success {
+  border-left: 4px solid #1b8f4f;
+  background: linear-gradient(
+    115deg,
+    rgb(236 251 242 / 0.98),
+    rgb(246 255 249 / 0.92)
+  );
 
-  .ubax-toast-message--success {
-    border-left: 4px solid #1b8f4f;
-    background: linear-gradient(
-      115deg,
-      rgb(236 251 242 / 0.98),
-      rgb(246 255 249 / 0.92)
-    );
-
-    .p-toast-message-icon {
-      color: #1b8f4f;
-    }
-  }
-
-  .ubax-toast-message--error {
-    border-left: 4px solid #d94c43;
-    background: linear-gradient(
-      115deg,
-      rgb(255 241 240 / 0.98),
-      rgb(255 247 246 / 0.92)
-    );
-
-    .p-toast-message-icon {
-      color: #d94c43;
-    }
-  }
-
-  .ubax-toast-message--info {
-    border-left: 4px solid #1a5f9f;
-    background: linear-gradient(
-      115deg,
-      rgb(236 245 255 / 0.98),
-      rgb(245 251 255 / 0.92)
-    );
-
-    .p-toast-message-icon {
-      color: #1a5f9f;
-    }
+  .ubax-toast__icon {
+    color: #1b8f4f;
   }
 }
 
-@keyframes ubaxToastShimmer {
-  0% {
+.ubax-toast--error {
+  border-left: 4px solid #d94c43;
+  background: linear-gradient(
+    115deg,
+    rgb(255 241 240 / 0.98),
+    rgb(255 247 246 / 0.92)
+  );
+
+  .ubax-toast__icon {
+    color: #d94c43;
+  }
+}
+
+.ubax-toast--warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(
+    115deg,
+    rgb(255 249 236 / 0.98),
+    rgb(255 252 245 / 0.92)
+  );
+
+  .ubax-toast__icon {
+    color: #d97706;
+  }
+}
+
+.ubax-toast--info {
+  border-left: 4px solid #1a5f9f;
+  background: linear-gradient(
+    115deg,
+    rgb(236 245 255 / 0.98),
+    rgb(245 251 255 / 0.92)
+  );
+
+  .ubax-toast__icon {
+    color: #1a5f9f;
+  }
+}
+
+@keyframes ubaxToastEnter {
+  from {
     opacity: 0;
-    transform: translate3d(-18px, 0, 0);
+    transform: translate3d(0, -10px, 0) scale(0.98);
   }
 
-  40% {
-    opacity: 0.9;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate3d(14px, 0, 0);
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
 @media (max-width: 640px) {
-  :host ::ng-deep .ubax-toast-shell {
+  .ubax-toast-stack {
+    top: 82px;
+    right: 10px;
     width: calc(100vw - 20px);
-
-    &.p-toast-top-right {
-      top: 82px;
-      right: 10px;
-    }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :host ::ng-deep .ubax-toast-shell .p-toast-message::after {
+  .ubax-toast {
     animation: none;
-    opacity: 0.35;
   }
 }
 
@@ -237,7 +287,7 @@
   width: 2px;
   background: rgba(255, 255, 255, 0.19);
   border-radius: 5px;
-  margin-left: 1.25rem;
+  margin-left: 0.45rem;
   flex-shrink: 0;
 }
 
@@ -245,16 +295,17 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding-left: 0.5rem;
+  padding-left: 0.65rem;
 }
 
 .sidebar-subitem {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
+  min-height: 36px;
+  padding: 0.6rem 0.95rem;
   border-radius: 0.5rem;
   color: rgba(255, 255, 255, 0.65);
-  font-size: 0.9375rem;
+  font-size: 13px;
   font-weight: 400;
   font-family: 'Lexend', sans-serif;
   text-decoration: none;
@@ -265,24 +316,200 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: white;
   }
 
   &--active {
-    color: white;
     font-weight: 500;
 
     // Indicateur blanc sur la ligne verticale
     &::before {
       content: '';
       position: absolute;
-      left: -0.625rem;
+      left: -0.57rem;
       top: 50%;
       transform: translateY(-50%);
       width: 2px;
-      height: 49px;
+      height: 34px;
       background: white;
       border-radius: 5px;
     }
+  }
+}
+
+.sidebar-logout-item {
+  width: calc(100% - 2rem);
+}
+
+.admin-header {
+  padding: 0 32px 0 40px;
+}
+
+.admin-header__left {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-header__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header__date-picker {
+  position: relative;
+
+  :deep(.p-datepicker) {
+    min-width: 238px;
+  }
+
+  :deep(.admin-header__date-input.p-inputtext) {
+    width: 238px;
+    height: 42px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #1f2937;
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    padding-inline: 14px 36px;
+    line-height: 42px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:focus {
+      border-color: #f5a623;
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.16);
+    }
+  }
+
+  :deep(.p-datepicker .p-datepicker-input-icon-container) {
+    right: 12px;
+    color: #334155;
+  }
+
+  :deep(.p-datepicker-input-icon) {
+    font-size: 14px;
+  }
+}
+
+.admin-header__page-title {
+  margin: 0;
+  color: #1c1c1c;
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-header__notif {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #e1e4ed;
+  background: #f8faff;
+  color: #55657a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background-color 150ms ease;
+
+  &:hover {
+    border-color: #cdd6e2;
+    color: #1a3047;
+    background: #eef4fb;
+  }
+
+  i {
+    font-size: 16px;
+  }
+}
+
+.admin-header__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #e1e4ed;
+  background: linear-gradient(135deg, #f4f7fb 0%, #e6edf7 100%);
+  color: #465a72;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.admin-header__avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.admin-header__profile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 118px;
+}
+
+.admin-header__name {
+  margin: 0;
+  color: #292929;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.admin-header__role {
+  margin: 1px 0 0;
+  color: #292929;
+  font-family: 'Lexend', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.2;
+  opacity: 0.85;
+}
+
+:host ::ng-deep .admin-header__date-panel {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(17, 33, 56, 0.16);
+
+  .p-datepicker-header {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .p-datepicker-select-month,
+  .p-datepicker-select-year {
+    font-family: 'Lexend', sans-serif;
+    font-size: 12px;
+  }
+
+  .p-datepicker-calendar td > span {
+    width: 2rem;
+    height: 2rem;
+    font-size: 12px;
+    font-family: 'Lexend', sans-serif;
+  }
+
+  .p-datepicker-calendar td.p-datepicker-today > span {
+    border-color: #f5a623;
+  }
+
+  .p-datepicker-calendar td > span.p-highlight {
+    background: #f5a623;
+    color: #fff;
   }
 }

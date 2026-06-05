@@ -1,199 +1,244 @@
-<div class="partners-page">
-  <div class="partners-page__header">
-    <div class="partners-page__title-block">
-      <p class="partners-page__eyebrow">Back-office UBAX</p>
-      <div class="partners-page__title-row">
-        <h1 class="partners-page__title">Agences</h1>
-        <span class="partners-page__count">{{ agencyCount() }} agence(s)</span>
-      </div>
-      <p class="partners-page__subtitle">
-        Gérez les agences partenaires, leur statut et consultez leurs équipes.
-      </p>
-    </div>
-  </div>
+<div class="agencies-page">
+  @if (hasKpiSection()) {
+    <section class="agencies-kpi-grid" aria-label="Indicateurs agences">
+      @for (card of kpiCards(); track card.label; let cardIndex = $index) {
+        <ubax-kpi-card
+          [label]="card.label"
+          [value]="card.value"
+          [trend]="card.trend"
+          [trendPositive]="card.positive"
+        >
+          <i icon [class]="card.iconClass + ' ' + card.iconToneClass"></i>
 
-  <div class="partners-kpi-grid">
-    <ubax-kpi-card label="Agences actives" [value]="kpis().active">
-      <i icon class="pi pi-home text-xl text-brand-blue"></i>
-    </ubax-kpi-card>
-    <ubax-kpi-card label="Abonnements actifs" [value]="kpis().subscribed">
-      <i icon class="pi pi-wallet text-xl text-brand-orange"></i>
-    </ubax-kpi-card>
-    <ubax-kpi-card label="Agences vérifiées" [value]="kpis().verified">
-      <i icon class="pi pi-shield text-xl text-brand-teal"></i>
-    </ubax-kpi-card>
-    <ubax-kpi-card label="Agences suspendues" [value]="kpis().suspended">
-      <i icon class="pi pi-ban text-xl text-danger"></i>
-    </ubax-kpi-card>
-  </div>
+          <div graph [class]="card.graphWrapClass">
+            <svg [class]="card.graphClass" viewBox="0 0 82 30" fill="none">
+              <defs>
+                <linearGradient
+                  [attr.id]="'agenciesKpiStroke' + cardIndex"
+                  x1="0"
+                  y1="30"
+                  x2="82"
+                  y2="0"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0%"
+                    stop-opacity="0.72"
+                    [attr.stop-color]="card.gradientStart"
+                  />
+                  <stop offset="100%" [attr.stop-color]="card.gradientEnd" />
+                </linearGradient>
+
+                <linearGradient
+                  [attr.id]="'agenciesKpiArea' + cardIndex"
+                  x1="41"
+                  y1="6"
+                  x2="41"
+                  y2="30"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0%"
+                    stop-opacity="0.22"
+                    [attr.stop-color]="card.gradientEnd"
+                  />
+                  <stop
+                    offset="100%"
+                    stop-opacity="0"
+                    [attr.stop-color]="card.gradientEnd"
+                  />
+                </linearGradient>
+              </defs>
+
+              <path
+                class="agencies-kpi__graph-area"
+                d="M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5L81 30L1 30Z"
+                [attr.fill]="'url(#agenciesKpiArea' + cardIndex + ')'"
+              />
+
+              <path
+                class="agencies-kpi__graph-line"
+                d="M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5"
+                [attr.stroke]="'url(#agenciesKpiStroke' + cardIndex + ')'"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+        </ubax-kpi-card>
+      }
+    </section>
+  }
 
   <ubax-section-card bodyClass="p-0">
-    <ubax-search-filter-bar
-      class="partners-toolbar"
-      placeholder="Rechercher une agence..."
-      [filters]="searchFilters()"
-      (searchChange)="onSearchChange($event)"
-      (filterChange)="onFilterChange($event)"
-    />
+    <section class="agencies-stage" aria-label="Liste des agences">
+      <header class="agencies-stage__head">
+        <h2 class="agencies-stage__title">{{ listTitle() }}</h2>
 
-    <section class="partners-table-stage" aria-label="Liste des agences">
-      @if (loading()) {
-        <div class="partners-table-loading" aria-busy="true" aria-live="polite">
-          @for (_ of [0, 1, 2, 3, 4]; track $index) {
-            <div class="partners-table-loading__row" aria-hidden="true"></div>
+        <div class="agencies-stage__actions">
+          <div class="agencies-search">
+            <i class="pi pi-search"></i>
+            <input
+              type="search"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchChange($event)"
+              placeholder="Rechercher"
+              aria-label="Rechercher une agence"
+            />
+          </div>
+
+          @if (isSuperAdmin()) {
+            <button type="button" class="agencies-add-btn">
+              <i class="pi pi-plus-circle"></i>
+              Ajouter une agence
+            </button>
           }
         </div>
-      } @else {
-        <div class="partners-table-wrap">
-          <ubax-ui-data-table
-            class="partners-table"
-            [columns]="tableColumns"
-            [rows]="pagedRows()"
-            rowIdKey="id"
-          >
-            <ng-template ubaxDataTableEmpty>
-              <ubax-empty-state
-                icon="pi pi-home"
-                title="Aucune agence trouvée"
-                [description]="
-                  searchQuery()
-                    ? 'Aucune agence ne correspond à votre recherche.'
-                    : 'Aucune agence partenaire enregistrée.'
-                "
-              />
-            </ng-template>
+      </header>
 
-            <ng-template ubaxDataTableCell="agency" let-agency>
-              <div class="partners-user-cell">
+      @if (loading()) {
+        <div
+          class="agencies-grid agencies-grid--loading"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          @for (_ of [0, 1, 2, 3, 4, 5, 6, 7]; track $index) {
+            <div
+              class="agencies-card agencies-card--skeleton"
+              aria-hidden="true"
+            ></div>
+          }
+        </div>
+      } @else if (!pagedRows().length) {
+        <div class="agencies-empty-wrap">
+          <ubax-empty-state
+            icon="pi pi-home"
+            title="Aucune agence trouvée"
+            [description]="
+              searchQuery()
+                ? 'Aucune agence ne correspond à votre recherche.'
+                : 'Aucune agence enregistrée pour ce statut.'
+            "
+          />
+        </div>
+      } @else {
+        <div class="agencies-grid">
+          @for (agency of pagedRows(); track agency.id ?? $index) {
+            <article class="agencies-card">
+              <span [class]="agencyStatusClass(agency)">
+                {{ agencyStatusLabel(agency) }}
+              </span>
+
+              <div class="agencies-card__logo-wrap">
                 @if (agency.logoUrl) {
                   <img
+                    class="agencies-card__logo"
                     [src]="agency.logoUrl"
-                    [alt]="agency.name"
-                    class="partners-user-cell__logo"
+                    [alt]="agency.name ?? 'Agence'"
                   />
                 } @else {
-                  <div class="partners-user-cell__avatar">
+                  <div class="agencies-card__avatar">
                     {{ initials(agency) }}
                   </div>
                 }
-                <div class="partners-user-cell__meta">
-                  <p class="partners-user-cell__name">
-                    {{ agency.name ?? '—' }}
-                  </p>
-                  <p class="partners-user-cell__sub">
-                    {{ agency.city ?? '—' }}
-                  </p>
-                </div>
               </div>
-            </ng-template>
 
-            <ng-template ubaxDataTableCell="email" let-agency>
-              <span class="partners-table__cell">{{
-                agency.email ?? '—'
-              }}</span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="phone" let-agency>
-              <span class="partners-table__cell partners-table__cell--muted">
-                {{ agency.phone ?? '—' }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="city" let-agency>
-              <span class="partners-table__cell partners-table__cell--muted">
-                {{ agency.city ?? '—' }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="verification" let-agency>
-              @if (agency.verified) {
-                <ubax-status-badge variant="success"
-                  >Vérifiée</ubax-status-badge
-                >
-              } @else {
-                <ubax-status-badge variant="warning"
-                  >En attente</ubax-status-badge
-                >
-              }
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="subscription" let-agency>
-              <div class="partners-subscription-cell">
-                <ubax-status-badge [variant]="subscriptionVariant(agency)">
-                  {{ subscriptionLabel(agency) }}
-                </ubax-status-badge>
-                <span class="partners-subscription-cell__meta">
-                  {{ agency.subscriptionActive ? 'En cours' : 'À renouveler' }}
-                </span>
+              <div class="agencies-card__meta">
+                <p class="agencies-card__name">{{ agency.name ?? '—' }}</p>
+                <p class="agencies-card__sub">{{ locationLabel(agency) }}</p>
+                <p class="agencies-card__code">{{ agencyCode(agency) }}</p>
               </div>
-            </ng-template>
 
-            <ng-template ubaxDataTableCell="status" let-agency>
-              @if (agency.active) {
-                <ubax-status-badge variant="active">Active</ubax-status-badge>
-              } @else {
-                <ubax-status-badge variant="suspended"
-                  >Suspendue</ubax-status-badge
-                >
-              }
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="actions" let-agency>
-              <div class="partners-actions">
+              <div class="agencies-card__actions-row">
                 <button
                   type="button"
-                  class="partners-action-btn"
-                  title="Voir les membres"
-                  (click)="viewMembers(agency)"
+                  class="agencies-card__detail-btn"
+                  (click)="viewDetails(agency)"
                 >
-                  <i class="pi pi-users"></i>
+                  Voir les détails
                 </button>
 
-                @if (isSuperAdmin()) {
-                  <button
-                    type="button"
-                    class="partners-action-btn partners-action-btn--info"
-                    title="Mettre à jour l'abonnement"
-                    (click)="openSubscriptionDialog(agency)"
-                  >
-                    <i class="pi pi-wallet"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    [class]="
-                      agency.active
-                        ? 'partners-action-btn partners-action-btn--warn'
-                        : 'partners-action-btn partners-action-btn--success'
-                    "
-                    [title]="agency.active ? 'Suspendre' : 'Activer'"
-                    (click)="promptToggle(agency)"
-                  >
-                    <i
-                      [class]="
-                        agency.active ? 'pi pi-ban' : 'pi pi-check-circle'
-                      "
-                    ></i>
-                  </button>
-                }
+                <button
+                  type="button"
+                  class="agencies-card__action-btn"
+                  title="Actions"
+                  (click)="toggleActionsPopover($event, agency)"
+                >
+                  <i class="pi pi-ellipsis-v"></i>
+                </button>
               </div>
-            </ng-template>
-          </ubax-ui-data-table>
+            </article>
+          }
         </div>
       }
 
-      @if (!loading() && totalPages() > 1) {
-        <footer class="partners-pagination">
-          <ubax-ui-pagination
+      <footer class="agencies-footer">
+        <p class="agencies-footer__count">
+          Affichage
+          {{ pagedRows().length ? (currentPage() - 1) * pageSize + 1 : 0 }} à
+          {{ (currentPage() - 1) * pageSize + pagedRows().length }} sur
+          {{ agencyCount() }} agences
+        </p>
+
+        @if (!loading() && agencyCount() > 0) {
+          <ubax-paginator
             [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            variant="members"
-            (pageChange)="onPageChange($event)"
+            [totalPages]="totalPages() || 1"
+            (currentPageChange)="onPageChange($event)"
           />
-        </footer>
-      }
+        }
+      </footer>
     </section>
   </ubax-section-card>
+
+  @if (selectedAgency(); as selectedAgency) {
+    @if (isActionsPopoverOpen(selectedAgency)) {
+      <div
+        class="agencies-actions-popover"
+        [style.top.px]="actionPopoverTop()"
+        [style.left.px]="actionPopoverLeft()"
+      >
+        <button
+          type="button"
+          class="agencies-actions-popover__item"
+          (click)="handleViewMembers(selectedAgency)"
+        >
+          <i class="pi pi-users"></i>
+          Voir les membres de l'agence
+        </button>
+
+        @if (isSuperAdmin()) {
+          <button
+            type="button"
+            class="agencies-actions-popover__item"
+            (click)="handleOpenSubscription(selectedAgency)"
+          >
+            <i class="pi pi-wallet"></i>
+            Mettre à jour l'abonnement
+          </button>
+
+          <button
+            type="button"
+            class="agencies-actions-popover__item agencies-actions-popover__item--warn"
+            (click)="handlePromptToggle(selectedAgency)"
+          >
+            <i
+              [class]="
+                agencyStatusLabel(selectedAgency) === 'Suspendu'
+                  ? 'pi pi-check-circle'
+                  : 'pi pi-ban'
+              "
+            ></i>
+            {{
+              agencyStatusLabel(selectedAgency) === 'Suspendu'
+                ? "Réactiver l'abonnement"
+                : "Suspendre l'abonnement"
+            }}
+          </button>
+        }
+      </div>
+    }
+  }
 </div>
 
 <ubax-confirm-dialog
@@ -212,14 +257,14 @@
   [visible]="showSubscriptionDialog()"
   (visibleChange)="$event ? null : closeSubscriptionDialog()"
   [modal]="true"
-  [closable]="!subscriptionLoading()"
+  [closable]="false"
   [dismissableMask]="!subscriptionLoading()"
   [draggable]="false"
   [resizable]="false"
   [style]="{ width: '34rem', maxWidth: '94vw' }"
   styleClass="partners-dialog"
 >
-  <ng-template pTemplate="header">
+  <div class="partners-dialog__surface">
     <div class="partners-dialog__header">
       <div>
         <p class="partners-page__eyebrow">Abonnement partenaire</p>
@@ -228,48 +273,60 @@
         </h2>
       </div>
       @if (selectedAgency(); as agency) {
-        <ubax-status-badge [variant]="subscriptionVariant(agency)">
-          {{ subscriptionLabel(agency) }}
+        <ubax-status-badge [variant]="agency.active ? 'active' : 'suspended'">
+          {{ agency.active ? 'Actif' : 'Suspendu' }}
         </ubax-status-badge>
       }
-    </div>
-  </ng-template>
 
-  <div class="partners-dialog__body">
-    <div class="partners-field">
-      <span class="partners-field__label">Plan d'abonnement</span>
-      <p-select
-        [options]="subscriptionPlanOptions().slice(1)"
-        [ngModel]="subscriptionPlanValue"
-        (ngModelChange)="subscriptionPlanValue = $event"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Choisir un plan"
-        appendTo="body"
-        panelStyleClass="partners-plan-panel"
-      />
+      <button
+        type="button"
+        class="partners-dialog__close"
+        [disabled]="subscriptionLoading()"
+        aria-label="Fermer"
+        (click)="closeSubscriptionDialog()"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
     </div>
 
-    <div class="partners-field">
-      <span class="partners-field__label">Date d'expiration</span>
-      <div class="partners-datepicker-wrap">
-        <p-datepicker
-          [ngModel]="subscriptionExpiresAtValue"
-          (ngModelChange)="subscriptionExpiresAtValue = $event"
-          [showIcon]="true"
-          [showButtonBar]="true"
-          [minDate]="today"
+    <div class="partners-dialog__body">
+      <div class="partners-field">
+        <span class="partners-field__label">Plan d'abonnement</span>
+        <p-select
+          [options]="[
+            { label: 'FREE', value: 'FREE' },
+            { label: 'PRO', value: 'PRO' },
+            { label: 'PREMIUM', value: 'PREMIUM' },
+          ]"
+          [ngModel]="subscriptionPlanValue"
+          (ngModelChange)="subscriptionPlanValue = $event"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Choisir un plan"
           appendTo="body"
-          dateFormat="dd/mm/yy"
-          placeholder="jj/mm/aaaa"
-          inputId="agency-subscription-expiry"
-          panelStyleClass="partners-datepicker-panel"
+          panelStyleClass="partners-plan-panel"
         />
       </div>
-    </div>
-  </div>
 
-  <ng-template pTemplate="footer">
+      <div class="partners-field">
+        <span class="partners-field__label">Date d'expiration</span>
+        <div class="partners-datepicker-wrap">
+          <p-datepicker
+            [ngModel]="subscriptionExpiresAtValue"
+            (ngModelChange)="subscriptionExpiresAtValue = $event"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            [minDate]="today"
+            appendTo="body"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            inputId="agency-subscription-expiry"
+            panelStyleClass="partners-datepicker-panel"
+          />
+        </div>
+      </div>
+    </div>
+
     <div class="partners-dialog__footer">
       <button
         type="button"
@@ -291,5 +348,5 @@
         Enregistrer
       </button>
     </div>
-  </ng-template>
+  </div>
 </p-dialog>

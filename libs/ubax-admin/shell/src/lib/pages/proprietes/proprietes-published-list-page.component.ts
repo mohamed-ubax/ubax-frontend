@@ -211,6 +211,14 @@ export class ProprietesPublishedListPageComponent {
           property.transactionType === 'RENT' ||
           property.transactionType === 'RENT_FURNISHED',
       ).length;
+      const occupiedCount = properties.filter(
+        (property) =>
+          property.status === 'RESERVED' || property.status === 'SOLD',
+      ).length;
+      const occupancyRate =
+        properties.length > 0
+          ? `${Math.round((occupiedCount / properties.length) * 100)}%`
+          : '—';
 
       return [
         {
@@ -218,40 +226,40 @@ export class ProprietesPublishedListPageComponent {
           value: formatCount(totalPartners),
           trend: KPI_TREND_BY_SCOPE.agencies,
           icon: 'pi pi-building',
-          iconBg: 'rgba(43, 127, 255, 0.12)',
-          iconColor: '#2b7fff',
+          iconBg: '#22c55e',
+          iconColor: '#ffffff',
         },
         {
           label: 'Biens publiés',
           value: formatCount(totalProperties),
           trend: KPI_TREND_BY_SCOPE.agencies,
           icon: 'pi pi-home',
-          iconBg: 'rgba(232, 125, 30, 0.12)',
-          iconColor: '#e87d1e',
+          iconBg: '#2b7fff',
+          iconColor: '#ffffff',
         },
         {
           label: 'Propriétés à vendre',
           value: formatCount(saleCount),
           trend: KPI_PAGE_TREND,
           icon: 'pi pi-tag',
-          iconBg: 'rgba(52, 199, 89, 0.12)',
-          iconColor: '#34c759',
+          iconBg: '#e87d1e',
+          iconColor: '#ffffff',
         },
         {
           label: 'Propriétés à louer',
           value: formatCount(rentCount),
           trend: KPI_PAGE_TREND,
           icon: 'pi pi-key',
-          iconBg: 'rgba(232, 125, 30, 0.12)',
-          iconColor: '#e87d1e',
+          iconBg: '#a855f7',
+          iconColor: '#ffffff',
         },
         {
-          label: 'Prix moyen',
-          value: averagePrice,
+          label: 'Taux moyen',
+          value: occupancyRate,
           trend: KPI_PAGE_TREND,
-          icon: 'pi pi-chart-line',
-          iconBg: 'rgba(43, 127, 255, 0.12)',
-          iconColor: '#2b7fff',
+          icon: 'pi pi-chart-bar',
+          iconBg: '#06b6d4',
+          iconColor: '#ffffff',
         },
       ];
     }
@@ -272,40 +280,40 @@ export class ProprietesPublishedListPageComponent {
         value: formatCount(totalPartners),
         trend: KPI_TREND_BY_SCOPE.hotels,
         icon: 'pi pi-building',
-        iconBg: 'rgba(43, 127, 255, 0.12)',
-        iconColor: '#2b7fff',
+        iconBg: '#22c55e',
+        iconColor: '#ffffff',
       },
       {
         label: 'Chambres publiées',
         value: formatCount(totalProperties),
         trend: KPI_TREND_BY_SCOPE.hotels,
         icon: 'pi pi-th-large',
-        iconBg: 'rgba(232, 125, 30, 0.12)',
-        iconColor: '#e87d1e',
+        iconBg: '#2b7fff',
+        iconColor: '#ffffff',
       },
       {
         label: 'Chambres standards',
         value: formatCount(roomCount),
         trend: KPI_PAGE_TREND,
         icon: 'pi pi-home',
-        iconBg: 'rgba(52, 199, 89, 0.12)',
-        iconColor: '#34c759',
+        iconBg: '#e87d1e',
+        iconColor: '#ffffff',
       },
       {
         label: 'Suites',
         value: formatCount(suiteCount),
         trend: KPI_PAGE_TREND,
         icon: 'pi pi-star',
-        iconBg: 'rgba(43, 127, 255, 0.12)',
-        iconColor: '#2b7fff',
+        iconBg: '#a855f7',
+        iconColor: '#ffffff',
       },
       {
         label: 'Court séjour',
         value: formatCount(shortStayCount),
         trend: KPI_PAGE_TREND,
         icon: 'pi pi-calendar',
-        iconBg: 'rgba(232, 125, 30, 0.12)',
-        iconColor: '#e87d1e',
+        iconBg: '#06b6d4',
+        iconColor: '#ffffff',
       },
     ];
   });
@@ -497,6 +505,14 @@ export class ProprietesPublishedListPageComponent {
       (property as PropertyResponse & { coverPhotoUrl?: string })
         .coverPhotoUrl ?? null
     );
+  }
+
+  protected getOwnerLogoUrl(property: PropertyResponse): string | null {
+    const p = property as PropertyResponse & {
+      agencyLogoUrl?: string;
+      hotelLogoUrl?: string;
+    };
+    return p.agencyLogoUrl ?? p.hotelLogoUrl ?? null;
   }
 
   protected getDisplayCount(): string {

@@ -1,23 +1,20 @@
 <div class="ubax-shell">
-  <!-- Sidebar custom avec sous-items Propriétés -->
   <nav
-    class="ubax-sidebar bg-surface-sidebar flex flex-col h-full flex-shrink-0 overflow-y-auto overflow-x-hidden"
+    class="ubax-sidebar admin-sidebar bg-surface-sidebar flex flex-col h-full flex-shrink-0 overflow-y-auto overflow-x-hidden"
     aria-label="Navigation principale"
   >
-    <!-- Logo -->
-    <div class="flex items-center px-5 py-6 flex-shrink-0 gap-2">
-      <span
-        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-orange text-white font-semibold text-lg leading-none"
-        >U</span
-      >
-      <span class="text-white font-semibold text-2xl tracking-wide">BAX</span>
+    <div class="sidebar-brand flex-shrink-0" aria-label="Ubax Admin">
+      <img
+        class="sidebar-brand__logo"
+        src="/admin/sidebar/ubax-admin-logo.svg"
+        alt="Ubax"
+      />
     </div>
 
-    <!-- Navigation -->
     <div class="flex-1 flex flex-col gap-1 py-2">
       <a
         routerLink="/tableau-de-bord"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         [routerLinkActiveOptions]="{ exact: true }"
         class="sidebar-nav-item"
       >
@@ -26,28 +23,142 @@
       </a>
 
       @if (isSuperAdmin()) {
-        <a
-          routerLink="/hotels"
-          routerLinkActive="bg-brand-orange text-white"
-          class="sidebar-nav-item"
+        <button
+          type="button"
+          class="sidebar-nav-item sidebar-nav-item--btn"
+          [class.sidebar-nav-item--active]="isHotelsRoute()"
+          [class.sidebar-nav-item--expanded]="hotelsExpanded()"
+          (click)="toggleHotels()"
         >
           <i class="pi pi-building text-lg w-6 flex-shrink-0"></i>
-          <span class="flex-1 truncate">Hôtels</span>
-        </a>
+          <span class="flex-1 truncate text-left">Hôtels</span>
+          <i
+            class="pi text-sm flex-shrink-0 sidebar-chevron"
+            [class.pi-chevron-down]="!hotelsExpanded()"
+            [class.pi-chevron-up]="hotelsExpanded()"
+          ></i>
+        </button>
 
-        <a
-          routerLink="/agences"
-          routerLinkActive="bg-brand-orange text-white"
-          class="sidebar-nav-item"
+        @if (hotelsExpanded()) {
+          <div class="sidebar-subnav">
+            <div class="sidebar-subnav__track">
+              <div class="sidebar-subnav__line-bg"></div>
+              <div class="sidebar-subnav__items">
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'all' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Tous les hôtels ({{ hotelsSubItemCounts().all }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'suspended' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Suspendus ({{ hotelsSubItemCounts().suspended }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'active' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Hôtels actifs ({{ hotelsSubItemCounts().active }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/hotels"
+                  [queryParams]="{ status: 'pending' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    En attente ({{ hotelsSubItemCounts().pending }})
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        }
+
+        <button
+          type="button"
+          class="sidebar-nav-item sidebar-nav-item--btn"
+          [class.sidebar-nav-item--active]="isAgenciesRoute()"
+          [class.sidebar-nav-item--expanded]="agenciesExpanded()"
+          (click)="toggleAgencies()"
         >
           <i class="pi pi-home text-lg w-6 flex-shrink-0"></i>
-          <span class="flex-1 truncate">Agences</span>
-        </a>
+          <span class="flex-1 truncate text-left">Agences Immobilières</span>
+          <i
+            class="pi text-sm flex-shrink-0 sidebar-chevron"
+            [class.pi-chevron-down]="!agenciesExpanded()"
+            [class.pi-chevron-up]="agenciesExpanded()"
+          ></i>
+        </button>
+
+        @if (agenciesExpanded()) {
+          <div class="sidebar-subnav">
+            <div class="sidebar-subnav__track">
+              <div class="sidebar-subnav__line-bg"></div>
+              <div class="sidebar-subnav__items">
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'all' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Toutes les agences ({{ agenciesSubItemCounts().all }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'pending' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    En attente ({{ agenciesSubItemCounts().pending }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'suspended' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Suspendues ({{ agenciesSubItemCounts().suspended }})
+                  </span>
+                </a>
+                <a
+                  routerLink="/agences"
+                  [queryParams]="{ status: 'active' }"
+                  routerLinkActive="sidebar-subitem--active"
+                  class="sidebar-subitem"
+                >
+                  <span>
+                    Agences actives ({{ agenciesSubItemCounts().active }})
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        }
       }
 
       <a
         routerLink="/candidatures"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-inbox text-lg w-6 flex-shrink-0"></i>
@@ -56,7 +167,7 @@
 
       <a
         routerLink="/bailleurs"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-users text-lg w-6 flex-shrink-0"></i>
@@ -86,6 +197,14 @@
             <div class="sidebar-subnav__line-bg"></div>
             <div class="sidebar-subnav__items">
               <a
+                routerLink="/proprietes"
+                routerLinkActive="sidebar-subitem--active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="sidebar-subitem"
+              >
+                <span>Modération</span>
+              </a>
+              <a
                 routerLink="/proprietes/agences"
                 routerLinkActive="sidebar-subitem--active"
                 class="sidebar-subitem"
@@ -104,20 +223,9 @@
         </div>
       }
 
-      <!-- Modération -->
-      <a
-        routerLink="/proprietes"
-        routerLinkActive="bg-brand-orange text-white"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="sidebar-nav-item"
-      >
-        <i class="pi pi-shield text-lg w-6 flex-shrink-0"></i>
-        <span class="flex-1 truncate">Modération</span>
-      </a>
-
       <a
         routerLink="/reservations"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-calendar text-lg w-6 flex-shrink-0"></i>
@@ -126,7 +234,7 @@
 
       <a
         routerLink="/administrateurs"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-users text-lg w-6 flex-shrink-0"></i>
@@ -135,7 +243,7 @@
 
       <a
         routerLink="/clients"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-user text-lg w-6 flex-shrink-0"></i>
@@ -144,7 +252,7 @@
 
       <a
         routerLink="/code-lists"
-        routerLinkActive="bg-brand-orange text-white"
+        routerLinkActive="sidebar-nav-item--active"
         class="sidebar-nav-item"
       >
         <i class="pi pi-sliders-h text-lg w-6 flex-shrink-0"></i>
@@ -158,13 +266,22 @@
 
       <span class="sidebar-nav-item sidebar-nav-item--disabled">
         <i class="pi pi-chart-bar text-lg w-6 flex-shrink-0"></i>
-        <span class="flex-1 truncate">Statistiques</span>
+        <span class="flex-1 truncate">Statistiques &amp; Rapports</span>
+      </span>
+
+      <span class="sidebar-nav-item sidebar-nav-item--disabled">
+        <i class="pi pi-book text-lg w-6 flex-shrink-0"></i>
+        <span class="flex-1 truncate">Logs système</span>
       </span>
     </div>
 
     <!-- Footer -->
-    <div class="flex-shrink-0 border-t border-white/10 py-4 px-2">
-      <button type="button" class="sidebar-nav-item w-full" (click)="logout()">
+    <div class="flex-shrink-0 border-t border-white/10 py-4">
+      <button
+        type="button"
+        class="sidebar-nav-item sidebar-logout-item"
+        (click)="logout()"
+      >
         <i class="pi pi-sign-out text-lg w-6 flex-shrink-0"></i>
         <span>Déconnexion</span>
       </button>
@@ -173,22 +290,41 @@
 
   <!-- Zone principale -->
   <div class="ubax-main">
-    <!-- Topbar -->
-    <header class="ubax-header">
-      <div></div>
-      <div class="text-right">
-        <p class="text-xl font-medium text-neutral-900 m-0 leading-tight">
-          {{ fullName() }}
-        </p>
-        <p
-          class="text-base font-regular text-neutral-500 m-0 leading-tight mt-0.5"
+    <header class="ubax-header admin-header">
+      <div class="admin-header__left">
+        <p class="admin-header__page-title">{{ currentPageTitle() }}</p>
+      </div>
+      <div class="admin-header__actions">
+        <button
+          type="button"
+          class="admin-header__notif"
+          aria-label="Notifications"
         >
-          {{
-            user()?.mainRole === 'UBAX_SUPER_ADMIN'
-              ? 'Super Admin'
-              : 'Administrateur'
-          }}
-        </p>
+          <i class="pi pi-bell"></i>
+        </button>
+
+        <div class="admin-header__avatar" aria-hidden="true">
+          @if (avatarUrl()) {
+            <img
+              class="admin-header__avatar-image"
+              [src]="avatarUrl()!"
+              alt="Avatar utilisateur"
+            />
+          } @else {
+            <i class="pi pi-user"></i>
+          }
+        </div>
+
+        <div class="admin-header__profile">
+          <p class="admin-header__name">{{ fullName() }}</p>
+          <p class="admin-header__role">
+            {{
+              user()?.mainRole === 'UBAX_SUPER_ADMIN'
+                ? 'Super Admin'
+                : 'Administrateur'
+            }}
+          </p>
+        </div>
       </div>
     </header>
 
@@ -199,12 +335,39 @@
   </div>
 </div>
 
-<p-toast
-  position="top-right"
-  styleClass="ubax-toast-shell"
-  [baseZIndex]="1300"
-  [showTransformOptions]="'translate3d(0, -14px, 0) scale(0.98)'"
-  [hideTransformOptions]="'translate3d(0, -18px, 0) scale(0.96)'"
-  [showTransitionOptions]="'420ms var(--ubax-motion-ease)'"
-  [hideTransitionOptions]="'260ms cubic-bezier(0.4, 0, 1, 1)'"
-/>
+<div class="ubax-toast-stack" aria-live="polite" aria-relevant="all">
+  @for (notification of notifications(); track notification.id) {
+    <div class="ubax-toast" [class]="'ubax-toast--' + notification.severity">
+      <div class="ubax-toast__icon">
+        @switch (notification.severity) {
+          @case ('success') {
+            <i class="pi pi-check"></i>
+          }
+          @case ('error') {
+            <i class="pi pi-times"></i>
+          }
+          @case ('warn') {
+            <i class="pi pi-exclamation-triangle"></i>
+          }
+          @default {
+            <i class="pi pi-info-circle"></i>
+          }
+        }
+      </div>
+
+      <div class="ubax-toast__body">
+        <p class="ubax-toast__title">{{ notification.title }}</p>
+        <p class="ubax-toast__detail">{{ notification.detail }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="ubax-toast__close"
+        aria-label="Fermer la notification"
+        (click)="dismissNotification(notification)"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  }
+</div>

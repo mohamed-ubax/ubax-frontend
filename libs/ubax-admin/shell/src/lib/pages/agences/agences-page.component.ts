@@ -2,12 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  HostListener,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AdminAgenciesStore } from '@ubax-workspace/ubax-admin-data-access';
 import type {
   AdminAgencyResponse,
@@ -17,18 +20,10 @@ import {
   ConfirmDialogComponent,
   EmptyStateComponent,
   KpiCardComponent,
-  SearchFilterBarComponent,
   SectionCardComponent,
   StatusBadgeComponent,
-  type FilterOption,
 } from '@ubax-workspace/shared-design-system';
-import {
-  UiDataTableCellDefDirective,
-  type UiDataTableColumn,
-  UiDataTableComponent,
-  UiDataTableEmptyDefDirective,
-  UiPaginationComponent,
-} from '@ubax-workspace/shared-ui';
+import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import { NOTIFICATION_HANDLER } from '@ubax-workspace/shared-data-access';
 import { ButtonModule } from 'primeng/button';
@@ -36,26 +31,9 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 
-type StatusFilter = 'all' | 'active' | 'suspended';
-type VerificationFilter = 'all' | 'verified' | 'unverified';
+type StatusFilter = 'all' | 'active' | 'pending' | 'suspended';
 
-const STATUS_FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
-  { label: 'Tous les statuts', value: 'all' },
-  { label: 'Actives', value: 'active' },
-  { label: 'Suspendues', value: 'suspended' },
-];
-
-const VERIFICATION_FILTER_OPTIONS: {
-  label: string;
-  value: VerificationFilter;
-}[] = [
-  { label: 'Toutes les vérifications', value: 'all' },
-  { label: 'Vérifiées', value: 'verified' },
-  { label: 'Non vérifiées', value: 'unverified' },
-];
-
-const DEFAULT_SUBSCRIPTION_PLANS = ['FREE', 'PRO', 'PREMIUM'] as const;
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 12;
 
 @Component({
   selector: 'ubax-admin-agences-page',
@@ -67,15 +45,11 @@ const PAGE_SIZE = 15;
     DialogModule,
     SelectModule,
     KpiCardComponent,
-    SearchFilterBarComponent,
     SectionCardComponent,
-    StatusBadgeComponent,
     EmptyStateComponent,
     ConfirmDialogComponent,
-    UiDataTableComponent,
-    UiDataTableCellDefDirective,
-    UiDataTableEmptyDefDirective,
-    UiPaginationComponent,
+    StatusBadgeComponent,
+    UbaxPaginatorComponent,
   ],
   templateUrl: './agences-page.component.html',
   styleUrl: './agences-page.component.scss',
@@ -86,18 +60,21 @@ export class AgencesPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly notif = inject(NOTIFICATION_HANDLER);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  private readonly queryParamMap = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
 
   protected readonly loading = this.store.loading;
-  protected readonly actionLoading = signal(false);
   protected readonly agencies = this.store.agencies;
   protected readonly searchQuery = signal('');
   protected readonly statusFilter = signal<StatusFilter>('all');
-  protected readonly subscriptionFilter = signal<string>('all');
-  protected readonly verificationFilter = signal<VerificationFilter>('all');
   protected readonly currentPage = signal(1);
 
   protected readonly isSuperAdmin = this.authStore.isSuperAdmin;
-
+  protected readonly pageSize = PAGE_SIZE;
+  protected readonly actionLoading = signal(false);
   protected readonly showConfirm = signal(false);
   protected readonly confirmAction = signal<'activate' | 'suspend' | null>(
     null,
@@ -105,67 +82,148 @@ export class AgencesPageComponent implements OnInit {
   protected readonly selectedAgency = signal<AdminAgencyResponse | null>(null);
   protected readonly showSubscriptionDialog = signal(false);
   protected readonly subscriptionLoading = signal(false);
+  protected readonly openedActionAgencyId = signal<string | null>(null);
+  protected readonly actionPopoverTop = signal(0);
+  protected readonly actionPopoverLeft = signal(0);
 
   protected subscriptionPlanValue: string | null = null;
   protected subscriptionExpiresAtValue: Date | null = null;
   protected readonly today = new Date();
 
-  protected readonly subscriptionPlanOptions = computed<FilterOption[]>(() => {
-    const dynamicPlans = this.agencies()
-      .map((agency) => agency.subscriptionPlan?.trim().toUpperCase())
-      .filter((plan): plan is string => Boolean(plan));
+  protected readonly pageTitle = computed(() => {
+    const status = this.statusFilter();
 
-    const plans = [
-      ...new Set([...DEFAULT_SUBSCRIPTION_PLANS, ...dynamicPlans]),
-    ];
-    return [
-      { label: 'Tous les plans', value: 'all' },
-      ...plans.map((plan) => ({ label: plan, value: plan })),
-    ];
+    if (status === 'active') {
+      return 'Agences actives';
+    }
+
+    if (status === 'pending') {
+      return 'Agences en attente';
+    }
+
+    if (status === 'suspended') {
+      return 'Agences suspendues';
+    }
+
+    return 'Toutes les agences';
   });
 
-  protected readonly searchFilters = computed<
-    {
-      label: string;
-      options: FilterOption[];
-    }[]
-  >(() => [
-    { label: 'Tous les statuts', options: STATUS_FILTER_OPTIONS },
-    { label: 'Tous les plans', options: this.subscriptionPlanOptions() },
-    { label: 'Toutes les vérifications', options: VERIFICATION_FILTER_OPTIONS },
-  ]);
+  protected readonly listTitle = computed(() => {
+    const status = this.statusFilter();
+
+    if (status === 'active') {
+      return 'Liste des agences actives';
+    }
+
+    if (status === 'pending') {
+      return 'Liste des agences en attente';
+    }
+
+    if (status === 'suspended') {
+      return 'Liste des agences suspendues';
+    }
+
+    return 'Liste des agences';
+  });
+
+  protected readonly hasKpiSection = computed(
+    () => this.statusFilter() === 'all',
+  );
 
   protected readonly kpis = computed(() => {
     const agencies = this.agencies();
-    const active = agencies.filter((agency) => agency.active).length;
-    const suspended = agencies.length - active;
-    const subscribed = agencies.filter(
-      (agency) => agency.subscriptionActive,
+    const active = agencies.filter(
+      (agency) => this.resolveAgencyStatus(agency) === 'active',
     ).length;
-    const verified = agencies.filter((agency) => agency.verified).length;
+    const pending = agencies.filter(
+      (agency) => this.resolveAgencyStatus(agency) === 'pending',
+    ).length;
+    const suspended = agencies.filter(
+      (agency) => this.resolveAgencyStatus(agency) === 'suspended',
+    ).length;
 
-    return { active, subscribed, suspended, verified };
+    return {
+      total: agencies.length,
+      active,
+      pending,
+      suspended,
+    };
   });
 
-  protected readonly tableColumns: readonly UiDataTableColumn<AdminAgencyResponse>[] =
-    [
-      { key: 'agency', header: 'Agence', width: '20%' },
-      { key: 'email', header: 'Email', width: '16%' },
-      { key: 'phone', header: 'Téléphone', width: '13%' },
-      { key: 'city', header: 'Ville', width: '10%' },
-      { key: 'verification', header: 'Vérification', width: '11%' },
-      { key: 'subscription', header: 'Abonnement', width: '12%' },
-      { key: 'status', header: 'Statut', width: '8%' },
-      { key: 'actions', header: 'Actions', width: '10%', align: 'end' },
-    ];
+  protected readonly kpiCards = computed(() => {
+    const kpis = this.kpis();
+
+    return [
+      {
+        label: 'Toutes les agences',
+        value: kpis.total,
+        trend: '+ 12 ce mois ci',
+        positive: true,
+        iconClass: 'pi pi-home',
+        iconToneClass: 'agencies-kpi__icon agencies-kpi__icon--purple',
+        graphWrapClass:
+          'agencies-kpi__graph-wrap agencies-kpi__graph-wrap--purple',
+        graphClass: 'agencies-kpi__graph agencies-kpi__graph--purple',
+        gradientStart: '#E8B6F7',
+        gradientEnd: '#BE4FE7',
+      },
+      {
+        label: 'Agences actives',
+        value: kpis.active,
+        trend: '+ 45 ce mois ci',
+        positive: true,
+        iconClass: 'pi pi-check',
+        iconToneClass: 'agencies-kpi__icon agencies-kpi__icon--green',
+        graphWrapClass:
+          'agencies-kpi__graph-wrap agencies-kpi__graph-wrap--green',
+        graphClass: 'agencies-kpi__graph agencies-kpi__graph--green',
+        gradientStart: '#8CE3A5',
+        gradientEnd: '#22C55E',
+      },
+      {
+        label: 'En attente',
+        value: kpis.pending,
+        trend: '+ 3 ce mois ci',
+        positive: true,
+        iconClass: 'pi pi-clock',
+        iconToneClass: 'agencies-kpi__icon agencies-kpi__icon--orange',
+        graphWrapClass:
+          'agencies-kpi__graph-wrap agencies-kpi__graph-wrap--orange',
+        graphClass: 'agencies-kpi__graph agencies-kpi__graph--orange',
+        gradientStart: '#FCD79A',
+        gradientEnd: '#F59E0B',
+      },
+      {
+        label: 'Suspendus',
+        value: kpis.suspended,
+        trend: '-2 ce mois ci',
+        positive: false,
+        iconClass: 'pi pi-ban',
+        iconToneClass: 'agencies-kpi__icon agencies-kpi__icon--red',
+        graphWrapClass:
+          'agencies-kpi__graph-wrap agencies-kpi__graph-wrap--red',
+        graphClass: 'agencies-kpi__graph agencies-kpi__graph--red',
+        gradientStart: '#FECACA',
+        gradientEnd: '#EF4444',
+      },
+    ] as const;
+  });
+
+  protected readonly syncStatusFromQuery = effect(
+    () => {
+      const status = this.queryParamMap().get('status');
+      this.statusFilter.set(this.normalizeStatusFilter(status));
+      this.currentPage.set(1);
+    },
+    { allowSignalWrites: true },
+  );
 
   protected readonly filteredAgencies = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const status = this.statusFilter();
-    const subscription = this.subscriptionFilter();
-    const verification = this.verificationFilter();
 
     return this.agencies().filter((a) => {
+      const resolvedStatus = this.resolveAgencyStatus(a);
       const matchesQuery =
         !query ||
         (a.name ?? '').toLowerCase().includes(query) ||
@@ -173,22 +231,11 @@ export class AgencesPageComponent implements OnInit {
         (a.email ?? '').toLowerCase().includes(query);
       const matchesStatus =
         status === 'all' ||
-        (status === 'active' && a.active) ||
-        (status === 'suspended' && !a.active);
-      const matchesSubscription =
-        subscription === 'all' ||
-        (a.subscriptionPlan ?? '').trim().toUpperCase() === subscription;
-      const matchesVerification =
-        verification === 'all' ||
-        (verification === 'verified' && !!a.verified) ||
-        (verification === 'unverified' && !a.verified);
+        (status === 'active' && resolvedStatus === 'active') ||
+        (status === 'pending' && resolvedStatus === 'pending') ||
+        (status === 'suspended' && resolvedStatus === 'suspended');
 
-      return (
-        matchesQuery &&
-        matchesStatus &&
-        matchesSubscription &&
-        matchesVerification
-      );
+      return matchesQuery && matchesStatus;
     });
   });
 
@@ -201,7 +248,9 @@ export class AgencesPageComponent implements OnInit {
     return this.filteredAgencies().slice(start, start + PAGE_SIZE);
   });
 
-  protected readonly agencyCount = computed(() => this.agencies().length);
+  protected readonly agencyCount = computed(
+    () => this.filteredAgencies().length,
+  );
 
   ngOnInit(): void {
     void this.loadAgencies();
@@ -226,27 +275,99 @@ export class AgencesPageComponent implements OnInit {
     this.currentPage.set(1);
   }
 
-  protected onFilterChange(event: { filter: string; value: unknown }): void {
-    this.currentPage.set(1);
-
-    if (event.filter === 'Tous les statuts') {
-      this.statusFilter.set((event.value as StatusFilter) ?? 'all');
-      return;
-    }
-
-    if (event.filter === 'Tous les plans') {
-      this.subscriptionFilter.set((event.value as string) ?? 'all');
-      return;
-    }
-
-    this.verificationFilter.set((event.value as VerificationFilter) ?? 'all');
-  }
-
   protected onPageChange(page: number): void {
     this.currentPage.set(page);
   }
 
+  protected toggleActionsPopover(
+    event: MouseEvent,
+    agency: AdminAgencyResponse,
+  ): void {
+    event.stopPropagation();
+
+    const id = agency.id ?? null;
+    if (!id) {
+      this.openedActionAgencyId.set(null);
+      return;
+    }
+
+    const trigger = event.currentTarget as HTMLElement | null;
+    if (!trigger) {
+      this.closeActionsPopover();
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const panelWidth = 286;
+    const margin = 12;
+    const nextLeft = Math.max(
+      margin,
+      Math.min(
+        window.innerWidth - panelWidth - margin,
+        rect.right - panelWidth,
+      ),
+    );
+
+    this.selectedAgency.set(agency);
+    this.actionPopoverTop.set(rect.bottom + 8);
+    this.actionPopoverLeft.set(nextLeft);
+    this.openedActionAgencyId.set(
+      this.openedActionAgencyId() === id ? null : id,
+    );
+  }
+
+  protected isActionsPopoverOpen(agency: AdminAgencyResponse): boolean {
+    return Boolean(agency.id) && this.openedActionAgencyId() === agency.id;
+  }
+
+  protected closeActionsPopover(): void {
+    this.openedActionAgencyId.set(null);
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.agencies-actions-popover')) {
+      return;
+    }
+
+    this.closeActionsPopover();
+  }
+
+  @HostListener('window:scroll')
+  @HostListener('window:resize')
+  protected onViewportChange(): void {
+    this.closeActionsPopover();
+  }
+
+  protected handleViewMembers(agency: AdminAgencyResponse): void {
+    this.closeActionsPopover();
+    this.viewMembers(agency);
+  }
+
+  protected handleOpenSubscription(agency: AdminAgencyResponse): void {
+    this.closeActionsPopover();
+    this.openSubscriptionDialog(agency);
+  }
+
+  protected handlePromptToggle(agency: AdminAgencyResponse): void {
+    this.closeActionsPopover();
+    this.promptToggle(agency);
+  }
+
+  protected viewDetails(agency: AdminAgencyResponse): void {
+    if (!agency.id) {
+      return;
+    }
+
+    void this.router.navigate(['/agences', agency.id]);
+  }
+
   protected viewMembers(agency: AdminAgencyResponse): void {
+    if (!agency.id) {
+      return;
+    }
+
     void this.router.navigate(['/agences', agency.id, 'membres']);
   }
 
@@ -307,7 +428,9 @@ export class AgencesPageComponent implements OnInit {
 
   protected async confirmToggle(): Promise<void> {
     const agency = this.selectedAgency();
-    if (!agency?.id) return;
+    if (!agency?.id) {
+      return;
+    }
 
     this.actionLoading.set(true);
     try {
@@ -357,39 +480,66 @@ export class AgencesPageComponent implements OnInit {
     );
   }
 
-  protected formatDate(value?: string | null): string {
-    if (!value) {
-      return '—';
+  protected agencyStatusLabel(agency: AdminAgencyResponse): string {
+    const status = this.resolveAgencyStatus(agency);
+
+    if (status === 'active') {
+      return 'Actif';
     }
 
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return '—';
+    if (status === 'pending') {
+      return 'En attente';
     }
 
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(date);
+    return 'Suspendu';
   }
 
-  protected subscriptionVariant(
-    agency: AdminAgencyResponse,
-  ): 'active' | 'warning' | 'neutral' {
-    if (!agency.subscriptionActive) {
-      return 'neutral';
+  protected agencyStatusClass(agency: AdminAgencyResponse): string {
+    const status = this.resolveAgencyStatus(agency);
+
+    if (status === 'active') {
+      return 'agencies-status-pill agencies-status-pill--active';
     }
 
-    if (this.isExpired(agency.subscriptionExpiresAt)) {
-      return 'warning';
+    if (status === 'pending') {
+      return 'agencies-status-pill agencies-status-pill--pending';
+    }
+
+    return 'agencies-status-pill agencies-status-pill--suspended';
+  }
+
+  protected agencyCode(agency: AdminAgencyResponse): string {
+    const base = (agency.id ?? '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5);
+    return base ? `UBX-AG${base.toUpperCase()}` : 'UBX-AG001';
+  }
+
+  protected locationLabel(agency: AdminAgencyResponse): string {
+    return agency.city ?? '—';
+  }
+
+  private normalizeStatusFilter(value: string | null): StatusFilter {
+    if (value === 'active' || value === 'pending' || value === 'suspended') {
+      return value;
+    }
+
+    return 'all';
+  }
+
+  private resolveAgencyStatus(
+    agency: AdminAgencyResponse,
+  ): 'active' | 'pending' | 'suspended' {
+    if (!agency.active) {
+      return 'suspended';
+    }
+
+    if (
+      !agency.subscriptionActive ||
+      this.isExpired(agency.subscriptionExpiresAt)
+    ) {
+      return 'pending';
     }
 
     return 'active';
-  }
-
-  protected subscriptionLabel(agency: AdminAgencyResponse): string {
-    return agency.subscriptionPlan?.trim().toUpperCase() ?? 'Inactif';
   }
 
   private isExpired(value?: string | null): boolean {

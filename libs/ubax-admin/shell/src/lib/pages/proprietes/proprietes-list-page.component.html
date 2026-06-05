@@ -1,186 +1,152 @@
-<div class="proprietes-page">
-  <!-- En-tête -->
-  <div class="proprietes-page__header">
-    <div class="proprietes-page__title-block">
-      <p class="proprietes-page__eyebrow">Modération des biens</p>
-      <div class="proprietes-page__title-row">
-        <h1 class="proprietes-page__title">File d'attente — Biens PENDING</h1>
-        <span class="proprietes-page__count"
-          >{{ totalElements() }} bien(s) en attente</span
-        >
-      </div>
-      <p class="proprietes-page__subtitle">
-        Examinez et statuez sur chaque bien soumis par les agences et
-        propriétaires.
-      </p>
+<div class="props-page">
+  <!-- Barre de filtres -->
+  <div class="props-filters">
+    <div class="props-filters__search">
+      <input
+        type="text"
+        class="props-filters__search-input"
+        placeholder="Rechercher par titre, ville, agence..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event.target).value)"
+      />
+      <i class="pi pi-search props-filters__search-icon"></i>
     </div>
+    <ubax-ui-form-select
+      class="props-filters__select-field"
+      [options]="typeOptions"
+      [value]="typeFilterLabel()"
+      (valueChange)="onTypeFilterChange($event)"
+    />
   </div>
 
-  <!-- Carte principale -->
-  <ubax-section-card bodyClass="p-0">
-    <!-- Barre de recherche + filtres -->
-    <ubax-search-filter-bar
-      class="proprietes-toolbar"
-      placeholder="Rechercher par titre, ville, agence..."
-      [filters]="searchFilters"
-      (searchChange)="onSearchChange($event)"
-      (filterChange)="onFilterChange($event)"
+  <!-- Grille de cartes -->
+  @if (loading()) {
+    <div class="props-grid">
+      @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+        <div class="props-card-skeleton"></div>
+      }
+    </div>
+  } @else if (filteredProperties().length === 0) {
+    <ubax-empty-state
+      icon="pi pi-check-circle"
+      title="File d'attente vide"
+      [description]="
+        searchQuery()
+          ? 'Aucun bien ne correspond à votre recherche.'
+          : 'Aucun bien en attente de modération.'
+      "
     />
-
-    <section
-      class="proprietes-table-stage"
-      aria-label="Liste des biens en attente"
-    >
-      @if (loading()) {
-        <div
-          class="proprietes-table-loading"
-          aria-busy="true"
-          aria-live="polite"
-        >
-          @for (_ of [0, 1, 2, 3, 4]; track $index) {
-            <div class="proprietes-table-loading__row" aria-hidden="true"></div>
-          }
-        </div>
-      } @else {
-        <div class="proprietes-table-wrap">
-          <ubax-ui-data-table
-            class="proprietes-data-table"
-            [columns]="tableColumns"
-            [rows]="pagedRows()"
-            rowIdKey="id"
-          >
-            <ng-template ubaxDataTableEmpty>
-              <ubax-empty-state
-                icon="pi pi-check-circle"
-                title="File d'attente vide"
-                [description]="
-                  searchQuery()
-                    ? 'Aucun bien ne correspond à votre recherche.'
-                    : 'Aucun bien en attente de modération. Tout est à jour !'
-                "
+  } @else {
+    <div class="props-grid">
+      @for (property of filteredProperties(); track property.id) {
+        <button type="button" class="props-card" (click)="viewDetail(property)">
+          <!-- Photo + gradient -->
+          <div class="props-card__photo-wrap">
+            @if (getCoverPhotoUrl(property)) {
+              <img
+                [src]="getCoverPhotoUrl(property)"
+                [alt]="property.title"
+                class="props-card__photo"
+                loading="lazy"
               />
-            </ng-template>
+            } @else {
+              <div class="props-card__photo-placeholder">
+                <i class="pi pi-home"></i>
+              </div>
+            }
+            <div class="props-card__gradient"></div>
 
-            <ng-template ubaxDataTableCell="property" let-property>
-              <div class="proprietes-property-cell">
-                @if (getCoverPhotoUrl(property)) {
-                  <img
-                    [src]="getCoverPhotoUrl(property)"
-                    [alt]="property.title"
-                    class="proprietes-property-cell__photo"
-                  />
-                } @else {
-                  <div class="proprietes-property-cell__placeholder">
-                    <i class="pi pi-home"></i>
+            <!-- Badge transaction type -->
+            <span
+              class="props-card__transaction-badge"
+              [style.background]="getTransactionColor(property.transactionType)"
+            >
+              {{ getTransactionTypeLabel(property.transactionType) }}
+            </span>
+
+            <!-- Badge statut -->
+            <span
+              class="props-card__status-badge"
+              [style.background]="getStatusColor(property.status)"
+            >
+              {{ getStatusLabel(property.status) }}
+            </span>
+
+            <!-- Nom agence/propriétaire + prix -->
+            <div class="props-card__bottom-overlay">
+              @if (
+                property.agencyName || property.ownerName
+              ) {
+                <div class="props-card__owner-row">
+                  <div class="props-card__owner-avatar">
+                    @if (getOwnerLogoUrl(property); as logo) {
+                      <img [src]="logo" class="props-card__owner-avatar-img" alt="" />
+                    } @else {
+                      <i class="pi pi-building"></i>
+                    }
                   </div>
-                }
-                <div class="proprietes-property-cell__meta">
-                  <p class="proprietes-property-cell__title">
-                    {{ property.title ?? '—' }}
-                  </p>
-                  <p class="proprietes-property-cell__sub">
-                    {{ property.district ?? property.street ?? '' }}
-                  </p>
+                  <span class="props-card__owner-name">
+                    {{ property.agencyName ?? property.ownerName }}
+                  </span>
                 </div>
-              </div>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="type" let-property>
-              <span class="proprietes-type-chip">
-                {{ getPropertyTypeLabel(property.propertyType) }}
+              }
+              <span class="props-card__price">
+                {{ formatPrice(property.price, property.transactionType) }}
               </span>
-            </ng-template>
+            </div>
+          </div>
 
-            <ng-template ubaxDataTableCell="transaction" let-property>
-              <ubax-status-badge
-                [variant]="getTransactionBadge(property.transactionType)"
-              >
-                {{ getTransactionTypeLabel(property.transactionType) }}
-              </ubax-status-badge>
-            </ng-template>
+          <!-- Infos bas de carte -->
+          <div class="props-card__info">
+            <p class="props-card__title">{{ property.title ?? '—' }}</p>
+            <p class="props-card__location">
+              {{ property.city ?? '' }}
+              @if (property.district) {
+                , {{ property.district }}
+              }
+            </p>
 
-            <ng-template ubaxDataTableCell="city" let-property>
-              <span
-                class="proprietes-table__cell proprietes-table__cell--muted"
-              >
-                {{ property.city ?? '—' }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="price" let-property>
-              <span
-                class="proprietes-table__cell proprietes-table__cell--price"
-              >
-                {{ formatPrice(property.price) }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="owner" let-property>
-              <div class="proprietes-owner-cell">
-                @if (property.agencyName) {
-                  <div
-                    class="proprietes-owner-cell__avatar proprietes-owner-cell__avatar--agency"
-                  >
-                    <i class="pi pi-building"></i>
-                  </div>
-                  <div class="proprietes-owner-cell__meta">
-                    <p class="proprietes-owner-cell__name">
-                      {{ property.agencyName }}
-                    </p>
-                    <p class="proprietes-owner-cell__sub">Agence</p>
-                  </div>
-                } @else if (property.ownerName) {
-                  <div
-                    class="proprietes-owner-cell__avatar proprietes-owner-cell__avatar--owner"
-                  >
-                    <i class="pi pi-user"></i>
-                  </div>
-                  <div class="proprietes-owner-cell__meta">
-                    <p class="proprietes-owner-cell__name">
-                      {{ property.ownerName }}
-                    </p>
-                    <p class="proprietes-owner-cell__sub">Propriétaire</p>
-                  </div>
-                } @else {
-                  <span class="proprietes-table__cell--muted">—</span>
-                }
-              </div>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="submittedAt" let-property>
-              <span
-                class="proprietes-table__cell proprietes-table__cell--muted"
-              >
-                {{ property.createdAt | date: 'dd/MM/yyyy' }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="actions" let-property>
-              <div class="proprietes-actions">
-                <button
-                  type="button"
-                  class="proprietes-action-btn proprietes-action-btn--view"
-                  title="Examiner ce bien"
-                  (click)="viewDetail(property)"
-                >
-                  <i class="pi pi-eye"></i>
-                </button>
-              </div>
-            </ng-template>
-          </ubax-ui-data-table>
-        </div>
+            <!-- Caractéristiques -->
+            <div class="props-card__features">
+              @if (property.bedrooms) {
+                <span class="props-card__feature">
+                  <i class="pi pi-objects-column"></i>
+                  {{ property.bedrooms }} Chambres
+                </span>
+              }
+              @if (property.bathrooms) {
+                <span class="props-card__feature">
+                  <svg class="props-card__feature-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 12h16"/>
+                    <path d="M4 12V6a3 3 0 0 1 3-3 3 3 0 0 1 3 3v.5"/>
+                    <path d="M7 17v.01M10 19v.01M13 17v.01M16 19v.01"/>
+                  </svg>
+                  {{ property.bathrooms }} Salle de bains
+                </span>
+              }
+              @if (property.surfaceLiving) {
+                <span class="props-card__feature">
+                  <i class="pi pi-expand"></i>
+                  Surface {{ property.surfaceLiving }} m²
+                </span>
+              }
+            </div>
+          </div>
+        </button>
       }
+    </div>
+  }
 
-      @if (!loading() && totalPages() > 1) {
-        <footer class="proprietes-pagination">
-          <ubax-ui-pagination
-            [currentPage]="currentPage() + 1"
-            [totalPages]="totalPages()"
-            variant="members"
-            (pageChange)="onPageChange($event)"
-          />
-        </footer>
-      }
-    </section>
-  </ubax-section-card>
+  <!-- Footer : compteur + pagination -->
+  @if (!loading() && totalElements() > 0) {
+    <div class="props-footer">
+      <p class="props-footer__count">{{ getDisplayCount() }}</p>
+      <ubax-paginator
+        variant="white"
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        (currentPageChange)="onPageChange($event)"
+      />
+    </div>
+  }
 </div>

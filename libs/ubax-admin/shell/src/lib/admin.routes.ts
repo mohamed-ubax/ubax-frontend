@@ -49,6 +49,15 @@ export const adminRoutes: Route[] = [
             (m) => m.AgencesPageComponent,
           ),
       },
+      {
+        path: 'agences/:agencyId',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/agences/agency-detail-page.component').then(
+            (m) => m.AgencyDetailPageComponent,
+          ),
+      },
       // FE-408 — Membres d'une agence (lecture seule)
       {
         path: 'agences/:agencyId/membres',
@@ -67,6 +76,15 @@ export const adminRoutes: Route[] = [
         loadComponent: () =>
           import('./pages/hotels/hotels-page.component').then(
             (m) => m.HotelsPageComponent,
+          ),
+      },
+      {
+        path: 'hotels/:hotelId',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/hotels/hotel-detail-page.component').then(
+            (m) => m.HotelDetailPageComponent,
           ),
       },
       // FE-409 — Membres d'un hôtel (lecture seule)

@@ -295,7 +295,7 @@
     [visible]="editorOpen()"
     (visibleChange)="$event ? null : closeEditorModal()"
     [modal]="true"
-    [closable]="!saving()"
+    [closable]="false"
     [dismissableMask]="!saving()"
     [draggable]="false"
     [resizable]="false"
@@ -303,7 +303,7 @@
     appendTo="body"
     styleClass="code-lists-dialog"
   >
-    <ng-template pTemplate="header">
+    <div class="code-lists-dialog__surface">
       <div class="code-lists-dialog__header">
         <div>
           <p class="editor-panel__eyebrow">
@@ -325,159 +325,170 @@
             {{ sourceLabel(selectedEntry) }}
           </ubax-status-badge>
         }
+
+        <button
+          type="button"
+          class="code-lists-dialog__close"
+          [disabled]="saving()"
+          aria-label="Fermer"
+          (click)="closeEditorModal()"
+        >
+          <i class="pi pi-times" aria-hidden="true"></i>
+        </button>
       </div>
-    </ng-template>
 
-    <form
-      class="editor-modal editor-form"
-      [formGroup]="form"
-      (ngSubmit)="save()"
-    >
-      <section class="editor-modal__intro">
-        <p class="editor-panel__subtitle">
-          Les champs `type` et `value` sont normalisés en majuscules à
-          l’enregistrement pour garder des codes homogènes entre les
-          environnements.
-        </p>
+      <form
+        class="editor-modal editor-form"
+        [formGroup]="form"
+        (ngSubmit)="save()"
+      >
+        <section class="editor-modal__intro">
+          <p class="editor-panel__subtitle">
+            Les champs `type` et `value` sont normalisés en majuscules à
+            l’enregistrement pour garder des codes homogènes entre les
+            environnements.
+          </p>
 
-        @if (selectedEntry(); as selectedEntry) {
-          <section class="editor-insight editor-insight--dialog">
-            <div class="editor-insight__row">
-              <span>ID</span>
-              <strong>{{ selectedEntry.id || 'Non retourné' }}</strong>
-            </div>
-            <div class="editor-insight__row">
-              <span>Type</span>
-              <strong>{{ selectedEntry.type || '—' }}</strong>
-            </div>
-            <div class="editor-insight__row">
-              <span>Valeur</span>
-              <strong>{{ selectedEntry.value || '—' }}</strong>
-            </div>
-          </section>
-        }
-      </section>
+          @if (selectedEntry(); as selectedEntry) {
+            <section class="editor-insight editor-insight--dialog">
+              <div class="editor-insight__row">
+                <span>ID</span>
+                <strong>{{ selectedEntry.id || 'Non retourné' }}</strong>
+              </div>
+              <div class="editor-insight__row">
+                <span>Type</span>
+                <strong>{{ selectedEntry.type || '—' }}</strong>
+              </div>
+              <div class="editor-insight__row">
+                <span>Valeur</span>
+                <strong>{{ selectedEntry.value || '—' }}</strong>
+              </div>
+            </section>
+          }
+        </section>
 
-      <div class="editor-form__grid">
-        <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -->
-        <label class="editor-field">
-          <span class="editor-field__label">Type</span>
-          @if (isCustomTypeSelected()) {
+        <div class="editor-form__grid">
+          <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -->
+          <label class="editor-field">
+            <span class="editor-field__label">Type</span>
+            @if (isCustomTypeSelected()) {
+              <input
+                type="text"
+                class="editor-field__control"
+                formControlName="type"
+                placeholder="Ex. : PROPERTY_TYPE"
+              />
+              <button
+                type="button"
+                class="editor-field__mode-btn"
+                (click)="switchToKnownTypeSelect()"
+              >
+                Revenir à la liste des types
+              </button>
+            } @else {
+              <p-select
+                [options]="typeSelectOptions()"
+                [ngModel]="selectedTypeOption()"
+                (ngModelChange)="onTypeOptionChange($event)"
+                [ngModelOptions]="{ standalone: true }"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Choisir un type"
+                appendTo="body"
+                panelStyleClass="code-lists-type-panel"
+                styleClass="ubax-select code-lists-type-select"
+              />
+            }
+
+            @if (isControlInvalid('type')) {
+              <span class="editor-field__error">Le type est requis.</span>
+            }
+          </label>
+
+          <label class="editor-field">
+            <span class="editor-field__label">Valeur</span>
             <input
               type="text"
               class="editor-field__control"
-              formControlName="type"
-              placeholder="Ex. : PROPERTY_TYPE"
+              formControlName="value"
+              placeholder="Ex. : CHALET"
             />
-            <button
-              type="button"
-              class="editor-field__mode-btn"
-              (click)="switchToKnownTypeSelect()"
+            @if (isControlInvalid('value')) {
+              <span class="editor-field__error">La valeur est requise.</span>
+            }
+          </label>
+        </div>
+
+        <p class="editor-form__helper">
+          Sélectionnez un type existant ou choisissez « Saisir un nouveau type
+          ».
+        </p>
+
+        <label class="editor-field editor-field--stacked">
+          <span class="editor-field__label">Description</span>
+          <textarea
+            class="editor-field__control editor-field__control--textarea"
+            formControlName="description"
+            rows="5"
+            placeholder="Ajoutez une description claire pour aider les équipes produit et ops."
+          ></textarea>
+          @if (isControlInvalid('description')) {
+            <span class="editor-field__error"
+              >La description est trop longue.</span
             >
-              Revenir à la liste des types
-            </button>
-          } @else {
-            <p-select
-              [options]="typeSelectOptions()"
-              [ngModel]="selectedTypeOption()"
-              (ngModelChange)="onTypeOptionChange($event)"
-              [ngModelOptions]="{ standalone: true }"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Choisir un type"
-              appendTo="body"
-              panelStyleClass="code-lists-type-panel"
-              styleClass="ubax-select code-lists-type-select"
-            />
-          }
-
-          @if (isControlInvalid('type')) {
-            <span class="editor-field__error">Le type est requis.</span>
           }
         </label>
 
-        <label class="editor-field">
-          <span class="editor-field__label">Valeur</span>
-          <input
-            type="text"
-            class="editor-field__control"
-            formControlName="value"
-            placeholder="Ex. : CHALET"
-          />
-          @if (isControlInvalid('value')) {
-            <span class="editor-field__error">La valeur est requise.</span>
-          }
-        </label>
-      </div>
-
-      <p class="editor-form__helper">
-        Sélectionnez un type existant ou choisissez « Saisir un nouveau type ».
-      </p>
-
-      <label class="editor-field editor-field--stacked">
-        <span class="editor-field__label">Description</span>
-        <textarea
-          class="editor-field__control editor-field__control--textarea"
-          formControlName="description"
-          rows="5"
-          placeholder="Ajoutez une description claire pour aider les équipes produit et ops."
-        ></textarea>
-        @if (isControlInvalid('description')) {
-          <span class="editor-field__error"
-            >La description est trop longue.</span
-          >
-        }
-      </label>
-
-      <label class="editor-toggle">
-        <input type="checkbox" formControlName="systemAssign" />
-        <span>
-          <strong>Entrée système</strong>
-          <small>
-            Utilisez cette option pour identifier une valeur réservée à la
-            plateforme.
-          </small>
-        </span>
-      </label>
-
-      <div class="editor-form__actions editor-form__actions--dialog">
-        <button
-          type="button"
-          class="editor-btn editor-btn--ghost"
-          [disabled]="saving()"
-          (click)="closeEditorModal()"
-        >
-          Fermer
-        </button>
-        <button
-          type="button"
-          class="editor-btn editor-btn--subtle"
-          [disabled]="saving()"
-          (click)="resetEditorForm()"
-        >
-          Réinitialiser
-        </button>
-        <button
-          type="submit"
-          class="editor-btn editor-btn--primary"
-          [disabled]="saving()"
-        >
-          <i
-            class="pi"
-            [class.pi-save]="!saving()"
-            [class.pi-spinner]="saving()"
-            [class.pi-spin]="saving()"
-            aria-hidden="true"
-          ></i>
+        <label class="editor-toggle">
+          <input type="checkbox" formControlName="systemAssign" />
           <span>
-            {{
-              editorMode() === 'edit'
-                ? 'Enregistrer les changements'
-                : 'Créer l’entrée'
-            }}
+            <strong>Entrée système</strong>
+            <small>
+              Utilisez cette option pour identifier une valeur réservée à la
+              plateforme.
+            </small>
           </span>
-        </button>
-      </div>
-    </form>
+        </label>
+
+        <div class="editor-form__actions editor-form__actions--dialog">
+          <button
+            type="button"
+            class="editor-btn editor-btn--ghost"
+            [disabled]="saving()"
+            (click)="closeEditorModal()"
+          >
+            Fermer
+          </button>
+          <button
+            type="button"
+            class="editor-btn editor-btn--subtle"
+            [disabled]="saving()"
+            (click)="resetEditorForm()"
+          >
+            Réinitialiser
+          </button>
+          <button
+            type="submit"
+            class="editor-btn editor-btn--primary"
+            [disabled]="saving()"
+          >
+            <i
+              class="pi"
+              [class.pi-save]="!saving()"
+              [class.pi-spinner]="saving()"
+              [class.pi-spin]="saving()"
+              aria-hidden="true"
+            ></i>
+            <span>
+              {{
+                editorMode() === 'edit'
+                  ? 'Enregistrer les changements'
+                  : 'Créer l’entrée'
+              }}
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
   </p-dialog>
 </section>

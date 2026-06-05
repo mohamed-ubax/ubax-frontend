@@ -2,46 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 2rem;
-
-  &__header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  &__eyebrow {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-brand-orange);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-  }
-
-  &__title-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  &__title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-brand-navy);
-    margin: 0;
-    font-family: 'Lexend', sans-serif;
-  }
-
-  &__count {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-neutral-500);
-    background: var(--color-neutral-200);
-    padding: 0.125rem 0.625rem;
-    border-radius: 9999px;
-  }
 }
 
 // KPI Grid — 5 colonnes
@@ -58,15 +18,16 @@
 .props-kpi-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.125rem;
   background: var(--color-surface-card);
-  border: 1px solid var(--color-neutral-300);
-  border-radius: 0.625rem;
-  padding: 1.25rem;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.375rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
   &__icon {
-    width: 68px;
-    height: 68px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -74,8 +35,15 @@
     flex-shrink: 0;
 
     i {
-      font-size: 1.5rem;
+      font-size: 1.375rem;
     }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
   }
 
   &__label {
@@ -84,22 +52,28 @@
     color: var(--color-brand-navy);
     margin: 0;
     font-family: 'Lexend', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__value {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.625rem;
+    font-weight: 700;
     color: var(--color-brand-navy);
-    margin: 0.25rem 0;
+    margin: 0;
     font-family: 'Lexend', sans-serif;
-    line-height: 1;
+    line-height: 1.1;
   }
 
   &__trend {
-    font-size: 0.625rem;
-    color: var(--color-success);
+    font-size: 0.6875rem;
+    color: var(--color-neutral-500);
     margin: 0;
     font-family: 'Lexend', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -118,51 +92,58 @@
 
   &__search-icon {
     position: absolute;
-    left: 1.125rem;
+    right: 1.25rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--color-neutral-500);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     pointer-events: none;
     z-index: 1;
   }
 
   &__search-input {
     width: 100%;
-    height: 55px;
-    padding: 0 1rem 0 2.75rem;
-    border: none;
-    border-radius: 27.5px;
-    background: var(--color-neutral-200);
+    height: 52px;
+    padding: 0 3rem 0 1.25rem;
+    border: 1.5px solid var(--color-neutral-300);
+    border-radius: 26px;
+    background: #ffffff;
     font-size: 0.9375rem;
     font-weight: 300;
     color: var(--color-brand-navy);
     font-family: 'Lexend', sans-serif;
     outline: none;
-    transition: box-shadow 0.18s ease;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease;
 
     &::placeholder {
-      color: #565656;
+      color: var(--color-neutral-500);
     }
 
     &:hover {
-      box-shadow: 0 14px 26px rgb(13 10 44 / 0.08);
+      border-color: var(--color-neutral-400);
     }
     &:focus {
-      box-shadow: inset 0 0 0 1px rgb(26 48 71 / 0.12);
+      border-color: var(--color-brand-navy);
+      box-shadow: 0 0 0 3px rgba(26, 48, 71, 0.08);
     }
   }
 
   // Override UiFormSelectComponent pour matcher le style pill
   &__select-field {
     flex-shrink: 0;
-    min-width: 180px;
+    min-width: 190px;
 
-    // Le composant utilise .form-select__trigger avec border-radius: 27.5px
-    // et background: var(--ubax-page-bg) — on surcharge pour matcher le contexte admin
-    :host ::ng-deep .form-select__trigger {
-      background: var(--color-neutral-200);
-      min-height: 55px;
+    ::ng-deep .form-select__trigger {
+      background: #ffffff !important;
+      border: 1.5px solid var(--color-neutral-300) !important;
+      min-height: 52px !important;
+      border-radius: 26px !important;
+
+      &:hover {
+        border-color: var(--color-neutral-400) !important;
+      }
     }
   }
 }
@@ -207,26 +188,27 @@
 // Carte propriété — fidèle au design Figma
 .props-card {
   position: relative;
-  height: 302px;
+  height: 320px;
   border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
   border: none;
   padding: 0;
-  background: transparent;
+  background: #ffffff;
   text-align: left;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(10, 20, 35, 0.18);
+    box-shadow: 0 14px 36px rgba(10, 20, 35, 0.16);
   }
 
   &__photo-wrap {
     position: absolute;
-    inset: 0 0 31.79% 0;
+    inset: 0 0 33% 0;
     border-radius: 20px 20px 0 0;
     overflow: hidden;
   }
@@ -270,10 +252,10 @@
     position: absolute;
     top: 13px;
     left: 14px;
-    padding: 0.2rem 0.625rem;
+    padding: 0.5rem;
     border-radius: 22.5px;
-    font-size: 0.625rem;
-    font-weight: 400;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: white;
     font-family: 'Lexend', sans-serif;
     z-index: 2;
@@ -283,10 +265,10 @@
     position: absolute;
     top: 13px;
     right: 13px;
-    padding: 0.2rem 0.625rem;
+    padding: 0.5rem;
     border-radius: 50px;
-    font-size: 0.625rem;
-    font-weight: 500;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: white;
     font-family: 'Lexend', sans-serif;
     z-index: 2;
@@ -294,10 +276,10 @@
 
   &__bottom-overlay {
     position: absolute;
-    bottom: 32%;
+    bottom: 0;
     left: 0;
     right: 0;
-    padding: 0 14px;
+    padding: 0.5rem 0.875rem 0.75rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -307,59 +289,74 @@
   &__owner-row {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: 0.4rem;
+    min-width: 0;
   }
 
   &__owner-avatar {
-    width: 21px;
-    height: 21px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.21);
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden;
 
     i {
-      font-size: 0.5rem;
+      font-size: 0.6875rem;
       color: white;
+    }
+
+    &-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
     }
   }
 
   &__owner-name {
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     color: white;
     font-family: 'Lexend', sans-serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px;
+    max-width: 130px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
   &__price {
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: white;
     font-family: 'Lexend', sans-serif;
     white-space: nowrap;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.21);
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
   }
 
   // Zone blanche du bas
   &__info {
     position: absolute;
-    inset: 68.21% 0 0 0;
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(2px);
-    border-radius: 0 0 15px 15px;
-    padding: 0.625rem 0.875rem 0.5rem;
+    inset: 67% 0 0 0;
+    background: #ffffff;
+    border-radius: 0 0 20px 20px;
+    padding: 0.75rem 0.875rem 0.625rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.3rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   &__title {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     color: #1c1c1c;
     margin: 0;
@@ -370,23 +367,14 @@
   }
 
   &__location {
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 300;
-    color: #1c1c1c;
+    color: var(--color-neutral-500);
     margin: 0;
     font-family: 'Lexend', sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    i {
-      font-size: 0.5rem;
-      color: var(--color-brand-orange);
-      flex-shrink: 0;
-    }
   }
 
   &__features {
@@ -400,16 +388,23 @@
   &__feature {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 0.625rem;
+    gap: 0.3rem;
+    font-size: 0.6875rem;
     color: #1c1c1c;
     font-family: 'Lexend', sans-serif;
     white-space: nowrap;
 
     i {
-      font-size: 0.625rem;
-      color: var(--color-neutral-500);
+      font-size: 0.75rem;
+      color: var(--color-brand-orange);
     }
+  }
+
+  &__feature-svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
+    flex-shrink: 0;
+    color: var(--color-brand-orange);
   }
 }
 
@@ -420,7 +415,6 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  padding-top: 0.5rem;
 
   &__count {
     font-size: 0.9375rem;
