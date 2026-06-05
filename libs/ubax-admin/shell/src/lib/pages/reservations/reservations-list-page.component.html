@@ -1,15 +1,19 @@
 <div class="ar-page">
-
   <!-- ── Header ─────────────────────────────────────────────────── -->
   <header class="ar-header">
-    <h1 class="ar-header__title">Toutes les reservations</h1>
     <div class="ar-header__toolbar">
-      <button type="button" class="ar-date-chip">
+      <button type="button" class="ar-date-chip" (click)="toggleDateOverlay($event)">
         <i class="pi pi-calendar"></i>
         <span>{{ currentDateLabel() }}</span>
+        @if (dateRange()) {
+          <i
+            class="pi pi-times ar-date-chip__clear"
+            (click)="clearDateRange(); $event.stopPropagation()"
+          ></i>
+        }
       </button>
       <div class="ar-header__spacer"></div>
-      <button type="button" class="ar-export-btn">
+      <button type="button" class="ar-export-btn" (click)="exportToCsv()">
         <i class="pi pi-upload"></i>
         <span>Exporter</span>
       </button>
@@ -46,12 +50,22 @@
       }
     </div>
     <div class="ar-filter-selects">
-      <button type="button" class="ar-select">
-        <span>Tous les types</span>
+      <button
+        type="button"
+        class="ar-select"
+        [class.ar-select--active]="selectedType() !== null"
+        (click)="toggleTypeDropdown($event)"
+      >
+        <span>{{ typeLabel() }}</span>
         <i class="pi pi-chevron-down"></i>
       </button>
-      <button type="button" class="ar-select">
-        <span>Toutes les propriétés</span>
+      <button
+        type="button"
+        class="ar-select"
+        [class.ar-select--active]="selectedProperty() !== null"
+        (click)="togglePropertyDropdown($event)"
+      >
+        <span>{{ propertyLabel() }}</span>
         <i class="pi pi-chevron-down"></i>
       </button>
     </div>
@@ -85,8 +99,11 @@
       }
 
       @default {
-        <div class="ar-table" role="table" aria-label="Tableau des réservations">
-
+        <div
+          class="ar-table"
+          role="table"
+          aria-label="Tableau des réservations"
+        >
           <!-- Head -->
           <div class="ar-table__head" role="rowgroup">
             <div class="ar-table__row ar-table__row--head" role="row">
@@ -105,31 +122,42 @@
           <div class="ar-table__body" role="rowgroup">
             @for (reservation of filteredReservations(); track reservation.id) {
               <div class="ar-table__row" role="row">
-
                 <!-- Réservations -->
                 <div class="ar-col-res">
                   <div class="ar-col-res__thumb">
                     <i class="pi pi-building"></i>
                   </div>
                   <div class="ar-col-res__info">
-                    <span class="ar-col-res__code">{{ reservationCode(reservation.id) }}</span>
+                    <span class="ar-col-res__code">{{
+                      reservationCode(reservation.id)
+                    }}</span>
                     <span class="ar-col-res__badge">Agence immobilière</span>
                   </div>
                 </div>
 
                 <!-- Client -->
                 <div class="ar-col-client">
-                  <div class="ar-avatar">{{ clientInitials(reservation.clientFullName) }}</div>
+                  <div class="ar-avatar">
+                    {{ clientInitials(reservation.clientFullName) }}
+                  </div>
                   <div class="ar-col-client__info">
-                    <span class="ar-col-client__name">{{ reservation.clientFullName ?? '—' }}</span>
-                    <span class="ar-col-client__sub">{{ reservation.clientEmail ?? '—' }}</span>
+                    <span class="ar-col-client__name">{{
+                      reservation.clientFullName ?? '—'
+                    }}</span>
+                    <span class="ar-col-client__sub">{{
+                      reservation.clientEmail ?? '—'
+                    }}</span>
                   </div>
                 </div>
 
                 <!-- Propriété -->
                 <div class="ar-col-property">
-                  <span class="ar-col-property__name">{{ reservation.propertyTitle ?? '—' }}</span>
-                  <span class="ar-col-property__city">{{ reservation.propertyCity ?? '—' }}</span>
+                  <span class="ar-col-property__name">{{
+                    reservation.propertyTitle ?? '—'
+                  }}</span>
+                  <span class="ar-col-property__city">{{
+                    reservation.propertyCity ?? '—'
+                  }}</span>
                 </div>
 
                 <!-- Type -->
@@ -138,32 +166,49 @@
                 <!-- Date -->
                 <div class="ar-col-date">
                   <span class="ar-col-date__range">
-                    {{ formatDate(reservation.checkInDate) }}&nbsp;→&nbsp;{{ formatDate(reservation.checkOutDate) }}
+                    {{ formatDate(reservation.checkInDate) }}&nbsp;→&nbsp;{{
+                      formatDate(reservation.checkOutDate)
+                    }}
                   </span>
-                  <span class="ar-col-date__nights">{{ reservation.numberOfNights ?? 0 }} nuits</span>
+                  <span class="ar-col-date__nights"
+                    >{{ reservation.numberOfNights ?? 0 }} nuits</span
+                  >
                 </div>
 
                 <!-- Montant -->
                 <div class="ar-col-amount">
-                  <span class="ar-col-amount__value">{{ formatCurrency(reservation.totalAmount) }}</span>
+                  <span class="ar-col-amount__value">{{
+                    formatCurrency(reservation.totalAmount)
+                  }}</span>
                   <span class="ar-col-amount__sub">Paiement complet</span>
                 </div>
 
                 <!-- Statut -->
-                <span class="ar-status ar-status--{{ statusTone(reservation.status) }}">
+                <span
+                  class="ar-status ar-status--{{
+                    statusTone(reservation.status)
+                  }}"
+                >
                   {{ statusLabel(reservation.status) }}
                 </span>
 
                 <!-- Actions -->
                 <div class="ar-actions">
-                  <button type="button" class="ar-action-btn" aria-label="Voir le détail">
+                  <button
+                    type="button"
+                    class="ar-action-btn"
+                    aria-label="Voir le détail"
+                  >
                     <i class="pi pi-eye"></i>
                   </button>
-                  <button type="button" class="ar-action-btn" aria-label="Plus d'actions">
+                  <button
+                    type="button"
+                    class="ar-action-btn"
+                    aria-label="Plus d'actions"
+                  >
                     <i class="pi pi-ellipsis-v"></i>
                   </button>
                 </div>
-
               </div>
             }
           </div>
@@ -171,16 +216,83 @@
 
         <footer class="ar-pagination-bar">
           <span class="ar-pagination-info">{{ paginationLabel() }}</span>
-          @if (store.totalPages() > 1) {
-            <ubax-paginator
-              [(currentPage)]="currentPage"
-              [totalPages]="store.totalPages()"
-              (currentPageChange)="onPageChange($event)"
-            />
-          }
+          <ubax-paginator
+            [(currentPage)]="currentPage"
+            [totalPages]="store.totalPages() || 1"
+            (currentPageChange)="onPageChange($event)"
+          />
         </footer>
       }
     }
   </div>
-
 </div>
+
+<!-- ── Overlay Backdrop ───────────────────────────────────────── -->
+@if (typeDropdownOpen() || propertyDropdownOpen() || dateOverlayOpen()) {
+  <div class="ar-overlay-backdrop" (click)="closeAllOverlays()"></div>
+}
+
+<!-- ── Type Dropdown ──────────────────────────────────────────── -->
+@if (typeDropdownOpen()) {
+  <div
+    class="ar-dropdown-panel"
+    [style.top.px]="typeDropdownTop()"
+    [style.left.px]="typeDropdownLeft()"
+  >
+    @for (opt of TYPE_OPTIONS; track opt.value) {
+      <button
+        type="button"
+        class="ar-dropdown-option"
+        [class.ar-dropdown-option--active]="selectedType() === opt.value"
+        (click)="selectType(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    }
+  </div>
+}
+
+<!-- ── Property Dropdown ──────────────────────────────────────── -->
+@if (propertyDropdownOpen()) {
+  <div
+    class="ar-dropdown-panel ar-dropdown-panel--scrollable"
+    [style.top.px]="propertyDropdownTop()"
+    [style.left.px]="propertyDropdownLeft()"
+  >
+    @for (opt of propertyOptions(); track opt.value) {
+      <button
+        type="button"
+        class="ar-dropdown-option"
+        [class.ar-dropdown-option--active]="selectedProperty() === opt.value"
+        (click)="selectProperty(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    }
+  </div>
+}
+
+<!-- ── Date Overlay ───────────────────────────────────────────── -->
+@if (dateOverlayOpen()) {
+  <div
+    class="ar-date-overlay"
+    [style.top.px]="dateOverlayTop()"
+    [style.left.px]="dateOverlayLeft()"
+  >
+    <p-datepicker
+      [ngModel]="datePickerModel"
+      (ngModelChange)="datePickerModel = $event"
+      selectionMode="range"
+      [inline]="true"
+      dateFormat="dd/mm/yy"
+    />
+    <div class="ar-date-overlay__footer">
+      <button type="button" class="ar-date-clear-btn" (click)="clearDateRange()">
+        Effacer
+      </button>
+      <button type="button" class="ar-date-apply-btn" (click)="applyDateRange()">
+        Appliquer
+      </button>
+    </div>
+  </div>
+}

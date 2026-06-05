@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -6,6 +6,9 @@
   OnInit,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DatePickerModule } from 'primeng/datepicker';
 import { UbaxPaginatorComponent } from '@ubax-workspace/shared-ui';
 import {
   ADMIN_RESERVATION_STATUSES,
@@ -45,17 +48,57 @@ interface KpiCard {
 @Component({
   selector: 'ubax-admin-reservations-list-page',
   standalone: true,
-  imports: [UbaxPaginatorComponent],
+  imports: [UbaxPaginatorComponent, FormsModule, DatePickerModule],
   templateUrl: './reservations-list-page.component.html',
   styleUrl: './reservations-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReservationsListPageComponent implements OnInit {
   protected readonly store = inject(AdminReservationsStore);
+  private readonly doc = inject(DOCUMENT);
 
   protected readonly searchTerm = signal('');
   protected readonly currentPage = signal(1);
   protected readonly selectedFilter = signal<ReservationFilter>('ALL');
+  protected readonly selectedType = signal<string | null>(null);
+  protected readonly selectedProperty = signal<string | null>(null);
+  protected readonly dateRange = signal<Date[] | null>(null);
+
+  // Overlay states (fixed-position overlay pattern)
+  protected readonly typeDropdownOpen = signal(false);
+  protected readonly typeDropdownTop = signal(0);
+  protected readonly typeDropdownLeft = signal(0);
+
+  protected readonly propertyDropdownOpen = signal(false);
+  protected readonly propertyDropdownTop = signal(0);
+  protected readonly propertyDropdownLeft = signal(0);
+
+  protected readonly dateOverlayOpen = signal(false);
+  protected readonly dateOverlayTop = signal(0);
+  protected readonly dateOverlayLeft = signal(0);
+
+  protected datePickerModel: Date[] | null = null;
+
+  protected readonly TYPE_OPTIONS: { label: string; value: string | null }[] = [
+    { label: 'Tous les types', value: null },
+    { label: 'Location', value: 'Location' },
+    { label: 'Hôtel', value: 'Hôtel' },
+    { label: 'Immobilier', value: 'Immobilier' },
+  ];
+
+  protected readonly propertyOptions = computed(() => {
+    const seen = new Set<string>();
+    const opts: { label: string; value: string | null }[] = [
+      { label: 'Toutes les propriétés', value: null },
+    ];
+    for (const r of this.store.reservations()) {
+      if (r.propertyTitle && !seen.has(r.propertyTitle)) {
+        seen.add(r.propertyTitle);
+        opts.push({ label: r.propertyTitle, value: r.propertyTitle });
+      }
+    }
+    return opts;
+  });
 
   protected readonly statusTabs = computed(() => {
     const counts = this.store.statusCounts();
@@ -137,23 +180,40 @@ export class ReservationsListPageComponent implements OnInit {
 
   protected readonly filteredReservations = computed(() => {
     const query = this.normalizeText(this.searchTerm());
+    const property = this.selectedProperty();
+    const range = this.dateRange();
 
     return this.store.reservations().filter((reservation) => {
-      if (!query) return true;
+      if (query) {
+        const haystack = this.normalizeText(
+          [
+            reservation.propertyTitle,
+            reservation.propertyCity,
+            reservation.clientFullName,
+            reservation.clientEmail,
+            reservation.status,
+          ]
+            .filter(Boolean)
+            .join(' '),
+        );
+        if (!haystack.includes(query)) return false;
+      }
 
-      const haystack = this.normalizeText(
-        [
-          reservation.propertyTitle,
-          reservation.propertyCity,
-          reservation.clientFullName,
-          reservation.clientEmail,
-          reservation.status,
-        ]
-          .filter(Boolean)
-          .join(' '),
-      );
+      if (property && reservation.propertyTitle !== property) return false;
 
-      return haystack.includes(query);
+      if (range && range.length === 2 && range[0] && range[1]) {
+        const checkIn = reservation.checkInDate
+          ? new Date(reservation.checkInDate)
+          : null;
+        if (!checkIn) return false;
+        const start = new Date(range[0]);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(range[1]);
+        end.setHours(23, 59, 59, 999);
+        if (checkIn < start || checkIn > end) return false;
+      }
+
+      return true;
     });
   });
 
@@ -194,6 +254,137 @@ export class ReservationsListPageComponent implements OnInit {
     this.loadStatusCounts();
   }
 
+  // ── Dropdowns ────────────────────────────────────────────────────────────────
+
+  protected typeLabel(): string {
+    return this.selectedType() ?? 'Tous les types';
+  }
+
+  protected propertyLabel(): string {
+    return this.selectedProperty() ?? 'Toutes les propriétés';
+  }
+
+  protected toggleTypeDropdown(event: MouseEvent): void {
+    const btn = event.currentTarget as HTMLElement;
+    const rect = btn.getBoundingClientRect();
+    if (this.typeDropdownOpen()) {
+      this.typeDropdownOpen.set(false);
+      return;
+    }
+    this.propertyDropdownOpen.set(false);
+    this.dateOverlayOpen.set(false);
+    this.typeDropdownTop.set(rect.bottom + 6);
+    this.typeDropdownLeft.set(rect.left);
+    this.typeDropdownOpen.set(true);
+  }
+
+  protected togglePropertyDropdown(event: MouseEvent): void {
+    const btn = event.currentTarget as HTMLElement;
+    const rect = btn.getBoundingClientRect();
+    if (this.propertyDropdownOpen()) {
+      this.propertyDropdownOpen.set(false);
+      return;
+    }
+    this.typeDropdownOpen.set(false);
+    this.dateOverlayOpen.set(false);
+    this.propertyDropdownTop.set(rect.bottom + 6);
+    this.propertyDropdownLeft.set(rect.left);
+    this.propertyDropdownOpen.set(true);
+  }
+
+  protected selectType(value: string | null): void {
+    this.selectedType.set(value);
+    this.typeDropdownOpen.set(false);
+  }
+
+  protected selectProperty(value: string | null): void {
+    this.selectedProperty.set(value);
+    this.propertyDropdownOpen.set(false);
+  }
+
+  // ── Date overlay ─────────────────────────────────────────────────────────────
+
+  protected toggleDateOverlay(event: MouseEvent): void {
+    const btn = event.currentTarget as HTMLElement;
+    const rect = btn.getBoundingClientRect();
+    if (this.dateOverlayOpen()) {
+      this.dateOverlayOpen.set(false);
+      return;
+    }
+    this.typeDropdownOpen.set(false);
+    this.propertyDropdownOpen.set(false);
+    this.dateOverlayTop.set(rect.bottom + 6);
+    this.dateOverlayLeft.set(rect.left);
+    this.dateOverlayOpen.set(true);
+  }
+
+  protected applyDateRange(): void {
+    const model = this.datePickerModel;
+    if (Array.isArray(model) && model.length === 2 && model[0] && model[1]) {
+      this.dateRange.set([model[0], model[1]]);
+    }
+    this.dateOverlayOpen.set(false);
+  }
+
+  protected clearDateRange(): void {
+    this.dateRange.set(null);
+    this.datePickerModel = null;
+    this.dateOverlayOpen.set(false);
+  }
+
+  protected closeAllOverlays(): void {
+    this.typeDropdownOpen.set(false);
+    this.propertyDropdownOpen.set(false);
+    this.dateOverlayOpen.set(false);
+  }
+
+  // ── Export ───────────────────────────────────────────────────────────────────
+
+  protected exportToCsv(): void {
+    const headers = [
+      'Code',
+      'Client',
+      'Email',
+      'Propriété',
+      'Ville',
+      'Type',
+      'Check-in',
+      'Check-out',
+      'Nuits',
+      'Montant (FCFA)',
+      'Statut',
+    ];
+    const rows = this.filteredReservations().map((r) => [
+      this.reservationCode(r.id),
+      r.clientFullName ?? '',
+      r.clientEmail ?? '',
+      r.propertyTitle ?? '',
+      r.propertyCity ?? '',
+      'Location',
+      this.formatDate(r.checkInDate),
+      this.formatDate(r.checkOutDate),
+      r.numberOfNights ?? 0,
+      r.totalAmount ?? 0,
+      this.statusLabel(r.status),
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','),
+      )
+      .join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = this.doc.createElement('a');
+    a.href = url;
+    a.download = `reservations-${new Date().toISOString().split('T')[0]}.csv`;
+    this.doc.body.appendChild(a);
+    a.click();
+    this.doc.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Display helpers ──────────────────────────────────────────────────────────
+
   protected statusLabel(status: AdminReservationStatus): string {
     return STATUS_LABELS[status];
   }
@@ -216,6 +407,15 @@ export class ReservationsListPageComponent implements OnInit {
   }
 
   protected currentDateLabel(): string {
+    const range = this.dateRange();
+    if (range && range.length === 2 && range[0] && range[1]) {
+      const fmt = (d: Date) =>
+        new Intl.DateTimeFormat('fr-FR', {
+          day: '2-digit',
+          month: 'short',
+        }).format(d);
+      return `${fmt(range[0])} — ${fmt(range[1])}`;
+    }
     return new Intl.DateTimeFormat('fr-FR', {
       day: '2-digit',
       month: 'long',
