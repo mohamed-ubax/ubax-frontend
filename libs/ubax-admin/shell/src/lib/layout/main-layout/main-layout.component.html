@@ -298,22 +298,6 @@
         <p class="admin-header__page-title">{{ currentPageTitle() }}</p>
       </div>
       <div class="admin-header__actions">
-        <div class="admin-header__date-picker">
-          <p-datepicker
-            [ngModel]="selectedRange()"
-            (ngModelChange)="selectedRange.set($event)"
-            selectionMode="range"
-            [readonlyInput]="true"
-            [showIcon]="true"
-            iconDisplay="input"
-            appendTo="body"
-            dateFormat="dd M yy"
-            [inputStyleClass]="'admin-header__date-input'"
-            panelStyleClass="admin-header__date-panel"
-            placeholder="Sélectionner une période"
-          />
-        </div>
-
         <button
           type="button"
           class="admin-header__notif"

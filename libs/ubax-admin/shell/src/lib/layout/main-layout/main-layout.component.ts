@@ -6,7 +6,6 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   NavigationEnd,
@@ -15,7 +14,6 @@ import {
   RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
-import { DatePickerModule } from 'primeng/datepicker';
 import { AuthStore } from '@ubax-workspace/ubax-web-data-access/auth-store';
 import {
   AdminAgenciesStore,
@@ -32,11 +30,9 @@ import { filter, map, startWith } from 'rxjs/operators';
   selector: 'ubax-admin-main-layout',
   standalone: true,
   imports: [
-    FormsModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    DatePickerModule,
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
@@ -71,10 +67,6 @@ export class MainLayoutComponent implements OnInit {
     this.resolveCurrentPageTitle(this.currentUrl()),
   );
   protected readonly avatarUrl = computed(() => this.user()?.avatar ?? null);
-
-  protected readonly selectedRange = signal<Date[] | null>(
-    this.createCurrentWeekRange(),
-  );
 
   protected readonly proprietesExpanded = signal(false);
   protected readonly hotelsExpanded = signal(true);
@@ -147,25 +139,6 @@ export class MainLayoutComponent implements OnInit {
 
   protected dismissNotification(notification: AdminNotification): void {
     this.notificationService.dismiss(notification.id);
-  }
-
-  protected formatRangeDisplay(range: Date[] | null): string {
-    if (!range?.length) {
-      return '';
-    }
-
-    const [start, end] = range;
-    if (!start || !end) {
-      return '';
-    }
-
-    const formatter = new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-
-    return `${formatter.format(start)} - ${formatter.format(end)}`;
   }
 
   protected logout(): void {
@@ -265,21 +238,6 @@ export class MainLayoutComponent implements OnInit {
     }
 
     return 'Toutes les agences';
-  }
-
-  private createCurrentWeekRange(): Date[] {
-    const today = new Date();
-    const start = new Date(today);
-    const day = start.getDay();
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-    start.setDate(start.getDate() + diffToMonday);
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    end.setHours(23, 59, 59, 999);
-
-    return [start, end];
   }
 
   private resolveHotelStatus(hotel: {
