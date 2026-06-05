@@ -252,10 +252,10 @@
     position: absolute;
     top: 13px;
     left: 14px;
-    padding: 0.2rem 0.625rem;
+    padding: 0.5rem;
     border-radius: 22.5px;
-    font-size: 0.625rem;
-    font-weight: 400;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: white;
     font-family: 'Lexend', sans-serif;
     z-index: 2;
@@ -265,10 +265,10 @@
     position: absolute;
     top: 13px;
     right: 13px;
-    padding: 0.2rem 0.625rem;
+    padding: 0.5rem;
     border-radius: 50px;
-    font-size: 0.625rem;
-    font-weight: 500;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: white;
     font-family: 'Lexend', sans-serif;
     z-index: 2;
@@ -331,13 +331,15 @@
   }
 
   &__price {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: white;
     font-family: 'Lexend', sans-serif;
     white-space: nowrap;
     flex-shrink: 0;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.21);
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
   }
 
   // Zone blanche du bas
@@ -354,7 +356,7 @@
   }
 
   &__title {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     color: #1c1c1c;
     margin: 0;
@@ -365,7 +367,7 @@
   }
 
   &__location {
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 300;
     color: var(--color-neutral-500);
     margin: 0;
@@ -387,20 +389,20 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     color: #1c1c1c;
     font-family: 'Lexend', sans-serif;
     white-space: nowrap;
 
     i {
-      font-size: 0.6875rem;
+      font-size: 0.75rem;
       color: var(--color-brand-orange);
     }
   }
 
   &__feature-svg {
-    width: 0.75rem;
-    height: 0.75rem;
+    width: 0.8125rem;
+    height: 0.8125rem;
     flex-shrink: 0;
     color: var(--color-brand-orange);
   }
