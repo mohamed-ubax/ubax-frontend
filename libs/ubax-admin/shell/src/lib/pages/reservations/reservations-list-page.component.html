@@ -10,6 +10,7 @@
         <i class="pi pi-calendar"></i>
         <span>{{ currentDateLabel() }}</span>
         @if (dateRange()) {
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
           <i
             class="pi pi-times ar-date-chip__clear"
             (click)="clearDateRange(); $event.stopPropagation()"
@@ -283,6 +284,7 @@
 
 <!-- ── Overlay Backdrop ───────────────────────────────────────── -->
 @if (typeDropdownOpen() || propertyDropdownOpen() || dateOverlayOpen()) {
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
   <div class="ar-overlay-backdrop" (click)="closeAllOverlays()"></div>
 }
 

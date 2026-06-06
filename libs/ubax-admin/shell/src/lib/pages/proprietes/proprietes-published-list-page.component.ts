@@ -139,21 +139,6 @@ function formatCount(value: number): string {
   return new Intl.NumberFormat('fr-FR').format(value);
 }
 
-function formatAveragePrice(properties: readonly PropertyResponse[]): string {
-  const prices = properties
-    .map((property) => property.price ?? 0)
-    .filter((price) => price > 0);
-
-  if (prices.length === 0) {
-    return '—';
-  }
-
-  const average = prices.reduce((sum, price) => sum + price, 0) / prices.length;
-
-  return `${new Intl.NumberFormat('fr-FR', {
-    maximumFractionDigits: 0,
-  }).format(average)} FCFA`;
-}
 
 // Options pour les selects
 @Component({
@@ -200,8 +185,6 @@ export class ProprietesPublishedListPageComponent {
     const totalPartners = this.partnerIdFilter()
       ? 1
       : this.partnerSelectOptions().length;
-    const averagePrice = formatAveragePrice(properties);
-
     if (scope === 'agencies') {
       const saleCount = properties.filter(
         (property) => property.transactionType === 'SALE',

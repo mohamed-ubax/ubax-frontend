@@ -86,7 +86,7 @@
                 <span class="res-value">—</span>
                 <span class="res-label">Durée du séjour :</span>
                 <span class="res-value">
-                  {{ r.numberOfNights != null ? r.numberOfNights + ' nuits' : '—' }}
+                  {{ r.numberOfNights !== null ? r.numberOfNights + ' nuits' : '—' }}
                 </span>
 
                 <span class="res-label">Plan Tarifaire :</span>
@@ -96,7 +96,7 @@
 
                 <span class="res-label">Nombre de personnes :</span>
                 <span class="res-value">
-                  {{ r.guestCount != null ? r.guestCount + ' voyageur(s)' : '—' }}
+                  {{ r.guestCount !== null ? r.guestCount + ' voyageur(s)' : '—' }}
                 </span>
                 <span class="res-label">Paiement :</span>
                 <span class="res-value" [ngClass]="paymentStatusClass(r.status)">
@@ -172,7 +172,7 @@
                 </div>
                 <div class="res-cost-row">
                   <span>Nombre de nuits</span>
-                  <span>{{ r.numberOfNights != null ? r.numberOfNights + ' Nuits' : '—' }}</span>
+                  <span>{{ r.numberOfNights !== null ? r.numberOfNights + ' Nuits' : '—' }}</span>
                 </div>
                 <div class="res-cost-row">
                   <span>Sous total :</span>
