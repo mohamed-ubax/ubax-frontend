@@ -105,6 +105,7 @@
             type="line"
             [data]="revenueChartData()"
             [options]="revenueChartOptions"
+            height="184"
           />
         </div>
       </article>
@@ -130,6 +131,8 @@
               type="doughnut"
               [data]="reservationTypeData()"
               [options]="reservationTypeOptions"
+              width="136"
+              height="136"
             />
             <div class="dashboard-donut-wrap__center">
               {{ reservationTypeTotal() }}
@@ -279,6 +282,22 @@
       </article>
 
       <article class="dashboard-card dashboard-card--map">
+        <header class="dashboard-card__header dashboard-card__header--map">
+          <h2 class="dashboard-card__title">Aperçu géographique</h2>
+          <div class="dashboard-map__legend-items" aria-hidden="true">
+            <span class="dashboard-map__legend-item">
+              <i class="dashboard-map__legend-dot"></i>
+              Hotels
+            </span>
+            <span class="dashboard-map__legend-item">
+              <i
+                class="dashboard-map__legend-dot dashboard-map__legend-dot--agency"
+              ></i>
+              Agence immobilière
+            </span>
+          </div>
+        </header>
+
         <div class="dashboard-map">
           <iframe
             class="dashboard-map__frame"
@@ -286,22 +305,6 @@
             [src]="mapEmbedUrl()"
             loading="lazy"
           ></iframe>
-
-          <div class="dashboard-map__legend">
-            <h2 class="dashboard-map__title">Aperçu géographique</h2>
-            <div class="dashboard-map__legend-items">
-              <span class="dashboard-map__legend-item">
-                <i class="dashboard-map__legend-dot"></i>
-                Hotels
-              </span>
-              <span class="dashboard-map__legend-item">
-                <i
-                  class="dashboard-map__legend-dot dashboard-map__legend-dot--agency"
-                ></i>
-                Agence immobilière
-              </span>
-            </div>
-          </div>
 
           @for (marker of mapMarkers(); track $index) {
             <span
@@ -321,9 +324,7 @@
       </article>
 
       <article class="dashboard-card dashboard-card--revenue-categories">
-        <header class="dashboard-card__header">
-          <h2 class="dashboard-card__title">Revenus par catégorie</h2>
-
+        <div class="select-wrapper">
           <p-select
             class="dashboard-select dashboard-select--compact"
             [options]="rangeOptions"
@@ -333,6 +334,10 @@
             optionValue="value"
             appendTo="body"
           />
+        </div>
+
+        <header class="dashboard-card__header">
+          <h2 class="dashboard-card__title">Revenus par catégorie</h2>
         </header>
 
         <p class="dashboard-revenue-category__summary">

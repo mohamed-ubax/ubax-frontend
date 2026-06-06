@@ -6,6 +6,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -83,6 +84,7 @@ export class DashboardComponent implements OnInit {
   private readonly reservationsStore = inject(AdminReservationsStore);
   private readonly hotelsStore = inject(AdminHotelsStore);
   private readonly agenciesStore = inject(AdminAgenciesStore);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly notif = inject(NOTIFICATION_HANDLER);
 
   protected readonly loading = this.dashboardStore.loading;
@@ -246,10 +248,10 @@ export class DashboardComponent implements OnInit {
           label: 'Confirmées',
           data: confirmedRevenue,
           borderColor: '#2b7fff',
-          backgroundColor: 'rgba(43, 127, 255, 0.12)',
+          backgroundColor: 'rgba(43, 127, 255, 0.08)',
           borderWidth: 2.2,
-          pointRadius: 3,
-          pointHoverRadius: 4,
+          pointRadius: 2.5,
+          pointHoverRadius: 4.5,
           pointBackgroundColor: '#ffffff',
           pointBorderColor: '#2b7fff',
           pointBorderWidth: 2,
@@ -260,10 +262,10 @@ export class DashboardComponent implements OnInit {
           label: 'En attente',
           data: pendingRevenue,
           borderColor: '#e87d1e',
-          backgroundColor: 'rgba(232, 125, 30, 0.12)',
+          backgroundColor: 'rgba(232, 125, 30, 0.08)',
           borderWidth: 2.2,
-          pointRadius: 3,
-          pointHoverRadius: 4,
+          pointRadius: 2.5,
+          pointHoverRadius: 4.5,
           pointBackgroundColor: '#ffffff',
           pointBorderColor: '#e87d1e',
           pointBorderWidth: 2,
@@ -297,6 +299,8 @@ export class DashboardComponent implements OnInit {
         grid: { display: false },
         border: { display: false },
         ticks: {
+          maxRotation: 0,
+          minRotation: 0,
           color: '#979797',
           font: { family: 'Lexend', size: 12 },
         },
@@ -332,9 +336,9 @@ export class DashboardComponent implements OnInit {
             ],
             backgroundColor: ['#2b7fff', '#34c759', '#e87d1e'],
             borderColor: '#ffffff',
-            borderWidth: 5,
-            hoverOffset: 0,
-            spacing: 2,
+            borderWidth: 4,
+            hoverOffset: 1,
+            spacing: 0,
           },
         ],
       };
@@ -344,8 +348,11 @@ export class DashboardComponent implements OnInit {
   protected readonly reservationTypeOptions: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '68%',
+    cutout: '72%',
     rotation: -90,
+    layout: {
+      padding: 0,
+    },
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -490,9 +497,10 @@ export class DashboardComponent implements OnInit {
     }));
   });
 
-  protected readonly mapEmbedUrl = computed(() => {
+  protected readonly mapEmbedUrl = computed<SafeResourceUrl>(() => {
     const bounds = this.mapBounds();
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&layer=mapnik`;
+    const url = `https://www.openstreetmap.org/export/embed.html?bbox=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&layer=mapnik`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   });
 
   protected readonly hasMapPoints = computed(
