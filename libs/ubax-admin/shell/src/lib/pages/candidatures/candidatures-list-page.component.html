@@ -1,169 +1,192 @@
 <div class="candidatures-page">
-  <!-- En-tête -->
-  <div class="candidatures-page__header">
-    <div class="candidatures-page__title-block">
-      <p class="candidatures-page__eyebrow">Back-office UBAX</p>
-      <div class="candidatures-page__title-row">
-        <h1 class="candidatures-page__title">Demandes partenaires</h1>
-        <span class="candidatures-page__count"
-          >{{ totalCount() }} candidature(s)</span
-        >
-      </div>
-      <p class="candidatures-page__subtitle">
-        Gérez les candidatures des agences et hôtels souhaitant rejoindre la
-        plateforme UBAX.
-      </p>
-    </div>
-  </div>
+  <!-- KPI grid — 4 indicateurs, style agences/hôtels -->
+  <section class="candidatures-kpi-grid" aria-label="Indicateurs candidatures">
+    @for (card of kpiCards(); track card.label; let cardIndex = $index) {
+      <ubax-kpi-card
+        [label]="card.label"
+        [value]="card.value"
+        [trend]="card.trend"
+        [trendPositive]="card.positive"
+      >
+        <i icon [class]="card.iconClass + ' ' + card.iconToneClass"></i>
 
-  <div class="candidatures-kpi-grid">
-    @for (card of kpiCards(); track card.label) {
-      <ubax-kpi-card [label]="card.label" [value]="card.value">
-        <i icon [class]="card.iconClass"></i>
+        <div graph [class]="card.graphWrapClass">
+          <svg [class]="card.graphClass" viewBox="0 0 82 30" fill="none">
+            <defs>
+              <linearGradient
+                [attr.id]="'candidaturesKpiStroke' + cardIndex"
+                x1="0"
+                y1="30"
+                x2="82"
+                y2="0"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop
+                  offset="0%"
+                  stop-opacity="0.72"
+                  [attr.stop-color]="card.gradientStart"
+                />
+                <stop offset="100%" [attr.stop-color]="card.gradientEnd" />
+              </linearGradient>
+
+              <linearGradient
+                [attr.id]="'candidaturesKpiArea' + cardIndex"
+                x1="41"
+                y1="6"
+                x2="41"
+                y2="30"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop
+                  offset="0%"
+                  stop-opacity="0.22"
+                  [attr.stop-color]="card.gradientEnd"
+                />
+                <stop
+                  offset="100%"
+                  stop-opacity="0"
+                  [attr.stop-color]="card.gradientEnd"
+                />
+              </linearGradient>
+            </defs>
+
+            <path
+              class="candidatures-kpi__graph-area"
+              d="M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5L81 30L1 30Z"
+              [attr.fill]="'url(#candidaturesKpiArea' + cardIndex + ')'"
+            />
+
+            <path
+              class="candidatures-kpi__graph-line"
+              d="M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5"
+              [attr.stroke]="'url(#candidaturesKpiStroke' + cardIndex + ')'"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
       </ubax-kpi-card>
     }
-  </div>
+  </section>
 
-  <!-- Carte principale -->
+  <!-- Section principale — même structure que la page agences -->
   <ubax-section-card bodyClass="p-0">
-    <ubax-search-filter-bar
-      class="candidatures-toolbar"
-      placeholder="Rechercher une candidature..."
-      [filters]="searchFilters"
-      (searchChange)="onSearchChange($event)"
-      (filterChange)="onFilterChange($event)"
-    />
+    <section class="candidatures-stage" aria-label="Liste des candidatures">
+      <header class="candidatures-stage__head">
+        <h2 class="candidatures-stage__title">{{ listTitle() }}</h2>
 
-    <section
-      class="candidatures-table-stage"
-      aria-label="Liste des candidatures"
-    >
+        <div class="candidatures-stage__actions">
+          <div class="candidatures-search">
+            <i class="pi pi-search"></i>
+            <input
+              type="search"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchChange($event)"
+              placeholder="Rechercher une candidature..."
+              aria-label="Rechercher une candidature"
+            />
+          </div>
+
+          <p-select
+            class="candidatures-status-select"
+            [options]="statusFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="onStatusFilterChange($event)"
+            appendTo="body"
+            panelStyleClass="candidatures-status-panel"
+          />
+        </div>
+      </header>
+
       @if (loading()) {
         <div
-          class="candidatures-table-loading"
+          class="candidatures-grid candidatures-grid--loading"
           aria-busy="true"
           aria-live="polite"
         >
-          @for (_ of [0, 1, 2, 3, 4]; track $index) {
+          @for (_ of [0, 1, 2, 3, 4, 5, 6, 7]; track $index) {
             <div
-              class="candidatures-table-loading__row"
+              class="candidatures-card candidatures-card--skeleton"
               aria-hidden="true"
             ></div>
           }
         </div>
+      } @else if (!pagedRows().length) {
+        <div class="candidatures-empty-wrap">
+          <ubax-empty-state
+            icon="pi pi-inbox"
+            title="Aucune candidature trouvée"
+            [description]="
+              searchQuery()
+                ? 'Aucune candidature ne correspond à votre recherche.'
+                : 'Aucune candidature partenaire enregistrée pour ce statut.'
+            "
+          />
+        </div>
       } @else {
-        <div class="candidatures-table-wrap">
-          <ubax-ui-data-table
-            class="candidatures-data-table"
-            [columns]="tableColumns"
-            [rows]="pagedRows()"
-            rowIdKey="id"
-          >
-            <ng-template ubaxDataTableEmpty>
-              <ubax-empty-state
-                icon="pi pi-inbox"
-                title="Aucune candidature trouvée"
-                [description]="
-                  searchQuery()
-                    ? 'Aucune candidature ne correspond à votre recherche.'
-                    : 'Aucune candidature partenaire enregistrée.'
-                "
-              />
-            </ng-template>
+        <div class="candidatures-grid">
+          @for (app of pagedRows(); track app.id ?? $index) {
+            <article class="candidatures-card">
+              <span [class]="applicationStatusClass(app)">
+                {{ getStatusLabel(app.status) }}
+              </span>
 
-            <ng-template ubaxDataTableCell="company" let-app>
-              <div class="candidatures-user-cell">
+              <div class="candidatures-card__logo-wrap">
                 @if (app.logoUrl) {
                   <img
+                    class="candidatures-card__logo"
                     [src]="app.logoUrl"
-                    [alt]="app.companyName"
-                    class="candidatures-user-cell__logo"
+                    [alt]="app.companyName ?? 'Partenaire'"
                   />
                 } @else {
-                  <div class="candidatures-user-cell__avatar">
+                  <div class="candidatures-card__avatar">
                     {{ (app.companyName ?? 'PA').slice(0, 2).toUpperCase() }}
                   </div>
                 }
-                <div class="candidatures-user-cell__meta">
-                  <p class="candidatures-user-cell__name">
-                    {{ app.companyName ?? '—' }}
-                  </p>
-                  <p class="candidatures-user-cell__sub">
-                    {{ app.registrationNumber ?? '' }}
-                  </p>
-                </div>
               </div>
-            </ng-template>
 
-            <ng-template ubaxDataTableCell="type" let-app>
-              <ubax-status-badge
-                [variant]="getPartnerTypeBadge(app.partnerType)"
-              >
-                {{ getPartnerTypeLabel(app.partnerType) }}
-              </ubax-status-badge>
-            </ng-template>
+              <div class="candidatures-card__meta">
+                <p class="candidatures-card__name">
+                  {{ app.companyName ?? '—' }}
+                </p>
+                <p class="candidatures-card__sub">{{ cardSubLabel(app) }}</p>
+                <p class="candidatures-card__code">
+                  {{ app.registrationNumber ?? '—' }}
+                </p>
+              </div>
 
-            <ng-template ubaxDataTableCell="legalRep" let-app>
-              <span
-                class="candidatures-table__cell candidatures-table__cell--wrap"
-                >{{ legalRepName(app) }}</span
-              >
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="email" let-app>
-              <span
-                class="candidatures-table__cell candidatures-table__cell--muted candidatures-table__cell--wrap"
-                >{{ app.email ?? '—' }}</span
-              >
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="city" let-app>
-              <span
-                class="candidatures-table__cell candidatures-table__cell--muted"
-                >{{ app.city ?? '—' }}</span
-              >
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="status" let-app>
-              <ubax-status-badge [variant]="getStatusBadge(app.status)">
-                {{ getStatusLabel(app.status) }}
-              </ubax-status-badge>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="submittedAt" let-app>
-              <span
-                class="candidatures-table__cell candidatures-table__cell--muted"
-              >
-                {{ app.submittedAt | date: 'dd/MM/yyyy' }}
-              </span>
-            </ng-template>
-
-            <ng-template ubaxDataTableCell="actions" let-app>
-              <div class="candidatures-actions">
+              <div class="candidatures-card__actions-row">
                 <button
                   type="button"
-                  class="candidatures-action-btn"
-                  title="Voir le détail"
+                  class="candidatures-card__detail-btn"
                   (click)="viewDetail(app)"
                 >
-                  <i class="pi pi-eye"></i>
+                  Voir le détail
                 </button>
               </div>
-            </ng-template>
-          </ubax-ui-data-table>
+            </article>
+          }
         </div>
       }
 
-      @if (!loading() && totalPages() > 1) {
-        <footer class="candidatures-pagination">
-          <ubax-ui-pagination
+      <footer class="candidatures-footer">
+        <p class="candidatures-footer__count">
+          Affichage
+          {{ pagedRows().length ? (currentPage() - 1) * pageSize + 1 : 0 }} à
+          {{ (currentPage() - 1) * pageSize + pagedRows().length }} sur
+          {{ filteredCount() }} candidature(s)
+        </p>
+
+        @if (!loading() && filteredCount() > 0) {
+          <ubax-paginator
             [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            variant="members"
-            (pageChange)="onPageChange($event)"
+            [totalPages]="totalPages() || 1"
+            (currentPageChange)="onPageChange($event)"
           />
-        </footer>
-      }
+        }
+      </footer>
     </section>
   </ubax-section-card>
 </div>

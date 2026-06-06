@@ -136,10 +136,6 @@ export class BailleursApplicationsPageComponent implements OnInit {
     return this.filteredApplications().slice(start, start + PAGE_SIZE);
   });
 
-  protected readonly totalCount = computed(
-    () => this.store.applications().length,
-  );
-
   ngOnInit(): void {
     void this.load();
   }

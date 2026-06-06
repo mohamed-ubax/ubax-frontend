@@ -1,177 +1,213 @@
-<div class="admin-res-detail-page">
-  <header class="admin-res-detail-header">
-    <div>
-      <a routerLink="/reservations" class="admin-res-detail-header__back">
-        <i class="pi pi-arrow-left"></i>
-        Retour aux réservations
-      </a>
-      <h1 class="admin-res-detail-header__title">Détail de réservation</h1>
-    </div>
-  </header>
+<div class="res-detail-page">
 
   @switch (viewState()) {
     @case ('loading') {
-      <section class="admin-res-detail-card admin-res-detail-state">
+      <section class="res-state-card">
         <i class="pi pi-spin pi-spinner"></i>
         <p>Chargement du détail de réservation...</p>
       </section>
     }
 
     @case ('not-found') {
-      <section class="admin-res-detail-card admin-res-detail-state">
+      <section class="res-state-card">
         <i class="pi pi-inbox"></i>
         <p>Réservation introuvable.</p>
       </section>
     }
 
     @case ('error') {
-      <section
-        class="admin-res-detail-card admin-res-detail-state admin-res-detail-state--error"
-      >
+      <section class="res-state-card res-state-card--error">
         <i class="pi pi-exclamation-triangle"></i>
         <p>{{ store.error() }}</p>
       </section>
     }
 
     @default {
-      @if (reservation(); as currentReservation) {
-        <section class="admin-res-detail-grid">
-          <article class="admin-res-detail-card admin-res-detail-card--wide">
-            <p class="admin-res-detail-card__eyebrow">Bien</p>
-            <h2>{{ currentReservation.propertyTitle ?? 'Bien sans titre' }}</h2>
-            <p class="admin-res-detail-card__location">
-              <i class="pi pi-map-marker"></i>
-              {{ currentReservation.propertyCity ?? 'Ville non renseignée' }}
-            </p>
-          </article>
+      @if (reservation(); as r) {
+        <div class="res-layout">
 
-          <article class="admin-res-detail-card">
-            <p class="admin-res-detail-card__eyebrow">Client</p>
-            <div class="admin-res-detail-list">
-              <div>
-                <span>Nom</span>
-                <strong>{{ currentReservation.clientFullName ?? '—' }}</strong>
-              </div>
-              <div>
-                <span>Email</span>
-                <strong>{{ currentReservation.clientEmail ?? '—' }}</strong>
-              </div>
-              <div>
-                <span>Identifiant client</span>
-                <strong>{{ currentReservation.clientId ?? '—' }}</strong>
-              </div>
-              <div>
-                <span>Référence</span>
-                <strong>{{ currentReservation.id }}</strong>
-              </div>
-            </div>
-          </article>
+          <!-- ═══ LEFT COLUMN ═══ -->
+          <div class="res-col">
 
-          <article class="admin-res-detail-card">
-            <p class="admin-res-detail-card__eyebrow">Séjour</p>
-            <div class="admin-res-detail-list">
-              <div>
-                <span>Arrivée</span>
-                <strong>{{
-                  formatDate(currentReservation.checkInDate)
-                }}</strong>
+            <!-- Property Card -->
+            <article class="res-card res-property-card">
+              <div class="res-property-img">
+                <i class="pi pi-image"></i>
               </div>
-              <div>
-                <span>Départ</span>
-                <strong>{{
-                  formatDate(currentReservation.checkOutDate)
-                }}</strong>
-              </div>
-              <div>
-                <span>Nuits</span>
-                <strong>{{ currentReservation.numberOfNights ?? '—' }}</strong>
-              </div>
-              <div>
-                <span>Voyageurs</span>
-                <strong>{{ currentReservation.guestCount ?? '—' }}</strong>
-              </div>
-            </div>
-          </article>
+              <div class="res-property-info">
+                <div class="res-property-badges">
+                  <span class="res-badge res-badge--ref">{{ r.id }}</span>
+                  <span class="res-badge" [ngClass]="statusBadgeClass(r.status)">
+                    {{ statusLabel(r.status) }}
+                  </span>
+                  <span class="res-property-price">{{ formatCurrency(r.totalAmount) }}</span>
+                </div>
 
-          <article class="admin-res-detail-card">
-            <p class="admin-res-detail-card__eyebrow">Montants</p>
-            <div class="admin-res-detail-list">
-              <div>
-                <span>Prix par nuit</span>
-                <strong>{{
-                  formatCurrency(currentReservation.pricePerNight)
-                }}</strong>
-              </div>
-              <div>
-                <span>Total</span>
-                <strong>{{
-                  formatCurrency(currentReservation.totalAmount)
-                }}</strong>
-              </div>
-              <div>
-                <span>Statut</span>
-                <strong>{{ currentReservation.status }}</strong>
-              </div>
-              <div>
-                <span>Annulé par</span>
-                <strong>{{ currentReservation.cancelledById ?? '—' }}</strong>
-              </div>
-            </div>
-          </article>
+                <h2 class="res-property-title">{{ r.propertyTitle ?? 'Bien sans titre' }}</h2>
+                <p class="res-property-city">{{ r.propertyCity ?? '—' }}</p>
 
-          <article class="admin-res-detail-card">
-            <p class="admin-res-detail-card__eyebrow">Timeline</p>
-            <div class="admin-res-detail-list">
-              <div>
-                <span>Créée le</span>
-                <strong>{{
-                  formatDateTime(currentReservation.createdAt)
-                }}</strong>
-              </div>
-              <div>
-                <span>Mise à jour</span>
-                <strong>{{
-                  formatDateTime(currentReservation.updatedAt)
-                }}</strong>
-              </div>
-              <div>
-                <span>Confirmée le</span>
-                <strong>{{
-                  formatDateTime(currentReservation.confirmedAt)
-                }}</strong>
-              </div>
-              <div>
-                <span>Terminée le</span>
-                <strong>{{
-                  formatDateTime(currentReservation.completedAt)
-                }}</strong>
-              </div>
-              <div>
-                <span>Annulée le</span>
-                <strong>{{
-                  formatDateTime(currentReservation.cancelledAt)
-                }}</strong>
-              </div>
-            </div>
-          </article>
+                <div class="res-property-dates">
+                  <i class="pi pi-calendar"></i>
+                  <span>du {{ formatDate(r.checkInDate) }}</span>
+                  <i class="pi pi-arrow-right"></i>
+                  <span>au {{ formatDate(r.checkOutDate) }}</span>
+                </div>
 
-          @if (currentReservation.notes) {
-            <article class="admin-res-detail-card admin-res-detail-card--wide">
-              <p class="admin-res-detail-card__eyebrow">Notes</p>
-              <p>{{ currentReservation.notes }}</p>
+                <div class="res-hotel-card">
+                  <div class="res-hotel-logo">
+                    <i class="pi pi-building"></i>
+                  </div>
+                  <div class="res-hotel-body">
+                    <p class="res-hotel-name">{{ r.propertyTitle ?? '—' }}</p>
+                    <p class="res-hotel-type">Hôtel</p>
+                    <p class="res-hotel-city">{{ r.propertyCity ?? '—' }}</p>
+                  </div>
+                  <span class="res-hotel-link">Consulter le profil</span>
+                </div>
+              </div>
             </article>
-          }
 
-          @if (currentReservation.cancellationReason) {
-            <article
-              class="admin-res-detail-card admin-res-detail-card--wide admin-res-detail-card--danger"
-            >
-              <p class="admin-res-detail-card__eyebrow">Motif d'annulation</p>
-              <p>{{ currentReservation.cancellationReason }}</p>
+            <!-- Détails du séjour -->
+            <article class="res-card res-sejour-card">
+              <h3 class="res-section-title">Détails du séjour</h3>
+              <div class="res-sejour-grid">
+
+                <span class="res-label">Type de propriété :</span>
+                <span class="res-value">{{ r.propertyTitle ?? '—' }}</span>
+                <span class="res-label">Arrivée ( Check-in)</span>
+                <span class="res-value">{{ formatDateTime(r.checkInDate) }}</span>
+
+                <span class="res-label">Publié par :</span>
+                <span class="res-value">—</span>
+                <span class="res-label">Départ ( Check-out)</span>
+                <span class="res-value">{{ formatDateTime(r.checkOutDate) }}</span>
+
+                <span class="res-label">Nombre de chambre :</span>
+                <span class="res-value">—</span>
+                <span class="res-label">Durée du séjour :</span>
+                <span class="res-value">
+                  {{ r.numberOfNights !== null ? r.numberOfNights + ' nuits' : '—' }}
+                </span>
+
+                <span class="res-label">Plan Tarifaire :</span>
+                <span class="res-value">—</span>
+                <span class="res-label">Montant :</span>
+                <span class="res-value">{{ formatCurrency(r.totalAmount) }}</span>
+
+                <span class="res-label">Nombre de personnes :</span>
+                <span class="res-value">
+                  {{ r.guestCount !== null ? r.guestCount + ' voyageur(s)' : '—' }}
+                </span>
+                <span class="res-label">Paiement :</span>
+                <span class="res-value" [ngClass]="paymentStatusClass(r.status)">
+                  {{ paymentStatusLabel(r.status) }}
+                </span>
+
+              </div>
             </article>
-          }
-        </section>
+
+            <!-- Statut de la réservation -->
+            <article class="res-card res-statut-card">
+              <h3 class="res-section-title">Statut de la reservation</h3>
+              <div class="res-timeline">
+                @for (step of timelineSteps; track step.key; let last = $last) {
+                  <div class="res-timeline-item" [class.is-active]="isStepActive(r.status, step.key)">
+                    <div class="res-timeline-track">
+                      <div class="res-timeline-circle">
+                        <i [class]="step.icon"></i>
+                      </div>
+                      @if (!last) {
+                        <div
+                          class="res-timeline-connector"
+                          [class.is-active]="isLineActive(r.status, step.key)"
+                        ></div>
+                      }
+                    </div>
+                    <p class="res-timeline-label">{{ step.label }}</p>
+                    @let date = timelineDate(r, step.key);
+                    @if (date) {
+                      <p class="res-timeline-date">{{ date }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </article>
+
+          </div>
+
+          <!-- ═══ RIGHT COLUMN ═══ -->
+          <div class="res-col">
+
+            <!-- Infos client -->
+            <article class="res-card res-client-card">
+              <h3 class="res-section-title">Infos client</h3>
+              <div class="res-client-avatar">
+                <i class="pi pi-user"></i>
+              </div>
+              <p class="res-client-name">{{ r.clientFullName ?? '—' }}</p>
+              <p class="res-client-role">Cliente</p>
+              <div class="res-client-contacts">
+                <div class="res-client-contact">
+                  <i class="pi pi-phone"></i>
+                  <span>—</span>
+                </div>
+                <div class="res-client-contact">
+                  <i class="pi pi-envelope"></i>
+                  <span>{{ r.clientEmail ?? '—' }}</span>
+                </div>
+              </div>
+              <div class="res-voir-profil">
+                <i class="pi pi-user"></i>
+                Voir le profil
+              </div>
+            </article>
+
+            <!-- Répartition des coûts -->
+            <article class="res-card res-repartition-card">
+              <h3 class="res-section-title">Répartition des couts</h3>
+              <div class="res-costs">
+                <div class="res-cost-row">
+                  <span>Prix fixe par nuit :</span>
+                  <span>{{ formatCurrency(r.pricePerNight) }}</span>
+                </div>
+                <div class="res-cost-row">
+                  <span>Nombre de nuits</span>
+                  <span>{{ r.numberOfNights !== null ? r.numberOfNights + ' Nuits' : '—' }}</span>
+                </div>
+                <div class="res-cost-row">
+                  <span>Sous total :</span>
+                  <span>{{ formatCurrency(computeSousTotal(r)) }}</span>
+                </div>
+                <div class="res-cost-row">
+                  <span>Taxes et frais :</span>
+                  <span>{{ formatCurrency(computeTaxes(r)) }}</span>
+                </div>
+                <div class="res-cost-row res-cost-row--discount">
+                  <span>Remise :</span>
+                  <span>—</span>
+                </div>
+              </div>
+
+              <div class="res-total-row">
+                <span>Montant total</span>
+                <span>{{ formatCurrency(r.totalAmount) }}</span>
+              </div>
+
+              <div class="res-payment-done">
+                <i class="pi pi-check-circle"></i>
+                <div class="res-payment-done-info">
+                  <p>Paiement complet</p>
+                  <p>Payé le {{ formatDate(r.confirmedAt ?? r.createdAt) }}</p>
+                </div>
+                <span>{{ formatCurrency(r.totalAmount) }}</span>
+              </div>
+            </article>
+
+          </div>
+
+        </div>
       }
     }
   }
+
 </div>

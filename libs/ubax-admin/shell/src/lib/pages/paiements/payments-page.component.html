@@ -1,0 +1,600 @@
+<div class="admin-payments-page">
+  <section class="admin-payments-kpis" aria-label="Synthèse paiements">
+    @for (kpi of kpis(); track kpi.title) {
+      <article
+        class="admin-payments-kpi-card admin-payments-kpi-card--{{ kpi.tone }}"
+      >
+        <div class="admin-payments-kpi-card__icon">
+          <i [class]="kpi.icon"></i>
+        </div>
+
+        <div>
+          <p class="admin-payments-kpi-card__label">
+            {{ kpi.title }} <span>{{ kpi.subtitle }}</span>
+          </p>
+          <strong class="admin-payments-kpi-card__value">{{
+            kpi.value
+          }}</strong>
+          <p class="admin-payments-kpi-card__caption">{{ kpi.caption }}</p>
+        </div>
+      </article>
+    }
+  </section>
+
+  <section class="admin-payments-panel admin-payments-panel--table">
+    <div class="admin-payments-panel__head">
+      <h2>Transactions Récentes</h2>
+
+      <div class="admin-payments-panel__filters">
+        <label
+          class="admin-payments-page__search"
+          aria-label="Rechercher un paiement"
+        >
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="onSearch($event)"
+            placeholder="Rechercher"
+          />
+        </label>
+
+        <p-select
+          class="admin-payments-page__type-select"
+          panelStyleClass="admin-payments-type-panel"
+          [options]="typeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="selectedType()"
+          (ngModelChange)="onTypeChange($event)"
+        />
+      </div>
+    </div>
+
+    @switch (viewState()) {
+      @case ('loading') {
+        <div class="admin-payments-state">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Chargement des paiements...</p>
+        </div>
+      }
+
+      @case ('error') {
+        <div class="admin-payments-state admin-payments-state--error">
+          <i class="pi pi-exclamation-triangle"></i>
+          <p>{{ store.error() }}</p>
+          <button type="button" (click)="retry()">Réessayer</button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="admin-payments-state">
+          <i class="pi pi-inbox"></i>
+          <p>Aucun paiement ne correspond au filtre courant.</p>
+        </div>
+      }
+
+      @default {
+        <div class="admin-payments-table-wrap">
+          <table class="admin-payments-table">
+            <colgroup>
+              <col class="admin-payments-table__col--reference" />
+              <col class="admin-payments-table__col--date" />
+              <col class="admin-payments-table__col--client" />
+              <col class="admin-payments-table__col--property" />
+              <col class="admin-payments-table__col--type" />
+              <col class="admin-payments-table__col--amount" />
+              <col class="admin-payments-table__col--commission" />
+              <col class="admin-payments-table__col--partner" />
+              <col class="admin-payments-table__col--status" />
+              <col class="admin-payments-table__col--actions" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Propriété</th>
+                <th>Type</th>
+                <th>Montant</th>
+                <th>Commission</th>
+                <th>Montant partenaire</th>
+                <th>Statut fonds</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (payment of recentTransactions(); track payment.id) {
+                <tr>
+                  <td class="admin-payments-table__reference">
+                    {{ payment.reference ?? payment.id }}
+                  </td>
+                  <td>
+                    {{
+                      formatDate(
+                        payment.paidDate ??
+                          payment.createdAt ??
+                          payment.updatedAt
+                      )
+                    }}
+                  </td>
+                  <td>
+                    <div class="admin-payments-person">
+                      <span class="admin-payments-person__avatar">
+                        {{ customerName(payment).slice(0, 2).toUpperCase() }}
+                      </span>
+                      <div class="admin-payments-person__meta">
+                        <strong>{{ customerName(payment) }}</strong>
+                        <small>{{ customerMeta(payment) }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="admin-payments-table__property">
+                      <span class="admin-payments-table__property-icon">
+                        <i class="pi pi-building"></i>
+                      </span>
+                      <div class="admin-payments-table__property-meta">
+                        <strong>{{ propertyLabel(payment) }}</strong>
+                        <small>{{ propertyMeta(payment) }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="admin-payments-type-chip">
+                      {{ paymentTypeLabel(payment.paymentType) }}
+                    </span>
+                  </td>
+                  <td>
+                    {{ formatCurrency(payment.amountPaid ?? payment.amount) }}
+                  </td>
+                  <td>{{ commissionAmount(payment) }}</td>
+                  <td>{{ partnerAmount(payment) }}</td>
+                  <td>
+                    <span
+                      class="admin-payments-status admin-payments-status--{{
+                        statusTone(payment.status)
+                      }}"
+                    >
+                      {{ statusLabel(payment.status) }}
+                    </span>
+                  </td>
+                  <td class="admin-payments-table__actions">
+                    <button
+                      type="button"
+                      class="admin-payments-icon-button"
+                      [attr.aria-label]="
+                        'Voir ' + (payment.reference ?? payment.id)
+                      "
+                      (click)="openDetails(payment.id)"
+                    >
+                      <i class="pi pi-ellipsis-v"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          class="admin-payments-panel__footer admin-payments-panel__footer--table-foot"
+          [class.admin-payments-panel__footer--table-foot-expanded]="tableShowAll()"
+        >
+          <button
+            type="button"
+            class="admin-payments-pill-button admin-payments-pill-button--dark admin-payments-pill-button--tout-voir"
+            (click)="toggleShowAll()"
+          >
+            {{ tableShowAll() ? 'Réduire' : 'Tout voir' }}
+          </button>
+          @if (tableShowAll()) {
+            <ubax-paginator
+              [currentPage]="store.currentPage()"
+              [totalPages]="store.totalPages() || 1"
+              (currentPageChange)="onUbaxPageChange($event)"
+            />
+          }
+        </div>
+      }
+    }
+  </section>
+
+  <div class="admin-payments-grid">
+    <section class="admin-payments-panel">
+      <div class="admin-payments-panel__head">
+        <h2>Liste demande de paiements</h2>
+        <button
+          type="button"
+          class="admin-payments-pill-button admin-payments-pill-button--bordered"
+        >
+          Tout voir
+        </button>
+      </div>
+
+      <div class="admin-payments-list">
+        @for (payment of pendingRequests(); track payment.id) {
+          <article class="admin-payments-list__item">
+            <div class="admin-payments-list__partner">
+              <span class="admin-payments-list__partner-avatar">
+                {{ partnerInitials(payment) }}
+              </span>
+              <div class="admin-payments-list__partner-meta">
+                <strong>{{ partnerName(payment) }}</strong>
+                <small>{{ partnerTypeLabel(payment) }}</small>
+              </div>
+            </div>
+
+            <strong class="admin-payments-list__amount">{{
+              formatCurrency(payment.amount)
+            }}</strong>
+
+            <button
+              type="button"
+              class="admin-payments-icon-button admin-payments-icon-button--ghost"
+              [attr.aria-label]="
+                'Voir le détail de ' + (payment.reference ?? payment.id)
+              "
+              (click)="openDetails(payment.id)"
+            >
+              <i class="pi pi-eye"></i>
+            </button>
+          </article>
+        }
+
+        @if (pendingRequests().length === 0) {
+          <div class="admin-payments-list__empty">
+            Aucune demande en attente.
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="admin-payments-panel">
+      <div class="admin-payments-panel__head">
+        <h2>Historique de paiements</h2>
+        <button
+          type="button"
+          class="admin-payments-pill-button admin-payments-pill-button--bordered"
+        >
+          Tout voir
+        </button>
+      </div>
+
+      <div class="admin-payments-list">
+        @for (payment of paymentHistory(); track payment.id) {
+          <article class="admin-payments-list__item">
+            <div class="admin-payments-list__partner">
+              <span class="admin-payments-list__partner-avatar">
+                {{ partnerInitials(payment) }}
+              </span>
+              <div class="admin-payments-list__partner-meta">
+                <strong>{{ partnerName(payment) }}</strong>
+                <small>{{ partnerTypeLabel(payment) }}</small>
+              </div>
+            </div>
+
+            <strong class="admin-payments-list__amount">{{
+              formatCurrency(payment.amountPaid ?? payment.amount)
+            }}</strong>
+
+            <div class="admin-payments-list__right">
+              <span class="admin-payments-status admin-payments-status--success"
+                >Réussi</span
+              >
+              <button
+                type="button"
+                class="admin-payments-icon-button admin-payments-icon-button--ghost"
+                [attr.aria-label]="
+                  'Voir le détail de ' + (payment.reference ?? payment.id)
+                "
+                (click)="openDetails(payment.id)"
+              >
+                <i class="pi pi-eye"></i>
+              </button>
+            </div>
+          </article>
+        }
+
+        @if (paymentHistory().length === 0) {
+          <div class="admin-payments-list__empty">
+            Aucun paiement validé récemment.
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+
+  @if (dialogOpen()) {
+    <div
+      class="admin-payments-dialog-backdrop"
+      role="button"
+      tabindex="-1"
+      aria-label="Fermer"
+      (click)="closeDetails()"
+      (keyup.escape)="closeDetails()"
+    ></div>
+
+    <dialog
+      class="admin-payments-dialog"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+      aria-modal="true"
+      tabindex="-1"
+      open
+    >
+      <header class="admin-payments-dialog__header">
+        <div>
+          <h2>Détails de la demande de paiement</h2>
+          <p>
+            Demandé le
+            {{
+              formatDateTime(
+                selectedPayment()?.createdAt ?? selectedPayment()?.updatedAt
+              )
+            }}
+          </p>
+        </div>
+
+        <div class="admin-payments-dialog__badges">
+          <span class="admin-payments-ref-badge">
+            {{ selectedPayment()?.reference ?? selectedPayment()?.id ?? '—' }}
+          </span>
+          <span
+            class="admin-payments-status admin-payments-status--{{
+              statusTone(selectedPayment()?.status)
+            }}"
+          >
+            {{ statusLabel(selectedPayment()?.status) }}
+          </span>
+          <button
+            type="button"
+            class="admin-payments-icon-button admin-payments-icon-button--close"
+            (click)="closeDetails()"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </header>
+
+      @if (store.detailLoading()) {
+        <div class="admin-payments-state admin-payments-state--dialog">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Chargement du détail...</p>
+        </div>
+      } @else if (store.detailError()) {
+        <div
+          class="admin-payments-state admin-payments-state--error admin-payments-state--dialog"
+        >
+          <i class="pi pi-exclamation-triangle"></i>
+          <p>{{ store.detailError() }}</p>
+        </div>
+      } @else if (selectedPayment(); as payment) {
+        <div class="admin-payments-dialog__content">
+          <div class="admin-payments-dialog__grid">
+            <article class="admin-payments-dialog-card">
+              <div class="admin-payments-dialog-card__title-row">
+                <h3><i class="pi pi-user"></i> Informations du demandeur</h3>
+                <span
+                  class="admin-payments-type-chip admin-payments-type-chip--soft"
+                >
+                  {{ paymentTypeLabel(payment.paymentType) }}
+                </span>
+              </div>
+
+              <div class="admin-payments-requester">
+                <span
+                  class="admin-payments-requester__logo"
+                  [class.admin-payments-requester__logo--has-img]="!!partnerLogoUrl(payment)"
+                >
+                  @if (partnerLogoUrl(payment); as logoUrl) {
+                    <img
+                      [src]="logoUrl"
+                      [alt]="partnerDisplayName(payment)"
+                      class="admin-payments-requester__logo-img"
+                    />
+                  } @else {
+                    {{ partnerInitialsForDialog(payment) }}
+                  }
+                </span>
+
+                <div>
+                  <strong>{{ partnerDisplayName(payment) }}</strong>
+                  <p>Responsable : {{ partnerOwnerName(payment) }}</p>
+                  <p>{{ propertyLabel(payment) }}</p>
+                  <p>{{ customerMeta(payment) }}</p>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="admin-payments-dialog-card admin-payments-dialog-card--center"
+            >
+              <h3><i class="pi pi-wallet"></i> Informations Financières</h3>
+              <span class="admin-payments-dialog-card__muted"
+                >Montant demandé</span
+              >
+              <strong class="admin-payments-dialog-card__hero">{{
+                formatCurrency(payment.amount)
+              }}</strong>
+              <div class="admin-payments-dialog-card__meta-grid">
+                <div>
+                  <span>Montant reçu</span>
+                  <strong>{{ formatCurrency(payment.amountPaid) }}</strong>
+                </div>
+                <div>
+                  <span>Échéance</span>
+                  <strong>{{ formatDate(payment.dueDate) }}</strong>
+                </div>
+              </div>
+            </article>
+
+            <article class="admin-payments-dialog-card">
+              <h3>
+                <i class="pi pi-building-columns"></i> Méthode de réception
+              </h3>
+
+              <div class="admin-payments-bank-box">
+                <p>
+                  <strong>{{
+                    paymentMethodLabel(payment.paymentMethod)
+                  }}</strong>
+                </p>
+                <div class="admin-payments-bank-box__grid">
+                  <div>
+                    <span>Référence</span>
+                    <strong>{{ payment.reference ?? '—' }}</strong>
+                  </div>
+                  <div>
+                    <span>Contrat</span>
+                    <strong>{{
+                      contractShortLabel(payment.contractId)
+                    }}</strong>
+                  </div>
+                  <div>
+                    <span>Période</span>
+                    <strong>{{ propertyLabel(payment) }}</strong>
+                  </div>
+                  <div>
+                    <span>Date de paiement</span>
+                    <strong>{{ formatDate(payment.paidDate) }}</strong>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="admin-payments-dialog-card">
+              <h3><i class="pi pi-paperclip"></i> Pièces jointes fournis</h3>
+
+              @if (payment.receiptUrl) {
+                <div class="admin-payments-attachment">
+                  <i class="pi pi-file-pdf admin-payments-attachment__icon"></i>
+                  <div>
+                    <strong>{{ attachmentLabel(payment) }}</strong>
+                  </div>
+
+                  <ubax-document-preview
+                    [fileUrl]="payment.receiptUrl"
+                    documentName="Reçu de paiement"
+                    buttonLabel="Voir"
+                    buttonIcon="pi pi-eye"
+                    [urlResolver]="resolveDocumentUrl"
+                  />
+                </div>
+              } @else {
+                <div
+                  class="admin-payments-attachment admin-payments-attachment--empty"
+                >
+                  <p>Aucune pièce fournie pour ce paiement.</p>
+                </div>
+              }
+            </article>
+          </div>
+
+          <article
+            class="admin-payments-dialog-card admin-payments-dialog-card--full"
+          >
+            <h3><i class="pi pi-file-edit"></i> Note du demandeur</h3>
+            <div class="admin-payments-note-box">
+              {{
+                payment.note?.trim() ||
+                  'Aucune note renseignée pour cette demande.'
+              }}
+            </div>
+          </article>
+
+          <article
+            class="admin-payments-dialog-card admin-payments-dialog-card--full"
+          >
+            <h3><i class="pi pi-cog"></i> Traitement de la demande</h3>
+
+            <div class="admin-payments-treatment-grid">
+              <div class="admin-payments-field">
+                <span>Statut</span>
+                <p-select
+                  class="admin-payments-field__select"
+                  panelStyleClass="admin-payments-status-panel"
+                  [options]="statusOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ngModel]="treatmentStatus()"
+                  (ngModelChange)="treatmentStatus.set($event)"
+                />
+              </div>
+
+              <label
+                class="admin-payments-field admin-payments-field--textarea"
+              >
+                <span>Note interne</span>
+                <textarea
+                  rows="4"
+                  [ngModel]="treatmentNote()"
+                  (ngModelChange)="treatmentNote.set($event)"
+                  placeholder="Ajouter une note interne"
+                ></textarea>
+              </label>
+
+              <div class="admin-payments-field admin-payments-field--upload">
+                <span>Preuve de paiement</span>
+
+                @if (payment.receiptUrl) {
+                  <div
+                    class="admin-payments-upload-box admin-payments-upload-box--filled"
+                  >
+                    <i class="pi pi-check-circle"></i>
+                    <p>Un reçu est déjà associé à ce paiement.</p>
+                  </div>
+                } @else {
+                  <div class="admin-payments-upload-box">
+                    <i class="pi pi-upload"></i>
+                    <p>Glisser vos fichiers ici ou cliquer pour importer</p>
+                  </div>
+                }
+              </div>
+            </div>
+
+            @if (store.updateError()) {
+              <p class="admin-payments-dialog__error">
+                {{ store.updateError() }}
+              </p>
+            }
+          </article>
+
+          <footer class="admin-payments-dialog__footer">
+            <button
+              type="button"
+              class="admin-payments-pill-button admin-payments-pill-button--primary-outline"
+              [disabled]="store.updating()"
+              (click)="saveTreatment()"
+            >
+              Enregistrer
+            </button>
+
+            <div class="admin-payments-dialog__footer-right">
+              <button
+                type="button"
+                class="admin-payments-pill-button admin-payments-pill-button--danger"
+                [disabled]="store.updating() || payment.status === 'CANCELLED'"
+                (click)="rejectRequest()"
+              >
+                Rejeter la demande
+              </button>
+
+              <button
+                type="button"
+                class="admin-payments-pill-button admin-payments-pill-button--success"
+                [disabled]="store.updating() || payment.status === 'PAID'"
+                (click)="validatePayment()"
+              >
+                @if (store.updating()) {
+                  <i class="pi pi-spin pi-spinner"></i>
+                }
+                Valider et envoyer le paiement
+              </button>
+            </div>
+          </footer>
+        </div>
+      }
+    </dialog>
+  }
+</div>

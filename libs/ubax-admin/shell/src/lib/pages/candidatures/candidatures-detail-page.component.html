@@ -1,12 +1,4 @@
 <div class="candidature-detail">
-  <!-- Fil d'Ariane -->
-  <nav class="candidature-detail__breadcrumb">
-    <a routerLink="/candidatures" class="candidature-detail__breadcrumb-link">
-      <i class="pi pi-arrow-left"></i>
-      Retour aux candidatures
-    </a>
-  </nav>
-
   @if (loading()) {
     <ubax-empty-state
       icon="pi pi-spin pi-spinner"
@@ -20,127 +12,100 @@
       description="Cette candidature n'existe pas ou a été supprimée."
     />
   } @else {
-    <!-- En-tête de la candidature -->
-    <div class="candidature-detail__header">
-      <div class="candidature-detail__company-info">
-        @if (application()?.logoUrl) {
-          <img
-            [src]="application()?.logoUrl"
-            [alt]="application()?.companyName"
-            class="candidature-detail__logo"
-          />
-        } @else {
-          <div class="candidature-detail__logo-placeholder">
-            {{ (application()?.companyName ?? 'PA').slice(0, 2).toUpperCase() }}
-          </div>
-        }
-        <div>
-          <h1 class="candidature-detail__company-name">
-            {{ application()?.companyName ?? '—' }}
-          </h1>
-          <p class="candidature-detail__company-type">
-            {{ getPartnerTypeLabel(application()?.partnerType) }}
-          </p>
-        </div>
-        <ubax-status-badge
-          [variant]="getStatusBadge(application()?.status)"
-          class="candidature-detail__status-badge"
-        >
-          {{ getStatusLabel(application()?.status) }}
-        </ubax-status-badge>
-      </div>
-
-      <!-- Boutons d'action -->
-      @if (isActionable()) {
-        <div class="candidature-detail__actions">
-          @if (availableActions().canTakeCharge) {
-            <button
-              type="button"
-              class="candidature-btn candidature-btn--secondary"
-              [disabled]="saving()"
-              (click)="takeCharge()"
-            >
-              <i class="pi pi-eye"></i>
-              Prendre en charge
-            </button>
-          }
-          @if (availableActions().canIncomplete) {
-            <button
-              type="button"
-              class="candidature-btn candidature-btn--warning"
-              [disabled]="saving()"
-              (click)="openModal('incomplete')"
-            >
-              <i class="pi pi-question-circle"></i>
-              Demander des compléments
-            </button>
-          }
-          @if (availableActions().canReject) {
-            <button
-              type="button"
-              class="candidature-btn candidature-btn--danger"
-              [disabled]="saving()"
-              (click)="openModal('reject')"
-            >
-              <i class="pi pi-times-circle"></i>
-              Rejeter
-            </button>
-          }
-          @if (availableActions().canApprove) {
-            <button
-              type="button"
-              class="candidature-btn candidature-btn--success"
-              [disabled]="saving()"
-              (click)="openModal('approve')"
-            >
-              <i class="pi pi-check-circle"></i>
-              Approuver
-            </button>
-          }
-        </div>
-      }
-
-      @if (isTerminal()) {
-        <div class="candidature-detail__terminal-info">
-          @if (application()?.status === 'APPROVED') {
-            <div class="candidature-terminal candidature-terminal--approved">
-              <i class="pi pi-check-circle"></i>
-              <div>
-                <p class="candidature-terminal__title">Candidature approuvée</p>
-                <p class="candidature-terminal__sub">
-                  Un compte partenaire a été créé automatiquement. Approuvé par
-                  {{ application()?.reviewedByName ?? '—' }} le
-                  {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
-                </p>
-              </div>
-            </div>
-          }
-          @if (application()?.status === 'REJECTED') {
-            <div class="candidature-terminal candidature-terminal--rejected">
-              <i class="pi pi-times-circle"></i>
-              <div>
-                <p class="candidature-terminal__title">Candidature rejetée</p>
-                <p class="candidature-terminal__sub">
-                  Rejeté par {{ application()?.reviewedByName ?? '—' }} le
-                  {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
-                </p>
-                @if (application()?.rejectionReason) {
-                  <p class="candidature-terminal__reason">
-                    Motif : {{ application()?.rejectionReason }}
-                  </p>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      }
-    </div>
-
     <div class="candidature-detail__body">
       <!-- Colonne principale -->
-      <div class="candidature-detail__main">
+      <div class="candidature-detail__main-card">
+        <!-- En-tête de la candidature -->
+        <div class="candidature-detail__header">
+          <div class="candidature-detail__header-top">
+            <div class="candidature-detail__company-info">
+              @if (application()?.logoUrl) {
+                <img
+                  [src]="application()?.logoUrl"
+                  [alt]="application()?.companyName"
+                  class="candidature-detail__logo"
+                />
+              } @else {
+                <div class="candidature-detail__logo-placeholder">
+                  {{
+                    (application()?.companyName ?? 'PA')
+                      .slice(0, 2)
+                      .toUpperCase()
+                  }}
+                </div>
+              }
+              <div class="candidature-detail__company-text">
+                <h1 class="candidature-detail__company-name">
+                  {{ application()?.companyName ?? '—' }}
+                </h1>
+                <p class="candidature-detail__company-type">
+                  {{ getPartnerTypeLabel(application()?.partnerType) }}
+                </p>
+              </div>
+            </div>
+            <ubax-status-badge
+              [variant]="getStatusBadge(application()?.status)"
+              class="candidature-detail__status-badge"
+            >
+              <span class="candidature-detail__badge-inner">
+                <i [class]="getStatusIcon(application()?.status)"></i>
+                {{ getStatusLabel(application()?.status) }}
+              </span>
+            </ubax-status-badge>
+          </div>
+
+          @if (isTerminal()) {
+            <div class="candidature-detail__terminal-info">
+              @if (application()?.status === 'APPROVED') {
+                <div
+                  class="candidature-terminal candidature-terminal--approved"
+                >
+                  <i class="pi pi-check-circle"></i>
+                  <div>
+                    <p class="candidature-terminal__title">
+                      Candidature approuvée
+                    </p>
+                    <p class="candidature-terminal__sub">
+                      Un compte partenaire a été créé automatiquement. Approuvé
+                      par
+                      {{ application()?.reviewedByName ?? '—' }} le
+                      {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
+                    </p>
+                  </div>
+                </div>
+              }
+              @if (application()?.status === 'REJECTED') {
+                <div
+                  class="candidature-terminal candidature-terminal--rejected"
+                >
+                  <i class="pi pi-times-circle"></i>
+                  <div>
+                    <p class="candidature-terminal__title">
+                      Candidature rejetée
+                    </p>
+                    <p class="candidature-terminal__sub">
+                      Rejeté par {{ application()?.reviewedByName ?? '—' }} le
+                      {{ application()?.reviewedAt | date: 'dd/MM/yyyy' }}.
+                    </p>
+                    @if (application()?.rejectionReason) {
+                      <p class="candidature-terminal__reason">
+                        Motif : {{ application()?.rejectionReason }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <hr class="candidature-detail__divider" />
+
         <!-- Informations partenaires -->
-        <ubax-section-card title="Informations partenaires">
+        <div class="candidature-detail__section">
+          <h2 class="candidature-detail__section-title">
+            Informations partenaires
+          </h2>
           <div class="info-grid">
             <div class="info-item">
               <span class="info-item__label">Type de partenaire</span>
@@ -183,10 +148,11 @@
               }}</span>
             </div>
           </div>
-        </ubax-section-card>
+        </div>
 
         <!-- Localisation -->
-        <ubax-section-card title="Localisation">
+        <div class="candidature-detail__section">
+          <h2 class="candidature-detail__section-title">Localisation</h2>
           <div class="info-grid">
             <div class="info-item">
               <span class="info-item__label">Pays</span>
@@ -213,7 +179,23 @@
               }}</span>
             </div>
           </div>
-        </ubax-section-card>
+        </div>
+      </div>
+
+      <!-- Colonne latérale -->
+      <div class="candidature-detail__side">
+        <!-- Documents -->
+        @if (documents().length === 0) {
+          <ubax-section-card title="Documents">
+            <p class="text-sm text-neutral-500 py-2">Aucun document joint.</p>
+          </ubax-section-card>
+        } @else {
+          <ubax-document-list
+            [documents]="documents()"
+            [downloadable]="false"
+            (viewClick)="openDocument($event)"
+          />
+        }
 
         <!-- Présentation -->
         @if (application()?.description) {
@@ -223,22 +205,6 @@
             </p>
           </ubax-section-card>
         }
-      </div>
-
-      <!-- Colonne latérale -->
-      <div class="candidature-detail__side">
-        <!-- Documents -->
-        <ubax-section-card title="Documents">
-          @if (documents().length === 0) {
-            <p class="text-sm text-neutral-500 py-2">Aucun document joint.</p>
-          } @else {
-            <ubax-document-list
-              [documents]="documents()"
-              [downloadable]="false"
-              (viewClick)="openDocument($event)"
-            />
-          }
-        </ubax-section-card>
 
         <!-- Historique des statuts -->
         <ubax-section-card title="Historique des statuts">
@@ -276,6 +242,54 @@
         </ubax-section-card>
       </div>
     </div>
+
+    <!-- Boutons d'action (en bas, alignés à droite) -->
+    @if (isActionable()) {
+      <div class="candidature-detail__bottom-actions">
+        @if (availableActions().canTakeCharge) {
+          <button
+            type="button"
+            class="candidature-btn candidature-btn--secondary"
+            [disabled]="saving()"
+            (click)="takeCharge()"
+          >
+            <i class="pi pi-eye"></i>
+            Prendre en charge
+          </button>
+        }
+        @if (availableActions().canIncomplete) {
+          <button
+            type="button"
+            class="candidature-btn candidature-btn--warning"
+            [disabled]="saving()"
+            (click)="openModal('incomplete')"
+          >
+            <i class="pi pi-question-circle"></i>
+            Demander des compléments
+          </button>
+        }
+        @if (availableActions().canReject) {
+          <button
+            type="button"
+            class="candidature-btn candidature-btn--danger"
+            [disabled]="saving()"
+            (click)="openModal('reject')"
+          >
+            Rejeter
+          </button>
+        }
+        @if (availableActions().canApprove) {
+          <button
+            type="button"
+            class="candidature-btn candidature-btn--success"
+            [disabled]="saving()"
+            (click)="openModal('approve')"
+          >
+            Approuver
+          </button>
+        }
+      </div>
+    }
   }
 </div>
 

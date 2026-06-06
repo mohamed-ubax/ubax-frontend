@@ -141,8 +141,6 @@ export class ClientsPageComponent implements OnInit {
     return this.filteredClients().slice(start, start + PAGE_SIZE);
   });
 
-  protected readonly clientCount = computed(() => this.clients().length);
-
   ngOnInit(): void {
     void this.loadClients();
   }

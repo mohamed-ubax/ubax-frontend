@@ -22,16 +22,37 @@ import { CommonModule } from '@angular/common';
   selector: 'ubax-kpi-card',
   standalone: true,
   imports: [CommonModule],
+  styles: `
+    :host {
+      display: block;
+    }
+
+    .ubax-kpi-card__icon {
+      width: var(--ubax-kpi-icon-size, 4rem);
+      height: var(--ubax-kpi-icon-size, 4rem);
+      min-width: var(--ubax-kpi-icon-size, 4rem);
+      min-height: var(--ubax-kpi-icon-size, 4rem);
+      aspect-ratio: 1 / 1;
+      border-radius: 999px;
+      flex: 0 0 auto;
+      background-color: var(--ubax-kpi-icon-bg, transparent);
+    }
+  `,
   template: `
     <div
       class="bg-surface-card rounded-xl border border-neutral-300 shadow-card
-             flex items-center gap-4 p-6 min-w-0"
+            flex items-center gap-4 p-6 min-w-0"
       data-ubax-motion="surface"
     >
       <!-- Icon circle -->
       <div
-        class="flex-shrink-0 flex items-center justify-center
-               rounded-full size-16 bg-neutral-200"
+        class="ubax-kpi-card__icon flex-shrink-0 flex items-center justify-center
+         rounded-full size-16"
+        [style.background-color]="
+          trendPositive()
+            ? 'var(--ubax-kpi-icon-bg, transparent)'
+            : 'var(--ubax-kpi-icon-bg, transparent)'
+        "
       >
         <ng-content select="[icon]" />
       </div>
@@ -65,11 +86,13 @@ import { CommonModule } from '@angular/common';
   `,
 })
 export class KpiCardComponent {
-  readonly label         = input.required<string>();
-  readonly value         = input.required<string | number>();
-  readonly trend         = input<string>();
+  readonly label = input.required<string>();
+  readonly value = input.required<string | number>();
+  readonly trend = input<string>();
   readonly trendPositive = input<boolean>(true);
 
   /** @internal — true when a [graph] slot is projected */
-  get hasGraph(): boolean { return true; }
+  get hasGraph(): boolean {
+    return true;
+  }
 }

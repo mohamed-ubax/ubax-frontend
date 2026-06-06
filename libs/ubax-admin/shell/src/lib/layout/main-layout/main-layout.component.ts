@@ -29,11 +29,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 @Component({
   selector: 'ubax-admin-main-layout',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-  ],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   providers: [
@@ -207,6 +203,7 @@ export class MainLayoutComponent implements OnInit {
       administrateurs: 'Administrateurs',
       clients: 'Clients',
       'code-lists': 'Listes de codes',
+      paiements: 'Paiements',
     };
 
     return labels[pair] ?? labels[first] ?? 'Back-office UBAX';

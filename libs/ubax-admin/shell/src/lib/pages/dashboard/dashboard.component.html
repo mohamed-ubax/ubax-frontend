@@ -1,0 +1,394 @@
+<div class="admin-dashboard">
+  @if (hasData()) {
+    <section class="admin-dashboard__kpis" aria-label="Indicateurs principaux">
+      @for (card of kpiCards(); track card.label; let cardIndex = $index) {
+        <ubax-kpi-card
+          [class]="card.cardClass"
+          [label]="card.label"
+          [value]="formatKpiValue(card)"
+          [trend]="card.trend"
+          [trendPositive]="card.trendPositive"
+        >
+          <i icon [class]="card.iconClass + ' ' + card.iconToneClass"></i>
+
+          @if (card.showGraph) {
+            <div graph [class]="card.graphWrapClass">
+              <svg [class]="card.graphClass" viewBox="0 0 82 30" fill="none">
+                <defs>
+                  <linearGradient
+                    [attr.id]="'dashboardKpiStroke' + cardIndex"
+                    x1="0"
+                    y1="30"
+                    x2="82"
+                    y2="0"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop
+                      offset="0%"
+                      stop-opacity="0.72"
+                      [attr.stop-color]="card.gradientStart"
+                    />
+                    <stop offset="100%" [attr.stop-color]="card.gradientEnd" />
+                  </linearGradient>
+
+                  <linearGradient
+                    [attr.id]="'dashboardKpiArea' + cardIndex"
+                    x1="41"
+                    y1="6"
+                    x2="41"
+                    y2="30"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop
+                      offset="0%"
+                      stop-opacity="0.22"
+                      [attr.stop-color]="card.gradientEnd"
+                    />
+                    <stop
+                      offset="100%"
+                      stop-opacity="0"
+                      [attr.stop-color]="card.gradientEnd"
+                    />
+                  </linearGradient>
+                </defs>
+
+                <path
+                  class="dashboard-kpi__graph-area"
+                  d="M1 22.5C10 8.5 17 20 24 16.5C32 12.5 40 5 49 12C58 19 66 25 81 6.5L81 30L1 30Z"
+                  [attr.fill]="'url(#dashboardKpiArea' + cardIndex + ')'"
+                />
+
+                <path
+                  class="dashboard-kpi__graph-line"
+                  [attr.d]="kpiSparkPath(cardIndex)"
+                  [attr.stroke]="'url(#dashboardKpiStroke' + cardIndex + ')'"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+          }
+        </ubax-kpi-card>
+      }
+    </section>
+
+    <section class="admin-dashboard__grid" aria-label="Contenu analytics">
+      <article class="dashboard-card dashboard-card--revenue">
+        <header class="dashboard-card__header">
+          <div class="dashboard-card__title-wrap">
+            <h2 class="dashboard-card__title">Revenus</h2>
+            <div class="dashboard-card__legend" aria-hidden="true">
+              <span
+                class="dashboard-card__legend-dot dashboard-card__legend-dot--hotels"
+              ></span>
+              <span>Confirmées</span>
+              <span
+                class="dashboard-card__legend-dot dashboard-card__legend-dot--agencies"
+              ></span>
+              <span>En attente</span>
+            </div>
+          </div>
+
+          <p-select
+            class="dashboard-select"
+            [options]="rangeOptions"
+            [ngModel]="revenueRange()"
+            (ngModelChange)="onRevenueRangeChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+          />
+        </header>
+
+        <div class="dashboard-revenue-chart">
+          <p-chart
+            type="line"
+            [data]="revenueChartData()"
+            [options]="revenueChartOptions"
+            height="184"
+          />
+        </div>
+      </article>
+
+      <article class="dashboard-card dashboard-card--reservation-types">
+        <header class="dashboard-card__header">
+          <h2 class="dashboard-card__title">Réservation par type</h2>
+
+          <p-select
+            class="dashboard-select dashboard-select--compact"
+            [options]="rangeOptions"
+            [ngModel]="donutRange()"
+            (ngModelChange)="onDonutRangeChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+          />
+        </header>
+
+        <div class="dashboard-donut-wrap">
+          <div class="dashboard-donut-wrap__chart">
+            <p-chart
+              type="doughnut"
+              [data]="reservationTypeData()"
+              [options]="reservationTypeOptions"
+              width="136"
+              height="136"
+            />
+            <div class="dashboard-donut-wrap__center">
+              {{ reservationTypeTotal() }}
+            </div>
+          </div>
+
+          <div class="dashboard-donut-legend">
+            @for (item of reservationTypeLegend(); track item.label) {
+              <div class="dashboard-donut-legend__row">
+                <span
+                  class="dashboard-donut-legend__dot"
+                  [style.background]="item.color"
+                ></span>
+                <div class="dashboard-donut-legend__content">
+                  <p>{{ item.label }}</p>
+                  <small>{{ item.meta }}</small>
+                </div>
+                <strong>{{ item.count }}</strong>
+              </div>
+            }
+          </div>
+        </div>
+      </article>
+
+      <article class="dashboard-card dashboard-card--activities">
+        <header class="dashboard-card__header">
+          <h2 class="dashboard-card__title">Activités récentes</h2>
+        </header>
+
+        <div class="dashboard-activity-list">
+          @if (recentActivities().length === 0 && !reservationsLoading()) {
+            <p class="dashboard-empty-inline">Aucune activité récente.</p>
+          } @else {
+            @for (
+              activity of recentActivities();
+              track activity.label + activity.time
+            ) {
+              <div class="dashboard-activity-item">
+                <span class="dashboard-activity-item__icon"
+                  ><i [class]="activity.iconClass"></i
+                ></span>
+                <div class="dashboard-activity-item__content">
+                  <p>{{ activity.label }}</p>
+                  <small>{{ activity.meta }}</small>
+                </div>
+                <span class="dashboard-activity-item__time">{{
+                  activity.time
+                }}</span>
+              </div>
+            }
+          }
+        </div>
+
+        <a class="dashboard-link-btn" [routerLink]="['/reservations']"
+          >Voir toutes les activités</a
+        >
+      </article>
+
+      <article class="dashboard-card dashboard-card--reservations-table">
+        <header class="dashboard-card__header">
+          <h2 class="dashboard-card__title">Réservations récentes</h2>
+          <a class="dashboard-outline-btn" [routerLink]="['/reservations']"
+            >Voir toutes</a
+          >
+        </header>
+
+        <div class="dashboard-reservations-table-wrap">
+          <table
+            class="dashboard-reservations-table"
+            aria-label="Réservations récentes"
+          >
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Client</th>
+                <th>Elément</th>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (reservationsLoading() && recentReservations().length === 0) {
+                @for (_ of skeletonRows; track $index) {
+                  <tr>
+                    <td colspan="7">
+                      <div class="dashboard-skeleton"></div>
+                    </td>
+                  </tr>
+                }
+              } @else if (recentReservations().length === 0) {
+                <tr>
+                  <td colspan="7" class="dashboard-empty-cell">
+                    Aucune réservation disponible.
+                  </td>
+                </tr>
+              } @else {
+                @for (
+                  reservation of recentReservations();
+                  track reservation.id
+                ) {
+                  <tr>
+                    <td>#{{ reservation.id.slice(0, 6).toUpperCase() }}</td>
+                    <td>{{ formatReservationType(reservation) }}</td>
+                    <td>{{ reservation.clientFullName ?? 'Client UBAX' }}</td>
+                    <td>
+                      {{ reservation.propertyTitle ?? 'Bien sans titre' }}
+                    </td>
+                    <td>{{ formatReservationDate(reservation.createdAt) }}</td>
+                    <td>
+                      {{ formatReservationAmount(reservation.totalAmount) }}
+                    </td>
+                    <td>
+                      <span [class]="statusClass(reservation.status)">
+                        {{ statusLabel(reservation.status) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="dashboard-card dashboard-card--validations">
+        <header class="dashboard-card__header">
+          <h2 class="dashboard-card__title">Statut des validations</h2>
+        </header>
+
+        <div class="dashboard-validations-list">
+          @for (item of validationItems(); track item.label) {
+            <div class="dashboard-validations-list__item">
+              <span class="dashboard-validations-list__icon"
+                ><i [class]="item.iconClass"></i
+              ></span>
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+          }
+        </div>
+
+        <a class="dashboard-primary-btn" [routerLink]="['/proprietes']"
+          >Voir toutes les validations</a
+        >
+      </article>
+
+      <article class="dashboard-card dashboard-card--map">
+        <header class="dashboard-card__header dashboard-card__header--map">
+          <h2 class="dashboard-card__title">Aperçu géographique</h2>
+          <div class="dashboard-map__legend-items" aria-hidden="true">
+            <span class="dashboard-map__legend-item">
+              <i class="dashboard-map__legend-dot"></i>
+              Hotels
+            </span>
+            <span class="dashboard-map__legend-item">
+              <i
+                class="dashboard-map__legend-dot dashboard-map__legend-dot--agency"
+              ></i>
+              Agence immobilière
+            </span>
+          </div>
+        </header>
+
+        <div class="dashboard-map">
+          <iframe
+            class="dashboard-map__frame"
+            title="Carte des partenaires"
+            [src]="mapEmbedUrl()"
+            loading="lazy"
+          ></iframe>
+
+          @for (marker of mapMarkers(); track $index) {
+            <span
+              class="dashboard-map__marker"
+              [class.dashboard-map__marker--agency]="marker.tone === 'agency'"
+              [style.left.%]="marker.left"
+              [style.top.%]="marker.top"
+            ></span>
+          }
+
+          @if (!hasMapPoints()) {
+            <p class="dashboard-map__empty">
+              Aucun point geographique disponible depuis les donnees actuelles.
+            </p>
+          }
+        </div>
+      </article>
+
+      <article class="dashboard-card dashboard-card--revenue-categories">
+        <div class="select-wrapper">
+          <p-select
+            class="dashboard-select dashboard-select--compact"
+            [options]="rangeOptions"
+            [ngModel]="categoriesRange()"
+            (ngModelChange)="onCategoryRangeChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+          />
+        </div>
+
+        <header class="dashboard-card__header">
+          <h2 class="dashboard-card__title">Revenus par catégorie</h2>
+        </header>
+
+        <p class="dashboard-revenue-category__summary">
+          {{ revenueSummary() }}
+        </p>
+
+        <div class="dashboard-revenue-category">
+          @for (item of revenueByCategory(); track item.label) {
+            <div class="dashboard-revenue-category__row">
+              <div class="dashboard-revenue-category__labels">
+                <span>{{ item.label }}</span>
+                <strong>{{ formatReservationAmount(item.amount) }}</strong>
+              </div>
+              <div class="dashboard-revenue-category__track">
+                <span
+                  class="dashboard-revenue-category__bar"
+                  [class]="item.colorClass"
+                  [style.width.%]="item.width"
+                ></span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="dashboard-health">
+          <div class="dashboard-health__item">
+            <span>Taux de confirmation</span>
+            <strong>{{ reservationCompletion() }}%</strong>
+          </div>
+          <div class="dashboard-health__track">
+            <span [style.width.%]="reservationCompletion()"></span>
+          </div>
+
+          <div class="dashboard-health__item">
+            <span>Couverture publication</span>
+            <strong>{{ publicationCoverage() }}%</strong>
+          </div>
+          <div class="dashboard-health__track dashboard-health__track--orange">
+            <span [style.width.%]="publicationCoverage()"></span>
+          </div>
+        </div>
+      </article>
+    </section>
+  } @else if (!loading()) {
+    <section class="admin-dashboard__empty">
+      <i class="pi pi-chart-bar"></i>
+      <h2>Aucune donnée disponible</h2>
+      <p>
+        Le tableau de bord n’a retourné aucune métrique exploitable pour le
+        moment.
+      </p>
+    </section>
+  }
+</div>

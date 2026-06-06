@@ -185,6 +185,15 @@ export const adminRoutes: Route[] = [
           ),
       },
       {
+        path: 'paiements',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_READ_ROLES },
+        loadComponent: () =>
+          import('./pages/paiements/payments-page.component').then(
+            (m) => m.PaymentsPageComponent,
+          ),
+      },
+      {
         path: 'code-lists',
         canActivate: [roleGuard],
         data: { roles: ADMIN_READ_ROLES },
